@@ -1,0 +1,64 @@
+# Original Renault binary documentation is intentionally not stored in Git.
+*.pdf
+*.PDF
+*.gif
+*.GIF
+*.png
+*.PNG
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+*.ico
+*.ICO
+
+# Original archives / split archives
+*.zip
+*.ZIP
+*.z[0-9][0-9]
+*.7z
+*.rar
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local analysis output
+analysis-out/
+original/
+*.tmp
+
+# Local third-party browser runtime
+web/vendor/pdfjs/
+
+# Android / Gradle local outputs
+.gradle/
+**/build/
+local.properties
+.externalNativeBuild/
+.cxx/
+
+# Signing material and secrets
+*.jks
+*.keystore
+*.jks.b64
+.github/signing/*.b64
+*.p12
+*.pfx
+release-signing.properties
+
+# IDE / local machine state
+.idea/
+*.iml
+.DS_Store
+
+
+# Versioned project design previews derived from canonical SVG sources.
+!docs/design/*.png
+!docs/design/*.pdf
+
+# Nested skin/design previews generated from canonical SVG sources.
+!docs/design/**/*.png
+!docs/design/**/*.pdf
+!docs/design/**/*.jpg
+!docs/design/**/*.jpeg

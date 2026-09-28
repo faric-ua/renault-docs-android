@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.22",
+  "versionCode": 38,
+  "phase": "phone-validation",
+  "feature": "Measured native compact table widths, bold abbreviations/headers, and app-wide rotation lifecycle restoration",
+  "branch": "fix/v0.5.22-lifecycle-table-widths",
+  "tested_source_sha": "b5e685d0b6c6d635ce64132685d00ccacc431007",
+  "tests_run": 36150581053,
+  "android_debug_run": 36150581047,
+  "artifact": "Renault-Docs-v0.5.22-Debug",
+  "artifact_id": 10871432429,
+  "apk_sha256": "f7619833cae34fa552cda3626e5770a9f3ae93bafe40adb38d0fa855258ce9a4",
+  "artifact_zip_sha256": "a7a6e0af3d69f7ce1cf16de117def9fd51091b20edbd6e565e4f12e4f1dff13d",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

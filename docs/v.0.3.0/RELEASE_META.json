@@ -1,0 +1,12 @@
+{
+  "versionName": "0.3.0",
+  "versionCode": 5,
+  "phase": "development",
+  "feature": "Modern native catalog + Classic fallback + PDF export",
+  "branch": "feat/modern-mode-pdf-export-v0.3.0",
+  "tested_source_sha": "0bb1a98b2e5b678f2974101d3e606486d2a133c4",
+  "android_debug_run": 35922042240,
+  "qa_status": "BUILD_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

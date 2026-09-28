@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.38",
+  "versionCode": 54,
+  "phase": "phone-validation",
+  "feature": "Converter foundation: fast SAF scanner, media isolation, friendly paths, exact-version Termux APK handoff",
+  "branch": "fix/v0.5.38-converter-foundation",
+  "tested_source_sha": "c9faf5bf704ff45e62f226bb39f163e562597a5b",
+  "merged_source_sha": "d93e56de43a5ec00120e62f99e77bf9875b0b4dc",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36240225061,
+  "android_debug_run": 36240225052,
+  "artifact": "Renault-Docs-v0.5.38-Debug",
+  "artifact_id": 10905865135,
+  "apk_sha256": "caf6ecb0426306b8953c97048e578f4459b20d5a2510491a2e1e9ffe7d45a90d",
+  "artifact_zip_sha256": "fa05aa143634aac5dc4ee172b9a7aa78e79515e2d680851fcae4800cdcaaa2d8",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

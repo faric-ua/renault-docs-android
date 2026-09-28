@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.8",
+  "versionCode": 24,
+  "phase": "phone-validation",
+  "feature": "Native Runtime IR v2 section preview and cross-year coverage audit",
+  "branch": "feat/v0.5.8-native-runtime-ir-preview",
+  "tested_source_sha": "187513adfbb2a183e167eae4ab6a7f8edf38ef69",
+  "tests_run": 36029452241,
+  "android_debug_run": 36029452533,
+  "artifact": "Renault-Docs-v0.5.8-Debug",
+  "artifact_id": 10820474101,
+  "apk_sha256": "30ed5c6405f2995d80a0d50afe6405d9cf5e67ef1a772205eb2422af603984bc",
+  "artifact_zip_sha256": "e19f3eb32cc970d35aee10e231840f8d0356a054e856dff9f8cbe92018dd7b6b",
+  "dataset_refresh_required": true,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

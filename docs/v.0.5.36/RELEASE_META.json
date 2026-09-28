@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.36",
+  "versionCode": 52,
+  "phase": "closed",
+  "feature": "Verify and retry PDF fullscreen button synchronization until WebView acknowledges state",
+  "branch": "fix/v0.5.36-fullscreen-button-ack",
+  "tested_source_sha": "7d65b6e6e09362dbc43838afad279275f1522764",
+  "merged_source_sha": "3b6580d5a2b8d2a012a978cd828c220035dbef79",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36206923878,
+  "android_debug_run": 36206923894,
+  "artifact": "Renault-Docs-v0.5.36-Debug",
+  "artifact_id": 10894740860,
+  "apk_sha256": "cf89e1273d550fb1c052c9d3c5a419fed5dde17609deada8ff5a81e413d46ec9",
+  "artifact_zip_sha256": "68dd8cb2df6983176e9865e5ed8fe5189ce99f5efacb15b61ab4069eb293bd46",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_PASS",
+  "release_tag": null,
+  "phone_test_date": "2026-09-26"
+}

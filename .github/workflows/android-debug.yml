@@ -1,0 +1,142 @@
+name: Android Debug APK
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "android/**"
+      - ".github/workflows/android-debug.yml"
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - ".github/workflows/android-debug.yml"
+
+concurrency:
+  group: android-debug-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      RENAULT_DEV_KEYSTORE_B64: ${{ secrets.RENAULT_DEV_KEYSTORE_B64 }}
+      RENAULT_DEV_STORE_PASSWORD: ${{ secrets.RENAULT_DEV_STORE_PASSWORD }}
+      RENAULT_DEV_KEY_ALIAS: ${{ secrets.RENAULT_DEV_KEY_ALIAS }}
+      RENAULT_DEV_KEY_PASSWORD: ${{ secrets.RENAULT_DEV_KEY_PASSWORD }}
+      RENAULT_DEV_CERT_SHA256: ${{ secrets.RENAULT_DEV_CERT_SHA256 }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+
+      - name: Locate Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          test -d "$SDK_ROOT"
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -path '*/bin/sdkmanager' 2>/dev/null | sort -V | tail -n 1)"
+          fi
+          test -n "$SDKMANAGER"
+          test -x "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+
+      - name: Install Android SDK 36
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
+
+      - name: Require stable signer for trusted builds
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RENAULT_DEV_KEYSTORE_B64"
+          test -n "$RENAULT_DEV_STORE_PASSWORD"
+          test -n "$RENAULT_DEV_KEY_ALIAS"
+          test -n "$RENAULT_DEV_KEY_PASSWORD"
+          test -n "$RENAULT_DEV_CERT_SHA256"
+
+      - name: Restore stable development signing key
+        if: env.RENAULT_DEV_KEYSTORE_B64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYSTORE_PATH="$RUNNER_TEMP/renault-docs-dev.jks"
+          printf '%s' "$RENAULT_DEV_KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH"
+          keytool -list \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass "$RENAULT_DEV_STORE_PASSWORD" \
+            -alias "$RENAULT_DEV_KEY_ALIAS" >/dev/null
+          echo "RENAULT_DEV_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+      - name: Run Android unit tests
+        run: gradle -p android :app:testDebugUnitTest
+
+      - name: Build debug APK
+        run: gradle -p android :app:assembleDebug
+
+      - name: Prepare and verify APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android/app/build.gradle.kts | head -n 1)"
+          test -n "$VERSION"
+
+          SRC="android/app/build/outputs/apk/debug/app-debug.apk"
+          APK="Renault-Docs-v${VERSION}-debug.apk"
+          cp "$SRC" "$APK"
+
+          BUILD_TOOLS="$ANDROID_SDK_ROOT/build-tools/35.0.0"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee signer.txt
+
+          if [ -n "$RENAULT_DEV_CERT_SHA256" ]; then
+            ACTUAL="$(
+              sed -n 's/^Signer #1 certificate SHA-256 digest: //p' signer.txt                 | head -n 1                 | tr -d ':'                 | tr '[:upper:]' '[:lower:]'
+            )"
+            EXPECTED="$(
+              printf '%s' "$RENAULT_DEV_CERT_SHA256"                 | tr -d ':'                 | tr '[:upper:]' '[:lower:]'
+            )"
+            test -n "$ACTUAL"
+            test "$ACTUAL" = "$EXPECTED"
+          else
+            echo "Stable signer secret is unavailable; fork/PR build uses the default debug signer."
+          fi
+
+          "$BUILD_TOOLS/zipalign" -c -v 4 "$APK"
+          "$BUILD_TOOLS/aapt" dump badging "$APK" | grep -E "^package:|^sdkVersion:|^targetSdkVersion:" | head -20
+          sha256sum "$APK" | tee "$APK.sha256"
+
+          echo "APK_NAME=$APK" >> "$GITHUB_ENV"
+          echo "ARTIFACT_NAME=Renault-Docs-v${VERSION}-Debug" >> "$GITHUB_ENV"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            ${{ env.APK_NAME }}
+            ${{ env.APK_NAME }}.sha256
+          retention-days: 3

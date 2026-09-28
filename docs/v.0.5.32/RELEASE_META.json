@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.32",
+  "versionCode": 48,
+  "phase": "accepted-with-follow-up",
+  "feature": "PDF Companion split view with same-volume documentation in a secondary WebView",
+  "branch": "feat/v0.5.32-pdf-companion",
+  "tested_source_sha": "f22fa09949225d9f483e860165446163c32966fc",
+  "merged_source_sha": "41dcede6ebea2f2220ba23e363e15be6c5ea79c8",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36201064184,
+  "android_debug_run": 36201064135,
+  "artifact": "Renault-Docs-v0.5.32-Debug",
+  "artifact_id": 10891713605,
+  "apk_sha256": "574c7184dda4267f84d688b8e748fa0aea18b65c2e0ee5078646db3acb4880f6",
+  "artifact_zip_sha256": "07ea758777485670cea36be5ee09a05cba73490650427a2a360e5a2f80a53112",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_CORE_PASS_UX_FOLLOWUP",
+  "release_tag": null,
+  "phone_test_date": "2026-09-26"
+}

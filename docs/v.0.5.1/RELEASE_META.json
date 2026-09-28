@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.1",
+  "versionCode": 17,
+  "phase": "development",
+  "feature": "Legacy standalone compatibility for native section content",
+  "branch": "fix/legacy-standalone-compat-v0.5.1",
+  "tested_source_sha": "08f5f61487931aa197337df88ce8c020dda74690",
+  "tests_run": 35947884873,
+  "android_debug_run": 35947884807,
+  "artifact": "Renault-Docs-v0.5.1-Debug",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

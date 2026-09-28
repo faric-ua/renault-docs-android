@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.33",
+  "versionCode": 49,
+  "phase": "accepted-with-known-bug",
+  "feature": "Fullscreen split focus mode with double-tap controls and draggable divider",
+  "branch": "feat/v0.5.33-split-focus-divider",
+  "tested_source_sha": "031d5b75a608fcd5a6dc7c427311f5b6476b8330",
+  "merged_source_sha": "250b2a26a799bc88b117b82d26005f98550681fd",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36203053082,
+  "android_debug_run": 36203052992,
+  "artifact": "Renault-Docs-v0.5.33-Debug",
+  "artifact_id": 10893250571,
+  "apk_sha256": "44ff64b86907148ea589f3415679944859e283cf92a78baa029bf7ec3baaf5d2",
+  "artifact_zip_sha256": "58f3d4b3dac95c0c6c1d9e5e420a3977dff5d756ff1f45dd6bcd0485d330d74e",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_UX_PASS_BUG_006",
+  "release_tag": null,
+  "phone_test_date": "2026-09-26"
+}

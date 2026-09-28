@@ -1,0 +1,10 @@
+{
+  "versionName": "0.4.0",
+  "versionCode": 10,
+  "phase": "development",
+  "feature": "Working Settings foundation",
+  "branch": "feat/settings-v0.4.0",
+  "qa_status": "CI_PENDING_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

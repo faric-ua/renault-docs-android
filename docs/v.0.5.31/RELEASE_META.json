@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.31",
+  "versionCode": 47,
+  "phase": "closed",
+  "feature": "Dedicated volume documentation Activity with direct volume entry and section shortcut",
+  "branch": "feat/v0.5.31-volume-documentation-screen",
+  "tested_source_sha": "b73d0a4893318233e2b222711a4bbe82740dd5fb",
+  "merged_source_sha": "6fae1c82b37e12a10938e428383e08aff3d8135c",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36193148657,
+  "android_debug_run": 36193148624,
+  "artifact": "Renault-Docs-v0.5.31-Debug",
+  "artifact_id": 10888463798,
+  "apk_sha256": "c1318bf7fff75e793f0f8270aa1a4f7587deb1b7b2c12f57410160b839779cd5",
+  "artifact_zip_sha256": "add2d7d8319eecd2a2e664f587adbc55bcb9d1a7ed4f3b22d9f158b4daaff589",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_PASS",
+  "release_tag": null,
+  "phone_test_date": "2026-09-26"
+}

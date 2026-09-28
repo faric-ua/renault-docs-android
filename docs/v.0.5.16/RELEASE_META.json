@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.16",
+  "versionCode": 32,
+  "phase": "phone-validation",
+  "feature": "Opaque Renault connector ID export naming and (pines) filename contract",
+  "branch": "fix/v0.5.16-connector-id-export",
+  "tested_source_sha": "b66ecb1a5f0e35250470b4e30ae580062e710121",
+  "tests_run": 36078619569,
+  "android_debug_run": 36078619634,
+  "artifact": "Renault-Docs-v0.5.16-Debug",
+  "artifact_id": 10841531621,
+  "apk_sha256": "cf5c2cff2e66fcd3844ee837b302484e27219b3e0686ce803b713b8fe2234134",
+  "artifact_zip_sha256": "6695b817fb280d80e0176a021c59920116b6f95fa4eb24b70934e38dfbccee9f",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

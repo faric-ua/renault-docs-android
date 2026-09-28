@@ -1,0 +1,10 @@
+{
+  "versionName": "0.3.3",
+  "versionCode": 8,
+  "phase": "development",
+  "feature": "Editable PDF zoom field and preset picker",
+  "branch": "feat/pdf-zoom-picker-v0.3.3",
+  "qa_status": "CI_PENDING_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

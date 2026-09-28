@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Technical document outline -->
+    <path
+        android:pathData="M31,22 L67,22 L82,37 L82,86 L31,86 Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#76BDFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Folded page corner -->
+    <path
+        android:pathData="M67,22 L67,39 L82,39"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#76BDFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Schematic traces -->
+    <path
+        android:pathData="M41,51 L64,51 M41,63 L71,63 M41,75 L59,75"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#F3F6F8"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+
+    <!-- Connector node -->
+    <path
+        android:pathData="M72,58 A5,5 0,1 1,71.9 58"
+        android:fillColor="#F4C542" />
+</vector>

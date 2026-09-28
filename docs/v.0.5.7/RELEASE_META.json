@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.7",
+  "versionCode": 23,
+  "phase": "phone-validation",
+  "feature": "Searchable live Modern section navigator over reused legacy runtime",
+  "branch": "feat/v0.5.7-live-section-navigator",
+  "tested_source_sha": "4ae04f1a2eda42fa56553fd31668ceb13e6c750e",
+  "tests_run": 36009167466,
+  "android_debug_run": 36009167695,
+  "artifact": "Renault-Docs-v0.5.7-Debug",
+  "artifact_id": 10811083951,
+  "apk_sha256": "df15e2931690395318c79b1a4ea0e9ea369a322bf2fb0f77651a94f2660ae3c0",
+  "artifact_zip_sha256": "0e79e7a994d46e3acb5db308327cde975b1ee9a5ec761f541010661524ace4fe",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

@@ -1,0 +1,16 @@
+{
+  "versionName": "0.5.0",
+  "versionCode": 16,
+  "phase": "development",
+  "feature": "Native Technical Blue section navigation wave 1",
+  "branch": "feat/native-sections-v0.5.0",
+  "tested_source_sha": "79fddfbe14336af619e989652aeddbaf9e4b8c67",
+  "tests_run": 35945733289,
+  "android_debug_run": 35945733273,
+  "artifact": "Renault-Docs-v0.5.0-Debug",
+  "dataset_refresh_required": true,
+  "dataset_refresh_action": "Renault → 9 — Оновити Fast/Modern package",
+  "qa_status": "CI_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

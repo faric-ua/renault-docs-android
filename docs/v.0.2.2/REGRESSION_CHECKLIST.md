@@ -1,0 +1,22 @@
+# v0.2.2 Regression Checklist
+
+- [ ] Existing dataset remains registered after in-place update from stable-signed v0.2.1.
+- [ ] Library still shows Laguna II with 10 volumes.
+- [ ] Dataset catalog opens.
+- [ ] Representative volume opens.
+- [ ] Legacy menu/frame/image navigation works.
+- [ ] Reopening the same volume feels faster after first resource resolution.
+- [ ] No obvious long stalls caused by repeated SAF traversal.
+- [ ] PDF link opens inside the same documentation frame.
+- [ ] PDF shows real technical content, not placeholder.
+- [ ] PDF pages scroll vertically.
+- [ ] Page indicator updates.
+- [ ] Previous/next controls work.
+- [ ] Zoom +/- reloads visible pages at new width.
+- [ ] Fast scroll does not crash.
+- [ ] Back returns within legacy docs.
+- [ ] Rotation does not relaunch dataset picker.
+- [ ] No INTERNET permission.
+- [ ] No MANAGE_EXTERNAL_STORAGE permission.
+- [ ] JVM tests pass.
+- [ ] Debug APK CI passes with stable signer.

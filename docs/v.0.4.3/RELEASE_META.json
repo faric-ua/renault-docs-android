@@ -1,0 +1,14 @@
+{
+  "versionName": "0.4.3",
+  "versionCode": 13,
+  "phase": "development",
+  "feature": "Search resume and Backup folder UX",
+  "branch": "fix/search-resume-backup-ux-v0.4.3",
+  "tested_source_sha": "2bee3608c06f05d261fc768c755417a40990e288",
+  "tests_run": 35941559116,
+  "android_debug_run": 35941559172,
+  "artifact": "Renault-Docs-v0.4.3-Debug",
+  "qa_status": "PHONE_PASS_WITH_BACKUP_LAYOUT_FINDING",
+  "release_tag": null,
+  "phone_test_date": "2026-09-24"
+}

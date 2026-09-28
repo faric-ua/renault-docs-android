@@ -1,0 +1,48 @@
+name: Export Design Assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "docs/design/**/*.svg"
+      - "tools/export_design_assets.py"
+      - ".github/workflows/export-design-assets.yml"
+      - ".gitignore"
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install SVG exporter
+        run: python -m pip install --disable-pip-version-check CairoSVG==2.7.1
+
+      - name: Export SVG to PNG and PDF
+        run: python tools/export_design_assets.py
+
+      - name: Commit derived design assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- docs/design)" ]; then
+            echo "Design exports are already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/design
+          git commit -m "Export design PNG/PDF assets [skip ci]"
+          git push

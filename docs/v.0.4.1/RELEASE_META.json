@@ -1,0 +1,19 @@
+{
+  "versionName": "0.4.1",
+  "versionCode": 11,
+  "phase": "development",
+  "feature": "Technical Blue viewer header wave 1",
+  "branch": "feat/technical-blue-header-v0.4.1",
+  "tested_source_sha": "49f49a364148e3744d8038330f78b5ab007eb7a7",
+  "tests_run": 35938712431,
+  "android_debug_run": 35938712460,
+  "artifact": "Renault-Docs-v0.4.1-Debug",
+  "qa_status": "PHONE_FUNCTIONAL_WITH_UI_FINDINGS",
+  "release_tag": null,
+  "phone_test_date": "2026-09-24",
+  "phone_findings": [
+    "current-page search works, but the search field is too narrow when controls share one row",
+    "Classic generated catalog tiles are not chronological in the existing dataset",
+    "Fit width Unicode arrow is visually off-center inside the button"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.34",
+  "versionCode": 50,
+  "phase": "phone-validation",
+  "feature": "Reconcile fullscreen state after Companion close and Activity recreation",
+  "branch": "fix/v0.5.34-fullscreen-state-reconcile",
+  "tested_source_sha": "bf23eb88d39565559d61caa40ac9373fac8feaab",
+  "merged_source_sha": "adb226f605c3730037e945fe0e6ce95275981710",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36204766057,
+  "android_debug_run": 36204766049,
+  "artifact": "Renault-Docs-v0.5.34-Debug",
+  "artifact_id": 10893043078,
+  "apk_sha256": "f45ebd66dd5d4c292f4808f63f0aac446d833798205db16d97f36fe5fe23896f",
+  "artifact_zip_sha256": "0efb0024c516538e0a2223603fc683c13c7b720463f0c2042d4dadad7767ac6c",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.20",
+  "versionCode": 36,
+  "phase": "phone-validation",
+  "feature": "Composed portrait pines PDF with connector card, section identity, vector header icons and measured compact columns",
+  "branch": "feat/v0.5.20-pines-pdf-layout",
+  "tested_source_sha": "094698411f6af56a62dcf306c4c4c24b49e6af8c",
+  "tests_run": 36142685738,
+  "android_debug_run": 36142685726,
+  "artifact": "Renault-Docs-v0.5.20-Debug",
+  "artifact_id": 10868375871,
+  "apk_sha256": "d3a898085c6b2dc3c3e19c58e82b3fdc27de75fefff5ea5a5e10f32bd47016fc",
+  "artifact_zip_sha256": "d480d5ff7717e633af0b76655567a660c2004bb7db7f32eaa5f10d3deecc4a5b",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

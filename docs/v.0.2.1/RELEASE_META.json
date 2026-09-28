@@ -1,0 +1,12 @@
+{
+  "versionName": "0.2.1",
+  "versionCode": 3,
+  "phase": "development",
+  "feature": "SAF-backed universal WebView viewer",
+  "branch": "fix/android-saf-webview-v0.2.1-r2",
+  "tested_source_sha": null,
+  "android_debug_run": null,
+  "qa_status": "NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

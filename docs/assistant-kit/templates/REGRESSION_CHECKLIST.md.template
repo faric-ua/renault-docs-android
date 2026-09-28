@@ -1,0 +1,11 @@
+# Regression Checklist
+
+- [ ] Library
+- [ ] Add/reconnect dataset
+- [ ] Viewer
+- [ ] Back navigation
+- [ ] Rotation
+- [ ] Help/dialog lifecycle
+- [ ] PDF
+- [ ] SAF cancel/return
+- [ ] Theme/layout

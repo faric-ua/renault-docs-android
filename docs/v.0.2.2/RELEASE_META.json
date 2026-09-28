@@ -1,0 +1,12 @@
+{
+  "versionName": "0.2.2",
+  "versionCode": 4,
+  "phase": "development",
+  "feature": "Android PDF layer + SAF viewer performance cache",
+  "branch": "feat/android-pdf-performance-v0.2.2",
+  "tested_source_sha": "2d2a5f057c5e1820cb7cd4a4cad34b32153864cb",
+  "android_debug_run": 35919503732,
+  "qa_status": "BUILD_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

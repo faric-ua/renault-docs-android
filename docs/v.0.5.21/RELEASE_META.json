@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.21",
+  "versionCode": 37,
+  "phase": "phone-validation",
+  "feature": "Native pin header fallback, tighter compact columns, 2cm PDF margins, centered generic headers and colored technical icons",
+  "branch": "feat/v0.5.21-pdf-polish",
+  "tested_source_sha": "ad9d69cb05697e960f2fc2800f28f7a95f99a4e8",
+  "tests_run": 36146178858,
+  "android_debug_run": 36146178924,
+  "artifact": "Renault-Docs-v0.5.21-Debug",
+  "artifact_id": 10869810678,
+  "apk_sha256": "934f9791804b65725f75f4b9db7be6e8701f394e646d4ee854fda79adbaf58ea",
+  "artifact_zip_sha256": "ae29db796261f2e3b7db26f4f290f414bb8d964c6222cf7e76f7053deec87ef2",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

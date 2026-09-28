@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.3",
+  "versionCode": 19,
+  "phase": "development",
+  "feature": "Hybrid native-section to full legacy frameset shell",
+  "branch": "fix/hybrid-section-shell-v0.5.3",
+  "tested_source_sha": "6191e1288c034e81599f04a8aa568e4ec6876956",
+  "tests_run": 35950162906,
+  "android_debug_run": 35950162849,
+  "artifact": "Renault-Docs-v0.5.3-Debug",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_PASS_RUNTIME_CLASSIC_VISIBLE",
+  "release_tag": null,
+  "phone_test_date": "2026-09-24"
+}

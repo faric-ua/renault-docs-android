@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.17",
+  "versionCode": 33,
+  "phase": "phone-validation",
+  "feature": "Structured-table PDF header rendering and repetition after pagination",
+  "branch": "fix/v0.5.17-pdf-table-headers",
+  "tested_source_sha": "b56b29b64cddd0cdf11531e7a1e543c45c5593e9",
+  "tests_run": 36081274501,
+  "android_debug_run": 36081274495,
+  "artifact": "Renault-Docs-v0.5.17-Debug",
+  "artifact_id": 10841149488,
+  "apk_sha256": "a72784d9c5519e0830c30ec2f213c20f7c622a33f5112d2c9ae2f5d46b4237ed",
+  "artifact_zip_sha256": "5fd8223e9a70b6cbf65e519640140923ea7197181018a69276d2bd84d9b671d7",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

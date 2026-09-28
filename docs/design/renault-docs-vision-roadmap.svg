@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+  <defs>
+    <style>
+      .bg{fill:#f4f7fb}.panel{fill:#ffffff;stroke:#c9d5e5;stroke-width:2}.head{fill:#17579b}.headText{font:700 28px system-ui,sans-serif;fill:#fff}.title{font:700 24px system-ui,sans-serif;fill:#132238}.body{font:18px system-ui,sans-serif;fill:#34445b}.small{font:15px system-ui,sans-serif;fill:#5f7088}.chip{fill:#eaf2ff;stroke:#8eb4e6;stroke-width:1.5}.chipText{font:700 18px system-ui,sans-serif;fill:#174e8b}.dark{fill:#10151d}.dark2{fill:#171e28}.darkLine{stroke:#405065;stroke-width:1.5}.darkText{font:18px system-ui,sans-serif;fill:#eef3f8}.muted{font:15px system-ui,sans-serif;fill:#aebccc}.ok{fill:#e8f7ee;stroke:#67b77e;stroke-width:1.5}.warn{fill:#fff4df;stroke:#e2a33d;stroke-width:1.5}.danger{fill:#fff0f0;stroke:#dc6c6c;stroke-width:1.5}.arrow{stroke:#2d70b7;stroke-width:4;fill:none;marker-end:url(#m)}.dash{stroke:#6b7f97;stroke-width:3;stroke-dasharray:8 8;fill:none;marker-end:url(#m2)}
+    </style>
+    <marker id="m" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#2d70b7"/></marker>
+    <marker id="m2" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#6b7f97"/></marker>
+  </defs>
+
+  <rect class="bg" width="1800" height="1200"/>
+
+  <rect class="panel" x="30" y="30" rx="18" width="860" height="420"/>
+  <rect class="head" x="30" y="30" rx="18" width="860" height="58"/>
+  <text class="headText" x="55" y="68">1. PDF viewer — керування масштабом</text>
+  <rect class="dark" x="55" y="110" rx="14" width="810" height="205"/>
+  <rect class="dark2" x="75" y="130" rx="10" width="770" height="56"/>
+  <text class="darkText" x="95" y="165">^</text>
+  <text class="muted" x="135" y="164">1 / 1</text>
+  <text class="darkText" x="200" y="165">v</text>
+  <text class="darkText" x="250" y="165">-</text>
+  <rect x="300" y="138" rx="7" width="115" height="40" fill="#0f2438" stroke="#5ab0ff" stroke-width="2"/>
+  <text class="darkText" x="327" y="165">135%</text>
+  <rect x="422" y="138" rx="7" width="46" height="40" fill="#171e28" stroke="#405065"/>
+  <text class="darkText" x="437" y="164">v</text>
+  <text class="darkText" x="478" y="165">FIT</text>
+  <text class="darkText" x="545" y="165">+</text>
+  <rect x="610" y="138" rx="7" width="95" height="40" fill="#171e28" stroke="#405065"/>
+  <text class="darkText" x="632" y="164">PDF</text>
+  <rect x="300" y="188" rx="8" width="168" height="118" fill="#171e28" stroke="#405065"/>
+  <text class="darkText" x="325" y="216">85%</text><text class="darkText" x="325" y="239">100%</text>
+  <text class="darkText" x="325" y="262">120%</text><text class="darkText" x="325" y="285">150% · 200%</text>
+  <rect x="500" y="205" width="300" height="92" fill="#fff"/>
+  <line x1="520" y1="220" x2="780" y2="220" stroke="#222"/><line x1="520" y1="240" x2="750" y2="270" stroke="#222"/><line x1="545" y1="286" x2="770" y2="235" stroke="#222"/>
+  <text class="body" x="60" y="350">• Широке поле для ручного введення 50–200%</text>
+  <text class="body" x="60" y="380">• Пресети: 85 / 100 / 120 / 150 / 200%</text>
+  <text class="body" x="60" y="410">• ↔ одним натисканням повертає PDF по ширині фрейма</text>
+
+  <rect class="panel" x="910" y="30" rx="18" width="860" height="420"/>
+  <rect class="head" x="910" y="30" rx="18" width="860" height="58"/>
+  <text class="headText" x="935" y="68">2. Конвертація + безпечний backup оригіналу</text>
+  <rect class="chip" x="945" y="115" rx="12" width="235" height="75"/><text class="chipText" x="980" y="147">Оригінальна папка</text><text class="small" x="985" y="173">HTML / JS / GIF / PDF…</text>
+  <path class="arrow" d="M1185 151 H1290"/>
+  <rect class="chip" x="1310" y="115" rx="12" width="190" height="75"/><text class="chipText" x="1350" y="147">Staging</text><text class="small" x="1340" y="173">конвертація</text>
+  <path class="arrow" d="M1505 151 H1590"/>
+  <rect class="ok" x="1610" y="115" rx="12" width="130" height="75"/><text class="chipText" x="1625" y="147">Dataset</text><text class="small" x="1620" y="173">перевірено</text>
+
+  <path class="dash" d="M1060 195 V265 H1250"/>
+  <rect class="warn" x="1250" y="230" rx="12" width="300" height="90"/>
+  <text class="title" x="1275" y="263">Backup ZIP + SHA-256</text>
+  <text class="small" x="1275" y="291">спочатку створити й перевірити</text>
+  <path class="arrow" d="M1555 275 H1650"/>
+  <rect class="danger" x="1650" y="232" rx="12" width="90" height="86"/>
+  <text class="title" x="1676" y="263">Delete</text><text class="small" x="1665" y="291">лише після</text><text class="small" x="1664" y="309">підтвердження</text>
+  <text class="body" x="945" y="355">Правило: якщо conversion / validation / backup / verify впали —</text>
+  <text class="body" x="945" y="384">оригінал НЕ видаляється. Видалення можливе тільки після</text>
+  <text class="body" x="945" y="413">успішного backup та окремого фінального підтвердження.</text>
+
+  <rect class="panel" x="30" y="475" rx="18" width="560" height="680"/>
+  <rect class="head" x="30" y="475" rx="18" width="560" height="58"/>
+  <text class="headText" x="55" y="513">3. Налаштування</text>
+  <text class="title" x="65" y="575">Загальні</text>
+  <text class="body" x="70" y="610">• Мова: Українська / English / Čeština / System</text>
+  <text class="body" x="70" y="640">• Тема та Modern / Classic за замовчуванням</text>
+  <text class="title" x="65" y="695">PDF</text>
+  <text class="body" x="70" y="730">• Масштаб за замовчуванням</text>
+  <text class="body" x="70" y="760">• Запам’ятовувати сторінку й zoom</text>
+  <text class="body" x="70" y="790">• Крок ± та «За шириною»</text>
+  <text class="title" x="65" y="845">Сховище й backup</text>
+  <text class="body" x="70" y="880">• Папка dataset / backup / cache</text>
+  <text class="body" x="70" y="910">• Fast Pack cache та очищення</text>
+  <text class="body" x="70" y="940">• Архівувати source після конвертації</text>
+  <text class="title" x="65" y="995">Про програму</text>
+  <text class="body" x="70" y="1030">• Версія, build, schema, ліцензії</text>
+  <text class="body" x="70" y="1060">• Посилання на проєкт і документацію</text>
+
+  <rect class="panel" x="610" y="475" rx="18" width="560" height="680"/>
+  <rect class="head" x="610" y="475" rx="18" width="560" height="58"/>
+  <text class="headText" x="635" y="513">4. Google / Google Drive</text>
+  <rect class="chip" x="655" y="570" rx="12" width="470" height="88"/>
+  <text class="title" x="680" y="604">Google account</text><text class="small" x="680" y="632">авторизація для sync та backup</text>
+  <path class="arrow" d="M890 665 V735"/>
+  <rect class="ok" x="655" y="745" rx="12" width="470" height="150"/>
+  <text class="title" x="680" y="780">Drive backup</text>
+  <text class="body" x="680" y="812">• settings, library, favorites, history</text>
+  <text class="body" x="680" y="842">• backup ZIP / dataset — окремо й opt-in</text>
+  <text class="body" x="680" y="872">• великі ISO/образи — тільки вручну</text>
+  <path class="arrow" d="M890 905 V975"/>
+  <rect class="chip" x="655" y="985" rx="12" width="470" height="125"/>
+  <text class="title" x="680" y="1020">Drive-backed library</text>
+  <text class="body" x="680" y="1052">Manifest + Modern index + Fast Pack кешуються локально</text>
+  <text class="body" x="680" y="1082">PDF завантажується on-demand і кешується</text>
+
+  <rect class="panel" x="1190" y="475" rx="18" width="580" height="680"/>
+  <rect class="head" x="1190" y="475" rx="18" width="580" height="58"/>
+  <text class="headText" x="1215" y="513">5. Архітектура та roadmap</text>
+  <rect class="chip" x="1230" y="570" rx="12" width="160" height="90"/><text class="chipText" x="1260" y="608">StorageProvider</text><text class="small" x="1260" y="635">абстракція</text>
+  <path class="arrow" d="M1395 615 H1480"/>
+  <rect class="ok" x="1490" y="555" rx="12" width="235" height="125"/>
+  <text class="title" x="1520" y="590">Providers</text>
+  <text class="body" x="1520" y="620">• Local SAF</text><text class="body" x="1520" y="650">• Google Drive</text>
+  <text class="title" x="1230" y="740">Версійні хвилі</text>
+  <text class="body" x="1240" y="782">v0.3.x — PDF + Fast Pack polish</text>
+  <text class="body" x="1240" y="822">v0.4.x — Settings + localization foundation</text>
+  <text class="body" x="1240" y="862">v0.5.x — Converter 2.0 + Backup Center</text>
+  <text class="body" x="1240" y="902">v0.6.x — Google cloud backup</text>
+  <text class="body" x="1240" y="942">v0.7.x — Drive-backed cloud library</text>
+  <text class="title" x="1230" y="1010">Source of truth</text>
+  <text class="body" x="1240" y="1048">Git repository = постійна пам’ять проєкту</text>
+  <text class="body" x="1240" y="1080">Chat = робочий інтерфейс, не архів рішень</text>
+  <text class="small" x="1240" y="1120">Canonical diagrams: SVG / Mermaid / PlantUML</text>
+</svg>

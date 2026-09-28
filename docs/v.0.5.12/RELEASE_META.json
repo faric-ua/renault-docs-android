@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.12",
+  "versionCode": 28,
+  "phase": "phone-validation",
+  "feature": "PDF toolbar follows zoomed document, compact Modern header/menu, horizontally scrollable contact rows",
+  "app_source_sha": "fa6963d05412def8ff917184e9a30537e06a2300",
+  "tests_run": 36051860932,
+  "android_debug_run": 36051860854,
+  "artifact": "Renault-Docs-v0.5.12-Debug",
+  "artifact_id": 10831137351,
+  "apk_sha256": "f892238a66d5aab02392fc3036d7e7ba212072ad6e93e7ac8e91f25745cf8c33",
+  "artifact_zip_sha256": "5607791d73e4d44ebc9984a7030947a6e82cee7019c0d3e39085e7637ea8bc59",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING"
+}

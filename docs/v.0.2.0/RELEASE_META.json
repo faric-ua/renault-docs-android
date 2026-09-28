@@ -1,0 +1,14 @@
+{
+  "versionName": "0.2.0",
+  "versionCode": 2,
+  "phase": "development",
+  "feature": "Converter foundation: source/destination SAF, lifecycle-safe draft state, Kotlin path normalization core",
+  "branch": "feat/android-converter-foundation",
+  "tested_source_sha": "47a536027b2c35b69a8e0dedf17f6e1ec140cd49",
+  "android_debug_run": 35908968101,
+  "signed_actions_run": null,
+  "qa_status": "BUILD_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "checkpoint": "v0.1.0 phone QA was not completed before development continued by user request",
+  "phone_test_date": null
+}

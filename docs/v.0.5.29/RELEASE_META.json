@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.29",
+  "versionCode": 45,
+  "phase": "phone-validation",
+  "feature": "Per-volume documentation Runtime IR with lazy Android loading and fullscreen pressed state",
+  "branch": "feat/v0.5.29-volume-documentation",
+  "tested_source_sha": "db1078e4a45b5e2e2d5fecaf9d64b105acbded15",
+  "merged_source_sha": "05c6833070ebbc5c2db8a3015bcdf1b030cfbcc6",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36181651229,
+  "android_debug_run": 36181651350,
+  "artifact": "Renault-Docs-v0.5.29-Debug",
+  "artifact_id": 10884272976,
+  "apk_sha256": "761404a0380ed07c47d02508a4298a393b87e9040b3390648b7c90a4c832b1e3",
+  "artifact_zip_sha256": "bb8a0ca782aa01de9c5231e405272de7e5aff415cf5327386af92ab2873b0047",
+  "dataset_refresh_required": true,
+  "qa_status": "CI_PASS_PHONE_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

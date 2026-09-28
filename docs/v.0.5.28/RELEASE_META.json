@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.28",
+  "versionCode": 44,
+  "phase": "closed",
+  "feature": "PDF zoom to 400 percent with high-zoom memory policy and explicit fullscreen mode",
+  "branch": "feat/v0.5.28-pdf-400-fullscreen",
+  "tested_source_sha": "330c4d7168712236453d76fe8fef92e17710b35c",
+  "merged_source_sha": "1104db917f5964db7efb41a9282eb88ccde733ee",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36179103365,
+  "android_debug_run": 36179103296,
+  "artifact": "Renault-Docs-v0.5.28-Debug",
+  "artifact_id": 10884005657,
+  "apk_sha256": "615fe8bb939b41a92ac999472bad0015c9a5e2b7dfaf204cb344bba778479fd2",
+  "artifact_zip_sha256": "9016bd4ef4b3dc03d28a6b50e9037f4eb89731e875db186b69c1ee8c052b780d",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_PASS_WITH_UX_FOLLOWUP",
+  "release_tag": null,
+  "phone_test_date": "2026-09-25"
+}

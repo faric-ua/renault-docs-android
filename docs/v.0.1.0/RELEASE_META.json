@@ -1,0 +1,17 @@
+{
+  "versionName": "0.1.0",
+  "versionCode": 1,
+  "phase": "development",
+  "feature": "Android library skeleton",
+  "branch": "feat/android-library-skeleton",
+  "testedSourceSha": "0d9465acc44c82e9322f87db901fed4f703fdcb1",
+  "debugActionsRun": 35898272768,
+  "debugArtifactName": "Renault-Docs-v0.1.0-Debug",
+  "debugArtifactId": 10768775075,
+  "debugArtifactDigest": "sha256:b3f2b3946d5549fc811ecbd80557bc10154a4e16614f42c9b154aae141d573df",
+  "signedActionsRun": null,
+  "qaStatus": "BUILD_PASS_PHONE_NOT_TESTED",
+  "releaseTag": null,
+  "checkpointTag": null,
+  "phoneTestDate": null
+}

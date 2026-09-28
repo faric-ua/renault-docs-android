@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.6",
+  "versionCode": 22,
+  "phase": "phone-validation",
+  "feature": "Deterministic named-frame projection from v0.5.5 phone evidence",
+  "branch": "feat/v0.5.6-deterministic-frame-projection",
+  "tested_source_sha": "a965413234d4d49c4a97714588096f91bb24708e",
+  "tests_run": 36005382508,
+  "android_debug_run": 36005382468,
+  "artifact": "Renault-Docs-v0.5.6-Debug",
+  "artifact_id": 10809478409,
+  "apk_sha256": "9bfafa025d2207ad7303c408a9311ffeca4d1179904f331449a2ca3f63cfd757",
+  "artifact_zip_sha256": "7aa28adbb7a4971bdcaa3e63ad9bb89450b2ad1a2add4563e63c3075121dd698",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

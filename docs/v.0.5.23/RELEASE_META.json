@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.23",
+  "versionCode": 39,
+  "phase": "phone-validation",
+  "feature": "Focused native landscape chrome and stronger pines PDF typography",
+  "branch": "fix/v0.5.23-landscape-focus-pdf-type",
+  "tested_source_sha": "087efd7a61acfcd573af7abc4c14d99e8468aa25",
+  "tests_run": 36155433400,
+  "android_debug_run": 36155433415,
+  "artifact": "Renault-Docs-v0.5.23-Debug",
+  "artifact_id": 10874000361,
+  "apk_sha256": "937a6e13e4e47c53a66637140a367d7f89b773d26e22fa7afae36d3066a2abc1",
+  "artifact_zip_sha256": "66268214f0bfe68df90a6ba1e37a0913798fe28c6b73badb987bcdd08f3126ec",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

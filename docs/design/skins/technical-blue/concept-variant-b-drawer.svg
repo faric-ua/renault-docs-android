@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs><style>
+    .bg{fill:#0B1118}.bar{fill:#0D1823}.drawer{fill:#101822}.surface{fill:#151F2A}.sel{fill:#0D4D89}
+    .line{stroke:#26384A;stroke-width:2}.t1{font:700 30px system-ui,sans-serif;fill:#F4F7FA}
+    .t2{font:500 24px system-ui,sans-serif;fill:#F4F7FA}.t3{font:500 20px system-ui,sans-serif;fill:#B1C0CF}
+    .blue{font:700 22px system-ui,sans-serif;fill:#5FB7FF}.paper{fill:#fff}.paperText{font:19px system-ui,sans-serif;fill:#202020}
+  </style></defs>
+  <rect class="bg" width="1080" height="1920"/>
+  <rect class="bar" width="1080" height="150"/>
+  <text class="blue" x="42" y="94">☰</text><text class="t1" x="115" y="94">‹  Laguna II - N.T.8328 - 09/05/2006</text>
+  <text class="blue" x="850" y="94">⌕</text><text class="blue" x="940" y="94">⚙</text>
+  <rect class="drawer" x="0" y="150" width="450" height="1770"/>
+  <text class="t1" x="55" y="220">Renault Docs</text><text class="t3" x="55" y="255">Технічна документація</text>
+  <rect class="sel" x="24" y="300" rx="14" width="402" height="78"/><text class="t2" x="55" y="350">⌂  Головне меню</text>
+  <text class="t2" x="55" y="440">⌕  Пошук на сторінці</text><text class="t2" x="55" y="520">▤  Розділи</text>
+  <line class="line" x1="40" y1="565" x2="410" y2="565"/>
+  <text class="t2" x="55" y="640">▣  101 Прикурювач</text><text class="t2" x="55" y="720">▣  103 Генератор</text>
+  <text class="t2" x="55" y="800">▣  105 Освітлення</text><text class="t2" x="55" y="880">▣  107 Акумулятор</text>
+  <text class="t2" x="55" y="960">▣  119 ABS</text><text class="t2" x="55" y="1040">▣  123 Замки</text>
+  <line class="line" x1="40" y1="1090" x2="410" y2="1090"/>
+  <text class="t2" x="55" y="1170">▤  PDF файли</text><text class="t2" x="55" y="1260">⚙  Налаштування</text>
+
+  <rect class="surface" x="450" y="150" width="630" height="170"/>
+  <text class="t2" x="485" y="220">1 / 1   ‹   ›</text><text class="t2" x="485" y="285">−   100% ▾   ↔ По ширині   +   PDF</text>
+  <rect class="paper" x="470" y="340" width="590" height="1500"/>
+  <text class="paperText" x="510" y="540">Tablet/landscape two-pane reference.</text>
+  <text class="paperText" x="510" y="590">Permanent drawer is not default for portrait phones.</text>
+</svg>

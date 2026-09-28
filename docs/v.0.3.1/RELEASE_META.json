@@ -1,0 +1,12 @@
+{
+  "versionName": "0.3.1",
+  "versionCode": 6,
+  "phase": "development",
+  "feature": "Fast Pack local web-resource runtime",
+  "branch": "feat/fast-pack-v0.3.1",
+  "tested_source_sha": "a37d0a33348af110dd4c708f6aee589548b20b6b",
+  "android_debug_run": 35925351638,
+  "qa_status": "PHONE_PERF_PASS_WITH_UI_FINDINGS",
+  "release_tag": null,
+  "phone_test_date": "2026-09-24"
+}

@@ -1,0 +1,14 @@
+{
+  "versionName": "0.4.4",
+  "versionCode": 14,
+  "phase": "development",
+  "feature": "Unified Backup settings card",
+  "branch": "fix/backup-card-v0.4.4",
+  "tested_source_sha": "4efcc1edbbd9df9092d99353943ffab919cda0a9",
+  "tests_run": 35942756642,
+  "android_debug_run": 35942756636,
+  "artifact": "Renault-Docs-v0.4.4-Debug",
+  "qa_status": "CI_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

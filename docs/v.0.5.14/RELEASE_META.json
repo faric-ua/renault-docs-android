@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.14",
+  "versionCode": 30,
+  "phase": "phone-validation",
+  "feature": "Unified native structured tables, Classic-like connector header, save structured tables as PDF",
+  "app_source_sha": "66702baec93d3747e8d2b70808177a3746b82ca2",
+  "tests_run": 36065777800,
+  "android_debug_run": 36065777851,
+  "artifact": "Renault-Docs-v0.5.14-Debug",
+  "artifact_id": 10836740287,
+  "apk_sha256": "1c3177fed7ce7e5c086a2b9f39cb2df78c19787959dea06fc21a559764308788",
+  "artifact_zip_sha256": "46950313f8726ee28afed6b44b1764f6df9f73ba640f079f3c5f682795756e4d",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING"
+}

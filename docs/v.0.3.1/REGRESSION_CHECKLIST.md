@@ -1,0 +1,21 @@
+# v0.3.1 Regression Checklist
+
+- [ ] v0.3.1 updates over v0.3.0.
+- [ ] Existing dataset remains registered.
+- [ ] Menu item 9 rebuilds Fast/Modern package.
+- [ ] Package rebuild creates one _renault/fast-content-*.zip.
+- [ ] renault-dataset.json contains fast_pack metadata.
+- [ ] PDF files are not duplicated inside Fast Pack.
+- [ ] Modern screen reports Fast Pack preparing/active.
+- [ ] First activation may take one-time copy time.
+- [ ] Reopening a volume uses already cached Fast Pack.
+- [ ] NT8236 menu navigation is visibly faster than v0.3.0.
+- [ ] Images/icons still load.
+- [ ] JavaScript navigation still works.
+- [ ] PDF still renders.
+- [ ] PDF export still works.
+- [ ] Classic mode still works.
+- [ ] Missing Fast Pack falls back to SAF instead of breaking viewer.
+- [ ] Rotation does not start a second Fast Pack copy.
+- [ ] No INTERNET permission.
+- [ ] No broad storage permission.

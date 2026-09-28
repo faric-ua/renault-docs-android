@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.9",
+  "versionCode": 25,
+  "phase": "phone-validation",
+  "feature": "Sharded Runtime IR Android reader to remove full-tree OOM",
+  "app_source_sha": "2ac19a941ce2f29d82d58e649cf332d343ab5a1d",
+  "tests_run": 36033113768,
+  "android_debug_run": 36033113767,
+  "artifact": "Renault-Docs-v0.5.9-Debug",
+  "artifact_id": 10823058032,
+  "apk_sha256": "36f5b1af5458006d11543fe768275a8402053e8c8441c8366b11eb23f85203fa",
+  "artifact_zip_sha256": "f7a029fac430ac636ee94e7e570a420042c26fd11a6c1d778a86c4604de35eea",
+  "dataset_refresh_required": true,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING"
+}

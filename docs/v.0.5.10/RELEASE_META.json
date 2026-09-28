@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.10",
+  "versionCode": 26,
+  "phase": "phone-validation",
+  "feature": "Friendly native menu labels, documentation grouping, pure Classic fallback, adaptive launcher icon",
+  "app_source_sha": "ee850788ce8481df94cb88a3ef3b8b9a29c621cc",
+  "tests_run": 36037676395,
+  "android_debug_run": 36037676490,
+  "artifact": "Renault-Docs-v0.5.10-Debug",
+  "artifact_id": 10824924034,
+  "apk_sha256": "269a093bba30292ee1da63ffe62b8e20d753f34287316e5dfbd3a9507ba4078c",
+  "artifact_zip_sha256": "dfe236f46ec24728761ec7ef8a8435a2aa3365c81c1789bc0a2c21d30ce69e39",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING"
+}

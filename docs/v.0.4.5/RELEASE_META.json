@@ -1,0 +1,14 @@
+{
+  "versionName": "0.4.5",
+  "versionCode": 15,
+  "phase": "development",
+  "feature": "PDF zoom preset popup hotfix",
+  "branch": "fix/pdf-zoom-menu-v0.4.5",
+  "tested_source_sha": "be45f7b9be93120f7eb542efbb8d21a5b3117695",
+  "tests_run": 35943891399,
+  "android_debug_run": 35943891510,
+  "artifact": "Renault-Docs-v0.4.5-Debug",
+  "qa_status": "CI_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}

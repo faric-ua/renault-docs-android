@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.4",
+  "versionCode": 20,
+  "phase": "development",
+  "feature": "Modern hybrid shell hiding Classic runtime",
+  "branch": "fix/modern-hybrid-shell-v0.5.4",
+  "tested_source_sha": "5a3718dacd37932d9a869b994e2a6dcba5c80dd6",
+  "tests_run": 35951443398,
+  "android_debug_run": 35951443423,
+  "artifact": "Renault-Docs-v0.5.4-Debug",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_FAIL_MODERN_PRESENTATION_RUNTIME_OK",
+  "release_tag": null,
+  "phone_test_date": "2026-09-24"
+}

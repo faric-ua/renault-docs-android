@@ -1,0 +1,40 @@
+{
+  "root": "laguna 2 2001-2006",
+  "files_total": 61759,
+  "bytes_total": 672246706,
+  "text_files_scanned": 48316,
+  "files_with_static_references": 48292,
+  "unique_source_reference_pairs": 354143,
+  "reference_statuses": {
+    "exact": 337263,
+    "dynamic_marker": 14,
+    "case_mismatch": 16866
+  },
+  "case_mismatch_source_files": 1505,
+  "case_mismatch_references": 16866,
+  "extension_counts": {
+    ".htm": 48305,
+    ".gif": 746,
+    ".ico": 11,
+    ".js": 11,
+    ".pdf": 12686
+  },
+  "extension_bytes": {
+    ".htm": 76740621,
+    ".gif": 3713381,
+    ".ico": 165946,
+    ".js": 32198,
+    ".pdf": 591594560
+  },
+  "features": {
+    "target_blank": 1,
+    "window_open": 7,
+    "navigator_appName": 11,
+    "onchange": 9778,
+    "frameset": 8149,
+    "frame_tag": 8149,
+    "onclick": 13318,
+    "pdf_viewrect": 6785
+  },
+  "windows_path_findings": {}
+}

@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.2",
+  "versionCode": 18,
+  "phase": "development",
+  "feature": "Legacy combo and frame-JS compatibility bridge",
+  "branch": "fix/legacy-inline-nav-v0.5.2",
+  "tested_source_sha": "3bf94e6a441e8a40b246872d93f03ccded43fca3",
+  "tests_run": 35949086107,
+  "android_debug_run": 35949086123,
+  "artifact": "Renault-Docs-v0.5.2-Debug",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_FAIL_DIRECT_FRAGMENT_ARCHITECTURE",
+  "release_tag": null,
+  "phone_test_date": "2026-09-24"
+}

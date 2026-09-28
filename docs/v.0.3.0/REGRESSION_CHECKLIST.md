@@ -1,0 +1,21 @@
+# v0.3.0 Regression Checklist
+
+- [ ] v0.3.0 installs over stable-signed v0.2.2.
+- [ ] Existing dataset registration remains.
+- [ ] Dataset tile opens Modern mode, not legacy catalog.
+- [ ] Modern mode shows title/model/years/platform and all 10 Laguna volumes.
+- [ ] Search filters volume cards immediately.
+- [ ] Tap representative volume opens its legacy documentation.
+- [ ] Classic action opens the old generated catalog.
+- [ ] Back from volume returns correctly.
+- [ ] Back from Modern mode returns to Library.
+- [ ] Rotation does not relaunch any picker.
+- [ ] Existing dataset without modern-index.json still opens Modern mode via manifest fallback.
+- [ ] New packaging generates _renault/modern-index.json.
+- [ ] PDF Save action opens Android create-document picker.
+- [ ] Cancel Save returns to the same PDF.
+- [ ] Saving writes the original PDF bytes to the chosen destination.
+- [ ] Exported PDF opens externally and matches expected file size/content.
+- [ ] No INTERNET permission.
+- [ ] No MANAGE_EXTERNAL_STORAGE.
+- [ ] CI and JVM tests pass.

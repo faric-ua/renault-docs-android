@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.24",
+  "versionCode": 40,
+  "phase": "phone-validation",
+  "feature": "Lossless higher-resolution PDF raster rendering with rotation-surviving shared page cache and visible-page-first scheduling",
+  "branch": "fix/v0.5.24-pdf-viewer-quality-cache",
+  "tested_source_sha": "c8decdb903c9b48325bdeb55e2c1e1413b8844a1",
+  "tests_run": 36163857309,
+  "android_debug_run": 36163857157,
+  "artifact": "Renault-Docs-v0.5.24-Debug",
+  "artifact_id": 10876995104,
+  "apk_sha256": "2df8bef3156341710d8c4c12e93fcc9eccd5d6758834f48f881db5ef35d7cb57",
+  "artifact_zip_sha256": "e6c9e23d7eb6fc939681bdcfa39486c671cdf3d323ab4f27d22b06d4379a995c",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

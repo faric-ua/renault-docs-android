@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.35",
+  "versionCode": 51,
+  "phase": "accepted-with-known-bug",
+  "feature": "Preserve ViewerActivity/fullscreen across orientation changes without recreation",
+  "branch": "fix/v0.5.35-viewer-rotation-preserve",
+  "tested_source_sha": "14994bc4a48356d6547da07883d7367f460f0054",
+  "merged_source_sha": "1eb744ce3959d1a56cb2d9059b5069dd1b207b9c",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36206184286,
+  "android_debug_run": 36206184390,
+  "artifact": "Renault-Docs-v0.5.35-Debug",
+  "artifact_id": 10894415207,
+  "apk_sha256": "d565d8e0f0c9f4d1787f2ee1a3397e15502fd5766081b5ace0681ebeaa80b0ed",
+  "artifact_zip_sha256": "1c79214b4f0a6f8257e24978098ce3a8b07e4074ad286625902f9fb02e1a8f2b",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_FAIL_FULLSCREEN_BUTTON_DESYNC",
+  "release_tag": null,
+  "phone_test_date": "2026-09-26"
+}

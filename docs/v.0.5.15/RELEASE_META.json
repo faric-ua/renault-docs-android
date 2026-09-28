@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.15",
+  "versionCode": 31,
+  "phase": "phone-validation",
+  "feature": "Adaptive structured tables, combined connector view, source-aware table PDF filenames",
+  "branch": "feat/v0.5.15-table-layout-combined-connector",
+  "tested_source_sha": "cd4d0cbcc78d2623488f8d50367c91b94c0e041b",
+  "tests_run": 36072358387,
+  "android_debug_run": 36072358369,
+  "artifact": "Renault-Docs-v0.5.15-Debug",
+  "artifact_id": 10838243576,
+  "apk_sha256": "7e2ca52f7e37cfa5844133e331fec0f58561f33538146b45e4b9096b423841b9",
+  "artifact_zip_sha256": "419916d1914c4b62d35ccd6e949d319baae086c283d4adb5a17f1f88f788fe9b",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

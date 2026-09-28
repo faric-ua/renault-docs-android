@@ -1,0 +1,9 @@
+{
+  "extension_case_mismatches": {
+    ".pdf -> .PDF": 12951,
+    ".htm -> .HTM": 2473,
+    ".gif -> .GIF": 1442
+  },
+  "affected_source_files": 1505,
+  "selected_source_files_with_all_js": 1516
+}

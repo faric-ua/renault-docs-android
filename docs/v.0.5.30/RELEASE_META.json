@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.30",
+  "versionCode": 46,
+  "phase": "closed",
+  "feature": "Reliable PDF page loading and current-page tracking at 250-400 percent zoom",
+  "branch": "fix/v0.5.30-pdf-high-zoom-scroll",
+  "tested_source_sha": "89160047ff9a4208b547e00bd0982b22b91a45df",
+  "merged_source_sha": "2a342aa505378b651baaeef9fe44b555e6836896",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36186156147,
+  "android_debug_run": 36186156169,
+  "artifact": "Renault-Docs-v0.5.30-Debug",
+  "artifact_id": 10885104783,
+  "apk_sha256": "06a3a032361ba18f6f925949b1eb959d9fa69320aba51d7c974cd177426f62ab",
+  "artifact_zip_sha256": "9db989fab0602ffd52ae8a7adc291cc1bf86f8ce814dafc555f0330f15dd0267",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_PASS",
+  "release_tag": null,
+  "phone_test_date": "2026-09-26"
+}

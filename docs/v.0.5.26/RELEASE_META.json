@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.26",
+  "versionCode": 42,
+  "phase": "phone-validation",
+  "feature": "Full Classic section catalog parity with opaque IDs, source order and duplicate-code Runtime IR routing",
+  "branch": "fix/v0.5.26-classic-catalog-parity",
+  "tested_source_sha": "03b0eb4a27fa0c0f076fb1cca9524a6109130272",
+  "tests_run": 36171369633,
+  "android_debug_run": 36171369588,
+  "artifact": "Renault-Docs-v0.5.26-Debug",
+  "artifact_id": 10880925610,
+  "apk_sha256": "3f42d50fc3cf335545380d6c7a47b114cbe92abdbba7d8d158028795f7a57413",
+  "artifact_zip_sha256": "2e4c62f2d10ba671ba896d31dd9a766d6788ea03b238894371ec937065c570df",
+  "dataset_refresh_required": true,
+  "qa_status": "CI_PASS_PHONE_PARITY_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

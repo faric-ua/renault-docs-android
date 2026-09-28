@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.18",
+  "versionCode": 34,
+  "phase": "ci-validation",
+  "feature": "Pin-table semantic headers and non-wrapping compact technical values",
+  "branch": "fix/v0.5.18-pin-table-semantics",
+  "tested_source_sha": null,
+  "tests_run": null,
+  "android_debug_run": null,
+  "artifact": null,
+  "artifact_id": null,
+  "apk_sha256": null,
+  "artifact_zip_sha256": null,
+  "dataset_refresh_required": true,
+  "qa_status": "IMPLEMENTED_CI_PENDING_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.11",
+  "versionCode": 27,
+  "phase": "phone-validation",
+  "feature": "Three-row Modern menu, separate NM contact document, Classic connector contrast",
+  "app_source_sha": "93c722270a5670eeab6f8343d48ab51cb067f19b",
+  "tests_run": 36041709175,
+  "android_debug_run": 36041708827,
+  "artifact": "Renault-Docs-v0.5.11-Debug",
+  "artifact_id": 10826734430,
+  "apk_sha256": "a172ad458e5c91d3e981d39da3ae86a7a0c11a4e062e488d3b509b9c4417eb4f",
+  "artifact_zip_sha256": "76b6a48ea2885f70a41cb1c00a4ffbbaa4956e2ce7fb97b05575d8683195debf",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING"
+}

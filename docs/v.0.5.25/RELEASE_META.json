@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.25",
+  "versionCode": 41,
+  "phase": "phone-validation",
+  "feature": "Independent responsive PDF controls with nested document viewport, progressive high-zoom rendering and decoded-page eviction",
+  "branch": "fix/v0.5.25-pdf-toolbar-scroll",
+  "tested_source_sha": "6e962b5bac1bdee93ba232f55ee594f318ab2f8b",
+  "tests_run": 36167218686,
+  "android_debug_run": 36167218706,
+  "artifact": "Renault-Docs-v0.5.25-Debug",
+  "artifact_id": 10878087586,
+  "apk_sha256": "205f031bb889826f0b3b7ae3d76318627c203ed0cb3829b60ac611b0380c625b",
+  "artifact_zip_sha256": "34b5508b7b7006f4c3e35f0e2839de8729a660bba16109caad70bef91194976e",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

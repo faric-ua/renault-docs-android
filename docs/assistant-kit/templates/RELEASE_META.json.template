@@ -1,0 +1,13 @@
+{
+  "versionName": "X.Y.Z",
+  "versionCode": 1,
+  "phase": "planned",
+  "feature": "",
+  "branch": "",
+  "testedSourceSha": null,
+  "signedActionsRun": null,
+  "qaStatus": "NOT_TESTED",
+  "releaseTag": null,
+  "checkpointTag": null,
+  "phoneTestDate": null
+}

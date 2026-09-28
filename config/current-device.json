@@ -1,0 +1,25 @@
+{
+  "profile": "current-android-device",
+  "repository_root": "/data/data/com.termux/files/home/renault-docs-android",
+  "source_root": "/storage/emulated/0/Documents/Renault/laguna 2 2001-2006",
+  "build_root": "/storage/emulated/0/Documents/Renault/laguna 2 2001-2006_android",
+  "dataset": {
+    "id": "renault-laguna-ii-x74-2001-2006",
+    "title": "Renault Laguna II 2001–2006",
+    "manufacturer": "Renault",
+    "model": "Laguna II",
+    "platform": "X74",
+    "years": {
+      "from": 2001,
+      "to": 2006
+    },
+    "content_type": "electrical-and-technical-documentation",
+    "entrypoint": "INDEX.HTM",
+    "viewer_profile": "renault-legacy-web-v1",
+    "preview": {
+      "type": "generated",
+      "title": "Laguna II",
+      "subtitle": "2001–2006"
+    }
+  }
+}

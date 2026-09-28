@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs><style>
+    .bg{fill:#0B1118}.bar{fill:#0D1823}.drawer{fill:#101822}.surface{fill:#151F2A}.sel{fill:#0D4D89}
+    .line{stroke:#26384A;stroke-width:2}.t1{font:700 30px system-ui,sans-serif;fill:#F4F7FA}
+    .t2{font:500 24px system-ui,sans-serif;fill:#F4F7FA}.t3{font:500 20px system-ui,sans-serif;fill:#B1C0CF}
+    .blue{font:700 22px system-ui,sans-serif;fill:#5FB7FF}.paper{fill:#fff}.paperText{font:19px system-ui,sans-serif;fill:#202020}
+  </style></defs>
+  <rect class="bg" width="1080" height="1920"/>
+  <rect class="bar" width="1080" height="150"/>
+  <text class="blue" x="36" y="94">☰</text><text class="t1" x="120" y="94">Laguna II - N.T.8328 - 09/05/2006</text>
+  <text class="blue" x="840" y="94">⌕</text><text class="blue" x="930" y="94">⚙</text>
+  <rect class="surface" x="0" y="150" width="1080" height="118"/>
+  <text class="t2" x="30" y="225">1 / 1   ‹   ›   −   100% ▾   ↔ По ширині   +   PDF</text>
+
+  <rect class="paper" x="460" y="300" width="600" height="1540"/>
+  <text class="paperText" x="500" y="550">Document remains visible behind temporary menu.</text>
+
+  <rect class="drawer" x="0" y="280" width="470" height="1560"/>
+  <rect class="sel" x="20" y="320" rx="14" width="425" height="82"/><text class="t2" x="55" y="372">⌂  Головне меню</text>
+  <text class="t2" x="55" y="470">⌕  Пошук на сторінці</text><text class="t2" x="55" y="555">▤  PDF файли</text>
+  <text class="t2" x="55" y="640">⚙  Налаштування</text>
+  <line class="line" x1="25" y1="700" x2="445" y2="700"/>
+  <text class="blue" x="35" y="760">РОЗДІЛИ</text>
+  <text class="t2" x="55" y="835">▣  101 Прикурювач  ›</text><text class="t2" x="55" y="920">▣  103 Генератор  ›</text>
+  <text class="t2" x="55" y="1005">▣  105 Освітлення  ›</text><text class="t2" x="55" y="1090">▣  107 Акумулятор  ›</text>
+  <text class="t2" x="55" y="1175">▣  119 ABS  ›</text><text class="t2" x="55" y="1260">▣  123 Замки  ›</text>
+  <text class="t3" x="55" y="1410">Overlay/drawer reference for phone menu behavior.</text>
+</svg>

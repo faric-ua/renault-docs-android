@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.27",
+  "versionCode": 43,
+  "phase": "phone-validation",
+  "feature": "Live PDF pinch zoom with fixed toolbar and deferred high-resolution rerender",
+  "branch": "feat/v0.5.27-pdf-pinch-zoom",
+  "tested_source_sha": "46ba0c0df464d144158cd5a696611f2366198d75",
+  "merged_source_sha": "7660416ad3f00a7fdf3d7556b6fd11a0bfd1186f",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36176557305,
+  "android_debug_run": 36176557288,
+  "artifact": "Renault-Docs-v0.5.27-Debug",
+  "artifact_id": 10882358464,
+  "apk_sha256": "03dca9deb5fda72e4fa5d72eae18f94285c451e04bd3b78157bf97fd19109ac8",
+  "artifact_zip_sha256": "b0f79a703f60fd1255fb90a9724bce8e39196bbcf694579c83a0e2416e5406ae",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

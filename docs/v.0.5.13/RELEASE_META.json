@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.13",
+  "versionCode": 29,
+  "phase": "phone-validation",
+  "feature": "Global native section navigation, Modern/Classic mode switch, persistent primary menu tiles, tiled selector groups",
+  "app_source_sha": "c6ab899042f016dd0e8bf6d7f7e463de8d2365e4",
+  "tests_run": 36057491536,
+  "android_debug_run": 36057491412,
+  "artifact": "Renault-Docs-v0.5.13-Debug",
+  "artifact_id": 10832474678,
+  "apk_sha256": "1f8adeca1a1c0695c337caafa624d7913b6355db393815fa07e00edb9afbfc4d",
+  "artifact_zip_sha256": "6bc4d0a25db7f5e1f43896010477716cafc26c1d0f3777d156153e74a06fd36c",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING"
+}

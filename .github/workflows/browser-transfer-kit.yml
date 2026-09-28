@@ -1,0 +1,35 @@
+name: Browser Transfer Kit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Build transfer ZIP
+        run: |
+          python tools/build_browser_transfer_kit.py --output Renault-Browser-Transfer-Kit.zip
+          cat Renault-Browser-Transfer-Kit.zip.sha256
+
+      - name: Upload transfer kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: Renault-Browser-Transfer-Kit
+          path: |
+            Renault-Browser-Transfer-Kit.zip
+            Renault-Browser-Transfer-Kit.zip.sha256

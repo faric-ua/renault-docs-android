@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.37",
+  "versionCode": 53,
+  "phase": "phone-validation",
+  "feature": "Converter Writer Wave 1: staged SAF copy, normalization, base package and validation",
+  "branch": "feat/v0.5.37-converter-writer",
+  "tested_source_sha": "de28d445749c752d5d0d1ecbf31959cab92b8d3f",
+  "merged_source_sha": "51c2d77771a7c5676e5793ee38de2f180eaf7bb5",
+  "tested_runtime_blobs_match_merged_main": true,
+  "tests_run": 36209095449,
+  "android_debug_run": 36209095432,
+  "artifact": "Renault-Docs-v0.5.37-Debug",
+  "artifact_id": 10894143612,
+  "apk_sha256": "ac7b0e6dfe0227c86b536f1811249690e8e6fe625f5364354c9ce81ccc590e6e",
+  "artifact_zip_sha256": "bed2177788448146fd3ac96f0f955a69922256bc3fd11c948463221d661f9739",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

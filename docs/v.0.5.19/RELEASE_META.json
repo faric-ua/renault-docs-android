@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.19",
+  "versionCode": 35,
+  "phase": "phone-validation",
+  "feature": "Structural pin-table header detection and content/header-aware compact column sizing",
+  "branch": "fix/v0.5.19-table-semantics-widths",
+  "tested_source_sha": "930b20d240fff0a2e0f7dd5e60769654241a23c9",
+  "tests_run": 36133711994,
+  "android_debug_run": 36133712023,
+  "artifact": "Renault-Docs-v0.5.19-Debug",
+  "artifact_id": 10862578973,
+  "apk_sha256": "03eb2a9f1edc9f5d0dcbe2aabad4090e433462ffcb866bcc38e610bedd682ab0",
+  "artifact_zip_sha256": "0e797cdfb03765ffb0115a8bb38bb4c7b6cc3018f836dfb0e25cd560189d150b",
+  "dataset_refresh_required": true,
+  "qa_status": "CI_PASS_PHONE_TEST_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

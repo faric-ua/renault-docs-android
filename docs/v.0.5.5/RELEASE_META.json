@@ -1,0 +1,16 @@
+{
+  "versionName": "0.5.5",
+  "versionCode": 21,
+  "phase": "diagnostic",
+  "feature": "Real-device legacy frame-tree diagnostics",
+  "branch": "feat/frame-tree-diagnostics-v0.5.5",
+  "tested_source_sha": "68a83adfd30d8dfda2dae4409876dcc36675dfe5",
+  "tests_run": 35987490749,
+  "android_debug_run": 35987490643,
+  "artifact": "Renault-Docs-v0.5.5-Debug",
+  "artifact_sha256": "9995c5da1ca0ffc604e08a27d8fe52fdb463255806d35d7d91abff2463d45c2a",
+  "dataset_refresh_required": false,
+  "qa_status": "CI_PASS_PHONE_CAPTURE_PENDING",
+  "release_tag": null,
+  "phone_test_date": null
+}

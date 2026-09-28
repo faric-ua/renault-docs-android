@@ -1,0 +1,14 @@
+{
+  "versionName": "0.4.2",
+  "versionCode": 12,
+  "phase": "development",
+  "feature": "Search layout, Classic chronology, Fit width alignment",
+  "branch": "fix/search-classic-order-fitwidth-v0.4.2",
+  "tested_source_sha": "90ef691d862fd28f24ca0b8ed088c6a0c81d2929",
+  "tests_run": 35940255443,
+  "android_debug_run": 35940255455,
+  "artifact": "Renault-Docs-v0.4.2-Debug",
+  "qa_status": "CI_PASS_PHONE_NOT_TESTED",
+  "release_tag": null,
+  "phone_test_date": null
+}
