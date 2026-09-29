@@ -1443,3 +1443,16 @@ It shows:
 - whether Android/build files changed after the latest Android build.
 
 Merged as `b0073f723e28c17622efbd3ad29c0a05d0193d2b`.
+
+
+### Accepted signer restore workflow
+
+Renault Menu now exposes:
+`20 — Відновити accepted signer + build`.
+
+The helper uses the private historical archive as the only source of the previously accepted development signer, verifies both keystore and certificate identity, updates public GitHub Actions Secrets without printing secret values, and then triggers an exact public-main build.
+
+Merged helper:
+`239663c4577c2e4d279a4052f1b0ac460b19bf9d`.
+
+This replaces manual key handling for the migration checkpoint.
