@@ -195,23 +195,33 @@ runtime PHONE PASS, merge, signer continuity, trusted public-main build, exact A
 
 ## v0.5.52 — terminal status polish
 
-Status: **IMPLEMENTED / CI PENDING**.
+Status: **PHONE PASS / READY TO MERGE — 2026-09-30**.
+
+Final accepted source:
+`8a364ef9e50d0bd81273e9d419321284abdfed03`.
 
 Scope:
-- [x] version bump to `0.5.52` / code `68`;
-- [x] terminal native-run status gets a right-side `×`;
-- [x] `×` is shown only for COMPLETE / CANCELLED / FAILED;
-- [x] active PREPARING / IMPORTING hides the terminal row;
-- [x] dismissal persists across Activity recreation by storing the dismissed `finishedAtMs`;
-- [x] dismissal hides presentation only; package/project/source/run metadata is preserved;
-- [x] new user run clears old dismissal state;
-- [x] `1 файлів` replaced by proper Ukrainian forms: `1 файл`, `2–4 файли`, `5+ файлів`, including 11–14 exception;
-- [x] JVM wording test added;
-- [x] v0.5.52 contract test added;
-- [x] Tests CI PASS — run `36611508371`;
-- [ ] Android PR Check / compile PASS — run `36611508366` in progress;
-- [ ] short phone UX check: terminal `×` dismisses and stays dismissed after rotation/reopen; active run has no `×`.
+- [x] version `0.5.52` / code `68`;
+- [x] terminal COMPLETE / CANCELLED / FAILED status gets a right-side `×`;
+- [x] active PREPARING / IMPORTING never shows the terminal dismiss `×`;
+- [x] terminal dismissal survives rotation and ProjectActivity reopen;
+- [x] dismissal is presentation-only and preserves project/package/source/run data;
+- [x] Ukrainian file-count wording uses `1 файл`, `2–4 файли`, `5+ файлів`, including 11–14;
+- [x] active native progress dialog live-updates from the persisted run state every 750 ms;
+- [x] when the run leaves active state, the progress dialog closes and terminal presentation takes over;
+- [x] Tests PASS — run `36639849368`;
+- [x] Android PR Check PASS — run `36639849222`;
+- [x] final stable-signed candidate PASS — run `36640408798`;
+- [x] final candidate APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`;
+- [x] stable signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- [x] real-phone in-place update preserved Megane II with 2 volumes plus Laguna II and Kangoo II;
+- [x] real-phone terminal `×` dismiss PASS;
+- [x] dismissal persistence through repeated rotation and reopen PASS;
+- [x] active PREPARING has no `×` PASS;
+- [x] PREPARING cancel -> terminal CANCELLED row PASS;
+- [x] live progress inside the already-open dialog PASS.
 
 ## Поточний наступний крок v0.5.52
 
-**Run CI on `feat/v0.5.52-terminal-status-polish`. If green, build the candidate and give the user one short phone check only; do not repeat NT8340A end-to-end acceptance.**
+**Merge PR #6 to `main`, verify trusted public-main build/signer, then perform one final in-place install/data-preservation smoke check. After v0.5.52 closeout, move to the read-only legacy `*_android` storage audit.**
+
