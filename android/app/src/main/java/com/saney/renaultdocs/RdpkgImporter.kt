@@ -378,7 +378,7 @@ object RdpkgImporter {
         )
     }
 
-    private fun ukrainianFileCount(
+    internal fun ukrainianFileCount(
         count: Int,
     ): String {
         val lastTwo =
