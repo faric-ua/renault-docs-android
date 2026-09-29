@@ -48,5 +48,20 @@ class AndroidSigningContractTests(unittest.TestCase):
         self.assertIn("renaultStableDebugSigningAvailable", gradle)
 
 
+    def test_android_signing_workflow_does_not_run_on_pull_requests(self):
+        repo = Path(__file__).resolve().parents[1]
+        workflow = (
+            repo / ".github/workflows/android-debug.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertNotIn(
+            "pull_request:",
+            workflow,
+            "Stable signing workflow must never run automatically for PRs.",
+        )
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("branches: [main]", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
