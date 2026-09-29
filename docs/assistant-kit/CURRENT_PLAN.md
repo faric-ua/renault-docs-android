@@ -141,3 +141,17 @@ This closes the previously identified unnecessary PR secret exposure path.
 User action remains:
 `reno-docs → 5 → 20`.
 Do not install the resulting APK until its signer/build output is reviewed.
+
+
+### 2026-09-29 pre-signer-update phone baseline
+
+Phone screenshot before the signer-continuity install check confirms:
+- currently installed Renault Docs reports `v0.5.51`;
+- Megane II project is present with `2` volumes;
+- Laguna II and Kangoo II placeholder projects remain present;
+- app data is intact before attempting any new public-main APK update.
+
+This screenshot is a baseline only; it does not identify the APK signer by itself.
+
+Next user action remains:
+`reno-docs → 5 → 20`, then return the complete restore/build output before installing the generated APK.
