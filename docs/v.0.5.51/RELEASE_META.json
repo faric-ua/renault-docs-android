@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.51",
   "versionCode": 67,
-  "phase": "merged-phone-accepted",
+  "phase": "closed",
   "feature": "Kotlin-native raw Renault folder to lifecycle-safe .rdpkg generation, validation, install and project upsert",
   "branch": "feat/v0.5.51-native-preparation-foundation",
   "tested_source_sha": "6b334eafb1fbf9dcca591fa4d1b619885f32ea4b",
@@ -21,7 +21,7 @@
   "phone_test_date": "2026-09-28",
   "public_pr": 1,
   "public_repo": "faric-ua/renault-docs-android",
-  "distribution_status": "SIGNER_VERIFIED_INSTALL_PENDING",
+  "distribution_status": "READY",
   "public_main_validation_sha": "fc7ffc6a7deda7074e5d6b2e631380fd923401c0",
   "public_main_android_debug_run": 36603132862,
   "public_main_artifact_id": 11050306597,
@@ -29,5 +29,9 @@
   "public_main_artifact_zip_sha256": "ddf9eb0ee9ef53e31ce997d157855c6bb3b1d7111cc1e662686039ddc4f55bb2",
   "public_main_signer_sha1": "4102350e2787fd538bbf58a219293a132235e618",
   "public_main_signer_sha256": "dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802",
-  "public_main_apk_matches_phone_accepted_candidate": true
+  "public_main_apk_matches_phone_accepted_candidate": true,
+  "in_place_install_verified": true,
+  "in_place_install_date": "2026-09-29",
+  "data_preservation_verified": true,
+  "release_closeout_note": "2026-09-29 post-install screenshot: Renault Docs v0.5.51; Megane II present; Томів: 2; Laguna II and Kangoo II placeholders preserved."
 }
