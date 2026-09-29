@@ -54,6 +54,30 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         self.assertIn("if (\n            state.isTerminalDismissed", self.project)
         self.assertIn("hideNativeTerminalStatus()", self.project)
 
+    def test_active_progress_dialog_tracks_live_run_message(self):
+        self.assertIn("nativeRunProgressDialog", self.project)
+        self.assertIn("updateNativeRunProgressDialog(", self.project)
+        self.assertIn("dialog.setMessage(", self.project)
+        self.assertIn(
+            "updateNativeRunProgressDialog(\n                state,",
+            self.project,
+        )
+        self.assertIn(
+            "private const val NATIVE_RUN_REFRESH_MS =\n            750L",
+            self.project,
+        )
+
+    def test_active_progress_dialog_is_closed_after_run_finishes(self):
+        refresh = self.project.split(
+            "private fun refreshNativeRunState()",
+            1,
+        )[1].split(
+            "private fun showNativeTerminalStatus",
+            1,
+        )[0]
+
+        self.assertIn("dismissNativeRunProgressDialog()", refresh)
+
     def test_rdpkg_progress_uses_ukrainian_file_count_helper(self):
         self.assertIn("ukrainianFileCount(", self.importer)
         self.assertNotIn('" файлів",\n                    )', self.importer)
