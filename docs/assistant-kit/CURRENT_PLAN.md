@@ -122,3 +122,22 @@ Renault Menu item `20 — Відновити accepted signer + build`:
 - then launches exact main Android build/download.
 
 User action is now explicit and phone-side; no manual secret copy/paste is required.
+
+
+### 2026-09-29 signing workflow hardening
+
+Security hardening merged as:
+`5aa665756e7b44de3dbb90bff2250d4bbe30596b`.
+
+Android Debug signing workflow no longer runs automatically on pull requests.
+Stable development signing secrets are now reachable only from:
+- push to `main`;
+- explicit `workflow_dispatch`.
+
+PRs keep using the separate Tests workflow and cannot trigger the signing workflow automatically.
+
+This closes the previously identified unnecessary PR secret exposure path.
+
+User action remains:
+`reno-docs → 5 → 20`.
+Do not install the resulting APK until its signer/build output is reviewed.
