@@ -208,8 +208,8 @@ Scope:
 - [x] `1 файлів` replaced by proper Ukrainian forms: `1 файл`, `2–4 файли`, `5+ файлів`, including 11–14 exception;
 - [x] JVM wording test added;
 - [x] v0.5.52 contract test added;
-- [ ] Tests CI PASS;
-- [ ] Android Debug APK CI PASS;
+- [x] Tests CI PASS — run `36611508371`;
+- [ ] Android PR Check / compile PASS — run `36611508366` in progress;
 - [ ] short phone UX check: terminal `×` dismisses and stays dismissed after rotation/reopen; active run has no `×`.
 
 ## Поточний наступний крок v0.5.52
