@@ -1427,3 +1427,19 @@ Post-merge distribution work is limited to development signer continuity:
 - then prove a public-main v0.5.51 APK updates the existing installed app without uninstall/data reset.
 
 Do not conflate this signing/distribution check with app runtime QA, which is already PHONE PASS.
+
+
+### Renault menu project/build status
+
+Termux Renault menu item `19 — Статус проєкту / build` is the user-facing read-only status check.
+
+It shows:
+- current Renault version / versionCode;
+- branch and local commit;
+- canonical CURRENT_PLAN project status and next step;
+- RELEASE_META QA/distribution status and expected signer;
+- latest Android Debug APK run;
+- latest Tests run;
+- whether Android/build files changed after the latest Android build.
+
+Merged as `b0073f723e28c17622efbd3ad29c0a05d0193d2b`.
