@@ -105,19 +105,19 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Legacy `*_android` storage audit
 
-Status: **MERGED / PHONE AUDIT OUTPUT PENDING**.
+Status: **REAL-PHONE READ-ONLY AUDIT PASS / MIGRATION BEFORE CLEANUP**.
 
-Scope:
-- [x] read-only Termux helper scans top-level `Documents/Renault/*_android` folders;
-- [x] reports path, size, file count, modified time, dataset/.nomedia markers and repo references;
-- [x] marks active configured `build_root` as `KEEP`;
-- [x] other folders default conservatively to `LEGACY`;
-- [x] never auto-promotes unknown folders to `SAFE TO REMOVE`;
-- [x] explicitly warns that `LEGACY ≠ SAFE TO REMOVE` because Termux cannot prove absence of app-private/SAF references;
-- [x] Renault Menu item `21 — Аудит legacy *_android (read-only)`;
-- [x] automated contract test forbids destructive helpers/commands.
+Real phone result on 2026-09-30:
+- `laguna 2 2001-2006_android` — 356M / 19836 files / dataset manifest present / **KEEP** because it is the configured active `build_root`;
+- `Megane II_NT8342A_android` — 405M / 7855 files / dataset manifest + `.nomedia` / **KEEP FOR NOW** because this prepared folder is the historical source of the current NT8342A project volume;
+- `Megane II_android` — 400M / 7664 files / dataset manifest + `.nomedia` / legacy single-volume Megane output from v0.5.37, historically used for NT8340A; current NT8340A has since been replaced by an app-private `.rdpkg` installation, so this is a **SAFE-TO-REMOVE CANDIDATE AFTER FINAL REFERENCE GATE**.
+
+Important code fact:
+`.rdpkg` imports are extracted into app-private `noBackupFilesDir/rdpkg/<packageId>` and project volume records then use the app-owned DocumentsProvider tree URI. They do not depend on the public `*_android` folder after a successful upsert.
+
+Menu presentation bug found during this audit:
+item 21 accidentally contained a literal `\n`; fixed and merged via PR #8 as `3d056d5641b8351163a844af816b43c7ec0b6ef7`.
 
 ## Поточний наступний крок
 
-**PR #7 merged as `038dc8c68ef0272434de1a774fd59e6930b66fd3`; final PR Tests `36643183451` PASS. On phone return Renault repo to `main`, run menu item 21, and bring back the full audit output. Classify real folders only from that evidence. Delete nothing automatically.**
-
+**Migrate NT8342A from `Megane II_NT8342A_android` into a single-volume `.rdpkg`, import it into Megane II, verify both NT8340A and NT8342A reopen from app-private packages, then perform a reversible quarantine gate before deleting either Megane `*_android` folder. Keep Laguna `*_android`.**
