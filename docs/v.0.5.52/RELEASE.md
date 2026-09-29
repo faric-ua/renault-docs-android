@@ -1,6 +1,6 @@
 # Renault Docs v0.5.52 — terminal status polish
 
-Status: **PHONE PASS / READY TO MERGE — 2026-09-30**
+Status: **READY / CLOSED — 2026-09-30**
 
 ## Scope
 
@@ -38,6 +38,18 @@ Real-phone checks completed on 2026-09-30:
 
 The `1 файл` wording is covered by JVM/contract tests; no extra destructive phone scenario was run only to force that exact counter value.
 
-## Next
+## Distribution closeout
 
-Merge PR #6, verify trusted public-main build and signer continuity, then do one final in-place install/data-preservation smoke check. No full NT8340A acceptance rerun is required.
+- PR #6 squash-merged to public `main` as `31c26e9c24abab6fb491f8aa9290c5395112a2ca`;
+- public-main Tests `36642605889` — PASS;
+- public-main Android Debug `36642605895` — PASS;
+- artifact id `11067202339`;
+- stable signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- public-main APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`.
+
+The public-main APK hash exactly matches the already installed and phone-accepted final candidate. Therefore no separate reinstall is required: it would install the identical signed binary and add no new evidence.
+
+Final verdict:
+**v0.5.52 READY / CLOSED.**
+
+Next work is the read-only audit of historical `*_android` folders before any cleanup.
