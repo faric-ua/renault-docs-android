@@ -64,15 +64,34 @@ CI for that candidate:
 - APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`;
 - signer cert SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
 
-## Closeout PR #138
+## Closeout — public PR #1
+
+Active repository:
+`faric-ua/renault-docs-android`.
+
+Private archive:
+`faric-ua/renault-docs-android-private-archive` — history/reference only.
 
 - [x] PHONE PASS recorded in release docs, handoff and ledger.
-- [x] Reconcile PR branch with current `main` versions of shared Termux/signing infrastructure.
-- [x] Resolve merge conflicts; PR is mergeable again.
-- [x] Condense active plan and phone QA so stale PENDING chronology is not the primary source of truth.
-- [ ] Verify final branch CI after main-reconciliation/documentation cleanup.
-- [ ] Mark PR #138 ready and merge only after final CI is green.
+- [x] v0.5.51 branch transplanted into the active public repository without changing the phone-accepted Kotlin/Java runtime.
+- [x] Public draft PR #1 created from `feat/v0.5.51-native-preparation-foundation`.
+- [x] Public candidate version verified: `versionName 0.5.51`, `versionCode 67`.
+- [x] Public Tests run `36582283061` — PASS.
+- [ ] Public Android Debug run `36582283147` — waiting for completion.
+- [ ] Mark public PR #1 ready and merge only after Android Debug is green.
 - [ ] Record merged SHA / final release state in `RELEASE_META.json`, handoff and ledger.
+
+### Wrong-branch build evidence — 2026-09-29
+
+The phone-side menu build reported:
+
+- repository: `faric-ua/renault-docs-android`;
+- branch: `main`;
+- commit: `97a5c6e29bd939197784f9ffced09161f5876bb2`;
+- version: `0.5.50`;
+- Android Debug run: `36580219193` — PASS.
+
+This is a valid **main v0.5.50** build, but it is **not** the v0.5.51 closeout candidate. It exposed that the active phone clone had already moved to the new public repository while the v0.5.51 candidate still existed only in the private archive. That repository split is now reconciled by public PR #1.
 
 ## Follow-up після merge
 
@@ -98,16 +117,4 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Поточний наступний крок
 
-**На телефоні через `reno-docs`: 5 — оновити поточну candidate-гілку, потім 7 — Build + Download APK для reconciled head. Після PASS зафіксувати run/artifact, перевести PR #138 з draft у ready, merge і записати merged SHA.**
-
-
-### 2026-09-29 closeout checkpoint
-
-PR #138:
-- branch reconciled with current `main` by merge commit `6e1755a29864e33be38cd9ac6f88002d15f6c833`;
-- current head after documentation cleanup: `5e8a6bdd808d89c3c0dd08ded4ba466d89811539`;
-- compare to `main`: ahead, behind `0`;
-- PR mergeable: yes;
-- no Android runtime Kotlin/Java source changed after the phone-accepted runtime source `6b334e...`; post-acceptance Android-side delta is build/signing configuration only.
-
-Final CI still needs an exact build of the reconciled head before merge.
+**Перевірити завершення public Android Debug run `36582283147`. Якщо PASS — перевести public PR #1 з draft у ready, merge і записати merged SHA в release metadata / CURRENT_PLAN / CURRENT_HANDOFF / PROJECT_LEDGER. Додаткова дія на телефоні зараз не потрібна.**
