@@ -3958,3 +3958,26 @@ Follow-up work after the accepted candidate is frozen:
 - terminal COMPLETE/CANCELLED/FAILED status dismiss `×`;
 - Ukrainian `1 файл` wording;
 - read-only audit of historical public `*_android` folders before cleanup.
+
+
+### Public-repo closeout correction — 2026-09-29
+
+The active phone clone now points to public `faric-ua/renault-docs-android`. Its `main` is still v0.5.50.
+
+A mistaken closeout instruction caused item 7 to build public main:
+- commit `97a5c6e29bd939197784f9ffced09161f5876bb2`;
+- run `36580219193`;
+- version v0.5.50;
+- build PASS, but Android installer reported `Додаток не встановлено`.
+
+Reason: this is a lower version than the installed v0.5.51 candidate (versionCode 66 vs 67), so it is not a valid candidate install.
+
+The phone-accepted private feature was transplanted file-for-file onto public branch:
+`feat/v0.5.51-native-preparation-foundation`.
+Public continuation PR: **#1**.
+
+Termux candidate flow was hardened:
+item 16 now selects/switches the public PR branch and launches `reno-build-apk.sh`, guaranteeing a fresh workflow_dispatch build with the stable signer.
+
+Next phone action after PR CI is green:
+`reno-docs` → 5 (update main) → 16 → select PR #1.
