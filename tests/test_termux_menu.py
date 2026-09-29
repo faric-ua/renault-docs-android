@@ -24,6 +24,8 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('bash "$REPO/tools/termux/reno-fast-convert.sh"', text)
         self.assertIn('19 — Статус проєкту / build', text)
         self.assertIn('bash "$REPO/tools/termux/reno-project-status.sh"', text)
+        self.assertIn('20 — Відновити accepted signer + build', text)
+        self.assertIn('bash "$REPO/tools/termux/reno-restore-accepted-signer.sh"', text)
         self.assertNotIn('Phone Diagnostics Menu', text)
 
     def test_renault_operational_paths_use_private_termux_checkout(self):
@@ -195,6 +197,7 @@ class TermuxMenuContractTests(unittest.TestCase):
             repo / "tools" / "termux" / "reno-download-apk.sh",
             repo / "tools" / "termux" / "reno-candidate.sh",
             repo / "tools" / "termux" / "reno-project-status.sh",
+            repo / "tools" / "termux" / "reno-restore-accepted-signer.sh",
         ]
 
         for script in scripts:
@@ -234,6 +237,24 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('show_workflow "  Tests" "tests.yml"', text)
         self.assertIn("SIGNER_CONTINUITY_PENDING", text)
         self.assertIn("PASS build ≠ готовність до встановлення.", text)
+
+
+    def test_restore_accepted_signer_helper_is_private_archive_to_github_secrets_only(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "reno-restore-accepted-signer.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("renault-docs-android-private-archive", text)
+        self.assertIn("EXPECTED_KEYSTORE_SHA256", text)
+        self.assertIn("EXPECTED_CERT_SHA256", text)
+        self.assertIn("gh secret set RENAULT_DEV_KEYSTORE_B64", text)
+        self.assertIn("gh secret set RENAULT_DEV_CERT_SHA256", text)
+        self.assertIn("Секретні значення на екран НЕ виводяться.", text)
+        self.assertIn('exec bash "$REPO_DIR/tools/termux/reno-build-apk.sh"', text)
+        self.assertNotIn("cat $TMP_DIR/renault-docs-dev.jks", text)
+        self.assertNotIn("echo $STORE_PASSWORD", text)
+        self.assertNotIn("echo $KEY_PASSWORD", text)
 
 
 if __name__ == "__main__":
