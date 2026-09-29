@@ -25,6 +25,8 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('19 — Статус проєкту / build', text)
         self.assertIn('bash "$REPO/tools/termux/reno-project-status.sh"', text)
         self.assertIn('20 — Відновити accepted signer + build', text)
+        self.assertIn('21 — Аудит legacy *_android (read-only)', text)
+        self.assertNotIn('build"\\n  echo "21 —', text)
         self.assertIn('bash "$REPO/tools/termux/reno-restore-accepted-signer.sh"', text)
         self.assertNotIn('Phone Diagnostics Menu', text)
 

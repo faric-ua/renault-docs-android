@@ -303,7 +303,8 @@ while true; do
   echo "17 — Повернутися на main"
   echo "18 — Оновити Termux aliases / Widget"
   echo "19 — Статус проєкту / build"
-  echo "20 — Відновити accepted signer + build"\n  echo "21 — Аудит legacy *_android (read-only)"
+  echo "20 — Відновити accepted signer + build"
+  echo "21 — Аудит legacy *_android (read-only)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
