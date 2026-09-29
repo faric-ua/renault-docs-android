@@ -104,7 +104,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
             text=True,
         )
 
-        self.assertEqual("0.5.50", result.stdout.strip())
+        self.assertEqual("0.5.51", result.stdout.strip())
         self.assertIn("awk -F'\"'", script)
         self.assertIn("versionName[[:space:]]*=", script)
 
@@ -113,8 +113,8 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
             "android/app/build.gradle.kts"
         )
 
-        self.assertIn("versionCode = 66", gradle)
-        self.assertIn('versionName = "0.5.50"', gradle)
+        self.assertIn("versionCode = 67", gradle)
+        self.assertIn('versionName = "0.5.51"', gradle)
 
 
 if __name__ == "__main__":
