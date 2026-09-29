@@ -76,7 +76,10 @@ CI for that candidate:
 - [x] Public PR #1 marked ready and squash-merged.
 - [x] Merged SHA: `921e87f728a222e8f388a01ad989b082a7bd8894`.
 - [x] Merge state recorded in release metadata.
-- [ ] Restore/verify development signer continuity before asking the user to install a new public-main APK over the accepted phone app.
+- [x] Restore accepted development signer in public GitHub Actions Secrets.
+- [x] Verify public-main signer continuity: SHA-1 `4102350e2787fd538bbf58a219293a132235e618`, accepted cert SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+- [x] Exact public-main APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48` matches the previously phone-accepted v0.5.51 APK byte-for-byte.
+- [ ] Final in-place install check on phone: install the exact public-main APK over existing Renault Docs without uninstall/data reset, reopen, confirm Megane II still has 2 volumes.
 
 ## Follow-up після merge
 
@@ -102,7 +105,8 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Поточний наступний крок
 
-**ТВОЯ НАСТУПНА ДІЯ: `reno-docs` → 5 (оновити main) → 20 (`Відновити accepted signer + build`). Пункт 20 сам дістає accepted development signer з private archive, перевіряє його SHA-256, оновлює GitHub Actions Secrets без показу секретних значень і запускає exact public-main v0.5.51 build. Після PASS не встановлюй APK мовчки — надішли фінальний блок від `Renault Docs · відновлення accepted development signer` до `READY`, і тоді дам точний install-check.**
+**ТВОЯ НАСТУПНА ДІЯ — тільки Renault Docs:** встановити `/storage/emulated/0/Documents/Renault/packages/Renault-Docs-v0.5.51-build/Renault-Docs-v0.5.51-debug.apk` ПОВЕРХ уже встановленої Renault Docs. Не видаляти застосунок і не очищати дані. Після успішної установки відкрити Renault Docs і підтвердити: версія v0.5.51, Megane II існує, `Томів: 2`. Надіслати скрін головного екрана або точний текст помилки інсталятора.
+
 
 Project separation:
 - Renault Docs: continue only from this checkpoint.
@@ -155,3 +159,18 @@ This screenshot is a baseline only; it does not identify the APK signer by itsel
 
 Next user action remains:
 `reno-docs → 5 → 20`, then return the complete restore/build output before installing the generated APK.
+
+
+### 2026-09-29 signer continuity verified
+
+Exact trusted public-main build:
+- commit `fc7ffc6a7deda7074e5d6b2e631380fd923401c0`;
+- Android Debug run `36603132862` — PASS;
+- artifact id `11050306597`;
+- signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- accepted signer SHA-256 verified by workflow: `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`;
+- artifact ZIP SHA-256 `ddf9eb0ee9ef53e31ce997d157855c6bb3b1d7111cc1e662686039ddc4f55bb2`.
+
+Important:
+the public-main APK SHA-256 is exactly the same as the already phone-accepted v0.5.51 candidate APK. Signing continuity and APK identity are therefore cryptographically confirmed. Only the final Android in-place install/data-preservation check remains.
