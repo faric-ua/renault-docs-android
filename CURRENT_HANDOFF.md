@@ -3998,3 +3998,28 @@ The user accidentally built public `main` v0.5.50/versionCode 66 (run `365802191
 
 Release-safe path:
 preserve update/data continuity by restoring the original accepted signer through the user's secure local/private backup workflow, without placing key material in the public repository or chat. Then build PR #1 as v0.5.51/versionCode 67, verify accepted cert SHA-256 `dd588f...`, install over the existing app, and only then merge.
+
+
+### v0.5.51 public merge — 2026-09-29
+
+Active repository:
+`faric-ua/renault-docs-android`.
+
+Public PR #1 was marked ready and squash-merged after final PR-head CI was green.
+
+Merged SHA:
+`921e87f728a222e8f388a01ad989b082a7bd8894`.
+
+Current public main:
+- `versionName 0.5.51`;
+- `versionCode 67`.
+
+Important remaining distribution checkpoint:
+do not ask the user to uninstall/reinstall Renault Docs yet. The phone-accepted build used the accepted development certificate SHA-256
+`dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+The public repository signing identity must be restored/verified to match before a new public-main APK is treated as an in-place update.
+
+The earlier phone menu build `36580219193` was public `main` v0.5.50 and is not v0.5.51 evidence.
+
+Project-separation rule:
+Renault Docs and YTM importer remain independent projects. Never mix their branches, menus, artifacts, QA, or release state.
