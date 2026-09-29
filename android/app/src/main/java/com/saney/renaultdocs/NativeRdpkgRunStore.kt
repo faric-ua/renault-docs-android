@@ -28,6 +28,7 @@ data class NativeRdpkgRunState(
     val cancelRequested: Boolean = false,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
+    val dismissedFinishedAtMs: Long = 0L,
 ) {
     val isRunning: Boolean
         get() =
@@ -36,6 +37,21 @@ data class NativeRdpkgRunState(
                     NativeRdpkgRunPhase.PREPARING,
                     NativeRdpkgRunPhase.IMPORTING,
                 )
+
+    val isTerminal: Boolean
+        get() =
+            phase in
+                setOf(
+                    NativeRdpkgRunPhase.COMPLETE,
+                    NativeRdpkgRunPhase.FAILED,
+                    NativeRdpkgRunPhase.CANCELLED,
+                )
+
+    val isTerminalDismissed: Boolean
+        get() =
+            isTerminal &&
+                finishedAtMs > 0L &&
+                dismissedFinishedAtMs == finishedAtMs
 }
 
 class NativeRdpkgRunStore(
@@ -172,6 +188,11 @@ class NativeRdpkgRunStore(
                     KEY_FINISHED_AT,
                     0L,
                 ),
+            dismissedFinishedAtMs =
+                prefs.getLong(
+                    KEY_DISMISSED_FINISHED_AT,
+                    0L,
+                ),
         )
 
     fun begin(
@@ -240,6 +261,9 @@ class NativeRdpkgRunStore(
             .putLong(
                 KEY_FINISHED_AT,
                 0L,
+            )
+            .remove(
+                KEY_DISMISSED_FINISHED_AT,
             )
             .apply()
     }
@@ -378,6 +402,28 @@ class NativeRdpkgRunStore(
             .apply()
     }
 
+    fun dismissTerminal(
+        finishedAtMs: Long,
+    ): Boolean {
+        val state =
+            load()
+
+        if (
+            !state.isTerminal ||
+            state.finishedAtMs <= 0L ||
+            state.finishedAtMs != finishedAtMs
+        ) {
+            return false
+        }
+
+        return prefs.edit()
+            .putLong(
+                KEY_DISMISSED_FINISHED_AT,
+                finishedAtMs,
+            )
+            .commit()
+    }
+
     fun requestCancel() {
         prefs.edit()
             .putBoolean(
@@ -445,5 +491,7 @@ class NativeRdpkgRunStore(
             "started_at"
         private const val KEY_FINISHED_AT =
             "finished_at"
+        private const val KEY_DISMISSED_FINISHED_AT =
+            "dismissed_finished_at"
     }
 }
