@@ -1516,3 +1516,25 @@ Status:
 
 Next product work after release closeout:
 read-only provenance/reference audit of historical `Documents/Renault/*_android` folders before any deletion.
+
+
+### v0.5.52 public-main distribution closeout
+
+PR #6 was squash-merged to public `main` as:
+`31c26e9c24abab6fb491f8aa9290c5395112a2ca`.
+
+Public-main validation:
+- Tests `36642605889` — PASS;
+- Android Debug `36642605895` — PASS;
+- artifact id `11067202339`;
+- stable signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- accepted signer certificate SHA-256 verified by the trusted workflow;
+- APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`.
+
+The public-main APK is byte-for-byte identical to the final candidate already installed and phone-accepted on 2026-09-30. A separate reinstall was intentionally skipped because it would not exercise a different binary.
+
+Status:
+**v0.5.52 READY / CLOSED — 2026-09-30.**
+
+Next work:
+read-only provenance/reference audit of historical public `Documents/Renault/*_android` folders. Delete nothing automatically.
