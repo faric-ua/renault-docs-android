@@ -22,12 +22,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      RENAULT_DEV_KEYSTORE_B64: ${{ secrets.RENAULT_DEV_KEYSTORE_B64 }}
-      RENAULT_DEV_STORE_PASSWORD: ${{ secrets.RENAULT_DEV_STORE_PASSWORD }}
-      RENAULT_DEV_KEY_ALIAS: ${{ secrets.RENAULT_DEV_KEY_ALIAS }}
-      RENAULT_DEV_KEY_PASSWORD: ${{ secrets.RENAULT_DEV_KEY_PASSWORD }}
-      RENAULT_DEV_CERT_SHA256: ${{ secrets.RENAULT_DEV_CERT_SHA256 }}
 
     steps:
       - name: Checkout
@@ -67,30 +61,48 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
 
-      - name: Require stable signer for trusted builds
-        if: github.event_name != 'pull_request'
+      - name: Restore stable development signing key (trusted only)
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         shell: bash
+        env:
+          RENAULT_DEV_KEYSTORE_B64: ${{ secrets.RENAULT_DEV_KEYSTORE_B64 }}
+          RENAULT_DEV_STORE_PASSWORD: ${{ secrets.RENAULT_DEV_STORE_PASSWORD }}
+          RENAULT_DEV_KEY_ALIAS: ${{ secrets.RENAULT_DEV_KEY_ALIAS }}
+          RENAULT_DEV_KEY_PASSWORD: ${{ secrets.RENAULT_DEV_KEY_PASSWORD }}
+          RENAULT_DEV_CERT_SHA256: ${{ secrets.RENAULT_DEV_CERT_SHA256 }}
         run: |
           set -euo pipefail
+
           test -n "$RENAULT_DEV_KEYSTORE_B64"
           test -n "$RENAULT_DEV_STORE_PASSWORD"
           test -n "$RENAULT_DEV_KEY_ALIAS"
           test -n "$RENAULT_DEV_KEY_PASSWORD"
           test -n "$RENAULT_DEV_CERT_SHA256"
 
-      - name: Restore stable development signing key
-        if: env.RENAULT_DEV_KEYSTORE_B64 != ''
-        shell: bash
-        run: |
-          set -euo pipefail
+          echo "::add-mask::$RENAULT_DEV_STORE_PASSWORD"
+          echo "::add-mask::$RENAULT_DEV_KEY_ALIAS"
+          echo "::add-mask::$RENAULT_DEV_KEY_PASSWORD"
+          echo "::add-mask::$RENAULT_DEV_CERT_SHA256"
+
           KEYSTORE_PATH="$RUNNER_TEMP/renault-docs-dev.jks"
           printf '%s' "$RENAULT_DEV_KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
           test -s "$KEYSTORE_PATH"
-          keytool -list \
-            -keystore "$KEYSTORE_PATH" \
-            -storepass "$RENAULT_DEV_STORE_PASSWORD" \
-            -alias "$RENAULT_DEV_KEY_ALIAS" >/dev/null
-          echo "RENAULT_DEV_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+          keytool -list             -keystore "$KEYSTORE_PATH"             -storepass "$RENAULT_DEV_STORE_PASSWORD"             -alias "$RENAULT_DEV_KEY_ALIAS" >/dev/null
+
+          {
+            echo "RENAULT_DEV_KEYSTORE_PATH=$KEYSTORE_PATH"
+            echo "RENAULT_DEV_STORE_PASSWORD=$RENAULT_DEV_STORE_PASSWORD"
+            echo "RENAULT_DEV_KEY_ALIAS=$RENAULT_DEV_KEY_ALIAS"
+            echo "RENAULT_DEV_KEY_PASSWORD=$RENAULT_DEV_KEY_PASSWORD"
+            echo "RENAULT_DEV_CERT_SHA256=$RENAULT_DEV_CERT_SHA256"
+          } >> "$GITHUB_ENV"
+
+      - name: PR signing mode
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo "PR build: repository signing secrets are not injected; Android uses the default ephemeral debug signer."
 
       - name: Run Android unit tests
         run: gradle -p android :app:testDebugUnitTest
@@ -112,7 +124,7 @@ jobs:
           BUILD_TOOLS="$ANDROID_SDK_ROOT/build-tools/35.0.0"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee signer.txt
 
-          if [ -n "$RENAULT_DEV_CERT_SHA256" ]; then
+          if [ -n "${RENAULT_DEV_CERT_SHA256:-}" ]; then
             ACTUAL="$(
               sed -n 's/^Signer #1 certificate SHA-256 digest: //p' signer.txt                 | head -n 1                 | tr -d ':'                 | tr '[:upper:]' '[:lower:]'
             )"
@@ -121,8 +133,9 @@ jobs:
             )"
             test -n "$ACTUAL"
             test "$ACTUAL" = "$EXPECTED"
+            echo "Stable signer certificate verified."
           else
-            echo "Stable signer secret is unavailable; fork/PR build uses the default debug signer."
+            echo "PR build: stable signer unavailable by design; default debug signer accepted."
           fi
 
           "$BUILD_TOOLS/zipalign" -c -v 4 "$APK"
