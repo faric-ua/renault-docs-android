@@ -228,6 +228,12 @@ export_runtime_ir_coverage() {
   pause_menu
 }
 
+show_project_status() {
+  clear
+  bash "$REPO/tools/termux/reno-project-status.sh"
+  pause_menu
+}
+
 refresh_termux_integration() {
   clear
   echo "Оновлюю Renault aliases та Termux:Widget shortcut..."
@@ -284,6 +290,7 @@ while true; do
   echo "16 — Тестовий candidate PR: перейти + build/download APK"
   echo "17 — Повернутися на main"
   echo "18 — Оновити Termux aliases / Widget"
+  echo "19 — Статус проєкту / build"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -344,6 +351,9 @@ while true; do
       ;;
     18)
       refresh_termux_integration
+      ;;
+    19)
+      show_project_status
       ;;
     0)
       clear
