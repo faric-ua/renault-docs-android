@@ -105,7 +105,7 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Legacy `*_android` storage audit
 
-Status: **IMPLEMENTED / CI PENDING**.
+Status: **IMPLEMENTED / CI PASS / READY TO MERGE**.
 
 Scope:
 - [x] read-only Termux helper scans top-level `Documents/Renault/*_android` folders;
@@ -119,5 +119,5 @@ Scope:
 
 ## Поточний наступний крок
 
-**Run CI for `tooling/legacy-android-audit`. If green, merge the tooling PR, update phone repo to `main`, run menu item 21, then classify the real folders from its output. Delete nothing automatically.**
+**Tests `36643121485` PASS. Merge PR #7, then on phone return Renault repo to `main` and run menu item 21. Bring back the full audit output; classify real folders only from that evidence. Delete nothing automatically.**
 
