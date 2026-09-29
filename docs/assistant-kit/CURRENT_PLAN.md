@@ -64,14 +64,14 @@ CI for that candidate:
 - APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`;
 - signer cert SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
 
-## Closeout PR #138
+## Closeout public PR #1
 
 - [x] PHONE PASS recorded in release docs, handoff and ledger.
 - [x] Reconcile PR branch with current `main` versions of shared Termux/signing infrastructure.
 - [x] Resolve merge conflicts; PR is mergeable again.
 - [x] Condense active plan and phone QA so stale PENDING chronology is not the primary source of truth.
 - [ ] Verify final branch CI after main-reconciliation/documentation cleanup.
-- [ ] Mark PR #138 ready and merge only after final CI is green.
+- [ ] Mark public PR #1 ready and merge only after final CI is green.
 - [ ] Record merged SHA / final release state in `RELEASE_META.json`, handoff and ledger.
 
 ## Follow-up після merge
@@ -98,12 +98,12 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Поточний наступний крок
 
-**На телефоні через `reno-docs`: 5 — оновити поточну candidate-гілку, потім 7 — Build + Download APK для reconciled head. Після PASS зафіксувати run/artifact, перевести PR #138 з draft у ready, merge і записати merged SHA.**
+**На телефоні через `reno-docs`: 5 — оновити main, потім 16 — вибрати public PR #1. Пункт 16 тепер сам переходить на candidate і запускає exact stable-signed build/download через workflow_dispatch. Після PASS зафіксувати run/artifact, перевести PR #1 з draft у ready, merge і записати merged SHA.**
 
 
 ### 2026-09-29 closeout checkpoint
 
-PR #138:
+Private archive PR #138 → public continuation PR #1:
 - branch reconciled with current `main` by merge commit `6e1755a29864e33be38cd9ac6f88002d15f6c833`;
 - current head after documentation cleanup: `5e8a6bdd808d89c3c0dd08ded4ba466d89811539`;
 - compare to `main`: ahead, behind `0`;
@@ -111,3 +111,22 @@ PR #138:
 - no Android runtime Kotlin/Java source changed after the phone-accepted runtime source `6b334e...`; post-acceptance Android-side delta is build/signing configuration only.
 
 Final CI still needs an exact build of the reconciled head before merge.
+
+
+### 2026-09-29 wrong-main build finding
+
+A closeout attempt accidentally ran menu item 7 while the phone clone was still on public `main`.
+
+Observed:
+- branch: `main`;
+- commit: `97a5c6e29bd939197784f9ffced09161f5876bb2`;
+- version: `v0.5.50`;
+- run: `36580219193` — build PASS;
+- installer reported `Додаток не встановлено`.
+
+This APK is not the v0.5.51 candidate and must not be used for closeout. The installed phone candidate is v0.5.51/versionCode 67, while public main is v0.5.50/versionCode 66, so attempting to install the main APK is a downgrade and Android may reject it.
+
+Root workflow correction:
+- public clean-history PR #1 now contains the v0.5.51 accepted delta;
+- menu item 16 now switches to the selected PR branch **and triggers a fresh stable-signed workflow_dispatch build**, instead of downloading an arbitrary existing PR artifact;
+- do not use item 7 from `main` for v0.5.51 closeout.
