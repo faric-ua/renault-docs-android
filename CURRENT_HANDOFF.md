@@ -4079,3 +4079,26 @@ The public-main APK SHA-256 is identical to the previously phone-accepted v0.5.5
 
 Final release-distribution gate:
 install this exact APK over the existing Renault Docs without uninstall/data reset, reopen, and confirm the pre-install baseline still exists: v0.5.51 and Megane II with 2 volumes.
+
+
+### v0.5.51 final distribution closeout — 2026-09-29
+
+Final phone install check passed.
+
+The exact trusted public-main APK was installed over the existing Renault Docs application without uninstall/data reset.
+
+Post-install screenshot confirms:
+- app version remains `v0.5.51`;
+- `Megane II` project is preserved;
+- `Томів: 2` is preserved;
+- Laguna II and Kangoo II placeholders remain present.
+
+This closes the distribution/signing continuity gate.
+
+Final status:
+**v0.5.51 READY / CLOSED**.
+
+Next development patch:
+- terminal COMPLETE/CANCELLED/FAILED dismiss `×`;
+- fix `1 файлів` → `1 файл`;
+- then perform read-only audit of legacy `*_android` folders.
