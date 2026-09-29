@@ -77,8 +77,8 @@ class V0530PdfHighZoomScrollContractTests(unittest.TestCase):
             repo / "android/app/build.gradle.kts"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("versionCode = 66", gradle)
-        self.assertIn('versionName = "0.5.50"', gradle)
+        self.assertIn("versionCode = 67", gradle)
+        self.assertIn('versionName = "0.5.51"', gradle)
 
 
 if __name__ == "__main__":
