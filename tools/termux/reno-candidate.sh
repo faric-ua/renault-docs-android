@@ -147,7 +147,7 @@ echo "  branch:  $PR_BRANCH"
 echo "  version: v$VERSION"
 echo "  commit:  $(git rev-parse HEAD)"
 echo
-echo "Завантажую exact APK artifact саме для цього commit..."
+echo "Запускаю exact stable-signed APK build саме для цього candidate commit..."
 echo
 
-exec bash "$REPO_DIR/tools/termux/reno-download-apk.sh"
+exec bash "$REPO_DIR/tools/termux/reno-build-apk.sh"
