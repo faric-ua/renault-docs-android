@@ -4023,3 +4023,24 @@ The earlier phone menu build `36580219193` was public `main` v0.5.50 and is not 
 
 Project-separation rule:
 Renault Docs and YTM importer remain independent projects. Never mix their branches, menus, artifacts, QA, or release state.
+
+
+### Accepted signer restore helper — 2026-09-29
+
+Public main now includes Renault Menu item `20 — Відновити accepted signer + build`.
+
+Merged helper SHA:
+`239663c4577c2e4d279a4052f1b0ac460b19bf9d`.
+
+Purpose:
+restore the exact phone-accepted development signing identity from the private historical archive into the public repository's GitHub Actions Secrets without exposing key/password values in chat or terminal output.
+
+The helper verifies:
+- keystore SHA-256 `7944e7d78bd2442021731a4cfd3105c06f475c13d70d4195b2378539604dfd10`;
+- accepted certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+
+Then it launches an exact public-main build.
+
+Next user action:
+`reno-docs → 5 → 20`.
+Do not uninstall Renault Docs. After the build, capture the final output before attempting installation.
