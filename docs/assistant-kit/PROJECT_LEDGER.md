@@ -1486,3 +1486,33 @@ Final acceptance:
 
 Status:
 **v0.5.51 READY / CLOSED — 2026-09-29**.
+
+
+### v0.5.52 terminal status / live progress phone acceptance
+
+Final accepted source:
+`8a364ef9e50d0bd81273e9d419321284abdfed03`.
+
+Real-phone acceptance on 2026-09-30:
+- candidate installed in-place over the existing app with data preserved;
+- app opened as v0.5.52;
+- Megane II remained at 2 volumes; Laguna II and Kangoo II remained present;
+- terminal COMPLETE/CANCELLED/FAILED presentation has a right-side `×`;
+- terminal dismissal survives repeated rotation and leaving/reopening the project;
+- active PREPARING has no terminal `×`;
+- PREPARING cancellation returns to terminal CANCELLED state;
+- the open “Підготовка .rdpkg виконується” dialog now follows real persisted progress live instead of showing a frozen snapshot;
+- Ukrainian file-count forms are covered by JVM/contract tests.
+
+Final candidate validation:
+- Tests `36639849368` — PASS;
+- Android PR Check `36639849222` — PASS;
+- trusted candidate build `36640408798` — PASS;
+- APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`;
+- stable signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`.
+
+Status:
+**v0.5.52 PHONE PASS; public-main distribution verification remains.**
+
+Next product work after release closeout:
+read-only provenance/reference audit of historical `Documents/Renault/*_android` folders before any deletion.
