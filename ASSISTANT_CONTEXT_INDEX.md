@@ -6,8 +6,8 @@
 
 ## Перед змінами коду
 
-1. Прочитати `CURRENT_HANDOFF.md`.
-2. Прочитати `ACTIVE_PLAN.md` і взяти перший невиконаний checkbox як default resume point.
+1. Прочитати `docs/assistant-kit/CURRENT_PLAN.md` і взяти його **Поточний наступний крок** як default resume point.
+2. Прочитати `CURRENT_HANDOFF.md` для ширшого історичного контексту.
 3. Прочитати цей файл.
 4. Прочитати всі шляхи з `docs/assistant-kit/CONTEXT_FILES.txt`.
 5. Перевірити живу Git-гілку та HEAD.
@@ -49,12 +49,14 @@ Android-застосунок — універсальна бібліотека/v
 
 ## Живий план / crash recovery
 
-`ACTIVE_PLAN.md` — обов'язковий mutable TODO-план.
+`docs/assistant-kit/CURRENT_PLAN.md` — єдиний canonical mutable TODO/checkpoint.
 
-- перед багатокроковою feature/release/research/QA роботою оновити план;
-- після кожного успішного кроку проєктного прогресу одразу відмітити лише реально підтверджений checkbox;
-- після phone PASS/FAIL разом оновити plan + QA/finding/handoff;
-- перший невиконаний checkbox — точка продовження після втрати чату;
+`ACTIVE_PLAN.md` у корені — лише compatibility pointer і не має дублювати checklist.
+
+- перед багатокроковою feature/release/research/QA роботою оновити CURRENT_PLAN;
+- після кожного успішного кроку одразу відмітити лише evidence-backed checkbox;
+- після phone PASS/FAIL разом оновити CURRENT_PLAN + QA/finding/handoff;
+- `Поточний наступний крок` — єдина default точка продовження після втрати чату;
 - не відмічати крок завершеним лише через code/CI без потрібного phone evidence;
 - при зміні scope переписати майбутні невиконані кроки, а не залишати застарілий план.
 
