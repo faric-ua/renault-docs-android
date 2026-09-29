@@ -4060,3 +4060,22 @@ Separate Python/contract Tests still run on PRs.
 
 Next user step:
 `reno-docs → 5 → 20`, then return the full signer-restore/build output before installing the APK.
+
+
+### Accepted signer restored and verified — 2026-09-29
+
+Renault Menu item 20 successfully restored the accepted development signer from the private archive into public GitHub Actions Secrets and launched an exact public-main build.
+
+Verified public-main build:
+- commit `fc7ffc6a7deda7074e5d6b2e631380fd923401c0`;
+- Android Debug run `36603132862` — PASS;
+- artifact id `11050306597`;
+- signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- workflow verified accepted signer SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`;
+- artifact ZIP SHA-256 `ddf9eb0ee9ef53e31ce997d157855c6bb3b1d7111cc1e662686039ddc4f55bb2`.
+
+The public-main APK SHA-256 is identical to the previously phone-accepted v0.5.51 APK, so signer continuity and APK identity are confirmed.
+
+Final release-distribution gate:
+install this exact APK over the existing Renault Docs without uninstall/data reset, reopen, and confirm the pre-install baseline still exists: v0.5.51 and Megane II with 2 volumes.
