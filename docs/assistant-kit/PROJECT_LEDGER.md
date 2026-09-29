@@ -1561,3 +1561,24 @@ Tests run `36643121485` — PASS.
 
 Next gate:
 run item 21 on the real phone and classify each returned folder. Delete nothing before that review.
+
+
+### Real-phone legacy `*_android` audit result
+
+Read-only Termux item 21 was run on the real phone.
+
+Observed:
+- `Megane II_NT8342A_android`: 405M, 7855 files, dataset manifest + `.nomedia`, historical prepared NT8342A source;
+- `Megane II_android`: 400M, 7664 files, dataset manifest + `.nomedia`, historical v0.5.37 single-volume Megane output used for the legacy NT8340A path;
+- `laguna 2 2001-2006_android`: 356M, 19836 files, dataset manifest, configured active `build_root`.
+
+Current classification:
+- Laguna output: **KEEP**;
+- NT8342A prepared folder: **KEEP until NT8342A is migrated to app-private .rdpkg**;
+- old Megane II output: **legacy / safe-to-remove candidate**, because current NT8340A was later upserted from a successful `.rdpkg` import.
+
+Code contract relevant to cleanup:
+`RdpkgImporter.install()` extracts the package into app-private `noBackupFilesDir/rdpkg/<packageId>`, exposes it through `LocalDatasetDocumentsProvider`, and the project volume record stores that app-owned tree URI. A successfully upserted package volume therefore no longer needs its historical public `*_android` folder for runtime access.
+
+Next:
+build/import NT8342A as `.rdpkg`, verify both Megane volumes reopen, then use reversible quarantine before any permanent deletion.
