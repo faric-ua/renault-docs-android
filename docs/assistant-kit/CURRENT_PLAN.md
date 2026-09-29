@@ -102,8 +102,23 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Поточний наступний крок
 
-**Signing continuity only. Do not ask the user to reinstall or uninstall Renault Docs yet. First verify that the secure local/private development signer available for the public repo matches accepted certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`. After that, build public `main` v0.5.51 and verify it installs as an update over the existing app without data reset.**
+**ТВОЯ НАСТУПНА ДІЯ: `reno-docs` → 5 (оновити main) → 20 (`Відновити accepted signer + build`). Пункт 20 сам дістає accepted development signer з private archive, перевіряє його SHA-256, оновлює GitHub Actions Secrets без показу секретних значень і запускає exact public-main v0.5.51 build. Після PASS не встановлюй APK мовчки — надішли фінальний блок від `Renault Docs · відновлення accepted development signer` до `READY`, і тоді дам точний install-check.**
 
 Project separation:
 - Renault Docs: continue only from this checkpoint.
 - YTM importer: separate project; do not mix branches, menus, artifacts or QA evidence.
+
+
+### 2026-09-29 signer restore helper
+
+Merged helper:
+`239663c4577c2e4d279a4052f1b0ac460b19bf9d`.
+
+Renault Menu item `20 — Відновити accepted signer + build`:
+- fetches the accepted signer only from the private archive at pinned ref;
+- verifies keystore SHA-256 `7944e7d78bd2442021731a4cfd3105c06f475c13d70d4195b2378539604dfd10`;
+- verifies certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- writes public GitHub Actions Secrets without printing secret values;
+- then launches exact main Android build/download.
+
+User action is now explicit and phone-side; no manual secret copy/paste is required.
