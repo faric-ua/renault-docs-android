@@ -1456,3 +1456,18 @@ Merged helper:
 `239663c4577c2e4d279a4052f1b0ac460b19bf9d`.
 
 This replaces manual key handling for the migration checkpoint.
+
+
+### v0.5.51 signer continuity verified
+
+Public-main signing continuity was restored successfully.
+
+Evidence:
+- trusted build run `36603132862` PASS;
+- public-main commit `fc7ffc6a7deda7074e5d6b2e631380fd923401c0`;
+- signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- accepted signer SHA-256 verified: `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`, exactly matching the phone-accepted v0.5.51 candidate;
+- artifact id `11050306597`.
+
+Only the final in-place installation/data-preservation phone check remains for distribution closeout.
