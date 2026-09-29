@@ -14,7 +14,7 @@
 
 ## v0.5.51 — Kotlin-native raw Renault → .rdpkg
 
-Статус: **PHONE PASS + MERGED — 2026-09-29**.
+Статус: **PHONE PASS + MERGED + DISTRIBUTION VERIFIED — CLOSED 2026-09-29**.
 
 Reference:
 `NT8340A · 2006-04-18`.
@@ -79,7 +79,7 @@ CI for that candidate:
 - [x] Restore accepted development signer in public GitHub Actions Secrets.
 - [x] Verify public-main signer continuity: SHA-1 `4102350e2787fd538bbf58a219293a132235e618`, accepted cert SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
 - [x] Exact public-main APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48` matches the previously phone-accepted v0.5.51 APK byte-for-byte.
-- [ ] Final in-place install check on phone: install the exact public-main APK over existing Renault Docs without uninstall/data reset, reopen, confirm Megane II still has 2 volumes.
+- [x] Final in-place install check PASS: exact public-main v0.5.51 installed over existing Renault Docs without uninstall/data reset; reopen kept Megane II with `Томів: 2`.
 
 ## Follow-up після merge
 
@@ -105,7 +105,7 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Поточний наступний крок
 
-**ТВОЯ НАСТУПНА ДІЯ — тільки Renault Docs:** встановити `/storage/emulated/0/Documents/Renault/packages/Renault-Docs-v0.5.51-build/Renault-Docs-v0.5.51-debug.apk` ПОВЕРХ уже встановленої Renault Docs. Не видаляти застосунок і не очищати дані. Після успішної установки відкрити Renault Docs і підтвердити: версія v0.5.51, Megane II існує, `Томів: 2`. Надіслати скрін головного екрана або точний текст помилки інсталятора.
+**v0.5.51 CLOSED. Наступний окремий patch: terminal COMPLETE/CANCELLED/FAILED dismiss `×` + українське `1 файл` замість `1 файлів`. Після цього — read-only audit legacy `*_android` storage.**
 
 
 Project separation:
@@ -174,3 +174,20 @@ Exact trusted public-main build:
 
 Important:
 the public-main APK SHA-256 is exactly the same as the already phone-accepted v0.5.51 candidate APK. Signing continuity and APK identity are therefore cryptographically confirmed. Only the final Android in-place install/data-preservation check remains.
+
+
+### 2026-09-29 final in-place install PASS
+
+Post-install phone screenshot confirms the exact public-main v0.5.51 update preserved application state:
+- app opens as `v0.5.51`;
+- `Megane II` remains present;
+- `Томів: 2` remains present;
+- Laguna II and Kangoo II placeholder projects remain present.
+
+No uninstall/data reset was used for this acceptance check.
+
+Final v0.5.51 distribution verdict:
+**READY / CLOSED**.
+
+All v0.5.51 gates are now closed:
+runtime PHONE PASS, merge, signer continuity, trusted public-main build, exact APK identity, in-place update, and data preservation.
