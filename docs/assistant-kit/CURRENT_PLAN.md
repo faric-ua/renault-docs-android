@@ -130,3 +130,35 @@ Root workflow correction:
 - public clean-history PR #1 now contains the v0.5.51 accepted delta;
 - menu item 16 now switches to the selected PR branch **and triggers a fresh stable-signed workflow_dispatch build**, instead of downloading an arbitrary existing PR artifact;
 - do not use item 7 from `main` for v0.5.51 closeout.
+
+
+### 2026-09-29 signing continuity blocker
+
+Public PR #1 CI is green on head `266840f5182f1c49a4b84673592367744f09e77e`:
+- Tests `36583494822` — PASS;
+- Android Debug APK `36583494741` — PASS.
+
+However merge/install closeout is blocked by signing identity continuity.
+
+Evidence:
+- phone-accepted v0.5.51/private candidate signer SHA-1:
+  `4102350e2787fd538bbf58a219293a132235e618`;
+- public main v0.5.50 run `36580219193` signer SHA-1:
+  `aa91096d3699a62c0d6e4d4306064068e67fda0d`;
+- accepted signer certificate SHA-256:
+  `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+
+The failed phone install was therefore not a valid v0.5.51 closeout check:
+- it built `main` v0.5.50 / versionCode 66 while v0.5.51 / versionCode 67 is installed;
+- the public migration also changed the development signing identity.
+
+Do **not** uninstall/reset the accepted phone app and do **not** merge v0.5.51 until signing continuity is resolved deliberately.
+
+Preferred next step:
+restore the original accepted signing identity to the public build/secrets using the user's own secure local/private backup process (never commit or expose the private key), then build public PR #1 and verify:
+- versionName `0.5.51`;
+- versionCode `67`;
+- signer certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- install succeeds over the existing phone app without uninstall/data reset.
+
+Only after that: mark PR #1 ready and merge.
