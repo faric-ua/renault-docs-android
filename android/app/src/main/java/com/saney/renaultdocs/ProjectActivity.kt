@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.DocumentsContract
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -13,10 +16,13 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.documentfile.provider.DocumentFile
+import java.util.UUID
 
 class ProjectActivity : Activity() {
     private lateinit var store: ProjectStore
     private lateinit var settings: AppSettings
+    private lateinit var nativeRunStore: NativeRdpkgRunStore
     private lateinit var project: RenaultProject
     private lateinit var volumeContainer: LinearLayout
     private lateinit var statusText: TextView
@@ -26,6 +32,32 @@ class ProjectActivity : Activity() {
     private var pendingRdpkgExportVolumeId:
         String? =
         null
+    private var pendingNativeSourceUri:
+        String? =
+        null
+    private var pendingNativeSourceName:
+        String? =
+        null
+    private var pendingNativeRequestId:
+        String? =
+        null
+    private var lastShownNativeFinishedAt =
+        0L
+    private val nativeRunHandler by lazy {
+        Handler(
+            Looper.getMainLooper(),
+        )
+    }
+    private val nativeRunRefresh =
+        object : Runnable {
+            override fun run() {
+                refreshNativeRunState()
+                nativeRunHandler.postDelayed(
+                    this,
+                    NATIVE_RUN_REFRESH_MS,
+                )
+            }
+        }
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -39,6 +71,21 @@ class ProjectActivity : Activity() {
                 ?.getString(
                     STATE_PENDING_RDPKG_EXPORT_VOLUME_ID,
                 )
+        pendingNativeSourceUri =
+            savedInstanceState
+                ?.getString(
+                    STATE_PENDING_NATIVE_SOURCE_URI,
+                )
+        pendingNativeSourceName =
+            savedInstanceState
+                ?.getString(
+                    STATE_PENDING_NATIVE_SOURCE_NAME,
+                )
+        pendingNativeRequestId =
+            savedInstanceState
+                ?.getString(
+                    STATE_PENDING_NATIVE_REQUEST_ID,
+                )
 
         store =
             ProjectStore(
@@ -46,6 +93,10 @@ class ProjectActivity : Activity() {
             )
         settings =
             AppSettings(
+                this,
+            )
+        nativeRunStore =
+            NativeRdpkgRunStore(
                 this,
             )
 
@@ -84,6 +135,25 @@ class ProjectActivity : Activity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        nativeRunHandler.removeCallbacks(
+            nativeRunRefresh,
+        )
+        nativeRunHandler.post(
+            nativeRunRefresh,
+        )
+    }
+
+    override fun onStop() {
+        nativeRunHandler.removeCallbacks(
+            nativeRunRefresh,
+        )
+
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -104,6 +174,18 @@ class ProjectActivity : Activity() {
         outState.putString(
             STATE_PENDING_RDPKG_EXPORT_VOLUME_ID,
             pendingRdpkgExportVolumeId,
+        )
+        outState.putString(
+            STATE_PENDING_NATIVE_SOURCE_URI,
+            pendingNativeSourceUri,
+        )
+        outState.putString(
+            STATE_PENDING_NATIVE_SOURCE_NAME,
+            pendingNativeSourceName,
+        )
+        outState.putString(
+            STATE_PENDING_NATIVE_REQUEST_ID,
+            pendingNativeRequestId,
         )
     }
 
@@ -142,6 +224,22 @@ class ProjectActivity : Activity() {
 
             REQUEST_RDPKG_EXPORT ->
                 handleRdpkgExportResult(
+                    resultCode =
+                        resultCode,
+                    data =
+                        data,
+                )
+
+            REQUEST_NATIVE_RDPKG_SOURCE ->
+                handleNativeRdpkgSourceResult(
+                    resultCode =
+                        resultCode,
+                    data =
+                        data,
+                )
+
+            REQUEST_NATIVE_RDPKG_DESTINATION ->
+                handleNativeRdpkgDestinationResult(
                     resultCode =
                         resultCode,
                     data =
@@ -357,6 +455,471 @@ class ProjectActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun handleNativeRdpkgSourceResult(
+        resultCode: Int,
+        data: Intent?,
+    ) {
+        if (
+            resultCode !=
+            RESULT_OK
+        ) {
+            pendingNativeSourceUri =
+                null
+            pendingNativeSourceName =
+                null
+            pendingNativeRequestId =
+                null
+            statusText.text =
+                "Вибір raw Renault папки скасовано."
+            return
+        }
+
+        val uri =
+            data?.data
+
+        if (
+            uri ==
+            null
+        ) {
+            statusText.text =
+                "Android не повернув адресу raw Renault папки."
+            return
+        }
+
+        persistReadPermission(
+            uri =
+                uri,
+            returnedFlags =
+                data.flags,
+        )
+
+        val sourceName =
+            DocumentFile
+                .fromTreeUri(
+                    this,
+                    uri,
+                )
+                ?.name
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: "Renault"
+
+        pendingNativeSourceUri =
+            uri.toString()
+        pendingNativeSourceName =
+            sourceName
+        pendingNativeRequestId =
+            UUID.randomUUID()
+                .toString()
+
+        openNativeRdpkgDestinationPicker(
+            sourceName,
+        )
+    }
+
+    private fun handleNativeRdpkgDestinationResult(
+        resultCode: Int,
+        data: Intent?,
+    ) {
+        val sourceUri =
+            pendingNativeSourceUri
+        val sourceName =
+            pendingNativeSourceName
+                ?: "Renault"
+        val requestId =
+            pendingNativeRequestId
+
+        pendingNativeSourceUri =
+            null
+        pendingNativeSourceName =
+            null
+        pendingNativeRequestId =
+            null
+
+        if (
+            resultCode !=
+            RESULT_OK
+        ) {
+            statusText.text =
+                "Створення .rdpkg скасовано до запуску."
+            return
+        }
+
+        if (
+            sourceUri.isNullOrBlank() ||
+            requestId.isNullOrBlank()
+        ) {
+            statusText.text =
+                "Втрачено raw source/session. Вибери папку ще раз."
+            return
+        }
+
+        val destination =
+            data?.data
+
+        if (
+            destination ==
+            null
+        ) {
+            statusText.text =
+                "Android не повернув адресу для нового .rdpkg."
+            return
+        }
+
+        persistReadWritePermission(
+            uri =
+                destination,
+            returnedFlags =
+                data.flags,
+        )
+
+        val parsedSourceUri =
+            Uri.parse(
+                sourceUri,
+            )
+
+        if (
+            destinationIsInsideSourceTree(
+                sourceTreeUri =
+                    parsedSourceUri,
+                destinationUri =
+                    destination,
+            )
+        ) {
+            deleteCreatedDestination(
+                destination,
+            )
+
+            statusText.text =
+                "Не зберігай .rdpkg всередині raw source. " +
+                    "Вибери іншу папку для готового пакета."
+            return
+        }
+
+        val existingRun =
+            nativeRunStore.load()
+
+        if (
+            existingRun.isRunning
+        ) {
+            statusText.text =
+                "Інша native .rdpkg підготовка вже виконується."
+            return
+        }
+
+        nativeRunStore.clearFinished()
+
+        NativeRdpkgPreparationService.start(
+            context =
+                this,
+            request =
+                NativeRdpkgPreparationService
+                    .StartRequest(
+                        requestId =
+                            requestId,
+                        sourceTreeUri =
+                            sourceUri,
+                        sourceName =
+                            sourceName,
+                        destinationUri =
+                            destination.toString(),
+                        projectId =
+                            project.id,
+                        projectTitle =
+                            project.title,
+                        model =
+                            project.model,
+                    ),
+        )
+
+        statusText.text =
+            "Запускаю Kotlin-native raw → .rdpkg…"
+
+        refreshNativeRunState()
+    }
+
+    private fun destinationIsInsideSourceTree(
+        sourceTreeUri: Uri,
+        destinationUri: Uri,
+    ): Boolean {
+        if (
+            sourceTreeUri.authority !=
+                destinationUri.authority
+        ) {
+            return false
+        }
+
+        return runCatching {
+            val sourceDocumentId =
+                DocumentsContract
+                    .getTreeDocumentId(
+                        sourceTreeUri,
+                    )
+                    .trimEnd(
+                        '/',
+                    )
+            val destinationDocumentId =
+                DocumentsContract
+                    .getDocumentId(
+                        destinationUri,
+                    )
+
+            destinationDocumentId ==
+                sourceDocumentId ||
+                destinationDocumentId.startsWith(
+                    sourceDocumentId +
+                        "/",
+                )
+        }.getOrDefault(
+            false,
+        )
+    }
+
+    private fun deleteCreatedDestination(
+        uri: Uri,
+    ) {
+        val deleted =
+            runCatching {
+                contentResolver.delete(
+                    uri,
+                    null,
+                    null,
+                ) >
+                    0
+            }.getOrDefault(
+                false,
+            )
+
+        if (
+            deleted ||
+            !DocumentsContract.isDocumentUri(
+                this,
+                uri,
+            )
+        ) {
+            return
+        }
+
+        runCatching {
+            DocumentsContract.deleteDocument(
+                contentResolver,
+                uri,
+            )
+        }
+    }
+
+    private fun startNativeRdpkgFlow() {
+        val state =
+            nativeRunStore.load()
+
+        if (
+            state.isRunning
+        ) {
+            val dialog =
+                AlertDialog.Builder(
+                    this,
+                )
+                    .setTitle(
+                        "Підготовка .rdpkg виконується",
+                    )
+                    .setMessage(
+                        state.message
+                            .ifBlank {
+                                "Операція працює у фоні."
+                            },
+                    )
+                    .setNegativeButton(
+                        "Закрити",
+                        null,
+                    )
+
+            if (
+                state.phase ==
+                NativeRdpkgRunPhase.PREPARING
+            ) {
+                dialog.setPositiveButton(
+                    "Скасувати",
+                ) {
+                    _,
+                    _ ->
+                    NativeRdpkgPreparationService
+                        .requestCancel(
+                            this,
+                        )
+
+                    statusText.text =
+                        "Запит на скасування надіслано…"
+                }
+            }
+
+            dialog.show()
+
+            return
+        }
+
+        nativeRunStore.clearFinished()
+
+        val picker =
+            Intent(
+                Intent.ACTION_OPEN_DOCUMENT_TREE,
+            ).apply {
+                addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+                addFlags(
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
+                )
+                addFlags(
+                    Intent.FLAG_GRANT_PREFIX_URI_PERMISSION,
+                )
+            }
+
+        @Suppress(
+            "DEPRECATION",
+        )
+        startActivityForResult(
+            picker,
+            REQUEST_NATIVE_RDPKG_SOURCE,
+        )
+    }
+
+    private fun openNativeRdpkgDestinationPicker(
+        sourceName: String,
+    ) {
+        val defaultName =
+            NativePreparationStager
+                .safeToken(
+                    project.model +
+                        "_" +
+                        sourceName,
+                ) +
+                ".rdpkg"
+
+        val picker =
+            Intent(
+                Intent.ACTION_CREATE_DOCUMENT,
+            ).apply {
+                addCategory(
+                    Intent.CATEGORY_OPENABLE,
+                )
+                type =
+                    "application/octet-stream"
+                putExtra(
+                    Intent.EXTRA_TITLE,
+                    defaultName,
+                )
+                addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+                addFlags(
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
+                addFlags(
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
+                )
+            }
+
+        @Suppress(
+            "DEPRECATION",
+        )
+        startActivityForResult(
+            picker,
+            REQUEST_NATIVE_RDPKG_DESTINATION,
+        )
+    }
+
+    private fun refreshNativeRunState() {
+        if (
+            !::nativeRunStore.isInitialized ||
+            !::statusText.isInitialized ||
+            !::project.isInitialized
+        ) {
+            return
+        }
+
+        val state =
+            nativeRunStore.load()
+
+        if (
+            state.projectId !=
+            project.id
+        ) {
+            return
+        }
+
+        if (
+            state.isRunning
+        ) {
+            val serviceActive =
+                NativeRdpkgPreparationService
+                    .isActive()
+            val withinStartupGrace =
+                System.currentTimeMillis() -
+                    state.startedAtMs <
+                    NATIVE_RUN_STARTUP_GRACE_MS
+
+            if (
+                !serviceActive &&
+                !withinStartupGrace
+            ) {
+                nativeRunStore.fail(
+                    "Попередню native .rdpkg підготовку було перервано. " +
+                        "Source не змінено. Запусти її ще раз.",
+                )
+                refreshNativeRunState()
+                return
+            }
+
+            statusText.text =
+                state.message
+                    .ifBlank {
+                        "Kotlin-native .rdpkg підготовка виконується…"
+                    }
+            return
+        }
+
+        if (
+            state.finishedAtMs <=
+                0L ||
+            state.finishedAtMs <=
+                lastShownNativeFinishedAt
+        ) {
+            return
+        }
+
+        lastShownNativeFinishedAt =
+            state.finishedAtMs
+
+        statusText.text =
+            when (
+                state.phase
+            ) {
+                NativeRdpkgRunPhase.COMPLETE ->
+                    state.message
+
+                NativeRdpkgRunPhase.CANCELLED ->
+                    state.message
+                        .ifBlank {
+                            "Підготовку .rdpkg скасовано."
+                        }
+
+                NativeRdpkgRunPhase.FAILED ->
+                    "Не вдалося створити .rdpkg: " +
+                        state.message
+
+                else ->
+                    state.message
+            }
+
+        if (
+            state.phase ==
+            NativeRdpkgRunPhase.COMPLETE
+        ) {
+            render()
+        }
     }
 
     private fun handleFolderResult(
@@ -631,6 +1194,29 @@ class ProjectActivity : Activity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
             ),
+        )
+
+        root.addView(
+            buildProjectActionCard(
+                title =
+                    "Створити .rdpkg з raw",
+                subtitle =
+                    "Kotlin · без Python/Termux · без *_android",
+                primary =
+                    true,
+            ) {
+                startNativeRdpkgFlow()
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                topMargin =
+                    Ui.dp(
+                        this@ProjectActivity,
+                        10,
+                    )
+            },
         )
 
         statusText =
@@ -1539,6 +2125,33 @@ class ProjectActivity : Activity() {
         }
     }
 
+    private fun persistReadWritePermission(
+        uri: Uri,
+        returnedFlags: Int,
+    ) {
+        val granted =
+            returnedFlags and
+                (
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+
+        if (
+            granted ==
+            0
+        ) {
+            return
+        }
+
+        runCatching {
+            contentResolver
+                .takePersistableUriPermission(
+                    uri,
+                    granted,
+                )
+        }
+    }
+
     companion object {
         private const val EXTRA_PROJECT_ID =
             "projectId"
@@ -1550,8 +2163,22 @@ class ProjectActivity : Activity() {
             4302
         private const val REQUEST_RDPKG_EXPORT =
             4303
+        private const val REQUEST_NATIVE_RDPKG_SOURCE =
+            4304
+        private const val REQUEST_NATIVE_RDPKG_DESTINATION =
+            4305
         private const val STATE_PENDING_RDPKG_EXPORT_VOLUME_ID =
             "pendingRdpkgExportVolumeId"
+        private const val STATE_PENDING_NATIVE_SOURCE_URI =
+            "pendingNativeSourceUri"
+        private const val STATE_PENDING_NATIVE_SOURCE_NAME =
+            "pendingNativeSourceName"
+        private const val STATE_PENDING_NATIVE_REQUEST_ID =
+            "pendingNativeRequestId"
+        private const val NATIVE_RUN_REFRESH_MS =
+            750L
+        private const val NATIVE_RUN_STARTUP_GRACE_MS =
+            5_000L
 
         fun intent(
             context: Context,
