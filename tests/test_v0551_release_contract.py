@@ -20,7 +20,8 @@ class V0551ReleaseContractTests(unittest.TestCase):
         self.assertIn("347 · native", qa)
         self.assertIn("no new public `*_android`", qa)
         self.assertIn("RdpkgImporter.install()", qa)
-        self.assertIn("rotate portrait", qa.lower())
+        self.assertIn("rotation/background/external-app", qa.lower())
+        self.assertIn("no duplicate/parallel run", qa.lower())
 
     def test_durable_plan_tracks_phone_gate(self):
         plan = self._read("docs/assistant-kit/CURRENT_PLAN.md")
