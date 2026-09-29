@@ -63,5 +63,18 @@ class AndroidSigningContractTests(unittest.TestCase):
         self.assertIn("branches: [main]", workflow)
 
 
+    def test_pr_android_check_is_secret_free(self):
+        repo = Path(__file__).resolve().parents[1]
+        workflow = (
+            repo / ".github/workflows/android-pr-check.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("pull_request:", workflow)
+        self.assertIn("assembleDebug", workflow)
+        self.assertIn("testDebugUnitTest", workflow)
+        self.assertNotIn("secrets.", workflow)
+        self.assertNotIn("RENAULT_DEV_", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()

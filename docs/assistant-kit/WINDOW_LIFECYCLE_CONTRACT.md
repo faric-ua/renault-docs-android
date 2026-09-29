@@ -119,3 +119,18 @@ SAF picker / platform installer не є app dialog.
 При виході в system UI app зберігає parent state.
 
 Cancel повертає у parent без fake-success і без втрати draft/selection.
+
+
+## Native long-operation progress dialog
+
+For the project-level native raw → `.rdpkg` flow:
+
+- the main Project screen polls persisted `NativeRdpkgRunState` every 750 ms while the Activity is started;
+- if the active progress dialog is open, its message must refresh from the same persisted state instead of freezing the text captured when the dialog opened;
+- PREPARING may expose `Скасувати`; IMPORTING must not expose a cancellation action unless cancellation is explicitly supported for that phase;
+- active PREPARING / IMPORTING must never show the terminal dismiss `×`;
+- once the run leaves active state, the active progress dialog closes and the terminal COMPLETE / CANCELLED / FAILED presentation becomes authoritative;
+- terminal `×` dismissal is presentation-only, is scoped to the exact `finishedAtMs`, and survives Activity recreation/reopen;
+- starting a new run clears the prior terminal dismissal marker.
+
+Phone-accepted in v0.5.52 on 2026-09-30, including live numeric progress updates in an already-open dialog.

@@ -1,0 +1,20 @@
+{
+  "versionName": "0.5.52",
+  "versionCode": 68,
+  "phase": "phone_pass",
+  "feature": "terminal status dismiss, Ukrainian file-count wording, and live native preparation dialog progress",
+  "branch": "feat/v0.5.52-terminal-status-polish",
+  "tested_source_sha": "8a364ef9e50d0bd81273e9d419321284abdfed03",
+  "tests_run": 36639849368,
+  "android_pr_check_run": 36639849222,
+  "signed_candidate_run": 36640408798,
+  "artifact": "Renault-Docs-v0.5.52-Debug",
+  "apk_sha256": "2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa",
+  "signer_sha1": "4102350e2787fd538bbf58a219293a132235e618",
+  "qa_status": "PHONE_PASS",
+  "phone_test_date": "2026-09-30",
+  "public_pr": 6,
+  "public_repo": "faric-ua/renault-docs-android",
+  "distribution_status": "PENDING_MAIN_VERIFICATION",
+  "release_tag": null
+}

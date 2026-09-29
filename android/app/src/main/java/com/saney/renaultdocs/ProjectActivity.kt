@@ -26,6 +26,8 @@ class ProjectActivity : Activity() {
     private lateinit var project: RenaultProject
     private lateinit var volumeContainer: LinearLayout
     private lateinit var statusText: TextView
+    private lateinit var nativeTerminalStatusRow: LinearLayout
+    private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
     private var pendingManualImport =
         false
@@ -43,6 +45,9 @@ class ProjectActivity : Activity() {
         null
     private var lastShownNativeFinishedAt =
         0L
+    private var nativeRunProgressDialog:
+        AlertDialog? =
+        null
     private val nativeRunHandler by lazy {
         Handler(
             Looper.getMainLooper(),
@@ -711,40 +716,45 @@ class ProjectActivity : Activity() {
         }
     }
 
-    private fun startNativeRdpkgFlow() {
-        val state =
-            nativeRunStore.load()
+    private fun showNativeRunProgressDialog(
+        state: NativeRdpkgRunState,
+    ) {
+        dismissNativeRunProgressDialog()
+
+        val builder =
+            AlertDialog.Builder(
+                this,
+            )
+                .setTitle(
+                    "Підготовка .rdpkg виконується",
+                )
+                .setMessage(
+                    state.message
+                        .ifBlank {
+                            "Операція працює у фоні."
+                        },
+                )
+                .setNegativeButton(
+                    "Закрити",
+                    null,
+                )
 
         if (
-            state.isRunning
+            state.phase ==
+            NativeRdpkgRunPhase.PREPARING
         ) {
-            val dialog =
-                AlertDialog.Builder(
-                    this,
-                )
-                    .setTitle(
-                        "Підготовка .rdpkg виконується",
-                    )
-                    .setMessage(
-                        state.message
-                            .ifBlank {
-                                "Операція працює у фоні."
-                            },
-                    )
-                    .setNegativeButton(
-                        "Закрити",
-                        null,
-                    )
-
-            if (
-                state.phase ==
-                NativeRdpkgRunPhase.PREPARING
+            builder.setPositiveButton(
+                "Скасувати",
             ) {
-                dialog.setPositiveButton(
-                    "Скасувати",
+                _,
+                _ ->
+                val latestState =
+                    nativeRunStore.load()
+
+                if (
+                    latestState.phase ==
+                    NativeRdpkgRunPhase.PREPARING
                 ) {
-                    _,
-                    _ ->
                     NativeRdpkgPreparationService
                         .requestCancel(
                             this,
@@ -754,9 +764,96 @@ class ProjectActivity : Activity() {
                         "Запит на скасування надіслано…"
                 }
             }
+        }
 
-            dialog.show()
+        val dialog =
+            builder.create()
 
+        dialog.setOnDismissListener {
+            if (
+                nativeRunProgressDialog ===
+                dialog
+            ) {
+                nativeRunProgressDialog =
+                    null
+            }
+        }
+
+        nativeRunProgressDialog =
+            dialog
+        dialog.show()
+
+        updateNativeRunProgressDialog(
+            state,
+        )
+    }
+
+    private fun updateNativeRunProgressDialog(
+        state: NativeRdpkgRunState,
+    ) {
+        val dialog =
+            nativeRunProgressDialog
+                ?: return
+
+        if (
+            !dialog.isShowing
+        ) {
+            return
+        }
+
+        if (
+            !state.isRunning
+        ) {
+            dismissNativeRunProgressDialog()
+            return
+        }
+
+        dialog.setMessage(
+            state.message
+                .ifBlank {
+                    "Kotlin-native .rdpkg підготовка виконується…"
+                },
+        )
+
+        dialog.getButton(
+            AlertDialog.BUTTON_POSITIVE,
+        )
+            ?.visibility =
+            if (
+                state.phase ==
+                NativeRdpkgRunPhase.PREPARING
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+    }
+
+    private fun dismissNativeRunProgressDialog() {
+        val dialog =
+            nativeRunProgressDialog
+
+        nativeRunProgressDialog =
+            null
+
+        if (
+            dialog?.isShowing ==
+            true
+        ) {
+            dialog.dismiss()
+        }
+    }
+
+    private fun startNativeRdpkgFlow() {
+        val state =
+            nativeRunStore.load()
+
+        if (
+            state.isRunning
+        ) {
+            showNativeRunProgressDialog(
+                state,
+            )
             return
         }
 
@@ -847,12 +944,19 @@ class ProjectActivity : Activity() {
             state.projectId !=
             project.id
         ) {
+            dismissNativeRunProgressDialog()
+            hideNativeTerminalStatus()
             return
         }
 
         if (
             state.isRunning
         ) {
+            hideNativeTerminalStatus()
+            updateNativeRunProgressDialog(
+                state,
+            )
+
             val serviceActive =
                 NativeRdpkgPreparationService
                     .isActive()
@@ -881,19 +985,58 @@ class ProjectActivity : Activity() {
             return
         }
 
+        dismissNativeRunProgressDialog()
+
         if (
+            !state.isTerminal ||
             state.finishedAtMs <=
-                0L ||
-            state.finishedAtMs <=
+                0L
+        ) {
+            hideNativeTerminalStatus()
+            return
+        }
+
+        if (
+            state.isTerminalDismissed
+        ) {
+            hideNativeTerminalStatus()
+            return
+        }
+
+        if (
+            state.finishedAtMs >
                 lastShownNativeFinishedAt
+        ) {
+            lastShownNativeFinishedAt =
+                state.finishedAtMs
+
+            statusText.text =
+                DEFAULT_STATUS_TEXT
+
+            if (
+                state.phase ==
+                NativeRdpkgRunPhase.COMPLETE
+            ) {
+                render()
+            }
+        }
+
+        showNativeTerminalStatus(
+            state,
+        )
+    }
+
+    private fun showNativeTerminalStatus(
+        state: NativeRdpkgRunState,
+    ) {
+        if (
+            !::nativeTerminalStatusRow.isInitialized ||
+            !::nativeTerminalStatusText.isInitialized
         ) {
             return
         }
 
-        lastShownNativeFinishedAt =
-            state.finishedAtMs
-
-        statusText.text =
+        nativeTerminalStatusText.text =
             when (
                 state.phase
             ) {
@@ -914,11 +1057,16 @@ class ProjectActivity : Activity() {
                     state.message
             }
 
+        nativeTerminalStatusRow.visibility =
+            View.VISIBLE
+    }
+
+    private fun hideNativeTerminalStatus() {
         if (
-            state.phase ==
-            NativeRdpkgRunPhase.COMPLETE
+            ::nativeTerminalStatusRow.isInitialized
         ) {
-            render()
+            nativeTerminalStatusRow.visibility =
+                View.GONE
         }
     }
 
@@ -1224,7 +1372,7 @@ class ProjectActivity : Activity() {
                 context =
                     this,
                 value =
-                    "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів.",
+                    DEFAULT_STATUS_TEXT,
                 sizeSp =
                     14f,
                 color =
@@ -1246,6 +1394,137 @@ class ProjectActivity : Activity() {
 
         root.addView(
             statusText,
+        )
+
+        nativeTerminalStatusText =
+            Ui.textView(
+                context =
+                    this,
+                value =
+                    "",
+                sizeSp =
+                    14f,
+                color =
+                    Ui.text,
+            )
+
+        nativeTerminalStatusRow =
+            LinearLayout(
+                this,
+            ).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+                gravity =
+                    Gravity.CENTER_VERTICAL
+                visibility =
+                    View.GONE
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ProjectActivity,
+                        fill =
+                            Ui.surface,
+                        stroke =
+                            Ui.border,
+                    )
+                setPadding(
+                    Ui.dp(
+                        this@ProjectActivity,
+                        12,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        10,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        4,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        10,
+                    ),
+                )
+
+                addView(
+                    nativeTerminalStatusText,
+                    LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1f,
+                    ),
+                )
+
+                addView(
+                    Ui.textView(
+                        context =
+                            this@ProjectActivity,
+                        value =
+                            "×",
+                        sizeSp =
+                            24f,
+                        color =
+                            Ui.muted,
+                    ).apply {
+                        contentDescription =
+                            "Закрити статус"
+                        gravity =
+                            Gravity.CENTER
+                        isClickable =
+                            true
+                        isFocusable =
+                            true
+                        setPadding(
+                            Ui.dp(
+                                this@ProjectActivity,
+                                12,
+                            ),
+                            0,
+                            Ui.dp(
+                                this@ProjectActivity,
+                                12,
+                            ),
+                            0,
+                        )
+                        setOnClickListener {
+                            val state =
+                                nativeRunStore.load()
+
+                            if (
+                                state.projectId ==
+                                    project.id &&
+                                state.isTerminal
+                            ) {
+                                nativeRunStore.dismissTerminal(
+                                    state.finishedAtMs,
+                                )
+                            }
+
+                            hideNativeTerminalStatus()
+                        }
+                    },
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            44,
+                        ),
+                    ),
+                )
+            }
+
+        root.addView(
+            nativeTerminalStatusRow,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                bottomMargin =
+                    Ui.dp(
+                        this@ProjectActivity,
+                        10,
+                    )
+            },
         )
 
         val scroll =
@@ -2175,6 +2454,9 @@ class ProjectActivity : Activity() {
             "pendingNativeSourceName"
         private const val STATE_PENDING_NATIVE_REQUEST_ID =
             "pendingNativeRequestId"
+        private const val DEFAULT_STATUS_TEXT =
+            "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів."
+
         private const val NATIVE_RUN_REFRESH_MS =
             750L
         private const val NATIVE_RUN_STARTUP_GRACE_MS =
