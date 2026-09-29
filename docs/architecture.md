@@ -141,3 +141,7 @@ Feature branch → tests → PR → merge.
 Канонічний контракт одного тому як одного `.rdpkg`, Android-native fast export без Python/Termux та план Kotlin-native full converter:
 
 - `docs/architecture/RDPKG_DISTRIBUTION_AND_ANDROID_EXPORT.md`
+
+## Kotlin-native raw preparation
+
+- `docs/architecture/KOTLIN_NATIVE_RAW_TO_RDPKG.md` — canonical raw SAF → private staging → Kotlin compiler → Fast Pack → `.rdpkg` pipeline and parity/performance contract.

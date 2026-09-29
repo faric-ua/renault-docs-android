@@ -2,14 +2,8 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
-import java.io.BufferedInputStream
 import java.io.File
-import java.security.DigestOutputStream
-import java.security.MessageDigest
 import java.text.Normalizer
-import java.util.Locale
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import org.json.JSONObject
 
 object RdpkgExporter {
@@ -17,10 +11,6 @@ object RdpkgExporter {
         "rdpkg.json"
     private const val DATASET_MANIFEST =
         "renault-dataset.json"
-    private const val BUFFER_SIZE =
-        1024 * 1024
-    private const val ZIP_EPOCH_MILLIS =
-        315_532_800_000L
 
     data class ExportResult(
         val packageId: String,
@@ -119,172 +109,36 @@ object RdpkgExporter {
                     packageId,
             )
 
-            val files =
-                sourceRoot
-                    .walkTopDown()
-                    .filter {
-                        it.isFile
-                    }
-                    .toList()
-                    .sortedBy {
-                        it.relativeTo(
+            val written =
+                RdpkgZipWriter
+                    .writeDirectory(
+                        context =
+                            appContext,
+                        sourceRoot =
                             sourceRoot,
-                        )
-                            .invariantSeparatorsPath
-                            .lowercase(
-                                Locale.ROOT,
-                            )
-                    }
-
-            require(
-                files.isNotEmpty(),
-            ) {
-                "Встановлений пакет порожній."
-            }
-
-            val sourceBytes =
-                files.sumOf {
-                    it.length()
-                }
-            val digest =
-                MessageDigest.getInstance(
-                    "SHA-256",
-                )
-
-            progress?.invoke(
-                "Експортую .rdpkg… 0/" +
-                    files.size
-            )
-
-            val rawOutput =
-                appContext
-                    .contentResolver
-                    .openOutputStream(
-                        destinationUri,
-                        "w",
-                    )
-                    ?: error(
-                        "Android не зміг відкрити файл для запису."
-                    )
-
-            DigestOutputStream(
-                rawOutput.buffered(),
-                digest,
-            ).use {
-                digestOutput ->
-                ZipOutputStream(
-                    digestOutput,
-                ).use {
-                    archive ->
-                    archive.setLevel(
-                        6,
-                    )
-
-                    val buffer =
-                        ByteArray(
-                            BUFFER_SIZE,
-                        )
-
-                    files.forEachIndexed {
-                        index,
-                        source ->
-                        val relative =
-                            source.relativeTo(
-                                sourceRoot,
-                            )
-                                .invariantSeparatorsPath
-
-                        val entry =
-                            ZipEntry(
-                                relative,
-                            ).apply {
-                                time =
-                                    ZIP_EPOCH_MILLIS
-                            }
-
-                        archive.putNextEntry(
-                            entry,
-                        )
-
-                        BufferedInputStream(
-                            source.inputStream(),
-                            BUFFER_SIZE,
-                        ).use {
-                            input ->
-                            while (
-                                true
-                            ) {
-                                val read =
-                                    input.read(
-                                        buffer,
-                                    )
-
-                                if (
-                                    read <
-                                    0
-                                ) {
-                                    break
-                                }
-
-                                if (
-                                    read ==
-                                    0
-                                ) {
-                                    continue
-                                }
-
-                                archive.write(
-                                    buffer,
-                                    0,
-                                    read,
-                                )
-                            }
-                        }
-
-                        archive.closeEntry()
-
-                        val completed =
-                            index +
-                                1
-
-                        if (
-                            completed ==
-                            1 ||
-                            completed %
-                                500 ==
-                            0 ||
-                            completed ==
-                            files.size
-                        ) {
+                        destinationUri =
+                            destinationUri,
+                        progress = {
+                            completed,
+                            total ->
                             progress?.invoke(
                                 "Експортую .rdpkg… " +
                                     completed +
                                     "/" +
-                                    files.size
+                                    total
                             )
-                        }
-                    }
-                }
-            }
+                        },
+                    )
 
             ExportResult(
                 packageId =
                     packageId,
                 fileCount =
-                    files.size,
+                    written.fileCount,
                 sourceBytes =
-                    sourceBytes,
+                    written.sourceBytes,
                 sha256 =
-                    digest.digest()
-                        .joinToString(
-                            "",
-                        ) {
-                            byte ->
-                            "%02x".format(
-                                byte.toInt() and
-                                    0xff,
-                            )
-                        },
+                    written.sha256,
             )
         }
 

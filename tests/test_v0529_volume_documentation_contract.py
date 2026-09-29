@@ -214,8 +214,8 @@ class V0529VolumeDocumentationContractTests(unittest.TestCase):
             repo / "android/app/build.gradle.kts"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("versionCode = 66", gradle)
-        self.assertIn('versionName = "0.5.50"', gradle)
+        self.assertIn("versionCode = 67", gradle)
+        self.assertIn('versionName = "0.5.51"', gradle)
 
     def test_fullscreen_button_has_visible_pressed_state(self):
         repo = Path(__file__).resolve().parents[1]

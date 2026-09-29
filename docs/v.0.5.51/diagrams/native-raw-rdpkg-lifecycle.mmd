@@ -1,0 +1,26 @@
+flowchart TD
+    A[User taps Create .rdpkg from raw] --> B[Pick exact raw Renault volume]
+    B --> C[Create destination document]
+    C --> D{Request UUID already claimed?}
+    D -- yes --> X[Ignore stale/replayed start]
+    D -- no --> E[Claim request UUID]
+    E --> F[Foreground preparation service]
+    F --> G[SAF metadata scan]
+    G --> H[Copy + normalize to app-private staging]
+    H --> I[Modern + Section IR + Runtime IR]
+    I --> J[Fast Pack]
+    J --> K[Stream final .rdpkg + SHA-256]
+    K --> L[Atomic RdpkgImporter.install]
+    L --> M[Project volume upsert]
+    M --> N[COMPLETE: native reopen]
+
+    F -->|rotation / Activity recreate| O[UI reattaches to persisted run state]
+    O --> F
+
+    H -->|Cancel during PREPARING| P[Stop work]
+    P --> Q[Delete private staging / incomplete destination]
+    Q --> R[CANCELLED: source unchanged]
+
+    N --> S[Terminal status may remain visible]
+    R --> S
+    S --> T[Follow-up: dismiss × for terminal state only]

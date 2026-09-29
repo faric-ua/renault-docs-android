@@ -1,0 +1,22 @@
+{
+  "versionName": "0.5.51",
+  "versionCode": 67,
+  "phase": "phone-accepted",
+  "feature": "Kotlin-native raw Renault folder to lifecycle-safe .rdpkg generation, validation, install and project upsert",
+  "branch": "feat/v0.5.51-native-preparation-foundation",
+  "tested_source_sha": "6b334eafb1fbf9dcca591fa4d1b619885f32ea4b",
+  "branch_validation_sha": "6b334eafb1fbf9dcca591fa4d1b619885f32ea4b",
+  "merged_source_sha": null,
+  "tested_runtime_blobs_match_branch_validation_sha": true,
+  "tests_run": 36370544159,
+  "android_debug_run": 36370544247,
+  "artifact": "Renault-Docs-v0.5.51-Debug",
+  "artifact_id": 10948508448,
+  "apk_sha256": "7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48",
+  "artifact_zip_sha256": "016f1958c20b9cddcaff7da99fc55902572e02eed723c8907474a6a27271117a",
+  "signer_certificate_sha256": "dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802",
+  "dataset_refresh_required": false,
+  "qa_status": "PHONE_PASS",
+  "release_tag": null,
+  "phone_test_date": "2026-09-28"
+}

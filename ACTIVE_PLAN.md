@@ -1,25 +1,22 @@
 # Renault Docs — ACTIVE PLAN
 
-Updated: 2026-09-28
+Updated: 2026-09-29
 
-Purpose: live crash-recovery checklist. Read after `CURRENT_HANDOFF.md`; continue from the first unchecked item.
+The canonical live crash-recovery checklist is:
 
-## Current repository baseline
+`docs/assistant-kit/CURRENT_PLAN.md`
 
-- [x] v0.5.50 Android-native `.rdpkg` export implemented.
-- [x] v0.5.50 native `.rdpkg` round-trip recorded as real-phone PASS on main.
-- [x] Mandatory active-plan rule added to the assistant/project workflow.
-- [ ] Reconcile the root `CURRENT_HANDOFF.md` with the latest v0.5.50 main baseline before starting another feature.
-- [ ] Define the next release goal with the user and create its release documentation skeleton before feature code.
-- [ ] Replace the remaining generic items here with the exact ordered checklist for that release.
-- [ ] Execute and mark each verified implementation/CI/phone step as it completes.
+Do **not** maintain a second independent checklist in this root file.
 
-## Rule
+Current status:
+- v0.5.51 raw Renault → Kotlin-native `.rdpkg` is **PHONE PASS**;
+- PR #138 is reconciled with current `main` and mergeable;
+- closeout is waiting for final CI / merge bookkeeping;
+- terminal-status dismiss UX, `1 файл` wording, and legacy `*_android` audit are post-merge follow-ups.
 
-After every successful project-progress step:
-1. mark only the evidence-backed checkbox `[x]`;
-2. update relevant QA/findings;
-3. update `CURRENT_HANDOFF.md` if the resume point changed;
-4. keep the first unchecked item as the next action.
+Resume rule:
+1. read `docs/assistant-kit/CURRENT_PLAN.md`;
+2. read `CURRENT_HANDOFF.md` only for broader history/context;
+3. continue from the single **Поточний наступний крок** in CURRENT_PLAN.
 
-Do not rely on chat memory as the only progress record.
+This file exists only as a stable root-level pointer for older tooling and context instructions.

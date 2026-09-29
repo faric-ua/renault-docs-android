@@ -3351,3 +3351,650 @@ Next logical stage:
 - keep Python/Termux only as reference/developer tooling and parity oracle;
 - do not embed Python runtime into the production APK.
 
+## v0.5.51 development — Kotlin-native raw preparation foundation — 2026-09-27
+
+Branch:
+`feat/v0.5.51-native-preparation-foundation`.
+
+Starting point:
+- v0.5.50 Android-native managed `.rdpkg` export/import round-trip is PHONE PASS / CLOSED;
+- accepted NT8340A reference result remains `NT8340A · 2006-04-18` → `347 · native`.
+
+Pipeline audit result:
+- reuse the existing fast SAF scanner and `ConverterPathNormalizer`;
+- do not reproduce the old user-facing `raw → *_android → package → .rdpkg` chain;
+- use one temporary app-private normalized staging copy;
+- run all compiler passes against local File I/O;
+- Python/Termux stay reference/developer tooling and the parity oracle.
+
+Implemented foundation on this branch:
+- new shared `RdpkgZipWriter`;
+- deterministic outer archive ordering/timestamps;
+- streaming SHA-256 while writing;
+- speed-oriented per-entry compression: text/metadata level 1, binary/already-compressed payload level 0;
+- existing v0.5.50 `RdpkgExporter` refactored to use the shared writer;
+- new `NativeFastPackWriter` with Python-equivalent selection rules, `BEST_SPEED`, deterministic output, and SHA-256 during write;
+- JVM tests for archive compression policy and Fast Pack selection;
+- canonical architecture: `docs/architecture/KOTLIN_NATIVE_RAW_TO_RDPKG.md`.
+
+Important scope boundary:
+this is the performance/storage foundation, not yet a complete raw-folder → native Modern `.rdpkg` implementation. Do not call v0.5.51 PHONE PASS yet.
+
+Next code step:
+extract/reuse the current fast SAF scan as a shared source scanner, then write exactly one normalized copy into app-private staging. After that, port volume/Modern index parity and then the Python-only section/Runtime IR compiler stages.
+### v0.5.51 private staging writer added
+
+`NativePreparationStager` now implements the next planned I/O stage:
+- fast `DocumentsContract` metadata scan with DocumentFile compatibility fallback;
+- complete exact-path map before writes, preserving `ConverterPathNormalizer` behavior;
+- exactly one SAF read/copy per source file into `noBackupFilesDir/native-preparation/<token>.staging`;
+- HTM/HTML/JS normalization during that copy;
+- binary streaming with a 1 MiB buffer;
+- cancellation checks during scan/copy;
+- automatic private staging cleanup on failure/cancel;
+- no public `*_android` output in this path.
+
+Next implementation step is now compiler parity on the local staging tree, starting with volume discovery + Modern index, then native section discovery.
+### v0.5.51 volume/index compiler foundation added
+
+`NativeVolumeCompiler` now ports the first local compiler stage from Python:
+- top-level Renault volume discovery;
+- INDEX/ACCUEIL entrypoint discovery;
+- NT document-code extraction;
+- date extraction;
+- VISU/technical-documentation kind;
+- stable volume slug/title/order;
+- `_renault/volumes.json`;
+- `_renault/modern-index.json`.
+
+JVM tests use an NT8340A-shaped temporary volume and verify `NT8340A · 2006-04-18` identity/entrypoint plus Modern index structure.
+
+Next compiler boundary: port `core/sections.py` semantics to Kotlin. Do not jump directly to Section IR until catalog identifier/order/target parity is covered.
+### v0.5.51 native section discovery foundation added
+
+`NativeSectionCompiler` now ports `core/sections.py` behavior onto local staging:
+- tolerant legacy HTML parsing through jsoup;
+- frames/iframes traversal without executing legacy JavaScript;
+- href / javascript-href / onclick local HTML target discovery;
+- table-row navigation fallback;
+- opaque section identifiers including numeric, 4-digit, R-prefixed and alphabetic families;
+- source order preservation;
+- identity by code + resolved entrypoint;
+- duplicate-title improvement without collapsing different targets;
+- bounded fallback scan for legacy navigation pages;
+- `modern-sections.json` schema v2 output.
+
+This preserves the BUG-004 durability rule: section identifiers are opaque strings, not exactly three decimal digits.
+
+Next compiler boundary is `core/section_ir.py`. That is the large semantic stage (actions, controls, selectors, connector/document relations, structured tables), so it should reuse the same tolerant HTML layer rather than introduce a second parser.
+### v0.5.51 foundation CI checkpoint
+
+Green code checkpoint:
+`51c833fbdbc23f6f2dbdf649cba79c09d3eb7968`.
+
+PR:
+`#138` — draft, `v0.5.51: Kotlin-native raw preparation foundation`.
+
+CI for the green code checkpoint:
+- Tests run `36342715326` — PASS;
+- Android Debug APK run `36342715337` — PASS.
+
+What is now implemented but not yet wired as the final user flow:
+- one-scan / one-copy SAF → private staging;
+- path normalization during that copy;
+- Kotlin volume discovery + Modern index;
+- Kotlin native section discovery / `modern-sections.json`;
+- Kotlin Fast Pack writer;
+- shared speed-oriented outer `.rdpkg` writer with SHA-256 during write.
+
+Important: version remains v0.5.50 / code 66 on this development branch for now. No phone install/gate is requested from this checkpoint. The next implementation boundary is `core/section_ir.py` parity, followed by Runtime IR shards/index/coverage and final package-manifest wiring.
+## v0.5.51 current integration boundary — 2026-09-28
+
+Live branch head at this checkpoint:
+`cc07797bc9f25bc6543da8d5386928a8cd37997a`.
+
+Important correction to the older handoff text:
+the branch has advanced beyond the earlier “next = section_ir.py” checkpoint. Section IR and Runtime IR are now implemented in Kotlin, and the native data path is assembled end-to-end in `NativeRdpkgPreparationEngine`.
+
+Implemented on branch:
+- raw SAF scan + one normalized copy into app-private staging;
+- volume discovery + Modern index;
+- native section discovery;
+- `NativeSectionIrCompiler` (`section-ir-v2`) with static legacy HTML/JS route extraction;
+- `NativeRuntimeIrCompiler` with runtime tree, section shards/index and coverage;
+- Fast Pack;
+- `renault-dataset.json` + `rdpkg.json`;
+- streamed outer `.rdpkg` with SHA-256 during write;
+- staging cleanup after completion/failure;
+- parser cache bounded for phone memory;
+- volume/section discovery reused across the native pipeline.
+
+Current branch CI at `cc07797...`:
+- Tests run `36345630397` — PASS;
+- Android Debug APK run `36345630361` — PASS.
+
+What is NOT done yet:
+1. the engine is not wired into the user-facing Project/Conversion UI;
+2. long-running native preparation needs lifecycle-safe execution (rotation/process UI reattachment) using the existing service/run-store pattern, not a raw Activity-owned thread;
+3. no real NT8340A Kotlin-native parity/phone gate has been run yet;
+4. v0.5.51 version bump/release/merge must wait for that gate.
+
+Therefore the next code task is UI + lifecycle integration around `NativeRdpkgPreparationEngine`, then a real-phone NT8340A run expecting one `.rdpkg`, reopen as `NT8340A · 2006-04-18`, and `347 · native` without compatibility fallback.
+
+
+### v0.5.51 lifecycle/UI integration — GREEN CI
+
+Integration is now wired around the native core:
+- `NativeRdpkgRunStore` persists native run state separately from legacy converter state;
+- `NativeRdpkgPreparationService` owns long-running work as a foreground `dataSync` service with wake lock;
+- ProjectActivity provides raw folder → `.rdpkg` destination two-step SAF flow;
+- pending source survives Activity recreation;
+- ProjectActivity reattaches to persistent progress after rotation/recreate;
+- Cancel reaches the engine during PREPARING; final validation/import is intentionally atomic;
+- generated package is immediately validated through `RdpkgImporter.install()`;
+- validated volume is automatically upserted into the same project;
+- stale RUNNING state is recovered after service/process loss;
+- incomplete destination is deleted on pre-validation failure/cancel.
+
+Green integration checkpoint:
+`83cfda448e20ad946704c6b05efb5adce1a38817`.
+
+CI:
+- Tests `36357699673` — PASS;
+- Android Debug APK `36357699651` — PASS.
+
+Next step:
+bump candidate to v0.5.51 / versionCode 67, rebuild/sign, then run `docs/v.0.5.51/qa/PHONE_TEST.md` on raw NT8340A.
+
+
+### v0.5.51 exact phone candidate — CI PASS / PHONE PENDING
+
+Version:
+- `0.5.51`;
+- versionCode `67`.
+
+Runtime APK source:
+`2adab113bbfd48607446310a2f2daa4ce5f3d354`.
+
+Branch validation source:
+`912fd52ef32613d5d2d3628382baae4994c38272`.
+
+Compare from runtime source to validation source contains only tests/docs, so Android runtime blobs match.
+
+CI:
+- Tests run `36358146811` — PASS;
+- Android Debug APK run `36357861552` — PASS.
+
+Artifact:
+- `Renault-Docs-v0.5.51-Debug`;
+- artifact id `10944810990`;
+- APK SHA-256 `c0b2ec950f6313d1befbc53b9bd6d4878737af5baf787f615aed4355fb1e3d4c`;
+- artifact ZIP SHA-256 `c0400b072ba4fdbd4efa2126b7446e0462c27ffbd408b2c6089423d3af6d2a9f`;
+- signer certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+
+Release metadata:
+`docs/v.0.5.51/RELEASE_META.json`.
+
+Phone gate:
+`docs/v.0.5.51/qa/PHONE_TEST.md`.
+
+Do not mark v0.5.51 PHONE PASS or merge PR #138 until raw NT8340A proves Android/Kotlin generation → validation/import → `347 · native`.
+
+
+### Default phone-side Termux workflow
+
+Для Renault Docs користувацький phone-side workflow за замовчуванням ведемо через існуюче Termux-меню (`reno-docs`), а не через ручні Git/gh/bash команди.
+
+Manual commands are fallback only for:
+- дії, яких ще немає в меню;
+- аварійну діагностику;
+- одноразове виправлення menu state.
+
+Якщо новий development/test flow потребує ручного branch switching, preferred fix — додати підтримку цього flow у меню.
+
+
+### Termux candidate menu workflow — 2026-09-28
+
+Default phone workflow remains menu-first.
+
+Operational support was merged to `main`:
+- PR #140 / `65b5a62a9f901c8b8d387c74b2f2caa6221ac568` — branch-aware update + candidate/main menu actions;
+- PR #141 / `32cdb8887576f0146381cbdb7f2f6fd19fe45eb0` — removes external `jq` dependency.
+
+Menu:
+- 5 = update current branch;
+- 16 = resolve PR #138, switch/update candidate branch, download exact APK;
+- 17 = return to main.
+
+For devices still running the old menu code, item 5 must be run once, then the menu process restarted so items 16/17 become visible.
+
+Do not give manual branch-switch commands unless menu recovery itself fails.
+
+
+### Termux candidate fetch repair — 2026-09-28
+
+Real-phone menu item 16 resolved PR #138 but failed before switching:
+`fatal: invalid reference: origin/feat/v0.5.51-native-preparation-foundation`.
+
+Cause:
+the phone clone's remote fetch configuration may not populate arbitrary remote branches on a plain fetch.
+
+Repair:
+- PR #142 merged to `main` as `5965e29e5e4f8183e8495891d209d30f484a0289`;
+- `reno-candidate.sh` explicitly fetches the PR head branch into `refs/remotes/origin/<branch>`;
+- then switches/tracks that exact ref;
+- Tests `36361285175` — PASS;
+- repair synced into the v0.5.51 branch too.
+
+Next phone action is menu-only:
+**5 — Оновити проєкт з GitHub**, then **16 — Тестовий candidate: перейти + завантажити APK**.
+
+
+### Termux candidate tracking repair — 2026-09-28
+
+After the explicit fetch fix, the phone reached the next failure:
+`fatal: cannot set up tracking information; starting point 'origin/feat/v0.5.51-native-preparation-foundation' is not a branch`.
+
+The ref existed, but the phone clone's narrow fetch configuration meant Git would not accept it as an upstream-tracking source.
+
+Repair:
+- PR #143 merged to `main` as `e2377031dd190c7f7e2667aa29ab76fbf5057ed4`;
+- candidate branch creation now uses the full `refs/remotes/origin/<branch>` ref without `--track`;
+- menu item 5 also uses an explicit fetch refspec and explicit remote ref;
+- Tests `36362625071` — PASS;
+- repair synced into the v0.5.51 branch.
+
+Next phone action remains menu-only:
+**5 — Оновити проєкт з GitHub**, then **16 — Тестовий candidate: перейти + завантажити APK**.
+
+
+### Interrupted candidate checkout recovery — 2026-09-28
+
+Real phone reached a third Termux edge case: failed `git switch --track` left the v0.5.51 candidate tree staged on the current branch. The clean-worktree guard then blocked further menu operations.
+
+PR #144 merged to `main` as `84659fe110030eb1bc12c9b447758b32a8b3d7d3`.
+
+The candidate script now auto-recovers only the exact safe residue case:
+- no untracked files;
+- no unstaged edits;
+- staged tree exactly equals the fetched PR #138 candidate tree;
+- current branch is not already the candidate.
+
+Only then does it reset the interrupted checkout residue and continue. Any other dirty state still stops.
+
+Tests `36363339053` — PASS. Fix is also synced into the v0.5.51 branch.
+
+For the one phone already stuck on the old script, a single emergency `git reset --hard HEAD` is needed, then resume menu-only flow: item 5 → item 16.
+
+
+### v0.5.51 phone gate started — 2026-09-28
+
+User confirmed the v0.5.51 candidate APK was downloaded and installed on the real phone.
+
+Next phone action:
+Renault Docs → project Megane II → **Створити .rdpkg з raw** → choose original raw NT8340A folder.
+
+Do not mark PHONE PASS yet; only installation is confirmed.
+
+
+### v0.5.51 phone finding: Runtime IR OOM — 2026-09-28
+
+The first real raw-folder phone run used the wrong source volume by mistake, so it is diagnostic evidence only, not the NT8340A acceptance run.
+
+Phone evidence:
+- volume: `NT8393 · 2007-06-04`;
+- source files: `14228`;
+- Runtime IR completed `351` sections;
+- failure: Android OOM requesting `150994952` bytes with heap growth limit `268435456`;
+- incomplete destination `.rdpkg` remained visible after failure.
+
+Root cause identified in the native compiler:
+`runtimeTree.toString(2)` followed by `File.writeText()` materialized the full large Runtime IR tree as a giant String/byte array on top of the already-resident JSONObject tree.
+
+Repair on PR #138:
+- buffered recursive JSON streaming writer replaces whole-document `toString()/writeText` for Runtime IR artifacts;
+- incomplete SAF destination cleanup now has a `DocumentsContract.deleteDocument()` fallback and user-visible warning on cleanup failure.
+
+NT8340A PHONE PASS remains pending. A rebuilt candidate must be installed before the next real acceptance run.
+
+
+### v0.5.51 OOM-fix candidate green — 2026-09-28
+
+The Runtime IR streaming + incomplete-SAF-destination cleanup repair is now fully green.
+
+Candidate source:
+`c0039b09ca4406dd73333a83cd9d44744dbf4f40`.
+
+CI:
+- Tests `36365007868` — PASS;
+- Android Debug APK `36365007904` — PASS.
+
+Artifact:
+- `Renault-Docs-v0.5.51-Debug`;
+- artifact id `10946489978`;
+- APK SHA-256 `6148bd8c46d917812c0eab8dff0062416414ea871f91731afd725528de20d1d6`;
+- artifact ZIP SHA-256 `03691e66dda1abba7d6df47ad71b46753af8fca7a603a04abb27afe7a9cad97d`.
+
+Next phone action:
+install this updated candidate through the Renault Termux menu, then run raw-folder conversion on the correct NT8340A source. PHONE PASS remains pending.
+
+
+### Termux APK artifact lookup repair — 2026-09-28
+
+Real phone showed menu item 16 returning silently immediately after the exact artifact search line.
+
+Cause:
+`set -euo pipefail` + `gh api ... | head -n 1`; multiple matching v0.5.51 artifacts cause SIGPIPE on `gh`.
+
+Repair:
+- PR #145 merged to `main` as `e05a3edb3c999ac70c8056e37f11f6475e2296ca`;
+- Tests `36367038334` — PASS;
+- feature branch has the same fix;
+- no Android runtime code changed.
+
+Next phone action:
+menu item **5**, then item **16** again.
+
+
+### v0.5.51 OOM-fix candidate installed — 2026-09-28
+
+User confirmed the updated v0.5.51 candidate containing Runtime IR streaming and failed-destination cleanup fixes is installed on the real phone.
+
+Next phone action:
+Renault Docs → Megane II → **Створити .rdpkg з raw** → select the correct original raw **NT8340A** folder.
+
+The previous NT8393 run remains diagnostic only and does not count toward NT8340A PHONE PASS.
+
+
+### v0.5.51 NT8340A phone run started — 2026-09-28
+
+User confirmed the correct raw NT8340A source is now running through the updated OOM-fix candidate.
+
+Phone evidence:
+- project: Megane II;
+- existing volume remains `NT8340A · 2006-04-18`;
+- native status: `Копіюю і нормалізую raw source…`;
+- progress observed: `900/21880`.
+
+Next phone gate inside this same run:
+rotate the device, send app to Home/background briefly, then reopen and confirm the same operation continues/reattaches without duplicate work.
+
+
+### NT8340A progress cadence observation — 2026-09-28
+
+During the real NT8340A phone run:
+- copy UI updates every 100 files by design;
+- DocumentsContract scan updates every 500 files; fallback scan updates every 100;
+- the selected destination can remain 0 bytes until the final outer package writer begins.
+
+Potential lifecycle issue to resolve:
+the previous phone screenshot had already reached COPY `900/21880`, while a later screenshot showed SCAN `3500 files / 27 folders`. If no manual second run was started, the operation restarted and this must be fixed before acceptance.
+
+
+### v0.5.51 phone finding: parent raw folder + nested destination — 2026-09-28
+
+The 21880-file run used the parent SAF folder `Megane II`, not one exact raw Renault volume folder. The filename `Megane-II_Megane-II.rdpkg` confirms the selected source name.
+
+Consequences:
+- recursive scan included unrelated sibling content (including the earlier NT8393 raw source);
+- destination `.rdpkg` was created inside the selected source tree and could appear in the scan as a 0-byte file.
+
+This is a source-boundary UX bug, not evidence that the converter wrote into the raw source.
+
+Fix added on PR #138:
+- require a root Renault entrypoint before any staging copy;
+- reject destination inside the source tree and clean the just-created document.
+
+The current 21880-file run must be cancelled and does not count toward PHONE PASS.
+
+
+### v0.5.51 lifecycle hardening for duplicate native start — 2026-09-28
+
+The phone showed one non-deterministic observation where UI appeared to move from copy progress back to scan progress after a window/app handoff. The user later repeated window switching and could not reproduce it.
+
+Because a narrow pre-run persistence race existed, PR #138 now hardens start idempotence:
+- `startInFlight` blocks duplicate start requests before `runStore.begin()` becomes visible;
+- service refuses to start a new worker when persisted run state is already running;
+- existing per-service `workerRunning` guard remains.
+
+This is defensive lifecycle hardening; the observation itself is not yet proven as a reproducible bug. CI pending at `7655b84e66f0dc6943fc573e651a569588b3dfae`.
+
+
+### Confirmed phone evidence: parent folder contained 2 volumes — 2026-09-28
+
+The user allowed the 21880-file run to finish. It reached:
+`Private staging готовий · 21880 файлів.`
+
+Then the compiler failed with:
+`Для .rdpkg потрібно вибрати одну Renault volume-папку. Знайдено томів: 2.`
+
+This definitively confirms the selected source was the parent/mixed folder containing two Renault volumes, not the single NT8340A raw volume. The run does not count toward PHONE PASS.
+
+PR #138 already contains an earlier source-root guard so future builds fail fast before staging this wrong selection.
+
+
+### v0.5.51 boundary/lifecycle candidate green — 2026-09-28
+
+Latest phone candidate is fully green.
+
+Source:
+`28ec4faf12c5ccea0daeb16f10d7afebc52b785a`.
+
+CI:
+- Tests `36368715992` — PASS;
+- Android Debug APK `36368715769` — PASS.
+
+Artifact:
+- `Renault-Docs-v0.5.51-Debug`;
+- artifact id `10948048373`;
+- APK SHA-256 `39bd542fb503b12f4431e1a21cd0cfd866cb6b2f489a0bf9c09e12b06c109a1c`;
+- artifact ZIP SHA-256 `87c46dd1e58a70a261a52dc8d35deca9463dd9ddf6294837471d0d7d04d607c4`.
+
+It includes OOM streaming, failed destination cleanup, fail-fast single-volume source validation, nested-destination rejection, and duplicate-start lifecycle hardening.
+
+Next phone action is menu-only: item 16, install over current v0.5.51, then rerun on the exact NT8340A raw folder.
+
+
+### NT8340A generation succeeded; stale Activity-result replay confirmed — 2026-09-28
+
+Correct NT8340A real-phone generation succeeded end-to-end far enough to prove the native data path:
+- Runtime IR: 347 sections;
+- Fast Pack: 6138 files;
+- outer package: 8012 files;
+- automatic import executed;
+- final result: `NT8340A · 2006-04-18 · 347 native`;
+- SHA-256: `7d6cc758b329adcd1ef46680de4d9c6815ff48b053f4e3550b06dd92b229b77e`;
+- project remained at 2 volumes, confirming update/upsert rather than duplicate volume creation.
+
+The same screenshot sequence proves an intermittent lifecycle replay:
+after import progress, the app later showed a fresh raw scan and section compilation without a new explicit user start. This can only be a second native run.
+
+Root cause boundary:
+the earlier `startInFlight` / persisted-RUNNING / `workerRunning` guards only block duplicates while a run is starting or active. A stale Activity result delivered after completion can still start again.
+
+Fix now on PR #138:
+- picker session UUID persisted in Activity saved state;
+- durable, synchronized one-shot request claim stored separately from run-state prefs;
+- same request id is rejected forever on replay, while a newly initiated user run receives a new id.
+
+CI pending at `6b334eafb1fbf9dcca591fa4d1b619885f32ea4b`.
+
+Do not mark PHONE PASS until the fixed candidate survives the lifecycle test and the resulting NT8340A is reopened as native without compatibility fallback.
+
+
+### NT8340A native reopen confirmed — 2026-09-28
+
+Phone screenshot after generated-package import confirms the resulting volume reopens natively:
+- `NT8340A · 2006-04-18`;
+- `Розділів: 347 · native`;
+- no compatibility / `Сумісний режим` fallback;
+- `Classic` remains a separate explicit alternate button.
+
+These acceptance sub-gates are PASS.
+
+Do not mark full PHONE PASS yet: stale-request lifecycle replay must be retested on the fixed candidate, and public `*_android` absence still needs explicit phone verification.
+
+
+### Stale-request replay candidate green — 2026-09-28
+
+The one-shot request-id lifecycle repair is fully green.
+
+Runtime source:
+`6b334eafb1fbf9dcca591fa4d1b619885f32ea4b`.
+
+CI:
+- Tests `36370544159` — PASS;
+- Android Debug APK `36370544247` — PASS.
+
+Artifact:
+- id `10948508448`;
+- APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`.
+
+Immediate phone gate:
+menu item 16 → install over v0.5.51 → repeat lifecycle handoff test. Full PHONE PASS remains pending.
+
+
+### Replay-fix rerun is clean and deterministic — 2026-09-28
+
+Phone screenshots from the fixed candidate show one monotonic NT8340A run:
+scan → copy (`7653` source files) → section index → Runtime IR `347` → Fast Pack `6138` → outer package `8012` → automatic import → COMPLETE.
+
+No second scan/restart appears in the submitted sequence.
+
+Final SHA-256:
+`7d6cc758b329adcd1ef46680de4d9c6815ff48b053f4e3550b06dd92b229b77e`,
+identical to the previous successful NT8340A package. This is strong deterministic-output evidence.
+
+Before closing lifecycle PASS, get explicit user confirmation that rotation/background/file-manager handoffs were performed during this exact rerun. Then only the no-public-`*_android` storage check remains.
+
+Non-blocking UX polish found: `Імпортую .rdpkg… 1 файлів` should use singular `1 файл`.
+
+
+### Post-completion stale replay phone check passed — 2026-09-28
+
+User explicitly confirmed that after the fixed-candidate NT8340A run completed, they rotated the phone, left the app, and switched between other apps/windows. No automatic second conversion started.
+
+Therefore the exact previously observed **post-completion stale Activity-result replay** is phone-PASS on the fixed candidate.
+
+The only lifecycle uncertainty left is the active-PREPARING handoff matrix, because the user is not certain whether all rotation/background steps were performed before completion. This can be closed with a short disposable run and Cancel during PREPARING; no second full package build is necessary.
+
+
+### PREPARING cancellation passed; Documents/Renault has legacy clutter — 2026-09-28
+
+Phone evidence confirms cancellation during active PREPARING:
+`Копіюю і нормалізую raw source… 1/7653` → Cancel → `Source не змінено, private staging очищено.`
+
+This is PASS for the cancel sub-gate.
+
+A root storage screenshot of `Documents/Renault` shows existing user-visible legacy `*_android` directories:
+`laguna 2 2001-2006_android`, `Megane II_android`, and `Megane II_NT8342A_android`.
+
+No new NT8340A-specific `*_android` output is visible from the Kotlin-native run. Do not conflate legacy storage clutter with current-flow behavior. Handle cleanup as a separate audited task; no blind deletion.
+
+
+### Tomorrow checkpoint — 2026-09-29
+
+Start from PR #138 / `feat/v0.5.51-native-preparation-foundation`.
+
+Known accepted phone evidence:
+- raw NT8340A → Kotlin-native package succeeds;
+- source count `7653`;
+- Runtime IR `347`;
+- Fast Pack `6138`;
+- outer package `8012`;
+- SHA-256 repeatable:
+  `7d6cc758b329adcd1ef46680de4d9c6815ff48b053f4e3550b06dd92b229b77e`;
+- importer/upsert succeeds without duplicate volume;
+- reopen is `NT8340A · 2006-04-18` / `347 · native`;
+- no compatibility fallback;
+- post-completion stale replay regression is PASS;
+- PREPARING Cancel is PASS.
+
+Still open:
+1. one short active-PREPARING lifecycle handoff check (rotation + Home/background + external app + return, then Cancel);
+2. final v0.5.51 PHONE PASS/closeout;
+3. non-blocking UX: terminal COMPLETE/CANCELLED/FAILED status needs a right-side close/dismiss icon;
+4. non-blocking grammar: `1 файлів` → `1 файл`;
+5. audit historical public `*_android` folders before any cleanup;
+6. consolidate v0.5.51 documentation after PHONE PASS so active docs stop accumulating stale/pending chronology.
+
+Do not delete any historical `*_android` folder without a reference/use audit.
+
+
+### v0.5.51 PHONE PASS — 2026-09-28
+
+Final active-PREPARING lifecycle phone check passed on the request-id guarded candidate.
+
+Phone sequence:
+- same copy operation progressed `500/7653 → 1400/7653 → 2300/7653` across the agreed rotation/background/external-window handoffs;
+- no reset to a fresh scan;
+- no second/parallel conversion started;
+- Cancel during PREPARING then completed cleanly with source unchanged and private staging removed.
+
+Combined accepted v0.5.51 phone evidence:
+- raw NT8340A source count `7653`;
+- Runtime IR `347`;
+- Fast Pack `6138`;
+- outer package `8012`;
+- deterministic SHA-256:
+  `7d6cc758b329adcd1ef46680de4d9c6815ff48b053f4e3550b06dd92b229b77e`;
+- auto validation/import PASS;
+- project upsert with no duplicate volume;
+- reopen exactly `NT8340A · 2006-04-18`;
+- Modern `347 · native`;
+- no compatibility fallback;
+- Classic remains explicit alternate;
+- post-completion stale replay PASS;
+- active-PREPARING lifecycle PASS;
+- current Kotlin-native flow created no new public `*_android` intermediate.
+
+Conclusion:
+**v0.5.51 PHONE PASS**.
+
+Next release action:
+consolidate stale chronological docs into one current PASS summary, then prepare PR #138 for merge without changing the accepted runtime.
+
+Follow-up work after the accepted candidate is frozen:
+- terminal COMPLETE/CANCELLED/FAILED status dismiss `×`;
+- Ukrainian `1 файл` wording;
+- read-only audit of historical public `*_android` folders before cleanup.
+
+
+### Public-repo closeout correction — 2026-09-29
+
+The active phone clone now points to public `faric-ua/renault-docs-android`. Its `main` is still v0.5.50.
+
+A mistaken closeout instruction caused item 7 to build public main:
+- commit `97a5c6e29bd939197784f9ffced09161f5876bb2`;
+- run `36580219193`;
+- version v0.5.50;
+- build PASS, but Android installer reported `Додаток не встановлено`.
+
+Reason: this is a lower version than the installed v0.5.51 candidate (versionCode 66 vs 67), so it is not a valid candidate install.
+
+The phone-accepted private feature was transplanted file-for-file onto public branch:
+`feat/v0.5.51-native-preparation-foundation`.
+Public continuation PR: **#1**.
+
+Termux candidate flow was hardened:
+item 16 now selects/switches the public PR branch and launches `reno-build-apk.sh`, guaranteeing a fresh workflow_dispatch build with the stable signer.
+
+Next phone action after PR CI is green:
+`reno-docs` → 5 (update main) → 16 → select PR #1.
+
+
+### Public signing continuity blocker — 2026-09-29
+
+Public continuation PR #1 is mergeable and CI-green at `266840f5182f1c49a4b84673592367744f09e77e`:
+Tests `36583494822` PASS; Android Debug `36583494741` PASS.
+
+Do not merge yet.
+
+The phone's accepted v0.5.51 build and the new public repository build use different development signing identities:
+- accepted/private signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- public signer SHA-1 `aa91096d3699a62c0d6e4d4306064068e67fda0d`.
+
+The user accidentally built public `main` v0.5.50/versionCode 66 (run `36580219193`) and Android showed `Додаток не встановлено`. That attempt had both a version downgrade and signer mismatch.
+
+Release-safe path:
+preserve update/data continuity by restoring the original accepted signer through the user's secure local/private backup workflow, without placing key material in the public repository or chat. Then build PR #1 as v0.5.51/versionCode 67, verify accepted cert SHA-256 `dd588f...`, install over the existing app, and only then merge.

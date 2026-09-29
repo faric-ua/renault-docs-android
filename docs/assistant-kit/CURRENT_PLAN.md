@@ -1,0 +1,164 @@
+# Renault Docs — CURRENT PLAN
+
+Останнє оновлення: 2026-09-29.
+
+Це коротка жива точка відновлення. Історія рішень і старих інцидентів лишається в `CURRENT_HANDOFF.md` та `docs/assistant-kit/PROJECT_LEDGER.md`.
+
+## Робочі правила
+
+- Телефонний workflow — через `reno-docs` / меню Termux; ручні Git/gh/bash команди лише для аварійної діагностики або відсутньої функції меню.
+- Після кожного завершеного кроку одразу оновлювати цей файл і довготривалий handoff/ledger.
+- Не змінювати phone-accepted runtime v0.5.51 під час closeout. Новий UX — окремим follow-up після merge.
+- Не видаляти legacy `*_android` без read-only provenance/reference audit.
+
+## v0.5.51 — Kotlin-native raw Renault → .rdpkg
+
+Статус: **PHONE PASS — 2026-09-28**.
+
+Reference:
+`NT8340A · 2006-04-18`.
+
+Accepted pipeline:
+
+```text
+raw Renault SAF folder
+→ app-private normalized staging
+→ Kotlin Modern / Section IR / Runtime IR
+→ Fast Pack
+→ manifests
+→ streamed .rdpkg
+→ validation/import
+→ project upsert
+→ native reopen
+```
+
+### Accepted phone evidence
+
+- [x] Android/Kotlin raw-folder conversion only; Python/Termux не входять у production flow.
+- [x] Source count: `7653` files.
+- [x] Runtime IR: `347` native sections.
+- [x] Fast Pack: `6138` files.
+- [x] Outer package: `8012` files.
+- [x] Deterministic package SHA-256 across successful reruns:
+  `7d6cc758b329adcd1ef46680de4d9c6815ff48b053f4e3550b06dd92b229b77e`.
+- [x] Automatic `RdpkgImporter.install()` validation/import PASS.
+- [x] Existing NT8340A upserted without duplicate; project stayed at 2 volumes.
+- [x] Reopen: `NT8340A · 2006-04-18`.
+- [x] Modern: `347 · native`.
+- [x] No compatibility fallback.
+- [x] Classic remains explicit alternate mode.
+- [x] Post-completion stale Activity-result replay regression fixed and phone-verified.
+- [x] Active PREPARING lifecycle PASS: same copy run progressed `500/7653 → 1400/7653 → 2300/7653` through rotation/background/external-app handoffs.
+- [x] PREPARING Cancel PASS: source unchanged; private staging cleaned.
+- [x] Current Kotlin flow created no new public `*_android` intermediate.
+
+### Accepted candidate / CI
+
+Phone-accepted runtime source:
+`6b334eafb1fbf9dcca591fa4d1b619885f32ea4b`.
+
+CI for that candidate:
+- Tests `36370544159` — PASS;
+- Android Debug APK `36370544247` — PASS;
+- artifact `Renault-Docs-v0.5.51-Debug`, id `10948508448`;
+- APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`;
+- signer cert SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+
+## Closeout public PR #1
+
+- [x] PHONE PASS recorded in release docs, handoff and ledger.
+- [x] Reconcile PR branch with current `main` versions of shared Termux/signing infrastructure.
+- [x] Resolve merge conflicts; PR is mergeable again.
+- [x] Condense active plan and phone QA so stale PENDING chronology is not the primary source of truth.
+- [ ] Verify final branch CI after main-reconciliation/documentation cleanup.
+- [ ] Mark public PR #1 ready and merge only after final CI is green.
+- [ ] Record merged SHA / final release state in `RELEASE_META.json`, handoff and ledger.
+
+## Follow-up після merge
+
+These are accepted work items, but they must not reopen the already accepted v0.5.51 runtime before merge:
+
+1. **Terminal status dismiss UX**
+   - right-side `×` for COMPLETE / CANCELLED / FAILED;
+   - never during PREPARING / IMPORTING;
+   - hides presentation state only;
+   - does not delete package, volume, source or project data;
+   - dismissal survives Activity recreation.
+
+2. **Ukrainian wording**
+   - `Імпортую .rdpkg… 1 файлів` → `Імпортую .rdpkg… 1 файл`.
+
+3. **Legacy storage audit**
+   Existing historical folders include:
+   - `laguna 2 2001-2006_android`;
+   - `Megane II_android`;
+   - `Megane II_NT8342A_android`.
+
+   Add a read-only Termux-menu audit: path, size, modified date, likely role/reference, then classify `KEEP / LEGACY / SAFE TO REMOVE`. Delete nothing automatically.
+
+## Поточний наступний крок
+
+**На телефоні через `reno-docs`: 5 — оновити main, потім 16 — вибрати public PR #1. Пункт 16 тепер сам переходить на candidate і запускає exact stable-signed build/download через workflow_dispatch. Після PASS зафіксувати run/artifact, перевести PR #1 з draft у ready, merge і записати merged SHA.**
+
+
+### 2026-09-29 closeout checkpoint
+
+Private archive PR #138 → public continuation PR #1:
+- branch reconciled with current `main` by merge commit `6e1755a29864e33be38cd9ac6f88002d15f6c833`;
+- current head after documentation cleanup: `5e8a6bdd808d89c3c0dd08ded4ba466d89811539`;
+- compare to `main`: ahead, behind `0`;
+- PR mergeable: yes;
+- no Android runtime Kotlin/Java source changed after the phone-accepted runtime source `6b334e...`; post-acceptance Android-side delta is build/signing configuration only.
+
+Final CI still needs an exact build of the reconciled head before merge.
+
+
+### 2026-09-29 wrong-main build finding
+
+A closeout attempt accidentally ran menu item 7 while the phone clone was still on public `main`.
+
+Observed:
+- branch: `main`;
+- commit: `97a5c6e29bd939197784f9ffced09161f5876bb2`;
+- version: `v0.5.50`;
+- run: `36580219193` — build PASS;
+- installer reported `Додаток не встановлено`.
+
+This APK is not the v0.5.51 candidate and must not be used for closeout. The installed phone candidate is v0.5.51/versionCode 67, while public main is v0.5.50/versionCode 66, so attempting to install the main APK is a downgrade and Android may reject it.
+
+Root workflow correction:
+- public clean-history PR #1 now contains the v0.5.51 accepted delta;
+- menu item 16 now switches to the selected PR branch **and triggers a fresh stable-signed workflow_dispatch build**, instead of downloading an arbitrary existing PR artifact;
+- do not use item 7 from `main` for v0.5.51 closeout.
+
+
+### 2026-09-29 signing continuity blocker
+
+Public PR #1 CI is green on head `266840f5182f1c49a4b84673592367744f09e77e`:
+- Tests `36583494822` — PASS;
+- Android Debug APK `36583494741` — PASS.
+
+However merge/install closeout is blocked by signing identity continuity.
+
+Evidence:
+- phone-accepted v0.5.51/private candidate signer SHA-1:
+  `4102350e2787fd538bbf58a219293a132235e618`;
+- public main v0.5.50 run `36580219193` signer SHA-1:
+  `aa91096d3699a62c0d6e4d4306064068e67fda0d`;
+- accepted signer certificate SHA-256:
+  `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
+
+The failed phone install was therefore not a valid v0.5.51 closeout check:
+- it built `main` v0.5.50 / versionCode 66 while v0.5.51 / versionCode 67 is installed;
+- the public migration also changed the development signing identity.
+
+Do **not** uninstall/reset the accepted phone app and do **not** merge v0.5.51 until signing continuity is resolved deliberately.
+
+Preferred next step:
+restore the original accepted signing identity to the public build/secrets using the user's own secure local/private backup process (never commit or expose the private key), then build public PR #1 and verify:
+- versionName `0.5.51`;
+- versionCode `67`;
+- signer certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- install succeeds over the existing phone app without uninstall/data reset.
+
+Only after that: mark PR #1 ready and merge.

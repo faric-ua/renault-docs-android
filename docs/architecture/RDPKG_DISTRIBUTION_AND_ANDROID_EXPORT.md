@@ -155,3 +155,38 @@ If the destination write fails or is cancelled, the installed source remains unt
 v0.5.50 fast export supports volumes installed into Renault Docs managed storage from `.rdpkg`.
 
 Legacy/reference SAF folder volumes remain readable, but converting those folders into a fresh `.rdpkg` is a later Kotlin-converter stage.
+## v0.5.51 Kotlin-native preparation foundation
+
+The next stage is no longer described only as a future converter. The canonical design is now:
+
+```text
+raw Renault SAF folder
+   ↓
+single metadata scan
+   ↓
+single copy/patch into app-private staging
+   ↓
+Kotlin Modern compiler
+   ↓
+native sections + Runtime IR shards/index + coverage
+   ↓
+Fast Pack
+   ↓
+rdpkg.json + renault-dataset.json
+   ↓
+stream .rdpkg + SHA-256 during write
+```
+
+The primary end-user flow must not create a public `*_android` directory. Temporary staging is private implementation storage used to avoid repeated SAF/provider reads.
+
+v0.5.51 foundation introduces:
+- `RdpkgZipWriter` — shared deterministic streaming outer-package writer;
+- SHA-256 through `DigestOutputStream`, without a second full package pass;
+- text/metadata entries at `Deflater.BEST_SPEED`;
+- binary/already-compressed entries at `Deflater.NO_COMPRESSION`;
+- `NativeFastPackWriter` — Kotlin File-based Fast Pack writer with streaming SHA-256 and Python-equivalent file-selection rules.
+
+The full raw-folder compiler is not claimed complete by this foundation. The remaining parity work is the Kotlin port of section discovery, Section IR, Runtime IR shards/index, and coverage.
+
+Canonical detailed design:
+- `docs/architecture/KOTLIN_NATIVE_RAW_TO_RDPKG.md`.
