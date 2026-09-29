@@ -13,7 +13,7 @@
 
 ## v0.5.51 — Kotlin-native raw Renault → .rdpkg
 
-Статус: **PHONE PASS — 2026-09-28**.
+Статус: **PHONE PASS + MERGED — 2026-09-29**.
 
 Reference:
 `NT8340A · 2006-04-18`.
@@ -70,9 +70,12 @@ CI for that candidate:
 - [x] Reconcile PR branch with current `main` versions of shared Termux/signing infrastructure.
 - [x] Resolve merge conflicts; PR is mergeable again.
 - [x] Condense active plan and phone QA so stale PENDING chronology is not the primary source of truth.
-- [ ] Verify final branch CI after main-reconciliation/documentation cleanup.
-- [ ] Mark public PR #1 ready and merge only after final CI is green.
-- [ ] Record merged SHA / final release state in `RELEASE_META.json`, handoff and ledger.
+- [x] Public Tests CI on final PR head — PASS.
+- [x] Public Android Debug CI on final PR head — PASS.
+- [x] Public PR #1 marked ready and squash-merged.
+- [x] Merged SHA: `921e87f728a222e8f388a01ad989b082a7bd8894`.
+- [x] Merge state recorded in release metadata.
+- [ ] Restore/verify development signer continuity before asking the user to install a new public-main APK over the accepted phone app.
 
 ## Follow-up після merge
 
@@ -98,67 +101,8 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Поточний наступний крок
 
-**На телефоні через `reno-docs`: 5 — оновити main, потім 16 — вибрати public PR #1. Пункт 16 тепер сам переходить на candidate і запускає exact stable-signed build/download через workflow_dispatch. Після PASS зафіксувати run/artifact, перевести PR #1 з draft у ready, merge і записати merged SHA.**
+**Signing continuity only. Do not ask the user to reinstall or uninstall Renault Docs yet. First verify that the secure local/private development signer available for the public repo matches accepted certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`. After that, build public `main` v0.5.51 and verify it installs as an update over the existing app without data reset.**
 
-
-### 2026-09-29 closeout checkpoint
-
-Private archive PR #138 → public continuation PR #1:
-- branch reconciled with current `main` by merge commit `6e1755a29864e33be38cd9ac6f88002d15f6c833`;
-- current head after documentation cleanup: `5e8a6bdd808d89c3c0dd08ded4ba466d89811539`;
-- compare to `main`: ahead, behind `0`;
-- PR mergeable: yes;
-- no Android runtime Kotlin/Java source changed after the phone-accepted runtime source `6b334e...`; post-acceptance Android-side delta is build/signing configuration only.
-
-Final CI still needs an exact build of the reconciled head before merge.
-
-
-### 2026-09-29 wrong-main build finding
-
-A closeout attempt accidentally ran menu item 7 while the phone clone was still on public `main`.
-
-Observed:
-- branch: `main`;
-- commit: `97a5c6e29bd939197784f9ffced09161f5876bb2`;
-- version: `v0.5.50`;
-- run: `36580219193` — build PASS;
-- installer reported `Додаток не встановлено`.
-
-This APK is not the v0.5.51 candidate and must not be used for closeout. The installed phone candidate is v0.5.51/versionCode 67, while public main is v0.5.50/versionCode 66, so attempting to install the main APK is a downgrade and Android may reject it.
-
-Root workflow correction:
-- public clean-history PR #1 now contains the v0.5.51 accepted delta;
-- menu item 16 now switches to the selected PR branch **and triggers a fresh stable-signed workflow_dispatch build**, instead of downloading an arbitrary existing PR artifact;
-- do not use item 7 from `main` for v0.5.51 closeout.
-
-
-### 2026-09-29 signing continuity blocker
-
-Public PR #1 CI is green on head `266840f5182f1c49a4b84673592367744f09e77e`:
-- Tests `36583494822` — PASS;
-- Android Debug APK `36583494741` — PASS.
-
-However merge/install closeout is blocked by signing identity continuity.
-
-Evidence:
-- phone-accepted v0.5.51/private candidate signer SHA-1:
-  `4102350e2787fd538bbf58a219293a132235e618`;
-- public main v0.5.50 run `36580219193` signer SHA-1:
-  `aa91096d3699a62c0d6e4d4306064068e67fda0d`;
-- accepted signer certificate SHA-256:
-  `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`.
-
-The failed phone install was therefore not a valid v0.5.51 closeout check:
-- it built `main` v0.5.50 / versionCode 66 while v0.5.51 / versionCode 67 is installed;
-- the public migration also changed the development signing identity.
-
-Do **not** uninstall/reset the accepted phone app and do **not** merge v0.5.51 until signing continuity is resolved deliberately.
-
-Preferred next step:
-restore the original accepted signing identity to the public build/secrets using the user's own secure local/private backup process (never commit or expose the private key), then build public PR #1 and verify:
-- versionName `0.5.51`;
-- versionCode `67`;
-- signer certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
-- install succeeds over the existing phone app without uninstall/data reset.
-
-Only after that: mark PR #1 ready and merge.
+Project separation:
+- Renault Docs: continue only from this checkpoint.
+- YTM importer: separate project; do not mix branches, menus, artifacts or QA evidence.
