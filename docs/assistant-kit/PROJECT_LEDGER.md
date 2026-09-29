@@ -1471,3 +1471,18 @@ Evidence:
 - artifact id `11050306597`.
 
 Only the final in-place installation/data-preservation phone check remains for distribution closeout.
+
+
+### v0.5.51 distribution closeout complete
+
+The signer-continuity migration is complete and verified on phone.
+
+Final acceptance:
+- exact trusted public-main APK installed in-place over the existing app;
+- no uninstall/data reset;
+- app reopened as `v0.5.51`;
+- Megane II remained present with `Томів: 2`;
+- existing project state was preserved.
+
+Status:
+**v0.5.51 READY / CLOSED — 2026-09-29**.
