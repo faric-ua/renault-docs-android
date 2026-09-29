@@ -22,6 +22,8 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('bash "$REPO/tools/termux/reno-open-latest-apk.sh"', text)
         self.assertIn('14 — Швидкий конвертер (Termux/direct filesystem)', text)
         self.assertIn('bash "$REPO/tools/termux/reno-fast-convert.sh"', text)
+        self.assertIn('19 — Статус проєкту / build', text)
+        self.assertIn('bash "$REPO/tools/termux/reno-project-status.sh"', text)
         self.assertNotIn('Phone Diagnostics Menu', text)
 
     def test_renault_operational_paths_use_private_termux_checkout(self):
@@ -192,6 +194,7 @@ class TermuxMenuContractTests(unittest.TestCase):
             repo / "tools" / "termux" / "reno-build-apk.sh",
             repo / "tools" / "termux" / "reno-download-apk.sh",
             repo / "tools" / "termux" / "reno-candidate.sh",
+            repo / "tools" / "termux" / "reno-project-status.sh",
         ]
 
         for script in scripts:
@@ -216,6 +219,21 @@ class TermuxMenuContractTests(unittest.TestCase):
             text = (repo / "tools" / "termux" / name).read_text(encoding="utf-8")
             self.assertIn('GH_REPO="$(reno_github_repo)"', text)
             self.assertNotIn('GH_REPO="faric-ua/renault-docs-android"', text)
+
+
+    def test_project_status_helper_shows_project_and_build_state(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "reno-project-status.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("Renault Docs · Status", text)
+        self.assertIn("CURRENT_PLAN.md", text)
+        self.assertIn("RELEASE_META.json", text)
+        self.assertIn('show_workflow "  Android Debug APK" "android-debug.yml"', text)
+        self.assertIn('show_workflow "  Tests" "tests.yml"', text)
+        self.assertIn("SIGNER_CONTINUITY_PENDING", text)
+        self.assertIn("PASS build ≠ готовність до встановлення.", text)
 
 
 if __name__ == "__main__":
