@@ -1411,3 +1411,19 @@ Historical `Documents/Renault/*_android` folders remain outside this acceptance 
 
 Status:
 **v0.5.51 PHONE PASS — 2026-09-28.**
+
+
+### v0.5.51 merged to public main
+
+Public PR #1 was merged as:
+`921e87f728a222e8f388a01ad989b082a7bd8894`.
+
+The release remains PHONE PASS for the Kotlin-native raw NT8340A → `.rdpkg` behavior.
+
+Post-merge distribution work is limited to development signer continuity:
+- accepted cert SHA-256:
+  `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
+- verify/restore the same secure signer for public-main builds;
+- then prove a public-main v0.5.51 APK updates the existing installed app without uninstall/data reset.
+
+Do not conflate this signing/distribution check with app runtime QA, which is already PHONE PASS.
