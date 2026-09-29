@@ -191,3 +191,27 @@ Final v0.5.51 distribution verdict:
 
 All v0.5.51 gates are now closed:
 runtime PHONE PASS, merge, signer continuity, trusted public-main build, exact APK identity, in-place update, and data preservation.
+
+
+## v0.5.52 — terminal status polish
+
+Status: **IMPLEMENTED / CI PENDING**.
+
+Scope:
+- [x] version bump to `0.5.52` / code `68`;
+- [x] terminal native-run status gets a right-side `×`;
+- [x] `×` is shown only for COMPLETE / CANCELLED / FAILED;
+- [x] active PREPARING / IMPORTING hides the terminal row;
+- [x] dismissal persists across Activity recreation by storing the dismissed `finishedAtMs`;
+- [x] dismissal hides presentation only; package/project/source/run metadata is preserved;
+- [x] new user run clears old dismissal state;
+- [x] `1 файлів` replaced by proper Ukrainian forms: `1 файл`, `2–4 файли`, `5+ файлів`, including 11–14 exception;
+- [x] JVM wording test added;
+- [x] v0.5.52 contract test added;
+- [ ] Tests CI PASS;
+- [ ] Android Debug APK CI PASS;
+- [ ] short phone UX check: terminal `×` dismisses and stays dismissed after rotation/reopen; active run has no `×`.
+
+## Поточний наступний крок v0.5.52
+
+**Run CI on `feat/v0.5.52-terminal-status-polish`. If green, build the candidate and give the user one short phone check only; do not repeat NT8340A end-to-end acceptance.**
