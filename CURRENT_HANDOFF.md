@@ -4044,3 +4044,19 @@ Then it launches an exact public-main build.
 Next user action:
 `reno-docs → 5 → 20`.
 Do not uninstall Renault Docs. After the build, capture the final output before attempting installation.
+
+
+### Signing workflow hardened — 2026-09-29
+
+Merged:
+`5aa665756e7b44de3dbb90bff2250d4bbe30596b`.
+
+The Android Debug signing workflow no longer has an automatic `pull_request` trigger.
+Accepted signing secrets are restricted to trusted execution paths:
+- main push;
+- explicit manual workflow dispatch.
+
+Separate Python/contract Tests still run on PRs.
+
+Next user step:
+`reno-docs → 5 → 20`, then return the full signer-restore/build output before installing the APK.
