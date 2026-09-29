@@ -46,3 +46,7 @@ docs/v.0.5.14/qa/PHONE_TEST.md
 docs/v.0.5.15/RELEASE.md
 docs/v.0.5.15/qa/PHONE_TEST.md
 docs/architecture/RDPKG_DISTRIBUTION_AND_ANDROID_EXPORT.md
+docs/architecture/KOTLIN_NATIVE_RAW_TO_RDPKG.md
+docs/assistant-kit/CURRENT_PLAN.md
+docs/v.0.5.51/RELEASE.md
+docs/v.0.5.51/qa/PHONE_TEST.md
