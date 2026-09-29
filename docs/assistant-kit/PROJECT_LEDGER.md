@@ -1538,3 +1538,26 @@ Status:
 
 Next work:
 read-only provenance/reference audit of historical public `Documents/Renault/*_android` folders. Delete nothing automatically.
+
+
+### Read-only legacy `*_android` audit tooling
+
+A dedicated Termux helper was added for the next storage-hygiene stage.
+
+Contract:
+- scan only top-level `Documents/Renault/*_android` folders;
+- report path, size, file count, modified date, dataset/.nomedia markers and repository references;
+- configured active `build_root` is `KEEP`;
+- all other unknown folders default conservatively to `LEGACY`;
+- `LEGACY` explicitly does not mean `SAFE TO REMOVE`;
+- no automatic deletion/move/rename;
+- Termux cannot by itself prove absence of app-private/SAF references, so actual deletion decisions require a second review of the real phone output.
+
+User-facing entry:
+`21 — Аудит legacy *_android (read-only)`.
+
+Validation:
+Tests run `36643121485` — PASS.
+
+Next gate:
+run item 21 on the real phone and classify each returned folder. Delete nothing before that review.
