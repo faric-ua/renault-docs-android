@@ -353,8 +353,9 @@ object RdpkgImporter {
                 ) {
                     progress?.invoke(
                         "Імпортую .rdpkg… " +
-                            fileCount +
-                            " файлів",
+                            ukrainianFileCount(
+                                fileCount,
+                            ),
                     )
                 }
 
@@ -375,6 +376,39 @@ object RdpkgImporter {
             bytes =
                 bytes,
         )
+    }
+
+    private fun ukrainianFileCount(
+        count: Int,
+    ): String {
+        val lastTwo =
+            count %
+                100
+
+        val noun =
+            when {
+                lastTwo in
+                    11..14 ->
+                    "файлів"
+
+                count %
+                    10 ==
+                    1 ->
+                    "файл"
+
+                count %
+                    10 in
+                    2..4 ->
+                    "файли"
+
+                else ->
+                    "файлів"
+            }
+
+        return count
+            .toString() +
+            " " +
+            noun
     }
 
     private fun readPackageMetadata(
