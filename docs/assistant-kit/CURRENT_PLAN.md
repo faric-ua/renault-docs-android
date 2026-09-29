@@ -7,6 +7,7 @@
 ## Робочі правила
 
 - Телефонний workflow — через `reno-docs` / меню Termux; ручні Git/gh/bash команди лише для аварійної діагностики або відсутньої функції меню.
+- Menu item 19 — `Статус проєкту / build` — є read-only self-check: version/branch/commit, CURRENT_PLAN status/next step, release QA/delivery, latest Android Debug and Tests runs.
 - Після кожного завершеного кроку одразу оновлювати цей файл і довготривалий handoff/ledger.
 - Не змінювати phone-accepted runtime v0.5.51 під час closeout. Новий UX — окремим follow-up після merge.
 - Не видаляти legacy `*_android` без read-only provenance/reference audit.
