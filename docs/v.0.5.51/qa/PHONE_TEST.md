@@ -34,6 +34,7 @@ Fixed candidate:
 
 Phone evidence:
 - post-completion: rotation, leaving Renault Docs and switching between apps did not restart conversion;
+- active lifecycle action: rotate portrait → landscape → portrait, then Home/background and return;
 - active PREPARING: the same copy operation continued
   `500/7653 → 1400/7653 → 2300/7653`
   through rotation/background/external-app handoffs;
