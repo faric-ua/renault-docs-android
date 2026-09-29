@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 import unittest
 
 
@@ -40,13 +39,16 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         self.assertIn(".commit()", self.run_store)
 
     def test_active_run_never_exposes_terminal_dismiss_row(self):
-        running_block = re.search(
-            r"if \(\s*state\.isRunning\s*\) \{(?P<body>.*?)\n\s*\}",
-            self.project,
-            flags=re.S,
-        )
-        self.assertIsNotNone(running_block)
-        self.assertIn("hideNativeTerminalStatus()", running_block.group("body"))
+        refresh = self.project.split(
+            "private fun refreshNativeRunState()",
+            1,
+        )[1].split(
+            "private fun showNativeTerminalStatus",
+            1,
+        )[0]
+
+        self.assertIn("state.isRunning", refresh)
+        self.assertIn("hideNativeTerminalStatus()", refresh)
 
     def test_dismissed_terminal_state_is_not_restored_after_recreation(self):
         self.assertIn("if (\n            state.isTerminalDismissed", self.project)
