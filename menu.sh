@@ -234,6 +234,12 @@ show_project_status() {
   pause_menu
 }
 
+restore_accepted_signer() {
+  clear
+  bash "$REPO/tools/termux/reno-restore-accepted-signer.sh"
+  pause_menu
+}
+
 refresh_termux_integration() {
   clear
   echo "Оновлюю Renault aliases та Termux:Widget shortcut..."
@@ -291,6 +297,7 @@ while true; do
   echo "17 — Повернутися на main"
   echo "18 — Оновити Termux aliases / Widget"
   echo "19 — Статус проєкту / build"
+  echo "20 — Відновити accepted signer + build"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -354,6 +361,9 @@ while true; do
       ;;
     19)
       show_project_status
+      ;;
+    20)
+      restore_accepted_signer
       ;;
     0)
       clear
