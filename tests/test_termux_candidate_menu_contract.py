@@ -23,7 +23,7 @@ class TermuxCandidateMenuContractTests(unittest.TestCase):
     def test_menu_exposes_candidate_and_return_to_main(self):
         menu = self._read("menu.sh")
 
-        self.assertIn("16 — Тестовий candidate PR: вибрати + завантажити APK", menu)
+        self.assertIn("16 — Тестовий candidate PR: перейти + build/download APK", menu)
         self.assertIn("17 — Повернутися на main", menu)
         self.assertIn('bash "$REPO/tools/termux/reno-candidate.sh"', menu)
 
@@ -58,7 +58,8 @@ class TermuxCandidateMenuContractTests(unittest.TestCase):
             'git merge --ff-only "$REMOTE_REF"',
             script,
         )
-        self.assertIn('reno-download-apk.sh', script)
+        self.assertIn('reno-build-apk.sh', script)
+        self.assertNotIn('exec bash "$REPO_DIR/tools/termux/reno-download-apk.sh"', script)
         self.assertIn('git write-tree', script)
         self.assertIn('git rev-parse "$REMOTE_REF^{tree}"', script)
         self.assertIn('git reset --hard HEAD', script)
