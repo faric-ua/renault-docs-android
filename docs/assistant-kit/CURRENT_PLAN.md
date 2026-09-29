@@ -195,33 +195,34 @@ runtime PHONE PASS, merge, signer continuity, trusted public-main build, exact A
 
 ## v0.5.52 — terminal status polish
 
-Status: **PHONE PASS / READY TO MERGE — 2026-09-30**.
+Status: **READY / CLOSED — 2026-09-30**.
 
-Final accepted source:
+Phone-accepted source:
 `8a364ef9e50d0bd81273e9d419321284abdfed03`.
 
-Scope:
-- [x] version `0.5.52` / code `68`;
-- [x] terminal COMPLETE / CANCELLED / FAILED status gets a right-side `×`;
-- [x] active PREPARING / IMPORTING never shows the terminal dismiss `×`;
-- [x] terminal dismissal survives rotation and ProjectActivity reopen;
-- [x] dismissal is presentation-only and preserves project/package/source/run data;
-- [x] Ukrainian file-count wording uses `1 файл`, `2–4 файли`, `5+ файлів`, including 11–14;
-- [x] active native progress dialog live-updates from the persisted run state every 750 ms;
-- [x] when the run leaves active state, the progress dialog closes and terminal presentation takes over;
-- [x] Tests PASS — run `36639849368`;
-- [x] Android PR Check PASS — run `36639849222`;
-- [x] final stable-signed candidate PASS — run `36640408798`;
-- [x] final candidate APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`;
+Merged public main:
+`31c26e9c24abab6fb491f8aa9290c5395112a2ca`.
+
+Accepted:
+- [x] terminal COMPLETE / CANCELLED / FAILED status has right-side `×`;
+- [x] active PREPARING / IMPORTING never shows terminal dismiss `×`;
+- [x] dismissal survives rotation and ProjectActivity reopen;
+- [x] dismissal is presentation-only;
+- [x] Ukrainian file-count wording fixed;
+- [x] open native preparation dialog live-updates progress every 750 ms;
+- [x] candidate Tests `36639849368` PASS;
+- [x] candidate Android PR Check `36639849222` PASS;
+- [x] trusted candidate build `36640408798` PASS;
+- [x] phone acceptance PASS, including live progress;
+- [x] PR #6 squash-merged;
+- [x] public-main Tests `36642605889` PASS;
+- [x] public-main Android Debug `36642605895` PASS;
+- [x] public-main artifact id `11067202339`;
 - [x] stable signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
-- [x] real-phone in-place update preserved Megane II with 2 volumes plus Laguna II and Kangoo II;
-- [x] real-phone terminal `×` dismiss PASS;
-- [x] dismissal persistence through repeated rotation and reopen PASS;
-- [x] active PREPARING has no `×` PASS;
-- [x] PREPARING cancel -> terminal CANCELLED row PASS;
-- [x] live progress inside the already-open dialog PASS.
+- [x] public-main APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`;
+- [x] public-main APK is byte-for-byte identical to the already installed and phone-accepted final candidate, so a redundant reinstall adds no new binary evidence.
 
-## Поточний наступний крок v0.5.52
+## Поточний наступний крок
 
-**Merge PR #6 to `main`, verify trusted public-main build/signer, then perform one final in-place install/data-preservation smoke check. After v0.5.52 closeout, move to the read-only legacy `*_android` storage audit.**
+**v0.5.52 CLOSED. Start the read-only provenance/reference audit of historical `Documents/Renault/*_android` folders. Delete nothing automatically.**
 
