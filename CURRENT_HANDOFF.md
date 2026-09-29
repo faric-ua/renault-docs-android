@@ -3981,3 +3981,20 @@ item 16 now selects/switches the public PR branch and launches `reno-build-apk.s
 
 Next phone action after PR CI is green:
 `reno-docs` → 5 (update main) → 16 → select PR #1.
+
+
+### Public signing continuity blocker — 2026-09-29
+
+Public continuation PR #1 is mergeable and CI-green at `266840f5182f1c49a4b84673592367744f09e77e`:
+Tests `36583494822` PASS; Android Debug `36583494741` PASS.
+
+Do not merge yet.
+
+The phone's accepted v0.5.51 build and the new public repository build use different development signing identities:
+- accepted/private signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
+- public signer SHA-1 `aa91096d3699a62c0d6e4d4306064068e67fda0d`.
+
+The user accidentally built public `main` v0.5.50/versionCode 66 (run `36580219193`) and Android showed `Додаток не встановлено`. That attempt had both a version downgrade and signer mismatch.
+
+Release-safe path:
+preserve update/data continuity by restoring the original accepted signer through the user's secure local/private backup workflow, without placing key material in the public repository or chat. Then build PR #1 as v0.5.51/versionCode 67, verify accepted cert SHA-256 `dd588f...`, install over the existing app, and only then merge.
