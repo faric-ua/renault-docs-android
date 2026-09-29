@@ -103,126 +103,21 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
    Add a read-only Termux-menu audit: path, size, modified date, likely role/reference, then classify `KEEP / LEGACY / SAFE TO REMOVE`. Delete nothing automatically.
 
-## Поточний наступний крок
+## Legacy `*_android` storage audit
 
-**v0.5.51 CLOSED. Наступний окремий patch: terminal COMPLETE/CANCELLED/FAILED dismiss `×` + українське `1 файл` замість `1 файлів`. Після цього — read-only audit legacy `*_android` storage.**
+Status: **IMPLEMENTED / CI PENDING**.
 
-
-Project separation:
-- Renault Docs: continue only from this checkpoint.
-- YTM importer: separate project; do not mix branches, menus, artifacts or QA evidence.
-
-
-### 2026-09-29 signer restore helper
-
-Merged helper:
-`239663c4577c2e4d279a4052f1b0ac460b19bf9d`.
-
-Renault Menu item `20 — Відновити accepted signer + build`:
-- fetches the accepted signer only from the private archive at pinned ref;
-- verifies keystore SHA-256 `7944e7d78bd2442021731a4cfd3105c06f475c13d70d4195b2378539604dfd10`;
-- verifies certificate SHA-256 `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
-- writes public GitHub Actions Secrets without printing secret values;
-- then launches exact main Android build/download.
-
-User action is now explicit and phone-side; no manual secret copy/paste is required.
-
-
-### 2026-09-29 signing workflow hardening
-
-Security hardening merged as:
-`5aa665756e7b44de3dbb90bff2250d4bbe30596b`.
-
-Android Debug signing workflow no longer runs automatically on pull requests.
-Stable development signing secrets are now reachable only from:
-- push to `main`;
-- explicit `workflow_dispatch`.
-
-PRs keep using the separate Tests workflow and cannot trigger the signing workflow automatically.
-
-This closes the previously identified unnecessary PR secret exposure path.
-
-User action remains:
-`reno-docs → 5 → 20`.
-Do not install the resulting APK until its signer/build output is reviewed.
-
-
-### 2026-09-29 pre-signer-update phone baseline
-
-Phone screenshot before the signer-continuity install check confirms:
-- currently installed Renault Docs reports `v0.5.51`;
-- Megane II project is present with `2` volumes;
-- Laguna II and Kangoo II placeholder projects remain present;
-- app data is intact before attempting any new public-main APK update.
-
-This screenshot is a baseline only; it does not identify the APK signer by itself.
-
-Next user action remains:
-`reno-docs → 5 → 20`, then return the complete restore/build output before installing the generated APK.
-
-
-### 2026-09-29 signer continuity verified
-
-Exact trusted public-main build:
-- commit `fc7ffc6a7deda7074e5d6b2e631380fd923401c0`;
-- Android Debug run `36603132862` — PASS;
-- artifact id `11050306597`;
-- signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
-- accepted signer SHA-256 verified by workflow: `dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802`;
-- APK SHA-256 `7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48`;
-- artifact ZIP SHA-256 `ddf9eb0ee9ef53e31ce997d157855c6bb3b1d7111cc1e662686039ddc4f55bb2`.
-
-Important:
-the public-main APK SHA-256 is exactly the same as the already phone-accepted v0.5.51 candidate APK. Signing continuity and APK identity are therefore cryptographically confirmed. Only the final Android in-place install/data-preservation check remains.
-
-
-### 2026-09-29 final in-place install PASS
-
-Post-install phone screenshot confirms the exact public-main v0.5.51 update preserved application state:
-- app opens as `v0.5.51`;
-- `Megane II` remains present;
-- `Томів: 2` remains present;
-- Laguna II and Kangoo II placeholder projects remain present.
-
-No uninstall/data reset was used for this acceptance check.
-
-Final v0.5.51 distribution verdict:
-**READY / CLOSED**.
-
-All v0.5.51 gates are now closed:
-runtime PHONE PASS, merge, signer continuity, trusted public-main build, exact APK identity, in-place update, and data preservation.
-
-
-## v0.5.52 — terminal status polish
-
-Status: **READY / CLOSED — 2026-09-30**.
-
-Phone-accepted source:
-`8a364ef9e50d0bd81273e9d419321284abdfed03`.
-
-Merged public main:
-`31c26e9c24abab6fb491f8aa9290c5395112a2ca`.
-
-Accepted:
-- [x] terminal COMPLETE / CANCELLED / FAILED status has right-side `×`;
-- [x] active PREPARING / IMPORTING never shows terminal dismiss `×`;
-- [x] dismissal survives rotation and ProjectActivity reopen;
-- [x] dismissal is presentation-only;
-- [x] Ukrainian file-count wording fixed;
-- [x] open native preparation dialog live-updates progress every 750 ms;
-- [x] candidate Tests `36639849368` PASS;
-- [x] candidate Android PR Check `36639849222` PASS;
-- [x] trusted candidate build `36640408798` PASS;
-- [x] phone acceptance PASS, including live progress;
-- [x] PR #6 squash-merged;
-- [x] public-main Tests `36642605889` PASS;
-- [x] public-main Android Debug `36642605895` PASS;
-- [x] public-main artifact id `11067202339`;
-- [x] stable signer SHA-1 `4102350e2787fd538bbf58a219293a132235e618`;
-- [x] public-main APK SHA-256 `2a2fc9c952ac24c11b3022786b1f6e1eccd98c5a595532317f15f080d01797aa`;
-- [x] public-main APK is byte-for-byte identical to the already installed and phone-accepted final candidate, so a redundant reinstall adds no new binary evidence.
+Scope:
+- [x] read-only Termux helper scans top-level `Documents/Renault/*_android` folders;
+- [x] reports path, size, file count, modified time, dataset/.nomedia markers and repo references;
+- [x] marks active configured `build_root` as `KEEP`;
+- [x] other folders default conservatively to `LEGACY`;
+- [x] never auto-promotes unknown folders to `SAFE TO REMOVE`;
+- [x] explicitly warns that `LEGACY ≠ SAFE TO REMOVE` because Termux cannot prove absence of app-private/SAF references;
+- [x] Renault Menu item `21 — Аудит legacy *_android (read-only)`;
+- [x] automated contract test forbids destructive helpers/commands.
 
 ## Поточний наступний крок
 
-**v0.5.52 CLOSED. Start the read-only provenance/reference audit of historical `Documents/Renault/*_android` folders. Delete nothing automatically.**
+**Run CI for `tooling/legacy-android-audit`. If green, merge the tooling PR, update phone repo to `main`, run menu item 21, then classify the real folders from its output. Delete nothing automatically.**
 
