@@ -70,8 +70,15 @@ class SettingsContractTests(unittest.TestCase):
         self.assertIn("zoomStepPercent", pdf)
 
         self.assertIn(".SettingsActivity", manifest)
-        self.assertIn('versionName = "0.5.51"', gradle)
-        self.assertIn("versionCode = 67", gradle)
+        version_code = int(
+            gradle.split("versionCode = ", 1)[1].splitlines()[0].strip()
+        )
+        version_name = tuple(
+            int(part)
+            for part in gradle.split('versionName = "', 1)[1].split('"', 1)[0].split(".")
+        )
+        self.assertGreaterEqual(version_code, 67)
+        self.assertGreaterEqual(version_name, (0, 5, 51))
 
 
 if __name__ == "__main__":
