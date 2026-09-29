@@ -45,6 +45,9 @@ class ProjectActivity : Activity() {
         null
     private var lastShownNativeFinishedAt =
         0L
+    private var nativeRunProgressDialog:
+        AlertDialog? =
+        null
     private val nativeRunHandler by lazy {
         Handler(
             Looper.getMainLooper(),
@@ -713,40 +716,45 @@ class ProjectActivity : Activity() {
         }
     }
 
-    private fun startNativeRdpkgFlow() {
-        val state =
-            nativeRunStore.load()
+    private fun showNativeRunProgressDialog(
+        state: NativeRdpkgRunState,
+    ) {
+        dismissNativeRunProgressDialog()
+
+        val builder =
+            AlertDialog.Builder(
+                this,
+            )
+                .setTitle(
+                    "Підготовка .rdpkg виконується",
+                )
+                .setMessage(
+                    state.message
+                        .ifBlank {
+                            "Операція працює у фоні."
+                        },
+                )
+                .setNegativeButton(
+                    "Закрити",
+                    null,
+                )
 
         if (
-            state.isRunning
+            state.phase ==
+            NativeRdpkgRunPhase.PREPARING
         ) {
-            val dialog =
-                AlertDialog.Builder(
-                    this,
-                )
-                    .setTitle(
-                        "Підготовка .rdpkg виконується",
-                    )
-                    .setMessage(
-                        state.message
-                            .ifBlank {
-                                "Операція працює у фоні."
-                            },
-                    )
-                    .setNegativeButton(
-                        "Закрити",
-                        null,
-                    )
-
-            if (
-                state.phase ==
-                NativeRdpkgRunPhase.PREPARING
+            builder.setPositiveButton(
+                "Скасувати",
             ) {
-                dialog.setPositiveButton(
-                    "Скасувати",
+                _,
+                _ ->
+                val latestState =
+                    nativeRunStore.load()
+
+                if (
+                    latestState.phase ==
+                    NativeRdpkgRunPhase.PREPARING
                 ) {
-                    _,
-                    _ ->
                     NativeRdpkgPreparationService
                         .requestCancel(
                             this,
@@ -756,9 +764,96 @@ class ProjectActivity : Activity() {
                         "Запит на скасування надіслано…"
                 }
             }
+        }
 
-            dialog.show()
+        val dialog =
+            builder.create()
 
+        dialog.setOnDismissListener {
+            if (
+                nativeRunProgressDialog ===
+                dialog
+            ) {
+                nativeRunProgressDialog =
+                    null
+            }
+        }
+
+        nativeRunProgressDialog =
+            dialog
+        dialog.show()
+
+        updateNativeRunProgressDialog(
+            state,
+        )
+    }
+
+    private fun updateNativeRunProgressDialog(
+        state: NativeRdpkgRunState,
+    ) {
+        val dialog =
+            nativeRunProgressDialog
+                ?: return
+
+        if (
+            !dialog.isShowing
+        ) {
+            return
+        }
+
+        if (
+            !state.isRunning
+        ) {
+            dismissNativeRunProgressDialog()
+            return
+        }
+
+        dialog.setMessage(
+            state.message
+                .ifBlank {
+                    "Kotlin-native .rdpkg підготовка виконується…"
+                },
+        )
+
+        dialog.getButton(
+            AlertDialog.BUTTON_POSITIVE,
+        )
+            ?.visibility =
+            if (
+                state.phase ==
+                NativeRdpkgRunPhase.PREPARING
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+    }
+
+    private fun dismissNativeRunProgressDialog() {
+        val dialog =
+            nativeRunProgressDialog
+
+        nativeRunProgressDialog =
+            null
+
+        if (
+            dialog?.isShowing ==
+            true
+        ) {
+            dialog.dismiss()
+        }
+    }
+
+    private fun startNativeRdpkgFlow() {
+        val state =
+            nativeRunStore.load()
+
+        if (
+            state.isRunning
+        ) {
+            showNativeRunProgressDialog(
+                state,
+            )
             return
         }
 
@@ -849,6 +944,7 @@ class ProjectActivity : Activity() {
             state.projectId !=
             project.id
         ) {
+            dismissNativeRunProgressDialog()
             hideNativeTerminalStatus()
             return
         }
@@ -857,6 +953,9 @@ class ProjectActivity : Activity() {
             state.isRunning
         ) {
             hideNativeTerminalStatus()
+            updateNativeRunProgressDialog(
+                state,
+            )
 
             val serviceActive =
                 NativeRdpkgPreparationService
@@ -885,6 +984,8 @@ class ProjectActivity : Activity() {
                     }
             return
         }
+
+        dismissNativeRunProgressDialog()
 
         if (
             !state.isTerminal ||
