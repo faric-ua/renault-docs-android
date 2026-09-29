@@ -11,10 +11,14 @@ class V0550NativeRdpkgExportContractTests(unittest.TestCase):
         exporter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/RdpkgExporter.kt"
         )
+        writer = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgZipWriter.kt"
+        )
 
-        self.assertIn("ZipOutputStream(", exporter)
-        self.assertIn("MessageDigest.getInstance(", exporter)
-        self.assertIn('"SHA-256"', exporter)
+        self.assertIn("RdpkgZipWriter", exporter)
+        self.assertIn("ZipOutputStream(", writer)
+        self.assertIn("MessageDigest.getInstance(", writer)
+        self.assertIn('"SHA-256"', writer)
         self.assertIn("packageIdFromTreeUri(", exporter)
         self.assertIn("packageDirectory(", exporter)
         self.assertIn('"rdpkg.json"', exporter)
@@ -55,11 +59,23 @@ class V0550NativeRdpkgExportContractTests(unittest.TestCase):
         self.assertIn("ACTION_CREATE_DOCUMENT", doc)
         self.assertIn("ZipOutputStream", doc)
 
-    def test_release_version(self):
+    def test_release_version_never_regresses_below_v0550(self):
         gradle = self._read("android/app/build.gradle.kts")
 
-        self.assertIn("versionCode = 66", gradle)
-        self.assertIn('versionName = "0.5.50"', gradle)
+        code_line = next(
+            line for line in gradle.splitlines() if "versionCode =" in line
+        )
+        name_line = next(
+            line for line in gradle.splitlines() if "versionName =" in line
+        )
+
+        code = int(code_line.split("=", 1)[1].strip())
+        version_text = name_line.split("=", 1)[1].strip().strip('"')
+        version = tuple(int(part) for part in version_text.split("."))
+
+        self.assertGreaterEqual(code, 66)
+        self.assertGreaterEqual(version, (0, 5, 50))
+
 
 
 if __name__ == "__main__":
