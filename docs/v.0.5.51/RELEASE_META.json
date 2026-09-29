@@ -21,5 +21,13 @@
   "phone_test_date": "2026-09-28",
   "public_pr": 1,
   "public_repo": "faric-ua/renault-docs-android",
-  "distribution_status": "SIGNER_CONTINUITY_PENDING"
+  "distribution_status": "SIGNER_VERIFIED_INSTALL_PENDING",
+  "public_main_validation_sha": "fc7ffc6a7deda7074e5d6b2e631380fd923401c0",
+  "public_main_android_debug_run": 36603132862,
+  "public_main_artifact_id": 11050306597,
+  "public_main_apk_sha256": "7b51c30cdd0be50de48ff8ddc21c6ee85f33c00eaa9c93adacf22fec4ef5ab48",
+  "public_main_artifact_zip_sha256": "ddf9eb0ee9ef53e31ce997d157855c6bb3b1d7111cc1e662686039ddc4f55bb2",
+  "public_main_signer_sha1": "4102350e2787fd538bbf58a219293a132235e618",
+  "public_main_signer_sha256": "dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802",
+  "public_main_apk_matches_phone_accepted_candidate": true
 }
