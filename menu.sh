@@ -281,7 +281,7 @@ while true; do
   echo "13 — Відкрити папку останнього APK"
   echo "14 — Швидкий конвертер (Termux/direct filesystem)"
   echo "15 — Створити single-volume .rdpkg"
-  echo "16 — Тестовий candidate PR: вибрати + завантажити APK"
+  echo "16 — Тестовий candidate PR: перейти + build/download APK"
   echo "17 — Повернутися на main"
   echo "18 — Оновити Termux aliases / Widget"
   echo "0 — Вийти"
