@@ -1884,7 +1884,7 @@ class ProjectActivity : Activity() {
                     value =
                         subtitle,
                     sizeSp =
-                        13f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -2044,7 +2044,7 @@ class ProjectActivity : Activity() {
                     value =
                         subtitle,
                     sizeSp =
-                        12f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
