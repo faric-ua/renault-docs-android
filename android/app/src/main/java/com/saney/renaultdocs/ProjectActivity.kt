@@ -33,6 +33,18 @@ class ProjectActivity : Activity() {
     private lateinit var countText: TextView
     private var pendingManualImport =
         false
+    private var activeProjectDialogKind:
+        String =
+        ""
+    private var activeProjectDialogVolumeId:
+        String? =
+        null
+    private var activeProjectDialogTreeUri:
+        String? =
+        null
+    private var activeProjectDialogAllowOverride:
+        Boolean =
+        false
     private var pendingRdpkgExportVolumeId:
         String? =
         null
@@ -77,6 +89,30 @@ class ProjectActivity : Activity() {
             savedInstanceState
                 ?.getBoolean(
                     STATE_PENDING_MANUAL_IMPORT,
+                    false,
+                )
+                ?: false
+
+        activeProjectDialogKind =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_KIND,
+                )
+                .orEmpty()
+        activeProjectDialogVolumeId =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_VOLUME_ID,
+                )
+        activeProjectDialogTreeUri =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_TREE_URI,
+                )
+        activeProjectDialogAllowOverride =
+            savedInstanceState
+                ?.getBoolean(
+                    STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE,
                     false,
                 )
                 ?: false
@@ -147,6 +183,17 @@ class ProjectActivity : Activity() {
         repairSavedVolumeMetadata()
 
         if (
+            savedInstanceState !=
+                null &&
+            activeProjectDialogKind
+                .isNotBlank()
+        ) {
+            volumeContainer.post {
+                restoreProjectDialog()
+            }
+        }
+
+        if (
             savedInstanceState ==
                 null &&
             intent.getBooleanExtra(
@@ -202,6 +249,23 @@ class ProjectActivity : Activity() {
         )
         helpDialogs.save(
             outState,
+        )
+
+        outState.putString(
+            STATE_ACTIVE_DIALOG_KIND,
+            activeProjectDialogKind,
+        )
+        outState.putString(
+            STATE_ACTIVE_DIALOG_VOLUME_ID,
+            activeProjectDialogVolumeId,
+        )
+        outState.putString(
+            STATE_ACTIVE_DIALOG_TREE_URI,
+            activeProjectDialogTreeUri,
+        )
+        outState.putBoolean(
+            STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE,
+            activeProjectDialogAllowOverride,
         )
 
         outState.putString(
@@ -1130,6 +1194,12 @@ class ProjectActivity : Activity() {
                 data.flags,
         )
 
+        val allowOverride =
+            pendingManualImport
+
+        pendingManualImport =
+            false
+
         PreparedVolumeReader.readAll(
             context =
                 this,
@@ -1142,7 +1212,7 @@ class ProjectActivity : Activity() {
                     volumes =
                         volumes,
                     allowOverride =
-                        pendingManualImport,
+                        allowOverride,
                 )
             }
             .onFailure {
@@ -2233,39 +2303,61 @@ class ProjectActivity : Activity() {
                     volume.title
                 }
 
-        AlertDialog.Builder(
-            this,
+        setProjectDialogState(
+            kind =
+                DIALOG_VOLUME_ACTIONS,
+            volume =
+                volume,
         )
-            .setTitle(
-                label,
-            )
-            .setItems(
-                arrayOf(
-                    "Експортувати .rdpkg",
-                    "Видалити з проєкту",
-                ),
-            ) {
-                _,
-                which ->
-                when (
-                    which
-                ) {
-                    0 ->
-                        startRdpkgExport(
-                            volume,
-                        )
 
-                    1 ->
-                        confirmRemoveVolume(
-                            volume,
-                        )
-                }
-            }
-            .setNegativeButton(
-                "Скасувати",
-                null,
+        val dialog =
+            AlertDialog.Builder(
+                this,
             )
-            .show()
+                .setTitle(
+                    label,
+                )
+                .setItems(
+                    arrayOf(
+                        "Експортувати .rdpkg",
+                        "Видалити з проєкту",
+                    ),
+                ) {
+                    _,
+                    which ->
+                    when (
+                        which
+                    ) {
+                        0 -> {
+                            clearProjectDialogState(
+                                DIALOG_VOLUME_ACTIONS,
+                            )
+                            startRdpkgExport(
+                                volume,
+                            )
+                        }
+
+                        1 ->
+                            confirmRemoveVolume(
+                                volume,
+                            )
+                    }
+                }
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .create()
+
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_VOLUME_ACTIONS,
+            volumeId =
+                volume.id,
+        )
+        dialog.show()
     }
 
     private fun startRdpkgExport(
@@ -2333,42 +2425,64 @@ class ProjectActivity : Activity() {
                     volume.title
                 }
 
-        AlertDialog.Builder(
-            this,
+        setProjectDialogState(
+            kind =
+                DIALOG_REMOVE_VOLUME,
+            volume =
+                volume,
         )
-            .setTitle(
-                "Видалити том з проєкту?",
+
+        val dialog =
+            AlertDialog.Builder(
+                this,
             )
-            .setMessage(
-                label +
-                    "\n\nБуде видалено лише запис із проєкту " +
-                    project.title +
-                    ". Файли на телефоні залишаться без змін.",
-            )
-            .setNegativeButton(
-                "Скасувати",
-                null,
-            )
-            .setPositiveButton(
-                "Видалити з проєкту",
-            ) {
-                _,
-                _ ->
-                store.removeVolume(
-                    projectId =
-                        project.id,
-                    volumeId =
-                        volume.id,
+                .setTitle(
+                    "Видалити том з проєкту?",
                 )
+                .setMessage(
+                    label +
+                        "\n\nБуде видалено лише запис із проєкту " +
+                        project.title +
+                        ". Файли на телефоні залишаться без змін.",
+                )
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .setPositiveButton(
+                    "Видалити з проєкту",
+                ) {
+                    _,
+                    _ ->
+                    clearProjectDialogState(
+                        DIALOG_REMOVE_VOLUME,
+                    )
 
-                statusText.text =
-                    "Том видалено з проєкту: " +
-                        label +
-                        ". Файли не видалено."
+                    store.removeVolume(
+                        projectId =
+                            project.id,
+                        volumeId =
+                            volume.id,
+                    )
 
-                render()
-            }
-            .show()
+                    statusText.text =
+                        "Том видалено з проєкту: " +
+                            label +
+                            ". Файли не видалено."
+
+                    render()
+                }
+                .create()
+
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_REMOVE_VOLUME,
+            volumeId =
+                volume.id,
+        )
+        dialog.show()
     }
 
     private fun importPreparedVolumes(
@@ -2384,6 +2498,27 @@ class ProjectActivity : Activity() {
                     volumes.single(),
                 allowOverride =
                     allowOverride,
+            )
+            return
+        }
+
+        showPreparedVolumeChooser(
+            volumes =
+                volumes,
+            allowOverride =
+                allowOverride,
+        )
+    }
+
+    private fun showPreparedVolumeChooser(
+        volumes: List<ProjectVolumeRecord>,
+        allowOverride: Boolean,
+    ) {
+        if (
+            volumes.isEmpty()
+        ) {
+            clearProjectDialogState(
+                DIALOG_VOLUME_CHOOSER,
             )
             return
         }
@@ -2404,29 +2539,53 @@ class ProjectActivity : Activity() {
             }
                 .toTypedArray()
 
-        AlertDialog.Builder(
-            this,
-        )
-            .setTitle(
-                "Вибери том",
+        activeProjectDialogKind =
+            DIALOG_VOLUME_CHOOSER
+        activeProjectDialogVolumeId =
+            null
+        activeProjectDialogTreeUri =
+            volumes.first()
+                .treeUri
+        activeProjectDialogAllowOverride =
+            allowOverride
+
+        val dialog =
+            AlertDialog.Builder(
+                this,
             )
-            .setItems(
-                labels,
-            ) {
-                _,
-                which ->
-                importPreparedVolume(
-                    volume =
-                        volumes[which],
-                    allowOverride =
-                        allowOverride,
+                .setTitle(
+                    "Вибери том",
                 )
-            }
-            .setNegativeButton(
-                "Скасувати",
+                .setItems(
+                    labels,
+                ) {
+                    _,
+                    which ->
+                    clearProjectDialogState(
+                        DIALOG_VOLUME_CHOOSER,
+                    )
+                    importPreparedVolume(
+                        volume =
+                            volumes[which],
+                        allowOverride =
+                            allowOverride,
+                    )
+                }
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .create()
+
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_VOLUME_CHOOSER,
+            volumeId =
                 null,
-            )
-            .show()
+        )
+        dialog.show()
     }
 
     private fun importPreparedVolume(
@@ -2455,6 +2614,35 @@ class ProjectActivity : Activity() {
                 return
             }
 
+            showProjectMismatchDialog(
+                volume =
+                    volume,
+                detectedProject =
+                    detectedProject,
+            )
+
+            return
+        }
+
+        saveVolume(
+            volume,
+        )
+    }
+
+    private fun showProjectMismatchDialog(
+        volume: ProjectVolumeRecord,
+        detectedProject: String =
+            volume.projectHint
+                .orEmpty(),
+    ) {
+        setProjectDialogState(
+            kind =
+                DIALOG_PROJECT_MISMATCH,
+            volume =
+                volume,
+        )
+
+        val dialog =
             AlertDialog.Builder(
                 this,
             )
@@ -2477,18 +2665,233 @@ class ProjectActivity : Activity() {
                 ) {
                     _,
                     _ ->
+                    clearProjectDialogState(
+                        DIALOG_PROJECT_MISMATCH,
+                    )
                     saveVolume(
                         volume,
                     )
                 }
-                .show()
+                .create()
 
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_PROJECT_MISMATCH,
+            volumeId =
+                volume.id,
+        )
+        dialog.show()
+    }
+
+    private fun setProjectDialogState(
+        kind: String,
+        volume: ProjectVolumeRecord? =
+            null,
+    ) {
+        activeProjectDialogKind =
+            kind
+        activeProjectDialogVolumeId =
+            volume?.id
+        activeProjectDialogTreeUri =
+            volume?.treeUri
+        activeProjectDialogAllowOverride =
+            false
+    }
+
+    private fun clearProjectDialogState(
+        expectedKind: String? =
+            null,
+    ) {
+        if (
+            expectedKind !=
+                null &&
+            activeProjectDialogKind !=
+                expectedKind
+        ) {
             return
         }
 
-        saveVolume(
-            volume,
+        activeProjectDialogKind =
+            ""
+        activeProjectDialogVolumeId =
+            null
+        activeProjectDialogTreeUri =
+            null
+        activeProjectDialogAllowOverride =
+            false
+    }
+
+    private fun trackProjectDialog(
+        dialog: AlertDialog,
+        kind: String,
+        volumeId: String?,
+    ) {
+        dialog.setOnDismissListener {
+            if (
+                !isChangingConfigurations &&
+                activeProjectDialogKind ==
+                    kind &&
+                activeProjectDialogVolumeId ==
+                    volumeId
+            ) {
+                clearProjectDialogState(
+                    kind,
+                )
+            }
+        }
+    }
+
+    private fun restoreProjectDialog() {
+        when (
+            activeProjectDialogKind
+        ) {
+            DIALOG_VOLUME_ACTIONS,
+            DIALOG_REMOVE_VOLUME -> {
+                val volume =
+                    store.volumes(
+                        project.id,
+                    )
+                        .firstOrNull {
+                            it.id ==
+                                activeProjectDialogVolumeId
+                        }
+
+                if (
+                    volume ==
+                    null
+                ) {
+                    clearProjectDialogState()
+                    return
+                }
+
+                if (
+                    activeProjectDialogKind ==
+                        DIALOG_VOLUME_ACTIONS
+                ) {
+                    showVolumeActions(
+                        volume,
+                    )
+                } else {
+                    confirmRemoveVolume(
+                        volume,
+                    )
+                }
+            }
+
+            DIALOG_VOLUME_CHOOSER ->
+                restorePreparedVolumeChooser()
+
+            DIALOG_PROJECT_MISMATCH ->
+                restoreProjectMismatchDialog()
+
+            else ->
+                clearProjectDialogState()
+        }
+    }
+
+    private fun restorePreparedVolumeChooser() {
+        val treeUri =
+            activeProjectDialogTreeUri
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: run {
+                    clearProjectDialogState()
+                    return
+                }
+
+        val allowOverride =
+            activeProjectDialogAllowOverride
+
+        PreparedVolumeReader.readAll(
+            context =
+                this,
+            treeUri =
+                Uri.parse(
+                    treeUri,
+                ),
         )
+            .onSuccess {
+                volumes ->
+                if (
+                    volumes.size <
+                    2
+                ) {
+                    clearProjectDialogState()
+                    statusText.text =
+                        "Список томів змінився. Вибери папку ще раз."
+                    return@onSuccess
+                }
+
+                showPreparedVolumeChooser(
+                    volumes =
+                        volumes,
+                    allowOverride =
+                        allowOverride,
+                )
+            }
+            .onFailure {
+                clearProjectDialogState()
+                statusText.text =
+                    "Не вдалося відновити вибір томів. Вибери папку ще раз."
+            }
+    }
+
+    private fun restoreProjectMismatchDialog() {
+        val treeUri =
+            activeProjectDialogTreeUri
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: run {
+                    clearProjectDialogState()
+                    return
+                }
+        val volumeId =
+            activeProjectDialogVolumeId
+                ?: run {
+                    clearProjectDialogState()
+                    return
+                }
+
+        PreparedVolumeReader.readAll(
+            context =
+                this,
+            treeUri =
+                Uri.parse(
+                    treeUri,
+                ),
+        )
+            .onSuccess {
+                volumes ->
+                val volume =
+                    volumes.firstOrNull {
+                        it.id ==
+                            volumeId
+                    }
+
+                if (
+                    volume ==
+                    null
+                ) {
+                    clearProjectDialogState()
+                    statusText.text =
+                        "Том для підтвердження більше не знайдено."
+                    return@onSuccess
+                }
+
+                showProjectMismatchDialog(
+                    volume =
+                        volume,
+                )
+            }
+            .onFailure {
+                clearProjectDialogState()
+                statusText.text =
+                    "Не вдалося відновити підтвердження. Вибери том ще раз."
+            }
     }
 
     private fun saveVolume(
@@ -2743,6 +3146,14 @@ class ProjectActivity : Activity() {
             4305
         private const val STATE_PENDING_MANUAL_IMPORT =
             "pendingManualImport"
+        private const val STATE_ACTIVE_DIALOG_KIND =
+            "activeProjectDialogKind"
+        private const val STATE_ACTIVE_DIALOG_VOLUME_ID =
+            "activeProjectDialogVolumeId"
+        private const val STATE_ACTIVE_DIALOG_TREE_URI =
+            "activeProjectDialogTreeUri"
+        private const val STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE =
+            "activeProjectDialogAllowOverride"
         private const val STATE_PENDING_RDPKG_EXPORT_VOLUME_ID =
             "pendingRdpkgExportVolumeId"
         private const val STATE_PENDING_NATIVE_SOURCE_URI =
@@ -2751,6 +3162,15 @@ class ProjectActivity : Activity() {
             "pendingNativeSourceName"
         private const val STATE_PENDING_NATIVE_REQUEST_ID =
             "pendingNativeRequestId"
+        private const val DIALOG_VOLUME_ACTIONS =
+            "volumeActions"
+        private const val DIALOG_REMOVE_VOLUME =
+            "removeVolume"
+        private const val DIALOG_VOLUME_CHOOSER =
+            "volumeChooser"
+        private const val DIALOG_PROJECT_MISMATCH =
+            "projectMismatch"
+
         private const val HELP_PROJECT =
             "project"
         private const val HELP_ADD =
