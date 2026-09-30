@@ -313,3 +313,35 @@ Fixes:
 ## Поточний наступний крок
 
 **Wait for CI on the latest PR #13 head. If green, install one candidate and continue the full phone regression from Converter + stale Legacy library first, then the remaining UI/lifecycle checklist.**
+
+
+## NEW CHAT HANDOFF — 2026-10-01
+
+Status: **v0.5.54 / PR #13 / UI polish + stale legacy guard / NOT MERGED**.
+
+Current branch:
+- `feat/v0.5.54-ux-help-audit`
+
+Checkpoint before switching chats:
+- latest PR #13 head observed before handoff: `682d2c437213019ae69974d1617699d5e428b813`;
+- Android PR Check `36790097812` = **PASS**;
+- Tests `36790097841` = **FAIL** with exactly one known contract-test failure;
+- failing test: `tests/test_v0513_modern_section_tiles_contract.py::test_global_nav_mode_switch_persistent_tiles_and_content_cards`;
+- reason: old assertion expects literal `label = "Modern"`, while NativeSection now uses the shared formatted `Ui.modeButton(... label = "Modern" ...)` layout. This is a test-contract update, not a phone/runtime failure.
+
+Latest implemented phone findings before handoff:
+- Converter default gray Android buttons were replaced with Renault Docs action styling;
+- old `Старі бібліотеки` SAF records are revalidated with `DatasetReader` before opening;
+- stale/moved/deleted old dataset no longer navigates into a broken Modern screen; user gets a re-add-via-Legacy explanation;
+- Modern direct stale-path error no longer exposes raw `renault-dataset.json` failure;
+- folder pictograms on Home Tools are bottom-right overlays;
+- Classic/Modern controls use shared `Ui.modeButton` styling across ModernDataset, ModernVolume, NativeSection, and Viewer;
+- legacy `Як користуватись` page gets a scope note explaining that its volume count belongs to the opened Classic dataset, not the current Renault Docs project.
+
+First action in the new chat:
+1. update the one stale v0.5.13 contract assertion for the new shared `Ui.modeButton` formatting;
+2. rerun CI and require **Tests PASS + Android PR Check PASS**;
+3. build/install one fresh PR #13 candidate;
+4. resume phone regression starting with **Converter** and the stale **Megane II / Старі бібліотеки** case;
+5. then continue the full v0.5.54 visual/lifecycle checklist;
+6. do **not merge PR #13** until the full phone gate passes.
