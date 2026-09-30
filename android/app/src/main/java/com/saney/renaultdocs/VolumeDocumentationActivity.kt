@@ -214,7 +214,7 @@ class VolumeDocumentationActivity : Activity() {
                             volumeTitle,
                         sizeSp = 12f,
                         color =
-                            Ui.muted,
+                            Ui.entityTitle,
                     ).apply {
                         maxLines = 1
                     }
