@@ -12,13 +12,15 @@ class V0543LibraryPolishContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
         )
 
-        self.assertIn('"Додати том"', main)
+        self.assertIn('"Додати"', main)
+        self.assertIn('"Новий том"', main)
         self.assertIn('"Новий проєкт"', main)
         self.assertIn('"Мої Renault"', main)
         self.assertIn('"Інструменти"', main)
         self.assertIn('"Конвертер"', main)
         self.assertIn('"Legacy"', main)
-        self.assertIn("buildHomeActionCard(", main)
+        self.assertIn("buildHomeAddPanel()", main)
+        self.assertIn("buildToolsPanel()", main)
         self.assertIn("buildToolCard(", main)
         self.assertIn('"Порожній · додай том"', main)
 
