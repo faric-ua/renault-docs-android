@@ -37,3 +37,23 @@ Result: **PENDING**
 - [ ] Laguna II remains populated.
 - [ ] NT8183A opens.
 - [ ] NT8328A opens.
+
+
+## Dialog visual audit
+
+- [ ] Settings → `Відкривати dataset` uses Renault Docs dark dialog theme.
+- [ ] Settings → `Масштаб PDF` uses Renault Docs dark dialog theme.
+- [ ] Settings → `Крок масштабу PDF` uses Renault Docs dark dialog theme.
+- [ ] Help dialog uses the same visual family.
+- [ ] Project → volume actions uses the same visual family.
+- [ ] Project → remove confirmation uses danger styling and survives rotation.
+- [ ] Project → multi-volume chooser uses the same visual family.
+- [ ] Project → wrong-project confirmation uses the same visual family.
+- [ ] Native raw preparation progress dialog uses the same visual family.
+- [ ] No app-owned AlertDialog remains system-gray.
+
+## Home tool cards
+
+- [ ] Converter shows `+ стару Renault` plus folder icon on one line.
+- [ ] Legacy shows `+ готова` plus folder icon on one line.
+- [ ] Converter and Legacy cards are visually the same height.
