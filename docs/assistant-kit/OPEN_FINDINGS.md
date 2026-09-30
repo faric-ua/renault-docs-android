@@ -1548,7 +1548,7 @@ Menu 8 must either deliver the APK matching current code `versionName` or fail. 
 
 ## DATA-001 — Laguna prepared dataset volume parity mismatch
 
-Status: **OPEN · DIAGNOSIS IN PROGRESS**
+Status: **ROOT CAUSE CONFIRMED · REPAIR PENDING**
 
 Real-phone dataset link checker baseline on 2026-09-30:
 
@@ -1572,5 +1572,16 @@ Affected stale root entries:
 
 The root `INDEX.HTM` is still a real Classic/browser entrypoint, so these are not automatically harmless warnings.
 
-Next diagnostic gate:
-compare `source_root` and `build_root` top-level discovered volumes. If the 7 folders exist in source but not build, prepared Laguna is incomplete and must be repaired/rebuilt. If they are absent from both, root catalog is stale and should be regenerated/pruned from actual volume inventory.
+Diagnosis result:
+- source volume count: 10;
+- build volume count: 3;
+- exactly 7 source volumes are missing from build;
+- historical handoff for v0.5.19 explicitly allowed moving 7 converted volume folders outside the build root temporarily, leaving 3 test volumes, then required restoring all volumes and rerunning package generation;
+- that restore was never completed.
+
+Therefore the current 14 missing links are a direct consequence of an intentionally partial test build that accidentally became persistent.
+
+The paired misses (volume INDEX.HTM + flag asset) prove whole volume folders are absent. A flag-name/language-cleanup issue alone would not also remove the volume INDEX.HTM.
+
+Repair:
+use fast converter MERGE mode to add only missing top-level volumes from configured source into the existing build, normalize only copied roots, rebuild package metadata/Runtime IR/Fast Pack, then rerun item 22. If only flag assets remain missing after volume restoration, handle those separately as a language-cleanup/catalog asset issue.
