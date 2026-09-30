@@ -30,11 +30,11 @@ HTML_LINK_ATTRIBUTES = {
     "poster",
 }
 CSS_URL_RE = re.compile(
-    r"url\(\s*(["']?)(.*?)\1\s*\)",
+    r'''url\(\s*(["']?)(.*?)\1\s*\)''',
     re.IGNORECASE,
 )
 CSS_IMPORT_RE = re.compile(
-    r"@import\s+(?:url\()?\s*(["'])(.*?)\1",
+    r'''@import\s+(?:url\()?\s*(["'])(.*?)\1''',
     re.IGNORECASE,
 )
 
