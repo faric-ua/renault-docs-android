@@ -1614,7 +1614,7 @@ the prepared Laguna dataset is now complete again. The prior 14 missing links we
 
 ## UX-023 — Modern section list natural display order
 
-Status: **v0.5.53 PHONE PARTIAL · GROUP ORDER REFINED / CI PENDING**
+Status: **CLOSED · v0.5.53 PHONE PASS — 2026-09-30**
 
 Found: 2026-09-30  
 Source: real-phone Laguna II NT8183A `.rdpkg` import
@@ -1643,3 +1643,9 @@ Phone refinement 2026-09-30:
 - first v0.5.53 candidate incorrectly placed alphabetic `NT/NU` before `R...`;
 - user clarified Renault display semantics: `R...` are connector entries and should come after numeric sections but before the remaining alphabetic groups;
 - comparator updated accordingly without changing package/runtime source order.
+
+Final phone result:
+- refined v0.5.53 candidate installed successfully;
+- user verified the Modern section order is now correct;
+- accepted display grouping: numeric-leading IDs → `R...` connectors → other alphabetic IDs;
+- no `.rdpkg` regeneration was required.
