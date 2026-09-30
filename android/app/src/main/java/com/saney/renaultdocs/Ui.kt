@@ -111,6 +111,85 @@ object Ui {
             }
         }
 
+    fun applyActionStyle(
+        view: TextView,
+        primary: Boolean = false,
+        dangerAction: Boolean = false,
+    ) {
+        view.isAllCaps =
+            false
+        view.textSize =
+            14f
+        view.gravity =
+            Gravity.CENTER
+        view.minHeight =
+            dp(
+                view.context,
+                44,
+            )
+        view.minimumHeight =
+            dp(
+                view.context,
+                44,
+            )
+        view.setTextColor(
+            when {
+                dangerAction ->
+                    danger
+
+                primary ->
+                    accent
+
+                else ->
+                    text
+            }
+        )
+        view.background =
+            roundedBackground(
+                context =
+                    view.context,
+                fill =
+                    if (
+                        primary
+                    ) {
+                        surfaceAlt
+                    } else {
+                        surface
+                    },
+                stroke =
+                    when {
+                        dangerAction ->
+                            danger
+
+                        primary ->
+                            accent
+
+                        else ->
+                            border
+                    },
+                radiusDp =
+                    11,
+            )
+        view.setPadding(
+            dp(
+                view.context,
+                12,
+            ),
+            dp(
+                view.context,
+                8,
+            ),
+            dp(
+                view.context,
+                12,
+            ),
+            dp(
+                view.context,
+                8,
+            ),
+        )
+    }
+
     fun modeButton(
         context: Context,
         label: String,
