@@ -58,3 +58,10 @@ The audit found the direct `.rdpkg` install worker is still Activity-owned. It s
 - Classic/Modern controls share `Ui.modeButton`;
 - long Viewer titles use the entity-title hierarchy;
 - legacy info/help pages show an app note clarifying the scope/relevance of their volume counts.
+
+
+## Phone findings: Converter and stale legacy records
+
+- Converter's source/destination and main action buttons now use Renault Docs styling instead of default gray Android buttons.
+- Standalone legacy library records are revalidated before opening.
+- A moved/deleted old SAF dataset no longer opens a broken Modern screen; the user is told to re-add the folder through Legacy.
