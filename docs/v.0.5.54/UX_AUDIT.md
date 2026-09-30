@@ -142,3 +142,14 @@ Applied to:
 - Project standalone action-card subtitles such as raw → `.rdpkg`.
 
 Primary action titles remain unchanged. This avoids manual line breaks and keeps the same hierarchy across cards.
+
+
+## Settings typography
+
+Phone review expanded the compact typography rule to Settings:
+- section titles and setting names remain prominent;
+- descriptions use the shared secondary 12sp token;
+- selected values use the shared 13sp value token;
+- small labels/warnings use the compact 11sp token;
+- Backup action buttons use a shared compact 14sp button token;
+- section label `Backup` is localized to `Резервні копії`.
