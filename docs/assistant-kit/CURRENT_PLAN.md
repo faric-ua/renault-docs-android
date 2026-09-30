@@ -218,6 +218,7 @@ Implemented:
 - empty project `Порожній · додай том`;
 - Project one `Додати` tile with `Авто` / `Вручну`, with subtitles `.rdpkg · один том` / `Папка / SAF`;
 - secondary action subtitles standardized at 11sp across Home/Project action tiles;
+- Settings secondary text/value/button hierarchy standardized (12sp / 13sp / 14sp), with compact labels/warnings at 11sp;
 - shared rotation-safe Help controller with Renault Docs dark styling;
 - Help on Home / Project / Add / raw / Converter / Modern volume / Native section / Volume documentation;
 - CreateProject typed name survives rotation;
