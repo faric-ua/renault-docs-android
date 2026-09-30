@@ -227,6 +227,34 @@ Implemented:
 Audit follow-up:
 - `RISK-LIFE-001`: direct .rdpkg import worker remains Activity-owned.
 
+## Session checkpoint — 2026-09-30 06:42 +03:00
+
+Status: **STOPPED FOR THE NIGHT / SAFE CONTINUATION POINT**.
+
+v0.5.54 implementation is complete enough for phone QA:
+- PR #13 open and mergeable;
+- current PR head before this docs-only checkpoint: `5660b6f29f24d91c62abd16d1824a96b6b121c36`;
+- Tests `36664899562` — PASS;
+- Android PR Check `36664899564` — PASS;
+- no merge performed;
+- no phone installation/acceptance performed yet.
+
+Tomorrow continue from exactly this gate:
+
+1. Renault Menu `5 — Оновити проєкт з GitHub`;
+2. `16 — Тестовий candidate PR`;
+3. select PR #13 and install v0.5.54 candidate over the current app;
+4. first visual gate:
+   - Home: `Додати том` / `До проєкту`;
+   - empty project: `Порожній · додай том`;
+   - Laguna II: `Томів: 10`;
+   - Project add area: one `Додати` tile with `Авто` / `Вручну`;
+5. then rotation/lifecycle gate for Help and Project dialogs;
+6. only after phone PASS consider merging PR #13.
+
+Known follow-up remains open:
+`RISK-LIFE-001` — direct .rdpkg install worker is Activity-owned and is not part of tonight's phone gate.
+
 ## Поточний наступний крок
 
 **Final PR-head CI is green: Tests `36664711140` PASS; Android PR Check `36664711278` PASS. Build/install PR #13 candidate and execute the focused phone gate: Home copy, Add tile, Help rotation/no-autostart, Project dialog rotation/no-autostart, CreateProject text rotation, and final Laguna 10-volume count/dedup sanity.**
