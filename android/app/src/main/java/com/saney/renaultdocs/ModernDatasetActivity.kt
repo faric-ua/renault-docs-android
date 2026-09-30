@@ -469,9 +469,24 @@ class ModernDatasetActivity : Activity() {
                         statusText.setTextColor(
                             Ui.danger,
                         )
-                        statusText.text =
+
+                        val detail =
                             error.message
                                 ?: "Не вдалося прочитати Modern index."
+
+                        statusText.text =
+                            if (
+                                detail.contains(
+                                    "renault-dataset.json",
+                                    ignoreCase =
+                                        true,
+                                )
+                            ) {
+                                "Ця стара бібліотека більше не читається за збереженим шляхом. " +
+                                    "Якщо папку перенесено або видалено — додай її знову через Legacy."
+                            } else {
+                                detail
+                            }
                     }
             }
         }.start()
