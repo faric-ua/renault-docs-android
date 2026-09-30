@@ -7,7 +7,7 @@
 - [x] Реалізувати deterministic converter.
 - [x] Перевірити converter на повній копії Laguna II.
 - [x] Додати unit tests і CI.
-- [ ] Додати окремий post-conversion link checker/report як стабільний gate. *(checker implemented on tooling branch; real Laguna baseline pending before blocking integration)*
+- [ ] Додати окремий post-conversion link checker/report як стабільний gate. *(read-only checker real-phone validated on full Laguna dataset: 264779 refs / 0 missing; blocking converter integration is next)*
 
 ## Phase 2 — Web baseline
 
