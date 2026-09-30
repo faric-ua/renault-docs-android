@@ -603,7 +603,7 @@ class SettingsActivity : Activity() {
                         this@SettingsActivity,
                     value =
                         "Вибери окрему папку для резервних копій. Рекомендовано: Documents/Renault/backups.",
-                    sizeSp = 13f,
+                    sizeSp = Ui.secondaryTextSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -647,7 +647,7 @@ class SettingsActivity : Activity() {
                         this@SettingsActivity,
                     value =
                         "Не вибрано",
-                    sizeSp = 14f,
+                    sizeSp = Ui.valueTextSp,
                     color =
                         Ui.accent,
                 ).apply {
