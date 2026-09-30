@@ -1788,3 +1788,32 @@ Packages:
 
 Status:
 **Laguna II portable package preparation PASS — 10/10 volumes ready.**
+
+### v0.5.53 natural Modern section display order
+
+Real-phone finding from imported Laguna II NT8183A:
+- package import/open PASS;
+- volume opens as `NT8183A · 2001-01-22` / `383 · native`;
+- Modern section tiles are difficult to scan because the accepted BUG-004 data contract preserves raw Classic source order.
+
+v0.5.53 keeps that source-order contract intact and adds UI-only stable natural sorting in `ModernVolumeActivity`.
+
+Expected display behavior:
+- numeric runs compare numerically;
+- suffix variants remain grouped;
+- opaque alphanumeric IDs remain supported;
+- duplicate codes remain distinct and keep relative source order;
+- no `.rdpkg` regeneration required.
+
+### v0.5.53 phone sort PASS
+
+Final refined candidate phone result:
+- Laguna II NT8183A remains available and opens in native mode;
+- Modern list ordering accepted by user;
+- accepted order is numeric-leading section IDs first, then `R...` connector IDs, then remaining alphabetic IDs;
+- numeric natural ordering remains correct;
+- no `.rdpkg` regeneration required.
+
+CI on final PR head:
+- Tests `36660615811` — PASS;
+- Android PR Check `36660615926` — PASS.

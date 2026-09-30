@@ -169,6 +169,24 @@ Implementation:
 - batch writes one JSON summary containing package paths, identities, SHA-256, byte sizes and payload file counts;
 - single-volume selection remains available unchanged.
 
+## v0.5.53 — Modern section natural display order
+
+Status: **PHONE PASS / READY TO MERGE**.
+
+Real-phone finding:
+- Laguna II `NT8183A · 2001-01-22` imports and opens as `383 · native`;
+- Modern list currently exposes preserved Classic source order such as `R70 → 1013 → 338 → 321 → 853`, which is hard to scan.
+
+Implementation:
+- Runtime/converter order remains source-defined and opaque-ID safe;
+- only `ModernVolumeActivity` presentation is sorted;
+- stable natural comparison handles numeric runs and suffix variants;
+- display group priority is numeric-leading → `R...` connectors → other alphabetic IDs;
+- duplicates preserve original relative order;
+- search uses the same display order;
+- version bumped to `0.5.53` / code `69`;
+- existing `.rdpkg` files do not require regeneration.
+
 ## Поточний наступний крок
 
-**Laguna II batch packaging is complete: 10/10 independent `.rdpkg` files built successfully on phone. Next: validate package import/update behavior in the Laguna II project using representative packages before any bulk-import UX work.**
+**Refined v0.5.53 candidate passed phone verification: numeric-leading IDs → `R...` connectors → other alphabetic IDs. Tests `36660615811` PASS and Android PR Check `36660615926` PASS. Merge PR #12, then verify public-main CI.**

@@ -561,20 +561,22 @@ class ModernVolumeActivity : Activity() {
                 )
 
         val filtered =
-            current.sections.filter {
-                normalizedQuery.isBlank() ||
-                    (
-                        it.code +
-                            " " +
-                            it.title
-                    )
-                        .lowercase(
-                            Locale.ROOT,
+            ModernSectionDisplayOrder.sorted(
+                current.sections.filter {
+                    normalizedQuery.isBlank() ||
+                        (
+                            it.code +
+                                " " +
+                                it.title
                         )
-                        .contains(
-                            normalizedQuery,
-                        )
-            }
+                            .lowercase(
+                                Locale.ROOT,
+                            )
+                            .contains(
+                                normalizedQuery,
+                            )
+                }
+            )
 
         if (
             filtered.isEmpty()
