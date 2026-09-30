@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -490,6 +491,7 @@ class MainActivity : Activity() {
     private fun buildToolCard(
         title: String,
         subtitle: String,
+        folderIcon: Boolean = false,
         onClick: () -> Unit,
     ): View =
         LinearLayout(
@@ -547,17 +549,14 @@ class MainActivity : Activity() {
                 },
             )
 
-            addView(
-                Ui.textView(
-                    context =
-                        this@MainActivity,
-                    value =
-                        subtitle,
-                    sizeSp =
-                        Ui.actionSubtitleSp,
-                    color =
-                        Ui.muted,
+            val subtitleRow =
+                LinearLayout(
+                    this@MainActivity,
                 ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    gravity =
+                        Gravity.CENTER_VERTICAL
                     setPadding(
                         0,
                         Ui.dp(
@@ -567,7 +566,58 @@ class MainActivity : Activity() {
                         0,
                         0,
                     )
-                },
+                }
+
+            subtitleRow.addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        subtitle,
+                    sizeSp =
+                        Ui.actionSubtitleSp,
+                    color =
+                        Ui.muted,
+                ),
+            )
+
+            if (
+                folderIcon
+            ) {
+                subtitleRow.addView(
+                    ImageView(
+                        this@MainActivity,
+                    ).apply {
+                        setImageResource(
+                            R.drawable.ic_folder,
+                        )
+                        setColorFilter(
+                            Ui.muted,
+                        )
+                        contentDescription =
+                            "Папка"
+                    },
+                    LinearLayout.LayoutParams(
+                        Ui.dp(
+                            this@MainActivity,
+                            18,
+                        ),
+                        Ui.dp(
+                            this@MainActivity,
+                            18,
+                        ),
+                    ).apply {
+                        marginStart =
+                            Ui.dp(
+                                this@MainActivity,
+                                4,
+                            )
+                    },
+                )
+            }
+
+            addView(
+                subtitleRow,
             )
 
             setOnClickListener {
@@ -648,7 +698,9 @@ class MainActivity : Activity() {
                 title =
                     "Конвертер",
                 subtitle =
-                    "+ стару Renault-папку",
+                    "+ стару Renault",
+                folderIcon =
+                    true,
             ) {
                 startActivity(
                     Intent(
@@ -675,7 +727,9 @@ class MainActivity : Activity() {
                 title =
                     "Legacy",
                 subtitle =
-                    "+ готова папка",
+                    "+ готова",
+                folderIcon =
+                    true,
             ) {
                 openDatasetPicker()
             },
