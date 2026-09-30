@@ -32,3 +32,12 @@ The audit found the direct `.rdpkg` install worker is still Activity-owned. It s
 - Tests `36664711140` — PASS;
 - Android PR Check `36664711278` — PASS;
 - PR #13 phone acceptance is still required before merge.
+
+
+## Final UI consolidation
+
+- all app-owned AlertDialogs are audited and themed through shared `DialogUi`;
+- current inventory: 9 dialogs total (1 Help + 3 Settings + 5 Project);
+- Settings radio/list dialogs, Project confirmations/actions/progress, and Help share one Renault Docs dialog family;
+- OS-owned SAF/DocumentsUI remains outside app theming;
+- Converter/Legacy service cards use a folder pictogram instead of the word "папка" to prevent wrapping and equalize layout.
