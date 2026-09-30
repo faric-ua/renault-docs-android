@@ -120,4 +120,4 @@ item 21 accidentally contained a literal `\n`; fixed and merged via PR #8 as `3d
 
 ## Поточний наступний крок
 
-**Migrate NT8342A from `Megane II_NT8342A_android` into a single-volume `.rdpkg`, import it into Megane II, verify both NT8340A and NT8342A reopen from app-private packages, then perform a reversible quarantine gate before deleting either Megane `*_android` folder. Keep Laguna `*_android`.**
+**NT8342A `.rdpkg` built/imported and both NT8340A + NT8342A reopen PASS. Next: reversible quarantine of `Megane II_android` first, then `Megane II_NT8342A_android`, with reopen checks after each rename. Do not delete anything yet. Keep Laguna `*_android`.**
