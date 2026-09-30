@@ -9,6 +9,7 @@ Status: **IMPLEMENTED / CI PENDING**
 - opaque identifiers remain opaque and are never coerced to a single numeric-ID model;
 - numeric codes sort naturally, e.g. `321 < 338 < 853 < 1013`;
 - suffix variants remain grouped, e.g. `101 < 101_1 < 101_2`;
+- display groups are numeric-leading IDs → `R...` connectors → other alphabetic IDs;
 - alphanumeric/alphabetic identifiers remain supported;
 - duplicate display codes remain separate and preserve their relative source order;
 - search results use the same display ordering.
