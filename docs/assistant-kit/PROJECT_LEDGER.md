@@ -1705,3 +1705,19 @@ The current 14 missing root-catalog links are seven pairs:
 Therefore the primary problem is whole-folder absence, not flag naming or language cleanup.
 
 Repair is non-destructive fast-converter `--merge`: copy only missing source volume roots, normalize only those new roots, rebuild package metadata/Runtime IR/Fast Pack, then rerun the read-only link/parity gate.
+
+
+### Laguna hold-folder location confirmed
+
+User confirmed the seven prepared Classic volume folders removed for the reduced v0.5.19 test were not deleted and do not need reconversion.
+
+They are preserved under:
+`/storage/emulated/0/Documents/Renault/_volumes_hold`
+
+Repair direction is therefore corrected:
+1. verify the hold folder contains the exact 7 volumes reported missing by source/build parity;
+2. move those already-prepared volume folders back into `laguna 2 2001-2006_android`;
+3. rerun read-only item 22;
+4. only rebuild package metadata/Runtime IR if the restored physical Classic tree and generated package metadata prove inconsistent afterward.
+
+Do not run fast-converter MERGE unless the preserved hold copy is incomplete or invalid.
