@@ -153,7 +153,7 @@ This confirms there is no remaining link breakage from the user's earlier langua
 
 ## Laguna II batch .rdpkg preparation
 
-Status: **MERGED / CI PASS / PHONE BATCH BUILD PENDING**.
+Status: **PHONE BATCH BUILD PASS — 10/10 PACKAGES READY**.
 
 Target:
 - full Laguna dataset contains 10 validated volumes;
@@ -171,4 +171,4 @@ Implementation:
 
 ## Поточний наступний крок
 
-**PR #11 merged as `3c5a7d6d75ef3cb357b3d11602977678dd66dabd`; Tests `36656945889` PASS. On phone: menu 5 → menu 15 → select Laguna dataset → A — all volumes separately. Capture the final READY · RDPKG BATCH summary.**
+**Laguna II batch packaging is complete: 10/10 independent `.rdpkg` files built successfully on phone. Next: validate package import/update behavior in the Laguna II project using representative packages before any bulk-import UX work.**
