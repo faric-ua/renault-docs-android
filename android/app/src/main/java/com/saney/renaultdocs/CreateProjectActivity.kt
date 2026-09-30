@@ -276,4 +276,10 @@ class CreateProjectActivity : Activity() {
                         ?: "Не вдалося створити проєкт."
             }
     }
+
+    companion object {
+        private const val STATE_PROJECT_NAME =
+            "projectName"
+    }
+
 }
