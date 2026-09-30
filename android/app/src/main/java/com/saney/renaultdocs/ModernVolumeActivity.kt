@@ -204,6 +204,8 @@ class ModernVolumeActivity : Activity() {
                 value =
                     volumeTitle,
                 sizeSp = 20f,
+                color =
+                    Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -331,22 +333,16 @@ class ModernVolumeActivity : Activity() {
         )
 
         contextRow.addView(
-            Button(this).apply {
-                text =
-                    "Classic"
-                isAllCaps =
-                    false
-                gravity =
-                    Gravity.CENTER
-                minimumHeight =
-                    Ui.dp(
-                        this@ModernVolumeActivity,
-                        42,
-                    )
-                setOnClickListener {
-                    openClassicVolume()
-                }
-            }
+            Ui.actionButton(
+                context =
+                    this,
+                label =
+                    "Classic",
+                primary =
+                    false,
+            ) {
+                openClassicVolume()
+            },
         )
 
         root.addView(contextRow)
@@ -414,7 +410,7 @@ class ModernVolumeActivity : Activity() {
                         fill =
                             Ui.surfaceAlt,
                         stroke =
-                            Ui.border,
+                            Ui.accent,
                         radiusDp = 10,
                     )
                 setPadding(
@@ -755,7 +751,13 @@ class ModernVolumeActivity : Activity() {
                     value =
                         section.title,
                     sizeSp = 16f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
                     setPadding(
                         Ui.dp(
                             this@ModernVolumeActivity,
