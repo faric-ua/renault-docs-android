@@ -183,82 +183,82 @@ class ModernDatasetActivity : Activity() {
             )
         )
 
-        topBar.addView(
-            Ui.textView(
-                context =
-                    this,
-                value =
-                    "Modern",
-                sizeSp =
-                    15f,
-                color =
-                    Ui.accent,
+        val modeSwitch =
+            LinearLayout(
+                this,
             ).apply {
-                setTypeface(
-                    typeface,
-                    android.graphics.Typeface.BOLD,
-                )
+                orientation =
+                    LinearLayout.HORIZONTAL
                 gravity =
-                    Gravity.CENTER
-                minimumHeight =
-                    Ui.dp(
-                        this@ModernDatasetActivity,
-                        44,
-                    )
+                    Gravity.CENTER_VERTICAL
                 background =
                     Ui.roundedBackground(
                         context =
                             this@ModernDatasetActivity,
                         fill =
-                            Ui.surfaceAlt,
+                            Ui.surface,
                         stroke =
-                            Ui.accent,
+                            Ui.border,
                         radiusDp =
-                            11,
+                            12,
                     )
                 setPadding(
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        14,
+                        2,
                     ),
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        8,
+                        2,
                     ),
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        14,
+                        2,
                     ),
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        8,
+                        2,
                     ),
                 )
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@ModernDatasetActivity,
-                        8,
-                    )
-            },
+            }
+
+        modeSwitch.addView(
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Modern",
+                active =
+                    true,
+            ) {},
         )
 
-        topBar.addView(
-            Ui.actionButton(
+        modeSwitch.addView(
+            Ui.modeButton(
                 context =
                     this,
                 label =
                     "Classic",
-                primary =
+                active =
                     false,
             ) {
                 openClassic()
             },
+        )
+
+        topBar.addView(
+            View(
+                this,
+            ),
+            LinearLayout.LayoutParams(
+                0,
+                1,
+                1f,
+            ),
+        )
+
+        topBar.addView(
+            modeSwitch,
         )
 
         root.addView(topBar)
