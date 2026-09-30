@@ -435,6 +435,7 @@ class NativeSectionActivity : Activity() {
                 context = this,
                 value = sectionCode,
                 sizeSp = 24f,
+                color = Ui.accent,
             ).apply {
                 setTypeface(
                     typeface,
@@ -1734,6 +1735,7 @@ class NativeSectionActivity : Activity() {
                         " — " +
                         sectionTitle,
                 sizeSp = 19f,
+                color = Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
