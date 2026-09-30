@@ -1721,3 +1721,24 @@ Repair direction is therefore corrected:
 4. only rebuild package metadata/Runtime IR if the restored physical Classic tree and generated package metadata prove inconsistent afterward.
 
 Do not run fast-converter MERGE unless the preserved hold copy is incomplete or invalid.
+
+
+### Laguna dataset integrity restored
+
+The seven prepared Classic volume folders preserved under `_volumes_hold` were restored into the Laguna build root.
+
+Final real-phone item 22:
+- 48307 HTML/CSS files scanned;
+- 264779 local references checked;
+- 0 missing targets;
+- 0 outside-root skips;
+- source volumes 10;
+- build volumes 10;
+- missing volumes 0;
+- extra volumes 0;
+- link integrity PASS;
+- volume parity PASS.
+
+DATA-001 is CLOSED.
+
+No residual flag/language-cleanup issue remains in the prepared Laguna dataset.
