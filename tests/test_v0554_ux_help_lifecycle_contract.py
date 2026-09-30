@@ -19,8 +19,13 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Порожній · додай том"', main)
         self.assertNotIn('"У вибраний проєкт"', main)
         self.assertNotIn('"Порожній · додай потрібний том"', main)
-        self.assertIn('"+ стару Renault-папку"', main)
-        self.assertIn('"+ готова папка"', main)
+        self.assertIn('"+ стару Renault"', main)
+        self.assertIn('"+ готова"', main)
+        self.assertGreaterEqual(
+            main.count("folderIcon =\n                    true"),
+            2,
+        )
+        self.assertIn("R.drawable.ic_folder", main)
 
     def test_project_add_actions_are_one_tile_with_auto_and_manual(self):
         project = self.read(
@@ -85,11 +90,13 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("stroke =\n                                Ui.border", settings)
         self.assertNotIn('sectionTitle(\n                "Backup"', settings)
         self.assertEqual(
-            4,
-            settings.count("styleSettingsDialog("),
+            3,
+            settings.count("DialogRole.CHOICE"),
         )
-        self.assertIn("Ui.surfaceAlt", settings)
-        self.assertIn("Ui.border", settings)
+        self.assertGreaterEqual(
+            settings.count("DialogUi.apply("),
+            3,
+        )
 
     def test_help_controller_restores_only_presentation_state(self):
         helper = self.read(
@@ -102,10 +109,64 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("fun restoreOpen()", helper)
         self.assertIn("isChangingConfigurations", helper)
         self.assertIn('"Зрозуміло"', helper)
-        self.assertIn("Ui.roundedBackground(", helper)
-        self.assertIn("Ui.surfaceAlt", helper)
-        self.assertIn("Ui.accent", helper)
-        self.assertIn("isAllCaps", helper)
+        self.assertIn("DialogUi.apply(", helper)
+        self.assertIn("DialogRole.HELP", helper)
+
+    def test_every_app_owned_alert_dialog_uses_shared_theme(self):
+        base = (
+            self.repo
+            / "android/app/src/main/java/com/saney/renaultdocs"
+        )
+
+        audited = {}
+        total_builders = 0
+
+        for path in base.glob("*.kt"):
+            text = path.read_text(encoding="utf-8")
+            builders = text.count("AlertDialog.Builder")
+
+            if not builders:
+                continue
+
+            applies = text.count("DialogUi.apply(")
+            audited[path.name] = (builders, applies)
+            total_builders += builders
+
+            self.assertGreaterEqual(
+                applies,
+                builders,
+                msg=f"{path.name}: every AlertDialog must use DialogUi",
+            )
+
+        self.assertEqual(
+            {
+                "LifecycleHelpDialogController.kt": (1, 1),
+                "ProjectActivity.kt": (5, 5),
+                "SettingsActivity.kt": (3, 3),
+            },
+            audited,
+        )
+        self.assertEqual(9, total_builders)
+
+    def test_dialog_theme_defines_roles_and_shared_surface(self):
+        dialog_ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/DialogUi.kt"
+        )
+
+        for role in (
+            "HELP",
+            "CHOICE",
+            "CONFIRM",
+            "DANGER",
+            "PROGRESS",
+        ):
+            self.assertIn(role, dialog_ui)
+
+        self.assertIn("Ui.surfaceAlt", dialog_ui)
+        self.assertIn("Ui.border", dialog_ui)
+        self.assertIn("Ui.accent", dialog_ui)
+        self.assertIn("Ui.danger", dialog_ui)
+        self.assertIn("Ui.compactButtonSp", dialog_ui)
 
     def test_complex_surfaces_use_same_help_lifecycle(self):
         paths = [
