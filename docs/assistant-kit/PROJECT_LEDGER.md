@@ -1626,3 +1626,16 @@ Keep:
 `laguna 2 2001-2006_android`, because it is still the configured active `build_root`.
 
 Expected storage recovered by deleting the two quarantined Megane folders is roughly 805 MB based on the read-only audit sizes (400M + 405M).
+
+
+### Legacy Megane public-storage cleanup closed
+
+Final real-phone audit after permanent cleanup:
+- only `laguna 2 2001-2006_android` remains under top-level `Documents/Renault/*_android`;
+- Laguna is the configured active `build_root` and remains **KEEP**;
+- final audit summary: `KEEP 1 / LEGACY 0 / SAFE TO REMOVE 0`;
+- both old Megane prepared folders were removed only after app-private package migration plus two-step reversible quarantine/reopen PASS;
+- approximate recovered storage: 805 MB.
+
+Status:
+**legacy Megane storage cleanup CLOSED — 2026-09-30**.
