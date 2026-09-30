@@ -1326,6 +1326,8 @@ class ProjectActivity : Activity() {
                     project.title,
                 sizeSp =
                     26f,
+                color =
+                    Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -2213,6 +2215,8 @@ class ProjectActivity : Activity() {
                         primaryTitle,
                     sizeSp =
                         19f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
