@@ -1906,3 +1906,11 @@ Settings typography refinement from phone review:
 - small labels/warnings → 11sp;
 - Backup buttons → 14sp;
 - `Backup` section localized to `Резервні копії`.
+
+
+Settings backup button refinement from phone review:
+- Backup action button text reduced to 12sp;
+- kept a practical tap height while reducing visual weight;
+- replaced default gray Android Button background with Renault Docs themed surfaces;
+- primary folder action uses accent border/text;
+- reset action uses neutral border/text.
