@@ -128,3 +128,17 @@ Do not hide this finding by adding another dialog-state flag.
 6. Existing project/data:
    - Laguna II volumes stay present;
    - representative NT8183A and NT8328A still open.
+
+
+## Compact action subtitle typography
+
+After phone review, secondary labels inside action tiles are standardized through one UI token:
+`Ui.actionSubtitleSp = 11sp`.
+
+Applied to:
+- Home primary action subtitles;
+- Home service/tool subtitles;
+- Project `Авто` / `Вручну` subtitles;
+- Project standalone action-card subtitles such as raw → `.rdpkg`.
+
+Primary action titles remain unchanged. This avoids manual line breaks and keeps the same hierarchy across cards.
