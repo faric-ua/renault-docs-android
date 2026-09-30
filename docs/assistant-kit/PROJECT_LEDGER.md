@@ -1973,3 +1973,14 @@ Resolution:
 - stale legacy records are validated before navigation;
 - inaccessible records stay on Home with a clear re-add-via-Legacy message;
 - Modern direct stale-path failure now uses the same clear explanation rather than exposing the raw manifest error.
+
+
+### New-chat handoff 2026-10-01
+
+Checkpoint saved for v0.5.54 / PR #13.
+
+- PR remains open and must not be merged yet.
+- Android PR Check `36790097812` passed.
+- Tests `36790097841` failed on one stale contract assertion in `test_v0513_modern_section_tiles_contract.py` after the shared `Ui.modeButton` refactor; runtime/phone failure is not indicated by this test.
+- Latest phone-driven fixes before handoff: Converter button theming, stale Legacy SAF pre-open validation, clearer stale Modern failure, bottom-right Home tool folder icons, shared Classic/Modern switch styling, legacy help-page relevance note.
+- Resume by fixing only that stale test expectation, rerunning CI, then installing one fresh PR #13 candidate for the full phone regression.
