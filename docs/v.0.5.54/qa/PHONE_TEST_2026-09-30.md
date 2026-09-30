@@ -83,3 +83,13 @@ Result: **PENDING**
 - [ ] Classic Viewer / Visu / `Як користуватись` Modern button matches the same visual family.
 - [ ] Long Viewer titles remain readable and do not collide with mode/home/search/settings controls.
 - [ ] `Як користуватись` shows the relevance note that legacy volume counts describe only the opened Classic dataset.
+
+
+## Converter / stale Legacy regression
+
+- [ ] Converter folder buttons use Renault Docs dark/bordered styling.
+- [ ] `Перевірити план`, `Почати конвертацію`, `Очистити вибір` are no longer default gray Android buttons.
+- [ ] Cancel action uses danger styling when visible.
+- [ ] A valid old `Старі бібліотеки` record still opens normally.
+- [ ] A moved/deleted old library does not enter a broken Modern screen.
+- [ ] Stale library message tells the user to re-add it through Legacy.
