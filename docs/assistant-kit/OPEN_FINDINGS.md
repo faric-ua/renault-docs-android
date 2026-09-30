@@ -1544,3 +1544,33 @@ v0.5.38 fix:
 
 Required invariant:
 Menu 8 must either deliver the APK matching current code `versionName` or fail. It must never silently install an older version.
+
+
+## DATA-001 — Laguna prepared dataset volume parity mismatch
+
+Status: **OPEN · DIAGNOSIS IN PROGRESS**
+
+Real-phone dataset link checker baseline on 2026-09-30:
+
+- active build root: `laguna 2 2001-2006_android`;
+- scanned HTML/CSS files: `14417`;
+- checked local references: `77449`;
+- missing local targets: `14`;
+- all 14 missing targets come from root `INDEX.HTM`;
+- the 14 entries form exactly 7 pairs: missing top-level volume `INDEX.HTM` plus missing `FLAG-RUS.GIF` beneath the same top-level volume folder;
+- current Runtime IR coverage documents only 10 Laguna II volumes / 2174 sections;
+- original archive audit historically recorded 61759 files, while the current build root audit records 19836 files.
+
+Affected stale root entries:
+- NT8183A · 2001-01-22;
+- NT8218A · 2002-05-01;
+- NT8240A · 2003-11-17;
+- NT8254A · 2004-06-21;
+- NT8307A · 2005-12-12;
+- NT8327A · 2006-02-06;
+- NT8328A · 2006-05-09.
+
+The root `INDEX.HTM` is still a real Classic/browser entrypoint, so these are not automatically harmless warnings.
+
+Next diagnostic gate:
+compare `source_root` and `build_root` top-level discovered volumes. If the 7 folders exist in source but not build, prepared Laguna is incomplete and must be repaired/rebuilt. If they are absent from both, root catalog is stale and should be regenerated/pruned from actual volume inventory.
