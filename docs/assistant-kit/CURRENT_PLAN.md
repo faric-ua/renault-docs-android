@@ -284,6 +284,18 @@ Implemented from final phone review:
 - Create Project: input and primary action themed;
 - Project / Project chooser / Documentation / Native section identity titles aligned with the same hierarchy.
 
+## v0.5.54 header/mode polish
+
+Status: **IMPLEMENTED / CI PENDING**.
+
+Latest phone-review fixes:
+- Home tool folder icon moved to the lower-right corner of each child action;
+- tool text gets the full card width; `Конвертер` is forced to one line;
+- shared `Ui.modeButton` now owns Classic/Modern styling;
+- Modern dataset, Modern volume, Native section and Classic Viewer all use the same mode-control visual language;
+- Viewer toolbar titles use the shared entity-title color and smaller 16sp size for long titles;
+- legacy `Як користуватись` pages now show an app-owned relevance note: their volume count describes only the opened Classic dataset, not the current Renault Docs project.
+
 ## Поточний наступний крок
 
-**Wait for final PR #13 CI. If green, install one fresh candidate and run one complete v0.5.54 visual/lifecycle regression. Do not merge before full phone PASS.**
+**Run final PR #13 CI. If green, install one candidate and do the full visual/lifecycle phone pass. No more partial candidates unless the full pass finds a concrete defect.**
