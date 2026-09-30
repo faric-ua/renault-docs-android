@@ -23,6 +23,8 @@ class ModernVolumeActivity : Activity() {
     private lateinit var searchInput: EditText
     private lateinit var listContainer: LinearLayout
     private lateinit var sectionScroll: ScrollView
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private var sectionIndex:
         ModernVolumeSections? = null
@@ -90,6 +92,15 @@ class ModernVolumeActivity : Activity() {
                 false,
             )
 
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         if (
             treeUriText.isBlank() ||
             volumeEntrypoint.isBlank()
@@ -103,6 +114,7 @@ class ModernVolumeActivity : Activity() {
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
 
         if (
             restoredQuery.isNotBlank() ||
@@ -129,6 +141,10 @@ class ModernVolumeActivity : Activity() {
     override fun onSaveInstanceState(
         outState: Bundle,
     ) {
+        helpDialogs.save(
+            outState,
+        )
+
         outState.putString(
             STATE_QUERY,
             if (
@@ -234,6 +250,27 @@ class ModernVolumeActivity : Activity() {
             ) {
                 toggleSearch()
             }
+        )
+
+        topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_VOLUME,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
         )
 
         topBar.addView(
@@ -485,6 +522,26 @@ class ModernVolumeActivity : Activity() {
 
         return root
     }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_VOLUME ->
+                HelpDialogSpec(
+                    title =
+                        "Modern том",
+                    message =
+                        "Список нижче — розділи цього тому у Modern режимі. Пошук працює за кодом і назвою.\n\n" +
+                            "«Classic» відкриває оригінальну Renault HTML-навігацію. «Документація» відкриває native-меню документації тому.\n\n" +
+                            "Коди розділів відображаються у зручному порядку, але їхня справжня identity та legacy entrypoint не змінюються.",
+                )
+
+            else ->
+                null
+        }
 
     private fun loadSections() {
         statusText.text =
@@ -1109,6 +1166,8 @@ class ModernVolumeActivity : Activity() {
             "volumeEntrypoint"
         private const val STATE_QUERY =
             "query"
+        private const val HELP_VOLUME =
+            "volume"
         private const val EXTRA_OPEN_SEARCH =
             "openSearch"
 
