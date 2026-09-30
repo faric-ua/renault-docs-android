@@ -181,6 +181,7 @@ Implementation:
 - Runtime/converter order remains source-defined and opaque-ID safe;
 - only `ModernVolumeActivity` presentation is sorted;
 - stable natural comparison handles numeric runs and suffix variants;
+- display group priority is numeric-leading → `R...` connectors → other alphabetic IDs;
 - duplicates preserve original relative order;
 - search uses the same display order;
 - version bumped to `0.5.53` / code `69`;
@@ -188,4 +189,4 @@ Implementation:
 
 ## Поточний наступний крок
 
-**Run CI for `fix/v0.5.53-natural-section-sort`. If green, build/install a signed v0.5.53 candidate over the current app and re-open Laguna II NT8183A to verify natural section ordering without data loss.**
+**First phone candidate confirmed numeric sorting but exposed wrong group priority (`NT/NU` before `R...`). Comparator is refined to numeric-leading → `R...` → other alphabetic IDs. Run CI again, then rebuild/install PR #12 candidate and recheck NT8183A.**
