@@ -18,6 +18,9 @@ object Ui {
     val accent: Int = Color.parseColor("#76BDFF")
     val danger: Int = Color.parseColor("#FF7A88")
     const val actionSubtitleSp: Float = 11f
+    const val secondaryTextSp: Float = 12f
+    const val valueTextSp: Float = 13f
+    const val compactButtonSp: Float = 14f
 
     fun dp(
         context: Context,
