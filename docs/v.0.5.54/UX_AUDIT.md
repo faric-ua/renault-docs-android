@@ -230,3 +230,10 @@ Contract:
 
 Legacy info-page relevance:
 Classic pages such as `Як користуватись` may contain historical dataset-local counts. Renault Docs now labels that scope in the app chrome so those values are not mistaken for current project-wide state.
+
+
+## Converter button audit / stale legacy navigation
+
+Converter was a remaining exception to the shared visual hierarchy. Its folder-picker and operation buttons now use the same Renault Docs action styling tokens.
+
+Old standalone `DatasetStore` records are intentionally kept for compatibility, but are now treated as external SAF references that can become stale. Before opening such a record, Renault Docs re-runs `DatasetReader.read`. Failed validation blocks navigation and explains how to re-add the folder through Legacy. No record is deleted automatically.
