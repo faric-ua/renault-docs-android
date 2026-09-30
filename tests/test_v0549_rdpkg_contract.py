@@ -83,6 +83,9 @@ class V0549RdpkgContractTests(unittest.TestCase):
         launcher = self._read(
             "tools/termux/reno-build-rdpkg.sh"
         )
+        builder = self._read(
+            "tools/build_rdpkg.py"
+        )
 
         self.assertIn(
             "15 — Створити single-volume .rdpkg",
