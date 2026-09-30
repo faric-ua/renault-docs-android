@@ -24,7 +24,9 @@ class V0542ProjectVolumeLibraryContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
         )
 
-        self.assertIn('"Додати том"', main)
+        self.assertIn("buildHomeAddPanel()", main)
+        self.assertIn('"Додати"', main)
+        self.assertIn('"Новий том"', main)
         self.assertIn('"Новий проєкт"', main)
         chooser = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ProjectChooserActivity.kt"
