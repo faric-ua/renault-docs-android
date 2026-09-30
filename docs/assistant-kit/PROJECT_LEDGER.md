@@ -1892,3 +1892,9 @@ v0.5.54 visual refinement after first phone screenshots:
 - `Авто` now shows `.rdpkg · один том`;
 - `Вручну` now shows `Папка / SAF`;
 - Help dialogs use Renault Docs dark surface/border/accent styling instead of default system gray.
+
+
+v0.5.54 phone typography refinement:
+- introduced shared compact action subtitle token `Ui.actionSubtitleSp = 11sp`;
+- applied to Home and Project action-card secondary labels;
+- avoids forced/manual wrapping of `.rdpkg · один том` while keeping titles unchanged.
