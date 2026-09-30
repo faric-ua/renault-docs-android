@@ -23,6 +23,8 @@ class ProjectActivity : Activity() {
     private lateinit var store: ProjectStore
     private lateinit var settings: AppSettings
     private lateinit var nativeRunStore: NativeRdpkgRunStore
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
     private lateinit var project: RenaultProject
     private lateinit var volumeContainer: LinearLayout
     private lateinit var statusText: TextView
@@ -70,6 +72,14 @@ class ProjectActivity : Activity() {
         super.onCreate(
             savedInstanceState,
         )
+
+        pendingManualImport =
+            savedInstanceState
+                ?.getBoolean(
+                    STATE_PENDING_MANUAL_IMPORT,
+                    false,
+                )
+                ?: false
 
         pendingRdpkgExportVolumeId =
             savedInstanceState
@@ -120,9 +130,19 @@ class ProjectActivity : Activity() {
                     return
                 }
 
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
         render()
         repairSavedVolumeMetadata()
 
@@ -173,6 +193,14 @@ class ProjectActivity : Activity() {
         outState: Bundle,
     ) {
         super.onSaveInstanceState(
+            outState,
+        )
+
+        outState.putBoolean(
+            STATE_PENDING_MANUAL_IMPORT,
+            pendingManualImport,
+        )
+        helpDialogs.save(
             outState,
         )
 
@@ -1244,6 +1272,27 @@ class ProjectActivity : Activity() {
             ),
         )
 
+        topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_PROJECT,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
+        )
+
         root.addView(
             topBar,
         )
@@ -1277,67 +1326,8 @@ class ProjectActivity : Activity() {
             countText,
         )
 
-        val actionsRow =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-            }
-
-        actionsRow.addView(
-            buildProjectActionCard(
-                title =
-                    "Додати том",
-                subtitle =
-                    ".rdpkg · один том",
-                primary =
-                    true,
-            ) {
-                openPackagePicker()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        6,
-                    )
-            },
-        )
-
-        actionsRow.addView(
-            buildProjectActionCard(
-                title =
-                    "Ручне додавання",
-                subtitle =
-                    "Папка / SAF",
-                primary =
-                    false,
-            ) {
-                openVolumePicker(
-                    manual =
-                        true,
-                )
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginStart =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        6,
-                    )
-            },
-        )
-
         root.addView(
-            actionsRow,
+            buildAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1352,6 +1342,8 @@ class ProjectActivity : Activity() {
                     "Kotlin · без Python/Termux · без *_android",
                 primary =
                     true,
+                helpId =
+                    HELP_RAW,
             ) {
                 startNativeRdpkgFlow()
             },
@@ -1565,10 +1557,231 @@ class ProjectActivity : Activity() {
         return root
     }
 
+    private fun buildAddPanel():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@ProjectActivity,
+                    fill =
+                        Ui.surfaceAlt,
+                    stroke =
+                        Ui.accent,
+                )
+            setPadding(
+                Ui.dp(
+                    this@ProjectActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    12,
+                ),
+            )
+
+            val titleRow =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    gravity =
+                        Gravity.CENTER_VERTICAL
+                }
+
+            titleRow.addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        "Додати",
+                    sizeSp =
+                        18f,
+                    color =
+                        Ui.accent,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ),
+            )
+
+            titleRow.addView(
+                Ui.helpButton(
+                    context =
+                        this@ProjectActivity,
+                ) {
+                    helpDialogs.show(
+                        HELP_ADD,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                ),
+            )
+
+            addView(
+                titleRow,
+            )
+
+            val choices =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            6,
+                        ),
+                        0,
+                        0,
+                    )
+                }
+
+            choices.addView(
+                addChoiceButton(
+                    label =
+                        "Авто",
+                    primary =
+                        true,
+                ) {
+                    openPackagePicker()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            5,
+                        )
+                },
+            )
+
+            choices.addView(
+                addChoiceButton(
+                    label =
+                        "Вручну",
+                    primary =
+                        false,
+                ) {
+                    openVolumePicker(
+                        manual =
+                            true,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            5,
+                        )
+                },
+            )
+
+            addView(
+                choices,
+            )
+        }
+
+    private fun addChoiceButton(
+        label: String,
+        primary: Boolean,
+        onClick: () -> Unit,
+    ): View =
+        Ui.textView(
+            context =
+                this,
+            value =
+                label,
+            sizeSp =
+                16f,
+            color =
+                if (
+                    primary
+                ) {
+                    Ui.accent
+                } else {
+                    Ui.text
+                },
+        ).apply {
+            setTypeface(
+                typeface,
+                android.graphics.Typeface.BOLD,
+            )
+            gravity =
+                Gravity.CENTER
+            isClickable =
+                true
+            isFocusable =
+                true
+            minimumHeight =
+                Ui.dp(
+                    this@ProjectActivity,
+                    48,
+                )
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@ProjectActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        if (
+                            primary
+                        ) {
+                            Ui.accent
+                        } else {
+                            Ui.border
+                        },
+                    radiusDp =
+                        12,
+                )
+            setOnClickListener {
+                onClick()
+            }
+        }
+
     private fun buildProjectActionCard(
         title: String,
         subtitle: String,
         primary: Boolean,
+        helpId: String? = null,
         onClick: () -> Unit,
     ): View =
         LinearLayout(
@@ -1625,7 +1838,17 @@ class ProjectActivity : Activity() {
                 ),
             )
 
-            addView(
+            val titleRow =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    gravity =
+                        Gravity.CENTER_VERTICAL
+                }
+
+            titleRow.addView(
                 Ui.textView(
                     context =
                         this@ProjectActivity,
@@ -1647,6 +1870,41 @@ class ProjectActivity : Activity() {
                         android.graphics.Typeface.BOLD,
                     )
                 },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ),
+            )
+
+            if (
+                helpId !=
+                null
+            ) {
+                titleRow.addView(
+                    Ui.helpButton(
+                        context =
+                            this@ProjectActivity,
+                    ) {
+                        helpDialogs.show(
+                            helpId,
+                        )
+                    },
+                    LinearLayout.LayoutParams(
+                        Ui.dp(
+                            this@ProjectActivity,
+                            40,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            40,
+                        ),
+                    ),
+                )
+            }
+
+            addView(
+                titleRow,
             )
 
             addView(
@@ -1698,7 +1956,7 @@ class ProjectActivity : Activity() {
                     context =
                         this,
                     value =
-                        "Проєкт порожній. Додай потрібний том.",
+                        "Порожній · додай том",
                     sizeSp =
                         15f,
                     color =
@@ -2323,6 +2581,43 @@ class ProjectActivity : Activity() {
         )
     }
 
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_PROJECT ->
+                HelpDialogSpec(
+                    title =
+                        "Проєкт і томи",
+                    message =
+                        "Проєкт — це одна модель Renault. Кожен випуск документації додається окремим томом.\n\n" +
+                            "Том можна оновити повторним імпортом того самого .rdpkg. Видалення тому з проєкту не видаляє файли з телефона.",
+                )
+
+            HELP_ADD ->
+                HelpDialogSpec(
+                    title =
+                        "Як додати том",
+                    message =
+                        "Авто — рекомендований спосіб: вибери один .rdpkg. Пакет перевіряється та встановлюється у кероване сховище Renault Docs.\n\n" +
+                            "Вручну — вибір уже підготовленої папки через Android SAF. Це режим сумісності для старих або зовнішніх dataset-папок.",
+                )
+
+            HELP_RAW ->
+                HelpDialogSpec(
+                    title =
+                        "Створити .rdpkg з raw",
+                    message =
+                        "Цей режим бере оригінальну Renault-папку та готує один переносний .rdpkg без Python, Termux і проміжної *_android папки.\n\n" +
+                            "Спочатку вибирається raw source, потім місце збереження пакета. Підготовка працює у фоні; rotation не запускає її повторно.",
+                )
+
+            else ->
+                null
+        }
+
     private fun openPackagePicker() {
         val picker =
             Intent(
@@ -2446,6 +2741,8 @@ class ProjectActivity : Activity() {
             4304
         private const val REQUEST_NATIVE_RDPKG_DESTINATION =
             4305
+        private const val STATE_PENDING_MANUAL_IMPORT =
+            "pendingManualImport"
         private const val STATE_PENDING_RDPKG_EXPORT_VOLUME_ID =
             "pendingRdpkgExportVolumeId"
         private const val STATE_PENDING_NATIVE_SOURCE_URI =
@@ -2454,6 +2751,13 @@ class ProjectActivity : Activity() {
             "pendingNativeSourceName"
         private const val STATE_PENDING_NATIVE_REQUEST_ID =
             "pendingNativeRequestId"
+        private const val HELP_PROJECT =
+            "project"
+        private const val HELP_ADD =
+            "add"
+        private const val HELP_RAW =
+            "raw"
+
         private const val DEFAULT_STATUS_TEXT =
             "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів."
 
