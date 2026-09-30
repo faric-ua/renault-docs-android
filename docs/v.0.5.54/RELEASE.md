@@ -1,6 +1,6 @@
 # Renault Docs v0.5.54 — Add UX + lifecycle-safe Help
 
-Status: **IMPLEMENTED / CI PENDING**
+Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**
 
 ## Scope
 
@@ -23,3 +23,10 @@ Status: **IMPLEMENTED / CI PENDING**
 ## Known follow-up
 
 The audit found the direct `.rdpkg` install worker is still Activity-owned. It should become service/run-store backed in a separate lifecycle hardening change.
+
+
+## CI
+
+- Tests `36664711140` — PASS;
+- Android PR Check `36664711278` — PASS;
+- PR #13 phone acceptance is still required before merge.
