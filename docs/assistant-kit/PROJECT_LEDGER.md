@@ -1685,3 +1685,23 @@ Because root `INDEX.HTM` remains a Classic/browser entrypoint, this is treated a
 
 Next:
 item 22 will compare top-level volume inventory between configured `source_root` and `build_root`. No dataset mutation until that comparison is known.
+
+
+### Laguna partial-build root cause confirmed
+
+Real-phone source/build parity:
+- configured source has 10 top-level volumes;
+- current prepared build has 3;
+- exactly 7 source volumes are missing in build.
+
+Historical v0.5.19 instructions explicitly allowed temporarily moving 7 converted volume folders outside `laguna 2 2001-2006_android`, leaving 3 test volumes for faster package regeneration, with a mandatory later restore of all volumes.
+
+That restore was not completed. This exactly explains the present state.
+
+The current 14 missing root-catalog links are seven pairs:
+- missing volume `INDEX.HTM`;
+- missing flag asset under the same absent volume root.
+
+Therefore the primary problem is whole-folder absence, not flag naming or language cleanup.
+
+Repair is non-destructive fast-converter `--merge`: copy only missing source volume roots, normalize only those new roots, rebuild package metadata/Runtime IR/Fast Pack, then rerun the read-only link/parity gate.
