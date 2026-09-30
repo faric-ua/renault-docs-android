@@ -45,7 +45,7 @@ class NativeSectionsContractTests(unittest.TestCase):
         self.assertIn("Розділів:", volume)
         self.assertIn("Пошук: 101", volume)
         self.assertIn('label =\n                    "Classic"', volume)
-        self.assertIn("Ui.actionButton(", volume)
+        self.assertIn("Ui.modeButton(", volume)
         self.assertIn("section.code", volume)
         self.assertIn("section.title", volume)
         self.assertIn("NativeSectionActivity", volume)
