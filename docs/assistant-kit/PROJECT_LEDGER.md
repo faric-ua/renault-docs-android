@@ -1960,3 +1960,16 @@ Phone-review follow-up:
 - ModernDataset, ModernVolume, NativeSection and Viewer use the shared mode control;
 - Viewer toolbar titles reduced to 16sp and use entity-title color for long titles;
 - legacy `Як користуватись` pages explicitly warn that their volume count belongs to the opened Classic dataset, not the current project.
+
+
+### v0.5.54 converter + stale legacy phone findings
+
+Phone screenshots found:
+- Converter actions still rendered as default gray Android Buttons;
+- stale `Старі бібліотеки` records could enter Modern after the old SAF folder had been moved/deleted, producing raw `renault-dataset.json` read failure.
+
+Resolution:
+- Converter action buttons use shared Renault Docs styling;
+- stale legacy records are validated before navigation;
+- inaccessible records stay on Home with a clear re-add-via-Legacy message;
+- Modern direct stale-path failure now uses the same clear explanation rather than exposing the raw manifest error.
