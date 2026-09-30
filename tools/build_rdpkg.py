@@ -44,6 +44,11 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Build every packageable volume as a separate .rdpkg file.",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         help="Exact .rdpkg output path.",
@@ -99,17 +104,144 @@ def main() -> int:
             )
         return 0
 
+    if args.all and args.volume:
+        parser.error("Use either --all or --volume, not both.")
+
+    if args.all and args.output is not None:
+        parser.error("--all requires --output-dir (or the default output directory).")
+
     if args.output is not None and args.output_dir is not None:
         parser.error(
             "Use only one of --output or --output-dir."
         )
 
+    dataset = load_manifest(
+        source / "renault-dataset.json",
+    )
+
+    if args.all:
+        output_dir = (
+            args.output_dir.expanduser().resolve()
+            if args.output_dir is not None
+            else source.parent / "packages" / "rdpkg"
+        )
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        results = []
+        total = len(volumes)
+
+        for index, volume in enumerate(volumes, start=1):
+            selector = str(volume["source_folder"])
+            output = output_dir / default_package_filename(
+                dataset,
+                volume,
+            )
+
+            print("")
+            print(
+                "============================================================"
+            )
+            print(
+                f"RDPKG BATCH · {index}/{total} · "
+                + str(
+                    volume.get("document_code")
+                    or volume.get("title")
+                    or volume.get("source_folder")
+                )
+            )
+            print(
+                "============================================================"
+            )
+
+            result = build_rdpkg(
+                source,
+                output,
+                volume_selector=selector,
+                progress=log,
+            )
+            results.append(result)
+
+        dataset_id = str(
+            dataset.get("id")
+            or source.name
+            or "renault-dataset"
+        ).replace("/", "-").replace("\\", "-")
+
+        report_path = (
+            output_dir
+            / f"{dataset_id}-rdpkg-batch.json"
+        )
+
+        report = {
+            "source": str(source),
+            "dataset_id": dataset.get("id"),
+            "project_id": dataset.get("project_id"),
+            "package_count": len(results),
+            "packages": [
+                {
+                    "path": str(result["path"]),
+                    "package_id": result["package_id"],
+                    "volume": {
+                        key: result["volume"].get(key)
+                        for key in (
+                            "id",
+                            "title",
+                            "document_code",
+                            "date",
+                            "source_folder",
+                        )
+                        if result["volume"].get(key) is not None
+                    },
+                    "sha256": result["sha256"],
+                    "bytes": result["bytes"],
+                    "payload_file_count": result["payload_file_count"],
+                }
+                for result in results
+            ],
+        }
+
+        report_path.write_text(
+            json.dumps(
+                report,
+                ensure_ascii=False,
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+
+        print("")
+        print(
+            "============================================================"
+        )
+        print("READY · RDPKG BATCH")
+        print(
+            "============================================================"
+        )
+        print(f"Пакетів: {len(results)}")
+        print(f"Папка:   {output_dir}")
+        print(f"Звіт:    {report_path}")
+
+        for result in results:
+            volume = result["volume"]
+            label = " · ".join(
+                str(part)
+                for part in (
+                    volume.get("document_code")
+                    or volume.get("title"),
+                    volume.get("date"),
+                )
+                if part
+            )
+            print(
+                f"- {label} · {result['sha256']} · "
+                f"{result['bytes']} bytes"
+            )
+
+        return 0
+
     selected = select_volume(
         volumes,
         args.volume,
-    )
-    dataset = load_manifest(
-        source / "renault-dataset.json",
     )
 
     if args.output is not None:

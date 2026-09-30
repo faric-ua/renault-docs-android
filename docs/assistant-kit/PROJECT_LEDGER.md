@@ -1742,3 +1742,17 @@ Final real-phone item 22:
 DATA-001 is CLOSED.
 
 No residual flag/language-cleanup issue remains in the prepared Laguna dataset.
+
+
+### Laguna II all-volume .rdpkg batch
+
+The full Laguna II prepared dataset is now link-clean and volume-parity PASS at 10/10 volumes.
+
+Packaging direction:
+- keep the established distribution contract `one prepared volume = one .rdpkg`;
+- create 10 separate portable packages, not one multi-volume archive.
+
+Termux item 15 is extended with:
+`A — Усі томи окремими .rdpkg`.
+
+The batch path reuses the existing validated single-volume builder for every volume and produces a JSON batch report with per-package SHA-256, size and payload count.
