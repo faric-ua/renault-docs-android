@@ -1756,3 +1756,10 @@ Termux item 15 is extended with:
 `A — Усі томи окремими .rdpkg`.
 
 The batch path reuses the existing validated single-volume builder for every volume and produces a JSON batch report with per-package SHA-256, size and payload count.
+
+
+Batch implementation closeout:
+- PR #11 merged as `3c5a7d6d75ef3cb357b3d11602977678dd66dabd`;
+- Tests `36656945889` — PASS;
+- phone action: update main, open item 15, choose Laguna dataset, then `A — Усі томи окремими .rdpkg`;
+- expected output: 10 independent packages plus one JSON batch report.
