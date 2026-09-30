@@ -133,6 +133,22 @@ Scope:
 - [x] unit tests for valid, missing, external, fragment/query and outside-root references;
 - [x] checker does not mutate the dataset.
 
+## Laguna DATA-001 repair
+
+Status: **ROOT CAUSE CONFIRMED / REPAIR PENDING**.
+
+Evidence:
+- source volumes: 10;
+- build volumes: 3;
+- missing build volumes: 7;
+- no extra build volumes;
+- exactly the same 7 folders were intentionally moved outside the build root during the v0.5.19 reduced test cycle, with an explicit instruction to restore them afterward;
+- paired missing `INDEX.HTM` + flag asset means whole volume folders are absent, not merely differently named language icons.
+
+Safe repair path:
+`Renault Menu → 14 → mode 2 MERGE`.
+The current fast converter merge path copies only missing top-level volumes, skips existing volumes, normalizes only newly copied roots, then rebuilds dataset package metadata/Modern/Runtime IR/Fast Pack.
+
 ## Поточний наступний крок
 
-**Real Laguna baseline found 14 missing root-catalog targets grouped into 7 absent top-level volumes. Run CI for source→build volume parity extension; if green, merge and rerun menu item 22. Do not mutate the Laguna dataset until we know whether the 7 volumes still exist in source_root.**
+**Run fast-converter MERGE from `laguna 2 2001-2006` into existing `laguna 2 2001-2006_android`, then rerun item 22. Do not delete/recreate the existing build.**
