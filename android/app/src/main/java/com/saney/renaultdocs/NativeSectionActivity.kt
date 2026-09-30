@@ -23,6 +23,8 @@ class NativeSectionActivity : Activity() {
     private lateinit var bodyContainer: LinearLayout
     private lateinit var globalBar: LinearLayout
     private lateinit var contextRow: LinearLayout
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private var currentMenuLabel: String = ""
     private var currentMenuActionId: String = ""
@@ -146,6 +148,15 @@ class NativeSectionActivity : Activity() {
                     )
                 }
 
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         if (
             treeUriText.isBlank() ||
             volumeEntrypoint.isBlank() ||
@@ -160,6 +171,7 @@ class NativeSectionActivity : Activity() {
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
         loadRuntimeIr()
     }
 
@@ -182,6 +194,10 @@ class NativeSectionActivity : Activity() {
             STATE_MENU_ACTION_ID,
             currentMenuActionId,
         )
+        helpDialogs.save(
+            outState,
+        )
+
         pendingTablePdf
             ?.let {
                 outState.putString(
@@ -345,6 +361,27 @@ class NativeSectionActivity : Activity() {
             ) {
                 openSectionSearch()
             }
+        )
+
+        globalBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_SECTION,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
         )
 
         globalBar.addView(
@@ -784,6 +821,26 @@ class NativeSectionActivity : Activity() {
                 }
         )
     }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_SECTION ->
+                HelpDialogSpec(
+                    title =
+                        "Modern розділ",
+                    message =
+                        "Modern показує структуровані дані Runtime IR: схеми, роз’єми, положення на авто, документацію та інші дії, які реально є в цьому розділі.\n\n" +
+                            "Classic відкриває оригінальну Renault HTML-сторінку цього самого розділу.\n\n" +
+                            "Коди Renault залишаються opaque: суфікси на кшталт _1/_2 мають значення лише в контексті документації й не переіменовуються програмою.",
+                )
+
+            else ->
+                null
+        }
 
     private fun loadRuntimeIr() {
         Thread {
@@ -4130,6 +4187,8 @@ class NativeSectionActivity : Activity() {
     }
 
     companion object {
+        private const val HELP_SECTION =
+            "section"
         private const val STATE_MENU_LABEL =
             "nativeMenuLabel"
         private const val STATE_MENU_ACTION_ID =
