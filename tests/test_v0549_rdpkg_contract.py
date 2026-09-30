@@ -103,6 +103,12 @@ class V0549RdpkgContractTests(unittest.TestCase):
         self.assertIn("choose_number", launcher)
         self.assertIn("0 — Назад", launcher)
         self.assertIn("Enter — створити .rdpkg; 0 — назад:", launcher)
+        self.assertIn("A — Усі томи окремими .rdpkg", launcher)
+        self.assertIn("args+=(--all)", launcher)
+        self.assertIn('"--all"', builder)
+        self.assertIn('"READY · RDPKG BATCH"', builder)
+        self.assertIn('"package_count": len(results)', builder)
+        self.assertIn('"sha256": result["sha256"]', builder)
         self.assertNotIn("Prepared dataset folder:", launcher)
         self.assertNotIn("Том (наприклад", launcher)
 
