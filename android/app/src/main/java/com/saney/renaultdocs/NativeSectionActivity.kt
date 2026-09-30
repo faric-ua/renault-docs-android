@@ -490,16 +490,24 @@ class NativeSectionActivity : Activity() {
             }
 
         modeSwitch.addView(
-            modeButton(
-                label = "Modern",
-                active = true,
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Modern",
+                active =
+                    true,
             ) {},
         )
 
         modeSwitch.addView(
-            modeButton(
-                label = "Classic",
-                active = false,
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Classic",
+                active =
+                    false,
             ) {
                 openLegacyFallback()
             },
@@ -708,77 +716,6 @@ class NativeSectionActivity : Activity() {
                     10,
                 ),
             )
-            setOnClickListener {
-                onClick()
-            }
-        }
-
-    private fun modeButton(
-        label: String,
-        active: Boolean,
-        onClick: () -> Unit,
-    ): Button =
-        Button(this).apply {
-            text = label
-            isAllCaps = false
-            textSize = 13f
-            minWidth = 0
-            minimumWidth = 0
-            minHeight =
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    34,
-                )
-            minimumHeight =
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    34,
-                )
-            setPadding(
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    10,
-                ),
-                0,
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    10,
-                ),
-                0,
-            )
-            background =
-                Ui.roundedBackground(
-                    context =
-                        this@NativeSectionActivity,
-                    fill =
-                        if (active) {
-                            Ui.accent
-                        } else {
-                            Ui.surfaceAlt
-                        },
-                    stroke =
-                        if (active) {
-                            Ui.accent
-                        } else {
-                            Ui.border
-                        },
-                    radiusDp = 10,
-                )
-            setTextColor(
-                if (active) {
-                    Ui.background
-                } else {
-                    Ui.text
-                }
-            )
-            isEnabled =
-                !active
-            alpha =
-                if (active) {
-                    1f
-                } else {
-                    0.92f
-                }
             setOnClickListener {
                 onClick()
             }
