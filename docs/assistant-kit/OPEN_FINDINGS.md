@@ -1649,3 +1649,53 @@ Final phone result:
 - user verified the Modern section order is now correct;
 - accepted display grouping: numeric-leading IDs → `R...` connectors → other alphabetic IDs;
 - no `.rdpkg` regeneration was required.
+
+
+## UX-024 — Home copy cleanup
+
+Status: **IMPLEMENTED IN v0.5.54 · PHONE TEST PENDING**
+
+Requested from real-phone screenshots:
+- Home primary action subtitle: `У вибраний проєкт` → `До проєкту`;
+- empty project summary: `Порожній · додай потрібний том` → `Порожній · додай том`;
+- same concise empty-state wording inside Project.
+
+## UX-025 — Unified Project Add tile
+
+Status: **IMPLEMENTED IN v0.5.54 · PHONE TEST PENDING**
+
+Replace the two sibling add cards with one parent tile:
+
+- title: `Додати`;
+- action: `Авто` → one `.rdpkg`, recommended;
+- action: `Вручну` → prepared folder / SAF compatibility path.
+
+Raw → `.rdpkg` remains a separate explicit operation.
+
+## UX-026 — Lifecycle-safe contextual Help
+
+Status: **IMPLEMENTED IN v0.5.54 · PHONE TEST PENDING**
+
+A shared Help-window contract is added for the complex UI surfaces.
+
+Required:
+- Help opens above the same parent screen;
+- rotation restores the same Help;
+- no underlying action starts automatically;
+- closing Help returns to the same screen/panel;
+- nested native/documentation state is preserved independently.
+
+Covered surfaces:
+Home, Project, Project Add, raw builder, Converter, Modern volume, Native section, Volume documentation.
+
+## RISK-LIFE-001 — Direct .rdpkg install worker is Activity-owned
+
+Status: **OPEN · FOUND BY v0.5.54 AUDIT**
+
+`ProjectActivity.handleRdpkgResult()` starts `RdpkgImporter.install()` in a plain Activity-owned Thread.
+
+Risk:
+rotation/process recreation during package copy can detach the final UI/project-upsert handoff from the new Activity.
+
+This is separate from Help/modal restoration. Durable target:
+service/run-store-backed import with reattach semantics, comparable to native raw → `.rdpkg` preparation.
