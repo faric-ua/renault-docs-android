@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.check_dataset_links import check_dataset
+from tools.check_dataset_links import check_dataset, compare_volume_parity
 
 
 class DatasetLinkCheckerTests(unittest.TestCase):
@@ -77,6 +77,54 @@ class DatasetLinkCheckerTests(unittest.TestCase):
 
             self.assertEqual("PASS", report["status"])
             self.assertEqual(1, report["checked_references"])
+
+    def test_volume_parity_reports_missing_source_volume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "source"
+            build = root / "build"
+            source.mkdir()
+            build.mkdir()
+
+            for parent, names in (
+                (source, ("Volume A NT8183A 2001_01_22", "Volume B NT8218A 2002_05_01")),
+                (build, ("Volume A NT8183A 2001_01_22",)),
+            ):
+                for name in names:
+                    volume = parent / name
+                    volume.mkdir()
+                    (volume / "INDEX.HTM").write_text("<html></html>", encoding="utf-8")
+
+            parity = compare_volume_parity(source, build)
+
+            self.assertEqual("FAIL", parity["status"])
+            self.assertEqual(2, parity["source_volume_count"])
+            self.assertEqual(1, parity["build_volume_count"])
+            self.assertEqual(
+                ["Volume B NT8218A 2002_05_01"],
+                parity["missing_in_build"],
+            )
+            self.assertEqual([], parity["extra_in_build"])
+
+    def test_volume_parity_passes_for_matching_volume_sets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "source"
+            build = root / "build"
+            source.mkdir()
+            build.mkdir()
+
+            for parent in (source, build):
+                volume = parent / "Volume NT8183A 2001_01_22"
+                volume.mkdir()
+                (volume / "INDEX.HTM").write_text("<html></html>", encoding="utf-8")
+
+            parity = compare_volume_parity(source, build)
+
+            self.assertEqual("PASS", parity["status"])
+            self.assertEqual(1, parity["source_volume_count"])
+            self.assertEqual(1, parity["build_volume_count"])
+            self.assertEqual([], parity["missing_in_build"])
 
     def test_parent_escape_is_not_reported_as_missing_inside_dataset(self):
         with tempfile.TemporaryDirectory() as tmp:
