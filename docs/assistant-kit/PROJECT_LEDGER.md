@@ -1763,3 +1763,28 @@ Batch implementation closeout:
 - Tests `36656945889` — PASS;
 - phone action: update main, open item 15, choose Laguna dataset, then `A — Усі томи окремими .rdpkg`;
 - expected output: 10 independent packages plus one JSON batch report.
+
+
+### Laguna II 10-volume .rdpkg batch PASS
+
+Real-phone batch packaging completed successfully.
+
+Output:
+- package count: 10;
+- output directory: `/storage/emulated/0/Documents/Renault/packages/rdpkg`;
+- batch report: `renault-laguna-ii-x74-2001-2006-rdpkg-batch.json`.
+
+Packages:
+- NT8183A · 2001-01-22 · SHA-256 `decd71b01d017d01f6cd45968585482874114b65c00e2231ba88941afb0046e3`;
+- NT8218A · 2002-05-01 · SHA-256 `1177d44f3b46c2d00b40a7a6a20bdb694be621a6a668f9100245bce5a84d10a4`;
+- NT8236A · 2002-11-18 · SHA-256 `d87f1d862ad8289fdf7ba40306c6826b6446726fab5b980154f017704251aff5`;
+- NT8240A · 2003-11-17 · SHA-256 `ed1362814e17422984d3ce6268b62f997da119269383da8cabe029e03977107a`;
+- NT8254A · 2004-06-21 · SHA-256 `485316cd6f7902c421e3efbb88c3cc75143193752a9c01e58684c67503624cd3`;
+- NT8282A · 2005-04-22 · SHA-256 `54e1559cf7467b86355e25b744dda0f53ed2f0117c0615a17e108968355ae8f9`;
+- NT8283A · 2005-08-29 · SHA-256 `f77d6e603b388a6b09dabcf1b9589b82138be2ac627fd26b49ccb9aefccea008`;
+- NT8307A · 2005-12-12 · SHA-256 `4cdbbcc17764960e58fcec0609a8a19286aea1a72fef29fbb5400f2b31eb8def`;
+- NT8327A · 2006-02-06 · SHA-256 `58bc20dee56e327563c4be0fd602af25e6583bdf10c8a0db874a5e9ab6d1e2a5`;
+- NT8328A · 2006-05-09 · SHA-256 `c647cbe29784afc3cfd77e408cc350ab3e13561763248012aba19fc900711c14`.
+
+Status:
+**Laguna II portable package preparation PASS — 10/10 volumes ready.**
