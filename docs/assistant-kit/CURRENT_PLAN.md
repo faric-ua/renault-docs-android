@@ -187,6 +187,17 @@ Implementation:
 - version bumped to `0.5.53` / code `69`;
 - existing `.rdpkg` files do not require regeneration.
 
+## Laguna II `.rdpkg` phone validation
+
+Status: **EDGE PACKAGE PHONE PASS**.
+
+Validated on phone:
+- `NT8183A · 2001-01-22` — import/open/native sections PASS;
+- `NT8328A · 2006-05-09` — import/open/representative sections PASS.
+
+This covers the oldest and newest Laguna II package formats from the 10-volume batch.
+No package regeneration is required.
+
 ## Поточний наступний крок
 
-**v0.5.53 phone PASS and PR #12 merged as `68323e66c67f07df0e770d99ba7f7b2aa3d95b0f`. Next: verify public-main CI, then continue Laguna package/import validation.**
+**The remaining 8 Laguna II `.rdpkg` packages may now be imported normally. After all 10 are present in the Laguna II project, perform one final project-level sanity check: volume count 10, no duplicate/extra volumes, representative open from early/mid/late dates.**
