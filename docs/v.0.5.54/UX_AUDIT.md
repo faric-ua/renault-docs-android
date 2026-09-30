@@ -210,3 +210,23 @@ The final visual pass standardizes entity hierarchy without over-coloring the UI
 
 Audited surfaces:
 Home project/dataset tiles, Project header and volume tiles, Project chooser, Modern dataset header/volume cards, Modern volume header/section cards, Volume documentation context, and Native section identity.
+
+
+## Classic / Modern control audit
+
+Mode controls are now standardized through `Ui.modeButton`.
+
+Covered:
+- Modern dataset;
+- Modern volume;
+- Native section;
+- Classic Viewer / Visu / legacy info pages.
+
+Contract:
+- active mode = accent-filled compact chip;
+- target mode = dark bordered chip;
+- same 13sp typography and radius;
+- no default gray Android mode buttons.
+
+Legacy info-page relevance:
+Classic pages such as `Як користуватись` may contain historical dataset-local counts. Renault Docs now labels that scope in the app chrome so those values are not mistaken for current project-wide state.
