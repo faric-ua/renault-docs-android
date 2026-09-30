@@ -1089,14 +1089,11 @@ class SettingsActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
-        styleSettingsDialog(
-            dialog,
-        )
-        styleSettingsDialog(
-            dialog,
-        )
-        styleSettingsDialog(
-            dialog,
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
         )
     }
 
@@ -1156,6 +1153,12 @@ class SettingsActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun showPdfStepChooser() {
@@ -1210,29 +1213,12 @@ class SettingsActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
-    }
-
-    private fun styleSettingsDialog(
-        dialog: AlertDialog,
-    ) {
-        dialog.window
-            ?.setBackgroundDrawable(
-                Ui.roundedBackground(
-                    context = this,
-                    fill = Ui.surfaceAlt,
-                    stroke = Ui.border,
-                    radiusDp = 16,
-                ),
-            )
-
-        dialog.getButton(
-            AlertDialog.BUTTON_NEGATIVE,
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
         )
-            ?.apply {
-                setTextColor(Ui.accent)
-                isAllCaps = false
-                textSize = Ui.compactButtonSp
-            }
     }
 
     private fun openBackupFolderPicker() {
