@@ -28,7 +28,9 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("buildAddPanel()", project)
         self.assertIn('value =\n                        "Додати"', project)
         self.assertIn('"Авто"', project)
+        self.assertIn('".rdpkg · один том"', project)
         self.assertIn('"Вручну"', project)
+        self.assertIn('"Папка / SAF"', project)
         self.assertIn("openPackagePicker()", project)
         self.assertIn("openVolumePicker(", project)
         self.assertIn("HELP_ADD", project)
@@ -45,6 +47,10 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("fun restoreOpen()", helper)
         self.assertIn("isChangingConfigurations", helper)
         self.assertIn('"Зрозуміло"', helper)
+        self.assertIn("Ui.roundedBackground(", helper)
+        self.assertIn("Ui.surfaceAlt", helper)
+        self.assertIn("Ui.accent", helper)
+        self.assertIn("isAllCaps", helper)
 
     def test_complex_surfaces_use_same_help_lifecycle(self):
         paths = [
