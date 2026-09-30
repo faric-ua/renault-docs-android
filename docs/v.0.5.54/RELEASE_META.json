@@ -1,12 +1,14 @@
 {
   "versionName": "0.5.54",
   "versionCode": 70,
-  "phase": "implementation",
+  "phase": "ci_pass",
   "feature": "Add UX, lifecycle-safe Help, and UI lifecycle audit",
   "branch": "feat/v0.5.54-ux-help-audit",
   "qa_status": "PHONE_TEST_PENDING",
   "rdpkg_regeneration_required": false,
   "runtime_ir_regeneration_required": false,
   "known_follow_up": "RISK-LIFE-001 direct rdpkg install worker lifecycle",
-  "public_repo": "faric-ua/renault-docs-android"
+  "public_repo": "faric-ua/renault-docs-android",
+  "tests_run": 36664711140,
+  "android_pr_check_run": 36664711278
 }
