@@ -216,8 +216,8 @@ Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**.
 Implemented:
 - Home `Додати том → До проєкту`;
 - empty project `Порожній · додай том`;
-- Project one `Додати` tile with `Авто` / `Вручну`;
-- shared rotation-safe Help controller;
+- Project one `Додати` tile with `Авто` / `Вручну`, with subtitles `.rdpkg · один том` / `Папка / SAF`;
+- shared rotation-safe Help controller with Renault Docs dark styling;
 - Help on Home / Project / Add / raw / Converter / Modern volume / Native section / Volume documentation;
 - CreateProject typed name survives rotation;
 - Project pending manual mode survives recreation;
