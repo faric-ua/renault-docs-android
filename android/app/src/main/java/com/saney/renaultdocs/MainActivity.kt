@@ -18,6 +18,8 @@ class MainActivity : Activity() {
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
     private lateinit var settings: AppSettings
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,10 +27,21 @@ class MainActivity : Activity() {
         store = DatasetStore(this)
         projectStore = ProjectStore(this)
         settings = AppSettings(this)
+
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         projectStore.migrateLegacySingleVolumeDatasets(
             store.load(),
         )
         setContentView(buildContent())
+        helpDialogs.restoreOpen()
         renderLibrary()
         repairSavedVolumeMetadata()
     }
@@ -38,6 +51,17 @@ class MainActivity : Activity() {
         if (::libraryContainer.isInitialized) {
             renderLibrary()
         }
+    }
+
+    override fun onSaveInstanceState(
+        outState: Bundle,
+    ) {
+        helpDialogs.save(
+            outState,
+        )
+        super.onSaveInstanceState(
+            outState,
+        )
     }
 
     @Deprecated("Uses platform SAF result for minSdk 26 compatibility.")
@@ -137,6 +161,33 @@ class MainActivity : Activity() {
         )
 
         topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_LIBRARY,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ).apply {
+                marginEnd =
+                    Ui.dp(
+                        this@MainActivity,
+                        4,
+                    )
+            },
+        )
+
+        topBar.addView(
             ImageButton(this).apply {
                 setImageResource(
                     android.R.drawable.ic_menu_preferences,
@@ -212,7 +263,7 @@ class MainActivity : Activity() {
                 title =
                     "Додати том",
                 subtitle =
-                    "У вибраний проєкт",
+                    "До проєкту",
                 primary =
                     true,
             ) {
@@ -798,7 +849,7 @@ class MainActivity : Activity() {
                             volumeCount ==
                             0
                         ) {
-                            "Порожній · додай потрібний том"
+                            "Порожній · додай том"
                         } else {
                             "Томів: " +
                                 volumeCount
@@ -965,6 +1016,28 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_LIBRARY ->
+                HelpDialogSpec(
+                    title =
+                        "Як влаштована бібліотека",
+                    message =
+                        "Проєкт — це модель автомобіля, наприклад Megane II або Laguna II.\n\n" +
+                            "Том — окремий випуск документації для цієї моделі.\n\n" +
+                            "«Додати том» веде до вибору проєкту. Рекомендований формат — .rdpkg. " +
+                            "«Новий проєкт» створює нову модель у бібліотеці.\n\n" +
+                            "«Конвертер» і «Legacy» — сервісні інструменти для старих Renault-папок.",
+                )
+
+            else ->
+                null
+        }
+
     private fun chooseProjectForVolume() {
         startActivity(
             Intent(
@@ -1018,5 +1091,7 @@ class MainActivity : Activity() {
 
     companion object {
         private const val REQUEST_DATASET_FOLDER = 4101
+        private const val HELP_LIBRARY =
+            "library"
     }
 }
