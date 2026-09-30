@@ -296,6 +296,20 @@ Latest phone-review fixes:
 - Viewer toolbar titles use the shared entity-title color and smaller 16sp size for long titles;
 - legacy `Як користуватись` pages now show an app-owned relevance note: their volume count describes only the opened Classic dataset, not the current Renault Docs project.
 
+## v0.5.54 phone-findings follow-up
+
+Status: **IMPLEMENTED / CI PENDING**.
+
+Latest phone screenshots exposed two concrete defects:
+1. Converter still used default gray Android buttons on its folder/actions screen.
+2. A stale entry under `Старі бібліотеки` could still navigate into Modern and fail with `Не вдалося прочитати renault-dataset.json` after its old public folder had been moved/removed.
+
+Fixes:
+- Converter source/destination, validate, start, cancel, register and clear actions now use the Renault Docs button visual system.
+- Old standalone library records are revalidated with `DatasetReader` before any Modern/Classic navigation.
+- If the saved SAF target is gone/stale, navigation is blocked and Home explains that the folder must be re-added via Legacy.
+- Modern also replaces the raw manifest error with the same user-facing stale-library explanation when entered through an old/direct path.
+
 ## Поточний наступний крок
 
-**Run final PR #13 CI. If green, install one candidate and do the full visual/lifecycle phone pass. No more partial candidates unless the full pass finds a concrete defect.**
+**Wait for CI on the latest PR #13 head. If green, install one candidate and continue the full phone regression from Converter + stale Legacy library first, then the remaining UI/lifecycle checklist.**
