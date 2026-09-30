@@ -135,19 +135,22 @@ Scope:
 
 ## Laguna DATA-001 repair
 
-Status: **ROOT CAUSE CONFIRMED / REPAIR PENDING**.
+Status: **CLOSED / REAL-PHONE PASS — 2026-09-30**.
 
-Evidence:
+Final evidence:
+- restored seven prepared Classic volume folders from `_volumes_hold`;
 - source volumes: 10;
-- build volumes: 3;
-- missing build volumes: 7;
-- no extra build volumes;
-- exactly the same 7 folders were intentionally moved outside the build root during the v0.5.19 reduced test cycle, with an explicit instruction to restore them afterward;
-- paired missing `INDEX.HTM` + flag asset means whole volume folders are absent, not merely differently named language icons.
+- build volumes: 10;
+- missing volumes: 0;
+- extra volumes: 0;
+- HTML/CSS files scanned: 48307;
+- local references checked: 264779;
+- missing local targets: 0;
+- volume parity: PASS;
+- dataset link integrity: PASS.
 
-Safe repair path:
-restore the already-prepared missing Classic volume folders from `/storage/emulated/0/Documents/Renault/_volumes_hold` back into the existing build root after verifying names. Re-conversion is unnecessary unless a restored folder later fails integrity validation.
+This confirms there is no remaining link breakage from the user's earlier language cleanup.
 
 ## Поточний наступний крок
 
-**User confirmed the 7 previously removed prepared Classic volume folders are preserved under `/storage/emulated/0/Documents/Renault/_volumes_hold`. Do not reconvert them. First verify the hold inventory matches the 7 missing volumes, then move those prepared folders back into `laguna 2 2001-2006_android` and rerun item 22.**
+**Promote the now phone-validated dataset link checker into the stable post-conversion gate: wire it into the converter/package validation path so incomplete or broken prepared datasets fail before packaging/release.**
