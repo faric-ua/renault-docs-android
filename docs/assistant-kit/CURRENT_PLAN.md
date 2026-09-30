@@ -211,7 +211,7 @@ Final project-level count/dedup sanity is included in the v0.5.54 phone gate.
 
 ## v0.5.54 — UI / Help / lifecycle audit
 
-Status: **IMPLEMENTED / CI PENDING**.
+Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**.
 
 Implemented:
 - Home `Додати том → До проєкту`;
@@ -229,4 +229,4 @@ Audit follow-up:
 
 ## Поточний наступний крок
 
-**Run v0.5.54 CI. If green, build/install PR candidate and execute the focused phone gate: Home copy, Add tile, Help rotation/no-autostart, Project dialog rotation/no-autostart, CreateProject text rotation, and final Laguna 10-volume count/dedup sanity.**
+**Final PR-head CI is green: Tests `36664711140` PASS; Android PR Check `36664711278` PASS. Build/install PR #13 candidate and execute the focused phone gate: Home copy, Add tile, Help rotation/no-autostart, Project dialog rotation/no-autostart, CreateProject text rotation, and final Laguna 10-volume count/dedup sanity.**
