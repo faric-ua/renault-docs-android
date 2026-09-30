@@ -50,3 +50,11 @@ The audit found the direct `.rdpkg` install worker is still Activity-owned. It s
 - project/volume/dataset/section identities use shared secondary title color;
 - Modern active mode, Classic actions, search fields, and Create Project primary action use the Renault Docs visual system;
 - no payload, Runtime IR, or rdpkg rebuild is required.
+
+
+## Header and mode polish
+
+- tool folder pictograms are bottom-right overlays;
+- Classic/Modern controls share `Ui.modeButton`;
+- long Viewer titles use the entity-title hierarchy;
+- legacy info/help pages show an app note clarifying the scope/relevance of their volume counts.
