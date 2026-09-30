@@ -466,7 +466,7 @@ class MainActivity : Activity() {
                     value =
                         subtitle,
                     sizeSp =
-                        12f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -554,7 +554,7 @@ class MainActivity : Activity() {
                     value =
                         subtitle,
                     sizeSp =
-                        12f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
