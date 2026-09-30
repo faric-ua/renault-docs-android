@@ -21,11 +21,57 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertNotIn('"Порожній · додай потрібний том"', main)
         self.assertIn('"+ стару Renault"', main)
         self.assertIn('"+ готова"', main)
-        self.assertGreaterEqual(
-            main.count("folderIcon =\n                    true"),
-            2,
-        )
+        self.assertIn("buildHomeAddPanel()", main)
+        self.assertIn("buildToolsPanel()", main)
+        self.assertIn('"Новий том"', main)
+        self.assertIn('"Новий проєкт"', main)
         self.assertIn("R.drawable.ic_folder", main)
+        self.assertIn(
+            "Ui.dp(\n                        this@MainActivity,\n                        38,",
+            main,
+        )
+
+    def test_global_visual_hierarchy_and_shared_actions(self):
+        ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/Ui.kt"
+        )
+        main = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+        project = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+        chooser = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectChooserActivity.kt"
+        )
+        dataset = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernDatasetActivity.kt"
+        )
+        volume = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernVolumeActivity.kt"
+        )
+        create = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/CreateProjectActivity.kt"
+        )
+
+        self.assertIn("val entityTitle: Int", ui)
+        self.assertIn("fun actionButton(", ui)
+
+        for text in (
+            main,
+            project,
+            chooser,
+            dataset,
+            volume,
+            create,
+        ):
+            self.assertIn("Ui.entityTitle", text)
+
+        self.assertIn('"Modern"', dataset)
+        self.assertIn("Ui.actionButton(", dataset)
+        self.assertIn("stroke =\n                            Ui.accent", dataset)
+        self.assertIn("Ui.actionButton(", volume)
+        self.assertIn("Ui.actionButton(", create)
 
     def test_project_add_actions_are_one_tile_with_auto_and_manual(self):
         project = self.read(
