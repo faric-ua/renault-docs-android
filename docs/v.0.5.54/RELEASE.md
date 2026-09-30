@@ -8,6 +8,7 @@ Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**
 - empty-project copy cleanup;
 - one Project `Додати` tile with `Авто` / `Вручну`;
 - visible action hints: `.rdpkg · один том` and `Папка / SAF`;
+- compact secondary action typography uses one shared 11sp token across Home/Project action tiles;
 - reusable lifecycle-safe Help windows styled with Renault Docs dark surface/border/accent;
 - Help on the complex library/project/converter/Modern/native/documentation surfaces;
 - CreateProject text survives rotation;
