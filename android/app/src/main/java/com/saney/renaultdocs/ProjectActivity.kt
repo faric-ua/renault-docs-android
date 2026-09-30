@@ -1741,6 +1741,8 @@ class ProjectActivity : Activity() {
                 addChoiceButton(
                     label =
                         "Авто",
+                    subtitle =
+                        ".rdpkg · один том",
                     primary =
                         true,
                 ) {
@@ -1763,6 +1765,8 @@ class ProjectActivity : Activity() {
                 addChoiceButton(
                     label =
                         "Вручну",
+                    subtitle =
+                        "Папка / SAF",
                     primary =
                         false,
                 ) {
@@ -1791,29 +1795,15 @@ class ProjectActivity : Activity() {
 
     private fun addChoiceButton(
         label: String,
+        subtitle: String,
         primary: Boolean,
         onClick: () -> Unit,
     ): View =
-        Ui.textView(
-            context =
-                this,
-            value =
-                label,
-            sizeSp =
-                16f,
-            color =
-                if (
-                    primary
-                ) {
-                    Ui.accent
-                } else {
-                    Ui.text
-                },
+        LinearLayout(
+            this,
         ).apply {
-            setTypeface(
-                typeface,
-                android.graphics.Typeface.BOLD,
-            )
+            orientation =
+                LinearLayout.VERTICAL
             gravity =
                 Gravity.CENTER
             isClickable =
@@ -1823,7 +1813,7 @@ class ProjectActivity : Activity() {
             minimumHeight =
                 Ui.dp(
                     this@ProjectActivity,
-                    48,
+                    76,
                 )
             background =
                 Ui.roundedBackground(
@@ -1842,6 +1832,76 @@ class ProjectActivity : Activity() {
                     radiusDp =
                         12,
                 )
+            setPadding(
+                Ui.dp(
+                    this@ProjectActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    8,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    8,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        label,
+                    sizeSp =
+                        16f,
+                    color =
+                        if (
+                            primary
+                        ) {
+                            Ui.accent
+                        } else {
+                            Ui.text
+                        },
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                    gravity =
+                        Gravity.CENTER
+                },
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        subtitle,
+                    sizeSp =
+                        13f,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    gravity =
+                        Gravity.CENTER
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            2,
+                        ),
+                        0,
+                        0,
+                    )
+                },
+            )
+
             setOnClickListener {
                 onClick()
             }
