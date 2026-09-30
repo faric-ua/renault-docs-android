@@ -114,6 +114,35 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             viewer,
         )
 
+    def test_converter_uses_renault_docs_action_styling(self):
+        converter = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
+        )
+        ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/Ui.kt"
+        )
+
+        self.assertIn("fun applyActionStyle(", ui)
+        self.assertGreaterEqual(
+            converter.count("Ui.applyActionStyle("),
+            6,
+        )
+        self.assertIn("Ui.entityTitle", converter)
+
+    def test_stale_legacy_dataset_is_validated_before_open(self):
+        main = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+        modern = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernDatasetActivity.kt"
+        )
+
+        self.assertIn("openLegacyDataset(", main)
+        self.assertIn("DatasetReader.read(", main)
+        self.assertIn("більше недоступна за збереженим шляхом", main)
+        self.assertIn("додай її знову через Legacy", main)
+        self.assertIn("Ця стара бібліотека більше не читається", modern)
+
     def test_project_add_actions_are_one_tile_with_auto_and_manual(self):
         project = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
