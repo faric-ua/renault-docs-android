@@ -332,17 +332,71 @@ class ModernVolumeActivity : Activity() {
             )
         )
 
-        contextRow.addView(
-            Ui.actionButton(
+        val modeSwitch =
+            LinearLayout(
+                this,
+            ).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+                gravity =
+                    Gravity.CENTER_VERTICAL
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernVolumeActivity,
+                        fill =
+                            Ui.surface,
+                        stroke =
+                            Ui.border,
+                        radiusDp =
+                            12,
+                    )
+                setPadding(
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                )
+            }
+
+        modeSwitch.addView(
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Modern",
+                active =
+                    true,
+            ) {},
+        )
+
+        modeSwitch.addView(
+            Ui.modeButton(
                 context =
                     this,
                 label =
                     "Classic",
-                primary =
+                active =
                     false,
             ) {
                 openClassicVolume()
             },
+        )
+
+        contextRow.addView(
+            modeSwitch,
         )
 
         root.addView(contextRow)
