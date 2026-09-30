@@ -111,6 +111,107 @@ object Ui {
             }
         }
 
+    fun modeButton(
+        context: Context,
+        label: String,
+        active: Boolean,
+        onClick: () -> Unit,
+    ): TextView =
+        textView(
+            context =
+                context,
+            value =
+                label,
+            sizeSp =
+                13f,
+            color =
+                if (
+                    active
+                ) {
+                    background
+                } else {
+                    text
+                },
+        ).apply {
+            setTypeface(
+                typeface,
+                android.graphics.Typeface.BOLD,
+            )
+            gravity =
+                android.view.Gravity.CENTER
+            isClickable =
+                !active
+            isFocusable =
+                !active
+            minHeight =
+                dp(
+                    context,
+                    36,
+                )
+            minimumHeight =
+                dp(
+                    context,
+                    36,
+                )
+            background =
+                roundedBackground(
+                    context =
+                        context,
+                    fill =
+                        if (
+                            active
+                        ) {
+                            accent
+                        } else {
+                            surfaceAlt
+                        },
+                    stroke =
+                        if (
+                            active
+                        ) {
+                            accent
+                        } else {
+                            border
+                        },
+                    radiusDp =
+                        10,
+                )
+            setPadding(
+                dp(
+                    context,
+                    10,
+                ),
+                dp(
+                    context,
+                    6,
+                ),
+                dp(
+                    context,
+                    10,
+                ),
+                dp(
+                    context,
+                    6,
+                ),
+            )
+            alpha =
+                if (
+                    active
+                ) {
+                    1f
+                } else {
+                    0.96f
+                }
+
+            if (
+                !active
+            ) {
+                setOnClickListener {
+                    onClick()
+                }
+            }
+        }
+
     fun actionButton(
         context: Context,
         label: String,
