@@ -19,6 +19,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Порожній · додай том"', main)
         self.assertNotIn('"У вибраний проєкт"', main)
         self.assertNotIn('"Порожній · додай потрібний том"', main)
+        self.assertIn('"+ стару Renault-папку"', main)
+        self.assertIn('"+ готова папка"', main)
 
     def test_project_add_actions_are_one_tile_with_auto_and_manual(self):
         project = self.read(
@@ -82,6 +84,12 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("stroke =\n                                Ui.accent", settings)
         self.assertIn("stroke =\n                                Ui.border", settings)
         self.assertNotIn('sectionTitle(\n                "Backup"', settings)
+        self.assertEqual(
+            4,
+            settings.count("styleSettingsDialog("),
+        )
+        self.assertIn("Ui.surfaceAlt", settings)
+        self.assertIn("Ui.border", settings)
 
     def test_help_controller_restores_only_presentation_state(self):
         helper = self.read(
