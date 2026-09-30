@@ -153,3 +153,48 @@ Phone review expanded the compact typography rule to Settings:
 - small labels/warnings use the compact 11sp token;
 - Backup action buttons use a shared compact 12sp button token with Renault Docs surface/border styling;
 - section label `Backup` is localized to `Резервні копії`.
+
+
+## Full app-owned dialog audit
+
+Phone review showed that styling only Help windows was not enough. The entire app-owned AlertDialog surface was audited.
+
+Inventory on v0.5.54 branch:
+
+| Owner | Count | Type |
+| --- | ---: | --- |
+| LifecycleHelpDialogController | 1 | Help |
+| SettingsActivity | 3 | single-choice/settings |
+| ProjectActivity | 5 | progress/actions/confirmation/chooser/mismatch |
+| **Total** | **9** | all app-owned AlertDialogs |
+
+All 9 now route through shared `DialogUi.apply(...)`.
+
+Roles:
+- `HELP` — contextual Help;
+- `CHOICE` — list/radio/action selection;
+- `CONFIRM` — affirmative confirmation;
+- `DANGER` — destructive confirmation;
+- `PROGRESS` — running operation / cancel-capable status.
+
+Shared visual contract:
+- Renault Docs dark surface;
+- rounded border;
+- transparent inner panels/list background;
+- shared title/message/list text colors;
+- compact non-all-caps buttons;
+- accent affirmative actions;
+- danger color for destructive/cancel-progress positive actions;
+- one implementation instead of per-screen ad-hoc styling.
+
+Lifecycle behavior remains owned by each screen/controller. Styling does not change restore semantics or trigger any action.
+
+Android SAF/DocumentsUI pickers are external system UI and are intentionally outside this styling contract; Renault Docs cannot theme those OS-owned screens.
+
+## Tool-card folder icon refinement
+
+The two Home service cards keep their wording but replace the word "папка/папку" with a dedicated folder pictogram:
+- Converter: `+ стару Renault` + folder icon;
+- Legacy: `+ готова` + folder icon.
+
+This keeps both cards on the same visual height and avoids wrapping while preserving the meaning.
