@@ -42,6 +42,15 @@ object ModernSectionDisplayOrder {
         left: String,
         right: String,
     ): Int {
+        val byGroup =
+            displayGroup(left).compareTo(
+                displayGroup(right),
+            )
+
+        if (byGroup != 0) {
+            return byGroup
+        }
+
         val leftTokens =
             tokens(left)
         val rightTokens =
@@ -86,6 +95,30 @@ object ModernSectionDisplayOrder {
                     Locale.ROOT,
                 )
             )
+    }
+
+    private fun displayGroup(
+        value: String,
+    ): Int {
+        val normalized =
+            value.trim()
+                .uppercase(
+                    Locale.ROOT,
+                )
+
+        return when {
+            normalized.firstOrNull()
+                ?.isDigit() == true ->
+                0
+
+            normalized.startsWith(
+                "R",
+            ) ->
+                1
+
+            else ->
+                2
+        }
     }
 
     private fun tokens(
