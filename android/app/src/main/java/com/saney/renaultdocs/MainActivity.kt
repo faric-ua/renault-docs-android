@@ -1179,31 +1179,101 @@ class MainActivity : Activity() {
             )
 
             setOnClickListener {
-                val intent =
-                    when (
-                        settings.defaultOpenMode
-                    ) {
-                        DatasetOpenMode.MODERN ->
-                            ModernDatasetActivity.intent(
-                                context =
-                                    this@MainActivity,
-                                record =
-                                    record,
-                            )
-
-                        DatasetOpenMode.CLASSIC ->
-                            ViewerActivity
-                                .intent(
-                                    context =
-                                        this@MainActivity,
-                                    record =
-                                        record,
-                                )
-                    }
-
-                startActivity(intent)
+                openLegacyDataset(
+                    record,
+                )
             }
         }
+    }
+
+    private fun openLegacyDataset(
+        record: DatasetRecord,
+    ) {
+        statusText.setTextColor(
+            Ui.muted,
+        )
+        statusText.text =
+            "Перевіряю стару бібліотеку: " +
+                record.title +
+                "…"
+
+        Thread {
+            val result =
+                DatasetReader.read(
+                    context =
+                        this,
+                    treeUri =
+                        Uri.parse(
+                            record.treeUri,
+                        ),
+                )
+
+            runOnUiThread {
+                if (
+                    isFinishing ||
+                    isDestroyed
+                ) {
+                    return@runOnUiThread
+                }
+
+                result
+                    .onSuccess {
+                        fresh ->
+                        store.upsert(
+                            fresh,
+                        )
+
+                        statusText.setTextColor(
+                            Ui.muted,
+                        )
+                        statusText.text =
+                            "Відкриваю: " +
+                                fresh.title
+
+                        val intent =
+                            when (
+                                settings.defaultOpenMode
+                            ) {
+                                DatasetOpenMode.MODERN ->
+                                    ModernDatasetActivity.intent(
+                                        context =
+                                            this,
+                                        record =
+                                            fresh,
+                                    )
+
+                                DatasetOpenMode.CLASSIC ->
+                                    ViewerActivity.intent(
+                                        context =
+                                            this,
+                                        record =
+                                            fresh,
+                                    )
+                            }
+
+                        startActivity(
+                            intent,
+                        )
+                    }
+                    .onFailure {
+                        error ->
+                        statusText.setTextColor(
+                            Ui.danger,
+                        )
+                        statusText.text =
+                            "Стара бібліотека «" +
+                                record.title +
+                                "» більше недоступна за збереженим шляхом. " +
+                                "Якщо папку перенесено або видалено — додай її знову через Legacy. " +
+                                "(" +
+                                (
+                                    error.message
+                                        ?: "невідома помилка"
+                                ) +
+                                ")"
+                    }
+            }
+        }.start()
     }
 
     private fun helpSpec(
