@@ -146,9 +146,8 @@ Evidence:
 - paired missing `INDEX.HTM` + flag asset means whole volume folders are absent, not merely differently named language icons.
 
 Safe repair path:
-`Renault Menu → 14 → mode 2 MERGE`.
-The current fast converter merge path copies only missing top-level volumes, skips existing volumes, normalizes only newly copied roots, then rebuilds dataset package metadata/Modern/Runtime IR/Fast Pack.
+restore the already-prepared missing Classic volume folders from `/storage/emulated/0/Documents/Renault/_volumes_hold` back into the existing build root after verifying names. Re-conversion is unnecessary unless a restored folder later fails integrity validation.
 
 ## Поточний наступний крок
 
-**Run fast-converter MERGE from `laguna 2 2001-2006` into existing `laguna 2 2001-2006_android`, then rerun item 22. Do not delete/recreate the existing build.**
+**User confirmed the 7 previously removed prepared Classic volume folders are preserved under `/storage/emulated/0/Documents/Renault/_volumes_hold`. Do not reconvert them. First verify the hold inventory matches the 7 missing volumes, then move those prepared folders back into `laguna 2 2001-2006_android` and rerun item 22.**
