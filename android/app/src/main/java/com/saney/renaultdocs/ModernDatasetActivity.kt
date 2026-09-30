@@ -185,47 +185,80 @@ class ModernDatasetActivity : Activity() {
 
         topBar.addView(
             Ui.textView(
-                context = this,
-                value = "Modern",
-                sizeSp = 20f,
+                context =
+                    this,
+                value =
+                    "Modern",
+                sizeSp =
+                    15f,
+                color =
+                    Ui.accent,
             ).apply {
                 setTypeface(
                     typeface,
                     android.graphics.Typeface.BOLD,
                 )
+                gravity =
+                    Gravity.CENTER
+                minimumHeight =
+                    Ui.dp(
+                        this@ModernDatasetActivity,
+                        44,
+                    )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernDatasetActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.accent,
+                        radiusDp =
+                            11,
+                    )
                 setPadding(
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        8,
+                        14,
                     ),
-                    0,
                     Ui.dp(
                         this@ModernDatasetActivity,
                         8,
                     ),
-                    0,
+                    Ui.dp(
+                        this@ModernDatasetActivity,
+                        14,
+                    ),
+                    Ui.dp(
+                        this@ModernDatasetActivity,
+                        8,
+                    ),
                 )
             },
             LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 1f,
-            )
+            ).apply {
+                marginEnd =
+                    Ui.dp(
+                        this@ModernDatasetActivity,
+                        8,
+                    )
+            },
         )
 
         topBar.addView(
-            Button(this).apply {
-                text = "Classic"
-                isAllCaps = false
-                minimumHeight =
-                    Ui.dp(
-                        this@ModernDatasetActivity,
-                        44,
-                    )
-                setOnClickListener {
-                    openClassic()
-                }
-            }
+            Ui.actionButton(
+                context =
+                    this,
+                label =
+                    "Classic",
+                primary =
+                    false,
+            ) {
+                openClassic()
+            },
         )
 
         root.addView(topBar)
@@ -235,6 +268,7 @@ class ModernDatasetActivity : Activity() {
                 context = this,
                 value = fallbackTitle,
                 sizeSp = 27f,
+                color = Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -276,9 +310,17 @@ class ModernDatasetActivity : Activity() {
                 setHintTextColor(
                     Ui.muted,
                 )
-                setBackgroundColor(
-                    Ui.surface,
-                )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernDatasetActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.accent,
+                        radiusDp =
+                            11,
+                    )
                 setPadding(
                     Ui.dp(
                         this@ModernDatasetActivity,
@@ -734,6 +776,8 @@ class ModernDatasetActivity : Activity() {
                     value =
                         volume.title,
                     sizeSp = 19f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
