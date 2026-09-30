@@ -1611,3 +1611,29 @@ Final item 22 result:
 
 Conclusion:
 the prepared Laguna dataset is now complete again. The prior 14 missing links were entirely explained by the intentionally parked seven volumes; no residual flag/language-cleanup link breakage remains.
+
+## UX-023 — Modern section list natural display order
+
+Status: **IMPLEMENTED IN v0.5.53 · CI / PHONE TEST PENDING**
+
+Found: 2026-09-30  
+Source: real-phone Laguna II NT8183A `.rdpkg` import
+
+Observed:
+Modern volume list shows preserved Classic source order; visible entries include `R70 → 1013 → 338 → 321 → 853`.
+
+This is not package corruption. BUG-004 intentionally made converter/runtime preserve Classic source order and treat section IDs as opaque strings so IDs such as `R70`, `1405`, `101_1`, alphabetic IDs, and duplicate display codes are not lost.
+
+Required behavior:
+- keep converter / `modern-sections.json` / Runtime IR source order unchanged;
+- sort only the Modern volume presentation list;
+- use stable natural ordering by section code;
+- numeric runs compare numerically (`321 < 338 < 853 < 1013`);
+- suffix variants stay grouped (`101 < 101_1 < 101_2`);
+- numeric-leading codes sort before alphabetic-leading codes;
+- duplicate display codes retain their original relative source order;
+- search uses the same display ordering;
+- section identity continues to include the real entrypoint and is not deduplicated by code.
+
+Implementation:
+`ModernSectionDisplayOrder` is a UI-only stable natural sorter used from `ModernVolumeActivity.renderSections()`.
