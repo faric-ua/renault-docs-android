@@ -30,6 +30,19 @@ class CreateProjectActivity : Activity() {
         setContentView(
             buildContent(),
         )
+
+        savedInstanceState
+            ?.getString(
+                STATE_PROJECT_NAME,
+            )
+            ?.let {
+                nameInput.setText(
+                    it,
+                )
+                nameInput.setSelection(
+                    nameInput.text.length,
+                )
+            }
     }
 
     private fun buildContent():
@@ -222,6 +235,19 @@ class CreateProjectActivity : Activity() {
         )
 
         return root
+    }
+
+    override fun onSaveInstanceState(
+        outState: Bundle,
+    ) {
+        outState.putString(
+            STATE_PROJECT_NAME,
+            nameInput.text
+                .toString(),
+        )
+        super.onSaveInstanceState(
+            outState,
+        )
     }
 
     private fun createProject() {
