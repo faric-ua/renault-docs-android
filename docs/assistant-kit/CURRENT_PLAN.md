@@ -105,19 +105,17 @@ These are accepted work items, but they must not reopen the already accepted v0.
 
 ## Legacy `*_android` storage audit
 
-Status: **REAL-PHONE READ-ONLY AUDIT PASS / MIGRATION BEFORE CLEANUP**.
+Status: **CLOSED — 2026-09-30**.
 
-Real phone result on 2026-09-30:
-- `laguna 2 2001-2006_android` — 356M / 19836 files / dataset manifest present / **KEEP** because it is the configured active `build_root`;
-- `Megane II_NT8342A_android` — 405M / 7855 files / dataset manifest + `.nomedia` / **KEEP FOR NOW** because this prepared folder is the historical source of the current NT8342A project volume;
-- `Megane II_android` — 400M / 7664 files / dataset manifest + `.nomedia` / legacy single-volume Megane output from v0.5.37, historically used for NT8340A; current NT8340A has since been replaced by an app-private `.rdpkg` installation, so this is a **SAFE-TO-REMOVE CANDIDATE AFTER FINAL REFERENCE GATE**.
-
-Important code fact:
-`.rdpkg` imports are extracted into app-private `noBackupFilesDir/rdpkg/<packageId>` and project volume records then use the app-owned DocumentsProvider tree URI. They do not depend on the public `*_android` folder after a successful upsert.
-
-Menu presentation bug found during this audit:
-item 21 accidentally contained a literal `\n`; fixed and merged via PR #8 as `3d056d5641b8351163a844af816b43c7ec0b6ef7`.
+Final real-phone result:
+- `Megane II_android` migrated/quarantined/reopen-tested and permanently removed;
+- `Megane II_NT8342A_android` migrated/quarantined/reopen-tested and permanently removed;
+- both NT8340A and NT8342A remained functional while both legacy folders were absent;
+- final read-only audit shows only `laguna 2 2001-2006_android`;
+- Laguna remains **KEEP** as the configured active `build_root`;
+- final audit summary: `KEEP 1 / LEGACY 0 / SAFE TO REMOVE 0`;
+- approximately 805 MB of obsolete Megane prepared data was removed.
 
 ## Поточний наступний крок
 
-**Both Megane quarantine gates PASS: with both `Megane II_android` and `Megane II_NT8342A_android` renamed out of place, NT8340A and NT8342A both reopen successfully. Both quarantined Megane folders are now SAFE TO REMOVE. Keep `laguna 2 2001-2006_android`.**
+**Legacy storage cleanup is complete. Choose the next Renault Docs feature/release from the maintained roadmap/open findings; do not reopen v0.5.52 or the completed cleanup unless a regression is found.**
