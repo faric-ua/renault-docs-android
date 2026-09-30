@@ -1548,7 +1548,7 @@ Menu 8 must either deliver the APK matching current code `versionName` or fail. 
 
 ## DATA-001 — Laguna prepared dataset volume parity mismatch
 
-Status: **ROOT CAUSE CONFIRMED · REPAIR PENDING**
+Status: **CLOSED · REAL-PHONE PASS 2026-09-30**
 
 Real-phone dataset link checker baseline on 2026-09-30:
 
@@ -1585,3 +1585,29 @@ The paired misses (volume INDEX.HTM + flag asset) prove whole volume folders are
 
 Repair:
 the seven already-prepared Classic volume folders are preserved in `/storage/emulated/0/Documents/Renault/_volumes_hold`. Verify the hold inventory, then restore those folders directly into the build root and rerun item 22. Re-conversion is fallback only if the preserved prepared folders are incomplete or invalid.
+
+
+### DATA-001 final repair result
+
+Real-phone repair completed by restoring the seven already-prepared Classic volume folders from:
+
+`/storage/emulated/0/Documents/Renault/_volumes_hold`
+
+back into:
+
+`/storage/emulated/0/Documents/Renault/laguna 2 2001-2006_android`
+
+Final item 22 result:
+- Scanned HTML/CSS files: 48307;
+- Checked local references: 264779;
+- Missing: 0;
+- Skipped outside-root refs: 0;
+- Status: PASS;
+- Source volumes: 10;
+- Build volumes: 10;
+- Missing volumes in build: 0;
+- Extra volumes in build: 0;
+- Volume parity: PASS.
+
+Conclusion:
+the prepared Laguna dataset is now complete again. The prior 14 missing links were entirely explained by the intentionally parked seven volumes; no residual flag/language-cleanup link breakage remains.
