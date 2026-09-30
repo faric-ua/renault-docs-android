@@ -151,5 +151,5 @@ Phone review expanded the compact typography rule to Settings:
 - descriptions use the shared secondary 12sp token;
 - selected values use the shared 13sp value token;
 - small labels/warnings use the compact 11sp token;
-- Backup action buttons use a shared compact 14sp button token;
+- Backup action buttons use a shared compact 12sp button token with Renault Docs surface/border styling;
 - section label `Backup` is localized to `Резервні копії`.
