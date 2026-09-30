@@ -1582,3 +1582,17 @@ Code contract relevant to cleanup:
 
 Next:
 build/import NT8342A as `.rdpkg`, verify both Megane volumes reopen, then use reversible quarantine before any permanent deletion.
+
+
+### Megane II package migration completed
+
+Real-phone result:
+- NT8342A single-volume package created as `Megane-II_NT8342A_2006-10-09.rdpkg`;
+- package SHA-256: `d76e55a8c7da29244ac01517526fea3e3b9fb118f0f45249a400e708fddf69aa`;
+- package payload files: `8204`;
+- import updated the existing NT8342A volume instead of adding a duplicate;
+- Megane II remained at exactly 2 volumes;
+- NT8340A reopen PASS;
+- NT8342A reopen PASS.
+
+Both Megane project volumes are now verified after app-private package migration. The next cleanup gate is reversible quarantine of the historical public Megane `*_android` folders, one at a time, with reopen verification after each rename. Permanent deletion remains blocked until quarantine PASS.
