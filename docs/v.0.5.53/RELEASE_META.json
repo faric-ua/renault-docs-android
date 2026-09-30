@@ -1,12 +1,15 @@
 {
   "versionName": "0.5.53",
   "versionCode": 69,
-  "phase": "implementation",
+  "phase": "phone_pass",
   "feature": "Modern section list stable natural display order",
   "branch": "fix/v0.5.53-natural-section-sort",
-  "qa_status": "PHONE_TEST_PENDING",
+  "qa_status": "PHONE_PASS",
   "phone_test_target": "Laguna II NT8183A · 2001-01-22",
   "runtime_ir_regeneration_required": false,
   "rdpkg_regeneration_required": false,
-  "public_repo": "faric-ua/renault-docs-android"
+  "public_repo": "faric-ua/renault-docs-android",
+  "phone_test_date": "2026-09-30",
+  "tests_run": 36660615811,
+  "android_pr_check_run": 36660615926
 }
