@@ -16,6 +16,7 @@ object Ui {
     val text: Int = Color.parseColor("#F3F6F8")
     val muted: Int = Color.parseColor("#AAB5C2")
     val accent: Int = Color.parseColor("#76BDFF")
+    val entityTitle: Int = Color.parseColor("#C8E5FF")
     val danger: Int = Color.parseColor("#FF7A88")
     const val actionSubtitleSp: Float = 11f
     const val secondaryTextSp: Float = 12f
@@ -105,6 +106,94 @@ object Ui {
                     radiusDp =
                         12,
                 )
+            setOnClickListener {
+                onClick()
+            }
+        }
+
+    fun actionButton(
+        context: Context,
+        label: String,
+        primary: Boolean = false,
+        onClick: () -> Unit,
+    ): TextView =
+        textView(
+            context =
+                context,
+            value =
+                label,
+            sizeSp =
+                14f,
+            color =
+                if (
+                    primary
+                ) {
+                    accent
+                } else {
+                    text
+                },
+        ).apply {
+            setTypeface(
+                typeface,
+                android.graphics.Typeface.BOLD,
+            )
+            gravity =
+                android.view.Gravity.CENTER
+            isClickable =
+                true
+            isFocusable =
+                true
+            minHeight =
+                dp(
+                    context,
+                    44,
+                )
+            minimumHeight =
+                dp(
+                    context,
+                    44,
+                )
+            background =
+                roundedBackground(
+                    context =
+                        context,
+                    fill =
+                        if (
+                            primary
+                        ) {
+                            surfaceAlt
+                        } else {
+                            surface
+                        },
+                    stroke =
+                        if (
+                            primary
+                        ) {
+                            accent
+                        } else {
+                            border
+                        },
+                    radiusDp =
+                        11,
+                )
+            setPadding(
+                dp(
+                    context,
+                    12,
+                ),
+                dp(
+                    context,
+                    8,
+                ),
+                dp(
+                    context,
+                    12,
+                ),
+                dp(
+                    context,
+                    8,
+                ),
+            )
             setOnClickListener {
                 onClick()
             }
