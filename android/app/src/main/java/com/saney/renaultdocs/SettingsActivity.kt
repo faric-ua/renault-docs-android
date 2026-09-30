@@ -717,13 +717,50 @@ class SettingsActivity : Activity() {
                         false
                     textSize =
                         Ui.compactButtonSp
+                    setTextColor(
+                        Ui.accent,
+                    )
                     gravity =
                         Gravity.CENTER
                     minHeight =
                         Ui.dp(
                             this@SettingsActivity,
-                            46,
+                            44,
                         )
+                    minimumHeight =
+                        Ui.dp(
+                            this@SettingsActivity,
+                            44,
+                        )
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@SettingsActivity,
+                            fill =
+                                Ui.surfaceAlt,
+                            stroke =
+                                Ui.accent,
+                            radiusDp =
+                                10,
+                        )
+                    setPadding(
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                    )
                     setOnClickListener {
                         openBackupFolderPicker()
                     }
@@ -748,13 +785,50 @@ class SettingsActivity : Activity() {
                         false
                     textSize =
                         Ui.compactButtonSp
+                    setTextColor(
+                        Ui.text,
+                    )
                     gravity =
                         Gravity.CENTER
                     minHeight =
                         Ui.dp(
                             this@SettingsActivity,
-                            46,
+                            44,
                         )
+                    minimumHeight =
+                        Ui.dp(
+                            this@SettingsActivity,
+                            44,
+                        )
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@SettingsActivity,
+                            fill =
+                                Ui.surfaceAlt,
+                            stroke =
+                                Ui.border,
+                            radiusDp =
+                                10,
+                        )
+                    setPadding(
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                    )
                     visibility =
                         View.GONE
                     setOnClickListener {
