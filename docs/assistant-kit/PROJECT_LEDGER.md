@@ -1609,3 +1609,20 @@ This proves the current project no longer requires `Megane II_android` at runtim
 
 Next:
 keep the first folder quarantined, quarantine `Megane II_NT8342A_android`, then re-open both volumes.
+
+
+### Megane II second quarantine gate PASS
+
+Real-phone reversible quarantine test:
+- `Megane II_android` remained renamed out of its historical path;
+- `Megane II_NT8342A_android` was also renamed out of its historical path;
+- NT8340A reopen PASS;
+- NT8342A reopen PASS.
+
+Conclusion:
+both historical public Megane `*_android` prepared folders are no longer required by the current runtime and are now classified **SAFE TO REMOVE**.
+
+Keep:
+`laguna 2 2001-2006_android`, because it is still the configured active `build_root`.
+
+Expected storage recovered by deleting the two quarantined Megane folders is roughly 805 MB based on the read-only audit sizes (400M + 405M).
