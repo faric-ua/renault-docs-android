@@ -517,6 +517,12 @@ class ConversionActivity : Activity() {
                         this@ConversionActivity,
                         48,
                     )
+                Ui.applyActionStyle(
+                    view =
+                        this,
+                    primary =
+                        false,
+                )
                 setOnClickListener {
                     validatePlan()
                 }
@@ -547,6 +553,12 @@ class ConversionActivity : Activity() {
                         this@ConversionActivity,
                         52,
                     )
+                Ui.applyActionStyle(
+                    view =
+                        this,
+                    primary =
+                        true,
+                )
                 setOnClickListener {
                     startConversion()
                 }
@@ -579,6 +591,12 @@ class ConversionActivity : Activity() {
                     )
                 visibility =
                     View.GONE
+                Ui.applyActionStyle(
+                    view =
+                        this,
+                    dangerAction =
+                        true,
+                )
                 setOnClickListener {
                     ConversionService
                         .requestCancel(
@@ -681,6 +699,12 @@ class ConversionActivity : Activity() {
                     )
                 visibility =
                     View.GONE
+                Ui.applyActionStyle(
+                    view =
+                        this,
+                    primary =
+                        true,
+                )
                 setOnClickListener {
                     registerConvertedDataset()
                 }
@@ -711,6 +735,12 @@ class ConversionActivity : Activity() {
                         this@ConversionActivity,
                         48,
                     )
+                Ui.applyActionStyle(
+                    view =
+                        this,
+                    primary =
+                        false,
+                )
                 setOnClickListener {
                     if (
                         runStore.load()
@@ -863,6 +893,8 @@ class ConversionActivity : Activity() {
                         title,
                     sizeSp =
                         18f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
@@ -916,6 +948,12 @@ class ConversionActivity : Activity() {
                             this@ConversionActivity,
                             48,
                         )
+                    Ui.applyActionStyle(
+                        view =
+                            this,
+                        primary =
+                            false,
+                    )
                     setOnClickListener {
                         onClick()
                     }
