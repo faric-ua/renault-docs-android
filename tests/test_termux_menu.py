@@ -26,6 +26,8 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('bash "$REPO/tools/termux/reno-project-status.sh"', text)
         self.assertIn('20 — Відновити accepted signer + build', text)
         self.assertIn('21 — Аудит legacy *_android (read-only)', text)
+        self.assertIn('22 — Перевірити посилання dataset (read-only)', text)
+        self.assertIn('bash "$REPO/tools/termux/reno-check-dataset-links.sh"', text)
         self.assertNotIn('build"\\n  echo "21 —', text)
         self.assertIn('bash "$REPO/tools/termux/reno-restore-accepted-signer.sh"', text)
         self.assertNotIn('Phone Diagnostics Menu', text)
@@ -200,6 +202,7 @@ class TermuxMenuContractTests(unittest.TestCase):
             repo / "tools" / "termux" / "reno-candidate.sh",
             repo / "tools" / "termux" / "reno-project-status.sh",
             repo / "tools" / "termux" / "reno-restore-accepted-signer.sh",
+            repo / "tools" / "termux" / "reno-check-dataset-links.sh",
         ]
 
         for script in scripts:
