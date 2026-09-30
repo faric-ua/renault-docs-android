@@ -1,6 +1,6 @@
 # v0.5.53 phone test report — 2026-09-30
 
-Result: **PENDING**
+Result: **PARTIAL — first candidate needs group-order refinement**
 
 Target:
 `Laguna II → NT8183A · 2001-01-22`
@@ -8,7 +8,8 @@ Target:
 Checks:
 - [ ] in-place install preserves projects/data;
 - [ ] volume still opens as native;
-- [ ] section list uses natural code order;
+- [x] numeric section list uses natural code order;
+- [ ] `R...` connector IDs appear after all numeric-leading IDs and before other alphabetic IDs;
 - [ ] `101 / 101_1 / 101_2`-style groups remain adjacent where present;
 - [ ] numeric values sort numerically, not lexicographically;
 - [ ] opaque IDs such as `R70` remain present;
