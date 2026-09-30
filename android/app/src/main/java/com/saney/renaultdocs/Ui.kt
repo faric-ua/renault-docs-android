@@ -17,6 +17,7 @@ object Ui {
     val muted: Int = Color.parseColor("#AAB5C2")
     val accent: Int = Color.parseColor("#76BDFF")
     val danger: Int = Color.parseColor("#FF7A88")
+    const val actionSubtitleSp: Float = 11f
 
     fun dp(
         context: Context,
