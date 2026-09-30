@@ -36,6 +36,30 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("HELP_ADD", project)
         self.assertIn("HELP_RAW", project)
 
+    def test_action_tile_subtitles_use_one_compact_style(self):
+        ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/Ui.kt"
+        )
+        main = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+        project = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+
+        self.assertIn(
+            "const val actionSubtitleSp: Float = 11f",
+            ui,
+        )
+        self.assertGreaterEqual(
+            main.count("Ui.actionSubtitleSp"),
+            2,
+        )
+        self.assertGreaterEqual(
+            project.count("Ui.actionSubtitleSp"),
+            2,
+        )
+
     def test_help_controller_restores_only_presentation_state(self):
         helper = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/LifecycleHelpDialogController.kt"
