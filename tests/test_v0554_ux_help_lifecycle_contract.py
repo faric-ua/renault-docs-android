@@ -78,6 +78,9 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             2,
             settings.count("Ui.compactButtonSp"),
         )
+        self.assertIn("Ui.surfaceAlt", settings)
+        self.assertIn("stroke =\n                                Ui.accent", settings)
+        self.assertIn("stroke =\n                                Ui.border", settings)
         self.assertNotIn('sectionTitle(\n                "Backup"', settings)
 
     def test_help_controller_restores_only_presentation_state(self):
