@@ -72,3 +72,14 @@ Result: **PENDING**
 - [ ] Modern volume `Classic` uses Renault Docs action styling.
 - [ ] Modern volume search field is clearly outlined.
 - [ ] Create Project input and `Створити проєкт` action use Renault Docs styling.
+
+
+## Header / mode polish
+
+- [ ] Tool folder icons sit in the lower-right corner and do not force `Конвертер` to wrap.
+- [ ] Modern dataset Classic/Modern switch matches Renault Docs styling.
+- [ ] Modern volume Classic/Modern switch matches the same styling.
+- [ ] Native section Classic/Modern switch matches the same styling.
+- [ ] Classic Viewer / Visu / `Як користуватись` Modern button matches the same visual family.
+- [ ] Long Viewer titles remain readable and do not collide with mode/home/search/settings controls.
+- [ ] `Як користуватись` shows the relevance note that legacy volume counts describe only the opened Classic dataset.
