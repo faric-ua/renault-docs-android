@@ -28,7 +28,8 @@ New shared `LifecycleHelpDialogController`:
 - restoring Help never triggers the underlying action;
 - closing Help returns to the same screen;
 - Help dismissal during configuration change does not clear the restored state;
-- Help uses one consistent close action: `Зрозуміло`.
+- Help uses one consistent close action: `Зрозуміло`;
+- Help uses Renault Docs dark surface/border/accent styling instead of the default system-gray dialog.
 
 Help is added only where the operation is meaningfully ambiguous:
 
