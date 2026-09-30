@@ -41,3 +41,12 @@ The audit found the direct `.rdpkg` install worker is still Activity-owned. It s
 - Settings radio/list dialogs, Project confirmations/actions/progress, and Help share one Renault Docs dialog family;
 - OS-owned SAF/DocumentsUI remains outside app theming;
 - Converter/Legacy service cards use a folder pictogram instead of the word "папка" to prevent wrapping and equalize layout.
+
+
+## Final visual hierarchy pass
+
+- Home Add and Tools each use one parent tile with two child actions;
+- tool folder icon is larger and right-aligned;
+- project/volume/dataset/section identities use shared secondary title color;
+- Modern active mode, Classic actions, search fields, and Create Project primary action use the Renault Docs visual system;
+- no payload, Runtime IR, or rdpkg rebuild is required.
