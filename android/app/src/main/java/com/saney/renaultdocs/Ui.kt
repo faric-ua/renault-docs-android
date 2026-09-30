@@ -3,6 +3,7 @@ package com.saney.renaultdocs
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import kotlin.math.roundToInt
@@ -46,6 +47,64 @@ object Ui {
         textSize = sizeSp
         setTextColor(color)
     }
+
+    fun helpButton(
+        context: Context,
+        onClick: () -> Unit,
+    ): TextView =
+        textView(
+            context = context,
+            value = "?",
+            sizeSp = 18f,
+            color = accent,
+        ).apply {
+            setTypeface(
+                typeface,
+                android.graphics.Typeface.BOLD,
+            )
+            gravity =
+                Gravity.CENTER
+            contentDescription =
+                "Довідка"
+            isClickable =
+                true
+            isFocusable =
+                true
+            minWidth =
+                dp(
+                    context,
+                    40,
+                )
+            minimumWidth =
+                dp(
+                    context,
+                    40,
+                )
+            minHeight =
+                dp(
+                    context,
+                    40,
+                )
+            minimumHeight =
+                dp(
+                    context,
+                    40,
+                )
+            background =
+                roundedBackground(
+                    context =
+                        context,
+                    fill =
+                        surface,
+                    stroke =
+                        border,
+                    radiusDp =
+                        12,
+                )
+            setOnClickListener {
+                onClick()
+            }
+        }
 
     fun applySystemInsets(
         view: View,
