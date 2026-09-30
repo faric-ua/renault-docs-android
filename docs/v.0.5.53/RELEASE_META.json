@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.53",
   "versionCode": 69,
-  "phase": "phone_pass",
+  "phase": "merged",
   "feature": "Modern section list stable natural display order",
   "branch": "fix/v0.5.53-natural-section-sort",
   "qa_status": "PHONE_PASS",
@@ -11,5 +11,9 @@
   "public_repo": "faric-ua/renault-docs-android",
   "phone_test_date": "2026-09-30",
   "tests_run": 36660615811,
-  "android_pr_check_run": 36660615926
+  "android_pr_check_run": 36660615926,
+  "merged_source_sha": "68323e66c67f07df0e770d99ba7f7b2aa3d95b0f",
+  "public_pr": 12,
+  "final_pr_tests_run": 36661693096,
+  "final_pr_android_check_run": 36661693082
 }
