@@ -1914,3 +1914,24 @@ Settings backup button refinement from phone review:
 - replaced default gray Android Button background with Renault Docs themed surfaces;
 - primary folder action uses accent border/text;
 - reset action uses neutral border/text.
+
+
+### Full v0.5.54 app-dialog consolidation
+
+After phone screenshots exposed remaining system-gray dialogs, all app-owned AlertDialogs were audited.
+
+Inventory:
+- Help controller: 1;
+- Settings: 3;
+- Project: 5;
+- total: 9.
+
+All 9 now use shared `DialogUi` with explicit roles (HELP / CHOICE / CONFIRM / DANGER / PROGRESS).
+
+The Settings bug where styling had been applied repeatedly to only one chooser is removed; each of the three Settings choosers now receives the shared theme exactly once.
+
+Home tool cards also replace the folder word with `ic_folder`:
+- Converter: `+ стару Renault` + icon;
+- Legacy: `+ готова` + icon.
+
+External Android SAF/DocumentsUI is not app-owned and cannot be themed by Renault Docs.
