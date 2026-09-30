@@ -27,7 +27,11 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Новий проєкт"', main)
         self.assertIn("R.drawable.ic_folder", main)
         self.assertIn(
-            "Ui.dp(\n                        this@MainActivity,\n                        38,",
+            "Gravity.END or Gravity.BOTTOM",
+            main,
+        )
+        self.assertIn(
+            "FrameLayout.LayoutParams(",
             main,
         )
 
@@ -56,6 +60,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertIn("val entityTitle: Int", ui)
         self.assertIn("fun actionButton(", ui)
+        self.assertIn("fun modeButton(", ui)
 
         for text in (
             main,
@@ -68,10 +73,46 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             self.assertIn("Ui.entityTitle", text)
 
         self.assertIn('"Modern"', dataset)
-        self.assertIn("Ui.actionButton(", dataset)
+        self.assertIn("Ui.modeButton(", dataset)
         self.assertIn("stroke =\n                            Ui.accent", dataset)
-        self.assertIn("Ui.actionButton(", volume)
+        self.assertIn("Ui.modeButton(", volume)
         self.assertIn("Ui.actionButton(", create)
+
+    def test_mode_switch_is_shared_across_modern_and_classic_surfaces(self):
+        ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/Ui.kt"
+        )
+        dataset = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernDatasetActivity.kt"
+        )
+        volume = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernVolumeActivity.kt"
+        )
+        native = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeSectionActivity.kt"
+        )
+        viewer = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ViewerActivity.kt"
+        )
+
+        self.assertIn("fun modeButton(", ui)
+
+        for text in (
+            dataset,
+            volume,
+            native,
+            viewer,
+        ):
+            self.assertIn("Ui.modeButton(", text)
+
+        self.assertIn(
+            "Classic-довідка цього dataset",
+            viewer,
+        )
+        self.assertIn(
+            "а не поточного проєкту Renault Docs",
+            viewer,
+        )
 
     def test_project_add_actions_are_one_tile_with_auto_and_manual(self):
         project = self.read(
