@@ -7,7 +7,8 @@ Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**
 - Home microcopy cleanup;
 - empty-project copy cleanup;
 - one Project `Додати` tile with `Авто` / `Вручну`;
-- reusable lifecycle-safe Help windows;
+- visible action hints: `.rdpkg · один том` and `Папка / SAF`;
+- reusable lifecycle-safe Help windows styled with Renault Docs dark surface/border/accent;
 - Help on the complex library/project/converter/Modern/native/documentation surfaces;
 - CreateProject text survives rotation;
 - Project modal state survives rotation without automatic actions;
