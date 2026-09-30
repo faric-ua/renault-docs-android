@@ -57,3 +57,18 @@ Result: **PENDING**
 - [ ] Converter shows `+ стару Renault` plus folder icon on one line.
 - [ ] Legacy shows `+ готова` plus folder icon on one line.
 - [ ] Converter and Legacy cards are visually the same height.
+
+
+## Final visual hierarchy
+
+- [ ] Home shows one `Додати` parent tile.
+- [ ] Add child actions are `Новий том / До проєкту` and `Новий проєкт / Створити модель`.
+- [ ] Home shows one `Інструменти` parent tile.
+- [ ] Converter / Legacy child cards have equal height and a large folder icon on the right.
+- [ ] Modern dataset shows active `Modern` state clearly.
+- [ ] Dataset `Classic` uses Renault Docs action styling.
+- [ ] Dataset search field is clearly outlined and readable.
+- [ ] Dataset/project/volume titles use the secondary identity color.
+- [ ] Modern volume `Classic` uses Renault Docs action styling.
+- [ ] Modern volume search field is clearly outlined.
+- [ ] Create Project input and `Створити проєкт` action use Renault Docs styling.
