@@ -1935,3 +1935,17 @@ Home tool cards also replace the folder word with `ic_folder`:
 - Legacy: `+ готова` + icon.
 
 External Android SAF/DocumentsUI is not app-owned and cannot be themed by Renault Docs.
+
+
+### v0.5.54 final visual hierarchy pass
+
+Final phone-review package:
+- Home Add converted to one parent tile with New Volume / New Project child actions;
+- Home Tools converted to one parent tile with Converter / Legacy child actions;
+- folder icon enlarged and right-aligned inside tool child actions;
+- entity titles across project/volume/dataset/native surfaces use shared `Ui.entityTitle`;
+- shared `Ui.actionButton` replaces audited gray app-owned buttons;
+- Modern dataset/volume search fields receive accent outline for readability;
+- Modern active mode is visually highlighted;
+- Create Project form and action are themed;
+- all changes remain in PR #13 pending one final phone regression.
