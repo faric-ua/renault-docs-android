@@ -1898,3 +1898,11 @@ v0.5.54 phone typography refinement:
 - introduced shared compact action subtitle token `Ui.actionSubtitleSp = 11sp`;
 - applied to Home and Project action-card secondary labels;
 - avoids forced/manual wrapping of `.rdpkg · один том` while keeping titles unchanged.
+
+
+Settings typography refinement from phone review:
+- descriptions → 12sp shared secondary token;
+- selected values → 13sp;
+- small labels/warnings → 11sp;
+- Backup buttons → 14sp;
+- `Backup` section localized to `Резервні копії`.
