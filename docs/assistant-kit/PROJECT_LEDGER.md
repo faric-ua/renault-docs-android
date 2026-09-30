@@ -1596,3 +1596,16 @@ Real-phone result:
 - NT8342A reopen PASS.
 
 Both Megane project volumes are now verified after app-private package migration. The next cleanup gate is reversible quarantine of the historical public Megane `*_android` folders, one at a time, with reopen verification after each rename. Permanent deletion remains blocked until quarantine PASS.
+
+
+### Megane II first quarantine gate PASS
+
+Real-phone reversible quarantine test:
+- `Megane II_android` was renamed out of its original public-storage path;
+- NT8340A reopen PASS;
+- NT8342A reopen PASS.
+
+This proves the current project no longer requires `Megane II_android` at runtime. Permanent deletion is still deferred until the second Megane folder also passes quarantine.
+
+Next:
+keep the first folder quarantined, quarantine `Megane II_NT8342A_android`, then re-open both volumes.
