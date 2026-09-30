@@ -60,6 +60,26 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             2,
         )
 
+    def test_settings_use_compact_secondary_typography(self):
+        settings = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/SettingsActivity.kt"
+        )
+
+        self.assertIn('"Резервні копії"', settings)
+        self.assertGreaterEqual(
+            settings.count("Ui.secondaryTextSp"),
+            4,
+        )
+        self.assertGreaterEqual(
+            settings.count("Ui.valueTextSp"),
+            2,
+        )
+        self.assertEqual(
+            2,
+            settings.count("Ui.compactButtonSp"),
+        )
+        self.assertNotIn('sectionTitle(\n                "Backup"', settings)
+
     def test_help_controller_restores_only_presentation_state(self):
         helper = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/LifecycleHelpDialogController.kt"
