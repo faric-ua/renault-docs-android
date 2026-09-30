@@ -269,6 +269,21 @@ Final consolidation before phone acceptance:
 - external Android SAF/DocumentsUI remains OS-owned and cannot be themed by Renault Docs;
 - Home tool cards replace the folder word with a dedicated folder icon to prevent wrapping and align card height.
 
+## v0.5.54 final visual hierarchy pass
+
+Status: **IMPLEMENTED / CI PENDING**.
+
+Implemented from final phone review:
+- Home `Додати` is one parent tile with `Новий том` + `Новий проєкт`;
+- Home `Інструменти` is one parent tile with `Конвертер` + `Legacy`;
+- tool folder pictogram enlarged to 38dp and positioned on the right side of each child action;
+- shared `Ui.actionButton` replaces remaining gray app-owned primary/Classic actions on the audited screens;
+- shared `Ui.entityTitle` gives project/volume/dataset/section identities a second readable color;
+- Modern dataset: active Modern state highlighted, Classic themed, search field accent-outlined, volume titles highlighted;
+- Modern volume: Classic themed, search field accent-outlined, volume/section identity hierarchy improved;
+- Create Project: input and primary action themed;
+- Project / Project chooser / Documentation / Native section identity titles aligned with the same hierarchy.
+
 ## Поточний наступний крок
 
-**Run CI on the final PR #13 head. If green, install one fresh PR #13 candidate and perform the full v0.5.54 phone gate in one pass: Home tool cards, Project Add, all dialog families, rotation/no-autostart, CreateProject text restore, Settings typography/buttons, and Laguna 10-volume regression. Do not merge before that PASS.**
+**Wait for final PR #13 CI. If green, install one fresh candidate and run one complete v0.5.54 visual/lifecycle regression. Do not merge before full phone PASS.**
