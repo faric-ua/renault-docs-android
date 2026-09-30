@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -682,13 +683,9 @@ class MainActivity : Activity() {
         subtitle: String,
         onClick: () -> Unit,
     ): View =
-        LinearLayout(
+        FrameLayout(
             this,
         ).apply {
-            orientation =
-                LinearLayout.HORIZONTAL
-            gravity =
-                Gravity.CENTER_VERTICAL
             isClickable =
                 true
             isFocusable =
@@ -720,7 +717,7 @@ class MainActivity : Activity() {
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    10,
+                    12,
                 ),
                 Ui.dp(
                     this@MainActivity,
@@ -743,7 +740,7 @@ class MainActivity : Activity() {
                     value =
                         title,
                     sizeSp =
-                        16f,
+                        15f,
                     color =
                         Ui.text,
                 ).apply {
@@ -751,6 +748,8 @@ class MainActivity : Activity() {
                         typeface,
                         android.graphics.Typeface.BOLD,
                     )
+                    maxLines =
+                        1
                 },
             )
 
@@ -771,7 +770,10 @@ class MainActivity : Activity() {
                             this@MainActivity,
                             4,
                         ),
-                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            46,
+                        ),
                         0,
                     )
                 },
@@ -779,10 +781,9 @@ class MainActivity : Activity() {
 
             addView(
                 textColumn,
-                LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
                 ),
             )
 
@@ -799,7 +800,7 @@ class MainActivity : Activity() {
                     contentDescription =
                         "Папка"
                 },
-                LinearLayout.LayoutParams(
+                FrameLayout.LayoutParams(
                     Ui.dp(
                         this@MainActivity,
                         38,
@@ -808,13 +809,14 @@ class MainActivity : Activity() {
                         this@MainActivity,
                         38,
                     ),
+                    Gravity.END or Gravity.BOTTOM,
                 ).apply {
-                    marginStart =
+                    marginEnd =
                         Ui.dp(
                             this@MainActivity,
-                            8,
+                            2,
                         )
-                    marginEnd =
+                    bottomMargin =
                         Ui.dp(
                             this@MainActivity,
                             2,
