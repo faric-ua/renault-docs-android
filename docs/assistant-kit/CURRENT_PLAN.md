@@ -116,6 +116,23 @@ Final real-phone result:
 - final audit summary: `KEEP 1 / LEGACY 0 / SAFE TO REMOVE 0`;
 - approximately 805 MB of obsolete Megane prepared data was removed.
 
+## Dataset link integrity gate
+
+Status: **IMPLEMENTED / CI PASS / READY TO MERGE**.
+
+Scope:
+- [x] read-only scanner for prepared dataset HTML/CSS local references;
+- [x] checks HTML `href/src/background/action/data/poster`;
+- [x] checks CSS `url(...)` and quoted `@import`;
+- [x] strips query/fragment before filesystem resolution;
+- [x] ignores external/data/javascript/mail/tel references;
+- [x] validates manifest path fields such as entrypoint/modern/runtime/fast-pack references;
+- [x] JSON report with source/reference/resolved path;
+- [x] nonzero exit code when missing local targets are found;
+- [x] Termux Menu item `22 — Перевірити посилання dataset (read-only)`;
+- [x] unit tests for valid, missing, external, fragment/query and outside-root references;
+- [x] checker does not mutate the dataset.
+
 ## Поточний наступний крок
 
-**Legacy storage cleanup is complete. Choose the next Renault Docs feature/release from the maintained roadmap/open findings; do not reopen v0.5.52 or the completed cleanup unless a regression is found.**
+**Tests `36651746426` PASS. Merge PR #9, update phone main, run menu item 22 against the active Laguna dataset, then classify any reported missing references before making this a blocking post-conversion gate.**

@@ -1639,3 +1639,26 @@ Final real-phone audit after permanent cleanup:
 
 Status:
 **legacy Megane storage cleanup CLOSED — 2026-09-30**.
+
+
+### Dataset link integrity checker foundation
+
+A read-only post-conversion checker was added before enabling any blocking converter gate.
+
+Scope:
+- HTML local references: href/src/background/action/data/poster;
+- CSS url(...) and quoted @import;
+- selected path-bearing dataset manifest fields;
+- query/fragment stripping before filesystem resolution;
+- external/data/javascript/mail/tel references ignored;
+- JSON report plus nonzero exit code when missing local targets are found;
+- no dataset mutation.
+
+User-facing entry:
+`22 — Перевірити посилання dataset (read-only)`.
+
+Validation:
+Tests `36651746426` — PASS.
+
+Next gate:
+run item 22 against the real active Laguna dataset and inspect the baseline before deciding which legacy references are true failures and whether the checker can become a blocking post-conversion gate.
