@@ -198,3 +198,15 @@ The two Home service cards keep their wording but replace the word "папка/�
 - Legacy: `+ готова` + folder icon.
 
 This keeps both cards on the same visual height and avoids wrapping while preserving the meaning.
+
+
+## Final title/tile hierarchy audit
+
+The final visual pass standardizes entity hierarchy without over-coloring the UI:
+- `Ui.entityTitle` is reserved for identity-bearing names (project, dataset, volume, section);
+- `Ui.accent` remains for active mode/state/code/action emphasis;
+- `Ui.text` remains the normal primary reading color;
+- `Ui.muted` remains secondary metadata.
+
+Audited surfaces:
+Home project/dataset tiles, Project header and volume tiles, Project chooser, Modern dataset header/volume cards, Modern volume header/section cards, Volume documentation context, and Native section identity.
