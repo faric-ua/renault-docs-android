@@ -120,4 +120,4 @@ item 21 accidentally contained a literal `\n`; fixed and merged via PR #8 as `3d
 
 ## Поточний наступний крок
 
-**First quarantine gate PASS: with `Megane II_android` renamed out of place, both NT8340A and NT8342A reopen successfully. Next: keep that folder quarantined and quarantine `Megane II_NT8342A_android`; then recheck both volumes. Do not delete anything yet. Keep Laguna `*_android`.**
+**Both Megane quarantine gates PASS: with both `Megane II_android` and `Megane II_NT8342A_android` renamed out of place, NT8340A and NT8342A both reopen successfully. Both quarantined Megane folders are now SAFE TO REMOVE. Keep `laguna 2 2001-2006_android`.**
