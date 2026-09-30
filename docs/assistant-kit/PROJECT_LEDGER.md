@@ -1885,3 +1885,10 @@ State:
 
 Resume:
 Menu 5 → Menu 16 → PR #13 → install candidate → visual gate → Help/dialog rotation gate → merge only after phone PASS.
+
+
+v0.5.54 visual refinement after first phone screenshots:
+- unified Add tile kept;
+- `Авто` now shows `.rdpkg · один том`;
+- `Вручну` now shows `Папка / SAF`;
+- Help dialogs use Renault Docs dark surface/border/accent styling instead of default system gray.
