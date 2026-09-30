@@ -1949,3 +1949,14 @@ Final phone-review package:
 - Modern active mode is visually highlighted;
 - Create Project form and action are themed;
 - all changes remain in PR #13 pending one final phone regression.
+
+
+### v0.5.54 header and mode polish
+
+Phone-review follow-up:
+- tool folder icons moved to bottom-right overlay;
+- tool titles no longer lose width to the icon;
+- one shared `Ui.modeButton` now styles Classic/Modern controls;
+- ModernDataset, ModernVolume, NativeSection and Viewer use the shared mode control;
+- Viewer toolbar titles reduced to 16sp and use entity-title color for long titles;
+- legacy `Як користуватись` pages explicitly warn that their volume count belongs to the opened Classic dataset, not the current project.
