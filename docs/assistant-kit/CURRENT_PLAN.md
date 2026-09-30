@@ -118,7 +118,7 @@ Final real-phone result:
 
 ## Dataset link integrity gate
 
-Status: **IMPLEMENTED / CI PENDING**.
+Status: **IMPLEMENTED / CI PASS / READY TO MERGE**.
 
 Scope:
 - [x] read-only scanner for prepared dataset HTML/CSS local references;
@@ -135,4 +135,4 @@ Scope:
 
 ## Поточний наступний крок
 
-**Run CI on `tooling/dataset-link-checker`. If green, merge, update phone main, run menu item 22 against the active Laguna dataset, then classify any reported missing references before making this a blocking post-conversion gate.**
+**Tests `36651746426` PASS. Merge PR #9, update phone main, run menu item 22 against the active Laguna dataset, then classify any reported missing references before making this a blocking post-conversion gate.**
