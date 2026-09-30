@@ -246,6 +246,12 @@ audit_legacy_android() {
   pause_menu
 }
 
+check_dataset_links() {
+  clear
+  bash "$REPO/tools/termux/reno-check-dataset-links.sh"
+  pause_menu
+}
+
 refresh_termux_integration() {
   clear
   echo "Оновлюю Renault aliases та Termux:Widget shortcut..."
@@ -305,6 +311,7 @@ while true; do
   echo "19 — Статус проєкту / build"
   echo "20 — Відновити accepted signer + build"
   echo "21 — Аудит legacy *_android (read-only)"
+  echo "22 — Перевірити посилання dataset (read-only)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -374,6 +381,9 @@ while true; do
       ;;
     21)
       audit_legacy_android
+      ;;
+    22)
+      check_dataset_links
       ;;
     0)
       clear
