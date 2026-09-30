@@ -648,7 +648,7 @@ class MainActivity : Activity() {
                 title =
                     "Конвертер",
                 subtitle =
-                    "Стара Renault-папка",
+                    "+ стару Renault-папку",
             ) {
                 startActivity(
                     Intent(
@@ -675,7 +675,7 @@ class MainActivity : Activity() {
                 title =
                     "Legacy",
                 subtitle =
-                    "Додати готову папку",
+                    "+ готова папка",
             ) {
                 openDatasetPicker()
             },
