@@ -20,7 +20,7 @@ class V0543LibraryPolishContractTests(unittest.TestCase):
         self.assertIn('"Legacy"', main)
         self.assertIn("buildHomeActionCard(", main)
         self.assertIn("buildToolCard(", main)
-        self.assertIn('"Порожній · додай потрібний том"', main)
+        self.assertIn('"Порожній · додай том"', main)
 
     def test_project_volume_cards_do_not_repeat_document_code_and_date(self):
         activity = self._read(
@@ -30,8 +30,8 @@ class V0543LibraryPolishContractTests(unittest.TestCase):
         self.assertIn("volume.documentCode", activity)
         self.assertIn("val primaryTitle", activity)
         self.assertIn("volume.date", activity)
-        self.assertIn('"Ручне додавання"', activity)
-        self.assertIn('"Папка / SAF"', activity)
+        self.assertIn('"Вручну"', activity)
+        self.assertIn("openVolumePicker(", activity)
 
     def test_legacy_single_volume_metadata_is_repaired(self):
         store = self._read(
