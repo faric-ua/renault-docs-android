@@ -10,6 +10,12 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from core.volumes import discover_volumes
+
 HTML_EXTENSIONS = {".htm", ".html"}
 CSS_EXTENSIONS = {".css"}
 SKIP_SCHEMES = {
@@ -243,6 +249,51 @@ def check_dataset(root: Path) -> dict:
     }
 
 
+def compare_volume_parity(source_root: Path, build_root: Path) -> dict:
+    source_root = source_root.resolve(strict=True)
+    build_root = build_root.resolve(strict=True)
+
+    source_volumes = discover_volumes(source_root)
+    build_volumes = discover_volumes(build_root)
+
+    source_by_folder = {
+        str(item["source_folder"]): item
+        for item in source_volumes
+    }
+    build_by_folder = {
+        str(item["source_folder"]): item
+        for item in build_volumes
+    }
+
+    source_names = set(source_by_folder)
+    build_names = set(build_by_folder)
+
+    missing_in_build = sorted(
+        source_names - build_names,
+        key=str.casefold,
+    )
+    extra_in_build = sorted(
+        build_names - source_names,
+        key=str.casefold,
+    )
+
+    return {
+        "source_root": str(source_root),
+        "build_root": str(build_root),
+        "source_volume_count": len(source_volumes),
+        "build_volume_count": len(build_volumes),
+        "missing_in_build_count": len(missing_in_build),
+        "extra_in_build_count": len(extra_in_build),
+        "missing_in_build": missing_in_build,
+        "extra_in_build": extra_in_build,
+        "status": (
+            "PASS"
+            if not missing_in_build and not extra_in_build
+            else "FAIL"
+        ),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Read-only Renault dataset link integrity checker."
@@ -254,6 +305,11 @@ def main() -> int:
         help="Optional JSON report path outside or inside the dataset.",
     )
     parser.add_argument(
+        "--source-root",
+        type=Path,
+        help="Optional original source root for top-level volume parity comparison.",
+    )
+    parser.add_argument(
         "--max-print",
         type=int,
         default=100,
@@ -263,6 +319,13 @@ def main() -> int:
 
     try:
         report = check_dataset(args.root)
+        if args.source_root is not None:
+            report["volume_parity"] = compare_volume_parity(
+                args.source_root,
+                args.root,
+            )
+            if report["volume_parity"]["status"] != "PASS":
+                report["status"] = "FAIL"
     except (OSError, ValueError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 2
@@ -274,6 +337,18 @@ def main() -> int:
     print(f"Missing: {report['missing_count']}")
     print(f"Skipped outside-root refs: {report['skipped_outside_root']}")
     print(f"Status: {report['status']}")
+
+    parity = report.get("volume_parity")
+    if parity is not None:
+        print(f"Source volumes: {parity['source_volume_count']}")
+        print(f"Build volumes: {parity['build_volume_count']}")
+        print(f"Missing volumes in build: {parity['missing_in_build_count']}")
+        print(f"Extra volumes in build: {parity['extra_in_build_count']}")
+        print(f"Volume parity: {parity['status']}")
+        for folder in parity["missing_in_build"]:
+            print(f"MISSING VOLUME: {folder}")
+        for folder in parity["extra_in_build"]:
+            print(f"EXTRA VOLUME: {folder}")
 
     for item in report["missing"][: max(args.max_print, 0)]:
         print(

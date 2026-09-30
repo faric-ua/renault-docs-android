@@ -118,7 +118,7 @@ Final real-phone result:
 
 ## Dataset link integrity gate
 
-Status: **IMPLEMENTED / CI PASS / READY TO MERGE**.
+Status: **REAL-PHONE BASELINE FAIL / SOURCE-BUILD PARITY DIAGNOSIS IMPLEMENTED / CI PENDING**.
 
 Scope:
 - [x] read-only scanner for prepared dataset HTML/CSS local references;
@@ -135,4 +135,4 @@ Scope:
 
 ## Поточний наступний крок
 
-**Tests `36651746426` PASS. Merge PR #9, update phone main, run menu item 22 against the active Laguna dataset, then classify any reported missing references before making this a blocking post-conversion gate.**
+**Real Laguna baseline found 14 missing root-catalog targets grouped into 7 absent top-level volumes. Run CI for source→build volume parity extension; if green, merge and rerun menu item 22. Do not mutate the Laguna dataset until we know whether the 7 volumes still exist in source_root.**
