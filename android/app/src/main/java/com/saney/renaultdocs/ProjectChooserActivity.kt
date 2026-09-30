@@ -231,6 +231,8 @@ class ProjectChooserActivity : Activity() {
                                     project.title,
                                 sizeSp =
                                     20f,
+                                color =
+                                    Ui.entityTitle,
                             ).apply {
                                 setTypeface(
                                     typeface,
