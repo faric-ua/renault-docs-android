@@ -171,7 +171,7 @@ Implementation:
 
 ## v0.5.53 — Modern section natural display order
 
-Status: **IMPLEMENTED / CI PENDING**.
+Status: **PHONE PASS / READY TO MERGE**.
 
 Real-phone finding:
 - Laguna II `NT8183A · 2001-01-22` imports and opens as `383 · native`;
@@ -189,4 +189,4 @@ Implementation:
 
 ## Поточний наступний крок
 
-**First phone candidate confirmed numeric sorting but exposed wrong group priority (`NT/NU` before `R...`). Comparator is refined to numeric-leading → `R...` → other alphabetic IDs. Run CI again, then rebuild/install PR #12 candidate and recheck NT8183A.**
+**Refined v0.5.53 candidate passed phone verification: numeric-leading IDs → `R...` connectors → other alphabetic IDs. Tests `36660615811` PASS and Android PR Check `36660615926` PASS. Merge PR #12, then verify public-main CI.**
