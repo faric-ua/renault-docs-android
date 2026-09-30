@@ -7,12 +7,13 @@ Result: **PENDING**
 - [ ] Home: `Додати том` subtitle is `До проєкту`.
 - [ ] Empty project card: `Порожній · додай том`.
 - [ ] Project has one `Додати` tile.
-- [ ] Add tile has `Авто` and `Вручну`.
+- [ ] Add tile has `Авто` / `.rdpkg · один том`.
+- [ ] Add tile has `Вручну` / `Папка / SAF`.
 - [ ] raw → `.rdpkg` action remains separate.
 
 ## Help lifecycle
 
-- [ ] Home Help opens.
+- [ ] Home Help opens in Renault Docs dark theme, not the system-gray dialog.
 - [ ] Home Help survives rotation.
 - [ ] Closing Help returns to Home with no action launched.
 - [ ] Project Add Help opens.
