@@ -120,4 +120,4 @@ item 21 accidentally contained a literal `\n`; fixed and merged via PR #8 as `3d
 
 ## Поточний наступний крок
 
-**NT8342A `.rdpkg` built/imported and both NT8340A + NT8342A reopen PASS. Next: reversible quarantine of `Megane II_android` first, then `Megane II_NT8342A_android`, with reopen checks after each rename. Do not delete anything yet. Keep Laguna `*_android`.**
+**First quarantine gate PASS: with `Megane II_android` renamed out of place, both NT8340A and NT8342A reopen successfully. Next: keep that folder quarantined and quarantine `Megane II_NT8342A_android`; then recheck both volumes. Do not delete anything yet. Keep Laguna `*_android`.**
