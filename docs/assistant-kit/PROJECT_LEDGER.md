@@ -1817,3 +1817,9 @@ Final refined candidate phone result:
 CI on final PR head:
 - Tests `36660615811` — PASS;
 - Android PR Check `36660615926` — PASS.
+
+v0.5.53 merge:
+- PR #12 merged as `68323e66c67f07df0e770d99ba7f7b2aa3d95b0f`;
+- final PR-head Tests `36661693096` — PASS;
+- final PR-head Android PR Check `36661693082` — PASS;
+- phone ordering PASS before merge.
