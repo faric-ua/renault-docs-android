@@ -249,70 +249,12 @@ class MainActivity : Activity() {
             }
         )
 
-        val primaryActions =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-                gravity =
-                    Gravity.CENTER_VERTICAL
-            }
-
-        primaryActions.addView(
-            buildHomeActionCard(
-                title =
-                    "Додати том",
-                subtitle =
-                    "До проєкту",
-                primary =
-                    true,
-            ) {
-                chooseProjectForVolume()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
-        primaryActions.addView(
-            buildHomeActionCard(
-                title =
-                    "Новий проєкт",
-                subtitle =
-                    "Створити модель",
-                primary =
-                    false,
-            ) {
-                showCreateProjectDialog()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginStart =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
         root.addView(
-            primaryActions,
+            buildHomeAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
+            ),
         )
 
         statusText = Ui.textView(
@@ -374,7 +316,130 @@ class MainActivity : Activity() {
         return root
     }
 
-    private fun buildHomeActionCard(
+    private fun buildHomeAddPanel():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@MainActivity,
+                    fill =
+                        Ui.surfaceAlt,
+                    stroke =
+                        Ui.accent,
+                )
+            setPadding(
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    12,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        "Додати",
+                    sizeSp =
+                        18f,
+                    color =
+                        Ui.accent,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            val row =
+                LinearLayout(
+                    this@MainActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            8,
+                        ),
+                        0,
+                        0,
+                    )
+                }
+
+            row.addView(
+                buildHomeChoiceCard(
+                    title =
+                        "Новий том",
+                    subtitle =
+                        "До проєкту",
+                    primary =
+                        true,
+                ) {
+                    chooseProjectForVolume()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            row.addView(
+                buildHomeChoiceCard(
+                    title =
+                        "Новий проєкт",
+                    subtitle =
+                        "Створити модель",
+                    primary =
+                        false,
+                ) {
+                    showCreateProjectDialog()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            addView(
+                row,
+            )
+        }
+
+    private fun buildHomeChoiceCard(
         title: String,
         subtitle: String,
         primary: Boolean,
@@ -386,7 +451,7 @@ class MainActivity : Activity() {
             orientation =
                 LinearLayout.VERTICAL
             gravity =
-                Gravity.CENTER_VERTICAL
+                Gravity.CENTER
             isClickable =
                 true
             isFocusable =
@@ -394,20 +459,14 @@ class MainActivity : Activity() {
             minimumHeight =
                 Ui.dp(
                     this@MainActivity,
-                    76,
+                    86,
                 )
             background =
                 Ui.roundedBackground(
                     context =
                         this@MainActivity,
                     fill =
-                        if (
-                            primary
-                        ) {
-                            Ui.surfaceAlt
-                        } else {
-                            Ui.surface
-                        },
+                        Ui.surface,
                     stroke =
                         if (
                             primary
@@ -416,23 +475,25 @@ class MainActivity : Activity() {
                         } else {
                             Ui.border
                         },
+                    radiusDp =
+                        12,
                 )
             setPadding(
                 Ui.dp(
                     this@MainActivity,
-                    16,
+                    10,
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    12,
+                    10,
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    16,
+                    10,
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    12,
+                    10,
                 ),
             )
 
@@ -443,7 +504,7 @@ class MainActivity : Activity() {
                     value =
                         title,
                     sizeSp =
-                        17f,
+                        16f,
                     color =
                         if (
                             primary
@@ -457,10 +518,243 @@ class MainActivity : Activity() {
                         typeface,
                         android.graphics.Typeface.BOLD,
                     )
+                    gravity =
+                        Gravity.CENTER
                 },
             )
 
             addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        subtitle,
+                    sizeSp =
+                        Ui.actionSubtitleSp,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    gravity =
+                        Gravity.CENTER
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            4,
+                        ),
+                        0,
+                        0,
+                    )
+                },
+            )
+
+            setOnClickListener {
+                onClick()
+            }
+        }
+
+    private fun buildToolsPanel():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@MainActivity,
+                    fill =
+                        Ui.surfaceAlt,
+                    stroke =
+                        Ui.border,
+                )
+            setPadding(
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    12,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        "Інструменти",
+                    sizeSp =
+                        18f,
+                    color =
+                        Ui.entityTitle,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            val row =
+                LinearLayout(
+                    this@MainActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            8,
+                        ),
+                        0,
+                        0,
+                    )
+                }
+
+            row.addView(
+                buildToolCard(
+                    title =
+                        "Конвертер",
+                    subtitle =
+                        "+ стару Renault",
+                ) {
+                    startActivity(
+                        Intent(
+                            this@MainActivity,
+                            ConversionActivity::class.java,
+                        )
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            row.addView(
+                buildToolCard(
+                    title =
+                        "Legacy",
+                    subtitle =
+                        "+ готова",
+                ) {
+                    openDatasetPicker()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            addView(
+                row,
+            )
+        }
+
+    private fun buildToolCard(
+        title: String,
+        subtitle: String,
+        onClick: () -> Unit,
+    ): View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.HORIZONTAL
+            gravity =
+                Gravity.CENTER_VERTICAL
+            isClickable =
+                true
+            isFocusable =
+                true
+            minimumHeight =
+                Ui.dp(
+                    this@MainActivity,
+                    94,
+                )
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@MainActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        Ui.border,
+                    radiusDp =
+                        12,
+                )
+            setPadding(
+                Ui.dp(
+                    this@MainActivity,
+                    12,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    10,
+                ),
+            )
+
+            val textColumn =
+                LinearLayout(
+                    this@MainActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.VERTICAL
+                }
+
+            textColumn.addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        title,
+                    sizeSp =
+                        16f,
+                    color =
+                        Ui.text,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            textColumn.addView(
                 Ui.textView(
                     context =
                         this@MainActivity,
@@ -483,141 +777,49 @@ class MainActivity : Activity() {
                 },
             )
 
-            setOnClickListener {
-                onClick()
-            }
-        }
-
-    private fun buildToolCard(
-        title: String,
-        subtitle: String,
-        folderIcon: Boolean = false,
-        onClick: () -> Unit,
-    ): View =
-        LinearLayout(
-            this,
-        ).apply {
-            orientation =
-                LinearLayout.VERTICAL
-            isClickable =
-                true
-            isFocusable =
-                true
-            background =
-                Ui.roundedBackground(
-                    context =
-                        this@MainActivity,
-                    fill =
-                        Ui.surface,
-                    stroke =
-                        Ui.border,
-                    radiusDp =
-                        12,
-                )
-            setPadding(
-                Ui.dp(
-                    this@MainActivity,
-                    14,
-                ),
-                Ui.dp(
-                    this@MainActivity,
-                    12,
-                ),
-                Ui.dp(
-                    this@MainActivity,
-                    14,
-                ),
-                Ui.dp(
-                    this@MainActivity,
-                    12,
+            addView(
+                textColumn,
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
                 ),
             )
 
             addView(
-                Ui.textView(
-                    context =
-                        this@MainActivity,
-                    value =
-                        title,
-                    sizeSp =
-                        15f,
+                ImageView(
+                    this@MainActivity,
                 ).apply {
-                    setTypeface(
-                        typeface,
-                        android.graphics.Typeface.BOLD,
+                    setImageResource(
+                        R.drawable.ic_folder,
                     )
+                    setColorFilter(
+                        Ui.accent,
+                    )
+                    contentDescription =
+                        "Папка"
                 },
-            )
-
-            val subtitleRow =
-                LinearLayout(
-                    this@MainActivity,
+                LinearLayout.LayoutParams(
+                    Ui.dp(
+                        this@MainActivity,
+                        38,
+                    ),
+                    Ui.dp(
+                        this@MainActivity,
+                        38,
+                    ),
                 ).apply {
-                    orientation =
-                        LinearLayout.HORIZONTAL
-                    gravity =
-                        Gravity.CENTER_VERTICAL
-                    setPadding(
-                        0,
+                    marginStart =
                         Ui.dp(
                             this@MainActivity,
-                            3,
-                        ),
-                        0,
-                        0,
-                    )
-                }
-
-            subtitleRow.addView(
-                Ui.textView(
-                    context =
-                        this@MainActivity,
-                    value =
-                        subtitle,
-                    sizeSp =
-                        Ui.actionSubtitleSp,
-                    color =
-                        Ui.muted,
-                ),
-            )
-
-            if (
-                folderIcon
-            ) {
-                subtitleRow.addView(
-                    ImageView(
-                        this@MainActivity,
-                    ).apply {
-                        setImageResource(
-                            R.drawable.ic_folder,
+                            8,
                         )
-                        setColorFilter(
-                            Ui.muted,
+                    marginEnd =
+                        Ui.dp(
+                            this@MainActivity,
+                            2,
                         )
-                        contentDescription =
-                            "Папка"
-                    },
-                    LinearLayout.LayoutParams(
-                        Ui.dp(
-                            this@MainActivity,
-                            18,
-                        ),
-                        Ui.dp(
-                            this@MainActivity,
-                            18,
-                        ),
-                    ).apply {
-                        marginStart =
-                            Ui.dp(
-                                this@MainActivity,
-                                4,
-                            )
-                    },
-                )
-            }
-
-            addView(
-                subtitleRow,
+                },
             )
 
             setOnClickListener {
@@ -670,88 +872,17 @@ class MainActivity : Activity() {
         }
 
         libraryContainer.addView(
-            Ui.textView(
-                context = this,
-                value = "Інструменти",
-                sizeSp = 16f,
-                color = Ui.muted,
-            ).apply {
-                setPadding(
-                    0,
-                    Ui.dp(this@MainActivity, 14),
-                    0,
-                    Ui.dp(this@MainActivity, 8),
-                )
-            }
-        )
-
-        val toolsRow =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-            }
-
-        toolsRow.addView(
-            buildToolCard(
-                title =
-                    "Конвертер",
-                subtitle =
-                    "+ стару Renault",
-                folderIcon =
-                    true,
-            ) {
-                startActivity(
-                    Intent(
-                        this@MainActivity,
-                        ConversionActivity::class.java,
-                    )
-                )
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
-        toolsRow.addView(
-            buildToolCard(
-                title =
-                    "Legacy",
-                subtitle =
-                    "+ готова",
-                folderIcon =
-                    true,
-            ) {
-                openDatasetPicker()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginStart =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
-        libraryContainer.addView(
-            toolsRow,
+            buildToolsPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
+            ).apply {
+                topMargin =
+                    Ui.dp(
+                        this@MainActivity,
+                        14,
+                    )
+            },
         )
 
         val records =
@@ -886,6 +1017,8 @@ class MainActivity : Activity() {
                         project.title,
                     sizeSp =
                         20f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
@@ -987,6 +1120,7 @@ class MainActivity : Activity() {
                     context = this@MainActivity,
                     value = record.title,
                     sizeSp = 20f,
+                    color = Ui.entityTitle,
                 ).apply {
                     setTypeface(typeface, android.graphics.Typeface.BOLD)
                 }
