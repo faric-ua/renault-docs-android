@@ -874,6 +874,12 @@ class ProjectActivity : Activity() {
         nativeRunProgressDialog =
             dialog
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.PROGRESS,
+        )
 
         updateNativeRunProgressDialog(
             state,
@@ -2418,6 +2424,12 @@ class ProjectActivity : Activity() {
                 volume.id,
         )
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun startRdpkgExport(
@@ -2543,6 +2555,12 @@ class ProjectActivity : Activity() {
                 volume.id,
         )
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.DANGER,
+        )
     }
 
     private fun importPreparedVolumes(
@@ -2646,6 +2664,12 @@ class ProjectActivity : Activity() {
                 null,
         )
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun importPreparedVolume(
@@ -2743,6 +2767,12 @@ class ProjectActivity : Activity() {
                 volume.id,
         )
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CONFIRM,
+        )
     }
 
     private fun setProjectDialogState(
