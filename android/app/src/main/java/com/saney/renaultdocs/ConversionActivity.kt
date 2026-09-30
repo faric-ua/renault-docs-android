@@ -22,6 +22,8 @@ class ConversionActivity : Activity() {
     private lateinit var draftStore: ConversionDraftStore
     private lateinit var runStore: ConversionRunStore
     private lateinit var datasetStore: DatasetStore
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private lateinit var sourceValue: TextView
     private lateinit var destinationValue: TextView
@@ -80,11 +82,32 @@ class ConversionActivity : Activity() {
                 this,
             )
 
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
         renderDraft()
         renderRunState()
+    }
+
+    override fun onSaveInstanceState(
+        outState: Bundle,
+    ) {
+        helpDialogs.save(
+            outState,
+        )
+        super.onSaveInstanceState(
+            outState,
+        )
     }
 
     override fun onStart() {
@@ -349,6 +372,27 @@ class ConversionActivity : Activity() {
                         8,
                     )
             }
+        )
+
+        topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_CONVERTER,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
         )
 
         root.addView(
@@ -748,6 +792,26 @@ class ConversionActivity : Activity() {
 
         return root
     }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_CONVERTER ->
+                HelpDialogSpec(
+                    title =
+                        "Як працює конвертер",
+                    message =
+                        "Source — оригінальна Renault-папка, її конвертер не видаляє і не змінює.\n\n" +
+                            "Destination — батьківська папка для готового dataset. Якщо сумісний dataset цієї моделі вже існує, нові томи додаються через merge.\n\n" +
+                            "Перед записом виконується план/валідація. Запущена конвертація живе окремо від Activity, тому rotation або повторне відкриття екрана не повинні запускати її вдруге.",
+                )
+
+            else ->
+                null
+        }
 
     private fun buildFolderCard(
         title: String,
@@ -1648,6 +1712,8 @@ class ConversionActivity : Activity() {
     }
 
     companion object {
+        private const val HELP_CONVERTER =
+            "converter"
         private const val REQUEST_SOURCE_FOLDER =
             4201
         private const val REQUEST_DESTINATION_FOLDER =
