@@ -257,6 +257,18 @@ Tomorrow continue from exactly this gate:
 Known follow-up remains open:
 `RISK-LIFE-001` — direct .rdpkg install worker is Activity-owned and is not part of tonight's phone gate.
 
+## v0.5.54 final UI consolidation
+
+Status: **IMPLEMENTED / CI PENDING AFTER FULL DIALOG AUDIT**.
+
+Final consolidation before phone acceptance:
+- audited all 9 app-owned AlertDialogs;
+- all use shared `DialogUi` with explicit roles;
+- Settings chooser dialogs no longer use per-dialog ad-hoc styling;
+- Help / Settings / Project dialogs share one visual contract;
+- external Android SAF/DocumentsUI remains OS-owned and cannot be themed by Renault Docs;
+- Home tool cards replace the folder word with a dedicated folder icon to prevent wrapping and align card height.
+
 ## Поточний наступний крок
 
-**Final PR-head CI is green: Tests `36664711140` PASS; Android PR Check `36664711278` PASS. Build/install PR #13 candidate and execute the focused phone gate: Home copy, Add tile, Help rotation/no-autostart, Project dialog rotation/no-autostart, CreateProject text rotation, and final Laguna 10-volume count/dedup sanity.**
+**Run CI on the final PR #13 head. If green, install one fresh PR #13 candidate and perform the full v0.5.54 phone gate in one pass: Home tool cards, Project Add, all dialog families, rotation/no-autostart, CreateProject text restore, Settings typography/buttons, and Laguna 10-volume regression. Do not merge before that PASS.**
