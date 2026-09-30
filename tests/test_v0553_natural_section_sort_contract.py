@@ -24,6 +24,9 @@ class V0553NaturalSectionSortContractTests(unittest.TestCase):
         self.assertIn("compareCodes(", sorter)
         self.assertIn("withIndex()", sorter)
         self.assertIn("left.index.compareTo(", sorter)
+        self.assertIn("displayGroup(", sorter)
+        self.assertIn('normalized.startsWith(', sorter)
+        self.assertIn('"R",', sorter)
 
     def test_release_version(self):
         gradle = self._read("android/app/build.gradle.kts")
