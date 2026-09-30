@@ -27,7 +27,7 @@ class ModernModePdfExportContractTests(unittest.TestCase):
             modern,
         )
         self.assertIn(
-            "Ui.actionButton(",
+            "Ui.modeButton(",
             modern,
         )
         self.assertIn(
