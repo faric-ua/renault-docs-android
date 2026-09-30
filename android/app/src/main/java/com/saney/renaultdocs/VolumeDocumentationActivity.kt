@@ -19,6 +19,8 @@ import org.json.JSONObject
 class VolumeDocumentationActivity : Activity() {
     private lateinit var bodyContainer:
         LinearLayout
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private var datasetTitle: String =
         "Renault dataset"
@@ -81,6 +83,15 @@ class VolumeDocumentationActivity : Activity() {
                 panelStack.addAll(it)
             }
 
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         if (
             treeUriText.isBlank() ||
             volumeEntrypoint.isBlank()
@@ -94,6 +105,7 @@ class VolumeDocumentationActivity : Activity() {
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
 
         loadDocumentation()
     }
@@ -104,6 +116,9 @@ class VolumeDocumentationActivity : Activity() {
         outState.putStringArrayList(
             STATE_PANEL_STACK,
             ArrayList(panelStack),
+        )
+        helpDialogs.save(
+            outState,
         )
         super.onSaveInstanceState(
             outState,
@@ -227,6 +242,27 @@ class VolumeDocumentationActivity : Activity() {
         )
 
         topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_DOCUMENTATION,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
+        )
+
+        topBar.addView(
             headerAction(
                 icon =
                     R.drawable.ic_settings,
@@ -286,6 +322,25 @@ class VolumeDocumentationActivity : Activity() {
 
         return root
     }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_DOCUMENTATION ->
+                HelpDialogSpec(
+                    title =
+                        "Документація тому",
+                    message =
+                        "Цей екран відтворює native-меню документації конкретного тому. Пункти й вкладені панелі беруться з Runtime IR і ведуть до тих самих документів, що й Classic.\n\n" +
+                            "Якщо ти зайшов у вкладену панель, «Назад» повертає на попередній рівень. Відкрита панель і Help відновлюються після rotation.",
+                )
+
+            else ->
+                null
+        }
 
     private fun loadDocumentation() {
         bodyContainer.removeAllViews()
@@ -1453,6 +1508,8 @@ class VolumeDocumentationActivity : Activity() {
     }
 
     companion object {
+        private const val HELP_DOCUMENTATION =
+            "documentation"
         private const val STATE_PANEL_STACK =
             "documentationPanelStack"
 
