@@ -118,7 +118,7 @@ Final real-phone result:
 
 ## Dataset link integrity gate
 
-Status: **REAL-PHONE BASELINE FAIL / SOURCE-BUILD PARITY DIAGNOSIS IMPLEMENTED / CI PENDING**.
+Status: **REAL-PHONE PASS — 264779 refs / 0 missing / 10↔10 volumes**.
 
 Scope:
 - [x] read-only scanner for prepared dataset HTML/CSS local references;
@@ -198,6 +198,35 @@ Validated on phone:
 This covers the oldest and newest Laguna II package formats from the 10-volume batch.
 No package regeneration is required.
 
+## Laguna II full package import
+
+Status: **USER REPORTS REMAINING 8 IMPORTED / FINAL 10-VOLUME SCREEN CHECK PENDING**.
+
+Already phone-validated:
+- NT8183A early edge PASS;
+- NT8328A late edge PASS;
+- user then imported the remaining Laguna II packages.
+
+Final project-level count/dedup sanity is included in the v0.5.54 phone gate.
+
+## v0.5.54 — UI / Help / lifecycle audit
+
+Status: **IMPLEMENTED / CI PENDING**.
+
+Implemented:
+- Home `Додати том → До проєкту`;
+- empty project `Порожній · додай том`;
+- Project one `Додати` tile with `Авто` / `Вручну`;
+- shared rotation-safe Help controller;
+- Help on Home / Project / Add / raw / Converter / Modern volume / Native section / Volume documentation;
+- CreateProject typed name survives rotation;
+- Project pending manual mode survives recreation;
+- Project dialogs restore after rotation without automatically exporting/removing/adding;
+- full audit in `docs/v.0.5.54/UX_AUDIT.md`.
+
+Audit follow-up:
+- `RISK-LIFE-001`: direct .rdpkg import worker remains Activity-owned.
+
 ## Поточний наступний крок
 
-**The remaining 8 Laguna II `.rdpkg` packages may now be imported normally. After all 10 are present in the Laguna II project, perform one final project-level sanity check: volume count 10, no duplicate/extra volumes, representative open from early/mid/late dates.**
+**Run v0.5.54 CI. If green, build/install PR candidate and execute the focused phone gate: Home copy, Add tile, Help rotation/no-autostart, Project dialog rotation/no-autostart, CreateProject text rotation, and final Laguna 10-volume count/dedup sanity.**
