@@ -130,32 +130,12 @@ class LifecycleHelpDialogController(
             created
         created.show()
 
-        created.window
-            ?.setBackgroundDrawable(
-                Ui.roundedBackground(
-                    context =
-                        activity,
-                    fill =
-                        Ui.surfaceAlt,
-                    stroke =
-                        Ui.border,
-                    radiusDp =
-                        16,
-                ),
-            )
-
-        created.getButton(
-            AlertDialog.BUTTON_POSITIVE,
+        DialogUi.apply(
+            dialog =
+                created,
+            role =
+                DialogRole.HELP,
         )
-            ?.apply {
-                setTextColor(
-                    Ui.accent,
-                )
-                isAllCaps =
-                    false
-                textSize =
-                    16f
-            }
     }
 
     companion object {
