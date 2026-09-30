@@ -1614,7 +1614,7 @@ the prepared Laguna dataset is now complete again. The prior 14 missing links we
 
 ## UX-023 — Modern section list natural display order
 
-Status: **IMPLEMENTED IN v0.5.53 · CI / PHONE TEST PENDING**
+Status: **v0.5.53 PHONE PARTIAL · GROUP ORDER REFINED / CI PENDING**
 
 Found: 2026-09-30  
 Source: real-phone Laguna II NT8183A `.rdpkg` import
@@ -1630,10 +1630,16 @@ Required behavior:
 - use stable natural ordering by section code;
 - numeric runs compare numerically (`321 < 338 < 853 < 1013`);
 - suffix variants stay grouped (`101 < 101_1 < 101_2`);
-- numeric-leading codes sort before alphabetic-leading codes;
+- display groups are: numeric-leading IDs first → `R...` connector IDs second → other alphabetic IDs last;
 - duplicate display codes retain their original relative source order;
 - search uses the same display ordering;
 - section identity continues to include the real entrypoint and is not deduplicated by code.
 
 Implementation:
 `ModernSectionDisplayOrder` is a UI-only stable natural sorter used from `ModernVolumeActivity.renderSections()`.
+
+Phone refinement 2026-09-30:
+- numeric ordering itself is correct;
+- first v0.5.53 candidate incorrectly placed alphabetic `NT/NU` before `R...`;
+- user clarified Renault display semantics: `R...` are connector entries and should come after numeric sections but before the remaining alphabetic groups;
+- comparator updated accordingly without changing package/runtime source order.
