@@ -1584,4 +1584,4 @@ Therefore the current 14 missing links are a direct consequence of an intentiona
 The paired misses (volume INDEX.HTM + flag asset) prove whole volume folders are absent. A flag-name/language-cleanup issue alone would not also remove the volume INDEX.HTM.
 
 Repair:
-use fast converter MERGE mode to add only missing top-level volumes from configured source into the existing build, normalize only copied roots, rebuild package metadata/Runtime IR/Fast Pack, then rerun item 22. If only flag assets remain missing after volume restoration, handle those separately as a language-cleanup/catalog asset issue.
+the seven already-prepared Classic volume folders are preserved in `/storage/emulated/0/Documents/Renault/_volumes_hold`. Verify the hold inventory, then restore those folders directly into the build root and rerun item 22. Re-conversion is fallback only if the preserved prepared folders are incomplete or invalid.
