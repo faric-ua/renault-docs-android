@@ -1662,3 +1662,26 @@ Tests `36651746426` — PASS.
 
 Next gate:
 run item 22 against the real active Laguna dataset and inspect the baseline before deciding which legacy references are true failures and whether the checker can become a blocking post-conversion gate.
+
+
+### Laguna link-check baseline found 7 absent volume targets
+
+First real-phone run of Termux item 22:
+- scanned 14417 HTML/CSS files;
+- checked 77449 local references;
+- found 14 missing targets;
+- 0 outside-root skips.
+
+The 14 misses are not random:
+each of 7 root-catalog volume entries contributes exactly two missing targets:
+the volume's `INDEX.HTM` and its Russian flag GIF.
+
+The affected volume folders correspond to:
+NT8183A, NT8218A, NT8240A, NT8254A, NT8307A, NT8327A and NT8328A.
+
+Current Laguna Runtime IR coverage is based on 10 volumes / 2174 sections, while the historical original archive audit had 61759 files and the current build-root storage audit shows only 19836 files.
+
+Because root `INDEX.HTM` remains a Classic/browser entrypoint, this is treated as a real data-integrity finding rather than an ignored warning.
+
+Next:
+item 22 will compare top-level volume inventory between configured `source_root` and `build_root`. No dataset mutation until that comparison is known.
