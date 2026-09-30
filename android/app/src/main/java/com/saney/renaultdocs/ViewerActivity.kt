@@ -392,7 +392,8 @@ class ViewerActivity : Activity() {
         titleView = Ui.textView(
             context = this,
             value = title,
-            sizeSp = 18f,
+            sizeSp = 16f,
+            color = Ui.entityTitle,
         ).apply {
             setTypeface(
                 typeface,
@@ -421,58 +422,46 @@ class ViewerActivity : Activity() {
                 .isNotBlank()
         ) {
             toolbar.addView(
-                Button(this).apply {
-                    text =
+                Ui.actionButton(
+                    context =
+                        this,
+                    label =
                         if (
                             hybridSectionMode
                         ) {
                             "Розділи"
                         } else {
                             "Modern"
-                        }
-                    contentDescription =
-                        if (
-                            hybridSectionMode
-                        ) {
-                            "Розділи Modern"
-                        } else {
-                            "Modern"
-                        }
-                    isAllCaps = false
-                    gravity =
-                        Gravity.CENTER
-                    minWidth =
-                        Ui.dp(
-                            this@ViewerActivity,
-                            70,
-                        )
-                    minimumHeight =
-                        Ui.dp(
-                            this@ViewerActivity,
-                            44,
-                        )
-                    setPadding(
-                        Ui.dp(
-                            this@ViewerActivity,
-                            8,
-                        ),
-                        0,
-                        Ui.dp(
-                            this@ViewerActivity,
-                            8,
-                        ),
-                        0,
-                    )
-                    setOnClickListener {
-                        if (
-                            hybridSectionMode
-                        ) {
-                            showSectionNavigator()
-                        } else {
-                            openModern()
-                        }
+                        },
+                    primary =
+                        true,
+                ) {
+                    if (
+                        hybridSectionMode
+                    ) {
+                        showSectionNavigator()
+                    } else {
+                        openModern()
                     }
-                }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    Ui.dp(
+                        this,
+                        44,
+                    ),
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@ViewerActivity,
+                            4,
+                        )
+                    marginEnd =
+                        Ui.dp(
+                            this@ViewerActivity,
+                            4,
+                        )
+                },
             )
         }
 
