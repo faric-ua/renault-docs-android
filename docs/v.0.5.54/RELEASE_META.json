@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.54",
   "versionCode": 70,
-  "phase": "ci_pass",
+  "phase": "phone_qa_pending",
   "feature": "Add UX, lifecycle-safe Help, and UI lifecycle audit",
   "branch": "feat/v0.5.54-ux-help-audit",
   "qa_status": "PHONE_TEST_PENDING",
@@ -10,5 +10,8 @@
   "known_follow_up": "RISK-LIFE-001 direct rdpkg install worker lifecycle",
   "public_repo": "faric-ua/renault-docs-android",
   "tests_run": 36664711140,
-  "android_pr_check_run": 36664711278
+  "android_pr_check_run": 36664711278,
+  "session_checkpoint": "2026-09-30T06:42:00+03:00",
+  "next_action": "Menu 5 -> Menu 16 -> PR #13 -> install v0.5.54 candidate -> visual gate -> Help/dialog rotation gate",
+  "merge_blocked_until_phone_pass": true
 }
