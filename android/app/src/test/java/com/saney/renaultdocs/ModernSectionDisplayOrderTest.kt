@@ -9,6 +9,7 @@ class ModernSectionDisplayOrderTest {
         val sections =
             listOf(
                 section("R70"),
+                section("R15"),
                 section("1013"),
                 section("338"),
                 section("321"),
@@ -38,9 +39,10 @@ class ModernSectionDisplayOrderTest {
                 "338",
                 "853",
                 "1013",
+                "R15",
+                "R70",
                 "MAH",
                 "NT",
-                "R70",
             ),
             sorted,
         )
