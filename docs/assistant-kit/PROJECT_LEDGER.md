@@ -1804,3 +1804,16 @@ Expected display behavior:
 - opaque alphanumeric IDs remain supported;
 - duplicate codes remain distinct and keep relative source order;
 - no `.rdpkg` regeneration required.
+
+### v0.5.53 phone sort PASS
+
+Final refined candidate phone result:
+- Laguna II NT8183A remains available and opens in native mode;
+- Modern list ordering accepted by user;
+- accepted order is numeric-leading section IDs first, then `R...` connector IDs, then remaining alphabetic IDs;
+- numeric natural ordering remains correct;
+- no `.rdpkg` regeneration required.
+
+CI on final PR head:
+- Tests `36660615811` — PASS;
+- Android PR Check `36660615926` — PASS.
