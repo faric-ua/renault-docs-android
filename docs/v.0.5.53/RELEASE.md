@@ -1,6 +1,6 @@
 # Renault Docs v0.5.53 — Modern section display order
 
-Status: **IMPLEMENTED / CI PENDING**
+Status: **PHONE PASS / READY TO MERGE — 2026-09-30**
 
 ## Scope
 
@@ -31,3 +31,13 @@ Verify:
 3. search still finds numeric and alphanumeric codes;
 4. representative sections still route to the correct entrypoint;
 5. existing projects/data survive the in-place update.
+
+## Acceptance
+
+- final refined candidate installed on phone;
+- Laguna II NT8183A remained available in native mode;
+- user confirmed final section ordering is correct;
+- accepted grouping: numeric-leading IDs → `R...` connectors → other alphabetic IDs;
+- Tests `36660615811` — PASS;
+- Android PR Check `36660615926` — PASS;
+- `.rdpkg` regeneration not required.
