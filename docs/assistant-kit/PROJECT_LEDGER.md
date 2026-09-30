@@ -1868,3 +1868,20 @@ Final v0.5.54 PR-head CI:
 - Tests `36664711140` — PASS;
 - Android PR Check `36664711278` — PASS;
 - PR #13 remains open for phone acceptance.
+
+
+### Overnight checkpoint — v0.5.54 phone QA pending
+
+Session stopped at 2026-09-30 06:42 +03:00.
+
+State:
+- PR #13 is open and mergeable;
+- v0.5.54 implementation complete for the planned UX/Help/lifecycle scope;
+- final code-bearing PR head before checkpoint docs: `5660b6f29f24d91c62abd16d1824a96b6b121c36`;
+- Tests `36664899562` PASS;
+- Android PR Check `36664899564` PASS;
+- no merge yet;
+- phone candidate not installed/accepted yet.
+
+Resume:
+Menu 5 → Menu 16 → PR #13 → install candidate → visual gate → Help/dialog rotation gate → merge only after phone PASS.
