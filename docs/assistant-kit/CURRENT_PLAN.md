@@ -171,7 +171,7 @@ Implementation:
 
 ## v0.5.53 — Modern section natural display order
 
-Status: **PHONE PASS / READY TO MERGE**.
+Status: **MERGED / PHONE PASS — 2026-09-30**.
 
 Real-phone finding:
 - Laguna II `NT8183A · 2001-01-22` imports and opens as `383 · native`;
@@ -189,4 +189,4 @@ Implementation:
 
 ## Поточний наступний крок
 
-**Refined v0.5.53 candidate passed phone verification: numeric-leading IDs → `R...` connectors → other alphabetic IDs. Tests `36660615811` PASS and Android PR Check `36660615926` PASS. Merge PR #12, then verify public-main CI.**
+**v0.5.53 phone PASS and PR #12 merged as `68323e66c67f07df0e770d99ba7f7b2aa3d95b0f`. Next: verify public-main CI, then continue Laguna package/import validation.**
