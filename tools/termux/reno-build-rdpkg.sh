@@ -129,6 +129,8 @@ if [ "${#volume_lines[@]}" -eq 0 ]; then
   exit 1
 fi
 
+BUILD_ALL=0
+
 if [ "${#volume_lines[@]}" -eq 1 ]; then
   parse_volume_line "${volume_lines[0]}"
   echo
@@ -140,22 +142,50 @@ else
   echo "Вибери том номером:"
   for i in "${!volume_lines[@]}"; do
     parse_volume_line "${volume_lines[$i]}"
-    printf "  %d — %s\n"       "$((i + 1))"       "$VOLUME_LABEL"
+    printf "  %d — %s\n" "$((i + 1))" "$VOLUME_LABEL"
   done
+  echo "  A — Усі томи окремими .rdpkg"
   echo "  0 — Назад"
   echo
 
-  choose_number "${#volume_lines[@]}"
-  parse_volume_line "${volume_lines[$CHOICE_INDEX]}"
+  while true; do
+    printf "Вибір: "
+    if ! read -r answer; then
+      exit 0
+    fi
+
+    case "$answer" in
+      a|A)
+        BUILD_ALL=1
+        break
+        ;;
+      0)
+        echo "Скасовано."
+        exit 0
+        ;;
+      ''|*[!0-9]*)
+        echo "Введи номер, A або 0."
+        ;;
+      *)
+        number=$((10#$answer))
+        if (( number >= 1 && number <= ${#volume_lines[@]} )); then
+          CHOICE_INDEX=$((number - 1))
+          parse_volume_line "${volume_lines[$CHOICE_INDEX]}"
+          break
+        fi
+        echo "Немає такого пункту."
+        ;;
+    esac
+  done
 
   echo
-  echo "Том:"
-  echo "  $VOLUME_LABEL"
-fi
-
-if [ -z "$VOLUME_SELECTOR" ]; then
-  echo "Не вдалося визначити ідентифікатор вибраного тому."
-  exit 1
+  if [ "$BUILD_ALL" -eq 1 ]; then
+    echo "Томи:"
+    echo "  усі ${#volume_lines[@]} · кожен окремим .rdpkg"
+  else
+    echo "Том:"
+    echo "  $VOLUME_LABEL"
+  fi
 fi
 
 args=(
@@ -163,13 +193,26 @@ args=(
   "$REPO/tools/build_rdpkg.py"
   --source "$SOURCE"
   --output-dir "$OUTPUT_DIR"
-  --volume "$VOLUME_SELECTOR"
 )
+
+if [ "$BUILD_ALL" -eq 1 ]; then
+  args+=(--all)
+else
+  if [ -z "$VOLUME_SELECTOR" ]; then
+    echo "Не вдалося визначити ідентифікатор вибраного тому."
+    exit 1
+  fi
+  args+=(--volume "$VOLUME_SELECTOR")
+fi
 
 echo
 echo "Буде створено:"
 echo "  Dataset: $(basename -- "$SOURCE")"
-echo "  Том:     $VOLUME_LABEL"
+if [ "$BUILD_ALL" -eq 1 ]; then
+  echo "  Томи:    усі ${#volume_lines[@]} окремими пакетами"
+else
+  echo "  Том:     $VOLUME_LABEL"
+fi
 echo "  Папка:   $OUTPUT_DIR"
 echo
 
@@ -199,7 +242,11 @@ status=$?
 
 echo
 if [ "$status" -eq 0 ]; then
-  echo "Пакет готовий."
+  if [ "$BUILD_ALL" -eq 1 ]; then
+    echo "Усі пакети готові."
+  else
+    echo "Пакет готовий."
+  fi
   echo "Папка:"
   echo "  $OUTPUT_DIR"
 else
