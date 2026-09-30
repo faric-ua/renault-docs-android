@@ -626,7 +626,25 @@ class ViewerActivity : Activity() {
 
                     reconcilePdfFullscreenPresentation()
 
+                    val legacyInfoPage =
+                        pageTitle
+                            ?.lowercase()
+                            ?.contains(
+                                "як користув",
+                            )
+                            ?: false
+
                     if (
+                        legacyInfoPage
+                    ) {
+                        statusView.setTextColor(
+                            Ui.muted,
+                        )
+                        statusView.text =
+                            "Classic-довідка цього dataset · кількість томів тут стосується лише відкритого dataset, а не поточного проєкту Renault Docs."
+                        statusView.visibility =
+                            View.VISIBLE
+                    } else if (
                         !hybridSectionWarmup ||
                         webView.alpha > 0f
                     ) {
