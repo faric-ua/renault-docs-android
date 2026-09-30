@@ -1823,3 +1823,14 @@ v0.5.53 merge:
 - final PR-head Tests `36661693096` — PASS;
 - final PR-head Android PR Check `36661693082` — PASS;
 - phone ordering PASS before merge.
+
+### Laguna II edge package import PASS
+
+Real-phone package validation:
+- oldest batch volume `NT8183A · 2001-01-22` — PASS;
+- newest batch volume `NT8328A · 2006-05-09` — PASS.
+
+Both packages imported into Laguna II, opened in native mode, and representative section navigation worked.
+
+Conclusion:
+the 10-volume batch has representative compatibility coverage at both ends of the Laguna II date range; no `.rdpkg` rebuild is required before importing the remaining eight packages.
