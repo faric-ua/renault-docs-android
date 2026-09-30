@@ -21,6 +21,17 @@ print(data.get("build_root", ""))
 PY
 )"
 
+SOURCE_ROOT="$(
+  python - "$CONFIG" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(data.get("source_root", ""))
+PY
+)"
+
 if [ -z "$BUILD_ROOT" ] || [ ! -d "$BUILD_ROOT" ]; then
   echo "Активний build_root не знайдено:"
   echo "  $BUILD_ROOT"
@@ -36,6 +47,9 @@ echo " Renault Docs · Dataset link check"
 echo " READ-ONLY"
 echo "========================================"
 echo
+echo "Source:"
+echo "  $SOURCE_ROOT"
+echo
 echo "Dataset:"
 echo "  $BUILD_ROOT"
 echo
@@ -43,9 +57,18 @@ echo "Звіт:"
 echo "  $REPORT"
 echo
 
-python "$REPO/tools/check_dataset_links.py" \
-  "$BUILD_ROOT" \
+checker_args=(
+  python
+  "$REPO/tools/check_dataset_links.py"
+  "$BUILD_ROOT"
   --json-out "$REPORT"
+)
+
+if [ -n "$SOURCE_ROOT" ] && [ -d "$SOURCE_ROOT" ]; then
+  checker_args+=(--source-root "$SOURCE_ROOT")
+fi
+
+"${checker_args[@]}"
 
 status=$?
 echo
