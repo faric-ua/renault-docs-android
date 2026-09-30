@@ -41,8 +41,9 @@ class V0542ProjectVolumeLibraryContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
         )
 
-        self.assertIn('"Додати том"', activity)
-        self.assertIn('"Ручне додавання"', activity)
+        self.assertIn("buildAddPanel()", activity)
+        self.assertIn('"Авто"', activity)
+        self.assertIn('"Вручну"', activity)
         self.assertIn("PreparedVolumeReader.readAll(", activity)
         self.assertIn('"Інший проєкт"', activity)
         self.assertIn('"Додати сюди"', activity)
