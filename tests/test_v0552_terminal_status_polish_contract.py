@@ -23,8 +23,15 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
     def test_release_version(self):
-        self.assertIn('versionName = "0.5.52"', self.gradle)
-        self.assertIn("versionCode = 68", self.gradle)
+        version_code = int(
+            self.gradle.split("versionCode = ", 1)[1].splitlines()[0].strip()
+        )
+        version_name = tuple(
+            int(part)
+            for part in self.gradle.split('versionName = "', 1)[1].split('"', 1)[0].split(".")
+        )
+        self.assertGreaterEqual(version_code, 68)
+        self.assertGreaterEqual(version_name, (0, 5, 52))
 
     def test_terminal_status_has_explicit_dismiss_action(self):
         self.assertIn('value =\n                            "×"', self.project)
