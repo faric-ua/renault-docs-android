@@ -1834,3 +1834,31 @@ Both packages imported into Laguna II, opened in native mode, and representative
 
 Conclusion:
 the 10-volume batch has representative compatibility coverage at both ends of the Laguna II date range; no `.rdpkg` rebuild is required before importing the remaining eight packages.
+
+
+### Laguna II remaining package import
+
+User reports the remaining eight Laguna II `.rdpkg` packages were added after the edge-package checks.
+
+Final exact 10-volume / no-duplicate screen sanity remains part of the next phone gate.
+
+### v0.5.54 UI/lifecycle audit implementation
+
+User-requested UX:
+- Home add subtitle becomes `До проєкту`;
+- empty project becomes `Порожній · додай том`;
+- Project add actions become one `Додати` tile with `Авто` and `Вручну`.
+
+Lifecycle work:
+- shared `LifecycleHelpDialogController`;
+- contextual Help IDs survive rotation and reopen above the same Activity;
+- Help restoration never starts the underlying action;
+- CreateProject typed name survives rotation;
+- Project volume action/removal/multi-volume/mismatch dialogs restore presentation state without automatic mutation;
+- pending manual import mode survives recreation.
+
+Help surfaces:
+Home, Project, Add, raw builder, Converter, Modern volume, Native section, Volume documentation.
+
+Audit finding kept open:
+`RISK-LIFE-001` — direct `.rdpkg` import uses an Activity-owned Thread and should move to a durable service/run-store lifecycle.
