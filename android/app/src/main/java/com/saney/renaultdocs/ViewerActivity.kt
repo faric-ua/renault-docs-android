@@ -422,7 +422,7 @@ class ViewerActivity : Activity() {
                 .isNotBlank()
         ) {
             toolbar.addView(
-                Ui.actionButton(
+                Ui.modeButton(
                     context =
                         this,
                     label =
@@ -433,8 +433,8 @@ class ViewerActivity : Activity() {
                         } else {
                             "Modern"
                         },
-                    primary =
-                        true,
+                    active =
+                        false,
                 ) {
                     if (
                         hybridSectionMode
@@ -448,7 +448,7 @@ class ViewerActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     Ui.dp(
                         this,
-                        44,
+                        38,
                     ),
                 ).apply {
                     marginStart =
