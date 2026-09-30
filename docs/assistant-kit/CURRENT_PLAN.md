@@ -151,6 +151,24 @@ Final evidence:
 
 This confirms there is no remaining link breakage from the user's earlier language cleanup.
 
+## Laguna II batch .rdpkg preparation
+
+Status: **IMPLEMENTED / CI PENDING**.
+
+Target:
+- full Laguna dataset contains 10 validated volumes;
+- package model remains `1 volume = 1 .rdpkg`;
+- do not create one monolithic 10-volume package.
+
+Implementation:
+- existing menu item 15 remains the package entrypoint;
+- when a dataset has multiple volumes, it now offers `A — Усі томи окремими .rdpkg`;
+- batch iterates every discovered packageable volume;
+- each volume uses the existing single-volume `build_rdpkg()` pipeline and its validation;
+- output remains under `Documents/Renault/packages/rdpkg`;
+- batch writes one JSON summary containing package paths, identities, SHA-256, byte sizes and payload file counts;
+- single-volume selection remains available unchanged.
+
 ## Поточний наступний крок
 
-**Promote the now phone-validated dataset link checker into the stable post-conversion gate: wire it into the converter/package validation path so incomplete or broken prepared datasets fail before packaging/release.**
+**Run CI for the batch .rdpkg implementation. If green, merge, update phone main, then use menu item 15 → Laguna dataset → A to build all 10 volumes as separate packages.**
