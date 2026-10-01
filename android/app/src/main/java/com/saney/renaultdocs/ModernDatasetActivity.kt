@@ -100,8 +100,34 @@ class ModernDatasetActivity : Activity() {
             )
         }
 
-        loadCatalog()
+        val retainedCatalog =
+            catalog
+
+        if (
+            retainedCatalog != null
+        ) {
+            baseStatus =
+                buildStatus(
+                    retainedCatalog,
+                )
+            statusText.setTextColor(
+                Ui.muted,
+            )
+            statusText.text =
+                baseStatus
+            renderVolumes(
+                searchInput.text
+                    .toString(),
+            )
+        } else {
+            loadCatalog()
+        }
+
+        restoreVolumeScroll()
     }
+
+    override fun onRetainNonConfigurationInstance(): Any? =
+        catalog
 
     override fun onSaveInstanceState(
         outState: Bundle,
