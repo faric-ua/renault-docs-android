@@ -315,13 +315,14 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertEqual(
             {
+                "HomeProjectDialogController.kt": (2, 2),
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (5, 5),
                 "SettingsActivity.kt": (3, 3),
             },
             audited,
         )
-        self.assertEqual(9, total_builders)
+        self.assertEqual(11, total_builders)
 
     def test_dialog_theme_defines_roles_and_shared_surface(self):
         dialog_ui = self.read(
