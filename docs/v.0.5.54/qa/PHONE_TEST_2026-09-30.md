@@ -21,9 +21,10 @@ Result: **PENDING**
 - [x] Project Add Help survives rotation. Phone PASS 2026-10-01.
 - [x] No picker/import starts automatically after Help rotation. Phone PASS 2026-10-01.
 - [x] Closing Project Add Help returns to the same Project with no picker/import launched.
+- [ ] Project list scroll position survives rotation. Video FAIL 2026-10-01: position jumped from NT8307A/NT8327A/NT8328A area back to NT8183A; fix implemented, phone recheck pending.
 - [x] Converter Help survives rotation. Phone PASS 2026-10-01: dialog restored over the same Converter.
 - [x] Closing Converter Help returns to the same Converter state with source/destination preserved and no action launched.
-- [ ] Modern volume Help survives rotation.
+- [x] Modern volume Help survives rotation. User-confirmed PASS 2026-10-01.
 - [ ] Native section Help survives rotation.
 - [ ] Volume documentation Help survives rotation and panel context stays intact.
 
