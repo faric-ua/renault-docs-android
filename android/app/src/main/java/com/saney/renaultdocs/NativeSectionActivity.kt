@@ -1630,6 +1630,8 @@ class NativeSectionActivity : Activity() {
         currentViewKind =
             VIEW_DOCUMENTATION
         currentViewId = ""
+        currentViewLabel = ""
+        currentDocumentParentPanelId = ""
         bodyContainer.removeAllViews()
         bodyContainer.addView(
             infoCard(
@@ -1700,6 +1702,8 @@ class NativeSectionActivity : Activity() {
         currentViewKind =
             VIEW_DOCUMENTATION
         currentViewId = ""
+        currentViewLabel = ""
+        currentDocumentParentPanelId = ""
         bodyContainer.removeAllViews()
 
         bodyContainer.addView(
