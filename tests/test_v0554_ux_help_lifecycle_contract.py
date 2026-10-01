@@ -395,6 +395,28 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("STATE_PENDING_MANUAL_IMPORT", project)
         self.assertIn("savedInstanceState !=\n                null", project)
 
+    def test_project_preserves_scroll_position_on_rotation(self):
+        project = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+
+        self.assertIn(
+            "STATE_SCROLL_Y",
+            project,
+        )
+        self.assertIn(
+            "projectScroll.scrollY",
+            project,
+        )
+        self.assertIn(
+            "restoreProjectScroll()",
+            project,
+        )
+        self.assertIn(
+            "projectScroll.scrollTo(",
+            project,
+        )
+
     def test_modern_volume_retains_loaded_sections_on_rotation(self):
         volume = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ModernVolumeActivity.kt"
