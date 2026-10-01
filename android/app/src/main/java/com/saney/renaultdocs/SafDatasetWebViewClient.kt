@@ -323,10 +323,45 @@ class SafDatasetWebViewClient(
             return true
         }
 
-        if (
-            DatasetVirtualUrl.isLocal(
+        val localPath =
+            DatasetVirtualUrl.relativePath(
                 url.toString(),
             )
+
+        if (
+            localPath
+                ?.equals(
+                    "_renault/README_UA.html",
+                    ignoreCase = true,
+                )
+                ?: false
+        ) {
+            if (
+                request.isForMainFrame &&
+                url.getQueryParameter(
+                    README_LAYOUT_QUERY,
+                ) !=
+                README_LAYOUT_VERSION
+            ) {
+                view?.loadUrl(
+                    url
+                        .buildUpon()
+                        .appendQueryParameter(
+                            README_LAYOUT_QUERY,
+                            README_LAYOUT_VERSION,
+                        )
+                        .build()
+                        .toString()
+                )
+                return true
+            }
+
+            return false
+        }
+
+        if (
+            localPath !=
+            null
         ) {
             return false
         }
@@ -3909,6 +3944,11 @@ class SafDatasetWebViewClient(
         .replace("\"", "&quot;")
 
     companion object {
+        private const val README_LAYOUT_QUERY =
+            "rdhelp"
+        private const val README_LAYOUT_VERSION =
+            "compact-v2"
+
         const val PDF_SAVE_SCHEME =
             "renaultsavepdf"
 

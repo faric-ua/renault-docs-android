@@ -135,6 +135,18 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             '"compact-readme"',
             web_client,
         )
+        self.assertIn(
+            "README_LAYOUT_QUERY",
+            web_client,
+        )
+        self.assertIn(
+            '"compact-v2"',
+            web_client,
+        )
+        self.assertIn(
+            "appendQueryParameter(",
+            web_client,
+        )
         self.assertNotIn(
             "applyReadmeMobileLayout(",
             web_client,
