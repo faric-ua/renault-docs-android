@@ -33,7 +33,7 @@ Result: **PENDING**
 
 ## Other lifecycle
 
-- [ ] New Project typed text survives rotation.
+- [x] New Project typed text survives rotation. Phone PASS 2026-10-02.
 - [ ] Volume actions dialog survives rotation.
 - [ ] Remove confirmation survives rotation.
 - [ ] Rotation does not export/remove/add automatically.
@@ -42,7 +42,7 @@ Result: **PENDING**
 
 - [ ] Existing projects/data preserved.
 - [x] Laguna II remains populated. Phone PASS 2026-10-01: Project shows `Laguna II · томів: 10`.
-- [ ] NT8183A opens.
+- [x] NT8183A opens. Phone PASS 2026-10-02.
 - [ ] NT8328A opens.
 
 
