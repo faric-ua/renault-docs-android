@@ -16,7 +16,7 @@ Result: **PENDING**
 - [x] Home Help opens in Renault Docs dark theme, not the system-gray dialog. Phone PASS 2026-10-01.
 - [x] Home Help survives rotation. Phone PASS 2026-10-01.
 - [x] Home stale-Legacy status text and danger color survive rotation under Help.
-- [ ] Closing Help returns to Home with no action launched.
+- [x] Closing Help returns to Home with no action launched. Phone PASS 2026-10-01.
 - [ ] Project Add Help opens.
 - [ ] Project Add Help survives rotation.
 - [ ] No picker/import starts automatically after Help rotation.
