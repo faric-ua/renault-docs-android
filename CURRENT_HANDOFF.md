@@ -4225,3 +4225,20 @@ Real-device Megane II stale-library test:
 
 Minor copy-polish follow-up:
 the appended technical detail `Вибраний об'єкт не є папкою` is useful diagnostically but can be softened or hidden from the primary user message later.
+
+
+### Home Help + stale status rotation phone PASS — 2026-10-01
+
+Real-device recheck on fixed candidate `c5c322b73183afb67c34744144328674a2a75c66`:
+- stale Megane II danger message is visible before rotation;
+- Home Help opens with Renault Docs dark styling;
+- Help remains open after rotation;
+- stale danger message remains present behind the Help after Activity recreation;
+- status text/color persistence fix is therefore phone-accepted.
+
+CI on this head:
+- Tests `36885079913` PASS;
+- Android PR Check `36885079690` PASS.
+
+One final close-state micro-check remains:
+close Help and confirm Home stays on the same stale-status state with no action launched.
