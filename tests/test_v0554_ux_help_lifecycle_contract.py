@@ -324,6 +324,25 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
         self.assertEqual(11, total_builders)
 
+    def test_dialog_action_buttons_are_readable(self):
+        dialog_ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/DialogUi.kt"
+        )
+        ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/Ui.kt"
+        )
+
+        self.assertGreaterEqual(
+            dialog_ui.count("color =\n                Ui.text"),
+            2,
+        )
+        self.assertIn("Ui.danger", dialog_ui)
+        self.assertIn("Ui.secondaryButtonTextSp", dialog_ui)
+        self.assertIn(
+            "const val secondaryButtonTextSp: Float = 14f",
+            ui,
+        )
+
     def test_dialog_theme_defines_roles_and_shared_surface(self):
         dialog_ui = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/DialogUi.kt"
