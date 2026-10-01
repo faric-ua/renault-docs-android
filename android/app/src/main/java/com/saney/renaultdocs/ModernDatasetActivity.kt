@@ -29,6 +29,7 @@ class ModernDatasetActivity : Activity() {
     private var fallbackTitle: String = "Renault dataset"
     private var focusEntrypoint: String = ""
     private var restoredQuery: String = ""
+    private var restoredScrollY: Int = 0
     private var baseStatus: String = ""
 
     override fun onCreate(
