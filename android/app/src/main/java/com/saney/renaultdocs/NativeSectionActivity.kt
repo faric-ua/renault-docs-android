@@ -882,18 +882,9 @@ class NativeSectionActivity : Activity() {
                 result
                     .onSuccess {
                         runtimeData = it
-                        statusText.setTextColor(
-                            Ui.muted,
+                        showRuntimeData(
+                            it,
                         )
-                        statusText.text =
-                            "Runtime IR v" +
-                                it.schemaVersion +
-                                " · native preview"
-                        statusText.visibility =
-                            View.GONE
-
-                        renderMenu()
-                        restoreViewAfterRotation()
                     }
                     .onFailure {
                         statusText.setTextColor(
@@ -917,6 +908,46 @@ class NativeSectionActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun showRuntimeData(
+        data: RuntimeIrSectionData,
+    ) {
+        statusText.setTextColor(
+            Ui.muted,
+        )
+        statusText.text =
+            "Runtime IR v" +
+                data.schemaVersion +
+                " · native preview"
+        statusText.visibility =
+            View.GONE
+
+        renderMenu()
+        restoreViewAfterRotation()
+        restoreBodyScroll()
+    }
+
+    private fun restoreBodyScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::bodyScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        bodyScroll.post {
+            bodyScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
     }
 
     private fun restoreViewAfterRotation() {
@@ -951,7 +982,12 @@ class NativeSectionActivity : Activity() {
                         documentId =
                             restoredViewId,
                         label =
-                            "Документ",
+                            restoredViewLabel
+                                .ifBlank {
+                                    "Документ"
+                                },
+                        parentPanelId =
+                            restoredDocumentParentPanelId,
                     )
                     return
                 }
@@ -1737,6 +1773,10 @@ class NativeSectionActivity : Activity() {
             VIEW_PANEL
         currentViewId =
             panelId
+        currentViewLabel =
+            ""
+        currentDocumentParentPanelId =
+            ""
 
         val panel =
             findPanel(panelId)
