@@ -1984,3 +1984,20 @@ Checkpoint saved for v0.5.54 / PR #13.
 - Tests `36790097841` failed on one stale contract assertion in `test_v0513_modern_section_tiles_contract.py` after the shared `Ui.modeButton` refactor; runtime/phone failure is not indicated by this test.
 - Latest phone-driven fixes before handoff: Converter button theming, stale Legacy SAF pre-open validation, clearer stale Modern failure, bottom-right Home tool folder icons, shared Classic/Modern switch styling, legacy help-page relevance note.
 - Resume by fixing only that stale test expectation, rerunning CI, then installing one fresh PR #13 candidate for the full phone regression.
+
+
+### v0.5.54 stale contract-test recovery — 2026-10-01
+
+The remaining PR #13 CI failure was confirmed as a stale source-format assertion, not a runtime defect.
+
+Change:
+- `tests/test_v0513_modern_section_tiles_contract.py` now validates the shared `Ui.modeButton` contract with whitespace-tolerant regexes for Modern(active) and Classic(inactive);
+- no Android runtime file changed in the fix commit.
+
+Evidence:
+- fix commit `c3073d44f381c8160829abdc6cee707353711b32`;
+- Tests `36794236208` PASS;
+- Android PR Check `36794236168` PASS.
+
+Release state:
+PR #13 remains open/not merged. One fresh candidate and the full v0.5.54 phone regression are still required before merge.
