@@ -214,6 +214,25 @@ class ProjectStore(
         )
     }
 
+    fun removeProject(
+        projectId: String,
+    ) {
+        saveProjects(
+            loadProjects()
+                .filterNot {
+                    it.id ==
+                        projectId
+                },
+        )
+        saveVolumes(
+            loadVolumes()
+                .filterNot {
+                    it.first ==
+                        projectId
+                },
+        )
+    }
+
     fun removeVolume(
         projectId: String,
         volumeId: String,
