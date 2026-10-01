@@ -4174,3 +4174,18 @@ Both storage paths are now verified:
 - Project app-private installed packages: 10/10.
 
 Next phone regression target: Converter styling and stale-Legacy behavior, then lifecycle/rotation.
+
+
+### Converter visual phone PASS — 2026-10-01
+
+Real-device screenshot confirms:
+- source/destination selectors use Renault Docs dark bordered controls;
+- validate/start/clear actions no longer use default system-gray Android buttons;
+- primary start action uses accent styling;
+- cancelled-state status text renders normally.
+
+Still pending:
+- Cancel danger styling while an operation is actively running;
+- Converter Help rotation/lifecycle.
+
+Minor non-blocking copy polish observed: `source` / `destination` remain English inside Ukrainian UI.

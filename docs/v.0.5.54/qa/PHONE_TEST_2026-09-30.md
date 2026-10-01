@@ -87,8 +87,8 @@ Result: **PENDING**
 
 ## Converter / stale Legacy regression
 
-- [ ] Converter folder buttons use Renault Docs dark/bordered styling.
-- [ ] `Перевірити план`, `Почати конвертацію`, `Очистити вибір` are no longer default gray Android buttons.
+- [x] Converter folder buttons use Renault Docs dark/bordered styling. Phone PASS 2026-10-01.
+- [x] `Перевірити план`, `Почати конвертацію`, `Очистити вибір` are no longer default gray Android buttons. Phone PASS 2026-10-01.
 - [ ] Cancel action uses danger styling when visible.
 - [x] A valid old `Старі бібліотеки` record still opens normally. Phone PASS 2026-10-01: Laguna II opens with 10 volumes.
 - [ ] A moved/deleted old library does not enter a broken Modern screen.
