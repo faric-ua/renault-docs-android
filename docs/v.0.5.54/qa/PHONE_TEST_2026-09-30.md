@@ -34,7 +34,7 @@ Result: **PENDING**
 ## Other lifecycle
 
 - [x] New Project typed text survives rotation. Phone PASS 2026-10-02.
-- [ ] Volume actions dialog survives rotation.
+- [x] Volume actions dialog survives rotation. Phone PASS 2026-10-02.
 - [ ] Remove confirmation survives rotation.
 - [ ] Rotation does not export/remove/add automatically.
 
