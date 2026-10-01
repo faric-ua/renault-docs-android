@@ -2412,12 +2412,28 @@ class NativeSectionActivity : Activity() {
                         if (
                             documentId.isNotBlank()
                         ) {
-                            renderOrOpenDocument(
-                                documentId,
+                            val label =
                                 action.optString(
                                     "label",
                                     "Документ",
-                                ),
+                                )
+                            val parentPanelId =
+                                if (
+                                    currentViewKind ==
+                                    VIEW_PANEL
+                                ) {
+                                    currentViewId
+                                } else {
+                                    currentDocumentParentPanelId
+                                }
+
+                            renderOrOpenDocument(
+                                documentId =
+                                    documentId,
+                                label =
+                                    label,
+                                parentPanelId =
+                                    parentPanelId,
                             )
                         } else {
                             openPath(
@@ -2484,6 +2500,7 @@ class NativeSectionActivity : Activity() {
     private fun renderOrOpenDocument(
         documentId: String,
         label: String,
+        parentPanelId: String = "",
     ) {
         val document =
             findDocument(documentId)
@@ -2506,11 +2523,17 @@ class NativeSectionActivity : Activity() {
                 )
             "structured-html" ->
                 renderStructuredDocument(
-                    document,
+                    document = document,
+                    label = label,
+                    parentPanelId =
+                        parentPanelId,
                 )
             "composite-document" ->
                 renderCompositeDocument(
-                    document,
+                    document = document,
+                    label = label,
+                    parentPanelId =
+                        parentPanelId,
                 )
             else ->
                 openPath(
@@ -2524,16 +2547,30 @@ class NativeSectionActivity : Activity() {
 
     private fun renderCompositeDocument(
         document: JSONObject,
+        label: String = "Документи розʼєму",
+        parentPanelId: String = "",
     ) {
+        val inline =
+            prepareDocumentBody(
+                parentPanelId =
+                    parentPanelId,
+                label =
+                    label,
+            )
+
         currentViewKind =
             VIEW_DOCUMENT
         currentViewId =
             document.optString(
                 "id",
             )
-        bodyContainer.removeAllViews()
+        currentViewLabel =
+            label
+        currentDocumentParentPanelId =
+            parentPanelId
 
-        bodyContainer.addView(
+        if (!inline) {
+            bodyContainer.addView(
             Ui.textView(
                 context = this,
                 value =
@@ -2557,7 +2594,8 @@ class NativeSectionActivity : Activity() {
                     ),
                 )
             }
-        )
+            )
+        }
 
         bodyContainer.addView(
             Ui.textView(
@@ -2702,7 +2740,21 @@ class NativeSectionActivity : Activity() {
                             },
                     ) {
                         renderStructuredDocument(
-                            nested,
+                            document =
+                                nested,
+                            label =
+                                if (
+                                    role.equals(
+                                        "alveoles",
+                                        ignoreCase = true,
+                                    )
+                                ) {
+                                    "Опис контактів"
+                                } else {
+                                    "Опис"
+                                },
+                            parentPanelId =
+                                currentDocumentParentPanelId,
                         )
                     }
 
@@ -2769,16 +2821,91 @@ class NativeSectionActivity : Activity() {
         )
     }
 
+    private fun prepareDocumentBody(
+        parentPanelId: String,
+        label: String,
+    ): Boolean {
+        val validParent =
+            parentPanelId
+                .takeIf {
+                    it.isNotBlank() &&
+                        findPanel(
+                            it,
+                        ) !=
+                        null
+                }
+
+        if (
+            validParent ==
+            null
+        ) {
+            bodyContainer.removeAllViews()
+            return false
+        }
+
+        renderPanel(
+            validParent,
+        )
+
+        bodyContainer.addView(
+            Ui.textView(
+                context = this,
+                value = label,
+                sizeSp = 16f,
+                color = Ui.accent,
+            ).apply {
+                setTypeface(
+                    typeface,
+                    android.graphics.Typeface
+                        .BOLD,
+                )
+                setPadding(
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    ),
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        8,
+                    ),
+                )
+            }
+        )
+
+        return true
+    }
+
     private fun renderStructuredDocument(
         document: JSONObject,
+        label: String = "Критерії / скорочення",
+        parentPanelId: String = "",
     ) {
+        val inline =
+            prepareDocumentBody(
+                parentPanelId =
+                    parentPanelId,
+                label =
+                    label,
+            )
+
         currentViewKind =
             VIEW_DOCUMENT
         currentViewId =
             document.optString(
                 "id",
             )
-        bodyContainer.removeAllViews()
+        currentViewLabel =
+            label
+        currentDocumentParentPanelId =
+            parentPanelId
 
         val headings =
             structuredHeadingTexts(
@@ -2796,6 +2923,8 @@ class NativeSectionActivity : Activity() {
         renderStructuredHeader(
             criteria = header.first,
             metadata = header.second,
+            showSectionHeading =
+                !inline,
         )
 
         if (tables.isEmpty()) {
@@ -3038,6 +3167,7 @@ class NativeSectionActivity : Activity() {
     private fun renderStructuredHeader(
         criteria: String?,
         metadata: List<String>,
+        showSectionHeading: Boolean = true,
     ) {
         if (metadata.isNotEmpty()) {
             val metaTile =
@@ -3123,37 +3253,39 @@ class NativeSectionActivity : Activity() {
             )
         }
 
-        bodyContainer.addView(
-            Ui.textView(
-                context = this,
-                value =
-                    sectionCode +
-                        " — " +
-                        sectionTitle,
-                sizeSp = 18f,
-            ).apply {
-                setTypeface(
-                    typeface,
-                    android.graphics.Typeface
-                        .BOLD,
-                )
-                setPadding(
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        2,
-                    ),
-                    0,
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        2,
-                    ),
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        3,
-                    ),
-                )
-            }
-        )
+        if (showSectionHeading) {
+            bodyContainer.addView(
+                Ui.textView(
+                    context = this,
+                    value =
+                        sectionCode +
+                            " — " +
+                            sectionTitle,
+                    sizeSp = 18f,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface
+                            .BOLD,
+                    )
+                    setPadding(
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            2,
+                        ),
+                        0,
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            2,
+                        ),
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            3,
+                        ),
+                    )
+                }
+            )
+        }
 
         criteria
             ?.takeIf {
@@ -4245,6 +4377,11 @@ class NativeSectionActivity : Activity() {
         )
     }
 
+    private data class RetainedRuntimeState(
+        val runtimeData: RuntimeIrSectionData?,
+        val runtimeDocumentation: JSONObject?,
+    )
+
     companion object {
         private const val HELP_SECTION =
             "section"
@@ -4257,6 +4394,12 @@ class NativeSectionActivity : Activity() {
             "nativeViewKind"
         private const val STATE_VIEW_ID =
             "nativeViewId"
+        private const val STATE_VIEW_LABEL =
+            "nativeViewLabel"
+        private const val STATE_DOCUMENT_PARENT_PANEL_ID =
+            "nativeDocumentParentPanelId"
+        private const val STATE_SCROLL_Y =
+            "nativeScrollY"
         private const val STATE_PENDING_TABLE_PDF =
             "pendingTablePdf"
 
