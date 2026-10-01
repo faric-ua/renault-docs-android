@@ -425,6 +425,21 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             volume,
         )
 
+        manifest = self.read(
+            "android/app/src/main/AndroidManifest.xml"
+        )
+        modern_volume_manifest = manifest.split(
+            'android:name=".ModernVolumeActivity"',
+            1,
+        )[1].split(
+            "/>",
+            1,
+        )[0]
+        self.assertIn(
+            'android:configChanges="orientation|screenSize"',
+            modern_volume_manifest,
+        )
+
     def test_create_project_keeps_typed_name_on_rotation(self):
         create = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/CreateProjectActivity.kt"
