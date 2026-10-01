@@ -4308,3 +4308,50 @@ CI on checkpoint head `ab433db654d42e3d8d285477675c512cd8d58d2d`:
 - Android PR Check `36895819104` PASS.
 
 Project scroll lifecycle issue is closed.
+
+
+### Native section detail-navigation + rotation-cache audit — 2026-10-01
+
+Phone/video evidence:
+- Native section Help itself survives portrait/landscape rotation and remains over the same section — PASS;
+- section 130 exposed a separate UX defect: opening `Критерії / скорочення` from either Schemes or Connector replaced the whole active panel, so the upper selectable fields/options disappeared until the user tapped Schemes/Connector again.
+
+Root cause:
+`renderStructuredDocument()` cleared `bodyContainer` and rendered the structured table as a replacement screen instead of a child/detail of the active panel.
+
+Implemented correction:
+- preserve the active parent panel id and detail label;
+- structured/composite detail is rendered below the current panel controls when launched from a panel;
+- `Зберегти таблицю PDF` and the table remain available below the preserved controls;
+- current detail + parent panel id + scroll position are saved across recreation;
+- parsed Native section Runtime IR and already-loaded volume documentation are retained in memory across configuration recreation, avoiding repeat reads;
+- VolumeDocumentationActivity now retains parsed Runtime IR + panel stack and restores scroll;
+- ModernDatasetActivity now retains the parsed catalog and restores scroll rather than rereading the index on recreation;
+- ModernVolumeActivity was already hardened earlier to keep the 383-section view alive on normal rotation.
+
+Lifecycle/cache contract after this audit:
+- presentation state (Help/dialog) → LifecycleHelpDialogController / Bundle;
+- expensive parsed Runtime/Modern data → retained across configuration recreation;
+- scroll position → Bundle;
+- long-running work (Converter / native package preparation) → service/store, not Activity cache;
+- Viewer and ModernVolume use configChanges for normal orientation changes where preserving the live view is preferable.
+
+Code path commits in this correction include:
+`e09ec092d49f308cb241caaee1e942baa0230c45`,
+`22ba6837365726e96d0b41d9f85c64a9665d3a5c`,
+`3685aa0be94c189eb27ceddf79d5932ba39a498b`,
+`905c6182ff1076705c579994ec13fe5bdf10f06b`,
+`975c42b52a07e9f9bad8ce5995ac1902f37cb5b7`,
+`4fb56b907ecb0e3e2302dbb35de638a5776336a3`,
+`67a5209accda8c37610854894bd95be17c77875d`,
+`b39c66f278f99a2c68cb1fb608bebe73c1277505`,
+`3e4f45017d16baad641f516ee33f9aa6d861d2b3`.
+
+Contract tests for the Native detail parent-panel behavior and runtime-heavy rotation retention were added in `a48a5829dcf89aa2cc3f4a96b76def4718b6f45b`.
+
+Phone recheck after one fresh candidate:
+1. section 130 → Schemes (or Connector) → open `Критерії / скорочення`;
+2. original panel fields/options must remain visible above the detail;
+3. detail heading + PDF action + table appear below;
+4. rotate with this state open — same parent panel/detail and approximate scroll must remain; no Runtime IR reload flash;
+5. quick rotation smoke on volume Documentation and top-level Modern dataset should preserve panel/list position without a reread/loading flash.
