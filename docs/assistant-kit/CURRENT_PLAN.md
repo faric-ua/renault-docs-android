@@ -484,3 +484,18 @@ Next:
 2. count installed Project volumes separately;
 3. if fewer than 10, identify missing installed packages;
 4. then continue Converter + lifecycle regression.
+
+
+## Project Laguna II installed-volume phone check — PASS 2026-10-01
+
+Real-device screenshot confirms the normal Project `Laguna II` reports `томів: 10`.
+
+Conclusion:
+- all 10 Laguna II packages are already installed into the Project;
+- no missing `.rdpkg` import remains;
+- Legacy 10-volume state and Project 10-volume state are both independently verified.
+
+Next regression block:
+1. Converter visual/buttons;
+2. stale Legacy guard;
+3. remaining Help/dialog rotation lifecycle.

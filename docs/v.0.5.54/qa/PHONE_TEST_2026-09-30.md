@@ -34,7 +34,7 @@ Result: **PENDING**
 ## Regression
 
 - [ ] Existing projects/data preserved.
-- [ ] Laguna II remains populated.
+- [x] Laguna II remains populated. Phone PASS 2026-10-01: Project shows `Laguna II · томів: 10`.
 - [ ] NT8183A opens.
 - [ ] NT8328A opens.
 
@@ -122,3 +122,15 @@ Phone result 2026-10-01: **PASS**.
 - [x] Public `packages/rdpkg` folder visibly contains all 10 Laguna II install archives.
 
 Next check is separate: open the normal Project `Laguna II` and count installed Project volumes. Do not infer Project installation state from legacy/public folders.
+
+
+## Project Laguna II installed-volume check
+
+Phone result 2026-10-01: **PASS**.
+
+- [x] Normal Project `Laguna II` opens.
+- [x] Project header shows `Laguna II · томів: 10`.
+- [x] Installed Project volume list is present and populated.
+- [x] No additional Laguna II `.rdpkg` import is required.
+
+This is independent from the Legacy 10-volume PASS and confirms the app-private Project package set is complete.

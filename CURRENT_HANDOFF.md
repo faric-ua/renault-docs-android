@@ -4159,3 +4159,18 @@ This closes the old `Томів: 3` legacy symptom.
 
 Next phone step is intentionally separate:
 open the normal Project `Laguna II` and count **installed Project volumes**. Presence of 10 public archives does not prove 10 packages are installed into the Project.
+
+
+### Project Laguna II 10-volume phone PASS — 2026-10-01
+
+Normal Project `Laguna II` now independently confirms:
+- project opens;
+- header shows `томів: 10`;
+- installed volume list is populated;
+- no additional Laguna II `.rdpkg` import is needed.
+
+Both storage paths are now verified:
+- Legacy public dataset: 10/10;
+- Project app-private installed packages: 10/10.
+
+Next phone regression target: Converter styling and stale-Legacy behavior, then lifecycle/rotation.
