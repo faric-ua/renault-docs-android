@@ -17,9 +17,9 @@ Result: **PENDING**
 - [x] Home Help survives rotation. Phone PASS 2026-10-01.
 - [x] Home stale-Legacy status text and danger color survive rotation under Help.
 - [x] Closing Help returns to Home with no action launched. Phone PASS 2026-10-01.
-- [ ] Project Add Help opens.
-- [ ] Project Add Help survives rotation.
-- [ ] No picker/import starts automatically after Help rotation.
+- [x] Project Add Help opens. Phone PASS 2026-10-01.
+- [x] Project Add Help survives rotation. Phone PASS 2026-10-01.
+- [x] No picker/import starts automatically after Help rotation. Phone PASS 2026-10-01.
 - [x] Converter Help survives rotation. Phone PASS 2026-10-01: dialog restored over the same Converter.
 - [x] Closing Converter Help returns to the same Converter state with source/destination preserved and no action launched.
 - [ ] Modern volume Help survives rotation.
