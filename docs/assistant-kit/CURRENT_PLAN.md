@@ -396,3 +396,32 @@ CI:
 
 Phone gate:
 open Laguna II → Classic → `Як користуватись` and verify the compact toolbar title, table readability, action row, and absence of oversized headings. No `.rdpkg` regeneration is required.
+
+
+## Classic help phone correction — 2026-10-01
+
+Status: **FIRST ATTEMPT PHONE FAIL → RESPONSE-LEVEL FIX IMPLEMENTED / CI GREEN / RECHECK REQUIRED**.
+
+Phone evidence after the first compact-help candidate:
+- Viewer toolbar changed, proving the new app code was installed;
+- the actual `README_UA.html` body stayed old: oversized H1/H2, old `З чого почати`, old file paragraph, old `Android` copy;
+- therefore the post-load JavaScript DOM adaptation did not satisfy the phone gate.
+
+Correction:
+- removed the post-load `applyReadmeMobileLayout()` approach;
+- `SafDatasetWebViewClient` now intercepts `_renault/README_UA.html` **before** the generic Fast Pack response and serves a deterministic compact HTML response;
+- old README content is used only to recover dataset identity and dataset-local volume count;
+- the compact response contains the intended mobile layout and the `Файл | Призначення` table directly;
+- Viewer toolbar identity is parsed from the help page title, drops the redundant `Renault` prefix and splits a trailing year range, targeting `Laguna II` / `2001–2006`;
+- old cached README responses are bypassed with the versioned query `rdhelp=compact-v2`, without clearing the rest of the WebView/documentation cache.
+
+Code:
+- response-level replacement: `874648c5ea851926f5f5443e15688948a6c87ac8`;
+- cache-bust: `d36dd3b8343d514733ec88b14235c7f38a956968`.
+
+CI on `d36dd3b...`:
+- Tests `36811029640` — **PASS**;
+- Android PR Check `36811029609` — **PASS**.
+
+Phone recheck:
+install one fresh PR #13 candidate and reopen the same Laguna II Classic `Як користуватись` page. The old giant layout must not appear.

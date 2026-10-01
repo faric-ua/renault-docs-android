@@ -2022,3 +2022,30 @@ CI:
 Tests `36797661478` PASS; Android PR Check `36797661499` PASS.
 
 This is presentation-only. Dataset schema, Runtime IR and current Laguna II `.rdpkg` payloads are unchanged.
+
+
+### Classic help page first-attempt failure and deterministic replacement — 2026-10-01
+
+The first v0.5.54 mobile-help implementation was rejected by real-phone evidence.
+
+Observed:
+- app-owned Viewer toolbar reflected new code;
+- `_renault/README_UA.html` still rendered the legacy body unchanged;
+- post-load JavaScript adaptation was therefore not reliable enough for this screen.
+
+Final implementation contract:
+- README requests are intercepted before generic Fast Pack delivery;
+- already-imported legacy README files are replaced by an app-rendered compact HTML response;
+- no package rebuild/reimport is needed;
+- the response contains smaller typography, compact catalog action, two-column file table, current Renault Docs copy and concise warning;
+- toolbar gets its identity from the README page title and formats `Laguna II` / `2001–2006`;
+- `rdhelp=compact-v2` prevents the previous 24-hour Fast Pack/WebView cache entry from masking the fix.
+
+Commits:
+`874648c5ea851926f5f5443e15688948a6c87ac8` + `d36dd3b8343d514733ec88b14235c7f38a956968`.
+
+CI:
+Tests `36811029640` PASS; Android PR Check `36811029609` PASS.
+
+Status:
+phone recheck required; PR #13 remains unmerged.
