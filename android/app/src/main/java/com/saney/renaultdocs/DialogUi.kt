@@ -163,7 +163,7 @@ object DialogUi {
             which =
                 AlertDialog.BUTTON_NEGATIVE,
             color =
-                Ui.muted,
+                Ui.text,
         )
         styleButton(
             dialog =
@@ -171,7 +171,7 @@ object DialogUi {
             which =
                 AlertDialog.BUTTON_NEUTRAL,
             color =
-                Ui.muted,
+                Ui.text,
         )
         styleButton(
             dialog =
@@ -207,7 +207,7 @@ object DialogUi {
                 isAllCaps =
                     false
                 textSize =
-                    Ui.compactButtonSp
+                    Ui.secondaryButtonTextSp
             }
     }
 
