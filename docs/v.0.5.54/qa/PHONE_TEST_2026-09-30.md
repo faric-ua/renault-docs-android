@@ -28,6 +28,7 @@ Result: **PENDING**
 - [x] Native section Help survives rotation. Phone/video PASS 2026-10-01.
 - [ ] Native section `Критерії / скорочення` keeps the active Schemes/Connector panel controls visible above the table. Video FAIL 2026-10-01; fix implemented, phone recheck pending.
 - [ ] Native section detail/table state and scroll survive rotation without rereading Runtime IR. Fix implemented, phone recheck pending.
+- [ ] Native section Connector composite actions (`Схема + піни роз’єма`, `Схема роз’єму`, `Опис контактів`) use Renault Docs styling instead of default gray Android buttons. Phone FAIL 2026-10-02; fix implemented, recheck pending.
 - [ ] Volume documentation Help survives rotation and panel context stays intact.
 
 ## Other lifecycle
