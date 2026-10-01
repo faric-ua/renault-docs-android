@@ -363,3 +363,36 @@ Next:
 2. start phone regression with Converter button styling and stale `Старі бібліотеки` / Megane II handling;
 3. continue the full v0.5.54 visual + lifecycle checklist;
 4. keep PR #13 unmerged until the full phone gate passes.
+
+
+## v0.5.54 Classic help-page mobile layout
+
+Status: **IMPLEMENTED / CI GREEN / PHONE CHECK NEXT**.
+
+Phone screenshot finding:
+- legacy `Як користуватись` / `README_UA.html` is too tall and text-heavy on a phone;
+- page title and headings consume too much vertical space;
+- long file descriptions are hard to scan;
+- the Viewer toolbar can waste two lines on the generic `Як користуватися — …` title.
+
+Implemented:
+- Viewer shows the actual dataset identity for legacy info pages instead of the generic help-page title;
+- a trailing year range is normalized to a second line, e.g. `Laguna II` / `2001–2006`;
+- Classic scope note is shorter;
+- existing imported `README_UA.html` pages receive an idempotent mobile layout at runtime, so Laguna II packages do not need rebuilding;
+- `Відкрити каталог документації` becomes a compact `Відкрити каталог` action;
+- `Що знаходиться у папці` becomes `Основні файли`;
+- the old long file paragraph becomes a two-column `Файл | Призначення` table with wrapping paths;
+- large help headings are reduced;
+- the Android explanatory paragraph is shortened;
+- Python and Android package writers generate the same compact visual family for future packages.
+
+Code commit:
+`24a99325157b1871b9e3d8dd53e7253f046bc237`.
+
+CI:
+- Tests `36797661478` — **PASS**;
+- Android PR Check `36797661499` — **PASS**.
+
+Phone gate:
+open Laguna II → Classic → `Як користуватись` and verify the compact toolbar title, table readability, action row, and absence of oversized headings. No `.rdpkg` regeneration is required.

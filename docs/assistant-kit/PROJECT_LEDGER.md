@@ -2001,3 +2001,24 @@ Evidence:
 
 Release state:
 PR #13 remains open/not merged. One fresh candidate and the full v0.5.54 phone regression are still required before merge.
+
+
+### v0.5.54 Classic help-page mobile layout — 2026-10-01
+
+Real-phone screenshot showed that legacy `README_UA.html` is visually oversized and inefficient on a narrow screen.
+
+Resolution:
+- existing package HTML is adapted at runtime in `SafDatasetWebViewClient`, so already imported Laguna II data changes presentation without package regeneration;
+- Viewer toolbar uses dataset identity on info/help pages and places a trailing `YYYY–YYYY` range on line 2;
+- the Classic scope note is shortened;
+- the help page uses smaller headings, a compact catalog action and a wrapping two-column `Файл | Призначення` table;
+- stale `Android` explanatory copy is shortened to current Renault Docs behavior;
+- both Python and Android package writers emit the compact layout for future datasets.
+
+Implementation commit:
+`24a99325157b1871b9e3d8dd53e7253f046bc237`.
+
+CI:
+Tests `36797661478` PASS; Android PR Check `36797661499` PASS.
+
+This is presentation-only. Dataset schema, Runtime IR and current Laguna II `.rdpkg` payloads are unchanged.

@@ -237,3 +237,28 @@ Classic pages such as `Як користуватись` may contain historical d
 Converter was a remaining exception to the shared visual hierarchy. Its folder-picker and operation buttons now use the same Renault Docs action styling tokens.
 
 Old standalone `DatasetStore` records are intentionally kept for compatibility, but are now treated as external SAF references that can become stale. Before opening such a record, Renault Docs re-runs `DatasetReader.read`. Failed validation blocks navigation and explains how to re-add the folder through Legacy. No record is deleted automatically.
+
+
+## Classic README/help-page mobile presentation
+
+A phone screenshot exposed a readability issue in generated `_renault/README_UA.html`: large H1/H2 text, long inline file descriptions and a generic page title consumed too much space on narrow screens.
+
+v0.5.54 now has two layers so the fix applies immediately and remains correct for future packages:
+
+1. Runtime compatibility layer
+   - `SafDatasetWebViewClient` detects `_renault/README_UA.html`;
+   - injects one idempotent mobile style/DOM adaptation;
+   - converts the old file-description paragraph into a wrapping two-column table;
+   - shortens labels/copy without changing files or package data;
+   - works with already imported Laguna II packages, so no `.rdpkg` regeneration is needed.
+
+2. Generator contract
+   - Python `render_readme_html()` emits the compact table layout;
+   - Android `AndroidDatasetPackageWriter.renderReadme()` uses the same visual family for phone-created packages.
+
+Viewer chrome contract:
+- legacy info/help pages show dataset identity instead of the generic `Як користуватися — …` title;
+- a trailing year range is placed on line 2;
+- the scope note remains app-owned and concise.
+
+This change is presentation-only and does not alter Classic navigation, manifest schema, Runtime IR or Fast Pack semantics.

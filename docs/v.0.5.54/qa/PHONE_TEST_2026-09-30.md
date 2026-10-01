@@ -93,3 +93,17 @@ Result: **PENDING**
 - [ ] A valid old `Старі бібліотеки` record still opens normally.
 - [ ] A moved/deleted old library does not enter a broken Modern screen.
 - [ ] Stale library message tells the user to re-add it through Legacy.
+
+
+## Classic help-page readability
+
+- [ ] Laguna II → Classic → `Як користуватись` opens without rebuilding/reimporting the package.
+- [ ] Viewer toolbar shows dataset identity, not the generic long `Як користуватися — …` page title.
+- [ ] A trailing year range is on line 2 when present, e.g. `Laguna II` / `2001–2006`.
+- [ ] Classic scope note is compact and remains readable.
+- [ ] `Відкрити каталог` is a compact action row and does not wrap awkwardly.
+- [ ] Section title is `Основні файли`, not the oversized old heading.
+- [ ] File information is shown as a two-column `Файл | Призначення` table.
+- [ ] Long paths wrap inside the first column without horizontal overflow.
+- [ ] Help-page H1/H2 typography is compact; no giant multi-line heading dominates the screen.
+- [ ] `Renault Docs` explanatory copy is short and current.
