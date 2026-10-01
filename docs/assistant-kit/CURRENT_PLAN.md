@@ -467,3 +467,20 @@ Resume after sleep:
 3. if Project already has 10 — continue regression; if it has fewer, identify missing installed `.rdpkg` packages before doing any unrelated dataset rebuild;
 4. then resume v0.5.54 phone regression at Converter / stale Legacy / remaining Help+rotation gates;
 5. PR #13 stays **NOT MERGED** until full phone PASS.
+
+
+## Legacy Laguna phone refresh — PASS 2026-10-01
+
+Real-device screenshots confirm:
+- legacy `Renault Laguna II 2001–2006` opens with `томів: 10`;
+- Home legacy card refreshes to `Томів: 10 · відкриття: Classic`;
+- public `*_android` contains all 10 physical volume folders;
+- public `packages/rdpkg` contains all 10 Laguna II archives.
+
+This closes the stale 3-volume legacy-card symptom.
+
+Next:
+1. open normal Project `Laguna II`;
+2. count installed Project volumes separately;
+3. if fewer than 10, identify missing installed packages;
+4. then continue Converter + lifecycle regression.

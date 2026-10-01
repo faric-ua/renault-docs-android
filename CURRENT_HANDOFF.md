@@ -4144,3 +4144,18 @@ Resume:
 4. continue v0.5.54 regression: Converter styling/stale Legacy handling, then Help/dialog rotation/lifecycle;
 5. keep `RISK-LIFE-001` as a separate follow-up;
 6. do not merge PR #13 until full phone PASS.
+
+
+### Legacy Laguna refresh phone PASS — 2026-10-01
+
+Real-phone evidence after metadata repair:
+- legacy Laguna II opened successfully;
+- Modern/legacy dataset shows `томів: 10`;
+- Home `Старі бібліотеки` card now shows `Томів: 10 · відкриття: Classic`;
+- all 10 physical prepared volume folders are present in the public `*_android` dataset;
+- all 10 Laguna II `.rdpkg` archives are present in the public package folder.
+
+This closes the old `Томів: 3` legacy symptom.
+
+Next phone step is intentionally separate:
+open the normal Project `Laguna II` and count **installed Project volumes**. Presence of 10 public archives does not prove 10 packages are installed into the Project.

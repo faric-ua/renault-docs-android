@@ -90,7 +90,7 @@ Result: **PENDING**
 - [ ] Converter folder buttons use Renault Docs dark/bordered styling.
 - [ ] `Перевірити план`, `Почати конвертацію`, `Очистити вибір` are no longer default gray Android buttons.
 - [ ] Cancel action uses danger styling when visible.
-- [ ] A valid old `Старі бібліотеки` record still opens normally.
+- [x] A valid old `Старі бібліотеки` record still opens normally. Phone PASS 2026-10-01: Laguna II opens with 10 volumes.
 - [ ] A moved/deleted old library does not enter a broken Modern screen.
 - [ ] Stale library message tells the user to re-add it through Legacy.
 
@@ -109,3 +109,16 @@ Phone result 2026-10-01: **PASS — compact layout accepted from real-device scr
 - [x] Long paths wrap inside the first column without horizontal overflow.
 - [x] Help-page H1/H2 typography is compact; no giant multi-line heading dominates the screen.
 - [ ] Scroll to the bottom once and confirm the short `Renault Docs` / `Важливо` copy renders normally.
+
+
+## Legacy Laguna 10-volume refresh
+
+Phone result 2026-10-01: **PASS**.
+
+- [x] Old `Старі бібліотеки → Renault Laguna II 2001–2006` opens successfully.
+- [x] Opened legacy dataset reports `томів: 10`.
+- [x] Returning to Home refreshes the stored legacy card to `Томів: 10 · відкриття: Classic`.
+- [x] Public prepared `*_android` folder visibly contains all 10 Laguna II volume directories.
+- [x] Public `packages/rdpkg` folder visibly contains all 10 Laguna II install archives.
+
+Next check is separate: open the normal Project `Laguna II` and count installed Project volumes. Do not infer Project installation state from legacy/public folders.
