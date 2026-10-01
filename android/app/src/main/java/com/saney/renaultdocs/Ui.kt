@@ -22,6 +22,7 @@ object Ui {
     const val secondaryTextSp: Float = 12f
     const val valueTextSp: Float = 13f
     const val compactButtonSp: Float = 12f
+    const val secondaryButtonTextSp: Float = 14f
 
     fun dp(
         context: Context,
