@@ -4242,3 +4242,13 @@ CI on this head:
 
 One final close-state micro-check remains:
 close Help and confirm Home stays on the same stale-status state with no action launched.
+
+
+### Home Help close-state phone PASS — 2026-10-01
+
+User-confirmed close-state:
+- closing Help returns to the same Home screen;
+- stale Megane II danger status remains visible;
+- no picker, navigation or other action launches automatically.
+
+Home Help lifecycle is fully accepted.
