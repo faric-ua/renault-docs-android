@@ -97,13 +97,15 @@ Result: **PENDING**
 
 ## Classic help-page readability
 
-- [ ] Laguna II → Classic → `Як користуватись` opens without rebuilding/reimporting the package.
-- [ ] Viewer toolbar shows dataset identity, not the generic long `Як користуватися — …` page title.
-- [ ] A trailing year range is on line 2 when present, e.g. `Laguna II` / `2001–2006`.
-- [ ] Classic scope note is compact and remains readable.
-- [ ] `Відкрити каталог` is a compact action row and does not wrap awkwardly.
-- [ ] Section title is `Основні файли`, not the oversized old heading.
-- [ ] File information is shown as a two-column `Файл | Призначення` table.
-- [ ] Long paths wrap inside the first column without horizontal overflow.
-- [ ] Help-page H1/H2 typography is compact; no giant multi-line heading dominates the screen.
-- [ ] `Renault Docs` explanatory copy is short and current.
+Phone result 2026-10-01: **PASS — compact layout accepted from real-device screenshots**.
+
+- [x] Laguna II → Classic → `Як користуватись` opens without rebuilding/reimporting the package.
+- [x] Viewer toolbar shows dataset identity, not the generic long `Як користуватися — …` page title.
+- [x] Dataset identity stays readable in the narrow toolbar; years are shown separately in the page body.
+- [x] Classic scope note is compact and remains readable.
+- [x] `Відкрити каталог` is a compact action row and does not wrap awkwardly.
+- [x] Section title is `Основні файли`, not the oversized old heading.
+- [x] File information is shown as a two-column `Файл | Призначення` table.
+- [x] Long paths wrap inside the first column without horizontal overflow.
+- [x] Help-page H1/H2 typography is compact; no giant multi-line heading dominates the screen.
+- [ ] Scroll to the bottom once and confirm the short `Renault Docs` / `Важливо` copy renders normally.
