@@ -2049,3 +2049,35 @@ Tests `36811029640` PASS; Android PR Check `36811029609` PASS.
 
 Status:
 phone recheck required; PR #13 remains unmerged.
+
+
+### Laguna dataset metadata parity final PASS — 2026-10-01
+
+After the seven preserved prepared volumes had been restored, the physical build root contained all 10 Laguna II volumes, but the old package metadata still described only 3. That stale metadata explained why `Старі бібліотеки` continued to display `Томів: 3`.
+
+Package generation was rerun against the restored build root. Final real-phone integrity evidence:
+
+- HTML/CSS scanned: 48307;
+- local references checked: 264793;
+- missing: 0;
+- live build volumes: 10;
+- manifest volumes: 10 / PASS;
+- `_renault/volumes.json`: 10 / PASS;
+- `_renault/modern-index.json`: 10 / PASS;
+- source/build parity: 10/10;
+- missing/extra: 0/0;
+- overall: **PASS**.
+
+Report:
+`/storage/emulated/0/Documents/Renault/reports/dataset-links-20261001-074659.json`.
+
+The integrity checker was hardened in commit
+`82491c108f5a75352edd6466d27c0f9f0b475114`
+so a future state such as “10 live folders but 3 manifest volumes” is a FAIL rather than a false PASS.
+
+CI:
+Tests `36813567420` PASS;
+Android PR Check `36813567450` PASS.
+
+Architecture clarification recorded from phone investigation:
+legacy `*_android` datasets and Project-installed `.rdpkg` volumes are independent storage flows. Project Classic reads the app-private installed package copy via `LocalDatasetDocumentsProvider`; Legacy Classic reads the SAF-linked public dataset folder.

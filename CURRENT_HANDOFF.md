@@ -4102,3 +4102,45 @@ Next development patch:
 - terminal COMPLETE/CANCELLED/FAILED dismiss `×`;
 - fix `1 файлів` → `1 файл`;
 - then perform read-only audit of legacy `*_android` folders.
+
+
+### v0.5.54 sleep handoff — 2026-10-01
+
+Active repository:
+`faric-ua/renault-docs-android`
+
+Branch / PR:
+- `feat/v0.5.54-ux-help-audit`;
+- PR #13 open, mergeable, **NOT MERGED**.
+
+Latest code-bearing head before this checkpoint:
+`82491c108f5a75352edd6466d27c0f9f0b475114`.
+
+CI on that head:
+- Tests `36813567420` PASS;
+- Android PR Check `36813567450` PASS.
+
+Accepted phone evidence this session:
+- compact Classic `Як користуватись` response-level layout is visibly working;
+- old giant help layout is gone;
+- file info is now a wrapping `Файл | Призначення` table;
+- Laguna public prepared dataset is restored to 10 physical volumes;
+- final item 22 integrity result: 48307 HTML/CSS, 264793 local refs, 0 missing;
+- live / manifest / volumes.json / modern-index.json all report 10 volumes with metadata parity PASS;
+- source/build parity is 10/10 with 0 missing and 0 extra.
+
+Critical architecture distinction:
+1. `Старі бібліотеки` Laguna II is a SAF-linked **legacy public dataset** at the old `*_android` location. Classic opened from that record reads the public dataset directly.
+2. Project `Laguna II` built from `.rdpkg` uses **installed app-private packages** under `noBackupFilesDir/rdpkg/<packageId>` exposed through `LocalDatasetDocumentsProvider`. Classic opened from a Project volume reads that private installed copy.
+3. Files in `Documents/Renault/packages/rdpkg` are install archives. All 10 Laguna II archives are present, but that alone does not prove all 10 are already installed into the Project.
+
+All 10 Laguna II `.rdpkg` archives observed:
+NT8183A, NT8218A, NT8236A, NT8240A, NT8254A, NT8282A, NT8283A, NT8307A, NT8327A, NT8328A.
+
+Resume:
+1. open old `Старі бібліотеки → Renault Laguna II 2001–2006`, then return Home; verify its card refreshes to `Томів: 10`;
+2. separately open Project `Laguna II` and count its installed volumes;
+3. if fewer than 10, determine which `.rdpkg` archives are not installed; do **not** confuse this with the repaired legacy `*_android` dataset;
+4. continue v0.5.54 regression: Converter styling/stale Legacy handling, then Help/dialog rotation/lifecycle;
+5. keep `RISK-LIFE-001` as a separate follow-up;
+6. do not merge PR #13 until full phone PASS.

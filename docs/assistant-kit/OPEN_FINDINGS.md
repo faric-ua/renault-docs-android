@@ -1548,7 +1548,7 @@ Menu 8 must either deliver the APK matching current code `versionName` or fail. 
 
 ## DATA-001 — Laguna prepared dataset volume parity mismatch
 
-Status: **CLOSED · REAL-PHONE PASS 2026-09-30**
+Status: **CLOSED · FINAL REAL-PHONE + METADATA PARITY PASS 2026-10-01**
 
 Real-phone dataset link checker baseline on 2026-09-30:
 
@@ -1611,6 +1611,27 @@ Final item 22 result:
 
 Conclusion:
 the prepared Laguna dataset is now complete again. The prior 14 missing links were entirely explained by the intentionally parked seven volumes; no residual flag/language-cleanup link breakage remains.
+
+
+
+### DATA-001 metadata-parity closeout correction — 2026-10-01
+
+The earlier 10/10 physical volume repair was necessary but not sufficient: package metadata still contained the previous 3-volume test snapshot.
+
+After rerunning package generation, final item 22 evidence is:
+- live build volumes: 10;
+- manifest volumes: 10 / PASS;
+- `volumes.json`: 10 / PASS;
+- `modern-index.json`: 10 / PASS;
+- source/build volumes: 10/10;
+- missing/extra volumes: 0/0;
+- missing local links: 0;
+- package metadata parity: PASS;
+- overall status: PASS.
+
+Checker commit `82491c108f5a75352edd6466d27c0f9f0b475114` permanently adds this metadata-parity requirement.
+
+DATA-001 is therefore closed on both physical-volume integrity and package-metadata integrity.
 
 ## UX-023 — Modern section list natural display order
 

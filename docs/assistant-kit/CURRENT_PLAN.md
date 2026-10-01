@@ -425,3 +425,45 @@ CI on `d36dd3b...`:
 
 Phone recheck:
 install one fresh PR #13 candidate and reopen the same Laguna II Classic `Як користуватись` page. The old giant layout must not appear.
+
+
+## SLEEP CHECKPOINT — 2026-10-01 · Laguna integrity restored
+
+Status: **DATASET 10/10 PASS / PACKAGE METADATA 10/10 PASS / PR #13 OPEN / PHONE REGRESSION CONTINUES LATER**.
+
+Real-phone item 22 result after rebuilding package metadata:
+- scanned HTML/CSS files: `48307`;
+- checked local references: `264793`;
+- missing local targets: `0`;
+- skipped outside-root refs: `0`;
+- live build volumes: `10`;
+- `renault-dataset.json` volumes: `10` — metadata parity PASS;
+- `_renault/volumes.json` volumes: `10` — metadata parity PASS;
+- `_renault/modern-index.json` volumes: `10` — metadata parity PASS;
+- source volumes: `10`;
+- build volumes: `10`;
+- missing/extra volumes: `0 / 0`;
+- overall dataset link/integrity check: **PASS**;
+- report: `/storage/emulated/0/Documents/Renault/reports/dataset-links-20261001-074659.json`.
+
+Checker hardening:
+- commit `82491c108f5a75352edd6466d27c0f9f0b475114`;
+- item 22 now fails when live build volumes disagree with manifest / volumes.json / modern-index.json;
+- Tests `36813567420` PASS;
+- Android PR Check `36813567450` PASS.
+
+Important source separation:
+- `Старі бібліотеки` / legacy Laguna II reads directly from the SAF-linked public `laguna 2 2001-2006_android` dataset;
+- Project Laguna II volumes imported from `.rdpkg` are unpacked into app-private `noBackupFilesDir/rdpkg/<packageId>`;
+- Classic opened from a Project volume reads that installed private package copy, not the old public `*_android` folder;
+- public `Documents/Renault/packages/rdpkg` contains source/install archives; presence there does not by itself prove every package is installed in the Project.
+
+Verified public Laguna II package inventory exists for all 10 volumes:
+`NT8183A, NT8218A, NT8236A, NT8240A, NT8254A, NT8282A, NT8283A, NT8307A, NT8327A, NT8328A`.
+
+Resume after sleep:
+1. reopen the old `Старі бібліотеки → Renault Laguna II 2001–2006` once, return Home and verify its stored card refreshes from `Томів: 3` to `Томів: 10`;
+2. open the normal Project `Laguna II` and count installed Project volumes separately;
+3. if Project already has 10 — continue regression; if it has fewer, identify missing installed `.rdpkg` packages before doing any unrelated dataset rebuild;
+4. then resume v0.5.54 phone regression at Converter / stale Legacy / remaining Help+rotation gates;
+5. PR #13 stays **NOT MERGED** until full phone PASS.
