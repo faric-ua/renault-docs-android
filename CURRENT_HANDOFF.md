@@ -4189,3 +4189,15 @@ Still pending:
 - Converter Help rotation/lifecycle.
 
 Minor non-blocking copy polish observed: `source` / `destination` remain English inside Ukrainian UI.
+
+
+### Converter Help lifecycle phone PASS — 2026-10-01
+
+Real-device screenshot after the requested rotation cycle confirms:
+- Converter Help remains open above the same Converter screen;
+- Help uses Renault Docs dark dialog styling;
+- no SAF picker is visible;
+- no conversion/action auto-started under the dialog.
+
+Final micro-check after closing Help:
+the same Converter state should remain visible with its selected source/destination unchanged.

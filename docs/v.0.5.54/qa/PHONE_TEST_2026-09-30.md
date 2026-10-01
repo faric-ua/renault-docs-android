@@ -19,7 +19,7 @@ Result: **PENDING**
 - [ ] Project Add Help opens.
 - [ ] Project Add Help survives rotation.
 - [ ] No picker/import starts automatically after Help rotation.
-- [ ] Converter Help survives rotation.
+- [x] Converter Help survives rotation. Phone PASS 2026-10-01.
 - [ ] Modern volume Help survives rotation.
 - [ ] Native section Help survives rotation.
 - [ ] Volume documentation Help survives rotation and panel context stays intact.
