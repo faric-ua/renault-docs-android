@@ -4213,3 +4213,15 @@ After closing the rotated Help dialog:
 - no picker, validation or conversion started automatically.
 
 Converter Help lifecycle is fully accepted.
+
+
+### Stale Legacy guard phone PASS — 2026-10-01
+
+Real-device Megane II stale-library test:
+- tapping the stale `Старі бібліотеки` record does not navigate into Modern;
+- Home remains visible;
+- no raw `renault-dataset.json` read failure is exposed;
+- user-facing message explains that the old saved path is unavailable and the folder should be added again through Legacy.
+
+Minor copy-polish follow-up:
+the appended technical detail `Вибраний об'єкт не є папкою` is useful diagnostically but can be softened or hidden from the primary user message later.
