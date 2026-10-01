@@ -1,6 +1,7 @@
 package com.saney.renaultdocs
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -22,6 +23,8 @@ class MainActivity : Activity() {
     private lateinit var settings: AppSettings
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
+    private var activeHomeDialogKind: String = ""
+    private var activeHomeDialogProjectId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +35,14 @@ class MainActivity : Activity() {
                     STATE_STATUS_TEXT,
                 )
                 ?.toString()
+        activeHomeDialogKind =
+            savedInstanceState
+                ?.getString(STATE_HOME_DIALOG_KIND)
+                .orEmpty()
+        activeHomeDialogProjectId =
+            savedInstanceState
+                ?.getString(STATE_HOME_DIALOG_PROJECT_ID)
+
         val restoredStatusColor =
             if (
                 savedInstanceState
@@ -79,6 +90,7 @@ class MainActivity : Activity() {
         }
 
         helpDialogs.restoreOpen()
+        restoreHomeDialog()
         repairSavedVolumeMetadata()
     }
 
@@ -94,6 +106,14 @@ class MainActivity : Activity() {
     ) {
         helpDialogs.save(
             outState,
+        )
+        outState.putString(
+            STATE_HOME_DIALOG_KIND,
+            activeHomeDialogKind,
+        )
+        outState.putString(
+            STATE_HOME_DIALOG_PROJECT_ID,
+            activeHomeDialogProjectId,
         )
 
         if (
@@ -1126,6 +1146,40 @@ class MainActivity : Activity() {
                     context =
                         this@MainActivity,
                     value =
+                        "⋮",
+                    sizeSp =
+                        26f,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    contentDescription =
+                        "Дії проєкту " +
+                            project.title
+                    gravity =
+                        Gravity.CENTER
+                    isClickable =
+                        true
+                    isFocusable =
+                        true
+                    setPadding(
+                        Ui.dp(this@MainActivity, 10),
+                        Ui.dp(this@MainActivity, 4),
+                        Ui.dp(this@MainActivity, 10),
+                        Ui.dp(this@MainActivity, 4),
+                    )
+                    setOnClickListener {
+                        showProjectActions(
+                            project,
+                        )
+                    }
+                }
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
                         "›",
                     sizeSp =
                         28f,
@@ -1144,6 +1198,175 @@ class MainActivity : Activity() {
                     )
                 )
             }
+        }
+    }
+
+    private fun showProjectActions(
+        project: RenaultProject,
+    ) {
+        activeHomeDialogKind =
+            DIALOG_PROJECT_ACTIONS
+        activeHomeDialogProjectId =
+            project.id
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle(project.title)
+                .setItems(
+                    arrayOf(
+                        "Видалити проєкт",
+                    ),
+                ) {
+                    _,
+                    which ->
+                    if (which == 0) {
+                        confirmRemoveProject(
+                            project,
+                        )
+                    }
+                }
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .create()
+
+        trackHomeDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_PROJECT_ACTIONS,
+            projectId =
+                project.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
+    }
+
+    private fun confirmRemoveProject(
+        project: RenaultProject,
+    ) {
+        activeHomeDialogKind =
+            DIALOG_REMOVE_PROJECT
+        activeHomeDialogProjectId =
+            project.id
+
+        val volumeCount =
+            projectStore
+                .volumes(project.id)
+                .size
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle(
+                    "Видалити проєкт?",
+                )
+                .setMessage(
+                    project.title +
+                        "\n\nПроєкт і " +
+                        volumeCount +
+                        " том(ів) буде прибрано з бібліотеки Renault Docs. " +
+                        "Вихідні .rdpkg, SAF-папки та оригінальні Renault-файли на телефоні не видаляються.",
+                )
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .setPositiveButton(
+                    "Видалити проєкт",
+                ) {
+                    _,
+                    _ ->
+                    clearHomeDialogState(
+                        DIALOG_REMOVE_PROJECT,
+                    )
+                    projectStore.removeProject(
+                        project.id,
+                    )
+                    statusText.text =
+                        "Проєкт видалено з бібліотеки: " +
+                            project.title +
+                            ". Файли на телефоні не видалено."
+                    renderLibrary()
+                }
+                .create()
+
+        trackHomeDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_REMOVE_PROJECT,
+            projectId =
+                project.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.DANGER,
+        )
+    }
+
+    private fun trackHomeDialog(
+        dialog: AlertDialog,
+        kind: String,
+        projectId: String,
+    ) {
+        dialog.setOnDismissListener {
+            if (
+                !isChangingConfigurations &&
+                activeHomeDialogKind ==
+                    kind &&
+                activeHomeDialogProjectId ==
+                    projectId
+            ) {
+                clearHomeDialogState(
+                    kind,
+                )
+            }
+        }
+    }
+
+    private fun clearHomeDialogState(
+        expectedKind: String? = null,
+    ) {
+        if (
+            expectedKind != null &&
+            activeHomeDialogKind !=
+                expectedKind
+        ) {
+            return
+        }
+        activeHomeDialogKind = ""
+        activeHomeDialogProjectId = null
+    }
+
+    private fun restoreHomeDialog() {
+        val projectId =
+            activeHomeDialogProjectId
+                ?: return
+        val project =
+            projectStore.project(projectId)
+                ?: run {
+                    clearHomeDialogState()
+                    return
+                }
+
+        when (activeHomeDialogKind) {
+            DIALOG_PROJECT_ACTIONS ->
+                showProjectActions(project)
+
+            DIALOG_REMOVE_PROJECT ->
+                confirmRemoveProject(project)
+
+            else ->
+                clearHomeDialogState()
         }
     }
 
@@ -1398,6 +1621,14 @@ class MainActivity : Activity() {
     }
 
     companion object {
+        private const val STATE_HOME_DIALOG_KIND =
+            "homeDialogKind"
+        private const val STATE_HOME_DIALOG_PROJECT_ID =
+            "homeDialogProjectId"
+        private const val DIALOG_PROJECT_ACTIONS =
+            "projectActions"
+        private const val DIALOG_REMOVE_PROJECT =
+            "removeProject"
         private const val REQUEST_DATASET_FOLDER = 4101
         private const val HELP_LIBRARY =
             "library"
