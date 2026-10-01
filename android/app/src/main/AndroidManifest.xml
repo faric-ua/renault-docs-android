@@ -28,7 +28,8 @@
         <activity
             android:name=".ModernVolumeActivity"
             android:exported="false"
-            android:screenOrientation="unspecified" />
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".NativeSectionActivity"
