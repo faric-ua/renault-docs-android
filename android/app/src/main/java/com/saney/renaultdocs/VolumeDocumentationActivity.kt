@@ -19,6 +19,8 @@ import org.json.JSONObject
 class VolumeDocumentationActivity : Activity() {
     private lateinit var bodyContainer:
         LinearLayout
+    private lateinit var bodyScroll:
+        ScrollView
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
 
@@ -36,6 +38,7 @@ class VolumeDocumentationActivity : Activity() {
 
     private val panelStack =
         mutableListOf<String>()
+    private var restoredScrollY: Int = 0
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -83,6 +86,20 @@ class VolumeDocumentationActivity : Activity() {
                 panelStack.addAll(it)
             }
 
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        runtimeData =
+            (
+                lastNonConfigurationInstance
+                    as? RetainedDocumentationState
+            )?.runtimeData
+
         helpDialogs =
             LifecycleHelpDialogController(
                 activity = this,
@@ -107,8 +124,24 @@ class VolumeDocumentationActivity : Activity() {
         )
         helpDialogs.restoreOpen()
 
-        loadDocumentation()
+        val retainedData =
+            runtimeData
+        if (
+            retainedData != null
+        ) {
+            showDocumentation(
+                retainedData,
+            )
+        } else {
+            loadDocumentation()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any =
+        RetainedDocumentationState(
+            runtimeData =
+                runtimeData,
+        )
 
     override fun onSaveInstanceState(
         outState: Bundle,
@@ -116,6 +149,16 @@ class VolumeDocumentationActivity : Activity() {
         outState.putStringArrayList(
             STATE_PANEL_STACK,
             ArrayList(panelStack),
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::bodyScroll.isInitialized
+            ) {
+                bodyScroll.scrollY
+            } else {
+                restoredScrollY
+            },
         )
         helpDialogs.save(
             outState,
@@ -280,7 +323,7 @@ class VolumeDocumentationActivity : Activity() {
 
         root.addView(topBar)
 
-        val scroll =
+        bodyScroll =
             ScrollView(this).apply {
                 isFillViewport = true
             }
@@ -303,7 +346,7 @@ class VolumeDocumentationActivity : Activity() {
                 )
             }
 
-        scroll.addView(
+        bodyScroll.addView(
             bodyContainer,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
@@ -312,7 +355,7 @@ class VolumeDocumentationActivity : Activity() {
         )
 
         root.addView(
-            scroll,
+            bodyScroll,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
@@ -367,16 +410,9 @@ class VolumeDocumentationActivity : Activity() {
                 result
                     .onSuccess {
                         runtimeData = it
-                        volumeTitle =
-                            it.volumeTitle
-                                .takeIf {
-                                    title ->
-                                    title.isNotBlank()
-                                }
-                                ?: volumeTitle
-
-                        sanitizePanelStack()
-                        renderCurrent()
+                        showDocumentation(
+                            it,
+                        )
                     }
                     .onFailure {
                         renderLoadFailure(
@@ -386,6 +422,43 @@ class VolumeDocumentationActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun showDocumentation(
+        data: RuntimeIrVolumeDocumentationData,
+    ) {
+        volumeTitle =
+            data.volumeTitle
+                .takeIf {
+                    it.isNotBlank()
+                }
+                ?: volumeTitle
+
+        sanitizePanelStack()
+        renderCurrent()
+        restoreBodyScroll()
+    }
+
+    private fun restoreBodyScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::bodyScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        bodyScroll.post {
+            bodyScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
     }
 
     private fun sanitizePanelStack() {
@@ -1507,11 +1580,18 @@ class VolumeDocumentationActivity : Activity() {
         )
     }
 
+    private data class RetainedDocumentationState(
+        val runtimeData:
+            RuntimeIrVolumeDocumentationData?,
+    )
+
     companion object {
         private const val HELP_DOCUMENTATION =
             "documentation"
         private const val STATE_PANEL_STACK =
             "documentationPanelStack"
+        private const val STATE_SCROLL_Y =
+            "documentationScrollY"
 
         private const val EXTRA_TREE_URI =
             "treeUri"
