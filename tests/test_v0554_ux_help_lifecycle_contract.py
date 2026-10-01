@@ -189,6 +189,19 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("додай її знову через Legacy", main)
         self.assertIn("Ця стара бібліотека більше не читається", modern)
 
+    def test_home_status_survives_rotation(self):
+        main = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+
+        self.assertIn("STATE_STATUS_TEXT", main)
+        self.assertIn("STATE_STATUS_COLOR", main)
+        self.assertIn("statusText.currentTextColor", main)
+        self.assertIn("outState.putCharSequence(", main)
+        self.assertIn("outState.putInt(", main)
+        self.assertIn("restoredStatusText", main)
+        self.assertIn("restoredStatusColor", main)
+
     def test_project_add_actions_are_one_tile_with_auto_and_manual(self):
         project = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
