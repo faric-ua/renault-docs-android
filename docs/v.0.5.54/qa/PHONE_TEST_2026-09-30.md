@@ -25,7 +25,9 @@ Result: **PENDING**
 - [x] Converter Help survives rotation. Phone PASS 2026-10-01: dialog restored over the same Converter.
 - [x] Closing Converter Help returns to the same Converter state with source/destination preserved and no action launched.
 - [x] Modern volume Help survives rotation. User-confirmed PASS 2026-10-01.
-- [ ] Native section Help survives rotation.
+- [x] Native section Help survives rotation. Phone/video PASS 2026-10-01.
+- [ ] Native section `Критерії / скорочення` keeps the active Schemes/Connector panel controls visible above the table. Video FAIL 2026-10-01; fix implemented, phone recheck pending.
+- [ ] Native section detail/table state and scroll survive rotation without rereading Runtime IR. Fix implemented, phone recheck pending.
 - [ ] Volume documentation Help survives rotation and panel context stays intact.
 
 ## Other lifecycle
