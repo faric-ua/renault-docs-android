@@ -4273,3 +4273,25 @@ User-confirmed close-state:
 - no .rdpkg picker, SAF picker or import starts automatically.
 
 Project Add Help lifecycle is fully accepted.
+
+
+### Project scroll rotation finding from video — 2026-10-01
+
+User video `380089.mp4` exposed a gap in the previously accepted Project Add Help lifecycle:
+- before rotation the Project list was scrolled near the last Laguna volumes (`NT8307A / NT8327A / NT8328A`);
+- after returning to portrait the list jumped back near `NT8183A`;
+- Help/picker lifecycle itself remained correct, but Project list position was not persisted.
+
+Root cause:
+`ProjectActivity` created its `ScrollView` as a local view and did not save/restore `scrollY`.
+
+Fix:
+- commit `60773e69eef197581600dcbea03908e7529215cd`: Project ScrollView is now an Activity field, `STATE_SCROLL_Y` is saved, and position is restored after `render()`;
+- commit `52a612f11c0d5a85f2280ddc2489060bd0c0cf75`: contract-test for Project scroll restoration;
+- Tests `36895716256` PASS;
+- Android PR Check `36895715833` pending at time of this checkpoint.
+
+Phone recheck required:
+scroll Project Laguna II near the bottom → rotate landscape → rotate portrait → same volume area must remain visible.
+
+Also user-confirmed the current Modern volume Help rotation as PASS.
