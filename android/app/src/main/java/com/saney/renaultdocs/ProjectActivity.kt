@@ -27,12 +27,15 @@ class ProjectActivity : Activity() {
         LifecycleHelpDialogController
     private lateinit var project: RenaultProject
     private lateinit var volumeContainer: LinearLayout
+    private lateinit var projectScroll: ScrollView
     private lateinit var statusText: TextView
     private lateinit var nativeTerminalStatusRow: LinearLayout
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
     private var pendingManualImport =
         false
+    private var restoredScrollY =
+        0
     private var activeProjectDialogKind:
         String =
         ""
@@ -92,6 +95,14 @@ class ProjectActivity : Activity() {
                     false,
                 )
                 ?: false
+
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
 
         activeProjectDialogKind =
             savedInstanceState
@@ -180,6 +191,7 @@ class ProjectActivity : Activity() {
         )
         helpDialogs.restoreOpen()
         render()
+        restoreProjectScroll()
         repairSavedVolumeMetadata()
 
         if (
@@ -246,6 +258,16 @@ class ProjectActivity : Activity() {
         outState.putBoolean(
             STATE_PENDING_MANUAL_IMPORT,
             pendingManualImport,
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::projectScroll.isInitialized
+            ) {
+                projectScroll.scrollY
+            } else {
+                restoredScrollY
+            },
         )
         helpDialogs.save(
             outState,
@@ -1597,7 +1619,7 @@ class ProjectActivity : Activity() {
             },
         )
 
-        val scroll =
+        projectScroll =
             ScrollView(
                 this,
             ).apply {
@@ -1615,7 +1637,7 @@ class ProjectActivity : Activity() {
                     Gravity.TOP
             }
 
-        scroll.addView(
+        projectScroll.addView(
             volumeContainer,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
@@ -1624,7 +1646,7 @@ class ProjectActivity : Activity() {
         )
 
         root.addView(
-            scroll,
+            projectScroll,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
@@ -2072,6 +2094,28 @@ class ProjectActivity : Activity() {
                 onClick()
             }
         }
+
+    private fun restoreProjectScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::projectScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        projectScroll.post {
+            projectScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
+    }
 
     private fun render() {
         val volumes =
@@ -3240,6 +3284,8 @@ class ProjectActivity : Activity() {
             4305
         private const val STATE_PENDING_MANUAL_IMPORT =
             "pendingManualImport"
+        private const val STATE_SCROLL_Y =
+            "projectScrollY"
         private const val STATE_ACTIVE_DIALOG_KIND =
             "activeProjectDialogKind"
         private const val STATE_ACTIVE_DIALOG_VOLUME_ID =
