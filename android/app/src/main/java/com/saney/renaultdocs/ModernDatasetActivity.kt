@@ -119,11 +119,10 @@ class ModernDatasetActivity : Activity() {
                 searchInput.text
                     .toString(),
             )
+            restoreVolumeScroll()
         } else {
             loadCatalog()
         }
-
-        restoreVolumeScroll()
     }
 
     override fun onRetainNonConfigurationInstance(): Any? =
@@ -533,6 +532,7 @@ class ModernDatasetActivity : Activity() {
                             searchInput.text
                                 .toString(),
                         )
+                        restoreVolumeScroll()
 
                         prewarmFastPack()
                     }
