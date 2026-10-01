@@ -37,6 +37,7 @@ class ModernVolumeActivity : Activity() {
         "Renault volume"
     private var volumeEntrypoint: String = ""
     private var restoredQuery: String = ""
+    private var restoredScrollY: Int = 0
     private var openSearchRequested: Boolean = false
 
     override fun onCreate(
@@ -85,6 +86,18 @@ class ModernVolumeActivity : Activity() {
                     STATE_QUERY,
                 )
                 .orEmpty()
+
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        sectionIndex =
+            lastNonConfigurationInstance
+                as? ModernVolumeSections
 
         openSearchRequested =
             intent.getBooleanExtra(
@@ -135,8 +148,22 @@ class ModernVolumeActivity : Activity() {
             searchInput.requestFocus()
         }
 
-        loadSections()
+        val retainedSections =
+            sectionIndex
+
+        if (
+            retainedSections != null
+        ) {
+            showLoadedSections(
+                retainedSections,
+            )
+        } else {
+            loadSections()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any? =
+        sectionIndex
 
     override fun onSaveInstanceState(
         outState: Bundle,
@@ -154,6 +181,17 @@ class ModernVolumeActivity : Activity() {
                     .toString()
             } else {
                 restoredQuery
+            },
+        )
+
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::sectionScroll.isInitialized
+            ) {
+                sectionScroll.scrollY
+            } else {
+                restoredScrollY
             },
         )
 
@@ -614,27 +652,9 @@ class ModernVolumeActivity : Activity() {
                 result
                     .onSuccess {
                         sectionIndex = it
-
-                        if (
-                            it.sections.isEmpty()
-                        ) {
-                            showNativeFallback(
-                                "Для цього тому розділи автоматично не знайдені."
-                            )
-                        } else {
-                            statusText.setTextColor(
-                                Ui.muted,
-                            )
-                            statusText.text =
-                                "Розділів: " +
-                                    it.sections.size +
-                                    " · native"
-
-                            renderSections(
-                                searchInput.text
-                                    .toString(),
-                            )
-                        }
+                        showLoadedSections(
+                            it,
+                        )
                     }
                     .onFailure {
                         showNativeFallback(
@@ -644,6 +664,44 @@ class ModernVolumeActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun showLoadedSections(
+        sections: ModernVolumeSections,
+    ) {
+        if (
+            sections.sections.isEmpty()
+        ) {
+            showNativeFallback(
+                "Для цього тому розділи автоматично не знайдені."
+            )
+            return
+        }
+
+        statusText.setTextColor(
+            Ui.muted,
+        )
+        statusText.text =
+            "Розділів: " +
+                sections.sections.size +
+                " · native"
+
+        renderSections(
+            searchInput.text
+                .toString(),
+        )
+
+        if (
+            restoredScrollY >
+            0
+        ) {
+            sectionScroll.post {
+                sectionScroll.scrollTo(
+                    0,
+                    restoredScrollY,
+                )
+            }
+        }
     }
 
     private fun renderSections(
@@ -1222,6 +1280,8 @@ class ModernVolumeActivity : Activity() {
             "volumeEntrypoint"
         private const val STATE_QUERY =
             "query"
+        private const val STATE_SCROLL_Y =
+            "scrollY"
         private const val HELP_VOLUME =
             "volume"
         private const val EXTRA_OPEN_SEARCH =
