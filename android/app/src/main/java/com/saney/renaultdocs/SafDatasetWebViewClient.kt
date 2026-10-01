@@ -223,6 +223,17 @@ class SafDatasetWebViewClient(
         }
 
         if (
+            relativePath.equals(
+                "_renault/README_UA.html",
+                ignoreCase = true,
+            )
+        ) {
+            applyReadmeMobileLayout(
+                view,
+            )
+        }
+
+        if (
             legacyStandaloneMode &&
             isLegacyHtml(
                 relativePath,
@@ -1987,6 +1998,534 @@ class SafDatasetWebViewClient(
 
                 window.__renaultClickFallback =
                   true;
+              }
+
+              return true;
+            })();
+            """.trimIndent()
+
+        view.evaluateJavascript(
+            script,
+            null,
+        )
+    }
+
+    private fun applyReadmeMobileLayout(
+        view: WebView?,
+    ) {
+        view
+            ?: return
+
+        val script =
+            """
+            (() => {
+              const body =
+                document.body;
+
+              if (!body) {
+                return false;
+              }
+
+              if (
+                !document.getElementById(
+                  '__renaultReadmeMobileStyle'
+                )
+              ) {
+                const style =
+                  document.createElement(
+                    'style'
+                  );
+
+                style.id =
+                  '__renaultReadmeMobileStyle';
+
+                style.textContent = `
+                  :root {
+                    color-scheme: dark;
+                  }
+                  html, body {
+                    background: #101318 !important;
+                    color: #f3f6f8 !important;
+                  }
+                  body {
+                    max-width: 860px !important;
+                    margin: 0 auto !important;
+                    padding: 14px 14px 28px !important;
+                    box-sizing: border-box;
+                    font-family: system-ui, -apple-system, sans-serif !important;
+                    font-size: 15px !important;
+                    line-height: 1.45 !important;
+                  }
+                  h1 {
+                    margin: 0 0 8px !important;
+                    font-size: 22px !important;
+                    line-height: 1.18 !important;
+                    letter-spacing: -0.2px;
+                  }
+                  .dataset-years {
+                    display: block;
+                    margin-top: 3px;
+                    color: #aab5c2;
+                    font-size: 15px;
+                    font-weight: 600;
+                    letter-spacing: 0;
+                  }
+                  h2 {
+                    margin: 22px 0 10px !important;
+                    font-size: 16px !important;
+                    line-height: 1.25 !important;
+                  }
+                  p {
+                    margin: 8px 0 12px !important;
+                  }
+                  a {
+                    color: #76bdff !important;
+                  }
+                  .box {
+                    margin: 12px 0 16px !important;
+                    padding: 10px 12px !important;
+                    border: 1px solid #384352 !important;
+                    border-radius: 12px !important;
+                    background: #181d25 !important;
+                    font-size: 14px !important;
+                  }
+                  .readme-action {
+                    margin: 0 0 18px !important;
+                  }
+                  .readme-action a {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    box-sizing: border-box;
+                    width: 100%;
+                    padding: 11px 12px;
+                    border: 1px solid #76bdff;
+                    border-radius: 11px;
+                    background: #181d25;
+                    text-decoration: none;
+                    font-size: 15px;
+                    font-weight: 700;
+                  }
+                  .readme-action a::after {
+                    content: '›';
+                    font-size: 22px;
+                    line-height: 1;
+                  }
+                  .file-table {
+                    width: 100%;
+                    table-layout: fixed;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    overflow: hidden;
+                    border: 1px solid #384352;
+                    border-radius: 12px;
+                    background: #181d25;
+                    font-size: 13px;
+                    line-height: 1.35;
+                  }
+                  .file-table th,
+                  .file-table td {
+                    box-sizing: border-box;
+                    padding: 9px 8px;
+                    vertical-align: top;
+                    text-align: left;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                  }
+                  .file-table th {
+                    color: #aab5c2;
+                    background: #222936;
+                    font-size: 12px;
+                    font-weight: 700;
+                  }
+                  .file-table th:first-child,
+                  .file-table td:first-child {
+                    width: 43%;
+                    border-right: 1px solid #384352;
+                  }
+                  .file-table tr + tr td {
+                    border-top: 1px solid #384352;
+                  }
+                  code {
+                    padding: 1px 4px !important;
+                    border-radius: 5px !important;
+                    background: #202732 !important;
+                    white-space: normal !important;
+                    overflow-wrap: anywhere;
+                    font-size: 12px !important;
+                  }
+                `;
+
+                (
+                  document.head ||
+                  document.documentElement
+                ).appendChild(
+                  style
+                );
+              }
+
+              const clean =
+                value =>
+                  (value || '')
+                    .replace(
+                      /\\s+/g,
+                      ' '
+                    )
+                    .trim();
+
+              const heading =
+                label =>
+                  Array.from(
+                    document.querySelectorAll(
+                      'h2'
+                    )
+                  ).find(
+                    item =>
+                      clean(
+                        item.textContent
+                      ) === label
+                  );
+
+              const title =
+                document.querySelector(
+                  'h1'
+                );
+
+              if (
+                title &&
+                title.dataset
+                  .renaultSplitTitle !==
+                  '1'
+              ) {
+                const raw =
+                  clean(
+                    title.textContent
+                  );
+                const match =
+                  raw.match(
+                    /^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})$/
+                  );
+
+                if (
+                  match &&
+                  clean(match[1])
+                ) {
+                  const name =
+                    document.createElement(
+                      'span'
+                    );
+                  name.textContent =
+                    clean(match[1]);
+
+                  const years =
+                    document.createElement(
+                      'span'
+                    );
+                  years.className =
+                    'dataset-years';
+                  years.textContent =
+                    match[2] +
+                    '–' +
+                    match[3];
+
+                  title.textContent = '';
+                  title.appendChild(name);
+                  title.appendChild(years);
+                }
+
+                title.dataset
+                  .renaultSplitTitle =
+                  '1';
+              }
+
+              const firstParagraph =
+                body.querySelector(
+                  'p'
+                );
+
+              if (
+                firstParagraph &&
+                clean(
+                  firstParagraph.textContent
+                ).startsWith(
+                  'Це конвертований Renault dataset'
+                )
+              ) {
+                firstParagraph.textContent =
+                  'Конвертований Renault dataset. Внутрішні файли не потрібно редагувати вручну.';
+              }
+
+              const infoBox =
+                body.querySelector(
+                  '.box'
+                );
+
+              if (
+                infoBox &&
+                clean(
+                  infoBox.textContent
+                ).includes(
+                  'Знайдено внутрішніх томів'
+                )
+              ) {
+                const count =
+                  clean(
+                    infoBox.textContent
+                  ).match(
+                    /(\\d+)/
+                  );
+
+                if (count) {
+                  infoBox.textContent =
+                    'Томів у цьому dataset: ' +
+                    count[1];
+                }
+              }
+
+              const startHeading =
+                heading(
+                  'З чого почати'
+                );
+
+              if (startHeading) {
+                startHeading.textContent =
+                  'Документація';
+
+                const action =
+                  startHeading
+                    .nextElementSibling;
+
+                if (action) {
+                  action.classList.add(
+                    'readme-action'
+                  );
+
+                  const link =
+                    action.querySelector(
+                      'a'
+                    );
+
+                  if (link) {
+                    link.textContent =
+                      'Відкрити каталог';
+                  }
+                }
+              }
+
+              const filesHeading =
+                heading(
+                  'Що знаходиться у папці'
+                ) ||
+                heading(
+                  'Основні файли'
+                );
+
+              if (filesHeading) {
+                filesHeading.textContent =
+                  'Основні файли';
+
+                const source =
+                  filesHeading
+                    .nextElementSibling;
+
+                if (
+                  source &&
+                  source.tagName === 'P' &&
+                  !document.getElementById(
+                    '__renaultReadmeTable'
+                  )
+                ) {
+                  const rows =
+                    source.innerHTML
+                      .split(
+                        /<br\\s*\\/?>/i
+                      )
+                      .map(
+                        item =>
+                          item.trim()
+                      )
+                      .filter(Boolean);
+
+                  const table =
+                    document.createElement(
+                      'table'
+                    );
+                  table.id =
+                    '__renaultReadmeTable';
+                  table.className =
+                    'file-table';
+
+                  const thead =
+                    document.createElement(
+                      'thead'
+                    );
+                  const headerRow =
+                    document.createElement(
+                      'tr'
+                    );
+
+                  for (
+                    const label of [
+                      'Файл',
+                      'Призначення'
+                    ]
+                  ) {
+                    const cell =
+                      document.createElement(
+                        'th'
+                      );
+                    cell.textContent =
+                      label;
+                    headerRow.appendChild(
+                      cell
+                    );
+                  }
+
+                  thead.appendChild(
+                    headerRow
+                  );
+                  table.appendChild(
+                    thead
+                  );
+
+                  const tbody =
+                    document.createElement(
+                      'tbody'
+                    );
+
+                  for (
+                    const rawRow of rows
+                  ) {
+                    const temp =
+                      document.createElement(
+                        'div'
+                      );
+                    temp.innerHTML =
+                      rawRow;
+
+                    const codes =
+                      Array.from(
+                        temp.querySelectorAll(
+                          'code'
+                        )
+                      ).map(
+                        item =>
+                          clean(
+                            item.textContent
+                          )
+                      );
+
+                    const textClone =
+                      temp.cloneNode(
+                        true
+                      );
+
+                    textClone
+                      .querySelectorAll(
+                        'code'
+                      )
+                      .forEach(
+                        item =>
+                          item.remove()
+                      );
+
+                    const description =
+                      clean(
+                        textClone.textContent
+                      ).replace(
+                        /^[-—–]\\s*/,
+                        ''
+                      );
+
+                    const row =
+                      document.createElement(
+                        'tr'
+                      );
+                    const fileCell =
+                      document.createElement(
+                        'td'
+                      );
+                    const descriptionCell =
+                      document.createElement(
+                        'td'
+                      );
+
+                    if (
+                      codes.length > 0
+                    ) {
+                      codes.forEach(
+                        (value, index) => {
+                          if (index > 0) {
+                            fileCell.appendChild(
+                              document.createTextNode(
+                                ' + '
+                              )
+                            );
+                          }
+
+                          const code =
+                            document.createElement(
+                              'code'
+                            );
+                          code.textContent =
+                            value;
+                          fileCell.appendChild(
+                            code
+                          );
+                        }
+                      );
+                    } else {
+                      fileCell.textContent =
+                        'Інше';
+                    }
+
+                    descriptionCell.textContent =
+                      description ||
+                      clean(
+                        temp.textContent
+                      );
+
+                    row.appendChild(
+                      fileCell
+                    );
+                    row.appendChild(
+                      descriptionCell
+                    );
+                    tbody.appendChild(
+                      row
+                    );
+                  }
+
+                  table.appendChild(
+                    tbody
+                  );
+                  source.replaceWith(
+                    table
+                  );
+                }
+              }
+
+              const androidHeading =
+                heading(
+                  'Android'
+                );
+
+              if (androidHeading) {
+                androidHeading.textContent =
+                  'Renault Docs';
+
+                const paragraph =
+                  androidHeading
+                    .nextElementSibling;
+
+                if (
+                  paragraph &&
+                  paragraph.tagName === 'P'
+                ) {
+                  paragraph.textContent =
+                    'Застосунок читає manifest, додає dataset до бібліотеки та відкриває PDF у власному viewer.';
+                }
               }
 
               return true;

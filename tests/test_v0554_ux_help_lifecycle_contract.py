@@ -94,6 +94,12 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         viewer = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ViewerActivity.kt"
         )
+        web_client = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/SafDatasetWebViewClient.kt"
+        )
+        package_writer = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/AndroidDatasetPackageWriter.kt"
+        )
 
         self.assertIn("fun modeButton(", ui)
 
@@ -106,12 +112,32 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             self.assertIn("Ui.modeButton(", text)
 
         self.assertIn(
-            "Classic-довідка цього dataset",
+            "compactLegacyInfoTitle",
             viewer,
         )
         self.assertIn(
-            "а не поточного проєкту Renault Docs",
+            "Classic-довідка · дані й кількість томів",
             viewer,
+        )
+        self.assertIn(
+            "applyReadmeMobileLayout(",
+            web_client,
+        )
+        self.assertIn(
+            "__renaultReadmeMobileStyle",
+            web_client,
+        )
+        self.assertIn(
+            "__renaultReadmeTable",
+            web_client,
+        )
+        self.assertIn(
+            '<table class="file-table">',
+            package_writer,
+        )
+        self.assertIn(
+            "<title>Як користуватися —",
+            package_writer,
         )
 
     def test_converter_uses_renault_docs_action_styling(self):

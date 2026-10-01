@@ -716,14 +716,41 @@ object AndroidDatasetPackageWriter {
         <html lang="uk">
         <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>Renault Docs</title>
+          <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+          <title>Як користуватися — ${escapeHtml(sourceName)}</title>
+          <style>
+            :root{color-scheme:dark}
+            body{max-width:860px;margin:0 auto;padding:14px 14px 28px;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.45;background:#101318;color:#f3f6f8}
+            h1{margin:0 0 8px;font-size:22px;line-height:1.18}
+            h2{margin:22px 0 10px;font-size:16px;line-height:1.25}
+            p{margin:8px 0 12px}
+            .box{margin:12px 0 16px;padding:10px 12px;border:1px solid #384352;border-radius:12px;background:#181d25;font-size:14px}
+            .file-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid #384352;border-radius:12px;background:#181d25;font-size:13px;line-height:1.35}
+            .file-table th,.file-table td{box-sizing:border-box;padding:9px 8px;vertical-align:top;text-align:left;overflow-wrap:anywhere;word-break:break-word}
+            .file-table th{color:#aab5c2;background:#222936;font-size:12px}
+            .file-table th:first-child,.file-table td:first-child{width:43%;border-right:1px solid #384352}
+            .file-table tr+tr td{border-top:1px solid #384352}
+            code{padding:1px 4px;border-radius:5px;background:#202732;white-space:normal;overflow-wrap:anywhere;font-size:12px}
+          </style>
         </head>
         <body>
           <h1>${escapeHtml(sourceName)}</h1>
-          <p>Конвертовано Renault Docs Android writer.</p>
-          <p>Томів: $volumeCount.</p>
-          <p>Ця хвиля створює нормалізований Classic-ready dataset. Повний Modern Runtime IR/Fast Pack компілюється наступним етапом Converter 2.0.</p>
+          <p>Конвертований Renault dataset. Внутрішні файли не потрібно редагувати вручну.</p>
+          <div class="box"><b>Томів у цьому dataset:</b> $volumeCount</div>
+
+          <h2>Основні файли</h2>
+          <table class="file-table">
+            <thead><tr><th>Файл</th><th>Призначення</th></tr></thead>
+            <tbody>
+              <tr><td><code>renault-dataset.json</code></td><td>Опис dataset і точки входу Renault Docs.</td></tr>
+              <tr><td><code>_renault/START.html</code></td><td>Каталог внутрішніх томів.</td></tr>
+              <tr><td><code>_renault/volumes.json</code></td><td>Машиночитуваний список томів.</td></tr>
+              <tr><td><code>_renault/modern-index.json</code></td><td>Швидкий індекс томів для Modern.</td></tr>
+            </tbody>
+          </table>
+
+          <h2>Про пакет</h2>
+          <p>Цей етап створює нормалізований Classic-ready dataset; подальша компіляція додає повний Modern Runtime IR і Fast Pack.</p>
         </body>
         </html>
         """.trimIndent()

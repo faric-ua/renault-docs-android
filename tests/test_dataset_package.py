@@ -84,6 +84,15 @@ class DatasetPackageTests(unittest.TestCase):
             self.assertIn("NT8218A", catalog)
             self.assertIn("../Laguna%20X74%20NT8218A%202002_05_01/INDEX.HTM", catalog)
 
+            readme = (root / "_renault" / "README_UA.html").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn('<span class="dataset-years">2001–2002</span>', readme)
+            self.assertIn("<h2>Основні файли</h2>", readme)
+            self.assertIn('class="file-table"', readme)
+            self.assertIn("<th>Файл</th><th>Призначення</th>", readme)
+            self.assertIn(">Відкрити каталог</a>", readme)
+
 
 if __name__ == "__main__":
     unittest.main()

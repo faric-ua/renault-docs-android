@@ -620,12 +620,6 @@ class ViewerActivity : Activity() {
                         pageTitle,
                     )
 
-                    if (!pageTitle.isNullOrBlank()) {
-                        titleView.text = pageTitle
-                    }
-
-                    reconcilePdfFullscreenPresentation()
-
                     val legacyInfoPage =
                         pageTitle
                             ?.lowercase()
@@ -637,11 +631,25 @@ class ViewerActivity : Activity() {
                     if (
                         legacyInfoPage
                     ) {
+                        titleView.text =
+                            compactLegacyInfoTitle()
+                    } else if (
+                        !pageTitle.isNullOrBlank()
+                    ) {
+                        titleView.text =
+                            pageTitle
+                    }
+
+                    reconcilePdfFullscreenPresentation()
+
+                    if (
+                        legacyInfoPage
+                    ) {
                         statusView.setTextColor(
                             Ui.muted,
                         )
                         statusView.text =
-                            "Classic-довідка цього dataset · кількість томів тут стосується лише відкритого dataset, а не поточного проєкту Renault Docs."
+                            "Classic-довідка · дані й кількість томів стосуються лише цього dataset."
                         statusView.visibility =
                             View.VISIBLE
                     } else if (
@@ -1145,6 +1153,46 @@ class ViewerActivity : Activity() {
         }
 
         super.onDestroy()
+    }
+
+    private fun compactLegacyInfoTitle(): String {
+        val source =
+            modernDatasetTitle
+                .trim()
+                .ifBlank {
+                    "Renault Docs"
+                }
+
+        val match =
+            Regex(
+                "^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})\\z",
+            ).matchEntire(
+                source,
+            )
+
+        if (
+            match == null
+        ) {
+            return source
+        }
+
+        val name =
+            match.groupValues[1]
+                .trim()
+        val years =
+            match.groupValues[2] +
+                "–" +
+                match.groupValues[3]
+
+        return if (
+            name.isBlank()
+        ) {
+            source
+        } else {
+            name +
+                "\n" +
+                years
+        }
     }
 
     private fun headerAction(
