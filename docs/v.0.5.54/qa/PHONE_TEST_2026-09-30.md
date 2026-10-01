@@ -20,6 +20,7 @@ Result: **PENDING**
 - [x] Project Add Help opens. Phone PASS 2026-10-01.
 - [x] Project Add Help survives rotation. Phone PASS 2026-10-01.
 - [x] No picker/import starts automatically after Help rotation. Phone PASS 2026-10-01.
+- [x] Closing Project Add Help returns to the same Project with no picker/import launched.
 - [x] Converter Help survives rotation. Phone PASS 2026-10-01: dialog restored over the same Converter.
 - [x] Closing Converter Help returns to the same Converter state with source/destination preserved and no action launched.
 - [ ] Modern volume Help survives rotation.
