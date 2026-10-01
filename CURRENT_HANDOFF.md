@@ -4201,3 +4201,15 @@ Real-device screenshot after the requested rotation cycle confirms:
 
 Final micro-check after closing Help:
 the same Converter state should remain visible with its selected source/destination unchanged.
+
+
+### Converter Help close-state phone PASS — 2026-10-01
+
+After closing the rotated Help dialog:
+- Converter remained on the same screen;
+- selected source stayed `Documents/Renault/Megane II`;
+- destination stayed `Documents/Renault`;
+- cancelled-state status text remained;
+- no picker, validation or conversion started automatically.
+
+Converter Help lifecycle is fully accepted.

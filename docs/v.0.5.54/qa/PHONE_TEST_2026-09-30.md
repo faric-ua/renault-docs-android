@@ -19,7 +19,8 @@ Result: **PENDING**
 - [ ] Project Add Help opens.
 - [ ] Project Add Help survives rotation.
 - [ ] No picker/import starts automatically after Help rotation.
-- [x] Converter Help survives rotation. Phone PASS 2026-10-01.
+- [x] Converter Help survives rotation. Phone PASS 2026-10-01: dialog restored over the same Converter.
+- [x] Closing Converter Help returns to the same Converter state with source/destination preserved and no action launched.
 - [ ] Modern volume Help survives rotation.
 - [ ] Native section Help survives rotation.
 - [ ] Volume documentation Help survives rotation and panel context stays intact.
