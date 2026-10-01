@@ -345,3 +345,21 @@ First action in the new chat:
 4. resume phone regression starting with **Converter** and the stale **Megane II / Старі бібліотеки** case;
 5. then continue the full v0.5.54 visual/lifecycle checklist;
 6. do **not merge PR #13** until the full phone gate passes.
+
+
+## CI recovery checkpoint — 2026-10-01
+
+Status: **TEST CONTRACT FIXED / CI GREEN / FRESH PHONE CANDIDATE NEXT**.
+
+Completed after the new-chat handoff:
+- stale contract test updated for shared whitespace-formatted `Ui.modeButton` calls;
+- runtime/app code was not changed by this fix;
+- test-only commit: `c3073d44f381c8160829abdc6cee707353711b32`;
+- Tests `36794236208` — **PASS**;
+- Android PR Check `36794236168` — **PASS**.
+
+Next:
+1. build/install exactly one fresh PR #13 candidate from the latest branch head;
+2. start phone regression with Converter button styling and stale `Старі бібліотеки` / Megane II handling;
+3. continue the full v0.5.54 visual + lifecycle checklist;
+4. keep PR #13 unmerged until the full phone gate passes.
