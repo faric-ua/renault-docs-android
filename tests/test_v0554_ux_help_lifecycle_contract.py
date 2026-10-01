@@ -443,6 +443,24 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             native,
         )
 
+    def test_connector_composite_actions_use_native_styling(self):
+        native = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeSectionActivity.kt"
+        )
+
+        composite = native.split(
+            "private fun addCompositePartButton",
+            1,
+        )[1].split(
+            "private fun prepareDocumentBody",
+            1,
+        )[0]
+
+        self.assertIn("Ui.surfaceAlt", composite)
+        self.assertIn("Ui.accent", composite)
+        self.assertIn("Ui.text", composite)
+        self.assertIn("radiusDp = 10", composite)
+
     def test_runtime_heavy_surfaces_reuse_loaded_data_on_rotation(self):
         native = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/NativeSectionActivity.kt"
