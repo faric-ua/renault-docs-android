@@ -479,6 +479,28 @@ class ModernDatasetActivity : Activity() {
         return root
     }
 
+    private fun restoreVolumeScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::volumeScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        volumeScroll.post {
+            volumeScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
+    }
+
     private fun loadCatalog() {
         statusText.text =
             "Читаю швидкий індекс…"
@@ -997,6 +1019,8 @@ class ModernDatasetActivity : Activity() {
             "focusEntrypoint"
         private const val STATE_QUERY =
             "query"
+        private const val STATE_SCROLL_Y =
+            "datasetScrollY"
 
         fun intent(
             context: Context,
