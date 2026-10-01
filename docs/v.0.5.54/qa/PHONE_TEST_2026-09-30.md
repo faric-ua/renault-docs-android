@@ -92,8 +92,8 @@ Result: **PENDING**
 - [x] `Перевірити план`, `Почати конвертацію`, `Очистити вибір` are no longer default gray Android buttons. Phone PASS 2026-10-01.
 - [ ] Cancel action uses danger styling when visible.
 - [x] A valid old `Старі бібліотеки` record still opens normally. Phone PASS 2026-10-01: Laguna II opens with 10 volumes.
-- [ ] A moved/deleted old library does not enter a broken Modern screen.
-- [ ] Stale library message tells the user to re-add it through Legacy.
+- [x] A moved/deleted old library does not enter a broken Modern screen. Phone PASS 2026-10-01: stale Megane II stays on Home.
+- [x] Stale library message tells the user to re-add it through Legacy. Phone PASS 2026-10-01.
 
 
 ## Classic help-page readability
