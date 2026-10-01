@@ -120,15 +120,23 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             viewer,
         )
         self.assertIn(
+            "compactReadmeResponse(",
+            web_client,
+        )
+        self.assertIn(
+            "renderCompactReadmeHtml(",
+            web_client,
+        )
+        self.assertIn(
+            '"X-Renault-Source" to',
+            web_client,
+        )
+        self.assertIn(
+            '"compact-readme"',
+            web_client,
+        )
+        self.assertNotIn(
             "applyReadmeMobileLayout(",
-            web_client,
-        )
-        self.assertIn(
-            "__renaultReadmeMobileStyle",
-            web_client,
-        )
-        self.assertIn(
-            "__renaultReadmeTable",
             web_client,
         )
         self.assertIn(

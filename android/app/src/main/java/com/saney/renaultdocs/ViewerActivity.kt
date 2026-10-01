@@ -632,7 +632,9 @@ class ViewerActivity : Activity() {
                         legacyInfoPage
                     ) {
                         titleView.text =
-                            compactLegacyInfoTitle()
+                            compactLegacyInfoTitle(
+                                pageTitle,
+                            )
                     } else if (
                         !pageTitle.isNullOrBlank()
                     ) {
@@ -1155,25 +1157,56 @@ class ViewerActivity : Activity() {
         super.onDestroy()
     }
 
-    private fun compactLegacyInfoTitle(): String {
-        val source =
-            modernDatasetTitle
+    private fun compactLegacyInfoTitle(
+        pageTitle: String?,
+    ): String {
+        val pageIdentity =
+            pageTitle
+                .orEmpty()
+                .replaceFirst(
+                    Regex(
+                        "^\\s*Як\\s+користув(?:атися|атись)\\s*[—–-]\\s*",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
                 .trim()
+
+        val source =
+            pageIdentity
+                .ifBlank {
+                    modernDatasetTitle
+                        .trim()
+                }
                 .ifBlank {
                     "Renault Docs"
+                }
+
+        val withoutBrand =
+            source
+                .replaceFirst(
+                    Regex(
+                        "^Renault\\s+",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+                .ifBlank {
+                    source
                 }
 
         val match =
             Regex(
                 "^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})\\z",
             ).matchEntire(
-                source,
+                withoutBrand,
             )
 
         if (
             match == null
         ) {
-            return source
+            return withoutBrand
         }
 
         val name =
@@ -1187,7 +1220,7 @@ class ViewerActivity : Activity() {
         return if (
             name.isBlank()
         ) {
-            source
+            withoutBrand
         } else {
             name +
                 "\n" +

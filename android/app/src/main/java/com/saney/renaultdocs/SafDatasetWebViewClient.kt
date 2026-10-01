@@ -123,6 +123,19 @@ class SafDatasetWebViewClient(
             )
         }
 
+        if (
+            relativePath.equals(
+                "_renault/README_UA.html",
+                ignoreCase = true,
+            )
+        ) {
+            compactReadmeResponse(
+                relativePath,
+            )?.let {
+                return it
+            }
+        }
+
         pdfLayer.intercept(
             requestUrl = requestUrl,
             relativePath = relativePath,
@@ -218,17 +231,6 @@ class SafDatasetWebViewClient(
             )
         ) {
             sortClassicCatalogByDate(
-                view,
-            )
-        }
-
-        if (
-            relativePath.equals(
-                "_renault/README_UA.html",
-                ignoreCase = true,
-            )
-        ) {
-            applyReadmeMobileLayout(
                 view,
             )
         }
@@ -2010,533 +2012,412 @@ class SafDatasetWebViewClient(
         )
     }
 
-    private fun applyReadmeMobileLayout(
-        view: WebView?,
-    ) {
-        view
-            ?: return
-
-        val script =
-            """
-            (() => {
-              const body =
-                document.body;
-
-              if (!body) {
-                return false;
-              }
-
-              if (
-                !document.getElementById(
-                  '__renaultReadmeMobileStyle'
+    private fun compactReadmeResponse(
+        relativePath: String,
+    ): WebResourceResponse? {
+        val stream =
+            fastArchive.value
+                ?.open(
+                    relativePath,
                 )
-              ) {
-                const style =
-                  document.createElement(
-                    'style'
-                  );
+                ?: resolver.openInputStream(
+                    relativePath,
+                )
+                ?: return null
 
-                style.id =
-                  '__renaultReadmeMobileStyle';
-
-                style.textContent = `
-                  :root {
-                    color-scheme: dark;
-                  }
-                  html, body {
-                    background: #101318 !important;
-                    color: #f3f6f8 !important;
-                  }
-                  body {
-                    max-width: 860px !important;
-                    margin: 0 auto !important;
-                    padding: 14px 14px 28px !important;
-                    box-sizing: border-box;
-                    font-family: system-ui, -apple-system, sans-serif !important;
-                    font-size: 15px !important;
-                    line-height: 1.45 !important;
-                  }
-                  h1 {
-                    margin: 0 0 8px !important;
-                    font-size: 22px !important;
-                    line-height: 1.18 !important;
-                    letter-spacing: -0.2px;
-                  }
-                  .dataset-years {
-                    display: block;
-                    margin-top: 3px;
-                    color: #aab5c2;
-                    font-size: 15px;
-                    font-weight: 600;
-                    letter-spacing: 0;
-                  }
-                  h2 {
-                    margin: 22px 0 10px !important;
-                    font-size: 16px !important;
-                    line-height: 1.25 !important;
-                  }
-                  p {
-                    margin: 8px 0 12px !important;
-                  }
-                  a {
-                    color: #76bdff !important;
-                  }
-                  .box {
-                    margin: 12px 0 16px !important;
-                    padding: 10px 12px !important;
-                    border: 1px solid #384352 !important;
-                    border-radius: 12px !important;
-                    background: #181d25 !important;
-                    font-size: 14px !important;
-                  }
-                  .readme-action {
-                    margin: 0 0 18px !important;
-                  }
-                  .readme-action a {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 12px;
-                    box-sizing: border-box;
-                    width: 100%;
-                    padding: 11px 12px;
-                    border: 1px solid #76bdff;
-                    border-radius: 11px;
-                    background: #181d25;
-                    text-decoration: none;
-                    font-size: 15px;
-                    font-weight: 700;
-                  }
-                  .readme-action a::after {
-                    content: '›';
-                    font-size: 22px;
-                    line-height: 1;
-                  }
-                  .file-table {
-                    width: 100%;
-                    table-layout: fixed;
-                    border-collapse: separate;
-                    border-spacing: 0;
-                    overflow: hidden;
-                    border: 1px solid #384352;
-                    border-radius: 12px;
-                    background: #181d25;
-                    font-size: 13px;
-                    line-height: 1.35;
-                  }
-                  .file-table th,
-                  .file-table td {
-                    box-sizing: border-box;
-                    padding: 9px 8px;
-                    vertical-align: top;
-                    text-align: left;
-                    overflow-wrap: anywhere;
-                    word-break: break-word;
-                  }
-                  .file-table th {
-                    color: #aab5c2;
-                    background: #222936;
-                    font-size: 12px;
-                    font-weight: 700;
-                  }
-                  .file-table th:first-child,
-                  .file-table td:first-child {
-                    width: 43%;
-                    border-right: 1px solid #384352;
-                  }
-                  .file-table tr + tr td {
-                    border-top: 1px solid #384352;
-                  }
-                  code {
-                    padding: 1px 4px !important;
-                    border-radius: 5px !important;
-                    background: #202732 !important;
-                    white-space: normal !important;
-                    overflow-wrap: anywhere;
-                    font-size: 12px !important;
-                  }
-                `;
-
-                (
-                  document.head ||
-                  document.documentElement
-                ).appendChild(
-                  style
-                );
-              }
-
-              const clean =
-                value =>
-                  (value || '')
-                    .replace(
-                      /\\s+/g,
-                      ' '
+        val source =
+            runCatching {
+                stream
+                    .bufferedReader(
+                        Charsets.UTF_8,
                     )
-                    .trim();
-
-              const heading =
-                label =>
-                  Array.from(
-                    document.querySelectorAll(
-                      'h2'
-                    )
-                  ).find(
-                    item =>
-                      clean(
-                        item.textContent
-                      ) === label
-                  );
-
-              const title =
-                document.querySelector(
-                  'h1'
-                );
-
-              if (
-                title &&
-                title.dataset
-                  .renaultSplitTitle !==
-                  '1'
-              ) {
-                const raw =
-                  clean(
-                    title.textContent
-                  );
-                const match =
-                  raw.match(
-                    /^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})$/
-                  );
-
-                if (
-                  match &&
-                  clean(match[1])
-                ) {
-                  const name =
-                    document.createElement(
-                      'span'
-                    );
-                  name.textContent =
-                    clean(match[1]);
-
-                  const years =
-                    document.createElement(
-                      'span'
-                    );
-                  years.className =
-                    'dataset-years';
-                  years.textContent =
-                    match[2] +
-                    '–' +
-                    match[3];
-
-                  title.textContent = '';
-                  title.appendChild(name);
-                  title.appendChild(years);
-                }
-
-                title.dataset
-                  .renaultSplitTitle =
-                  '1';
-              }
-
-              const firstParagraph =
-                body.querySelector(
-                  'p'
-                );
-
-              if (
-                firstParagraph &&
-                clean(
-                  firstParagraph.textContent
-                ).startsWith(
-                  'Це конвертований Renault dataset'
-                )
-              ) {
-                firstParagraph.textContent =
-                  'Конвертований Renault dataset. Внутрішні файли не потрібно редагувати вручну.';
-              }
-
-              const infoBox =
-                body.querySelector(
-                  '.box'
-                );
-
-              if (
-                infoBox &&
-                clean(
-                  infoBox.textContent
-                ).includes(
-                  'Знайдено внутрішніх томів'
-                )
-              ) {
-                const count =
-                  clean(
-                    infoBox.textContent
-                  ).match(
-                    /(\\d+)/
-                  );
-
-                if (count) {
-                  infoBox.textContent =
-                    'Томів у цьому dataset: ' +
-                    count[1];
-                }
-              }
-
-              const startHeading =
-                heading(
-                  'З чого почати'
-                );
-
-              if (startHeading) {
-                startHeading.textContent =
-                  'Документація';
-
-                const action =
-                  startHeading
-                    .nextElementSibling;
-
-                if (action) {
-                  action.classList.add(
-                    'readme-action'
-                  );
-
-                  const link =
-                    action.querySelector(
-                      'a'
-                    );
-
-                  if (link) {
-                    link.textContent =
-                      'Відкрити каталог';
-                  }
-                }
-              }
-
-              const filesHeading =
-                heading(
-                  'Що знаходиться у папці'
-                ) ||
-                heading(
-                  'Основні файли'
-                );
-
-              if (filesHeading) {
-                filesHeading.textContent =
-                  'Основні файли';
-
-                const source =
-                  filesHeading
-                    .nextElementSibling;
-
-                if (
-                  source &&
-                  source.tagName === 'P' &&
-                  !document.getElementById(
-                    '__renaultReadmeTable'
-                  )
-                ) {
-                  const rows =
-                    source.innerHTML
-                      .split(
-                        /<br\\s*\\/?>/i
-                      )
-                      .map(
-                        item =>
-                          item.trim()
-                      )
-                      .filter(Boolean);
-
-                  const table =
-                    document.createElement(
-                      'table'
-                    );
-                  table.id =
-                    '__renaultReadmeTable';
-                  table.className =
-                    'file-table';
-
-                  const thead =
-                    document.createElement(
-                      'thead'
-                    );
-                  const headerRow =
-                    document.createElement(
-                      'tr'
-                    );
-
-                  for (
-                    const label of [
-                      'Файл',
-                      'Призначення'
-                    ]
-                  ) {
-                    const cell =
-                      document.createElement(
-                        'th'
-                      );
-                    cell.textContent =
-                      label;
-                    headerRow.appendChild(
-                      cell
-                    );
-                  }
-
-                  thead.appendChild(
-                    headerRow
-                  );
-                  table.appendChild(
-                    thead
-                  );
-
-                  const tbody =
-                    document.createElement(
-                      'tbody'
-                    );
-
-                  for (
-                    const rawRow of rows
-                  ) {
-                    const temp =
-                      document.createElement(
-                        'div'
-                      );
-                    temp.innerHTML =
-                      rawRow;
-
-                    const codes =
-                      Array.from(
-                        temp.querySelectorAll(
-                          'code'
-                        )
-                      ).map(
-                        item =>
-                          clean(
-                            item.textContent
-                          )
-                      );
-
-                    const textClone =
-                      temp.cloneNode(
-                        true
-                      );
-
-                    textClone
-                      .querySelectorAll(
-                        'code'
-                      )
-                      .forEach(
-                        item =>
-                          item.remove()
-                      );
-
-                    const description =
-                      clean(
-                        textClone.textContent
-                      ).replace(
-                        /^[-—–]\\s*/,
-                        ''
-                      );
-
-                    const row =
-                      document.createElement(
-                        'tr'
-                      );
-                    const fileCell =
-                      document.createElement(
-                        'td'
-                      );
-                    const descriptionCell =
-                      document.createElement(
-                        'td'
-                      );
-
-                    if (
-                      codes.length > 0
-                    ) {
-                      codes.forEach(
-                        (value, index) => {
-                          if (index > 0) {
-                            fileCell.appendChild(
-                              document.createTextNode(
-                                ' + '
-                              )
-                            );
-                          }
-
-                          const code =
-                            document.createElement(
-                              'code'
-                            );
-                          code.textContent =
-                            value;
-                          fileCell.appendChild(
-                            code
-                          );
-                        }
-                      );
-                    } else {
-                      fileCell.textContent =
-                        'Інше';
+                    .use {
+                        it.readText()
                     }
+            }.getOrNull()
+                ?: return null
 
-                    descriptionCell.textContent =
-                      description ||
-                      clean(
-                        temp.textContent
-                      );
+        val rendered =
+            if (
+                source.contains(
+                    "class=\"file-table\"",
+                    ignoreCase = true,
+                )
+            ) {
+                source
+            } else {
+                renderCompactReadmeHtml(
+                    source,
+                )
+            }
 
-                    row.appendChild(
-                      fileCell
-                    );
-                    row.appendChild(
-                      descriptionCell
-                    );
-                    tbody.appendChild(
-                      row
-                    );
-                  }
-
-                  table.appendChild(
-                    tbody
-                  );
-                  source.replaceWith(
-                    table
-                  );
-                }
-              }
-
-              const androidHeading =
-                heading(
-                  'Android'
-                );
-
-              if (androidHeading) {
-                androidHeading.textContent =
-                  'Renault Docs';
-
-                const paragraph =
-                  androidHeading
-                    .nextElementSibling;
-
-                if (
-                  paragraph &&
-                  paragraph.tagName === 'P'
-                ) {
-                  paragraph.textContent =
-                    'Застосунок читає manifest, додає dataset до бібліотеки та відкриває PDF у власному viewer.';
-                }
-              }
-
-              return true;
-            })();
-            """.trimIndent()
-
-        view.evaluateJavascript(
-            script,
-            null,
+        return WebResourceResponse(
+            "text/html",
+            "UTF-8",
+            200,
+            "OK",
+            mapOf(
+                "Cache-Control" to
+                    "no-store",
+                "X-Renault-Source" to
+                    "compact-readme",
+            ),
+            ByteArrayInputStream(
+                rendered.toByteArray(
+                    Charsets.UTF_8,
+                )
+            ),
         )
     }
+
+    private fun renderCompactReadmeHtml(
+        source: String,
+    ): String {
+        val titleFromPage =
+            Regex(
+                "(?is)<title[^>]*>(.*?)</title>",
+            ).find(
+                source,
+            )
+                ?.groupValues
+                ?.getOrNull(
+                    1,
+                )
+                ?.let {
+                    decodeSimpleHtmlText(
+                        it,
+                    )
+                }
+                .orEmpty()
+                .replaceFirst(
+                    Regex(
+                        "^\\s*Як\\s+користув(?:атися|атись)\\s*[—–-]\\s*",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+
+        val titleFromHeading =
+            Regex(
+                "(?is)<h1[^>]*>(.*?)</h1>",
+            ).find(
+                source,
+            )
+                ?.groupValues
+                ?.getOrNull(
+                    1,
+                )
+                ?.let {
+                    decodeSimpleHtmlText(
+                        it,
+                    )
+                }
+                .orEmpty()
+                .trim()
+
+        val identity =
+            titleFromPage
+                .ifBlank {
+                    titleFromHeading
+                }
+                .ifBlank {
+                    "Renault Docs"
+                }
+
+        val withoutBrand =
+            identity
+                .replaceFirst(
+                    Regex(
+                        "^Renault\\s+",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+                .ifBlank {
+                    identity
+                }
+
+        val yearsMatch =
+            Regex(
+                "^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})\\z",
+            ).matchEntire(
+                withoutBrand,
+            )
+
+        val model =
+            (
+                yearsMatch
+                    ?.groupValues
+                    ?.getOrNull(
+                        1,
+                    )
+                    ?.trim()
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: withoutBrand
+            )
+        val years =
+            yearsMatch
+                ?.let {
+                    it.groupValues[2] +
+                        "–" +
+                        it.groupValues[3]
+                }
+
+        val volumeCount =
+            Regex(
+                "(?is)(?:Знайдено\\s+внутрішніх\\s+томів(?:/редакцій)?|Томів\\s+у\\s+цьому\\s+dataset)[^0-9]{0,120}(\\d+)",
+            ).find(
+                source,
+            )
+                ?.groupValues
+                ?.getOrNull(
+                    1,
+                )
+
+        val yearsHtml =
+            years
+                ?.let {
+                    "<span class=\"dataset-years\">" +
+                        escape(
+                            it,
+                        ) +
+                        "</span>"
+                }
+                .orEmpty()
+
+        val volumeHtml =
+            volumeCount
+                ?.let {
+                    """
+                    <div class="summary">
+                      <span>Томів у цьому dataset</span>
+                      <strong>${escape(it)}</strong>
+                    </div>
+                    """.trimIndent()
+                }
+                .orEmpty()
+
+        return """
+            <!doctype html>
+            <html lang="uk">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+              <title>Як користуватися — ${escape(identity)}</title>
+              <style>
+                :root { color-scheme: dark; }
+                * { box-sizing: border-box; }
+                html, body {
+                  margin: 0;
+                  background: #101318;
+                  color: #f3f6f8;
+                  font-family: system-ui, -apple-system, sans-serif;
+                }
+                body {
+                  max-width: 860px;
+                  margin: 0 auto;
+                  padding: 14px 14px 28px;
+                  font-size: 14px;
+                  line-height: 1.4;
+                }
+                h1 {
+                  margin: 0 0 8px;
+                  font-size: 22px;
+                  line-height: 1.15;
+                  letter-spacing: -0.2px;
+                }
+                .dataset-years {
+                  display: block;
+                  margin-top: 3px;
+                  color: #aab5c2;
+                  font-size: 14px;
+                  font-weight: 600;
+                  letter-spacing: 0;
+                }
+                .intro {
+                  margin: 0 0 12px;
+                  color: #c8d0d9;
+                }
+                .summary {
+                  display: flex;
+                  align-items: baseline;
+                  justify-content: space-between;
+                  gap: 12px;
+                  margin: 0 0 16px;
+                  padding: 10px 12px;
+                  border: 1px solid #384352;
+                  border-radius: 11px;
+                  background: #181d25;
+                }
+                .summary span {
+                  color: #aab5c2;
+                  font-size: 13px;
+                }
+                .summary strong {
+                  color: #f3f6f8;
+                  font-size: 16px;
+                }
+                h2 {
+                  margin: 20px 0 9px;
+                  font-size: 16px;
+                  line-height: 1.2;
+                }
+                .action {
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  gap: 12px;
+                  width: 100%;
+                  margin: 0 0 18px;
+                  padding: 10px 12px;
+                  border: 1px solid #76bdff;
+                  border-radius: 11px;
+                  background: #181d25;
+                  color: #76bdff;
+                  text-decoration: none;
+                  font-size: 14px;
+                  font-weight: 700;
+                }
+                .action::after {
+                  content: '›';
+                  font-size: 21px;
+                  line-height: 1;
+                }
+                table {
+                  width: 100%;
+                  table-layout: fixed;
+                  border-collapse: separate;
+                  border-spacing: 0;
+                  overflow: hidden;
+                  border: 1px solid #384352;
+                  border-radius: 11px;
+                  background: #181d25;
+                  font-size: 12px;
+                  line-height: 1.32;
+                }
+                th, td {
+                  padding: 8px 7px;
+                  vertical-align: top;
+                  text-align: left;
+                  overflow-wrap: anywhere;
+                  word-break: break-word;
+                }
+                th {
+                  background: #222936;
+                  color: #aab5c2;
+                  font-size: 11px;
+                  font-weight: 700;
+                }
+                th:first-child,
+                td:first-child {
+                  width: 43%;
+                  border-right: 1px solid #384352;
+                }
+                tr + tr td {
+                  border-top: 1px solid #384352;
+                }
+                code {
+                  color: #e8eef5;
+                  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                  font-size: 11px;
+                  overflow-wrap: anywhere;
+                }
+                p {
+                  margin: 7px 0 12px;
+                }
+                .muted {
+                  color: #aab5c2;
+                }
+              </style>
+            </head>
+            <body>
+              <h1>${escape(model)}$yearsHtml</h1>
+              <p class="intro">Конвертований Renault dataset. Внутрішні файли не потрібно редагувати вручну.</p>
+              $volumeHtml
+
+              <h2>Документація</h2>
+              <a class="action" href="START.html">Відкрити каталог</a>
+
+              <h2>Основні файли</h2>
+              <table class="file-table">
+                <thead>
+                  <tr><th>Файл</th><th>Призначення</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>renault-dataset.json</code></td><td>Опис dataset і точки входу Renault Docs.</td></tr>
+                  <tr><td><code>_renault/START.html</code></td><td>Каталог внутрішніх томів.</td></tr>
+                  <tr><td><code>_renault/volumes.json</code></td><td>Список томів та їхніх entrypoint.</td></tr>
+                  <tr><td><code>_renault/modern-index.json</code></td><td>Швидкий індекс томів для Modern.</td></tr>
+                  <tr><td><code>_renault/modern-sections.json</code></td><td>Native-індекс розділів для Modern.</td></tr>
+                  <tr><td><code>_renault/runtime-tree.json</code></td><td>Повний compiler/debug Runtime IR.</td></tr>
+                  <tr><td><code>_renault/runtime-ir-index.json</code><br><code>runtime-ir/sections/…</code></td><td>Шардований Runtime IR для телефону.</td></tr>
+                  <tr><td><code>_renault/runtime-ir-coverage.json</code></td><td>Аудит покриття меню, дій і документів.</td></tr>
+                  <tr><td><code>_renault/fast-content-*.zip</code></td><td>Fast Pack для швидкого локального читання.</td></tr>
+                  <tr><td><code>HTM / PDF / GIF</code></td><td>Документація Renault після нормалізації шляхів.</td></tr>
+                </tbody>
+              </table>
+
+              <h2>Renault Docs</h2>
+              <p>Застосунок читає manifest, додає dataset до бібліотеки та відкриває PDF у власному viewer.</p>
+
+              <h2>Важливо</h2>
+              <p class="muted">Не перейменовуй внутрішні папки після конвертації: це може зламати зв’язки між Classic-файлами.</p>
+            </body>
+            </html>
+        """.trimIndent()
+    }
+
+    private fun decodeSimpleHtmlText(
+        value: String,
+    ): String =
+        value
+            .replace(
+                Regex(
+                    "(?is)<[^>]+>",
+                ),
+                " ",
+            )
+            .replace(
+                "&nbsp;",
+                " ",
+                ignoreCase = true,
+            )
+            .replace(
+                "&quot;",
+                "\"",
+                ignoreCase = true,
+            )
+            .replace(
+                "&#39;",
+                "'",
+                ignoreCase = true,
+            )
+            .replace(
+                "&lt;",
+                "<",
+                ignoreCase = true,
+            )
+            .replace(
+                "&gt;",
+                ">",
+                ignoreCase = true,
+            )
+            .replace(
+                "&amp;",
+                "&",
+                ignoreCase = true,
+            )
+            .replace(
+                Regex(
+                    "\\s+",
+                ),
+                " ",
+            )
+            .trim()
 
     private fun sortClassicCatalogByDate(
         view: WebView?,
