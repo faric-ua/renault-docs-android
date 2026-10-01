@@ -21,6 +21,7 @@ class NativeSectionActivity : Activity() {
     private lateinit var statusText: TextView
     private lateinit var menuContainer: LinearLayout
     private lateinit var bodyContainer: LinearLayout
+    private lateinit var bodyScroll: ScrollView
     private lateinit var globalBar: LinearLayout
     private lateinit var contextRow: LinearLayout
     private lateinit var helpDialogs:
@@ -57,6 +58,11 @@ class NativeSectionActivity : Activity() {
     private var restoredViewKind: String =
         VIEW_DEFAULT
     private var restoredViewId: String = ""
+    private var currentViewLabel: String = ""
+    private var restoredViewLabel: String = ""
+    private var currentDocumentParentPanelId: String = ""
+    private var restoredDocumentParentPanelId: String = ""
+    private var restoredScrollY: Int = 0
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -137,6 +143,43 @@ class NativeSectionActivity : Activity() {
         currentViewId =
             restoredViewId
 
+        restoredViewLabel =
+            savedInstanceState
+                ?.getString(
+                    STATE_VIEW_LABEL,
+                )
+                .orEmpty()
+        currentViewLabel =
+            restoredViewLabel
+
+        restoredDocumentParentPanelId =
+            savedInstanceState
+                ?.getString(
+                    STATE_DOCUMENT_PARENT_PANEL_ID,
+                )
+                .orEmpty()
+        currentDocumentParentPanelId =
+            restoredDocumentParentPanelId
+
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        (
+            lastNonConfigurationInstance
+                as? RetainedRuntimeState
+        )?.let {
+            retained ->
+            runtimeData =
+                retained.runtimeData
+            runtimeDocumentation =
+                retained.runtimeDocumentation
+        }
+
         pendingTablePdf =
             savedInstanceState
                 ?.getString(
@@ -172,8 +215,27 @@ class NativeSectionActivity : Activity() {
             buildContent(),
         )
         helpDialogs.restoreOpen()
-        loadRuntimeIr()
+
+        val retainedData =
+            runtimeData
+        if (
+            retainedData != null
+        ) {
+            showRuntimeData(
+                retainedData,
+            )
+        } else {
+            loadRuntimeIr()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any =
+        RetainedRuntimeState(
+            runtimeData =
+                runtimeData,
+            runtimeDocumentation =
+                runtimeDocumentation,
+        )
 
     override fun onSaveInstanceState(
         outState: Bundle,
@@ -185,6 +247,24 @@ class NativeSectionActivity : Activity() {
         outState.putString(
             STATE_VIEW_ID,
             currentViewId,
+        )
+        outState.putString(
+            STATE_VIEW_LABEL,
+            currentViewLabel,
+        )
+        outState.putString(
+            STATE_DOCUMENT_PARENT_PANEL_ID,
+            currentDocumentParentPanelId,
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::bodyScroll.isInitialized
+            ) {
+                bodyScroll.scrollY
+            } else {
+                restoredScrollY
+            },
         )
         outState.putString(
             STATE_MENU_LABEL,
@@ -569,7 +649,7 @@ class NativeSectionActivity : Activity() {
 
         applyLandscapeFocusChrome()
 
-        val bodyScroll =
+        bodyScroll =
             ScrollView(this).apply {
                 isFillViewport = true
             }
