@@ -395,6 +395,36 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("STATE_PENDING_MANUAL_IMPORT", project)
         self.assertIn("savedInstanceState !=\n                null", project)
 
+    def test_modern_volume_retains_loaded_sections_on_rotation(self):
+        volume = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernVolumeActivity.kt"
+        )
+
+        self.assertIn(
+            "onRetainNonConfigurationInstance",
+            volume,
+        )
+        self.assertIn(
+            "lastNonConfigurationInstance",
+            volume,
+        )
+        self.assertIn(
+            "showLoadedSections(",
+            volume,
+        )
+        self.assertIn(
+            "STATE_SCROLL_Y",
+            volume,
+        )
+        self.assertIn(
+            "sectionScroll.scrollY",
+            volume,
+        )
+        self.assertIn(
+            "sectionScroll.scrollTo(",
+            volume,
+        )
+
     def test_create_project_keeps_typed_name_on_rotation(self):
         create = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/CreateProjectActivity.kt"
