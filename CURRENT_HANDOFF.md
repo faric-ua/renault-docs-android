@@ -4252,3 +4252,15 @@ User-confirmed close-state:
 - no picker, navigation or other action launches automatically.
 
 Home Help lifecycle is fully accepted.
+
+
+### Project Add Help rotation phone PASS — 2026-10-01
+
+Real-device Project Laguna II check:
+- Add Help opens with Renault Docs dark styling;
+- Help remains open after rotation;
+- Project context remains Laguna II;
+- no .rdpkg picker, SAF picker or import action launches automatically.
+
+One close-state micro-check remains:
+close Help and confirm the same Project stays visible with no automatic action.
