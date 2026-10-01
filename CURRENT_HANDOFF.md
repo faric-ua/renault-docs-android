@@ -4264,3 +4264,12 @@ Real-device Project Laguna II check:
 
 One close-state micro-check remains:
 close Help and confirm the same Project stays visible with no automatic action.
+
+
+### Project Add Help close-state phone PASS — 2026-10-01
+
+User-confirmed close-state:
+- Help closes back to the same Laguna II Project;
+- no .rdpkg picker, SAF picker or import starts automatically.
+
+Project Add Help lifecycle is fully accepted.
