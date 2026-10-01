@@ -68,6 +68,18 @@ class ModernDatasetActivity : Activity() {
                 )
                 .orEmpty()
 
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        catalog =
+            lastNonConfigurationInstance
+                as? ModernCatalog
+
         if (treeUriText.isBlank()) {
             showFatalError(
                 "Dataset не передав SAF URI.",
