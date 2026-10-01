@@ -31,7 +31,18 @@ Result: **PENDING**
 - [x] Native section Connector composite actions (`Схема + піни роз’єма`, `Схема роз’єму`, `Опис контактів`) use Renault Docs styling instead of default gray Android buttons. Phone PASS 2026-10-02.
 - [x] Volume documentation Help survives rotation and panel context stays intact. Phone PASS 2026-10-02.
 
+## Project actions
+
+- [ ] Home project card has `⋮` actions.
+- [ ] `⋮ → Видалити проєкт` opens a danger confirmation for the same project.
+- [ ] Project actions dialog survives rotation.
+- [ ] Project remove confirmation survives rotation.
+- [ ] Cancelling project removal is a no-op.
+- [ ] Confirming removal removes the Project and its internal volume records from Renault Docs.
+- [ ] Project removal does not delete source `.rdpkg`, SAF folders, or original Renault files.
+
 ## Other lifecycle
+
 
 - [x] New Project typed text survives rotation. Phone PASS 2026-10-02.
 - [x] Volume actions dialog survives rotation. Phone PASS 2026-10-02.
