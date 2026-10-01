@@ -26,6 +26,27 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val restoredStatusText =
+            savedInstanceState
+                ?.getCharSequence(
+                    STATE_STATUS_TEXT,
+                )
+                ?.toString()
+        val restoredStatusColor =
+            if (
+                savedInstanceState
+                    ?.containsKey(
+                        STATE_STATUS_COLOR,
+                    ) ==
+                    true
+            ) {
+                savedInstanceState.getInt(
+                    STATE_STATUS_COLOR,
+                )
+            } else {
+                null
+            }
+
         store = DatasetStore(this)
         projectStore = ProjectStore(this)
         settings = AppSettings(this)
@@ -43,8 +64,21 @@ class MainActivity : Activity() {
             store.load(),
         )
         setContentView(buildContent())
-        helpDialogs.restoreOpen()
         renderLibrary()
+
+        if (
+            !restoredStatusText.isNullOrBlank()
+        ) {
+            statusText.text =
+                restoredStatusText
+            restoredStatusColor?.let {
+                statusText.setTextColor(
+                    it,
+                )
+            }
+        }
+
+        helpDialogs.restoreOpen()
         repairSavedVolumeMetadata()
     }
 
@@ -61,6 +95,20 @@ class MainActivity : Activity() {
         helpDialogs.save(
             outState,
         )
+
+        if (
+            ::statusText.isInitialized
+        ) {
+            outState.putCharSequence(
+                STATE_STATUS_TEXT,
+                statusText.text,
+            )
+            outState.putInt(
+                STATE_STATUS_COLOR,
+                statusText.currentTextColor,
+            )
+        }
+
         super.onSaveInstanceState(
             outState,
         )
@@ -1353,5 +1401,9 @@ class MainActivity : Activity() {
         private const val REQUEST_DATASET_FOLDER = 4101
         private const val HELP_LIBRARY =
             "library"
+        private const val STATE_STATUS_TEXT =
+            "main_status_text"
+        private const val STATE_STATUS_COLOR =
+            "main_status_color"
     }
 }
