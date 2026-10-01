@@ -29,7 +29,7 @@ Result: **PENDING**
 - [x] Native section `130 → Схеми → Критерії / скорочення` keeps the active Schemes panel controls visible above the table. Phone PASS 2026-10-02.
 - [x] Native section detail/table state and scroll survive rotation without rereading Runtime IR. Phone PASS 2026-10-02.
 - [x] Native section Connector composite actions (`Схема + піни роз’єма`, `Схема роз’єму`, `Опис контактів`) use Renault Docs styling instead of default gray Android buttons. Phone PASS 2026-10-02.
-- [ ] Volume documentation Help survives rotation and panel context stays intact.
+- [x] Volume documentation Help survives rotation and panel context stays intact. Phone PASS 2026-10-02.
 
 ## Other lifecycle
 
