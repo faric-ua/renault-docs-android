@@ -13,8 +13,9 @@ Result: **PENDING**
 
 ## Help lifecycle
 
-- [ ] Home Help opens in Renault Docs dark theme, not the system-gray dialog.
-- [ ] Home Help survives rotation.
+- [x] Home Help opens in Renault Docs dark theme, not the system-gray dialog. Phone PASS 2026-10-01.
+- [x] Home Help survives rotation. Phone PASS 2026-10-01.
+- [x] Home stale-Legacy status text and danger color survive rotation under Help.
 - [ ] Closing Help returns to Home with no action launched.
 - [ ] Project Add Help opens.
 - [ ] Project Add Help survives rotation.
