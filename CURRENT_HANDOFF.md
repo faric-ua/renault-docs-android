@@ -4295,3 +4295,16 @@ Phone recheck required:
 scroll Project Laguna II near the bottom → rotate landscape → rotate portrait → same volume area must remain visible.
 
 Also user-confirmed the current Modern volume Help rotation as PASS.
+
+
+### Project scroll restoration phone PASS — 2026-10-01
+
+User-confirmed recheck after the scroll-state fix:
+- Project Laguna II remains at approximately the same volume position through landscape/portrait rotation;
+- the previous jump back to the start of the volume list is gone.
+
+CI on checkpoint head `ab433db654d42e3d8d285477675c512cd8d58d2d`:
+- Tests `36895818976` PASS;
+- Android PR Check `36895819104` PASS.
+
+Project scroll lifecycle issue is closed.
