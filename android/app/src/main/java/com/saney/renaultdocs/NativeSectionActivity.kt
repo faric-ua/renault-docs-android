@@ -2796,14 +2796,47 @@ class NativeSectionActivity : Activity() {
             Button(this).apply {
                 text = "› " + label
                 isAllCaps = false
+                textSize = 14f
                 gravity =
                     Gravity.START or
                         Gravity.CENTER_VERTICAL
+                minWidth = 0
+                minimumWidth = 0
+                minHeight =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        42,
+                    )
                 minimumHeight =
                     Ui.dp(
                         this@NativeSectionActivity,
-                        48,
+                        42,
                     )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@NativeSectionActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.accent,
+                        radiusDp = 10,
+                    )
+                setTextColor(
+                    Ui.text,
+                )
+                setPadding(
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    ),
+                    0,
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    ),
+                    0,
+                )
                 contentDescription =
                     label + " — відкрити"
                 setOnClickListener {
