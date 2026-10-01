@@ -417,6 +417,69 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             project,
         )
 
+    def test_native_section_keeps_parent_controls_with_detail_tables(self):
+        native = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeSectionActivity.kt"
+        )
+
+        self.assertIn(
+            "prepareDocumentBody(",
+            native,
+        )
+        self.assertIn(
+            "currentDocumentParentPanelId",
+            native,
+        )
+        self.assertIn(
+            "STATE_DOCUMENT_PARENT_PANEL_ID",
+            native,
+        )
+        self.assertIn(
+            "showSectionHeading =",
+            native,
+        )
+        self.assertIn(
+            "parentPanelId =",
+            native,
+        )
+
+    def test_runtime_heavy_surfaces_reuse_loaded_data_on_rotation(self):
+        native = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeSectionActivity.kt"
+        )
+        documentation = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/VolumeDocumentationActivity.kt"
+        )
+        dataset = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ModernDatasetActivity.kt"
+        )
+
+        for text in (
+            native,
+            documentation,
+            dataset,
+        ):
+            self.assertIn(
+                "onRetainNonConfigurationInstance",
+                text,
+            )
+            self.assertIn(
+                "lastNonConfigurationInstance",
+                text,
+            )
+            self.assertIn(
+                "STATE_SCROLL_Y",
+                text,
+            )
+            self.assertIn(
+                ".scrollY",
+                text,
+            )
+            self.assertIn(
+                ".scrollTo(",
+                text,
+            )
+
     def test_modern_volume_retains_loaded_sections_on_rotation(self):
         volume = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ModernVolumeActivity.kt"
