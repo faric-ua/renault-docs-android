@@ -294,6 +294,148 @@ def compare_volume_parity(source_root: Path, build_root: Path) -> dict:
     }
 
 
+
+def _volume_names_from_metadata(
+    volumes: object,
+) -> tuple[set[str], int]:
+    if not isinstance(volumes, list):
+        return set(), 0
+
+    names: set[str] = set()
+    unidentified = 0
+
+    for item in volumes:
+        if not isinstance(item, dict):
+            unidentified += 1
+            continue
+
+        source_folder = item.get("source_folder")
+        if isinstance(source_folder, str) and source_folder.strip():
+            names.add(source_folder.strip())
+            continue
+
+        entrypoint = item.get("entrypoint")
+        if isinstance(entrypoint, str) and entrypoint.strip():
+            normalized = entrypoint.replace("\\", "/").strip("/")
+            first = normalized.split("/", 1)[0].strip()
+            if first:
+                names.add(unquote(first))
+                continue
+
+        unidentified += 1
+
+    return names, unidentified
+
+
+def compare_package_volume_parity(build_root: Path) -> dict:
+    build_root = build_root.resolve(strict=True)
+    live_volumes = discover_volumes(build_root)
+    live_names = {
+        str(item["source_folder"])
+        for item in live_volumes
+    }
+
+    sources: dict[str, dict] = {}
+
+    definitions = (
+        (
+            "manifest",
+            build_root / "renault-dataset.json",
+            lambda data: data.get("volumes") if isinstance(data, dict) else None,
+        ),
+        (
+            "volumes",
+            build_root / "_renault" / "volumes.json",
+            lambda data: data if isinstance(data, list) else None,
+        ),
+        (
+            "modern_index",
+            build_root / "_renault" / "modern-index.json",
+            lambda data: (
+                data.get("navigation", {}).get("volumes")
+                if isinstance(data, dict)
+                and isinstance(data.get("navigation"), dict)
+                else None
+            ),
+        ),
+    )
+
+    for key, path, extract in definitions:
+        source = {
+            "path": path.relative_to(build_root).as_posix(),
+            "volume_count": None,
+            "missing_from_metadata": sorted(live_names, key=str.casefold),
+            "extra_in_metadata": [],
+            "unidentified_entries": 0,
+            "error": None,
+            "status": "FAIL",
+        }
+
+        if not path.is_file():
+            source["error"] = "missing file"
+            sources[key] = source
+            continue
+
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            source["error"] = f"invalid JSON: {error}"
+            sources[key] = source
+            continue
+
+        volumes = extract(data)
+        if not isinstance(volumes, list):
+            source["error"] = "volume list is missing or invalid"
+            sources[key] = source
+            continue
+
+        metadata_names, unidentified = _volume_names_from_metadata(volumes)
+        missing = sorted(
+            live_names - metadata_names,
+            key=str.casefold,
+        )
+        extra = sorted(
+            metadata_names - live_names,
+            key=str.casefold,
+        )
+
+        source.update(
+            {
+                "volume_count": len(volumes),
+                "missing_from_metadata": missing,
+                "extra_in_metadata": extra,
+                "unidentified_entries": unidentified,
+                "status": (
+                    "PASS"
+                    if (
+                        len(volumes) == len(live_volumes)
+                        and not missing
+                        and not extra
+                        and unidentified == 0
+                    )
+                    else "FAIL"
+                ),
+            }
+        )
+        sources[key] = source
+
+    status = (
+        "PASS"
+        if all(
+            source["status"] == "PASS"
+            for source in sources.values()
+        )
+        else "FAIL"
+    )
+
+    return {
+        "build_root": str(build_root),
+        "live_volume_count": len(live_volumes),
+        "live_volumes": sorted(live_names, key=str.casefold),
+        "sources": sources,
+        "status": status,
+    }
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Read-only Renault dataset link integrity checker."
@@ -319,6 +461,13 @@ def main() -> int:
 
     try:
         report = check_dataset(args.root)
+
+        report["package_volume_parity"] = compare_package_volume_parity(
+            args.root,
+        )
+        if report["package_volume_parity"]["status"] != "PASS":
+            report["status"] = "FAIL"
+
         if args.source_root is not None:
             report["volume_parity"] = compare_volume_parity(
                 args.source_root,
@@ -337,6 +486,50 @@ def main() -> int:
     print(f"Missing: {report['missing_count']}")
     print(f"Skipped outside-root refs: {report['skipped_outside_root']}")
     print(f"Status: {report['status']}")
+
+    package_parity = report.get("package_volume_parity")
+    if package_parity is not None:
+        print(
+            "Live build volumes: "
+            f"{package_parity['live_volume_count']}"
+        )
+        for key, label in (
+            ("manifest", "Manifest"),
+            ("volumes", "volumes.json"),
+            ("modern_index", "modern-index.json"),
+        ):
+            source = package_parity["sources"][key]
+            count = (
+                "?"
+                if source["volume_count"] is None
+                else str(source["volume_count"])
+            )
+            print(
+                f"{label} volumes: {count} · "
+                f"metadata parity: {source['status']}"
+            )
+            if source["error"]:
+                print(
+                    f"PACKAGE METADATA ERROR: "
+                    f"{source['path']} · {source['error']}"
+                )
+            for folder in source["missing_from_metadata"]:
+                print(
+                    f"MISSING FROM {label.upper()}: {folder}"
+                )
+            for folder in source["extra_in_metadata"]:
+                print(
+                    f"EXTRA IN {label.upper()}: {folder}"
+                )
+            if source["unidentified_entries"]:
+                print(
+                    f"UNIDENTIFIED {label.upper()} ENTRIES: "
+                    f"{source['unidentified_entries']}"
+                )
+        print(
+            "Package metadata parity: "
+            f"{package_parity['status']}"
+        )
 
     parity = report.get("volume_parity")
     if parity is not None:
