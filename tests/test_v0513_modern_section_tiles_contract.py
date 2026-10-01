@@ -24,9 +24,15 @@ class V0513ModernSectionTilesContractTests(unittest.TestCase):
         # The context row shows only the section identifier plus a
         # civilized Modern/Classic segmented switch.
         self.assertIn("value = sectionCode", native)
-        self.assertIn('label = "Modern"', native)
-        self.assertIn('label = "Classic"', native)
-        self.assertIn("modeButton(", native)
+        self.assertIn("Ui.modeButton(", native)
+        self.assertRegex(
+            native,
+            r'Ui\.modeButton\(\s*context\s*=\s*this,\s*label\s*=\s*"Modern",\s*active\s*=\s*true,',
+        )
+        self.assertRegex(
+            native,
+            r'Ui\.modeButton\(\s*context\s*=\s*this,\s*label\s*=\s*"Classic",\s*active\s*=\s*false,',
+        )
 
         # Core section actions never disappear just because the current
         # Runtime IR section does not expose an action.
