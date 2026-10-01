@@ -143,6 +143,16 @@ class ModernDatasetActivity : Activity() {
                 restoredQuery
             },
         )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::volumeScroll.isInitialized
+            ) {
+                volumeScroll.scrollY
+            } else {
+                restoredScrollY
+            },
+        )
 
         super.onSaveInstanceState(
             outState,
