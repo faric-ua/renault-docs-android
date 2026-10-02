@@ -9,4 +9,7 @@
     <cache-path
         name="shared_rdproject"
         path="shared-rdproject/" />
+    <files-path
+        name="prepared_share"
+        path="prepared-share/" />
 </paths>
