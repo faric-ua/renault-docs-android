@@ -149,21 +149,7 @@ class HomeProjectDialogController(
                 danger = true,
             ) {
                 clear(DIALOG_ACTIONS)
-                val deleted =
-                    PreparedShareStore.deleteProject(
-                        activity,
-                        project,
-                    )
-                showMessage(
-                    title = "Підготовлений файл",
-                    message =
-                        if (deleted) {
-                            "Підготовлений .rdproject видалено. " +
-                                "Сам проєкт і його томи не змінено."
-                        } else {
-                            "Не вдалося видалити підготовлений .rdproject."
-                        },
-                )
+                confirmDeletePreparedProject(project)
             }
         }
         addAction(
@@ -312,6 +298,42 @@ class HomeProjectDialogController(
                 }
             }
         }.start()
+    }
+
+    private fun confirmDeletePreparedProject(
+        project: RenaultProject,
+    ) {
+        val dialog =
+            AlertDialog.Builder(activity)
+                .setTitle("Видалити підготовлений файл?")
+                .setMessage(
+                    "Буде видалено тільки підготовлений .rdproject для поширення. " +
+                        "Сам проєкт, його томи та вихідні Renault-файли залишаться.",
+                )
+                .setNegativeButton("Скасувати", null)
+                .setPositiveButton("Видалити") { _, _ ->
+                    val deleted =
+                        PreparedShareStore.deleteProject(
+                            activity,
+                            project,
+                        )
+                    showMessage(
+                        title = "Підготовлений файл",
+                        message =
+                            if (deleted) {
+                                "Підготовлений .rdproject видалено. " +
+                                    "Сам проєкт і його томи не змінено."
+                            } else {
+                                "Не вдалося видалити підготовлений .rdproject."
+                            },
+                    )
+                }
+                .create()
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.DESTRUCTIVE_CONFIRM,
+        )
     }
 
     private fun sharePreparedProject(
