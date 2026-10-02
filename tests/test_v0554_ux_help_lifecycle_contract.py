@@ -343,14 +343,18 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             ui,
         )
 
-    def test_project_action_delete_item_uses_danger_button_style(self):
+    def test_project_actions_use_real_dialog_buttons(self):
         controller = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
         )
 
-        self.assertIn("dialog.listView?.getChildAt(0)", controller)
-        self.assertIn("Ui.applyActionStyle(", controller)
-        self.assertIn("dangerAction = true", controller)
+        show_actions = controller.split("fun showActions(projectId: String)", 1)[1]
+        show_actions = show_actions.split("private fun showRemoveConfirmation", 1)[0]
+
+        self.assertNotIn(".setItems(", show_actions)
+        self.assertIn('.setPositiveButton(\n                    "Видалити проєкт"', show_actions)
+        self.assertIn('.setNegativeButton(\n                    "Скасувати"', show_actions)
+        self.assertIn("role = DialogRole.DANGER", show_actions)
 
     def test_dialog_actions_have_visible_button_chrome(self):
         dialog_ui = self.read(
