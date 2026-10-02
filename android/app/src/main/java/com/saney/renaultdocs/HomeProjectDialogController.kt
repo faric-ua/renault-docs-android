@@ -13,7 +13,11 @@ class HomeProjectDialogController(
     private val activity: Activity,
     private val store: ProjectStore,
     private val onProjectRemoved: (RenaultProject) -> Unit,
+    private val onShareProgress: (Int, Int, String) -> Unit,
+    private val onShareFinished: (String) -> Unit,
 ) {
+    @Volatile
+    private var shareInProgress: Boolean = false
     private var activeKind: String = ""
     private var activeProjectId: String? = null
 
@@ -189,6 +193,22 @@ class HomeProjectDialogController(
             return
         }
 
+        if (shareInProgress) {
+            showMessage(
+                title = "Поділитися проєктом",
+                message = "Пакування проєкту вже виконується.",
+            )
+            return
+        }
+        shareInProgress = true
+        activity.runOnUiThread {
+            onShareProgress(
+                0,
+                volumes.size,
+                "Готую проєкт 0/" + volumes.size + "…",
+            )
+        }
+
         Thread {
             val shareDir =
                 File(
@@ -215,10 +235,28 @@ class HomeProjectDialogController(
                     project = project,
                     volumes = volumes,
                     destinationUri = uri,
+                    progress = { message ->
+                        val current =
+                            Regex("""Готую том (\d+)/""")
+                                .find(message)
+                                ?.groupValues
+                                ?.getOrNull(1)
+                                ?.toIntOrNull()
+                                ?: 0
+                        activity.runOnUiThread {
+                            onShareProgress(
+                                current,
+                                volumes.size,
+                                message,
+                            )
+                        }
+                    },
                 )
 
             activity.runOnUiThread {
+                shareInProgress = false
                 result.onSuccess {
+                    onShareFinished("Проєкт підготовлено для поширення.")
                     val send =
                         Intent(Intent.ACTION_SEND).apply {
                             type = "application/zip"
@@ -232,6 +270,7 @@ class HomeProjectDialogController(
                         ),
                     )
                 }.onFailure { error ->
+                    onShareFinished("Не вдалося підготувати проєкт.")
                     showMessage(
                         title = "Не вдалося поділитися",
                         message =
