@@ -2515,7 +2515,7 @@ class ProjectActivity : Activity() {
                 danger = true,
             ) {
                 activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS
-                confirmDeletePreparedVolume(volume)
+                showVolumeActionsBehindPreparedDelete(volume)
             }
         }
         addAction("Перемістити в інший проєкт") {
