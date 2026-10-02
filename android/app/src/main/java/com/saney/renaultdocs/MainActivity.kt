@@ -66,6 +66,18 @@ class MainActivity : Activity() {
                             ". Файли на телефоні не видалено."
                     renderLibrary()
                 },
+                onShareProgress = { current, total, message ->
+                    operationProgress.visibility = View.VISIBLE
+                    operationProgress.max = total.coerceAtLeast(1)
+                    operationProgress.progress =
+                        current.coerceIn(0, total.coerceAtLeast(1))
+                    statusText.text = message
+                },
+                onShareFinished = { message ->
+                    operationProgress.visibility = View.GONE
+                    operationProgress.progress = 0
+                    statusText.text = message
+                },
             )
         projectDialogs.restore(
             savedInstanceState,
