@@ -2484,6 +2484,39 @@ class ProjectActivity : Activity() {
             clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
             shareRdpkg(volume)
         }
+        val prepared =
+            PreparedShareStore.volumeFile(
+                this,
+                project,
+                volume,
+            )
+        if (prepared.exists()) {
+            addAction("Поділитися підготовленим .rdpkg") {
+                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                sharePreparedRdpkg(
+                    volume,
+                    prepared,
+                )
+            }
+            addAction(
+                title = "Видалити підготовлений .rdpkg",
+                danger = true,
+            ) {
+                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                val deleted =
+                    PreparedShareStore.deleteVolume(
+                        this,
+                        project,
+                        volume,
+                    )
+                statusText.text =
+                    if (deleted) {
+                        "Підготовлений .rdpkg видалено. Том і вихідні файли не змінено."
+                    } else {
+                        "Не вдалося видалити підготовлений .rdpkg."
+                    }
+            }
+        }
         addAction("Перемістити в інший проєкт") {
             showMoveVolumeDialog(volume)
         }
@@ -2647,21 +2680,11 @@ class ProjectActivity : Activity() {
         statusText.text = "Готую .rdpkg для поширення…"
 
         Thread {
-            val shareDir =
-                File(cacheDir, "shared-rdpkg").apply {
-                    mkdirs()
-                }
-            shareDir.listFiles()?.forEach {
-                it.delete()
-            }
-
             val file =
-                File(
-                    shareDir,
-                    RdpkgExporter.defaultFileName(
-                        project = project,
-                        volume = volume,
-                    ),
+                PreparedShareStore.volumeFile(
+                    this,
+                    project,
+                    volume,
                 )
             val uri =
                 FileProvider.getUriForFile(
@@ -2699,6 +2722,43 @@ class ProjectActivity : Activity() {
                 }
             }
         }.start()
+    }
+
+    private fun sharePreparedRdpkg(
+        volume: ProjectVolumeRecord,
+        file: File,
+    ) {
+        if (!file.exists()) {
+            statusText.text =
+                "Підготовлений .rdpkg уже відсутній."
+            return
+        }
+        val uri =
+            FileProvider.getUriForFile(
+                this,
+                packageName + ".files",
+                file,
+            )
+        val send =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        statusText.text =
+            "Використовую раніше підготовлений .rdpkg: " +
+                listOfNotNull(
+                    volume.documentCode,
+                    volume.date,
+                ).joinToString(" · ").ifBlank {
+                    volume.title
+                }
+        startActivity(
+            Intent.createChooser(
+                send,
+                "Поділитися підготовленим томом",
+            ),
+        )
     }
 
     private fun startRdpkgExport(
