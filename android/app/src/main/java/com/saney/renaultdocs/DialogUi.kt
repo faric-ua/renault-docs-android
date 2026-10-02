@@ -158,36 +158,31 @@ object DialogUi {
             }
 
         styleButton(
-            dialog =
-                dialog,
-            which =
-                AlertDialog.BUTTON_NEGATIVE,
-            color =
-                Ui.text,
+            dialog = dialog,
+            which = AlertDialog.BUTTON_NEGATIVE,
+            color = Ui.text,
+            stroke = Ui.border,
         )
         styleButton(
-            dialog =
-                dialog,
-            which =
-                AlertDialog.BUTTON_NEUTRAL,
-            color =
-                Ui.text,
+            dialog = dialog,
+            which = AlertDialog.BUTTON_NEUTRAL,
+            color = Ui.text,
+            stroke = Ui.border,
         )
         styleButton(
-            dialog =
-                dialog,
-            which =
-                AlertDialog.BUTTON_POSITIVE,
+            dialog = dialog,
+            which = AlertDialog.BUTTON_POSITIVE,
             color =
-                when (
-                    role
-                ) {
+                when (role) {
                     DialogRole.DANGER,
-                    DialogRole.PROGRESS ->
-                        Ui.danger
-
-                    else ->
-                        Ui.accent
+                    DialogRole.PROGRESS -> Ui.danger
+                    else -> Ui.accent
+                },
+            stroke =
+                when (role) {
+                    DialogRole.DANGER,
+                    DialogRole.PROGRESS -> Ui.danger
+                    else -> Ui.accent
                 },
         )
     }
@@ -196,18 +191,27 @@ object DialogUi {
         dialog: AlertDialog,
         which: Int,
         color: Int,
+        stroke: Int,
     ) {
-        dialog.getButton(
-            which,
-        )
+        dialog.getButton(which)
             ?.apply {
-                setTextColor(
-                    color,
+                setTextColor(color)
+                isAllCaps = false
+                textSize = Ui.secondaryButtonTextSp
+                background =
+                    Ui.roundedBackground(
+                        context = context,
+                        fill = Ui.surfaceAlt,
+                        stroke = stroke,
+                        radiusDp = 10,
+                    )
+                setPadding(
+                    Ui.dp(context, 14),
+                    Ui.dp(context, 8),
+                    Ui.dp(context, 14),
+                    Ui.dp(context, 8),
                 )
-                isAllCaps =
-                    false
-                textSize =
-                    Ui.secondaryButtonTextSp
+                minHeight = Ui.dp(context, 44)
             }
     }
 
