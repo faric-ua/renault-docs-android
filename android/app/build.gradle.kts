@@ -83,6 +83,7 @@ kotlin {
 }
 
 dependencies {
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("org.jsoup:jsoup:1.18.3")
     implementation("org.jspecify:jspecify:1.0.0")
