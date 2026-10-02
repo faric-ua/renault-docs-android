@@ -2503,18 +2503,7 @@ class ProjectActivity : Activity() {
                 danger = true,
             ) {
                 clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
-                val deleted =
-                    PreparedShareStore.deleteVolume(
-                        this,
-                        project,
-                        volume,
-                    )
-                statusText.text =
-                    if (deleted) {
-                        "Підготовлений .rdpkg видалено. Том і вихідні файли не змінено."
-                    } else {
-                        "Не вдалося видалити підготовлений .rdpkg."
-                    }
+                confirmDeletePreparedVolume(volume)
             }
         }
         addAction("Перемістити в інший проєкт") {
@@ -2722,6 +2711,39 @@ class ProjectActivity : Activity() {
                 }
             }
         }.start()
+    }
+
+    private fun confirmDeletePreparedVolume(
+        volume: ProjectVolumeRecord,
+    ) {
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle("Видалити підготовлений файл?")
+                .setMessage(
+                    "Буде видалено тільки підготовлений .rdpkg для поширення. " +
+                        "Сам том, проєкт і вихідні Renault-файли залишаться.",
+                )
+                .setNegativeButton("Скасувати", null)
+                .setPositiveButton("Видалити") { _, _ ->
+                    val deleted =
+                        PreparedShareStore.deleteVolume(
+                            this,
+                            project,
+                            volume,
+                        )
+                    statusText.text =
+                        if (deleted) {
+                            "Підготовлений .rdpkg видалено. Том і вихідні файли не змінено."
+                        } else {
+                            "Не вдалося видалити підготовлений .rdpkg."
+                        }
+                }
+                .create()
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.DESTRUCTIVE_CONFIRM,
+        )
     }
 
     private fun sharePreparedRdpkg(
