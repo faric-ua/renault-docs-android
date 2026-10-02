@@ -249,6 +249,38 @@ class ProjectStore(
         )
     }
 
+    fun moveVolume(
+        fromProjectId: String,
+        toProjectId: String,
+        volumeId: String,
+    ) {
+        require(fromProjectId != toProjectId) {
+            "Проєкт призначення збігається з поточним."
+        }
+        require(project(toProjectId) != null) {
+            "Проєкт призначення не знайдено: " + toProjectId
+        }
+
+        val all = loadVolumes()
+        val volume =
+            all.firstOrNull { pair ->
+                pair.first == fromProjectId &&
+                    pair.second.id == volumeId
+            }?.second
+                ?: error("Том не знайдено: " + volumeId)
+
+        val updated =
+            all.filterNot { pair ->
+                (pair.first == fromProjectId &&
+                    pair.second.id == volumeId) ||
+                    (pair.first == toProjectId &&
+                        (pair.second.id == volume.id ||
+                            pair.second.entrypoint == volume.entrypoint))
+            }.plus(toProjectId to volume)
+
+        saveVolumes(updated)
+    }
+
     fun migrateLegacySingleVolumeDatasets(
         legacy: List<DatasetRecord>,
     ) {
