@@ -2742,7 +2742,7 @@ class ProjectActivity : Activity() {
         dialog.show()
         DialogUi.apply(
             dialog = dialog,
-            role = DialogRole.DESTRUCTIVE_CONFIRM,
+            role = DialogRole.DANGER,
         )
     }
 
