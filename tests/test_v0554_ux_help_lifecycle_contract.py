@@ -322,6 +322,30 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             prepared_volume,
         )
 
+    def test_prepared_volume_delete_restores_parent_action_dialog_stack(self):
+        project = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+        self.assertIn("STATE_ACTIVE_DIALOG_PARENT_KIND", project)
+        self.assertIn(
+            "activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS",
+            project,
+        )
+        self.assertIn(
+            "showVolumeActionsBehindPreparedDelete(volume)",
+            project,
+        )
+        helper = project.split(
+            "private fun showVolumeActionsBehindPreparedDelete", 1
+        )[1].split("private fun confirmDeletePreparedVolume", 1)[0]
+        self.assertIn("showVolumeActions(volume)", helper)
+        self.assertIn("confirmDeletePreparedVolume(volume)", helper)
+        prepared = project.split(
+            "private fun confirmDeletePreparedVolume", 1
+        )[1].split("private fun sharePreparedRdpkg", 1)[0]
+        self.assertIn('setNegativeButton("Скасувати")', prepared)
+        self.assertIn("showVolumeActions(volume)", prepared)
+
     def test_project_share_uses_ukrainian_volume_plural(self):
         home = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
