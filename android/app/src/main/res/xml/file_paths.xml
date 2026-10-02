@@ -3,4 +3,10 @@
     <cache-path
         name="shared_rdpkg"
         path="shared-rdpkg/" />
+    <cache-path
+        name="rdproject_export"
+        path="rdproject-export/" />
+    <cache-path
+        name="shared_rdproject"
+        path="shared-rdproject/" />
 </paths>
