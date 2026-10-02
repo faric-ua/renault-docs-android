@@ -331,6 +331,17 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             "activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS",
             project,
         )
+        delete_action = project.split(
+            'title = "Видалити підготовлений .rdpkg"', 1
+        )[1].split('addAction("Перемістити в інший проєкт")', 1)[0]
+        self.assertIn(
+            "showVolumeActionsBehindPreparedDelete(volume)",
+            delete_action,
+        )
+        self.assertNotIn(
+            "confirmDeletePreparedVolume(volume)",
+            delete_action,
+        )
         self.assertIn(
             "showVolumeActionsBehindPreparedDelete(volume)",
             project,
