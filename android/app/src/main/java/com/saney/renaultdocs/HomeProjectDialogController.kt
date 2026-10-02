@@ -244,11 +244,13 @@ class HomeProjectDialogController(
                                 ?.toIntOrNull()
                                 ?: 0
                         activity.runOnUiThread {
-                            onShareProgress(
-                                current,
-                                volumes.size,
-                                message,
-                            )
+                            if (shareInProgress) {
+                                onShareProgress(
+                                    current,
+                                    volumes.size,
+                                    message,
+                                )
+                            }
                         }
                     },
                 )
@@ -256,7 +258,10 @@ class HomeProjectDialogController(
             activity.runOnUiThread {
                 shareInProgress = false
                 result.onSuccess {
-                    onShareFinished("Проєкт підготовлено для поширення.")
+                    onShareFinished(
+                        "Проєкт " + project.title +
+                            " підготовлено · " + volumes.size + " том(ів).",
+                    )
                     val send =
                         Intent(Intent.ACTION_SEND).apply {
                             type = "application/zip"
