@@ -343,6 +343,17 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             ui,
         )
 
+    def test_dialog_actions_have_visible_button_chrome(self):
+        dialog_ui = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/DialogUi.kt"
+        )
+
+        self.assertIn("stroke = Ui.border", dialog_ui)
+        self.assertIn("stroke = Ui.danger", dialog_ui)
+        self.assertIn("background =", dialog_ui)
+        self.assertIn("radiusDp = 10", dialog_ui)
+        self.assertIn("minHeight = Ui.dp(context, 44)", dialog_ui)
+
     def test_dialog_theme_defines_roles_and_shared_surface(self):
         dialog_ui = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/DialogUi.kt"
