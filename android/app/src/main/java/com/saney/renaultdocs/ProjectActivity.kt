@@ -50,6 +50,9 @@ class ProjectActivity : Activity() {
     private var activeProjectDialogAllowOverride:
         Boolean =
         false
+    private var activeProjectDialogParentKind:
+        String? =
+        null
     private var pendingRdpkgExportVolumeId:
         String? =
         null
@@ -129,6 +132,11 @@ class ProjectActivity : Activity() {
                     false,
                 )
                 ?: false
+        activeProjectDialogParentKind =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_PARENT_KIND,
+                )
 
         pendingRdpkgExportVolumeId =
             savedInstanceState
@@ -290,6 +298,10 @@ class ProjectActivity : Activity() {
         outState.putBoolean(
             STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE,
             activeProjectDialogAllowOverride,
+        )
+        outState.putString(
+            STATE_ACTIVE_DIALOG_PARENT_KIND,
+            activeProjectDialogParentKind,
         )
 
         outState.putString(
@@ -2502,7 +2514,7 @@ class ProjectActivity : Activity() {
                 title = "Видалити підготовлений .rdpkg",
                 danger = true,
             ) {
-                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS
                 confirmDeletePreparedVolume(volume)
             }
         }
@@ -2713,6 +2725,15 @@ class ProjectActivity : Activity() {
         }.start()
     }
 
+    private fun showVolumeActionsBehindPreparedDelete(
+        volume: ProjectVolumeRecord,
+    ) {
+        showVolumeActions(volume)
+        activeProjectDialogParentKind =
+            DIALOG_VOLUME_ACTIONS
+        confirmDeletePreparedVolume(volume)
+    }
+
     private fun confirmDeletePreparedVolume(
         volume: ProjectVolumeRecord,
     ) {
@@ -2728,7 +2749,15 @@ class ProjectActivity : Activity() {
                     "Буде видалено тільки підготовлений .rdpkg для поширення. " +
                         "Сам том, проєкт і вихідні Renault-файли залишаться.",
                 )
-                .setNegativeButton("Скасувати", null)
+                .setNegativeButton("Скасувати") { _, _ ->
+                    val returnToActions =
+                        activeProjectDialogParentKind ==
+                            DIALOG_VOLUME_ACTIONS
+                    clearProjectDialogState(DIALOG_DELETE_PREPARED_VOLUME)
+                    if (returnToActions) {
+                        showVolumeActions(volume)
+                    }
+                }
                 .setPositiveButton("Видалити") { _, _ ->
                     clearProjectDialogState(DIALOG_DELETE_PREPARED_VOLUME)
                     val deleted =
@@ -3173,6 +3202,8 @@ class ProjectActivity : Activity() {
             null
         activeProjectDialogAllowOverride =
             false
+        activeProjectDialogParentKind =
+            null
     }
 
     private fun trackProjectDialog(
@@ -3225,8 +3256,16 @@ class ProjectActivity : Activity() {
                         showVolumeActions(volume)
                     DIALOG_MOVE_VOLUME ->
                         showMoveVolumeDialog(volume)
-                    DIALOG_DELETE_PREPARED_VOLUME ->
-                        confirmDeletePreparedVolume(volume)
+                    DIALOG_DELETE_PREPARED_VOLUME -> {
+                        if (
+                            activeProjectDialogParentKind ==
+                            DIALOG_VOLUME_ACTIONS
+                        ) {
+                            showVolumeActionsBehindPreparedDelete(volume)
+                        } else {
+                            confirmDeletePreparedVolume(volume)
+                        }
+                    }
                     else ->
                         confirmRemoveVolume(volume)
                 }
@@ -3608,6 +3647,8 @@ class ProjectActivity : Activity() {
             "activeProjectDialogTreeUri"
         private const val STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE =
             "activeProjectDialogAllowOverride"
+        private const val STATE_ACTIVE_DIALOG_PARENT_KIND =
+            "activeProjectDialogParentKind"
         private const val STATE_PENDING_RDPKG_EXPORT_VOLUME_ID =
             "pendingRdpkgExportVolumeId"
         private const val STATE_PENDING_NATIVE_SOURCE_URI =
