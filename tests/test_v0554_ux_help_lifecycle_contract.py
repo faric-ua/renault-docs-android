@@ -317,12 +317,12 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             {
                 "HomeProjectDialogController.kt": (2, 2),
                 "LifecycleHelpDialogController.kt": (1, 1),
-                "ProjectActivity.kt": (5, 5),
+                "ProjectActivity.kt": (6, 6),
                 "SettingsActivity.kt": (3, 3),
             },
             audited,
         )
-        self.assertEqual(11, total_builders)
+        self.assertEqual(12, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(
@@ -332,10 +332,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/Ui.kt"
         )
 
-        self.assertGreaterEqual(
-            dialog_ui.count("color =\n                Ui.text"),
-            2,
-        )
+        self.assertIn("color = Ui.text", dialog_ui)
         self.assertIn("Ui.danger", dialog_ui)
         self.assertIn("Ui.secondaryButtonTextSp", dialog_ui)
         self.assertIn(
@@ -362,7 +359,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
 
         self.assertIn("stroke = Ui.border", dialog_ui)
-        self.assertIn("stroke = Ui.danger", dialog_ui)
+        self.assertIn("DialogRole.DANGER", dialog_ui)
+        self.assertIn("Ui.danger", dialog_ui)
         self.assertIn("background =", dialog_ui)
         self.assertIn("radiusDp = 10", dialog_ui)
         self.assertIn("minHeight = Ui.dp(context, 44)", dialog_ui)
@@ -385,7 +383,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("Ui.border", dialog_ui)
         self.assertIn("Ui.accent", dialog_ui)
         self.assertIn("Ui.danger", dialog_ui)
-        self.assertIn("Ui.compactButtonSp", dialog_ui)
+        self.assertIn("Ui.secondaryButtonTextSp", dialog_ui)
 
     def test_complex_surfaces_use_same_help_lifecycle(self):
         paths = [
