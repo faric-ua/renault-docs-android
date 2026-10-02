@@ -94,6 +94,13 @@ class HomeProjectDialogController(
             dialog = dialog,
             role = DialogRole.CHOICE,
         )
+        (dialog.listView?.getChildAt(0) as? android.widget.TextView)
+            ?.let {
+                Ui.applyActionStyle(
+                    view = it,
+                    dangerAction = true,
+                )
+            }
     }
 
     private fun showRemoveConfirmation(
