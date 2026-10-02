@@ -3,6 +3,11 @@ package com.saney.renaultdocs
 import android.app.Activity
 import android.app.AlertDialog
 import android.os.Bundle
+import android.content.Intent
+import android.view.Gravity
+import android.widget.LinearLayout
+import androidx.core.content.FileProvider
+import java.io.File
 
 class HomeProjectDialogController(
     private val activity: Activity,
@@ -62,22 +67,80 @@ class HomeProjectDialogController(
         activeKind = DIALOG_ACTIONS
         activeProjectId = project.id
 
-        val dialog =
+        val panel =
+            LinearLayout(activity).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(
+                    Ui.dp(activity, 18),
+                    Ui.dp(activity, 8),
+                    Ui.dp(activity, 18),
+                    Ui.dp(activity, 8),
+                )
+            }
+
+        lateinit var dialog: AlertDialog
+
+        fun addAction(
+            title: String,
+            danger: Boolean = false,
+            action: () -> Unit,
+        ) {
+            panel.addView(
+                Ui.textView(
+                    context = activity,
+                    value = "› " + title,
+                    sizeSp = 18f,
+                    color = if (danger) Ui.danger else Ui.text,
+                ).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    isClickable = true
+                    isFocusable = true
+                    background =
+                        Ui.roundedBackground(
+                            context = activity,
+                            fill = Ui.surfaceAlt,
+                            stroke = if (danger) Ui.danger else Ui.accent,
+                            radiusDp = 11,
+                        )
+                    setPadding(
+                        Ui.dp(activity, 14),
+                        Ui.dp(activity, 12),
+                        Ui.dp(activity, 14),
+                        Ui.dp(activity, 12),
+                    )
+                    minHeight = Ui.dp(activity, 52)
+                    setOnClickListener {
+                        dialog.dismiss()
+                        action()
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = Ui.dp(activity, 10)
+                },
+            )
+        }
+
+        addAction("Поділитися проєктом") {
+            clear(DIALOG_ACTIONS)
+            shareProject(project)
+        }
+        addAction(
+            title = "Видалити проєкт",
+            danger = true,
+        ) {
+            showRemoveConfirmation(project)
+        }
+        addAction("Скасувати") {
+            clear(DIALOG_ACTIONS)
+        }
+
+        dialog =
             AlertDialog.Builder(activity)
                 .setTitle(project.title)
-                .setNegativeButton(
-                    "Скасувати",
-                    null,
-                )
-                .setPositiveButton(
-                    "Видалити проєкт",
-                ) {
-                    _,
-                    _ ->
-                    showRemoveConfirmation(
-                        project,
-                    )
-                }
+                .setView(panel)
                 .create()
 
         track(
@@ -88,7 +151,112 @@ class HomeProjectDialogController(
         dialog.show()
         DialogUi.apply(
             dialog = dialog,
-            role = DialogRole.DANGER,
+            role = DialogRole.CHOICE,
+        )
+    }
+
+    private fun shareProject(
+        project: RenaultProject,
+    ) {
+        val volumes = store.volumes(project.id)
+        if (volumes.isEmpty()) {
+            showMessage(
+                title = "Поділитися проєктом",
+                message = "У проєкті немає томів для поширення.",
+            )
+            return
+        }
+
+        val blocked =
+            RdprojectExporter.blockingVolumes(volumes)
+        if (blocked.isNotEmpty()) {
+            val labels =
+                blocked.joinToString("\n") {
+                    "• " +
+                        listOfNotNull(
+                            it.documentCode,
+                            it.date,
+                        ).joinToString(" · ").ifBlank {
+                            it.title
+                        }
+                }
+            showMessage(
+                title = "Не можна поділитися проєктом",
+                message =
+                    "Спочатку потрібні .rdpkg для таких томів:\n\n" +
+                        labels,
+            )
+            return
+        }
+
+        Thread {
+            val shareDir =
+                File(
+                    activity.cacheDir,
+                    "shared-rdproject",
+                ).apply {
+                    deleteRecursively()
+                    mkdirs()
+                }
+            val file =
+                File(
+                    shareDir,
+                    RdprojectExporter.defaultFileName(project),
+                )
+            val uri =
+                FileProvider.getUriForFile(
+                    activity,
+                    activity.packageName + ".files",
+                    file,
+                )
+            val result =
+                RdprojectExporter.export(
+                    context = activity,
+                    project = project,
+                    volumes = volumes,
+                    destinationUri = uri,
+                )
+
+            activity.runOnUiThread {
+                result.onSuccess {
+                    val send =
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "application/zip"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                    activity.startActivity(
+                        Intent.createChooser(
+                            send,
+                            "Поділитися проєктом",
+                        ),
+                    )
+                }.onFailure { error ->
+                    showMessage(
+                        title = "Не вдалося поділитися",
+                        message =
+                            error.message
+                                ?: "Невідома помилка.",
+                    )
+                }
+            }
+        }.start()
+    }
+
+    private fun showMessage(
+        title: String,
+        message: String,
+    ) {
+        val dialog =
+            AlertDialog.Builder(activity)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("Закрити", null)
+                .create()
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.CONFIRM,
         )
     }
 
