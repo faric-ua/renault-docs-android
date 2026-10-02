@@ -287,6 +287,52 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("DialogUi.apply(", helper)
         self.assertIn("DialogRole.HELP", helper)
 
+    def test_prepared_share_delete_confirmations_restore_after_rotation(self):
+        home = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+        project = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+
+        self.assertIn("DIALOG_DELETE_PREPARED", home)
+        self.assertIn(
+            "DIALOG_DELETE_PREPARED ->\n                confirmDeletePreparedProject(project)",
+            home,
+        )
+        prepared_project = home.split(
+            "private fun confirmDeletePreparedProject", 1
+        )[1].split("private fun sharePreparedProject", 1)[0]
+        self.assertIn("activeKind = DIALOG_DELETE_PREPARED", prepared_project)
+        self.assertIn("track(", prepared_project)
+        self.assertIn("clear(DIALOG_DELETE_PREPARED)", prepared_project)
+
+        self.assertIn("DIALOG_DELETE_PREPARED_VOLUME", project)
+        restore = project.split("private fun restoreProjectDialog()", 1)[1]
+        restore = restore.split("private fun restorePreparedVolumeChooser", 1)[0]
+        self.assertIn("DIALOG_DELETE_PREPARED_VOLUME ->", restore)
+        self.assertIn("confirmDeletePreparedVolume(volume)", restore)
+        prepared_volume = project.split(
+            "private fun confirmDeletePreparedVolume", 1
+        )[1].split("private fun sharePreparedRdpkg", 1)[0]
+        self.assertIn("setProjectDialogState(", prepared_volume)
+        self.assertIn("trackProjectDialog(", prepared_volume)
+        self.assertIn(
+            "clearProjectDialogState(DIALOG_DELETE_PREPARED_VOLUME)",
+            prepared_volume,
+        )
+
+    def test_project_share_uses_ukrainian_volume_plural(self):
+        home = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+        self.assertNotIn("том(ів)", home)
+        self.assertIn("volumeCountLabel(volumes.size)", home)
+        self.assertIn("mod100 in 11..14", home)
+        self.assertIn('mod10 == 1 -> "том"', home)
+        self.assertIn('mod10 in 2..4 -> "томи"', home)
+        self.assertIn('else -> "томів"', home)
+
     def test_every_app_owned_alert_dialog_uses_shared_theme(self):
         base = (
             self.repo
