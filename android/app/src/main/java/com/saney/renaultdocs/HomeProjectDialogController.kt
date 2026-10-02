@@ -58,6 +58,9 @@ class HomeProjectDialogController(
             DIALOG_REMOVE ->
                 showRemoveConfirmation(project)
 
+            DIALOG_DELETE_PREPARED ->
+                confirmDeletePreparedProject(project)
+
             else ->
                 clear()
         }
@@ -273,7 +276,7 @@ class HomeProjectDialogController(
                 result.onSuccess {
                     onShareFinished(
                         "Проєкт " + project.title +
-                            " підготовлено · " + volumes.size + " том(ів).",
+                            " підготовлено · " + volumeCountLabel(volumes.size) + ".",
                     )
                     val send =
                         Intent(Intent.ACTION_SEND).apply {
@@ -303,6 +306,9 @@ class HomeProjectDialogController(
     private fun confirmDeletePreparedProject(
         project: RenaultProject,
     ) {
+        activeKind = DIALOG_DELETE_PREPARED
+        activeProjectId = project.id
+
         val dialog =
             AlertDialog.Builder(activity)
                 .setTitle("Видалити підготовлений файл?")
@@ -312,6 +318,7 @@ class HomeProjectDialogController(
                 )
                 .setNegativeButton("Скасувати", null)
                 .setPositiveButton("Видалити") { _, _ ->
+                    clear(DIALOG_DELETE_PREPARED)
                     val deleted =
                         PreparedShareStore.deleteProject(
                             activity,
@@ -329,6 +336,11 @@ class HomeProjectDialogController(
                     )
                 }
                 .create()
+        track(
+            dialog = dialog,
+            kind = DIALOG_DELETE_PREPARED,
+            projectId = project.id,
+        )
         dialog.show()
         DialogUi.apply(
             dialog = dialog,
@@ -401,8 +413,8 @@ class HomeProjectDialogController(
                 .setMessage(
                     project.title +
                         "\n\nПроєкт і " +
-                        volumeCount +
-                        " том(ів) буде прибрано з бібліотеки Renault Docs. " +
+                        volumeCountLabel(volumeCount) +
+                        " буде прибрано з бібліотеки Renault Docs. " +
                         "Вихідні .rdpkg, SAF-папки та оригінальні Renault-файли на телефоні не видаляються.",
                 )
                 .setNegativeButton(
@@ -461,6 +473,19 @@ class HomeProjectDialogController(
         activeProjectId = null
     }
 
+    private fun volumeCountLabel(count: Int): String {
+        val mod100 = count % 100
+        val mod10 = count % 10
+        val noun =
+            when {
+                mod100 in 11..14 -> "томів"
+                mod10 == 1 -> "том"
+                mod10 in 2..4 -> "томи"
+                else -> "томів"
+            }
+        return count.toString() + " " + noun
+    }
+
     companion object {
         private const val STATE_KIND =
             "homeProjectDialogKind"
@@ -470,5 +495,7 @@ class HomeProjectDialogController(
             "projectActions"
         private const val DIALOG_REMOVE =
             "removeProject"
+        private const val DIALOG_DELETE_PREPARED =
+            "deletePreparedProject"
     }
 }
