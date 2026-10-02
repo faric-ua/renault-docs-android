@@ -131,6 +131,41 @@ class HomeProjectDialogController(
             clear(DIALOG_ACTIONS)
             shareProject(project)
         }
+        val prepared =
+            PreparedShareStore.projectFile(
+                activity,
+                project,
+            )
+        if (prepared.exists()) {
+            addAction("Поділитися підготовленим .rdproject") {
+                clear(DIALOG_ACTIONS)
+                sharePreparedProject(
+                    project,
+                    prepared,
+                )
+            }
+            addAction(
+                title = "Видалити підготовлений .rdproject",
+                danger = true,
+            ) {
+                clear(DIALOG_ACTIONS)
+                val deleted =
+                    PreparedShareStore.deleteProject(
+                        activity,
+                        project,
+                    )
+                showMessage(
+                    title = "Підготовлений файл",
+                    message =
+                        if (deleted) {
+                            "Підготовлений .rdproject видалено. " +
+                                "Сам проєкт і його томи не змінено."
+                        } else {
+                            "Не вдалося видалити підготовлений .rdproject."
+                        },
+                )
+            }
+        }
         addAction(
             title = "Видалити проєкт",
             danger = true,
@@ -210,18 +245,10 @@ class HomeProjectDialogController(
         }
 
         Thread {
-            val shareDir =
-                File(
-                    activity.cacheDir,
-                    "shared-rdproject",
-                ).apply {
-                    deleteRecursively()
-                    mkdirs()
-                }
             val file =
-                File(
-                    shareDir,
-                    RdprojectExporter.defaultFileName(project),
+                PreparedShareStore.projectFile(
+                    activity,
+                    project,
                 )
             val uri =
                 FileProvider.getUriForFile(
@@ -285,6 +312,37 @@ class HomeProjectDialogController(
                 }
             }
         }.start()
+    }
+
+    private fun sharePreparedProject(
+        project: RenaultProject,
+        file: File,
+    ) {
+        if (!file.exists()) {
+            showMessage(
+                title = "Підготовлений файл",
+                message = "Підготовлений .rdproject уже відсутній.",
+            )
+            return
+        }
+        val uri =
+            FileProvider.getUriForFile(
+                activity,
+                activity.packageName + ".files",
+                file,
+            )
+        val send =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/zip"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        activity.startActivity(
+            Intent.createChooser(
+                send,
+                "Поділитися проєктом " + project.title,
+            ),
+        )
     }
 
     private fun showMessage(
