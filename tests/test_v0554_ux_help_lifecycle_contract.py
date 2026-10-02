@@ -343,6 +343,15 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             ui,
         )
 
+    def test_project_action_delete_item_uses_danger_button_style(self):
+        controller = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+
+        self.assertIn("dialog.listView?.getChildAt(0)", controller)
+        self.assertIn("Ui.applyActionStyle(", controller)
+        self.assertIn("dangerAction = true", controller)
+
     def test_dialog_actions_have_visible_button_chrome(self):
         dialog_ui = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/DialogUi.kt"
