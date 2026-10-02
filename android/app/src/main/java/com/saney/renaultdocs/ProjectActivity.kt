@@ -2716,6 +2716,11 @@ class ProjectActivity : Activity() {
     private fun confirmDeletePreparedVolume(
         volume: ProjectVolumeRecord,
     ) {
+        setProjectDialogState(
+            kind = DIALOG_DELETE_PREPARED_VOLUME,
+            volume = volume,
+        )
+
         val dialog =
             AlertDialog.Builder(this)
                 .setTitle("Видалити підготовлений файл?")
@@ -2725,6 +2730,7 @@ class ProjectActivity : Activity() {
                 )
                 .setNegativeButton("Скасувати", null)
                 .setPositiveButton("Видалити") { _, _ ->
+                    clearProjectDialogState(DIALOG_DELETE_PREPARED_VOLUME)
                     val deleted =
                         PreparedShareStore.deleteVolume(
                             this,
@@ -2739,6 +2745,11 @@ class ProjectActivity : Activity() {
                         }
                 }
                 .create()
+        trackProjectDialog(
+            dialog = dialog,
+            kind = DIALOG_DELETE_PREPARED_VOLUME,
+            volumeId = volume.id,
+        )
         dialog.show()
         DialogUi.apply(
             dialog = dialog,
@@ -3190,7 +3201,8 @@ class ProjectActivity : Activity() {
         ) {
             DIALOG_VOLUME_ACTIONS,
             DIALOG_REMOVE_VOLUME,
-            DIALOG_MOVE_VOLUME -> {
+            DIALOG_MOVE_VOLUME,
+            DIALOG_DELETE_PREPARED_VOLUME -> {
                 val volume =
                     store.volumes(
                         project.id,
@@ -3213,6 +3225,8 @@ class ProjectActivity : Activity() {
                         showVolumeActions(volume)
                     DIALOG_MOVE_VOLUME ->
                         showMoveVolumeDialog(volume)
+                    DIALOG_DELETE_PREPARED_VOLUME ->
+                        confirmDeletePreparedVolume(volume)
                     else ->
                         confirmRemoveVolume(volume)
                 }
@@ -3608,6 +3622,8 @@ class ProjectActivity : Activity() {
             "removeVolume"
         private const val DIALOG_MOVE_VOLUME =
             "moveVolume"
+        private const val DIALOG_DELETE_PREPARED_VOLUME =
+            "deletePreparedVolume"
         private const val DIALOG_VOLUME_CHOOSER =
             "volumeChooser"
         private const val DIALOG_PROJECT_MISMATCH =
