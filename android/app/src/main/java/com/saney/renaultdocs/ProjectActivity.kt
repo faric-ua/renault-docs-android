@@ -17,6 +17,8 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.documentfile.provider.DocumentFile
+import androidx.core.content.FileProvider
+import java.io.File
 import java.util.UUID
 
 class ProjectActivity : Activity() {
@@ -2409,75 +2411,294 @@ class ProjectActivity : Activity() {
             listOfNotNull(
                 volume.documentCode,
                 volume.date,
-            )
-                .joinToString(
-                    " · ",
-                )
-                .ifBlank {
-                    volume.title
-                }
+            ).joinToString(" · ").ifBlank {
+                volume.title
+            }
 
         setProjectDialogState(
-            kind =
-                DIALOG_VOLUME_ACTIONS,
-            volume =
-                volume,
+            kind = DIALOG_VOLUME_ACTIONS,
+            volume = volume,
         )
 
-        val dialog =
-            AlertDialog.Builder(
-                this,
-            )
-                .setTitle(
-                    label,
+        val actions =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
                 )
-                .setItems(
-                    arrayOf(
-                        "Експортувати .rdpkg",
-                        "Видалити з проєкту",
-                    ),
-                ) {
-                    _,
-                    which ->
-                    when (
-                        which
-                    ) {
-                        0 -> {
-                            clearProjectDialogState(
-                                DIALOG_VOLUME_ACTIONS,
-                            )
-                            startRdpkgExport(
-                                volume,
-                            )
-                        }
+            }
 
-                        1 ->
-                            confirmRemoveVolume(
-                                volume,
-                            )
+        lateinit var dialog: AlertDialog
+
+        fun addAction(
+            title: String,
+            danger: Boolean = false,
+            action: () -> Unit,
+        ) {
+            actions.addView(
+                Ui.textView(
+                    context = this,
+                    value = "› " + title,
+                    sizeSp = 18f,
+                    color = if (danger) Ui.danger else Ui.text,
+                ).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    isClickable = true
+                    isFocusable = true
+                    background =
+                        Ui.roundedBackground(
+                            context = this@ProjectActivity,
+                            fill = Ui.surfaceAlt,
+                            stroke = if (danger) Ui.danger else Ui.accent,
+                            radiusDp = 11,
+                        )
+                    setPadding(
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                    )
+                    minHeight = Ui.dp(this@ProjectActivity, 52)
+                    setOnClickListener {
+                        dialog.dismiss()
+                        action()
                     }
-                }
-                .setNegativeButton(
-                    "Скасувати",
-                    null,
-                )
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = Ui.dp(this@ProjectActivity, 10)
+                },
+            )
+        }
+
+        addAction("Експортувати .rdpkg") {
+            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+            startRdpkgExport(volume)
+        }
+        addAction("Поділитися томом") {
+            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+            shareRdpkg(volume)
+        }
+        addAction("Перемістити в інший проєкт") {
+            showMoveVolumeDialog(volume)
+        }
+        addAction(
+            title = "Видалити з проєкту",
+            danger = true,
+        ) {
+            confirmRemoveVolume(volume)
+        }
+        addAction("Скасувати") {
+            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+        }
+
+        dialog =
+            AlertDialog.Builder(this)
+                .setTitle(label)
+                .setView(actions)
                 .create()
 
         trackProjectDialog(
-            dialog =
-                dialog,
-            kind =
-                DIALOG_VOLUME_ACTIONS,
-            volumeId =
-                volume.id,
+            dialog = dialog,
+            kind = DIALOG_VOLUME_ACTIONS,
+            volumeId = volume.id,
         )
         dialog.show()
         DialogUi.apply(
-            dialog =
-                dialog,
-            role =
-                DialogRole.CHOICE,
+            dialog = dialog,
+            role = DialogRole.CHOICE,
         )
+    }
+
+    private fun showMoveVolumeDialog(
+        volume: ProjectVolumeRecord,
+    ) {
+        val targets =
+            store.projects()
+                .filter { it.id != project.id }
+
+        if (targets.isEmpty()) {
+            clearProjectDialogState()
+            statusText.text =
+                "Немає іншого проєкту, куди можна перемістити том."
+            return
+        }
+
+        setProjectDialogState(
+            kind = DIALOG_MOVE_VOLUME,
+            volume = volume,
+        )
+
+        val panel =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                )
+            }
+
+        lateinit var dialog: AlertDialog
+
+        targets.forEach { target ->
+            panel.addView(
+                Ui.textView(
+                    context = this,
+                    value = "› " + target.title,
+                    sizeSp = 18f,
+                ).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    isClickable = true
+                    isFocusable = true
+                    background =
+                        Ui.roundedBackground(
+                            context = this@ProjectActivity,
+                            fill = Ui.surfaceAlt,
+                            stroke = Ui.accent,
+                            radiusDp = 11,
+                        )
+                    setPadding(
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                    )
+                    minHeight = Ui.dp(this@ProjectActivity, 52)
+                    setOnClickListener {
+                        store.moveVolume(
+                            fromProjectId = project.id,
+                            toProjectId = target.id,
+                            volumeId = volume.id,
+                        )
+                        clearProjectDialogState(DIALOG_MOVE_VOLUME)
+                        dialog.dismiss()
+                        statusText.text =
+                            "Том переміщено до проєкту " +
+                                target.title +
+                                ". Файли не копіювалися."
+                        render()
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = Ui.dp(this@ProjectActivity, 10)
+                },
+            )
+        }
+
+        panel.addView(
+            Ui.textView(
+                context = this,
+                value = "Скасувати",
+                sizeSp = 18f,
+            ).apply {
+                Ui.applyActionStyle(this)
+                setOnClickListener {
+                    clearProjectDialogState(DIALOG_MOVE_VOLUME)
+                    dialog.dismiss()
+                }
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ),
+        )
+
+        dialog =
+            AlertDialog.Builder(this)
+                .setTitle("Перемістити том")
+                .setMessage(
+                    "Вибери проєкт призначення. Файли тому залишаться на телефоні без копіювання.",
+                )
+                .setView(panel)
+                .create()
+
+        trackProjectDialog(
+            dialog = dialog,
+            kind = DIALOG_MOVE_VOLUME,
+            volumeId = volume.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.CHOICE,
+        )
+    }
+
+    private fun shareRdpkg(
+        volume: ProjectVolumeRecord,
+    ) {
+        if (!RdpkgExporter.canFastExport(volume)) {
+            statusText.text =
+                "Поділитися можна томом, встановленим з .rdpkg. " +
+                    "Для SAF-папок спочатку створи .rdpkg."
+            return
+        }
+
+        statusText.text = "Готую .rdpkg для поширення…"
+
+        Thread {
+            val shareDir =
+                File(cacheDir, "shared-rdpkg").apply {
+                    mkdirs()
+                }
+            shareDir.listFiles()?.forEach {
+                it.delete()
+            }
+
+            val file =
+                File(
+                    shareDir,
+                    RdpkgExporter.defaultFileName(
+                        project = project,
+                        volume = volume,
+                    ),
+                )
+            val uri =
+                FileProvider.getUriForFile(
+                    this,
+                    packageName + ".files",
+                    file,
+                )
+
+            val result =
+                RdpkgExporter.export(
+                    context = this,
+                    volume = volume,
+                    destinationUri = uri,
+                )
+
+            runOnUiThread {
+                result.onSuccess {
+                    val send =
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "application/octet-stream"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                    statusText.text = "Том готовий для поширення."
+                    startActivity(
+                        Intent.createChooser(
+                            send,
+                            "Поділитися томом",
+                        ),
+                    )
+                }.onFailure { error ->
+                    statusText.text =
+                        "Не вдалося підготувати том: " +
+                            (error.message ?: "невідома помилка")
+                }
+            }
+        }.start()
     }
 
     private fun startRdpkgExport(
@@ -2886,7 +3107,8 @@ class ProjectActivity : Activity() {
             activeProjectDialogKind
         ) {
             DIALOG_VOLUME_ACTIONS,
-            DIALOG_REMOVE_VOLUME -> {
+            DIALOG_REMOVE_VOLUME,
+            DIALOG_MOVE_VOLUME -> {
                 val volume =
                     store.volumes(
                         project.id,
@@ -2904,17 +3126,13 @@ class ProjectActivity : Activity() {
                     return
                 }
 
-                if (
-                    activeProjectDialogKind ==
-                        DIALOG_VOLUME_ACTIONS
-                ) {
-                    showVolumeActions(
-                        volume,
-                    )
-                } else {
-                    confirmRemoveVolume(
-                        volume,
-                    )
+                when (activeProjectDialogKind) {
+                    DIALOG_VOLUME_ACTIONS ->
+                        showVolumeActions(volume)
+                    DIALOG_MOVE_VOLUME ->
+                        showMoveVolumeDialog(volume)
+                    else ->
+                        confirmRemoveVolume(volume)
                 }
             }
 
@@ -3306,6 +3524,8 @@ class ProjectActivity : Activity() {
             "volumeActions"
         private const val DIALOG_REMOVE_VOLUME =
             "removeVolume"
+        private const val DIALOG_MOVE_VOLUME =
+            "moveVolume"
         private const val DIALOG_VOLUME_CHOOSER =
             "volumeChooser"
         private const val DIALOG_PROJECT_MISMATCH =
