@@ -65,23 +65,19 @@ class HomeProjectDialogController(
         val dialog =
             AlertDialog.Builder(activity)
                 .setTitle(project.title)
-                .setItems(
-                    arrayOf(
-                        "Видалити проєкт",
-                    ),
-                ) {
-                    _,
-                    which ->
-                    if (which == 0) {
-                        showRemoveConfirmation(
-                            project,
-                        )
-                    }
-                }
                 .setNegativeButton(
                     "Скасувати",
                     null,
                 )
+                .setPositiveButton(
+                    "Видалити проєкт",
+                ) {
+                    _,
+                    _ ->
+                    showRemoveConfirmation(
+                        project,
+                    )
+                }
                 .create()
 
         track(
@@ -92,15 +88,8 @@ class HomeProjectDialogController(
         dialog.show()
         DialogUi.apply(
             dialog = dialog,
-            role = DialogRole.CHOICE,
+            role = DialogRole.DANGER,
         )
-        (dialog.listView?.getChildAt(0) as? android.widget.TextView)
-            ?.let {
-                Ui.applyActionStyle(
-                    view = it,
-                    dangerAction = true,
-                )
-            }
     }
 
     private fun showRemoveConfirmation(
