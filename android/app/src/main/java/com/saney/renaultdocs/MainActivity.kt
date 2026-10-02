@@ -11,12 +11,14 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
 
 class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
     private lateinit var statusText: TextView
+    private lateinit var operationProgress: ProgressBar
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
     private lateinit var settings: AppSettings
@@ -342,6 +344,24 @@ class MainActivity : Activity() {
             )
         }
         root.addView(statusText)
+
+        operationProgress =
+            ProgressBar(
+                this,
+                null,
+                android.R.attr.progressBarStyleHorizontal,
+            ).apply {
+                max = 100
+                progress = 0
+                visibility = View.GONE
+            }
+        root.addView(
+            operationProgress,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                Ui.dp(this, 4),
+            ),
+        )
 
         val scroll = ScrollView(this).apply {
             isFillViewport = true
