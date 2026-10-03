@@ -36,6 +36,15 @@ class OperationStatusUiContractTest(unittest.TestCase):
         running = activity[activity.index("private fun refreshNativeRunState"):activity.index("private fun showNativeTerminalStatus")]
         self.assertNotIn("updateNativeRunProgressDialog(\n                state,", running)
 
+    def test_project_status_is_inside_scrollable_content(self):
+        activity = self.read("ProjectActivity.kt")
+        build = activity[activity.index("private fun buildContent"):activity.index("private fun buildAddPanel")]
+        self.assertIn("val scrollContent =", build)
+        self.assertIn("scrollContent.addView(\n            operationStatus", build)
+        self.assertIn("scrollContent.addView(\n            volumeContainer", build)
+        self.assertIn("projectScroll.addView(\n            scrollContent", build)
+        self.assertNotIn("root.addView(\n            operationStatus", build)
+
     def test_project_content_initializes_scroll_before_use(self):
         activity = self.read("ProjectActivity.kt")
         build = activity[activity.index("private fun buildContent"):activity.index("private fun buildAddPanel")]
