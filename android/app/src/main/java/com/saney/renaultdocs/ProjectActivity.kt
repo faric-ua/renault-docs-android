@@ -2514,8 +2514,9 @@ class ProjectActivity : Activity() {
                 title = "Видалити підготовлений .rdpkg",
                 danger = true,
             ) {
+                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                 activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS
-                showVolumeActionsBehindPreparedDelete(volume)
+                confirmDeletePreparedVolume(volume)
             }
         }
         addAction("Перемістити в інший проєкт") {
@@ -2723,15 +2724,6 @@ class ProjectActivity : Activity() {
                 }
             }
         }.start()
-    }
-
-    private fun showVolumeActionsBehindPreparedDelete(
-        volume: ProjectVolumeRecord,
-    ) {
-        showVolumeActions(volume)
-        activeProjectDialogParentKind =
-            DIALOG_VOLUME_ACTIONS
-        confirmDeletePreparedVolume(volume)
     }
 
     private fun confirmDeletePreparedVolume(
@@ -3256,16 +3248,8 @@ class ProjectActivity : Activity() {
                         showVolumeActions(volume)
                     DIALOG_MOVE_VOLUME ->
                         showMoveVolumeDialog(volume)
-                    DIALOG_DELETE_PREPARED_VOLUME -> {
-                        if (
-                            activeProjectDialogParentKind ==
-                            DIALOG_VOLUME_ACTIONS
-                        ) {
-                            showVolumeActionsBehindPreparedDelete(volume)
-                        } else {
-                            confirmDeletePreparedVolume(volume)
-                        }
-                    }
+                    DIALOG_DELETE_PREPARED_VOLUME ->
+                        confirmDeletePreparedVolume(volume)
                     else ->
                         confirmRemoveVolume(volume)
                 }
