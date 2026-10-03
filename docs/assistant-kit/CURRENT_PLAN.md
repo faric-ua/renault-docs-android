@@ -522,10 +522,18 @@ Phone evidence:
 - [x] FAILED terminal `×` dismisses presentation state and returns to the empty-project screen — PHONE PASS 2026-10-03.
 - [ ] PREPARING Cancel reaches CANCELLED and does not remain stuck.
 - [x] Valid inner raw source creates/imports a real native .rdpkg — PHONE PASS 2026-10-03: NT8486 · 2009-08-31 · 276 native; Kangoo II 0 → 1 volume; terminal COMPLETE shown on the same status card with SHA-256.
-- [ ] rotation/recreation while native preparation is active preserves one coherent status surface.
+- [ ] rotation/recreation preserves one coherent native status surface — PHONE FAIL 2026-10-03 for COMPLETE: landscape recreation hides the COMPLETE card; returning to portrait shows it again. Volume count stays 1 and no duplicate import/rerun was observed.
 
 Important earlier phone finding now fixed in code:
 - an invalid/mixed raw folder could show a FAILED terminal card while the running `Створення .rdpkg` card remained orphaned;
 - the v0.5.56 contract is one native-run status surface: `Running → Complete / Failed / Cancelled`.
 
 Phone evidence for invalid/mixed source:\n- selected outer `Kangoo II` folder containing both ZIP and nested extracted volume;\n- scanner entered running state;\n- validation correctly rejected it as parent/mixed source;\n- the same status card transitioned to `Створення .rdpkg · помилка`;\n- no second/orphan running card remained.\n\nNext phone gate:\n- close the FAILED card with `×` and verify it disappears cleanly and does not return immediately.
+
+
+Phone finding 2026-10-03 — COMPLETE rotation lifecycle:
+- NT8486 remained installed exactly once (`Kangoo II · томів: 1`);
+- no visible rerun or duplicate import occurred;
+- COMPLETE card disappeared after portrait → landscape recreation;
+- COMPLETE card reappeared after landscape → portrait;
+- classify as UI lifecycle FAIL, not data/import failure.
