@@ -22,6 +22,11 @@ class OperationStatusUiContractTest(unittest.TestCase):
         activity = self.read("ProjectActivity.kt")
         self.assertIn('operationStatus.showRunning("Імпорт тому"', activity)
         self.assertIn('"Створення .rdpkg"', activity)
+        self.assertIn('operationStatus.showRunning("Підготовка тому"', activity)
+        self.assertIn('operationStatus.showRunning("Експорт тому"', activity)
+        self.assertIn("statusText.text = DEFAULT_STATUS_TEXT", activity)
+        running = activity[activity.index("private fun refreshNativeRunState"):activity.index("private fun showNativeTerminalStatus")]
+        self.assertNotIn("updateNativeRunProgressDialog(\n                state,", running)
 
     def test_home_project_share_uses_shared_surface(self):
         home = self.read("MainActivity.kt")
