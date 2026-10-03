@@ -25,6 +25,11 @@ class OperationStatusUiContractTest(unittest.TestCase):
         self.assertIn('operationStatus.showRunning("Імпорт тому"', activity)
         self.assertIn('"Створення .rdpkg"', activity)
         self.assertIn("NativeRdpkgPreparationService.requestCancel(this)", activity)
+        self.assertIn("if (!::operationStatus.isInitialized)", activity)
+        self.assertNotIn('value =\n                            "×"', activity)
+        terminal = activity[activity.index("private fun showNativeTerminalStatus"):activity.index("private fun hideNativeTerminalStatus")]
+        self.assertIn("operationStatus.showTerminal", terminal)
+        self.assertNotIn("nativeTerminalStatusText.text", terminal)
         self.assertIn('operationStatus.showRunning("Підготовка тому"', activity)
         self.assertIn('operationStatus.showRunning("Експорт тому"', activity)
         self.assertIn("statusText.text = DEFAULT_STATUS_TEXT", activity)
