@@ -1311,11 +1311,16 @@ class ProjectActivity : Activity() {
                 )
             }
 
-        root.addView(
+        val scrollContent =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+            }
+
+        scrollContent.addView(
             countText,
         )
 
-        root.addView(
+        scrollContent.addView(
             buildAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1323,7 +1328,7 @@ class ProjectActivity : Activity() {
             ),
         )
 
-        root.addView(
+        scrollContent.addView(
             buildProjectActionCard(
                 title =
                     "Створити .rdpkg з raw",
@@ -1373,12 +1378,12 @@ class ProjectActivity : Activity() {
                 )
             }
 
-        root.addView(
+        scrollContent.addView(
             statusText,
         )
 
         operationStatus = OperationStatusView(this)
-        root.addView(
+        scrollContent.addView(
             operationStatus,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1411,8 +1416,16 @@ class ProjectActivity : Activity() {
                     Gravity.TOP
             }
 
-        projectScroll.addView(
+        scrollContent.addView(
             volumeContainer,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ),
+        )
+
+        projectScroll.addView(
+            scrollContent,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
