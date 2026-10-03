@@ -517,9 +517,9 @@ Phone evidence:
 - [x] install/update of the exact-head v0.5.56 candidate — PASS;
 - [x] Home → Project `Kangoo II` opens without crash — PASS.
   - This specifically verifies the `projectScroll` initialization regression fix.
-- [x] Native raw → .rdpkg running/terminal single-card transition — PHONE PASS for FAILED transition 2026-10-03.
-- [x] FAILED run replaces running state; no orphan running card remains — PHONE PASS 2026-10-03.
-- [ ] terminal `×` dismisses presentation state.
+- [x] Native raw → .rdpkg UI transition on an intentionally invalid source — PHONE PASS for status-surface behavior only; package creation itself FAILED as expected because the selected folder was parent/mixed (2026-10-03).
+- [x] Expected validation failure for parent/mixed source replaces running state; no orphan running card remains — UI/LIFECYCLE PHONE PASS 2026-10-03.
+- [x] FAILED terminal `×` dismisses presentation state and returns to the empty-project screen — PHONE PASS 2026-10-03.
 - [ ] PREPARING Cancel reaches CANCELLED and does not remain stuck.
 - [ ] rotation/recreation while native preparation is active preserves one coherent status surface.
 
