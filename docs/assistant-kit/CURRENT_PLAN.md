@@ -522,7 +522,7 @@ Phone evidence:
 - [x] FAILED terminal `×` dismisses presentation state and returns to the empty-project screen — PHONE PASS 2026-10-03.
 - [ ] PREPARING Cancel reaches CANCELLED and does not remain stuck.
 - [x] Valid inner raw source creates/imports a real native .rdpkg — PHONE PASS 2026-10-03: NT8486 · 2009-08-31 · 276 native; Kangoo II 0 → 1 volume; terminal COMPLETE shown on the same status card with SHA-256.
-- [ ] rotation/recreation preserves one coherent native status surface — PHONE CHECK INCOMPLETE 2026-10-03: portrait → landscape keeps `Kangoo II · томів: 1` and no rerun/duplicate was observed, but the COMPLETE card is below the visible landscape viewport; scroll verification is required before classifying PASS/FAIL.
+- [x] COMPLETE rotation + landscape reachability — PHONE PASS 2026-10-03 on fixed build `1d5e76cd212bac2c1daeba7e8870a57664b26df0`: after rotation the Project screen scrolls to the same COMPLETE card; NT8486 remains exactly one volume and no rerun/duplicate import is observed.
 
 Important earlier phone finding now fixed in code:
 - an invalid/mixed raw folder could show a FAILED terminal card while the running `Створення .rdpkg` card remained orphaned;
@@ -532,3 +532,5 @@ Phone evidence for invalid/mixed source:\n- selected outer `Kangoo II` folder co
 
 
 Phone finding 2026-10-03 — COMPLETE rotation lifecycle (corrected after frame/code review):\n- NT8486 remained installed exactly once (`Kangoo II · томів: 1`);\n- no visible rerun or duplicate import occurred;\n- landscape viewport only shows the upper content through the raw-create tile; the operation status sits lower in the scroll content;\n- returning to portrait shows the COMPLETE card;\n- do not classify card persistence as PASS/FAIL until landscape is scrolled down.
+
+- Follow-up UX audit requested from phone QA: apply/verify the same full-page vertical scrolling contract on Home, especially landscape/small-height layouts.
