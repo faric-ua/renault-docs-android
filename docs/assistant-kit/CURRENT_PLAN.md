@@ -499,3 +499,40 @@ Next regression block:
 1. Converter visual/buttons;
 2. stale Legacy guard;
 3. remaining Help/dialog rotation lifecycle.
+
+
+## v0.5.56 — shared operation status UI / phone evidence
+
+Status: **PHONE QA IN PROGRESS — 2026-10-03**.
+
+Candidate under test:
+- branch: `feat/v0.5.56-operation-status-ui`;
+- phone-installed exact source: `9de7ebc761f0cadf268870632c3c6eeb95d93422`;
+- Tests `37120745185` — PASS;
+- Android PR Check `37120745176` — PASS;
+- Android Debug APK `37126617668` — PASS;
+- artifact: `Renault-Docs-v0.5.56-Debug`.
+
+Phone evidence:
+- [x] install/update of the exact-head v0.5.56 candidate — PASS;
+- [x] Home → Project `Kangoo II` opens without crash — PASS.
+  - This specifically verifies the `projectScroll` initialization regression fix.
+- [x] Native raw → .rdpkg UI transition on an intentionally invalid source — PHONE PASS for status-surface behavior only; package creation itself FAILED as expected because the selected folder was parent/mixed (2026-10-03).
+- [x] Expected validation failure for parent/mixed source replaces running state; no orphan running card remains — UI/LIFECYCLE PHONE PASS 2026-10-03.
+- [x] FAILED terminal `×` dismisses presentation state and returns to the empty-project screen — PHONE PASS 2026-10-03.
+- [x] PREPARING Cancel reaches CANCELLED and does not remain stuck — PHONE PASS 2026-10-03: live scan (`500 files · 6 folders`) → Cancel → terminal `Створення .rdpkg скасовано`; source unchanged, private staging cleaned; Kangoo II remains 1 volume / NT8486.
+- [x] Valid inner raw source creates/imports a real native .rdpkg — PHONE PASS 2026-10-03: NT8486 · 2009-08-31 · 276 native; Kangoo II 0 → 1 volume; terminal COMPLETE shown on the same status card with SHA-256.
+- [x] COMPLETE rotation + landscape reachability — PHONE PASS 2026-10-03 on fixed build `1d5e76cd212bac2c1daeba7e8870a57664b26df0`: after rotation the Project screen scrolls to the same COMPLETE card; NT8486 remains exactly one volume and no rerun/duplicate import is observed.
+
+Important earlier phone finding now fixed in code:
+- an invalid/mixed raw folder could show a FAILED terminal card while the running `Створення .rdpkg` card remained orphaned;
+- the v0.5.56 contract is one native-run status surface: `Running → Complete / Failed / Cancelled`.
+
+Phone evidence for invalid/mixed source:\n- selected outer `Kangoo II` folder containing both ZIP and nested extracted volume;\n- scanner entered running state;\n- validation correctly rejected it as parent/mixed source;\n- the same status card transitioned to `Створення .rdpkg · помилка`;\n- no second/orphan running card remained.\n\nNext phone gate:\n- close the FAILED card with `×` and verify it disappears cleanly and does not return immediately.
+
+
+Phone finding 2026-10-03 — COMPLETE rotation lifecycle (corrected after frame/code review):\n- NT8486 remained installed exactly once (`Kangoo II · томів: 1`);\n- no visible rerun or duplicate import occurred;\n- landscape viewport only shows the upper content through the raw-create tile; the operation status sits lower in the scroll content;\n- returning to portrait shows the COMPLETE card;\n- do not classify card persistence as PASS/FAIL until landscape is scrolled down.
+
+- Follow-up UX audit requested from phone QA: apply/verify the same full-page vertical scrolling contract on Home, especially landscape/small-height layouts.
+
+- [x] Home full-page landscape scrolling — PHONE PASS 2026-10-03 on v0.5.56: landscape can scroll through the project library to the bottom version label; lower project cards remain reachable.

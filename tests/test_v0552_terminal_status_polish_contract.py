@@ -21,6 +21,10 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         cls.gradle = (
             cls.repo / "android/app/build.gradle.kts"
         ).read_text(encoding="utf-8")
+        cls.operation_status = (
+            cls.repo
+            / "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
+        ).read_text(encoding="utf-8")
 
     def test_release_version(self):
         version_code = int(
@@ -34,9 +38,10 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         self.assertGreaterEqual(version_name, (0, 5, 52))
 
     def test_terminal_status_has_explicit_dismiss_action(self):
-        self.assertIn('value =\n                            "×"', self.project)
-        self.assertIn('"Закрити статус"', self.project)
+        self.assertIn('"×"', self.operation_status)
+        self.assertIn('"Закрити статус"', self.operation_status)
         self.assertIn("nativeRunStore.dismissTerminal(", self.project)
+        self.assertNotIn('value =\n                            "×"', self.project)
 
     def test_terminal_dismissal_is_persistent_and_scoped_to_finished_run(self):
         self.assertIn("dismissedFinishedAtMs", self.run_store)
@@ -61,20 +66,7 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         self.assertIn("if (\n            state.isTerminalDismissed", self.project)
         self.assertIn("hideNativeTerminalStatus()", self.project)
 
-    def test_active_progress_dialog_tracks_live_run_message(self):
-        self.assertIn("nativeRunProgressDialog", self.project)
-        self.assertIn("updateNativeRunProgressDialog(", self.project)
-        self.assertIn("dialog.setMessage(", self.project)
-        self.assertIn(
-            "updateNativeRunProgressDialog(\n                state,",
-            self.project,
-        )
-        self.assertIn(
-            "private const val NATIVE_RUN_REFRESH_MS =\n            750L",
-            self.project,
-        )
-
-    def test_active_progress_dialog_is_closed_after_run_finishes(self):
+    def test_active_status_surface_tracks_live_run_message(self):
         refresh = self.project.split(
             "private fun refreshNativeRunState()",
             1,
@@ -82,8 +74,18 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
             "private fun showNativeTerminalStatus",
             1,
         )[0]
+        self.assertIn("operationStatus.showRunning(", refresh)
+        self.assertIn("state.message.ifBlank", refresh)
+        self.assertIn(
+            "private const val NATIVE_RUN_REFRESH_MS =\n            750L",
+            self.project,
+        )
+        self.assertNotIn("nativeRunProgressDialog", self.project)
 
-        self.assertIn("dismissNativeRunProgressDialog()", refresh)
+    def test_terminal_status_replaces_running_surface(self):
+        self.assertIn("fun showTerminal(", self.operation_status)
+        self.assertIn("cancelView.visibility = View.GONE", self.operation_status)
+        self.assertIn("closeView.visibility = View.VISIBLE", self.operation_status)
 
     def test_rdpkg_progress_uses_ukrainian_file_count_helper(self):
         self.assertIn("ukrainianFileCount(", self.importer)

@@ -19,6 +19,7 @@ class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
     private lateinit var statusText: TextView
     private lateinit var operationProgress: ProgressBar
+    private lateinit var operationStatus: OperationStatusView
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
     private lateinit var settings: AppSettings
@@ -67,16 +68,29 @@ class MainActivity : Activity() {
                     renderLibrary()
                 },
                 onShareProgress = { current, total, message ->
-                    operationProgress.visibility = View.VISIBLE
-                    operationProgress.max = total.coerceAtLeast(1)
-                    operationProgress.progress =
-                        current.coerceIn(0, total.coerceAtLeast(1))
+                    operationProgress.visibility = View.GONE
                     statusText.text = message
+                    if (::operationStatus.isInitialized) {
+                        operationStatus.showRunning(
+                            "Підготовка проєкту",
+                            message,
+                            current,
+                            total,
+                        )
+                    }
                 },
                 onShareFinished = { message ->
                     operationProgress.visibility = View.GONE
                     operationProgress.progress = 0
                     statusText.text = message
+                    if (::operationStatus.isInitialized) {
+                        operationStatus.showTerminal(
+                            "Підготовка проєкту завершена",
+                            message,
+                        ) {
+                            operationStatus.hide()
+                        }
+                    }
                 },
             )
         projectDialogs.restore(
@@ -318,7 +332,14 @@ class MainActivity : Activity() {
 
         root.addView(topBar)
 
-        root.addView(
+        val scroll = ScrollView(this).apply {
+            isFillViewport = true
+        }
+        val scrollContent = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        scrollContent.addView(
             Ui.textView(
                 context = this,
                 value = "Бібліотека технічної документації",
@@ -334,7 +355,7 @@ class MainActivity : Activity() {
             }
         )
 
-        root.addView(
+        scrollContent.addView(
             buildHomeAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -355,7 +376,18 @@ class MainActivity : Activity() {
                 Ui.dp(this@MainActivity, 10),
             )
         }
-        root.addView(statusText)
+        scrollContent.addView(statusText)
+
+        operationStatus = OperationStatusView(this)
+        scrollContent.addView(
+            operationStatus,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                bottomMargin = Ui.dp(this@MainActivity, 10)
+            },
+        )
 
         operationProgress =
             ProgressBar(
@@ -367,17 +399,13 @@ class MainActivity : Activity() {
                 progress = 0
                 visibility = View.GONE
             }
-        root.addView(
+        scrollContent.addView(
             operationProgress,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 Ui.dp(this, 4),
             ),
         )
-
-        val scroll = ScrollView(this).apply {
-            isFillViewport = true
-        }
 
         libraryContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -389,9 +417,25 @@ class MainActivity : Activity() {
                 Ui.dp(this@MainActivity, 24),
             )
         }
+        scrollContent.addView(
+            libraryContainer,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            )
+        )
+
+        scrollContent.addView(
+            Ui.textView(
+                context = this,
+                value = "v" + BuildConfig.VERSION_NAME + " · SAF reference mode",
+                sizeSp = 12f,
+                color = Ui.muted,
+            )
+        )
 
         scroll.addView(
-            libraryContainer,
+            scrollContent,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -404,15 +448,6 @@ class MainActivity : Activity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
                 1f,
-            )
-        )
-
-        root.addView(
-            Ui.textView(
-                context = this,
-                value = "v" + BuildConfig.VERSION_NAME + " · SAF reference mode",
-                sizeSp = 12f,
-                color = Ui.muted,
             )
         )
 

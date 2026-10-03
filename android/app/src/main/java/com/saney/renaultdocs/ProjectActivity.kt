@@ -32,6 +32,7 @@ class ProjectActivity : Activity() {
     private lateinit var volumeContainer: LinearLayout
     private lateinit var projectScroll: ScrollView
     private lateinit var statusText: TextView
+    private lateinit var operationStatus: OperationStatusView
     private lateinit var nativeTerminalStatusRow: LinearLayout
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
@@ -68,9 +69,6 @@ class ProjectActivity : Activity() {
         null
     private var lastShownNativeFinishedAt =
         0L
-    private var nativeRunProgressDialog:
-        AlertDialog? =
-        null
     private val nativeRunHandler by lazy {
         Handler(
             Looper.getMainLooper(),
@@ -431,15 +429,24 @@ class ProjectActivity : Activity() {
         if (state.projectId != project.id || state.isConsumed) return
 
         if (state.isRunning) {
-            statusText.text = state.message.ifBlank { "Імпортую .rdpkg…" }
+            val detail = state.message.ifBlank { "Імпортую .rdpkg…" }
+            statusText.text = DEFAULT_STATUS_TEXT
+            if (::operationStatus.isInitialized) {
+                operationStatus.showRunning("Імпорт тому", detail)
+            }
             return
         }
 
         if (!state.isTerminal || state.finishedAtMs <= 0L) return
 
         if (state.phase == RdpkgImportRunPhase.FAILED) {
-            statusText.text = "Не вдалося імпортувати .rdpkg: " + state.message
-            rdpkgImportRunStore.consume(state.finishedAtMs)
+            val detail = "Не вдалося імпортувати .rdpkg: " + state.message
+            statusText.text = detail
+            if (::operationStatus.isInitialized) {
+                operationStatus.showTerminal("Імпорт тому · помилка", detail) {
+                    rdpkgImportRunStore.consume(state.finishedAtMs)
+                }
+            }
             return
         }
 
@@ -515,8 +522,8 @@ class ProjectActivity : Activity() {
             return
         }
 
-        statusText.text =
-            "Експортую .rdpkg…"
+        statusText.text = DEFAULT_STATUS_TEXT
+        operationStatus.showRunning("Експорт тому", "Експортую .rdpkg…")
 
         val appContext =
             applicationContext
@@ -537,8 +544,8 @@ class ProjectActivity : Activity() {
                                 !isFinishing &&
                                 !isDestroyed
                             ) {
-                                statusText.text =
-                                    message
+                                statusText.text = DEFAULT_STATUS_TEXT
+                                operationStatus.showRunning("Експорт тому", message)
                             }
                         }
                     },
@@ -842,150 +849,12 @@ class ProjectActivity : Activity() {
         }
     }
 
-    private fun showNativeRunProgressDialog(
-        state: NativeRdpkgRunState,
-    ) {
-        dismissNativeRunProgressDialog()
-
-        val builder =
-            AlertDialog.Builder(
-                this,
-            )
-                .setTitle(
-                    "Підготовка .rdpkg виконується",
-                )
-                .setMessage(
-                    state.message
-                        .ifBlank {
-                            "Операція працює у фоні."
-                        },
-                )
-                .setNegativeButton(
-                    "Закрити",
-                    null,
-                )
-
-        if (
-            state.phase ==
-            NativeRdpkgRunPhase.PREPARING
-        ) {
-            builder.setPositiveButton(
-                "Скасувати",
-            ) {
-                _,
-                _ ->
-                val latestState =
-                    nativeRunStore.load()
-
-                if (
-                    latestState.phase ==
-                    NativeRdpkgRunPhase.PREPARING
-                ) {
-                    NativeRdpkgPreparationService
-                        .requestCancel(
-                            this,
-                        )
-
-                    statusText.text =
-                        "Запит на скасування надіслано…"
-                }
-            }
-        }
-
-        val dialog =
-            builder.create()
-
-        dialog.setOnDismissListener {
-            if (
-                nativeRunProgressDialog ===
-                dialog
-            ) {
-                nativeRunProgressDialog =
-                    null
-            }
-        }
-
-        nativeRunProgressDialog =
-            dialog
-        dialog.show()
-        DialogUi.apply(
-            dialog =
-                dialog,
-            role =
-                DialogRole.PROGRESS,
-        )
-
-        updateNativeRunProgressDialog(
-            state,
-        )
-    }
-
-    private fun updateNativeRunProgressDialog(
-        state: NativeRdpkgRunState,
-    ) {
-        val dialog =
-            nativeRunProgressDialog
-                ?: return
-
-        if (
-            !dialog.isShowing
-        ) {
-            return
-        }
-
-        if (
-            !state.isRunning
-        ) {
-            dismissNativeRunProgressDialog()
-            return
-        }
-
-        dialog.setMessage(
-            state.message
-                .ifBlank {
-                    "Kotlin-native .rdpkg підготовка виконується…"
-                },
-        )
-
-        dialog.getButton(
-            AlertDialog.BUTTON_POSITIVE,
-        )
-            ?.visibility =
-            if (
-                state.phase ==
-                NativeRdpkgRunPhase.PREPARING
-            ) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-    }
-
-    private fun dismissNativeRunProgressDialog() {
-        val dialog =
-            nativeRunProgressDialog
-
-        nativeRunProgressDialog =
-            null
-
-        if (
-            dialog?.isShowing ==
-            true
-        ) {
-            dialog.dismiss()
-        }
-    }
-
     private fun startNativeRdpkgFlow() {
         val state =
             nativeRunStore.load()
 
-        if (
-            state.isRunning
-        ) {
-            showNativeRunProgressDialog(
-                state,
-            )
+        if (state.isRunning) {
+            refreshNativeRunState()
             return
         }
 
@@ -1076,8 +945,8 @@ class ProjectActivity : Activity() {
             state.projectId !=
             project.id
         ) {
-            dismissNativeRunProgressDialog()
             hideNativeTerminalStatus()
+            if (::operationStatus.isInitialized) operationStatus.hide()
             return
         }
 
@@ -1085,9 +954,24 @@ class ProjectActivity : Activity() {
             state.isRunning
         ) {
             hideNativeTerminalStatus()
-            updateNativeRunProgressDialog(
-                state,
-            )
+            if (::operationStatus.isInitialized) {
+                operationStatus.showRunning(
+                    title = "Створення .rdpkg",
+                    detail = state.message.ifBlank { "Kotlin-native .rdpkg підготовка виконується…" },
+                    onCancel =
+                        if (state.phase == NativeRdpkgRunPhase.PREPARING) {
+                            {
+                                NativeRdpkgPreparationService.requestCancel(this)
+                                operationStatus.showRunning(
+                                    "Створення .rdpkg",
+                                    "Скасовую після поточного безпечного кроку…",
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                )
+            }
 
             val serviceActive =
                 NativeRdpkgPreparationService
@@ -1109,15 +993,9 @@ class ProjectActivity : Activity() {
                 return
             }
 
-            statusText.text =
-                state.message
-                    .ifBlank {
-                        "Kotlin-native .rdpkg підготовка виконується…"
-                    }
+            statusText.text = DEFAULT_STATUS_TEXT
             return
         }
-
-        dismissNativeRunProgressDialog()
 
         if (
             !state.isTerminal ||
@@ -1132,6 +1010,7 @@ class ProjectActivity : Activity() {
             state.isTerminalDismissed
         ) {
             hideNativeTerminalStatus()
+            if (::operationStatus.isInitialized) operationStatus.hide()
             return
         }
 
@@ -1161,36 +1040,34 @@ class ProjectActivity : Activity() {
     private fun showNativeTerminalStatus(
         state: NativeRdpkgRunState,
     ) {
-        if (
-            !::nativeTerminalStatusRow.isInitialized ||
-            !::nativeTerminalStatusText.isInitialized
-        ) {
+        if (!::operationStatus.isInitialized) {
             return
         }
 
-        nativeTerminalStatusText.text =
-            when (
-                state.phase
-            ) {
-                NativeRdpkgRunPhase.COMPLETE ->
-                    state.message
-
+        val detail =
+            when (state.phase) {
+                NativeRdpkgRunPhase.COMPLETE -> state.message
                 NativeRdpkgRunPhase.CANCELLED ->
-                    state.message
-                        .ifBlank {
-                            "Підготовку .rdpkg скасовано."
-                        }
-
+                    state.message.ifBlank { "Підготовку .rdpkg скасовано." }
                 NativeRdpkgRunPhase.FAILED ->
-                    "Не вдалося створити .rdpkg: " +
-                        state.message
-
-                else ->
-                    state.message
+                    "Не вдалося створити .rdpkg: " + state.message
+                else -> state.message
             }
 
-        nativeTerminalStatusRow.visibility =
-            View.VISIBLE
+        nativeTerminalStatusRow.visibility = View.GONE
+        if (::operationStatus.isInitialized) {
+            val title =
+                when (state.phase) {
+                    NativeRdpkgRunPhase.COMPLETE -> "Створення .rdpkg завершено"
+                    NativeRdpkgRunPhase.CANCELLED -> "Створення .rdpkg скасовано"
+                    NativeRdpkgRunPhase.FAILED -> "Створення .rdpkg · помилка"
+                    else -> "Створення .rdpkg"
+                }
+            operationStatus.showTerminal(title, detail) {
+                nativeRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        }
     }
 
     private fun hideNativeTerminalStatus() {
@@ -1434,11 +1311,16 @@ class ProjectActivity : Activity() {
                 )
             }
 
-        root.addView(
+        val scrollContent =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+            }
+
+        scrollContent.addView(
             countText,
         )
 
-        root.addView(
+        scrollContent.addView(
             buildAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1446,7 +1328,7 @@ class ProjectActivity : Activity() {
             ),
         )
 
-        root.addView(
+        scrollContent.addView(
             buildProjectActionCard(
                 title =
                     "Створити .rdpkg з raw",
@@ -1496,147 +1378,32 @@ class ProjectActivity : Activity() {
                 )
             }
 
-        root.addView(
+        scrollContent.addView(
             statusText,
         )
 
-        nativeTerminalStatusText =
-            Ui.textView(
-                context =
-                    this,
-                value =
-                    "",
-                sizeSp =
-                    14f,
-                color =
-                    Ui.text,
-            )
-
-        nativeTerminalStatusRow =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-                gravity =
-                    Gravity.CENTER_VERTICAL
-                visibility =
-                    View.GONE
-                background =
-                    Ui.roundedBackground(
-                        context =
-                            this@ProjectActivity,
-                        fill =
-                            Ui.surface,
-                        stroke =
-                            Ui.border,
-                    )
-                setPadding(
-                    Ui.dp(
-                        this@ProjectActivity,
-                        12,
-                    ),
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    ),
-                    Ui.dp(
-                        this@ProjectActivity,
-                        4,
-                    ),
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    ),
-                )
-
-                addView(
-                    nativeTerminalStatusText,
-                    LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f,
-                    ),
-                )
-
-                addView(
-                    Ui.textView(
-                        context =
-                            this@ProjectActivity,
-                        value =
-                            "×",
-                        sizeSp =
-                            24f,
-                        color =
-                            Ui.muted,
-                    ).apply {
-                        contentDescription =
-                            "Закрити статус"
-                        gravity =
-                            Gravity.CENTER
-                        isClickable =
-                            true
-                        isFocusable =
-                            true
-                        setPadding(
-                            Ui.dp(
-                                this@ProjectActivity,
-                                12,
-                            ),
-                            0,
-                            Ui.dp(
-                                this@ProjectActivity,
-                                12,
-                            ),
-                            0,
-                        )
-                        setOnClickListener {
-                            val state =
-                                nativeRunStore.load()
-
-                            if (
-                                state.projectId ==
-                                    project.id &&
-                                state.isTerminal
-                            ) {
-                                nativeRunStore.dismissTerminal(
-                                    state.finishedAtMs,
-                                )
-                            }
-
-                            hideNativeTerminalStatus()
-                        }
-                    },
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        Ui.dp(
-                            this@ProjectActivity,
-                            44,
-                        ),
-                    ),
-                )
-            }
-
-        root.addView(
-            nativeTerminalStatusRow,
+        operationStatus = OperationStatusView(this)
+        scrollContent.addView(
+            operationStatus,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
             ).apply {
-                bottomMargin =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    )
+                bottomMargin = Ui.dp(this@ProjectActivity, 10)
             },
         )
 
+        // Native preparation terminal state is rendered by operationStatus.
+        nativeTerminalStatusText =
+            Ui.textView(this, "", 14f, Ui.text)
+        nativeTerminalStatusRow =
+            LinearLayout(this).apply {
+                visibility = View.GONE
+            }
+
         projectScroll =
-            ScrollView(
-                this,
-            ).apply {
-                isFillViewport =
-                    true
+            ScrollView(this).apply {
+                isFillViewport = true
             }
 
         volumeContainer =
@@ -1649,8 +1416,16 @@ class ProjectActivity : Activity() {
                     Gravity.TOP
             }
 
-        projectScroll.addView(
+        scrollContent.addView(
             volumeContainer,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ),
+        )
+
+        projectScroll.addView(
+            scrollContent,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -2677,7 +2452,8 @@ class ProjectActivity : Activity() {
             return
         }
 
-        statusText.text = "Готую .rdpkg для поширення…"
+        statusText.text = DEFAULT_STATUS_TEXT
+        operationStatus.showRunning("Підготовка тому", "Готую .rdpkg для поширення…")
 
         Thread {
             val file =
@@ -2708,7 +2484,8 @@ class ProjectActivity : Activity() {
                             putExtra(Intent.EXTRA_STREAM, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-                    statusText.text = "Том готовий для поширення."
+                    statusText.text = DEFAULT_STATUS_TEXT
+                    operationStatus.showTerminal("Підготовка тому завершена", "Том готовий для поширення.") { operationStatus.hide() }
                     startActivity(
                         Intent.createChooser(
                             send,
@@ -2716,9 +2493,9 @@ class ProjectActivity : Activity() {
                         ),
                     )
                 }.onFailure { error ->
-                    statusText.text =
-                        "Не вдалося підготувати том: " +
-                            (error.message ?: "невідома помилка")
+                    val detail = "Не вдалося підготувати том: " + (error.message ?: "невідома помилка")
+                    statusText.text = DEFAULT_STATUS_TEXT
+                    operationStatus.showTerminal("Підготовка тому · помилка", detail) { operationStatus.hide() }
                 }
             }
         }.start()
