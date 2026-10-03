@@ -17,11 +17,14 @@ class OperationStatusUiContractTest(unittest.TestCase):
         self.assertIn("fun showRunning(", ui)
         self.assertIn("fun showTerminal(", ui)
         self.assertIn('contentDescription = "Закрити статус"', ui)
+        self.assertIn('"Скасувати"', ui)
+        self.assertIn("onCancel: (() -> Unit)? = null", ui)
 
     def test_project_activity_uses_shared_surface_for_durable_volume_flows(self):
         activity = self.read("ProjectActivity.kt")
         self.assertIn('operationStatus.showRunning("Імпорт тому"', activity)
         self.assertIn('"Створення .rdpkg"', activity)
+        self.assertIn("NativeRdpkgPreparationService.requestCancel(this)", activity)
         self.assertIn('operationStatus.showRunning("Підготовка тому"', activity)
         self.assertIn('operationStatus.showRunning("Експорт тому"', activity)
         self.assertIn("statusText.text = DEFAULT_STATUS_TEXT", activity)
