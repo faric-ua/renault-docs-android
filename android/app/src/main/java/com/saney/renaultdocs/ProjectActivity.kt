@@ -433,7 +433,7 @@ class ProjectActivity : Activity() {
 
         if (state.isRunning) {
             val detail = state.message.ifBlank { "Імпортую .rdpkg…" }
-            statusText.text = detail
+            statusText.text = DEFAULT_STATUS_TEXT
             if (::operationStatus.isInitialized) {
                 operationStatus.showRunning("Імпорт тому", detail)
             }
@@ -525,8 +525,8 @@ class ProjectActivity : Activity() {
             return
         }
 
-        statusText.text =
-            "Експортую .rdpkg…"
+        statusText.text = DEFAULT_STATUS_TEXT
+        operationStatus.showRunning("Експорт тому", "Експортую .rdpkg…")
 
         val appContext =
             applicationContext
@@ -547,8 +547,8 @@ class ProjectActivity : Activity() {
                                 !isFinishing &&
                                 !isDestroyed
                             ) {
-                                statusText.text =
-                                    message
+                                statusText.text = DEFAULT_STATUS_TEXT
+                                operationStatus.showRunning("Експорт тому", message)
                             }
                         }
                     },
@@ -1101,9 +1101,7 @@ class ProjectActivity : Activity() {
                     state.message.ifBlank { "Kotlin-native .rdpkg підготовка виконується…" },
                 )
             }
-            updateNativeRunProgressDialog(
-                state,
-            )
+            dismissNativeRunProgressDialog()
 
             val serviceActive =
                 NativeRdpkgPreparationService
@@ -1125,11 +1123,7 @@ class ProjectActivity : Activity() {
                 return
             }
 
-            statusText.text =
-                state.message
-                    .ifBlank {
-                        "Kotlin-native .rdpkg підготовка виконується…"
-                    }
+            statusText.text = DEFAULT_STATUS_TEXT
             return
         }
 
@@ -1184,29 +1178,30 @@ class ProjectActivity : Activity() {
             return
         }
 
-        nativeTerminalStatusText.text =
-            when (
-                state.phase
-            ) {
-                NativeRdpkgRunPhase.COMPLETE ->
-                    state.message
-
+        val detail =
+            when (state.phase) {
+                NativeRdpkgRunPhase.COMPLETE -> state.message
                 NativeRdpkgRunPhase.CANCELLED ->
-                    state.message
-                        .ifBlank {
-                            "Підготовку .rdpkg скасовано."
-                        }
-
+                    state.message.ifBlank { "Підготовку .rdpkg скасовано." }
                 NativeRdpkgRunPhase.FAILED ->
-                    "Не вдалося створити .rdpkg: " +
-                        state.message
-
-                else ->
-                    state.message
+                    "Не вдалося створити .rdpkg: " + state.message
+                else -> state.message
             }
 
-        nativeTerminalStatusRow.visibility =
-            View.VISIBLE
+        nativeTerminalStatusRow.visibility = View.GONE
+        if (::operationStatus.isInitialized) {
+            val title =
+                when (state.phase) {
+                    NativeRdpkgRunPhase.COMPLETE -> "Створення .rdpkg завершено"
+                    NativeRdpkgRunPhase.CANCELLED -> "Створення .rdpkg скасовано"
+                    NativeRdpkgRunPhase.FAILED -> "Створення .rdpkg · помилка"
+                    else -> "Створення .rdpkg"
+                }
+            operationStatus.showTerminal(title, detail) {
+                nativeRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        }
     }
 
     private fun hideNativeTerminalStatus() {
@@ -2704,7 +2699,8 @@ class ProjectActivity : Activity() {
             return
         }
 
-        statusText.text = "Готую .rdpkg для поширення…"
+        statusText.text = DEFAULT_STATUS_TEXT
+        operationStatus.showRunning("Підготовка тому", "Готую .rdpkg для поширення…")
 
         Thread {
             val file =
@@ -2735,7 +2731,8 @@ class ProjectActivity : Activity() {
                             putExtra(Intent.EXTRA_STREAM, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-                    statusText.text = "Том готовий для поширення."
+                    statusText.text = DEFAULT_STATUS_TEXT
+                    operationStatus.showTerminal("Підготовка тому завершена", "Том готовий для поширення.") { operationStatus.hide() }
                     startActivity(
                         Intent.createChooser(
                             send,
@@ -2743,9 +2740,9 @@ class ProjectActivity : Activity() {
                         ),
                     )
                 }.onFailure { error ->
-                    statusText.text =
-                        "Не вдалося підготувати том: " +
-                            (error.message ?: "невідома помилка")
+                    val detail = "Не вдалося підготувати том: " + (error.message ?: "невідома помилка")
+                    statusText.text = DEFAULT_STATUS_TEXT
+                    operationStatus.showTerminal("Підготовка тому · помилка", detail) { operationStatus.hide() }
                 }
             }
         }.start()
