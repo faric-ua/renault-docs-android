@@ -521,6 +521,7 @@ Phone evidence:
 - [x] Expected validation failure for parent/mixed source replaces running state; no orphan running card remains — UI/LIFECYCLE PHONE PASS 2026-10-03.
 - [x] FAILED terminal `×` dismisses presentation state and returns to the empty-project screen — PHONE PASS 2026-10-03.
 - [ ] PREPARING Cancel reaches CANCELLED and does not remain stuck.
+- [x] Valid inner raw source creates/imports a real native .rdpkg — PHONE PASS 2026-10-03: NT8486 · 2009-08-31 · 276 native; Kangoo II 0 → 1 volume; terminal COMPLETE shown on the same status card with SHA-256.
 - [ ] rotation/recreation while native preparation is active preserves one coherent status surface.
 
 Important earlier phone finding now fixed in code:
