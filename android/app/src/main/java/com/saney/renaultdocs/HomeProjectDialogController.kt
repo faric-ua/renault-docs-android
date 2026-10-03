@@ -20,6 +20,7 @@ class HomeProjectDialogController(
     private var shareInProgress: Boolean = false
     private var activeKind: String = ""
     private var activeProjectId: String? = null
+    private var activeParentKind: String? = null
 
     fun restore(state: Bundle?) {
         activeKind =
@@ -29,6 +30,9 @@ class HomeProjectDialogController(
         activeProjectId =
             state
                 ?.getString(STATE_PROJECT_ID)
+        activeParentKind =
+            state
+                ?.getString(STATE_PARENT_KIND)
     }
 
     fun save(outState: Bundle) {
@@ -39,6 +43,10 @@ class HomeProjectDialogController(
         outState.putString(
             STATE_PROJECT_ID,
             activeProjectId,
+        )
+        outState.putString(
+            STATE_PARENT_KIND,
+            activeParentKind,
         )
     }
 
@@ -152,6 +160,7 @@ class HomeProjectDialogController(
                 danger = true,
             ) {
                 clear(DIALOG_ACTIONS)
+                activeParentKind = DIALOG_ACTIONS
                 confirmDeletePreparedProject(project)
             }
         }
@@ -159,6 +168,8 @@ class HomeProjectDialogController(
             title = "Видалити проєкт",
             danger = true,
         ) {
+            clear(DIALOG_ACTIONS)
+            activeParentKind = DIALOG_ACTIONS
             showRemoveConfirmation(project)
         }
         addAction("Скасувати") {
@@ -316,7 +327,14 @@ class HomeProjectDialogController(
                     "Буде видалено тільки підготовлений .rdproject для поширення. " +
                         "Сам проєкт, його томи та вихідні Renault-файли залишаться.",
                 )
-                .setNegativeButton("Скасувати", null)
+                .setNegativeButton("Скасувати") { _, _ ->
+                    val returnToActions =
+                        activeParentKind == DIALOG_ACTIONS
+                    clear(DIALOG_DELETE_PREPARED)
+                    if (returnToActions) {
+                        showActions(project.id)
+                    }
+                }
                 .setPositiveButton("Видалити") { _, _ ->
                     clear(DIALOG_DELETE_PREPARED)
                     val deleted =
@@ -419,8 +437,14 @@ class HomeProjectDialogController(
                 )
                 .setNegativeButton(
                     "Скасувати",
-                    null,
-                )
+                ) { _, _ ->
+                    val returnToActions =
+                        activeParentKind == DIALOG_ACTIONS
+                    clear(DIALOG_REMOVE)
+                    if (returnToActions) {
+                        showActions(project.id)
+                    }
+                }
                 .setPositiveButton(
                     "Видалити проєкт",
                 ) {
@@ -471,6 +495,7 @@ class HomeProjectDialogController(
         }
         activeKind = ""
         activeProjectId = null
+        activeParentKind = null
     }
 
     private fun volumeCountLabel(count: Int): String {
@@ -491,6 +516,8 @@ class HomeProjectDialogController(
             "homeProjectDialogKind"
         private const val STATE_PROJECT_ID =
             "homeProjectDialogProjectId"
+        private const val STATE_PARENT_KIND =
+            "homeProjectDialogParentKind"
         private const val DIALOG_ACTIONS =
             "projectActions"
         private const val DIALOG_REMOVE =
