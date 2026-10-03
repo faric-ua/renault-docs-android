@@ -358,6 +358,32 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('setNegativeButton("Скасувати")', prepared)
         self.assertIn("showVolumeActions(volume)", prepared)
 
+    def test_project_destructive_confirmations_return_to_project_actions(self):
+        home = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+        self.assertIn("STATE_PARENT_KIND", home)
+        prepared_action = home.split(
+            'title = "Видалити підготовлений .rdproject"', 1
+        )[1].split('title = "Видалити проєкт"', 1)[0]
+        self.assertIn("clear(DIALOG_ACTIONS)", prepared_action)
+        self.assertIn("activeParentKind = DIALOG_ACTIONS", prepared_action)
+        remove_action = home.split(
+            'title = "Видалити проєкт"', 1
+        )[1].split('addAction("Скасувати")', 1)[0]
+        self.assertIn("clear(DIALOG_ACTIONS)", remove_action)
+        self.assertIn("activeParentKind = DIALOG_ACTIONS", remove_action)
+        prepared = home.split(
+            "private fun confirmDeletePreparedProject", 1
+        )[1].split("private fun sharePreparedProject", 1)[0]
+        self.assertIn('setNegativeButton("Скасувати")', prepared)
+        self.assertIn("showActions(project.id)", prepared)
+        remove = home.split(
+            "private fun showRemoveConfirmation", 1
+        )[1].split("private fun track(", 1)[0]
+        self.assertIn('"Скасувати"', remove)
+        self.assertIn("showActions(project.id)", remove)
+
     def test_project_share_uses_ukrainian_volume_plural(self):
         home = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
