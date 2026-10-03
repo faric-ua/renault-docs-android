@@ -32,8 +32,8 @@ android {
         applicationId = "com.saney.renaultdocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 69
-        versionName = "0.5.53"
+        versionCode = 70
+        versionName = "0.5.54"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -83,6 +83,7 @@ kotlin {
 }
 
 dependencies {
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("org.jsoup:jsoup:1.18.3")
     implementation("org.jspecify:jspecify:1.0.0")

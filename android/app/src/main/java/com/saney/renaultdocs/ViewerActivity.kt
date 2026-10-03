@@ -392,7 +392,8 @@ class ViewerActivity : Activity() {
         titleView = Ui.textView(
             context = this,
             value = title,
-            sizeSp = 18f,
+            sizeSp = 16f,
+            color = Ui.entityTitle,
         ).apply {
             setTypeface(
                 typeface,
@@ -421,58 +422,46 @@ class ViewerActivity : Activity() {
                 .isNotBlank()
         ) {
             toolbar.addView(
-                Button(this).apply {
-                    text =
+                Ui.modeButton(
+                    context =
+                        this,
+                    label =
                         if (
                             hybridSectionMode
                         ) {
                             "Розділи"
                         } else {
                             "Modern"
-                        }
-                    contentDescription =
-                        if (
-                            hybridSectionMode
-                        ) {
-                            "Розділи Modern"
-                        } else {
-                            "Modern"
-                        }
-                    isAllCaps = false
-                    gravity =
-                        Gravity.CENTER
-                    minWidth =
-                        Ui.dp(
-                            this@ViewerActivity,
-                            70,
-                        )
-                    minimumHeight =
-                        Ui.dp(
-                            this@ViewerActivity,
-                            44,
-                        )
-                    setPadding(
-                        Ui.dp(
-                            this@ViewerActivity,
-                            8,
-                        ),
-                        0,
-                        Ui.dp(
-                            this@ViewerActivity,
-                            8,
-                        ),
-                        0,
-                    )
-                    setOnClickListener {
-                        if (
-                            hybridSectionMode
-                        ) {
-                            showSectionNavigator()
-                        } else {
-                            openModern()
-                        }
+                        },
+                    active =
+                        false,
+                ) {
+                    if (
+                        hybridSectionMode
+                    ) {
+                        showSectionNavigator()
+                    } else {
+                        openModern()
                     }
-                }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    Ui.dp(
+                        this,
+                        38,
+                    ),
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@ViewerActivity,
+                            4,
+                        )
+                    marginEnd =
+                        Ui.dp(
+                            this@ViewerActivity,
+                            4,
+                        )
+                },
             )
         }
 
@@ -631,13 +620,41 @@ class ViewerActivity : Activity() {
                         pageTitle,
                     )
 
-                    if (!pageTitle.isNullOrBlank()) {
-                        titleView.text = pageTitle
+                    val legacyInfoPage =
+                        pageTitle
+                            ?.lowercase()
+                            ?.contains(
+                                "як користув",
+                            )
+                            ?: false
+
+                    if (
+                        legacyInfoPage
+                    ) {
+                        titleView.text =
+                            compactLegacyInfoTitle(
+                                pageTitle,
+                            )
+                    } else if (
+                        !pageTitle.isNullOrBlank()
+                    ) {
+                        titleView.text =
+                            pageTitle
                     }
 
                     reconcilePdfFullscreenPresentation()
 
                     if (
+                        legacyInfoPage
+                    ) {
+                        statusView.setTextColor(
+                            Ui.muted,
+                        )
+                        statusView.text =
+                            "Classic-довідка · дані й кількість томів стосуються лише цього dataset."
+                        statusView.visibility =
+                            View.VISIBLE
+                    } else if (
                         !hybridSectionWarmup ||
                         webView.alpha > 0f
                     ) {
@@ -1138,6 +1155,77 @@ class ViewerActivity : Activity() {
         }
 
         super.onDestroy()
+    }
+
+    private fun compactLegacyInfoTitle(
+        pageTitle: String?,
+    ): String {
+        val pageIdentity =
+            pageTitle
+                .orEmpty()
+                .replaceFirst(
+                    Regex(
+                        "^\\s*Як\\s+користув(?:атися|атись)\\s*[—–-]\\s*",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+
+        val source =
+            pageIdentity
+                .ifBlank {
+                    modernDatasetTitle
+                        .trim()
+                }
+                .ifBlank {
+                    "Renault Docs"
+                }
+
+        val withoutBrand =
+            source
+                .replaceFirst(
+                    Regex(
+                        "^Renault\\s+",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+                .ifBlank {
+                    source
+                }
+
+        val match =
+            Regex(
+                "^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})\\z",
+            ).matchEntire(
+                withoutBrand,
+            )
+
+        if (
+            match == null
+        ) {
+            return withoutBrand
+        }
+
+        val name =
+            match.groupValues[1]
+                .trim()
+        val years =
+            match.groupValues[2] +
+                "–" +
+                match.groupValues[3]
+
+        return if (
+            name.isBlank()
+        ) {
+            withoutBrand
+        } else {
+            name +
+                "\n" +
+                years
+        }
     }
 
     private fun headerAction(

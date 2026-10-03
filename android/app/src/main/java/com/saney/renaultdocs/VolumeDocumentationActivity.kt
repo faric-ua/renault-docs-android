@@ -19,6 +19,10 @@ import org.json.JSONObject
 class VolumeDocumentationActivity : Activity() {
     private lateinit var bodyContainer:
         LinearLayout
+    private lateinit var bodyScroll:
+        ScrollView
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private var datasetTitle: String =
         "Renault dataset"
@@ -34,6 +38,7 @@ class VolumeDocumentationActivity : Activity() {
 
     private val panelStack =
         mutableListOf<String>()
+    private var restoredScrollY: Int = 0
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -81,6 +86,29 @@ class VolumeDocumentationActivity : Activity() {
                 panelStack.addAll(it)
             }
 
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        runtimeData =
+            (
+                lastNonConfigurationInstance
+                    as? RetainedDocumentationState
+            )?.runtimeData
+
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         if (
             treeUriText.isBlank() ||
             volumeEntrypoint.isBlank()
@@ -94,9 +122,26 @@ class VolumeDocumentationActivity : Activity() {
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
 
-        loadDocumentation()
+        val retainedData =
+            runtimeData
+        if (
+            retainedData != null
+        ) {
+            showDocumentation(
+                retainedData,
+            )
+        } else {
+            loadDocumentation()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any =
+        RetainedDocumentationState(
+            runtimeData =
+                runtimeData,
+        )
 
     override fun onSaveInstanceState(
         outState: Bundle,
@@ -104,6 +149,19 @@ class VolumeDocumentationActivity : Activity() {
         outState.putStringArrayList(
             STATE_PANEL_STACK,
             ArrayList(panelStack),
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::bodyScroll.isInitialized
+            ) {
+                bodyScroll.scrollY
+            } else {
+                restoredScrollY
+            },
+        )
+        helpDialogs.save(
+            outState,
         )
         super.onSaveInstanceState(
             outState,
@@ -199,7 +257,7 @@ class VolumeDocumentationActivity : Activity() {
                             volumeTitle,
                         sizeSp = 12f,
                         color =
-                            Ui.muted,
+                            Ui.entityTitle,
                     ).apply {
                         maxLines = 1
                     }
@@ -227,6 +285,27 @@ class VolumeDocumentationActivity : Activity() {
         )
 
         topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_DOCUMENTATION,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
+        )
+
+        topBar.addView(
             headerAction(
                 icon =
                     R.drawable.ic_settings,
@@ -244,7 +323,7 @@ class VolumeDocumentationActivity : Activity() {
 
         root.addView(topBar)
 
-        val scroll =
+        bodyScroll =
             ScrollView(this).apply {
                 isFillViewport = true
             }
@@ -267,7 +346,7 @@ class VolumeDocumentationActivity : Activity() {
                 )
             }
 
-        scroll.addView(
+        bodyScroll.addView(
             bodyContainer,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
@@ -276,7 +355,7 @@ class VolumeDocumentationActivity : Activity() {
         )
 
         root.addView(
-            scroll,
+            bodyScroll,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
@@ -286,6 +365,25 @@ class VolumeDocumentationActivity : Activity() {
 
         return root
     }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_DOCUMENTATION ->
+                HelpDialogSpec(
+                    title =
+                        "Документація тому",
+                    message =
+                        "Цей екран відтворює native-меню документації конкретного тому. Пункти й вкладені панелі беруться з Runtime IR і ведуть до тих самих документів, що й Classic.\n\n" +
+                            "Якщо ти зайшов у вкладену панель, «Назад» повертає на попередній рівень. Відкрита панель і Help відновлюються після rotation.",
+                )
+
+            else ->
+                null
+        }
 
     private fun loadDocumentation() {
         bodyContainer.removeAllViews()
@@ -312,16 +410,9 @@ class VolumeDocumentationActivity : Activity() {
                 result
                     .onSuccess {
                         runtimeData = it
-                        volumeTitle =
-                            it.volumeTitle
-                                .takeIf {
-                                    title ->
-                                    title.isNotBlank()
-                                }
-                                ?: volumeTitle
-
-                        sanitizePanelStack()
-                        renderCurrent()
+                        showDocumentation(
+                            it,
+                        )
                     }
                     .onFailure {
                         renderLoadFailure(
@@ -331,6 +422,43 @@ class VolumeDocumentationActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun showDocumentation(
+        data: RuntimeIrVolumeDocumentationData,
+    ) {
+        volumeTitle =
+            data.volumeTitle
+                .takeIf {
+                    it.isNotBlank()
+                }
+                ?: volumeTitle
+
+        sanitizePanelStack()
+        renderCurrent()
+        restoreBodyScroll()
+    }
+
+    private fun restoreBodyScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::bodyScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        bodyScroll.post {
+            bodyScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
     }
 
     private fun sanitizePanelStack() {
@@ -1452,9 +1580,18 @@ class VolumeDocumentationActivity : Activity() {
         )
     }
 
+    private data class RetainedDocumentationState(
+        val runtimeData:
+            RuntimeIrVolumeDocumentationData?,
+    )
+
     companion object {
+        private const val HELP_DOCUMENTATION =
+            "documentation"
         private const val STATE_PANEL_STACK =
             "documentationPanelStack"
+        private const val STATE_SCROLL_Y =
+            "documentationScrollY"
 
         private const val EXTRA_TREE_URI =
             "treeUri"

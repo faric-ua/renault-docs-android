@@ -23,6 +23,8 @@ class ModernVolumeActivity : Activity() {
     private lateinit var searchInput: EditText
     private lateinit var listContainer: LinearLayout
     private lateinit var sectionScroll: ScrollView
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private var sectionIndex:
         ModernVolumeSections? = null
@@ -35,6 +37,7 @@ class ModernVolumeActivity : Activity() {
         "Renault volume"
     private var volumeEntrypoint: String = ""
     private var restoredQuery: String = ""
+    private var restoredScrollY: Int = 0
     private var openSearchRequested: Boolean = false
 
     override fun onCreate(
@@ -84,11 +87,32 @@ class ModernVolumeActivity : Activity() {
                 )
                 .orEmpty()
 
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        sectionIndex =
+            lastNonConfigurationInstance
+                as? ModernVolumeSections
+
         openSearchRequested =
             intent.getBooleanExtra(
                 EXTRA_OPEN_SEARCH,
                 false,
             )
+
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
 
         if (
             treeUriText.isBlank() ||
@@ -103,6 +127,7 @@ class ModernVolumeActivity : Activity() {
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
 
         if (
             restoredQuery.isNotBlank() ||
@@ -123,12 +148,30 @@ class ModernVolumeActivity : Activity() {
             searchInput.requestFocus()
         }
 
-        loadSections()
+        val retainedSections =
+            sectionIndex
+
+        if (
+            retainedSections != null
+        ) {
+            showLoadedSections(
+                retainedSections,
+            )
+        } else {
+            loadSections()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any? =
+        sectionIndex
 
     override fun onSaveInstanceState(
         outState: Bundle,
     ) {
+        helpDialogs.save(
+            outState,
+        )
+
         outState.putString(
             STATE_QUERY,
             if (
@@ -138,6 +181,17 @@ class ModernVolumeActivity : Activity() {
                     .toString()
             } else {
                 restoredQuery
+            },
+        )
+
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::sectionScroll.isInitialized
+            ) {
+                sectionScroll.scrollY
+            } else {
+                restoredScrollY
             },
         )
 
@@ -188,6 +242,8 @@ class ModernVolumeActivity : Activity() {
                 value =
                     volumeTitle,
                 sizeSp = 20f,
+                color =
+                    Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -234,6 +290,27 @@ class ModernVolumeActivity : Activity() {
             ) {
                 toggleSearch()
             }
+        )
+
+        topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_VOLUME,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
         )
 
         topBar.addView(
@@ -293,23 +370,71 @@ class ModernVolumeActivity : Activity() {
             )
         )
 
-        contextRow.addView(
-            Button(this).apply {
-                text =
-                    "Classic"
-                isAllCaps =
-                    false
+        val modeSwitch =
+            LinearLayout(
+                this,
+            ).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
                 gravity =
-                    Gravity.CENTER
-                minimumHeight =
+                    Gravity.CENTER_VERTICAL
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernVolumeActivity,
+                        fill =
+                            Ui.surface,
+                        stroke =
+                            Ui.border,
+                        radiusDp =
+                            12,
+                    )
+                setPadding(
                     Ui.dp(
                         this@ModernVolumeActivity,
-                        42,
-                    )
-                setOnClickListener {
-                    openClassicVolume()
-                }
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernVolumeActivity,
+                        2,
+                    ),
+                )
             }
+
+        modeSwitch.addView(
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Modern",
+                active =
+                    true,
+            ) {},
+        )
+
+        modeSwitch.addView(
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Classic",
+                active =
+                    false,
+            ) {
+                openClassicVolume()
+            },
+        )
+
+        contextRow.addView(
+            modeSwitch,
         )
 
         root.addView(contextRow)
@@ -377,7 +502,7 @@ class ModernVolumeActivity : Activity() {
                         fill =
                             Ui.surfaceAlt,
                         stroke =
-                            Ui.border,
+                            Ui.accent,
                         radiusDp = 10,
                     )
                 setPadding(
@@ -486,6 +611,26 @@ class ModernVolumeActivity : Activity() {
         return root
     }
 
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_VOLUME ->
+                HelpDialogSpec(
+                    title =
+                        "Modern том",
+                    message =
+                        "Список нижче — розділи цього тому у Modern режимі. Пошук працює за кодом і назвою.\n\n" +
+                            "«Classic» відкриває оригінальну Renault HTML-навігацію. «Документація» відкриває native-меню документації тому.\n\n" +
+                            "Коди розділів відображаються у зручному порядку, але їхня справжня identity та legacy entrypoint не змінюються.",
+                )
+
+            else ->
+                null
+        }
+
     private fun loadSections() {
         statusText.text =
             "Читаю native index розділів…"
@@ -507,27 +652,9 @@ class ModernVolumeActivity : Activity() {
                 result
                     .onSuccess {
                         sectionIndex = it
-
-                        if (
-                            it.sections.isEmpty()
-                        ) {
-                            showNativeFallback(
-                                "Для цього тому розділи автоматично не знайдені."
-                            )
-                        } else {
-                            statusText.setTextColor(
-                                Ui.muted,
-                            )
-                            statusText.text =
-                                "Розділів: " +
-                                    it.sections.size +
-                                    " · native"
-
-                            renderSections(
-                                searchInput.text
-                                    .toString(),
-                            )
-                        }
+                        showLoadedSections(
+                            it,
+                        )
                     }
                     .onFailure {
                         showNativeFallback(
@@ -537,6 +664,44 @@ class ModernVolumeActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun showLoadedSections(
+        sections: ModernVolumeSections,
+    ) {
+        if (
+            sections.sections.isEmpty()
+        ) {
+            showNativeFallback(
+                "Для цього тому розділи автоматично не знайдені."
+            )
+            return
+        }
+
+        statusText.setTextColor(
+            Ui.muted,
+        )
+        statusText.text =
+            "Розділів: " +
+                sections.sections.size +
+                " · native"
+
+        renderSections(
+            searchInput.text
+                .toString(),
+        )
+
+        if (
+            restoredScrollY >
+            0
+        ) {
+            sectionScroll.post {
+                sectionScroll.scrollTo(
+                    0,
+                    restoredScrollY,
+                )
+            }
+        }
     }
 
     private fun renderSections(
@@ -698,7 +863,13 @@ class ModernVolumeActivity : Activity() {
                     value =
                         section.title,
                     sizeSp = 16f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
                     setPadding(
                         Ui.dp(
                             this@ModernVolumeActivity,
@@ -1109,6 +1280,10 @@ class ModernVolumeActivity : Activity() {
             "volumeEntrypoint"
         private const val STATE_QUERY =
             "query"
+        private const val STATE_SCROLL_Y =
+            "scrollY"
+        private const val HELP_VOLUME =
+            "volume"
         private const val EXTRA_OPEN_SEARCH =
             "openSearch"
 

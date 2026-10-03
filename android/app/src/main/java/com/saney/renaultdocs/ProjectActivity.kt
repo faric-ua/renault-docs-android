@@ -17,20 +17,42 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.documentfile.provider.DocumentFile
+import androidx.core.content.FileProvider
+import java.io.File
 import java.util.UUID
 
 class ProjectActivity : Activity() {
     private lateinit var store: ProjectStore
     private lateinit var settings: AppSettings
     private lateinit var nativeRunStore: NativeRdpkgRunStore
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
     private lateinit var project: RenaultProject
     private lateinit var volumeContainer: LinearLayout
+    private lateinit var projectScroll: ScrollView
     private lateinit var statusText: TextView
     private lateinit var nativeTerminalStatusRow: LinearLayout
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
     private var pendingManualImport =
         false
+    private var restoredScrollY =
+        0
+    private var activeProjectDialogKind:
+        String =
+        ""
+    private var activeProjectDialogVolumeId:
+        String? =
+        null
+    private var activeProjectDialogTreeUri:
+        String? =
+        null
+    private var activeProjectDialogAllowOverride:
+        Boolean =
+        false
+    private var activeProjectDialogParentKind:
+        String? =
+        null
     private var pendingRdpkgExportVolumeId:
         String? =
         null
@@ -70,6 +92,51 @@ class ProjectActivity : Activity() {
         super.onCreate(
             savedInstanceState,
         )
+
+        pendingManualImport =
+            savedInstanceState
+                ?.getBoolean(
+                    STATE_PENDING_MANUAL_IMPORT,
+                    false,
+                )
+                ?: false
+
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        activeProjectDialogKind =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_KIND,
+                )
+                .orEmpty()
+        activeProjectDialogVolumeId =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_VOLUME_ID,
+                )
+        activeProjectDialogTreeUri =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_TREE_URI,
+                )
+        activeProjectDialogAllowOverride =
+            savedInstanceState
+                ?.getBoolean(
+                    STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE,
+                    false,
+                )
+                ?: false
+        activeProjectDialogParentKind =
+            savedInstanceState
+                ?.getString(
+                    STATE_ACTIVE_DIALOG_PARENT_KIND,
+                )
 
         pendingRdpkgExportVolumeId =
             savedInstanceState
@@ -120,11 +187,33 @@ class ProjectActivity : Activity() {
                     return
                 }
 
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         setContentView(
             buildContent(),
         )
+        helpDialogs.restoreOpen()
         render()
+        restoreProjectScroll()
         repairSavedVolumeMetadata()
+
+        if (
+            savedInstanceState !=
+                null &&
+            activeProjectDialogKind
+                .isNotBlank()
+        ) {
+            volumeContainer.post {
+                restoreProjectDialog()
+            }
+        }
 
         if (
             savedInstanceState ==
@@ -174,6 +263,45 @@ class ProjectActivity : Activity() {
     ) {
         super.onSaveInstanceState(
             outState,
+        )
+
+        outState.putBoolean(
+            STATE_PENDING_MANUAL_IMPORT,
+            pendingManualImport,
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::projectScroll.isInitialized
+            ) {
+                projectScroll.scrollY
+            } else {
+                restoredScrollY
+            },
+        )
+        helpDialogs.save(
+            outState,
+        )
+
+        outState.putString(
+            STATE_ACTIVE_DIALOG_KIND,
+            activeProjectDialogKind,
+        )
+        outState.putString(
+            STATE_ACTIVE_DIALOG_VOLUME_ID,
+            activeProjectDialogVolumeId,
+        )
+        outState.putString(
+            STATE_ACTIVE_DIALOG_TREE_URI,
+            activeProjectDialogTreeUri,
+        )
+        outState.putBoolean(
+            STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE,
+            activeProjectDialogAllowOverride,
+        )
+        outState.putString(
+            STATE_ACTIVE_DIALOG_PARENT_KIND,
+            activeProjectDialogParentKind,
         )
 
         outState.putString(
@@ -782,6 +910,12 @@ class ProjectActivity : Activity() {
         nativeRunProgressDialog =
             dialog
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.PROGRESS,
+        )
 
         updateNativeRunProgressDialog(
             state,
@@ -1102,6 +1236,12 @@ class ProjectActivity : Activity() {
                 data.flags,
         )
 
+        val allowOverride =
+            pendingManualImport
+
+        pendingManualImport =
+            false
+
         PreparedVolumeReader.readAll(
             context =
                 this,
@@ -1114,7 +1254,7 @@ class ProjectActivity : Activity() {
                     volumes =
                         volumes,
                     allowOverride =
-                        pendingManualImport,
+                        allowOverride,
                 )
             }
             .onFailure {
@@ -1222,6 +1362,8 @@ class ProjectActivity : Activity() {
                     project.title,
                 sizeSp =
                     26f,
+                color =
+                    Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -1241,6 +1383,27 @@ class ProjectActivity : Activity() {
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 1f,
+            ),
+        )
+
+        topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_PROJECT,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
             ),
         )
 
@@ -1277,67 +1440,8 @@ class ProjectActivity : Activity() {
             countText,
         )
 
-        val actionsRow =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-            }
-
-        actionsRow.addView(
-            buildProjectActionCard(
-                title =
-                    "Додати том",
-                subtitle =
-                    ".rdpkg · один том",
-                primary =
-                    true,
-            ) {
-                openPackagePicker()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        6,
-                    )
-            },
-        )
-
-        actionsRow.addView(
-            buildProjectActionCard(
-                title =
-                    "Ручне додавання",
-                subtitle =
-                    "Папка / SAF",
-                primary =
-                    false,
-            ) {
-                openVolumePicker(
-                    manual =
-                        true,
-                )
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginStart =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        6,
-                    )
-            },
-        )
-
         root.addView(
-            actionsRow,
+            buildAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1352,6 +1456,8 @@ class ProjectActivity : Activity() {
                     "Kotlin · без Python/Termux · без *_android",
                 primary =
                     true,
+                helpId =
+                    HELP_RAW,
             ) {
                 startNativeRdpkgFlow()
             },
@@ -1527,7 +1633,7 @@ class ProjectActivity : Activity() {
             },
         )
 
-        val scroll =
+        projectScroll =
             ScrollView(
                 this,
             ).apply {
@@ -1545,7 +1651,7 @@ class ProjectActivity : Activity() {
                     Gravity.TOP
             }
 
-        scroll.addView(
+        projectScroll.addView(
             volumeContainer,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
@@ -1554,7 +1660,7 @@ class ProjectActivity : Activity() {
         )
 
         root.addView(
-            scroll,
+            projectScroll,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
@@ -1565,10 +1671,291 @@ class ProjectActivity : Activity() {
         return root
     }
 
+    private fun buildAddPanel():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@ProjectActivity,
+                    fill =
+                        Ui.surfaceAlt,
+                    stroke =
+                        Ui.accent,
+                )
+            setPadding(
+                Ui.dp(
+                    this@ProjectActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    12,
+                ),
+            )
+
+            val titleRow =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    gravity =
+                        Gravity.CENTER_VERTICAL
+                }
+
+            titleRow.addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        "Додати",
+                    sizeSp =
+                        18f,
+                    color =
+                        Ui.accent,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ),
+            )
+
+            titleRow.addView(
+                Ui.helpButton(
+                    context =
+                        this@ProjectActivity,
+                ) {
+                    helpDialogs.show(
+                        HELP_ADD,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                ),
+            )
+
+            addView(
+                titleRow,
+            )
+
+            val choices =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            6,
+                        ),
+                        0,
+                        0,
+                    )
+                }
+
+            choices.addView(
+                addChoiceButton(
+                    label =
+                        "Авто",
+                    subtitle =
+                        ".rdpkg · один том",
+                    primary =
+                        true,
+                ) {
+                    openPackagePicker()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            5,
+                        )
+                },
+            )
+
+            choices.addView(
+                addChoiceButton(
+                    label =
+                        "Вручну",
+                    subtitle =
+                        "Папка / SAF",
+                    primary =
+                        false,
+                ) {
+                    openVolumePicker(
+                        manual =
+                            true,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            5,
+                        )
+                },
+            )
+
+            addView(
+                choices,
+            )
+        }
+
+    private fun addChoiceButton(
+        label: String,
+        subtitle: String,
+        primary: Boolean,
+        onClick: () -> Unit,
+    ): View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            gravity =
+                Gravity.CENTER
+            isClickable =
+                true
+            isFocusable =
+                true
+            minimumHeight =
+                Ui.dp(
+                    this@ProjectActivity,
+                    76,
+                )
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@ProjectActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        if (
+                            primary
+                        ) {
+                            Ui.accent
+                        } else {
+                            Ui.border
+                        },
+                    radiusDp =
+                        12,
+                )
+            setPadding(
+                Ui.dp(
+                    this@ProjectActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    8,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@ProjectActivity,
+                    8,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        label,
+                    sizeSp =
+                        16f,
+                    color =
+                        if (
+                            primary
+                        ) {
+                            Ui.accent
+                        } else {
+                            Ui.text
+                        },
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                    gravity =
+                        Gravity.CENTER
+                },
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        subtitle,
+                    sizeSp =
+                        Ui.actionSubtitleSp,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    gravity =
+                        Gravity.CENTER
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            2,
+                        ),
+                        0,
+                        0,
+                    )
+                },
+            )
+
+            setOnClickListener {
+                onClick()
+            }
+        }
+
     private fun buildProjectActionCard(
         title: String,
         subtitle: String,
         primary: Boolean,
+        helpId: String? = null,
         onClick: () -> Unit,
     ): View =
         LinearLayout(
@@ -1625,7 +2012,17 @@ class ProjectActivity : Activity() {
                 ),
             )
 
-            addView(
+            val titleRow =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    gravity =
+                        Gravity.CENTER_VERTICAL
+                }
+
+            titleRow.addView(
                 Ui.textView(
                     context =
                         this@ProjectActivity,
@@ -1647,6 +2044,41 @@ class ProjectActivity : Activity() {
                         android.graphics.Typeface.BOLD,
                     )
                 },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ),
+            )
+
+            if (
+                helpId !=
+                null
+            ) {
+                titleRow.addView(
+                    Ui.helpButton(
+                        context =
+                            this@ProjectActivity,
+                    ) {
+                        helpDialogs.show(
+                            helpId,
+                        )
+                    },
+                    LinearLayout.LayoutParams(
+                        Ui.dp(
+                            this@ProjectActivity,
+                            40,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            40,
+                        ),
+                    ),
+                )
+            }
+
+            addView(
+                titleRow,
             )
 
             addView(
@@ -1656,7 +2088,7 @@ class ProjectActivity : Activity() {
                     value =
                         subtitle,
                     sizeSp =
-                        12f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -1676,6 +2108,28 @@ class ProjectActivity : Activity() {
                 onClick()
             }
         }
+
+    private fun restoreProjectScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::projectScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        projectScroll.post {
+            projectScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
+    }
 
     private fun render() {
         val volumes =
@@ -1698,7 +2152,7 @@ class ProjectActivity : Activity() {
                     context =
                         this,
                     value =
-                        "Проєкт порожній. Додай потрібний том.",
+                        "Порожній · додай том",
                     sizeSp =
                         15f,
                     color =
@@ -1819,6 +2273,8 @@ class ProjectActivity : Activity() {
                         primaryTitle,
                     sizeSp =
                         19f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
@@ -1967,47 +2423,396 @@ class ProjectActivity : Activity() {
             listOfNotNull(
                 volume.documentCode,
                 volume.date,
-            )
-                .joinToString(
-                    " · ",
-                )
-                .ifBlank {
-                    volume.title
-                }
+            ).joinToString(" · ").ifBlank {
+                volume.title
+            }
 
-        AlertDialog.Builder(
-            this,
+        setProjectDialogState(
+            kind = DIALOG_VOLUME_ACTIONS,
+            volume = volume,
         )
-            .setTitle(
-                label,
-            )
-            .setItems(
-                arrayOf(
-                    "Експортувати .rdpkg",
-                    "Видалити з проєкту",
-                ),
-            ) {
-                _,
-                which ->
-                when (
-                    which
-                ) {
-                    0 ->
-                        startRdpkgExport(
-                            volume,
-                        )
 
-                    1 ->
-                        confirmRemoveVolume(
-                            volume,
+        val actions =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                )
+            }
+
+        lateinit var dialog: AlertDialog
+
+        fun addAction(
+            title: String,
+            danger: Boolean = false,
+            action: () -> Unit,
+        ) {
+            actions.addView(
+                Ui.textView(
+                    context = this,
+                    value = "› " + title,
+                    sizeSp = 18f,
+                    color = if (danger) Ui.danger else Ui.text,
+                ).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    isClickable = true
+                    isFocusable = true
+                    background =
+                        Ui.roundedBackground(
+                            context = this@ProjectActivity,
+                            fill = Ui.surfaceAlt,
+                            stroke = if (danger) Ui.danger else Ui.accent,
+                            radiusDp = 11,
                         )
+                    setPadding(
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                    )
+                    minHeight = Ui.dp(this@ProjectActivity, 52)
+                    setOnClickListener {
+                        dialog.dismiss()
+                        action()
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = Ui.dp(this@ProjectActivity, 10)
+                },
+            )
+        }
+
+        addAction("Експортувати .rdpkg") {
+            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+            startRdpkgExport(volume)
+        }
+        addAction("Поділитися томом") {
+            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+            shareRdpkg(volume)
+        }
+        val prepared =
+            PreparedShareStore.volumeFile(
+                this,
+                project,
+                volume,
+            )
+        if (prepared.exists()) {
+            addAction("Поділитися підготовленим .rdpkg") {
+                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                sharePreparedRdpkg(
+                    volume,
+                    prepared,
+                )
+            }
+            addAction(
+                title = "Видалити підготовлений .rdpkg",
+                danger = true,
+            ) {
+                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS
+                confirmDeletePreparedVolume(volume)
+            }
+        }
+        addAction("Перемістити в інший проєкт") {
+            showMoveVolumeDialog(volume)
+        }
+        addAction(
+            title = "Видалити з проєкту",
+            danger = true,
+        ) {
+            confirmRemoveVolume(volume)
+        }
+        addAction("Скасувати") {
+            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+        }
+
+        dialog =
+            AlertDialog.Builder(this)
+                .setTitle(label)
+                .setView(actions)
+                .create()
+
+        trackProjectDialog(
+            dialog = dialog,
+            kind = DIALOG_VOLUME_ACTIONS,
+            volumeId = volume.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.CHOICE,
+        )
+    }
+
+    private fun showMoveVolumeDialog(
+        volume: ProjectVolumeRecord,
+    ) {
+        val targets =
+            store.projects()
+                .filter { it.id != project.id }
+
+        if (targets.isEmpty()) {
+            clearProjectDialogState()
+            statusText.text =
+                "Немає іншого проєкту, куди можна перемістити том."
+            return
+        }
+
+        setProjectDialogState(
+            kind = DIALOG_MOVE_VOLUME,
+            volume = volume,
+        )
+
+        val panel =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                    Ui.dp(this@ProjectActivity, 18),
+                    Ui.dp(this@ProjectActivity, 8),
+                )
+            }
+
+        lateinit var dialog: AlertDialog
+
+        targets.forEach { target ->
+            panel.addView(
+                Ui.textView(
+                    context = this,
+                    value = "› " + target.title,
+                    sizeSp = 18f,
+                ).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    isClickable = true
+                    isFocusable = true
+                    background =
+                        Ui.roundedBackground(
+                            context = this@ProjectActivity,
+                            fill = Ui.surfaceAlt,
+                            stroke = Ui.accent,
+                            radiusDp = 11,
+                        )
+                    setPadding(
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                        Ui.dp(this@ProjectActivity, 14),
+                        Ui.dp(this@ProjectActivity, 12),
+                    )
+                    minHeight = Ui.dp(this@ProjectActivity, 52)
+                    setOnClickListener {
+                        store.moveVolume(
+                            fromProjectId = project.id,
+                            toProjectId = target.id,
+                            volumeId = volume.id,
+                        )
+                        clearProjectDialogState(DIALOG_MOVE_VOLUME)
+                        dialog.dismiss()
+                        statusText.text =
+                            "Том переміщено до проєкту " +
+                                target.title +
+                                ". Файли не копіювалися."
+                        render()
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = Ui.dp(this@ProjectActivity, 10)
+                },
+            )
+        }
+
+        panel.addView(
+            Ui.textView(
+                context = this,
+                value = "Скасувати",
+                sizeSp = 18f,
+            ).apply {
+                Ui.applyActionStyle(this)
+                setOnClickListener {
+                    clearProjectDialogState(DIALOG_MOVE_VOLUME)
+                    dialog.dismiss()
+                }
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ),
+        )
+
+        dialog =
+            AlertDialog.Builder(this)
+                .setTitle("Перемістити том")
+                .setMessage(
+                    "Вибери проєкт призначення. Файли тому залишаться на телефоні без копіювання.",
+                )
+                .setView(panel)
+                .create()
+
+        trackProjectDialog(
+            dialog = dialog,
+            kind = DIALOG_MOVE_VOLUME,
+            volumeId = volume.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.CHOICE,
+        )
+    }
+
+    private fun shareRdpkg(
+        volume: ProjectVolumeRecord,
+    ) {
+        if (!RdpkgExporter.canFastExport(volume)) {
+            statusText.text =
+                "Поділитися можна томом, встановленим з .rdpkg. " +
+                    "Для SAF-папок спочатку створи .rdpkg."
+            return
+        }
+
+        statusText.text = "Готую .rdpkg для поширення…"
+
+        Thread {
+            val file =
+                PreparedShareStore.volumeFile(
+                    this,
+                    project,
+                    volume,
+                )
+            val uri =
+                FileProvider.getUriForFile(
+                    this,
+                    packageName + ".files",
+                    file,
+                )
+
+            val result =
+                RdpkgExporter.export(
+                    context = this,
+                    volume = volume,
+                    destinationUri = uri,
+                )
+
+            runOnUiThread {
+                result.onSuccess {
+                    val send =
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "application/octet-stream"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                    statusText.text = "Том готовий для поширення."
+                    startActivity(
+                        Intent.createChooser(
+                            send,
+                            "Поділитися томом",
+                        ),
+                    )
+                }.onFailure { error ->
+                    statusText.text =
+                        "Не вдалося підготувати том: " +
+                            (error.message ?: "невідома помилка")
                 }
             }
-            .setNegativeButton(
-                "Скасувати",
-                null,
+        }.start()
+    }
+
+    private fun confirmDeletePreparedVolume(
+        volume: ProjectVolumeRecord,
+    ) {
+        setProjectDialogState(
+            kind = DIALOG_DELETE_PREPARED_VOLUME,
+            volume = volume,
+        )
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle("Видалити підготовлений файл?")
+                .setMessage(
+                    "Буде видалено тільки підготовлений .rdpkg для поширення. " +
+                        "Сам том, проєкт і вихідні Renault-файли залишаться.",
+                )
+                .setNegativeButton("Скасувати") { _, _ ->
+                    val returnToActions =
+                        activeProjectDialogParentKind ==
+                            DIALOG_VOLUME_ACTIONS
+                    clearProjectDialogState(DIALOG_DELETE_PREPARED_VOLUME)
+                    if (returnToActions) {
+                        showVolumeActions(volume)
+                    }
+                }
+                .setPositiveButton("Видалити") { _, _ ->
+                    clearProjectDialogState(DIALOG_DELETE_PREPARED_VOLUME)
+                    val deleted =
+                        PreparedShareStore.deleteVolume(
+                            this,
+                            project,
+                            volume,
+                        )
+                    statusText.text =
+                        if (deleted) {
+                            "Підготовлений .rdpkg видалено. Том і вихідні файли не змінено."
+                        } else {
+                            "Не вдалося видалити підготовлений .rdpkg."
+                        }
+                }
+                .create()
+        trackProjectDialog(
+            dialog = dialog,
+            kind = DIALOG_DELETE_PREPARED_VOLUME,
+            volumeId = volume.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.DANGER,
+        )
+    }
+
+    private fun sharePreparedRdpkg(
+        volume: ProjectVolumeRecord,
+        file: File,
+    ) {
+        if (!file.exists()) {
+            statusText.text =
+                "Підготовлений .rdpkg уже відсутній."
+            return
+        }
+        val uri =
+            FileProvider.getUriForFile(
+                this,
+                packageName + ".files",
+                file,
             )
-            .show()
+        val send =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        statusText.text =
+            "Використовую раніше підготовлений .rdpkg: " +
+                listOfNotNull(
+                    volume.documentCode,
+                    volume.date,
+                ).joinToString(" · ").ifBlank {
+                    volume.title
+                }
+        startActivity(
+            Intent.createChooser(
+                send,
+                "Поділитися підготовленим томом",
+            ),
+        )
     }
 
     private fun startRdpkgExport(
@@ -2075,42 +2880,70 @@ class ProjectActivity : Activity() {
                     volume.title
                 }
 
-        AlertDialog.Builder(
-            this,
+        setProjectDialogState(
+            kind =
+                DIALOG_REMOVE_VOLUME,
+            volume =
+                volume,
         )
-            .setTitle(
-                "Видалити том з проєкту?",
+
+        val dialog =
+            AlertDialog.Builder(
+                this,
             )
-            .setMessage(
-                label +
-                    "\n\nБуде видалено лише запис із проєкту " +
-                    project.title +
-                    ". Файли на телефоні залишаться без змін.",
-            )
-            .setNegativeButton(
-                "Скасувати",
-                null,
-            )
-            .setPositiveButton(
-                "Видалити з проєкту",
-            ) {
-                _,
-                _ ->
-                store.removeVolume(
-                    projectId =
-                        project.id,
-                    volumeId =
-                        volume.id,
+                .setTitle(
+                    "Видалити том з проєкту?",
                 )
+                .setMessage(
+                    label +
+                        "\n\nБуде видалено лише запис із проєкту " +
+                        project.title +
+                        ". Файли на телефоні залишаться без змін.",
+                )
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .setPositiveButton(
+                    "Видалити з проєкту",
+                ) {
+                    _,
+                    _ ->
+                    clearProjectDialogState(
+                        DIALOG_REMOVE_VOLUME,
+                    )
 
-                statusText.text =
-                    "Том видалено з проєкту: " +
-                        label +
-                        ". Файли не видалено."
+                    store.removeVolume(
+                        projectId =
+                            project.id,
+                        volumeId =
+                            volume.id,
+                    )
 
-                render()
-            }
-            .show()
+                    statusText.text =
+                        "Том видалено з проєкту: " +
+                            label +
+                            ". Файли не видалено."
+
+                    render()
+                }
+                .create()
+
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_REMOVE_VOLUME,
+            volumeId =
+                volume.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.DANGER,
+        )
     }
 
     private fun importPreparedVolumes(
@@ -2126,6 +2959,27 @@ class ProjectActivity : Activity() {
                     volumes.single(),
                 allowOverride =
                     allowOverride,
+            )
+            return
+        }
+
+        showPreparedVolumeChooser(
+            volumes =
+                volumes,
+            allowOverride =
+                allowOverride,
+        )
+    }
+
+    private fun showPreparedVolumeChooser(
+        volumes: List<ProjectVolumeRecord>,
+        allowOverride: Boolean,
+    ) {
+        if (
+            volumes.isEmpty()
+        ) {
+            clearProjectDialogState(
+                DIALOG_VOLUME_CHOOSER,
             )
             return
         }
@@ -2146,29 +3000,59 @@ class ProjectActivity : Activity() {
             }
                 .toTypedArray()
 
-        AlertDialog.Builder(
-            this,
-        )
-            .setTitle(
-                "Вибери том",
+        activeProjectDialogKind =
+            DIALOG_VOLUME_CHOOSER
+        activeProjectDialogVolumeId =
+            null
+        activeProjectDialogTreeUri =
+            volumes.first()
+                .treeUri
+        activeProjectDialogAllowOverride =
+            allowOverride
+
+        val dialog =
+            AlertDialog.Builder(
+                this,
             )
-            .setItems(
-                labels,
-            ) {
-                _,
-                which ->
-                importPreparedVolume(
-                    volume =
-                        volumes[which],
-                    allowOverride =
-                        allowOverride,
+                .setTitle(
+                    "Вибери том",
                 )
-            }
-            .setNegativeButton(
-                "Скасувати",
+                .setItems(
+                    labels,
+                ) {
+                    _,
+                    which ->
+                    clearProjectDialogState(
+                        DIALOG_VOLUME_CHOOSER,
+                    )
+                    importPreparedVolume(
+                        volume =
+                            volumes[which],
+                        allowOverride =
+                            allowOverride,
+                    )
+                }
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .create()
+
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_VOLUME_CHOOSER,
+            volumeId =
                 null,
-            )
-            .show()
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun importPreparedVolume(
@@ -2197,6 +3081,35 @@ class ProjectActivity : Activity() {
                 return
             }
 
+            showProjectMismatchDialog(
+                volume =
+                    volume,
+                detectedProject =
+                    detectedProject,
+            )
+
+            return
+        }
+
+        saveVolume(
+            volume,
+        )
+    }
+
+    private fun showProjectMismatchDialog(
+        volume: ProjectVolumeRecord,
+        detectedProject: String =
+            volume.projectHint
+                .orEmpty(),
+    ) {
+        setProjectDialogState(
+            kind =
+                DIALOG_PROJECT_MISMATCH,
+            volume =
+                volume,
+        )
+
+        val dialog =
             AlertDialog.Builder(
                 this,
             )
@@ -2219,18 +3132,241 @@ class ProjectActivity : Activity() {
                 ) {
                     _,
                     _ ->
+                    clearProjectDialogState(
+                        DIALOG_PROJECT_MISMATCH,
+                    )
                     saveVolume(
                         volume,
                     )
                 }
-                .show()
+                .create()
 
+        trackProjectDialog(
+            dialog =
+                dialog,
+            kind =
+                DIALOG_PROJECT_MISMATCH,
+            volumeId =
+                volume.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CONFIRM,
+        )
+    }
+
+    private fun setProjectDialogState(
+        kind: String,
+        volume: ProjectVolumeRecord? =
+            null,
+    ) {
+        activeProjectDialogKind =
+            kind
+        activeProjectDialogVolumeId =
+            volume?.id
+        activeProjectDialogTreeUri =
+            volume?.treeUri
+        activeProjectDialogAllowOverride =
+            false
+    }
+
+    private fun clearProjectDialogState(
+        expectedKind: String? =
+            null,
+    ) {
+        if (
+            expectedKind !=
+                null &&
+            activeProjectDialogKind !=
+                expectedKind
+        ) {
             return
         }
 
-        saveVolume(
-            volume,
+        activeProjectDialogKind =
+            ""
+        activeProjectDialogVolumeId =
+            null
+        activeProjectDialogTreeUri =
+            null
+        activeProjectDialogAllowOverride =
+            false
+        activeProjectDialogParentKind =
+            null
+    }
+
+    private fun trackProjectDialog(
+        dialog: AlertDialog,
+        kind: String,
+        volumeId: String?,
+    ) {
+        dialog.setOnDismissListener {
+            if (
+                !isChangingConfigurations &&
+                activeProjectDialogKind ==
+                    kind &&
+                activeProjectDialogVolumeId ==
+                    volumeId
+            ) {
+                clearProjectDialogState(
+                    kind,
+                )
+            }
+        }
+    }
+
+    private fun restoreProjectDialog() {
+        when (
+            activeProjectDialogKind
+        ) {
+            DIALOG_VOLUME_ACTIONS,
+            DIALOG_REMOVE_VOLUME,
+            DIALOG_MOVE_VOLUME,
+            DIALOG_DELETE_PREPARED_VOLUME -> {
+                val volume =
+                    store.volumes(
+                        project.id,
+                    )
+                        .firstOrNull {
+                            it.id ==
+                                activeProjectDialogVolumeId
+                        }
+
+                if (
+                    volume ==
+                    null
+                ) {
+                    clearProjectDialogState()
+                    return
+                }
+
+                when (activeProjectDialogKind) {
+                    DIALOG_VOLUME_ACTIONS ->
+                        showVolumeActions(volume)
+                    DIALOG_MOVE_VOLUME ->
+                        showMoveVolumeDialog(volume)
+                    DIALOG_DELETE_PREPARED_VOLUME ->
+                        confirmDeletePreparedVolume(volume)
+                    else ->
+                        confirmRemoveVolume(volume)
+                }
+            }
+
+            DIALOG_VOLUME_CHOOSER ->
+                restorePreparedVolumeChooser()
+
+            DIALOG_PROJECT_MISMATCH ->
+                restoreProjectMismatchDialog()
+
+            else ->
+                clearProjectDialogState()
+        }
+    }
+
+    private fun restorePreparedVolumeChooser() {
+        val treeUri =
+            activeProjectDialogTreeUri
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: run {
+                    clearProjectDialogState()
+                    return
+                }
+
+        val allowOverride =
+            activeProjectDialogAllowOverride
+
+        PreparedVolumeReader.readAll(
+            context =
+                this,
+            treeUri =
+                Uri.parse(
+                    treeUri,
+                ),
         )
+            .onSuccess {
+                volumes ->
+                if (
+                    volumes.size <
+                    2
+                ) {
+                    clearProjectDialogState()
+                    statusText.text =
+                        "Список томів змінився. Вибери папку ще раз."
+                    return@onSuccess
+                }
+
+                showPreparedVolumeChooser(
+                    volumes =
+                        volumes,
+                    allowOverride =
+                        allowOverride,
+                )
+            }
+            .onFailure {
+                clearProjectDialogState()
+                statusText.text =
+                    "Не вдалося відновити вибір томів. Вибери папку ще раз."
+            }
+    }
+
+    private fun restoreProjectMismatchDialog() {
+        val treeUri =
+            activeProjectDialogTreeUri
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: run {
+                    clearProjectDialogState()
+                    return
+                }
+        val volumeId =
+            activeProjectDialogVolumeId
+                ?: run {
+                    clearProjectDialogState()
+                    return
+                }
+
+        PreparedVolumeReader.readAll(
+            context =
+                this,
+            treeUri =
+                Uri.parse(
+                    treeUri,
+                ),
+        )
+            .onSuccess {
+                volumes ->
+                val volume =
+                    volumes.firstOrNull {
+                        it.id ==
+                            volumeId
+                    }
+
+                if (
+                    volume ==
+                    null
+                ) {
+                    clearProjectDialogState()
+                    statusText.text =
+                        "Том для підтвердження більше не знайдено."
+                    return@onSuccess
+                }
+
+                showProjectMismatchDialog(
+                    volume =
+                        volume,
+                )
+            }
+            .onFailure {
+                clearProjectDialogState()
+                statusText.text =
+                    "Не вдалося відновити підтвердження. Вибери том ще раз."
+            }
     }
 
     private fun saveVolume(
@@ -2322,6 +3458,43 @@ class ProjectActivity : Activity() {
             openIntent,
         )
     }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_PROJECT ->
+                HelpDialogSpec(
+                    title =
+                        "Проєкт і томи",
+                    message =
+                        "Проєкт — це одна модель Renault. Кожен випуск документації додається окремим томом.\n\n" +
+                            "Том можна оновити повторним імпортом того самого .rdpkg. Видалення тому з проєкту не видаляє файли з телефона.",
+                )
+
+            HELP_ADD ->
+                HelpDialogSpec(
+                    title =
+                        "Як додати том",
+                    message =
+                        "Авто — рекомендований спосіб: вибери один .rdpkg. Пакет перевіряється та встановлюється у кероване сховище Renault Docs.\n\n" +
+                            "Вручну — вибір уже підготовленої папки через Android SAF. Це режим сумісності для старих або зовнішніх dataset-папок.",
+                )
+
+            HELP_RAW ->
+                HelpDialogSpec(
+                    title =
+                        "Створити .rdpkg з raw",
+                    message =
+                        "Цей режим бере оригінальну Renault-папку та готує один переносний .rdpkg без Python, Termux і проміжної *_android папки.\n\n" +
+                            "Спочатку вибирається raw source, потім місце збереження пакета. Підготовка працює у фоні; rotation не запускає її повторно.",
+                )
+
+            else ->
+                null
+        }
 
     private fun openPackagePicker() {
         val picker =
@@ -2446,6 +3619,20 @@ class ProjectActivity : Activity() {
             4304
         private const val REQUEST_NATIVE_RDPKG_DESTINATION =
             4305
+        private const val STATE_PENDING_MANUAL_IMPORT =
+            "pendingManualImport"
+        private const val STATE_SCROLL_Y =
+            "projectScrollY"
+        private const val STATE_ACTIVE_DIALOG_KIND =
+            "activeProjectDialogKind"
+        private const val STATE_ACTIVE_DIALOG_VOLUME_ID =
+            "activeProjectDialogVolumeId"
+        private const val STATE_ACTIVE_DIALOG_TREE_URI =
+            "activeProjectDialogTreeUri"
+        private const val STATE_ACTIVE_DIALOG_ALLOW_OVERRIDE =
+            "activeProjectDialogAllowOverride"
+        private const val STATE_ACTIVE_DIALOG_PARENT_KIND =
+            "activeProjectDialogParentKind"
         private const val STATE_PENDING_RDPKG_EXPORT_VOLUME_ID =
             "pendingRdpkgExportVolumeId"
         private const val STATE_PENDING_NATIVE_SOURCE_URI =
@@ -2454,6 +3641,26 @@ class ProjectActivity : Activity() {
             "pendingNativeSourceName"
         private const val STATE_PENDING_NATIVE_REQUEST_ID =
             "pendingNativeRequestId"
+        private const val DIALOG_VOLUME_ACTIONS =
+            "volumeActions"
+        private const val DIALOG_REMOVE_VOLUME =
+            "removeVolume"
+        private const val DIALOG_MOVE_VOLUME =
+            "moveVolume"
+        private const val DIALOG_DELETE_PREPARED_VOLUME =
+            "deletePreparedVolume"
+        private const val DIALOG_VOLUME_CHOOSER =
+            "volumeChooser"
+        private const val DIALOG_PROJECT_MISMATCH =
+            "projectMismatch"
+
+        private const val HELP_PROJECT =
+            "project"
+        private const val HELP_ADD =
+            "add"
+        private const val HELP_RAW =
+            "raw"
+
         private const val DEFAULT_STATUS_TEXT =
             "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів."
 

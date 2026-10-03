@@ -71,10 +71,11 @@ class V0549RdpkgContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
         )
 
-        self.assertIn('".rdpkg · один том"', activity)
+        self.assertIn('"Авто"', activity)
+        self.assertIn("openPackagePicker()", activity)
         self.assertIn("Intent.ACTION_OPEN_DOCUMENT,", activity)
         self.assertIn("RdpkgImporter.install(", activity)
-        self.assertIn('"Папка / SAF"', activity)
+        self.assertIn('"Вручну"', activity)
         self.assertIn("Intent.ACTION_OPEN_DOCUMENT_TREE,", activity)
         self.assertIn("PreparedVolumeReader.readAll(", activity)
 

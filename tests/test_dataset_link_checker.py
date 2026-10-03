@@ -3,7 +3,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.check_dataset_links import check_dataset, compare_volume_parity
+from tools.check_dataset_links import (
+    check_dataset,
+    compare_package_volume_parity,
+    compare_volume_parity,
+)
 
 
 class DatasetLinkCheckerTests(unittest.TestCase):
@@ -125,6 +129,99 @@ class DatasetLinkCheckerTests(unittest.TestCase):
             self.assertEqual(1, parity["source_volume_count"])
             self.assertEqual(1, parity["build_volume_count"])
             self.assertEqual([], parity["missing_in_build"])
+
+    def test_package_volume_parity_detects_stale_three_volume_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            build = Path(tmp)
+            names = (
+                "Volume A NT8183A 2001_01_22",
+                "Volume B NT8218A 2002_05_01",
+            )
+            for name in names:
+                volume = build / name
+                volume.mkdir()
+                (volume / "INDEX.HTM").write_text(
+                    "<html></html>",
+                    encoding="utf-8",
+                )
+
+            stale = [
+                {
+                    "source_folder": names[0],
+                    "entrypoint": f"{names[0]}/INDEX.HTM",
+                }
+            ]
+            (build / "_renault").mkdir()
+            (build / "renault-dataset.json").write_text(
+                json.dumps({"volumes": stale}),
+                encoding="utf-8",
+            )
+            (build / "_renault" / "volumes.json").write_text(
+                json.dumps(stale),
+                encoding="utf-8",
+            )
+            (build / "_renault" / "modern-index.json").write_text(
+                json.dumps({"navigation": {"volumes": stale}}),
+                encoding="utf-8",
+            )
+
+            parity = compare_package_volume_parity(build)
+
+            self.assertEqual("FAIL", parity["status"])
+            self.assertEqual(2, parity["live_volume_count"])
+            for source in parity["sources"].values():
+                self.assertEqual("FAIL", source["status"])
+                self.assertEqual(1, source["volume_count"])
+                self.assertEqual(
+                    [names[1]],
+                    source["missing_from_metadata"],
+                )
+
+    def test_package_volume_parity_passes_when_all_metadata_matches_build(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            build = Path(tmp)
+            names = (
+                "Volume A NT8183A 2001_01_22",
+                "Volume B NT8218A 2002_05_01",
+            )
+            volumes = []
+            for name in names:
+                volume = build / name
+                volume.mkdir()
+                (volume / "INDEX.HTM").write_text(
+                    "<html></html>",
+                    encoding="utf-8",
+                )
+                volumes.append(
+                    {
+                        "source_folder": name,
+                        "entrypoint": f"{name}/INDEX.HTM",
+                    }
+                )
+
+            (build / "_renault").mkdir()
+            (build / "renault-dataset.json").write_text(
+                json.dumps({"volumes": volumes}),
+                encoding="utf-8",
+            )
+            (build / "_renault" / "volumes.json").write_text(
+                json.dumps(volumes),
+                encoding="utf-8",
+            )
+            (build / "_renault" / "modern-index.json").write_text(
+                json.dumps({"navigation": {"volumes": volumes}}),
+                encoding="utf-8",
+            )
+
+            parity = compare_package_volume_parity(build)
+
+            self.assertEqual("PASS", parity["status"])
+            self.assertEqual(2, parity["live_volume_count"])
+            for source in parity["sources"].values():
+                self.assertEqual("PASS", source["status"])
+                self.assertEqual(2, source["volume_count"])
+                self.assertEqual([], source["missing_from_metadata"])
+                self.assertEqual([], source["extra_in_metadata"])
 
     def test_parent_escape_is_not_reported_as_missing_inside_dataset(self):
         with tempfile.TemporaryDirectory() as tmp:

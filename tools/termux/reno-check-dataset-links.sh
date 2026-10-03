@@ -73,9 +73,9 @@ fi
 status=$?
 echo
 if [ "$status" -eq 0 ]; then
-  echo "PASS · локальні посилання не мають missing targets."
+  echo "PASS · посилання, томи та package metadata узгоджені."
 elif [ "$status" -eq 1 ]; then
-  echo "FAIL · знайдено missing targets. Нічого не змінено."
+  echo "FAIL · integrity gate знайшов розбіжність. Нічого не змінено."
 else
   echo "ERROR · checker не завершив перевірку."
 fi

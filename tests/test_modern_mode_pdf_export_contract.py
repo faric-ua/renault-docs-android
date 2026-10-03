@@ -23,7 +23,11 @@ class ModernModePdfExportContractTests(unittest.TestCase):
             main,
         )
         self.assertIn(
-            'text = "Classic"',
+            'label =\n                    "Classic"',
+            modern,
+        )
+        self.assertIn(
+            "Ui.modeButton(",
             modern,
         )
         self.assertIn(

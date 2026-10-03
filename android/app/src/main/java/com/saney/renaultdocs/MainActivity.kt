@@ -7,29 +7,111 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
 
 class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
     private lateinit var statusText: TextView
+    private lateinit var operationProgress: ProgressBar
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
     private lateinit var settings: AppSettings
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
+    private lateinit var projectDialogs:
+        HomeProjectDialogController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val restoredStatusText =
+            savedInstanceState
+                ?.getCharSequence(
+                    STATE_STATUS_TEXT,
+                )
+                ?.toString()
+        val restoredStatusColor =
+            if (
+                savedInstanceState
+                    ?.containsKey(
+                        STATE_STATUS_COLOR,
+                    ) ==
+                    true
+            ) {
+                savedInstanceState.getInt(
+                    STATE_STATUS_COLOR,
+                )
+            } else {
+                null
+            }
+
         store = DatasetStore(this)
         projectStore = ProjectStore(this)
         settings = AppSettings(this)
+        projectDialogs =
+            HomeProjectDialogController(
+                activity = this,
+                store = projectStore,
+                onProjectRemoved = {
+                    project ->
+                    statusText.text =
+                        "Проєкт видалено з бібліотеки: " +
+                            project.title +
+                            ". Файли на телефоні не видалено."
+                    renderLibrary()
+                },
+                onShareProgress = { current, total, message ->
+                    operationProgress.visibility = View.VISIBLE
+                    operationProgress.max = total.coerceAtLeast(1)
+                    operationProgress.progress =
+                        current.coerceIn(0, total.coerceAtLeast(1))
+                    statusText.text = message
+                },
+                onShareFinished = { message ->
+                    operationProgress.visibility = View.GONE
+                    operationProgress.progress = 0
+                    statusText.text = message
+                },
+            )
+        projectDialogs.restore(
+            savedInstanceState,
+        )
+
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
+
         projectStore.migrateLegacySingleVolumeDatasets(
             store.load(),
         )
         setContentView(buildContent())
         renderLibrary()
+
+        if (
+            !restoredStatusText.isNullOrBlank()
+        ) {
+            statusText.text =
+                restoredStatusText
+            restoredStatusColor?.let {
+                statusText.setTextColor(
+                    it,
+                )
+            }
+        }
+
+        helpDialogs.restoreOpen()
+        projectDialogs.restoreOpen()
         repairSavedVolumeMetadata()
     }
 
@@ -38,6 +120,34 @@ class MainActivity : Activity() {
         if (::libraryContainer.isInitialized) {
             renderLibrary()
         }
+    }
+
+    override fun onSaveInstanceState(
+        outState: Bundle,
+    ) {
+        helpDialogs.save(
+            outState,
+        )
+        projectDialogs.save(
+            outState,
+        )
+
+        if (
+            ::statusText.isInitialized
+        ) {
+            outState.putCharSequence(
+                STATE_STATUS_TEXT,
+                statusText.text,
+            )
+            outState.putInt(
+                STATE_STATUS_COLOR,
+                statusText.currentTextColor,
+            )
+        }
+
+        super.onSaveInstanceState(
+            outState,
+        )
     }
 
     @Deprecated("Uses platform SAF result for minSdk 26 compatibility.")
@@ -137,6 +247,33 @@ class MainActivity : Activity() {
         )
 
         topBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_LIBRARY,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ).apply {
+                marginEnd =
+                    Ui.dp(
+                        this@MainActivity,
+                        4,
+                    )
+            },
+        )
+
+        topBar.addView(
             ImageButton(this).apply {
                 setImageResource(
                     android.R.drawable.ic_menu_preferences,
@@ -197,70 +334,12 @@ class MainActivity : Activity() {
             }
         )
 
-        val primaryActions =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-                gravity =
-                    Gravity.CENTER_VERTICAL
-            }
-
-        primaryActions.addView(
-            buildHomeActionCard(
-                title =
-                    "Додати том",
-                subtitle =
-                    "У вибраний проєкт",
-                primary =
-                    true,
-            ) {
-                chooseProjectForVolume()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
-        primaryActions.addView(
-            buildHomeActionCard(
-                title =
-                    "Новий проєкт",
-                subtitle =
-                    "Створити модель",
-                primary =
-                    false,
-            ) {
-                showCreateProjectDialog()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginStart =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
         root.addView(
-            primaryActions,
+            buildHomeAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
+            ),
         )
 
         statusText = Ui.textView(
@@ -277,6 +356,24 @@ class MainActivity : Activity() {
             )
         }
         root.addView(statusText)
+
+        operationProgress =
+            ProgressBar(
+                this,
+                null,
+                android.R.attr.progressBarStyleHorizontal,
+            ).apply {
+                max = 100
+                progress = 0
+                visibility = View.GONE
+            }
+        root.addView(
+            operationProgress,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                Ui.dp(this, 4),
+            ),
+        )
 
         val scroll = ScrollView(this).apply {
             isFillViewport = true
@@ -322,7 +419,130 @@ class MainActivity : Activity() {
         return root
     }
 
-    private fun buildHomeActionCard(
+    private fun buildHomeAddPanel():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@MainActivity,
+                    fill =
+                        Ui.surfaceAlt,
+                    stroke =
+                        Ui.accent,
+                )
+            setPadding(
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    12,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    14,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        "Додати",
+                    sizeSp =
+                        18f,
+                    color =
+                        Ui.accent,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            val row =
+                LinearLayout(
+                    this@MainActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            8,
+                        ),
+                        0,
+                        0,
+                    )
+                }
+
+            row.addView(
+                buildHomeChoiceCard(
+                    title =
+                        "Новий том",
+                    subtitle =
+                        "До проєкту",
+                    primary =
+                        true,
+                ) {
+                    chooseProjectForVolume()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            row.addView(
+                buildHomeChoiceCard(
+                    title =
+                        "Новий проєкт",
+                    subtitle =
+                        "Створити модель",
+                    primary =
+                        false,
+                ) {
+                    showCreateProjectDialog()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            addView(
+                row,
+            )
+        }
+
+    private fun buildHomeChoiceCard(
         title: String,
         subtitle: String,
         primary: Boolean,
@@ -334,7 +554,7 @@ class MainActivity : Activity() {
             orientation =
                 LinearLayout.VERTICAL
             gravity =
-                Gravity.CENTER_VERTICAL
+                Gravity.CENTER
             isClickable =
                 true
             isFocusable =
@@ -342,20 +562,14 @@ class MainActivity : Activity() {
             minimumHeight =
                 Ui.dp(
                     this@MainActivity,
-                    76,
+                    86,
                 )
             background =
                 Ui.roundedBackground(
                     context =
                         this@MainActivity,
                     fill =
-                        if (
-                            primary
-                        ) {
-                            Ui.surfaceAlt
-                        } else {
-                            Ui.surface
-                        },
+                        Ui.surface,
                     stroke =
                         if (
                             primary
@@ -364,23 +578,25 @@ class MainActivity : Activity() {
                         } else {
                             Ui.border
                         },
+                    radiusDp =
+                        12,
                 )
             setPadding(
                 Ui.dp(
                     this@MainActivity,
-                    16,
+                    10,
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    12,
+                    10,
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    16,
+                    10,
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    12,
+                    10,
                 ),
             )
 
@@ -391,7 +607,7 @@ class MainActivity : Activity() {
                     value =
                         title,
                     sizeSp =
-                        17f,
+                        16f,
                     color =
                         if (
                             primary
@@ -405,6 +621,8 @@ class MainActivity : Activity() {
                         typeface,
                         android.graphics.Typeface.BOLD,
                     )
+                    gravity =
+                        Gravity.CENTER
                 },
             )
 
@@ -415,10 +633,12 @@ class MainActivity : Activity() {
                     value =
                         subtitle,
                     sizeSp =
-                        12f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
+                    gravity =
+                        Gravity.CENTER
                     setPadding(
                         0,
                         Ui.dp(
@@ -436,30 +656,21 @@ class MainActivity : Activity() {
             }
         }
 
-    private fun buildToolCard(
-        title: String,
-        subtitle: String,
-        onClick: () -> Unit,
-    ): View =
+    private fun buildToolsPanel():
+        View =
         LinearLayout(
             this,
         ).apply {
             orientation =
                 LinearLayout.VERTICAL
-            isClickable =
-                true
-            isFocusable =
-                true
             background =
                 Ui.roundedBackground(
                     context =
                         this@MainActivity,
                     fill =
-                        Ui.surface,
+                        Ui.surfaceAlt,
                     stroke =
                         Ui.border,
-                    radiusDp =
-                        12,
                 )
             setPadding(
                 Ui.dp(
@@ -476,7 +687,7 @@ class MainActivity : Activity() {
                 ),
                 Ui.dp(
                     this@MainActivity,
-                    12,
+                    14,
                 ),
             )
 
@@ -485,9 +696,11 @@ class MainActivity : Activity() {
                     context =
                         this@MainActivity,
                     value =
-                        title,
+                        "Інструменти",
                     sizeSp =
-                        15f,
+                        18f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
@@ -496,14 +709,160 @@ class MainActivity : Activity() {
                 },
             )
 
+            val row =
+                LinearLayout(
+                    this@MainActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            8,
+                        ),
+                        0,
+                        0,
+                    )
+                }
+
+            row.addView(
+                buildToolCard(
+                    title =
+                        "Конвертер",
+                    subtitle =
+                        "+ стару Renault",
+                ) {
+                    startActivity(
+                        Intent(
+                            this@MainActivity,
+                            ConversionActivity::class.java,
+                        )
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
+            row.addView(
+                buildToolCard(
+                    title =
+                        "Legacy",
+                    subtitle =
+                        "+ готова",
+                ) {
+                    openDatasetPicker()
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f,
+                ).apply {
+                    marginStart =
+                        Ui.dp(
+                            this@MainActivity,
+                            5,
+                        )
+                },
+            )
+
             addView(
+                row,
+            )
+        }
+
+    private fun buildToolCard(
+        title: String,
+        subtitle: String,
+        onClick: () -> Unit,
+    ): View =
+        FrameLayout(
+            this,
+        ).apply {
+            isClickable =
+                true
+            isFocusable =
+                true
+            minimumHeight =
+                Ui.dp(
+                    this@MainActivity,
+                    94,
+                )
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@MainActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        Ui.border,
+                    radiusDp =
+                        12,
+                )
+            setPadding(
+                Ui.dp(
+                    this@MainActivity,
+                    12,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    10,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    12,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    10,
+                ),
+            )
+
+            val textColumn =
+                LinearLayout(
+                    this@MainActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.VERTICAL
+                }
+
+            textColumn.addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        title,
+                    sizeSp =
+                        15f,
+                    color =
+                        Ui.text,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                    maxLines =
+                        1
+                },
+            )
+
+            textColumn.addView(
                 Ui.textView(
                     context =
                         this@MainActivity,
                     value =
                         subtitle,
                     sizeSp =
-                        12f,
+                        Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -511,11 +870,59 @@ class MainActivity : Activity() {
                         0,
                         Ui.dp(
                             this@MainActivity,
-                            3,
+                            4,
+                        ),
+                        Ui.dp(
+                            this@MainActivity,
+                            46,
                         ),
                         0,
-                        0,
                     )
+                },
+            )
+
+            addView(
+                textColumn,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                ),
+            )
+
+            addView(
+                ImageView(
+                    this@MainActivity,
+                ).apply {
+                    setImageResource(
+                        R.drawable.ic_folder,
+                    )
+                    setColorFilter(
+                        Ui.accent,
+                    )
+                    contentDescription =
+                        "Папка"
+                },
+                FrameLayout.LayoutParams(
+                    Ui.dp(
+                        this@MainActivity,
+                        38,
+                    ),
+                    Ui.dp(
+                        this@MainActivity,
+                        38,
+                    ),
+                    Gravity.END or Gravity.BOTTOM,
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@MainActivity,
+                            2,
+                        )
+                    bottomMargin =
+                        Ui.dp(
+                            this@MainActivity,
+                            2,
+                        )
                 },
             )
 
@@ -569,84 +976,17 @@ class MainActivity : Activity() {
         }
 
         libraryContainer.addView(
-            Ui.textView(
-                context = this,
-                value = "Інструменти",
-                sizeSp = 16f,
-                color = Ui.muted,
-            ).apply {
-                setPadding(
-                    0,
-                    Ui.dp(this@MainActivity, 14),
-                    0,
-                    Ui.dp(this@MainActivity, 8),
-                )
-            }
-        )
-
-        val toolsRow =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-            }
-
-        toolsRow.addView(
-            buildToolCard(
-                title =
-                    "Конвертер",
-                subtitle =
-                    "Стара Renault-папка",
-            ) {
-                startActivity(
-                    Intent(
-                        this@MainActivity,
-                        ConversionActivity::class.java,
-                    )
-                )
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
-        toolsRow.addView(
-            buildToolCard(
-                title =
-                    "Legacy",
-                subtitle =
-                    "Додати готову папку",
-            ) {
-                openDatasetPicker()
-            },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            ).apply {
-                marginStart =
-                    Ui.dp(
-                        this@MainActivity,
-                        6,
-                    )
-            },
-        )
-
-        libraryContainer.addView(
-            toolsRow,
+            buildToolsPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
+            ).apply {
+                topMargin =
+                    Ui.dp(
+                        this@MainActivity,
+                        14,
+                    )
+            },
         )
 
         val records =
@@ -781,6 +1121,8 @@ class MainActivity : Activity() {
                         project.title,
                     sizeSp =
                         20f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
@@ -798,7 +1140,7 @@ class MainActivity : Activity() {
                             volumeCount ==
                             0
                         ) {
-                            "Порожній · додай потрібний том"
+                            "Порожній · додай том"
                         } else {
                             "Томів: " +
                                 volumeCount
@@ -831,6 +1173,40 @@ class MainActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     1f,
                 )
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        "⋮",
+                    sizeSp =
+                        26f,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    contentDescription =
+                        "Дії проєкту " +
+                            project.title
+                    gravity =
+                        Gravity.CENTER
+                    isClickable =
+                        true
+                    isFocusable =
+                        true
+                    setPadding(
+                        Ui.dp(this@MainActivity, 10),
+                        Ui.dp(this@MainActivity, 4),
+                        Ui.dp(this@MainActivity, 10),
+                        Ui.dp(this@MainActivity, 4),
+                    )
+                    setOnClickListener {
+                        projectDialogs.showActions(
+                            project.id,
+                        )
+                    }
+                }
             )
 
             addView(
@@ -882,6 +1258,7 @@ class MainActivity : Activity() {
                     context = this@MainActivity,
                     value = record.title,
                     sizeSp = 20f,
+                    color = Ui.entityTitle,
                 ).apply {
                     setTypeface(typeface, android.graphics.Typeface.BOLD)
                 }
@@ -938,32 +1315,124 @@ class MainActivity : Activity() {
             )
 
             setOnClickListener {
-                val intent =
-                    when (
-                        settings.defaultOpenMode
-                    ) {
-                        DatasetOpenMode.MODERN ->
-                            ModernDatasetActivity.intent(
-                                context =
-                                    this@MainActivity,
-                                record =
-                                    record,
-                            )
-
-                        DatasetOpenMode.CLASSIC ->
-                            ViewerActivity
-                                .intent(
-                                    context =
-                                        this@MainActivity,
-                                    record =
-                                        record,
-                                )
-                    }
-
-                startActivity(intent)
+                openLegacyDataset(
+                    record,
+                )
             }
         }
     }
+
+    private fun openLegacyDataset(
+        record: DatasetRecord,
+    ) {
+        statusText.setTextColor(
+            Ui.muted,
+        )
+        statusText.text =
+            "Перевіряю стару бібліотеку: " +
+                record.title +
+                "…"
+
+        Thread {
+            val result =
+                DatasetReader.read(
+                    context =
+                        this,
+                    treeUri =
+                        Uri.parse(
+                            record.treeUri,
+                        ),
+                )
+
+            runOnUiThread {
+                if (
+                    isFinishing ||
+                    isDestroyed
+                ) {
+                    return@runOnUiThread
+                }
+
+                result
+                    .onSuccess {
+                        fresh ->
+                        store.upsert(
+                            fresh,
+                        )
+
+                        statusText.setTextColor(
+                            Ui.muted,
+                        )
+                        statusText.text =
+                            "Відкриваю: " +
+                                fresh.title
+
+                        val intent =
+                            when (
+                                settings.defaultOpenMode
+                            ) {
+                                DatasetOpenMode.MODERN ->
+                                    ModernDatasetActivity.intent(
+                                        context =
+                                            this,
+                                        record =
+                                            fresh,
+                                    )
+
+                                DatasetOpenMode.CLASSIC ->
+                                    ViewerActivity.intent(
+                                        context =
+                                            this,
+                                        record =
+                                            fresh,
+                                    )
+                            }
+
+                        startActivity(
+                            intent,
+                        )
+                    }
+                    .onFailure {
+                        error ->
+                        statusText.setTextColor(
+                            Ui.danger,
+                        )
+                        statusText.text =
+                            "Стара бібліотека «" +
+                                record.title +
+                                "» більше недоступна за збереженим шляхом. " +
+                                "Якщо папку перенесено або видалено — додай її знову через Legacy. " +
+                                "(" +
+                                (
+                                    error.message
+                                        ?: "невідома помилка"
+                                ) +
+                                ")"
+                    }
+            }
+        }.start()
+    }
+
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_LIBRARY ->
+                HelpDialogSpec(
+                    title =
+                        "Як влаштована бібліотека",
+                    message =
+                        "Проєкт — це модель автомобіля, наприклад Megane II або Laguna II.\n\n" +
+                            "Том — окремий випуск документації для цієї моделі.\n\n" +
+                            "«Додати том» веде до вибору проєкту. Рекомендований формат — .rdpkg. " +
+                            "«Новий проєкт» створює нову модель у бібліотеці.\n\n" +
+                            "«Конвертер» і «Legacy» — сервісні інструменти для старих Renault-папок.",
+                )
+
+            else ->
+                null
+        }
 
     private fun chooseProjectForVolume() {
         startActivity(
@@ -1018,5 +1487,11 @@ class MainActivity : Activity() {
 
     companion object {
         private const val REQUEST_DATASET_FOLDER = 4101
+        private const val HELP_LIBRARY =
+            "library"
+        private const val STATE_STATUS_TEXT =
+            "main_status_text"
+        private const val STATE_STATUS_COLOR =
+            "main_status_color"
     }
 }

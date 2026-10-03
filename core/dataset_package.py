@@ -324,6 +324,15 @@ def render_readme_html(
     volumes: list[dict[str, Any]],
 ) -> str:
     title = html.escape(str(dataset.get("title") or "Renault Docs"))
+    display_name = html.escape(
+        str(dataset.get("model") or dataset.get("title") or "Renault Docs")
+    )
+    years = _years_label(dataset.get("years"))
+    years_html = (
+        f'<span class="dataset-years">{html.escape(years)}</span>'
+        if years
+        else ""
+    )
 
     return f"""<!doctype html>
 <html lang="uk">
@@ -332,66 +341,145 @@ def render_readme_html(
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Як користуватися — {title}</title>
   <style>
+    :root {{ color-scheme: dark; }}
     body {{
       max-width: 860px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 14px 14px 28px;
+      box-sizing: border-box;
       font-family: system-ui, -apple-system, sans-serif;
-      line-height: 1.65;
+      font-size: 15px;
+      line-height: 1.45;
       background: #101318;
       color: #f3f6f8;
     }}
-    a {{ color: #76bdff; }}
-    code {{
-      background: #202732;
-      padding: 2px 6px;
-      border-radius: 6px;
+    h1 {{
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.18;
     }}
+    .dataset-years {{
+      display: block;
+      margin-top: 3px;
+      color: #aab5c2;
+      font-size: 15px;
+      font-weight: 600;
+    }}
+    h2 {{
+      margin: 22px 0 10px;
+      font-size: 16px;
+      line-height: 1.25;
+    }}
+    p {{ margin: 8px 0 12px; }}
+    a {{ color: #76bdff; }}
     .box {{
-      background: #181d25;
+      margin: 12px 0 16px;
+      padding: 10px 12px;
       border: 1px solid #384352;
-      border-radius: 14px;
-      padding: 16px;
-      margin: 18px 0;
+      border-radius: 12px;
+      background: #181d25;
+      font-size: 14px;
+    }}
+    .readme-action {{
+      margin: 0 0 18px;
+    }}
+    .readme-action a {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #76bdff;
+      border-radius: 11px;
+      background: #181d25;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+    }}
+    .readme-action a::after {{
+      content: "›";
+      font-size: 22px;
+      line-height: 1;
+    }}
+    .file-table {{
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid #384352;
+      border-radius: 12px;
+      background: #181d25;
+      font-size: 13px;
+      line-height: 1.35;
+    }}
+    .file-table th,
+    .file-table td {{
+      box-sizing: border-box;
+      padding: 9px 8px;
+      vertical-align: top;
+      text-align: left;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }}
+    .file-table th {{
+      color: #aab5c2;
+      background: #222936;
+      font-size: 12px;
+    }}
+    .file-table th:first-child,
+    .file-table td:first-child {{
+      width: 43%;
+      border-right: 1px solid #384352;
+    }}
+    .file-table tr + tr td {{
+      border-top: 1px solid #384352;
+    }}
+    code {{
+      padding: 1px 4px;
+      border-radius: 5px;
+      background: #202732;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      font-size: 12px;
     }}
   </style>
 </head>
 <body>
-  <h1>{title}</h1>
-  <p>Це конвертований Renault dataset. Оригінальні дані не потрібно змінювати вручну.</p>
+  <h1><span>{display_name}</span>{years_html}</h1>
+  <p>Конвертований Renault dataset. Внутрішні файли не потрібно редагувати вручну.</p>
 
-  <div class="box">
-    <b>Знайдено внутрішніх томів/редакцій:</b> {len(volumes)}.
-  </div>
+  <div class="box"><b>Томів у цьому dataset:</b> {len(volumes)}</div>
 
-  <h2>З чого почати</h2>
-  <p><a href="{CATALOG_FILENAME}">Відкрити каталог документації</a>.</p>
+  <h2>Документація</h2>
+  <p class="readme-action"><a href="{CATALOG_FILENAME}">Відкрити каталог</a></p>
 
-  <h2>Що знаходиться у папці</h2>
-  <p>
-    <code>renault-dataset.json</code> — опис набору для Renault Docs app.<br>
-    <code>{PACKAGE_DIR}/{CATALOG_FILENAME}</code> — плитки внутрішніх томів.<br>
-    <code>{PACKAGE_DIR}/{VOLUMES_FILENAME}</code> — машинозчитуваний список томів.<br>
-    <code>{PACKAGE_DIR}/{MODERN_INDEX_FILENAME}</code> — швидкий індекс томів для Modern mode Android.<br>
-    <code>{PACKAGE_DIR}/{MODERN_SECTIONS_FILENAME}</code> — native індекс розділів 101/103/105/... для Modern mode.<br>
-    <code>{PACKAGE_DIR}/{RUNTIME_TREE_FILENAME}</code> — повний compiler/debug Runtime IR; Android його цілком у RAM не читає.<br>
-    <code>{PACKAGE_DIR}/{RUNTIME_IR_INDEX_FILENAME}</code> + <code>{PACKAGE_DIR}/runtime-ir/sections/...</code> — runtime-оптимізовані шардовані JSON для Modern mode.<br>
-    <code>{PACKAGE_DIR}/{RUNTIME_IR_COVERAGE_FILENAME}</code> — аудит типів меню/controls/actions/documents по всіх роках і томах.<br>
-    <code>{PACKAGE_DIR}/fast-content-*.zip</code> — Fast Pack для швидкого читання HTM/JS/GIF без тисяч SAF-запитів.<br>
-    Інші HTM/PDF/GIF — вихідна документація Renault після нормалізації шляхів.
-  </p>
+  <h2>Основні файли</h2>
+  <table class="file-table">
+    <thead>
+      <tr><th>Файл</th><th>Призначення</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>renault-dataset.json</code></td><td>Опис dataset і точки входу Renault Docs.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{CATALOG_FILENAME}</code></td><td>Каталог внутрішніх томів.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{VOLUMES_FILENAME}</code></td><td>Список томів та їхніх entrypoint.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{MODERN_INDEX_FILENAME}</code></td><td>Швидкий індекс томів для Modern.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{MODERN_SECTIONS_FILENAME}</code></td><td>Native-індекс розділів для Modern.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{RUNTIME_TREE_FILENAME}</code></td><td>Повний compiler/debug Runtime IR.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{RUNTIME_IR_INDEX_FILENAME}</code> + <code>{PACKAGE_DIR}/runtime-ir/sections/…</code></td><td>Шардований Runtime IR для роботи на телефоні.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/{RUNTIME_IR_COVERAGE_FILENAME}</code></td><td>Аудит покриття меню, дій і документів.</td></tr>
+      <tr><td><code>{PACKAGE_DIR}/fast-content-*.zip</code></td><td>Fast Pack для швидкого читання локального контенту.</td></tr>
+      <tr><td><code>HTM / PDF / GIF</code></td><td>Документація Renault після нормалізації шляхів.</td></tr>
+    </tbody>
+  </table>
 
-  <h2>Android</h2>
-  <p>
-    У фінальному Renault Docs APK достатньо буде вибрати цю папку.
-    Застосунок прочитає manifest, додасть dataset у бібліотеку та відкриватиме PDF власним viewer.
-  </p>
+  <h2>Renault Docs</h2>
+  <p>Застосунок читає manifest, додає dataset до бібліотеки та відкриває PDF у власному viewer.</p>
 
   <h2>Важливо</h2>
-  <p>
-    Не перейменовуй внутрішні папки після конвертації без повторного створення manifest/catalog,
-    інакше посилання між старими Renault HTM-файлами можуть зламатися.
-  </p>
+  <p>Не перейменовуй внутрішні папки після конвертації: це може зламати зв’язки між Classic-файлами.</p>
 </body>
 </html>
 """

@@ -1548,7 +1548,7 @@ Menu 8 must either deliver the APK matching current code `versionName` or fail. 
 
 ## DATA-001 — Laguna prepared dataset volume parity mismatch
 
-Status: **CLOSED · REAL-PHONE PASS 2026-09-30**
+Status: **CLOSED · FINAL REAL-PHONE + METADATA PARITY PASS 2026-10-01**
 
 Real-phone dataset link checker baseline on 2026-09-30:
 
@@ -1612,6 +1612,27 @@ Final item 22 result:
 Conclusion:
 the prepared Laguna dataset is now complete again. The prior 14 missing links were entirely explained by the intentionally parked seven volumes; no residual flag/language-cleanup link breakage remains.
 
+
+
+### DATA-001 metadata-parity closeout correction — 2026-10-01
+
+The earlier 10/10 physical volume repair was necessary but not sufficient: package metadata still contained the previous 3-volume test snapshot.
+
+After rerunning package generation, final item 22 evidence is:
+- live build volumes: 10;
+- manifest volumes: 10 / PASS;
+- `volumes.json`: 10 / PASS;
+- `modern-index.json`: 10 / PASS;
+- source/build volumes: 10/10;
+- missing/extra volumes: 0/0;
+- missing local links: 0;
+- package metadata parity: PASS;
+- overall status: PASS.
+
+Checker commit `82491c108f5a75352edd6466d27c0f9f0b475114` permanently adds this metadata-parity requirement.
+
+DATA-001 is therefore closed on both physical-volume integrity and package-metadata integrity.
+
 ## UX-023 — Modern section list natural display order
 
 Status: **CLOSED · v0.5.53 PHONE PASS — 2026-09-30**
@@ -1649,3 +1670,53 @@ Final phone result:
 - user verified the Modern section order is now correct;
 - accepted display grouping: numeric-leading IDs → `R...` connectors → other alphabetic IDs;
 - no `.rdpkg` regeneration was required.
+
+
+## UX-024 — Home copy cleanup
+
+Status: **IMPLEMENTED IN v0.5.54 · PHONE TEST PENDING**
+
+Requested from real-phone screenshots:
+- Home primary action subtitle: `У вибраний проєкт` → `До проєкту`;
+- empty project summary: `Порожній · додай потрібний том` → `Порожній · додай том`;
+- same concise empty-state wording inside Project.
+
+## UX-025 — Unified Project Add tile
+
+Status: **IMPLEMENTED IN v0.5.54 · PHONE TEST PENDING**
+
+Replace the two sibling add cards with one parent tile:
+
+- title: `Додати`;
+- action: `Авто` → one `.rdpkg`, recommended;
+- action: `Вручну` → prepared folder / SAF compatibility path.
+
+Raw → `.rdpkg` remains a separate explicit operation.
+
+## UX-026 — Lifecycle-safe contextual Help
+
+Status: **IMPLEMENTED IN v0.5.54 · PHONE TEST PENDING**
+
+A shared Help-window contract is added for the complex UI surfaces.
+
+Required:
+- Help opens above the same parent screen;
+- rotation restores the same Help;
+- no underlying action starts automatically;
+- closing Help returns to the same screen/panel;
+- nested native/documentation state is preserved independently.
+
+Covered surfaces:
+Home, Project, Project Add, raw builder, Converter, Modern volume, Native section, Volume documentation.
+
+## RISK-LIFE-001 — Direct .rdpkg install worker is Activity-owned
+
+Status: **OPEN · FOUND BY v0.5.54 AUDIT**
+
+`ProjectActivity.handleRdpkgResult()` starts `RdpkgImporter.install()` in a plain Activity-owned Thread.
+
+Risk:
+rotation/process recreation during package copy can detach the final UI/project-upsert handoff from the new Activity.
+
+This is separate from Help/modal restoration. Durable target:
+service/run-store-backed import with reattach semantics, comparable to native raw → `.rdpkg` preparation.

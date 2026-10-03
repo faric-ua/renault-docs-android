@@ -21,8 +21,11 @@ class NativeSectionActivity : Activity() {
     private lateinit var statusText: TextView
     private lateinit var menuContainer: LinearLayout
     private lateinit var bodyContainer: LinearLayout
+    private lateinit var bodyScroll: ScrollView
     private lateinit var globalBar: LinearLayout
     private lateinit var contextRow: LinearLayout
+    private lateinit var helpDialogs:
+        LifecycleHelpDialogController
 
     private var currentMenuLabel: String = ""
     private var currentMenuActionId: String = ""
@@ -55,6 +58,11 @@ class NativeSectionActivity : Activity() {
     private var restoredViewKind: String =
         VIEW_DEFAULT
     private var restoredViewId: String = ""
+    private var currentViewLabel: String = ""
+    private var restoredViewLabel: String = ""
+    private var currentDocumentParentPanelId: String = ""
+    private var restoredDocumentParentPanelId: String = ""
+    private var restoredScrollY: Int = 0
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -135,6 +143,43 @@ class NativeSectionActivity : Activity() {
         currentViewId =
             restoredViewId
 
+        restoredViewLabel =
+            savedInstanceState
+                ?.getString(
+                    STATE_VIEW_LABEL,
+                )
+                .orEmpty()
+        currentViewLabel =
+            restoredViewLabel
+
+        restoredDocumentParentPanelId =
+            savedInstanceState
+                ?.getString(
+                    STATE_DOCUMENT_PARENT_PANEL_ID,
+                )
+                .orEmpty()
+        currentDocumentParentPanelId =
+            restoredDocumentParentPanelId
+
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        (
+            lastNonConfigurationInstance
+                as? RetainedRuntimeState
+        )?.let {
+            retained ->
+            runtimeData =
+                retained.runtimeData
+            runtimeDocumentation =
+                retained.runtimeDocumentation
+        }
+
         pendingTablePdf =
             savedInstanceState
                 ?.getString(
@@ -145,6 +190,15 @@ class NativeSectionActivity : Activity() {
                         it,
                     )
                 }
+
+        helpDialogs =
+            LifecycleHelpDialogController(
+                activity = this,
+                resolve = ::helpSpec,
+            )
+        helpDialogs.restore(
+            savedInstanceState,
+        )
 
         if (
             treeUriText.isBlank() ||
@@ -160,8 +214,28 @@ class NativeSectionActivity : Activity() {
         setContentView(
             buildContent(),
         )
-        loadRuntimeIr()
+        helpDialogs.restoreOpen()
+
+        val retainedData =
+            runtimeData
+        if (
+            retainedData != null
+        ) {
+            showRuntimeData(
+                retainedData,
+            )
+        } else {
+            loadRuntimeIr()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any =
+        RetainedRuntimeState(
+            runtimeData =
+                runtimeData,
+            runtimeDocumentation =
+                runtimeDocumentation,
+        )
 
     override fun onSaveInstanceState(
         outState: Bundle,
@@ -175,6 +249,24 @@ class NativeSectionActivity : Activity() {
             currentViewId,
         )
         outState.putString(
+            STATE_VIEW_LABEL,
+            currentViewLabel,
+        )
+        outState.putString(
+            STATE_DOCUMENT_PARENT_PANEL_ID,
+            currentDocumentParentPanelId,
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::bodyScroll.isInitialized
+            ) {
+                bodyScroll.scrollY
+            } else {
+                restoredScrollY
+            },
+        )
+        outState.putString(
             STATE_MENU_LABEL,
             currentMenuLabel,
         )
@@ -182,6 +274,10 @@ class NativeSectionActivity : Activity() {
             STATE_MENU_ACTION_ID,
             currentMenuActionId,
         )
+        helpDialogs.save(
+            outState,
+        )
+
         pendingTablePdf
             ?.let {
                 outState.putString(
@@ -348,6 +444,27 @@ class NativeSectionActivity : Activity() {
         )
 
         globalBar.addView(
+            Ui.helpButton(
+                context =
+                    this,
+            ) {
+                helpDialogs.show(
+                    HELP_SECTION,
+                )
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(
+                    this,
+                    44,
+                ),
+                Ui.dp(
+                    this,
+                    44,
+                ),
+            ),
+        )
+
+        globalBar.addView(
             headerAction(
                 icon =
                     R.drawable.ic_settings,
@@ -398,6 +515,7 @@ class NativeSectionActivity : Activity() {
                 context = this,
                 value = sectionCode,
                 sizeSp = 24f,
+                color = Ui.accent,
             ).apply {
                 setTypeface(
                     typeface,
@@ -452,16 +570,24 @@ class NativeSectionActivity : Activity() {
             }
 
         modeSwitch.addView(
-            modeButton(
-                label = "Modern",
-                active = true,
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Modern",
+                active =
+                    true,
             ) {},
         )
 
         modeSwitch.addView(
-            modeButton(
-                label = "Classic",
-                active = false,
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Classic",
+                active =
+                    false,
             ) {
                 openLegacyFallback()
             },
@@ -523,7 +649,7 @@ class NativeSectionActivity : Activity() {
 
         applyLandscapeFocusChrome()
 
-        val bodyScroll =
+        bodyScroll =
             ScrollView(this).apply {
                 isFillViewport = true
             }
@@ -675,77 +801,6 @@ class NativeSectionActivity : Activity() {
             }
         }
 
-    private fun modeButton(
-        label: String,
-        active: Boolean,
-        onClick: () -> Unit,
-    ): Button =
-        Button(this).apply {
-            text = label
-            isAllCaps = false
-            textSize = 13f
-            minWidth = 0
-            minimumWidth = 0
-            minHeight =
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    34,
-                )
-            minimumHeight =
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    34,
-                )
-            setPadding(
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    10,
-                ),
-                0,
-                Ui.dp(
-                    this@NativeSectionActivity,
-                    10,
-                ),
-                0,
-            )
-            background =
-                Ui.roundedBackground(
-                    context =
-                        this@NativeSectionActivity,
-                    fill =
-                        if (active) {
-                            Ui.accent
-                        } else {
-                            Ui.surfaceAlt
-                        },
-                    stroke =
-                        if (active) {
-                            Ui.accent
-                        } else {
-                            Ui.border
-                        },
-                    radiusDp = 10,
-                )
-            setTextColor(
-                if (active) {
-                    Ui.background
-                } else {
-                    Ui.text
-                }
-            )
-            isEnabled =
-                !active
-            alpha =
-                if (active) {
-                    1f
-                } else {
-                    0.92f
-                }
-            setOnClickListener {
-                onClick()
-            }
-        }
-
     private fun openHome() {
         startActivity(
             Intent(
@@ -785,6 +840,26 @@ class NativeSectionActivity : Activity() {
         )
     }
 
+    private fun helpSpec(
+        helpId: String,
+    ): HelpDialogSpec? =
+        when (
+            helpId
+        ) {
+            HELP_SECTION ->
+                HelpDialogSpec(
+                    title =
+                        "Modern розділ",
+                    message =
+                        "Modern показує структуровані дані Runtime IR: схеми, роз’єми, положення на авто, документацію та інші дії, які реально є в цьому розділі.\n\n" +
+                            "Classic відкриває оригінальну Renault HTML-сторінку цього самого розділу.\n\n" +
+                            "Коди Renault залишаються opaque: суфікси на кшталт _1/_2 мають значення лише в контексті документації й не переіменовуються програмою.",
+                )
+
+            else ->
+                null
+        }
+
     private fun loadRuntimeIr() {
         Thread {
             val result =
@@ -807,18 +882,9 @@ class NativeSectionActivity : Activity() {
                 result
                     .onSuccess {
                         runtimeData = it
-                        statusText.setTextColor(
-                            Ui.muted,
+                        showRuntimeData(
+                            it,
                         )
-                        statusText.text =
-                            "Runtime IR v" +
-                                it.schemaVersion +
-                                " · native preview"
-                        statusText.visibility =
-                            View.GONE
-
-                        renderMenu()
-                        restoreViewAfterRotation()
                     }
                     .onFailure {
                         statusText.setTextColor(
@@ -842,6 +908,46 @@ class NativeSectionActivity : Activity() {
                     }
             }
         }.start()
+    }
+
+    private fun showRuntimeData(
+        data: RuntimeIrSectionData,
+    ) {
+        statusText.setTextColor(
+            Ui.muted,
+        )
+        statusText.text =
+            "Runtime IR v" +
+                data.schemaVersion +
+                " · native preview"
+        statusText.visibility =
+            View.GONE
+
+        renderMenu()
+        restoreViewAfterRotation()
+        restoreBodyScroll()
+    }
+
+    private fun restoreBodyScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::bodyScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        bodyScroll.post {
+            bodyScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
     }
 
     private fun restoreViewAfterRotation() {
@@ -876,7 +982,12 @@ class NativeSectionActivity : Activity() {
                         documentId =
                             restoredViewId,
                         label =
-                            "Документ",
+                            restoredViewLabel
+                                .ifBlank {
+                                    "Документ"
+                                },
+                        parentPanelId =
+                            restoredDocumentParentPanelId,
                     )
                     return
                 }
@@ -1519,6 +1630,8 @@ class NativeSectionActivity : Activity() {
         currentViewKind =
             VIEW_DOCUMENTATION
         currentViewId = ""
+        currentViewLabel = ""
+        currentDocumentParentPanelId = ""
         bodyContainer.removeAllViews()
         bodyContainer.addView(
             infoCard(
@@ -1589,6 +1702,8 @@ class NativeSectionActivity : Activity() {
         currentViewKind =
             VIEW_DOCUMENTATION
         currentViewId = ""
+        currentViewLabel = ""
+        currentDocumentParentPanelId = ""
         bodyContainer.removeAllViews()
 
         bodyContainer.addView(
@@ -1662,6 +1777,10 @@ class NativeSectionActivity : Activity() {
             VIEW_PANEL
         currentViewId =
             panelId
+        currentViewLabel =
+            ""
+        currentDocumentParentPanelId =
+            ""
 
         val panel =
             findPanel(panelId)
@@ -1677,6 +1796,7 @@ class NativeSectionActivity : Activity() {
                         " — " +
                         sectionTitle,
                 sizeSp = 19f,
+                color = Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -2296,12 +2416,28 @@ class NativeSectionActivity : Activity() {
                         if (
                             documentId.isNotBlank()
                         ) {
-                            renderOrOpenDocument(
-                                documentId,
+                            val label =
                                 action.optString(
                                     "label",
                                     "Документ",
-                                ),
+                                )
+                            val parentPanelId =
+                                if (
+                                    currentViewKind ==
+                                    VIEW_PANEL
+                                ) {
+                                    currentViewId
+                                } else {
+                                    currentDocumentParentPanelId
+                                }
+
+                            renderOrOpenDocument(
+                                documentId =
+                                    documentId,
+                                label =
+                                    label,
+                                parentPanelId =
+                                    parentPanelId,
                             )
                         } else {
                             openPath(
@@ -2368,6 +2504,7 @@ class NativeSectionActivity : Activity() {
     private fun renderOrOpenDocument(
         documentId: String,
         label: String,
+        parentPanelId: String = "",
     ) {
         val document =
             findDocument(documentId)
@@ -2390,11 +2527,17 @@ class NativeSectionActivity : Activity() {
                 )
             "structured-html" ->
                 renderStructuredDocument(
-                    document,
+                    document = document,
+                    label = label,
+                    parentPanelId =
+                        parentPanelId,
                 )
             "composite-document" ->
                 renderCompositeDocument(
-                    document,
+                    document = document,
+                    label = label,
+                    parentPanelId =
+                        parentPanelId,
                 )
             else ->
                 openPath(
@@ -2408,16 +2551,30 @@ class NativeSectionActivity : Activity() {
 
     private fun renderCompositeDocument(
         document: JSONObject,
+        label: String = "Документи розʼєму",
+        parentPanelId: String = "",
     ) {
+        val inline =
+            prepareDocumentBody(
+                parentPanelId =
+                    parentPanelId,
+                label =
+                    label,
+            )
+
         currentViewKind =
             VIEW_DOCUMENT
         currentViewId =
             document.optString(
                 "id",
             )
-        bodyContainer.removeAllViews()
+        currentViewLabel =
+            label
+        currentDocumentParentPanelId =
+            parentPanelId
 
-        bodyContainer.addView(
+        if (!inline) {
+            bodyContainer.addView(
             Ui.textView(
                 context = this,
                 value =
@@ -2441,7 +2598,8 @@ class NativeSectionActivity : Activity() {
                     ),
                 )
             }
-        )
+            )
+        }
 
         bodyContainer.addView(
             Ui.textView(
@@ -2586,7 +2744,21 @@ class NativeSectionActivity : Activity() {
                             },
                     ) {
                         renderStructuredDocument(
-                            nested,
+                            document =
+                                nested,
+                            label =
+                                if (
+                                    role.equals(
+                                        "alveoles",
+                                        ignoreCase = true,
+                                    )
+                                ) {
+                                    "Опис контактів"
+                                } else {
+                                    "Опис"
+                                },
+                            parentPanelId =
+                                currentDocumentParentPanelId,
                         )
                     }
 
@@ -2624,14 +2796,47 @@ class NativeSectionActivity : Activity() {
             Button(this).apply {
                 text = "› " + label
                 isAllCaps = false
+                textSize = 14f
                 gravity =
                     Gravity.START or
                         Gravity.CENTER_VERTICAL
+                minWidth = 0
+                minimumWidth = 0
+                minHeight =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        42,
+                    )
                 minimumHeight =
                     Ui.dp(
                         this@NativeSectionActivity,
-                        48,
+                        42,
                     )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@NativeSectionActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.accent,
+                        radiusDp = 10,
+                    )
+                setTextColor(
+                    Ui.text,
+                )
+                setPadding(
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    ),
+                    0,
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    ),
+                    0,
+                )
                 contentDescription =
                     label + " — відкрити"
                 setOnClickListener {
@@ -2653,16 +2858,91 @@ class NativeSectionActivity : Activity() {
         )
     }
 
+    private fun prepareDocumentBody(
+        parentPanelId: String,
+        label: String,
+    ): Boolean {
+        val validParent =
+            parentPanelId
+                .takeIf {
+                    it.isNotBlank() &&
+                        findPanel(
+                            it,
+                        ) !=
+                        null
+                }
+
+        if (
+            validParent ==
+            null
+        ) {
+            bodyContainer.removeAllViews()
+            return false
+        }
+
+        renderPanel(
+            validParent,
+        )
+
+        bodyContainer.addView(
+            Ui.textView(
+                context = this,
+                value = label,
+                sizeSp = 16f,
+                color = Ui.accent,
+            ).apply {
+                setTypeface(
+                    typeface,
+                    android.graphics.Typeface
+                        .BOLD,
+                )
+                setPadding(
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    ),
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        8,
+                    ),
+                )
+            }
+        )
+
+        return true
+    }
+
     private fun renderStructuredDocument(
         document: JSONObject,
+        label: String = "Критерії / скорочення",
+        parentPanelId: String = "",
     ) {
+        val inline =
+            prepareDocumentBody(
+                parentPanelId =
+                    parentPanelId,
+                label =
+                    label,
+            )
+
         currentViewKind =
             VIEW_DOCUMENT
         currentViewId =
             document.optString(
                 "id",
             )
-        bodyContainer.removeAllViews()
+        currentViewLabel =
+            label
+        currentDocumentParentPanelId =
+            parentPanelId
 
         val headings =
             structuredHeadingTexts(
@@ -2680,6 +2960,8 @@ class NativeSectionActivity : Activity() {
         renderStructuredHeader(
             criteria = header.first,
             metadata = header.second,
+            showSectionHeading =
+                !inline,
         )
 
         if (tables.isEmpty()) {
@@ -2922,6 +3204,7 @@ class NativeSectionActivity : Activity() {
     private fun renderStructuredHeader(
         criteria: String?,
         metadata: List<String>,
+        showSectionHeading: Boolean = true,
     ) {
         if (metadata.isNotEmpty()) {
             val metaTile =
@@ -3007,37 +3290,39 @@ class NativeSectionActivity : Activity() {
             )
         }
 
-        bodyContainer.addView(
-            Ui.textView(
-                context = this,
-                value =
-                    sectionCode +
-                        " — " +
-                        sectionTitle,
-                sizeSp = 18f,
-            ).apply {
-                setTypeface(
-                    typeface,
-                    android.graphics.Typeface
-                        .BOLD,
-                )
-                setPadding(
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        2,
-                    ),
-                    0,
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        2,
-                    ),
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        3,
-                    ),
-                )
-            }
-        )
+        if (showSectionHeading) {
+            bodyContainer.addView(
+                Ui.textView(
+                    context = this,
+                    value =
+                        sectionCode +
+                            " — " +
+                            sectionTitle,
+                    sizeSp = 18f,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface
+                            .BOLD,
+                    )
+                    setPadding(
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            2,
+                        ),
+                        0,
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            2,
+                        ),
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            3,
+                        ),
+                    )
+                }
+            )
+        }
 
         criteria
             ?.takeIf {
@@ -4129,7 +4414,14 @@ class NativeSectionActivity : Activity() {
         )
     }
 
+    private data class RetainedRuntimeState(
+        val runtimeData: RuntimeIrSectionData?,
+        val runtimeDocumentation: JSONObject?,
+    )
+
     companion object {
+        private const val HELP_SECTION =
+            "section"
         private const val STATE_MENU_LABEL =
             "nativeMenuLabel"
         private const val STATE_MENU_ACTION_ID =
@@ -4139,6 +4431,12 @@ class NativeSectionActivity : Activity() {
             "nativeViewKind"
         private const val STATE_VIEW_ID =
             "nativeViewId"
+        private const val STATE_VIEW_LABEL =
+            "nativeViewLabel"
+        private const val STATE_DOCUMENT_PARENT_PANEL_ID =
+            "nativeDocumentParentPanelId"
+        private const val STATE_SCROLL_Y =
+            "nativeScrollY"
         private const val STATE_PENDING_TABLE_PDF =
             "pendingTablePdf"
 

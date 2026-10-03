@@ -99,7 +99,7 @@ class SettingsActivity : Activity() {
             resultCode != RESULT_OK
         ) {
             statusText.text =
-                "Вибір папки backup скасовано."
+                "Вибір папки резервних копій скасовано."
             return
         }
 
@@ -174,7 +174,7 @@ class SettingsActivity : Activity() {
             if (
                 appearsInsideDataset
             ) {
-                "Папку збережено, але краще тримати backup поза dataset: Documents/Renault/backups."
+                "Папку збережено, але краще тримати резервні копії поза dataset: Documents/Renault/backups."
             } else {
                 "Папку backup збережено."
             }
@@ -356,7 +356,7 @@ class SettingsActivity : Activity() {
 
         body.addView(
             sectionTitle(
-                "Backup",
+                "Резервні копії",
             )
         )
 
@@ -391,7 +391,7 @@ class SettingsActivity : Activity() {
                 context = this,
                 value =
                     "Зміни зберігаються автоматично.",
-                sizeSp = 13f,
+                sizeSp = Ui.secondaryTextSp,
                 color = Ui.muted,
             ).apply {
                 setPadding(
@@ -510,7 +510,7 @@ class SettingsActivity : Activity() {
                     context =
                         this@SettingsActivity,
                     value = description,
-                    sizeSp = 13f,
+                    sizeSp = Ui.secondaryTextSp,
                     color = Ui.muted,
                 ).apply {
                     setPadding(
@@ -530,7 +530,7 @@ class SettingsActivity : Activity() {
                     context =
                         this@SettingsActivity,
                     value = "",
-                    sizeSp = 14f,
+                    sizeSp = Ui.valueTextSp,
                     color = Ui.accent,
                 ).apply {
                     setPadding(
@@ -603,7 +603,7 @@ class SettingsActivity : Activity() {
                         this@SettingsActivity,
                     value =
                         "Вибери окрему папку для резервних копій. Рекомендовано: Documents/Renault/backups.",
-                    sizeSp = 13f,
+                    sizeSp = Ui.secondaryTextSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -625,7 +625,7 @@ class SettingsActivity : Activity() {
                         this@SettingsActivity,
                     value =
                         "Вибрана папка",
-                    sizeSp = 12f,
+                    sizeSp = Ui.actionSubtitleSp,
                     color =
                         Ui.muted,
                 ).apply {
@@ -647,7 +647,7 @@ class SettingsActivity : Activity() {
                         this@SettingsActivity,
                     value =
                         "Не вибрано",
-                    sizeSp = 14f,
+                    sizeSp = Ui.valueTextSp,
                     color =
                         Ui.accent,
                 ).apply {
@@ -669,7 +669,7 @@ class SettingsActivity : Activity() {
                     context =
                         this@SettingsActivity,
                     value = "",
-                    sizeSp = 12f,
+                    sizeSp = Ui.actionSubtitleSp,
                     color =
                         Ui.danger,
                 ).apply {
@@ -715,13 +715,52 @@ class SettingsActivity : Activity() {
                         "Вибрати папку"
                     isAllCaps =
                         false
+                    textSize =
+                        Ui.compactButtonSp
+                    setTextColor(
+                        Ui.accent,
+                    )
                     gravity =
                         Gravity.CENTER
                     minHeight =
                         Ui.dp(
                             this@SettingsActivity,
-                            46,
+                            44,
                         )
+                    minimumHeight =
+                        Ui.dp(
+                            this@SettingsActivity,
+                            44,
+                        )
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@SettingsActivity,
+                            fill =
+                                Ui.surfaceAlt,
+                            stroke =
+                                Ui.accent,
+                            radiusDp =
+                                10,
+                        )
+                    setPadding(
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                    )
                     setOnClickListener {
                         openBackupFolderPicker()
                     }
@@ -744,13 +783,52 @@ class SettingsActivity : Activity() {
                         "Скинути вибір"
                     isAllCaps =
                         false
+                    textSize =
+                        Ui.compactButtonSp
+                    setTextColor(
+                        Ui.text,
+                    )
                     gravity =
                         Gravity.CENTER
                     minHeight =
                         Ui.dp(
                             this@SettingsActivity,
-                            46,
+                            44,
                         )
+                    minimumHeight =
+                        Ui.dp(
+                            this@SettingsActivity,
+                            44,
+                        )
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@SettingsActivity,
+                            fill =
+                                Ui.surfaceAlt,
+                            stroke =
+                                Ui.border,
+                            radiusDp =
+                                10,
+                        )
+                    setPadding(
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        ),
+                        Ui.dp(
+                            this@SettingsActivity,
+                            6,
+                        ),
+                    )
                     visibility =
                         View.GONE
                     setOnClickListener {
@@ -762,7 +840,7 @@ class SettingsActivity : Activity() {
                                 Ui.muted,
                             )
                         statusText.text =
-                            "Вибір папки backup скинуто. Файли не видалялися."
+                            "Вибір папки резервних копій скинуто. Файли не видалялися."
 
                         renderValues()
                     }
@@ -837,7 +915,7 @@ class SettingsActivity : Activity() {
                     context =
                         this@SettingsActivity,
                     value = text,
-                    sizeSp = 14f,
+                    sizeSp = Ui.secondaryTextSp,
                     color = Ui.muted,
                 ).apply {
                     setPadding(
@@ -949,7 +1027,7 @@ class SettingsActivity : Activity() {
             if (
                 appearsInsideDataset
             ) {
-                "Краще зберігати backup поза dataset: Documents/Renault/backups."
+                "Краще зберігати резервні копії поза dataset: Documents/Renault/backups."
             } else {
                 ""
             }
@@ -1011,6 +1089,12 @@ class SettingsActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun showPdfZoomChooser() {
@@ -1069,6 +1153,12 @@ class SettingsActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun showPdfStepChooser() {
@@ -1123,6 +1213,12 @@ class SettingsActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun openBackupFolderPicker() {

@@ -123,6 +123,19 @@ class SafDatasetWebViewClient(
             )
         }
 
+        if (
+            relativePath.equals(
+                "_renault/README_UA.html",
+                ignoreCase = true,
+            )
+        ) {
+            compactReadmeResponse(
+                relativePath,
+            )?.let {
+                return it
+            }
+        }
+
         pdfLayer.intercept(
             requestUrl = requestUrl,
             relativePath = relativePath,
@@ -310,10 +323,45 @@ class SafDatasetWebViewClient(
             return true
         }
 
-        if (
-            DatasetVirtualUrl.isLocal(
+        val localPath =
+            DatasetVirtualUrl.relativePath(
                 url.toString(),
             )
+
+        if (
+            localPath
+                ?.equals(
+                    "_renault/README_UA.html",
+                    ignoreCase = true,
+                )
+                ?: false
+        ) {
+            if (
+                request.isForMainFrame &&
+                url.getQueryParameter(
+                    README_LAYOUT_QUERY,
+                ) !=
+                README_LAYOUT_VERSION
+            ) {
+                view?.loadUrl(
+                    url
+                        .buildUpon()
+                        .appendQueryParameter(
+                            README_LAYOUT_QUERY,
+                            README_LAYOUT_VERSION,
+                        )
+                        .build()
+                        .toString()
+                )
+                return true
+            }
+
+            return false
+        }
+
+        if (
+            localPath !=
+            null
         ) {
             return false
         }
@@ -1999,6 +2047,413 @@ class SafDatasetWebViewClient(
         )
     }
 
+    private fun compactReadmeResponse(
+        relativePath: String,
+    ): WebResourceResponse? {
+        val stream =
+            fastArchive.value
+                ?.open(
+                    relativePath,
+                )
+                ?: resolver.openInputStream(
+                    relativePath,
+                )
+                ?: return null
+
+        val source =
+            runCatching {
+                stream
+                    .bufferedReader(
+                        Charsets.UTF_8,
+                    )
+                    .use {
+                        it.readText()
+                    }
+            }.getOrNull()
+                ?: return null
+
+        val rendered =
+            if (
+                source.contains(
+                    "class=\"file-table\"",
+                    ignoreCase = true,
+                )
+            ) {
+                source
+            } else {
+                renderCompactReadmeHtml(
+                    source,
+                )
+            }
+
+        return WebResourceResponse(
+            "text/html",
+            "UTF-8",
+            200,
+            "OK",
+            mapOf(
+                "Cache-Control" to
+                    "no-store",
+                "X-Renault-Source" to
+                    "compact-readme",
+            ),
+            ByteArrayInputStream(
+                rendered.toByteArray(
+                    Charsets.UTF_8,
+                )
+            ),
+        )
+    }
+
+    private fun renderCompactReadmeHtml(
+        source: String,
+    ): String {
+        val titleFromPage =
+            Regex(
+                "(?is)<title[^>]*>(.*?)</title>",
+            ).find(
+                source,
+            )
+                ?.groupValues
+                ?.getOrNull(
+                    1,
+                )
+                ?.let {
+                    decodeSimpleHtmlText(
+                        it,
+                    )
+                }
+                .orEmpty()
+                .replaceFirst(
+                    Regex(
+                        "^\\s*Як\\s+користув(?:атися|атись)\\s*[—–-]\\s*",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+
+        val titleFromHeading =
+            Regex(
+                "(?is)<h1[^>]*>(.*?)</h1>",
+            ).find(
+                source,
+            )
+                ?.groupValues
+                ?.getOrNull(
+                    1,
+                )
+                ?.let {
+                    decodeSimpleHtmlText(
+                        it,
+                    )
+                }
+                .orEmpty()
+                .trim()
+
+        val identity =
+            titleFromPage
+                .ifBlank {
+                    titleFromHeading
+                }
+                .ifBlank {
+                    "Renault Docs"
+                }
+
+        val withoutBrand =
+            identity
+                .replaceFirst(
+                    Regex(
+                        "^Renault\\s+",
+                        RegexOption.IGNORE_CASE,
+                    ),
+                    "",
+                )
+                .trim()
+                .ifBlank {
+                    identity
+                }
+
+        val yearsMatch =
+            Regex(
+                "^(.*?)(?:\\s*[·,|]\\s*|\\s+)(\\d{4})\\s*[-–—]\\s*(\\d{4})\\z",
+            ).matchEntire(
+                withoutBrand,
+            )
+
+        val model =
+            (
+                yearsMatch
+                    ?.groupValues
+                    ?.getOrNull(
+                        1,
+                    )
+                    ?.trim()
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: withoutBrand
+            )
+        val years =
+            yearsMatch
+                ?.let {
+                    it.groupValues[2] +
+                        "–" +
+                        it.groupValues[3]
+                }
+
+        val volumeCount =
+            Regex(
+                "(?is)(?:Знайдено\\s+внутрішніх\\s+томів(?:/редакцій)?|Томів\\s+у\\s+цьому\\s+dataset)[^0-9]{0,120}(\\d+)",
+            ).find(
+                source,
+            )
+                ?.groupValues
+                ?.getOrNull(
+                    1,
+                )
+
+        val yearsHtml =
+            years
+                ?.let {
+                    "<span class=\"dataset-years\">" +
+                        escape(
+                            it,
+                        ) +
+                        "</span>"
+                }
+                .orEmpty()
+
+        val volumeHtml =
+            volumeCount
+                ?.let {
+                    """
+                    <div class="summary">
+                      <span>Томів у цьому dataset</span>
+                      <strong>${escape(it)}</strong>
+                    </div>
+                    """.trimIndent()
+                }
+                .orEmpty()
+
+        return """
+            <!doctype html>
+            <html lang="uk">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+              <title>Як користуватися — ${escape(identity)}</title>
+              <style>
+                :root { color-scheme: dark; }
+                * { box-sizing: border-box; }
+                html, body {
+                  margin: 0;
+                  background: #101318;
+                  color: #f3f6f8;
+                  font-family: system-ui, -apple-system, sans-serif;
+                }
+                body {
+                  max-width: 860px;
+                  margin: 0 auto;
+                  padding: 14px 14px 28px;
+                  font-size: 14px;
+                  line-height: 1.4;
+                }
+                h1 {
+                  margin: 0 0 8px;
+                  font-size: 22px;
+                  line-height: 1.15;
+                  letter-spacing: -0.2px;
+                }
+                .dataset-years {
+                  display: block;
+                  margin-top: 3px;
+                  color: #aab5c2;
+                  font-size: 14px;
+                  font-weight: 600;
+                  letter-spacing: 0;
+                }
+                .intro {
+                  margin: 0 0 12px;
+                  color: #c8d0d9;
+                }
+                .summary {
+                  display: flex;
+                  align-items: baseline;
+                  justify-content: space-between;
+                  gap: 12px;
+                  margin: 0 0 16px;
+                  padding: 10px 12px;
+                  border: 1px solid #384352;
+                  border-radius: 11px;
+                  background: #181d25;
+                }
+                .summary span {
+                  color: #aab5c2;
+                  font-size: 13px;
+                }
+                .summary strong {
+                  color: #f3f6f8;
+                  font-size: 16px;
+                }
+                h2 {
+                  margin: 20px 0 9px;
+                  font-size: 16px;
+                  line-height: 1.2;
+                }
+                .action {
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  gap: 12px;
+                  width: 100%;
+                  margin: 0 0 18px;
+                  padding: 10px 12px;
+                  border: 1px solid #76bdff;
+                  border-radius: 11px;
+                  background: #181d25;
+                  color: #76bdff;
+                  text-decoration: none;
+                  font-size: 14px;
+                  font-weight: 700;
+                }
+                .action::after {
+                  content: '›';
+                  font-size: 21px;
+                  line-height: 1;
+                }
+                table {
+                  width: 100%;
+                  table-layout: fixed;
+                  border-collapse: separate;
+                  border-spacing: 0;
+                  overflow: hidden;
+                  border: 1px solid #384352;
+                  border-radius: 11px;
+                  background: #181d25;
+                  font-size: 12px;
+                  line-height: 1.32;
+                }
+                th, td {
+                  padding: 8px 7px;
+                  vertical-align: top;
+                  text-align: left;
+                  overflow-wrap: anywhere;
+                  word-break: break-word;
+                }
+                th {
+                  background: #222936;
+                  color: #aab5c2;
+                  font-size: 11px;
+                  font-weight: 700;
+                }
+                th:first-child,
+                td:first-child {
+                  width: 43%;
+                  border-right: 1px solid #384352;
+                }
+                tr + tr td {
+                  border-top: 1px solid #384352;
+                }
+                code {
+                  color: #e8eef5;
+                  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                  font-size: 11px;
+                  overflow-wrap: anywhere;
+                }
+                p {
+                  margin: 7px 0 12px;
+                }
+                .muted {
+                  color: #aab5c2;
+                }
+              </style>
+            </head>
+            <body>
+              <h1>${escape(model)}$yearsHtml</h1>
+              <p class="intro">Конвертований Renault dataset. Внутрішні файли не потрібно редагувати вручну.</p>
+              $volumeHtml
+
+              <h2>Документація</h2>
+              <a class="action" href="START.html">Відкрити каталог</a>
+
+              <h2>Основні файли</h2>
+              <table class="file-table">
+                <thead>
+                  <tr><th>Файл</th><th>Призначення</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>renault-dataset.json</code></td><td>Опис dataset і точки входу Renault Docs.</td></tr>
+                  <tr><td><code>_renault/START.html</code></td><td>Каталог внутрішніх томів.</td></tr>
+                  <tr><td><code>_renault/volumes.json</code></td><td>Список томів та їхніх entrypoint.</td></tr>
+                  <tr><td><code>_renault/modern-index.json</code></td><td>Швидкий індекс томів для Modern.</td></tr>
+                  <tr><td><code>_renault/modern-sections.json</code></td><td>Native-індекс розділів для Modern.</td></tr>
+                  <tr><td><code>_renault/runtime-tree.json</code></td><td>Повний compiler/debug Runtime IR.</td></tr>
+                  <tr><td><code>_renault/runtime-ir-index.json</code><br><code>runtime-ir/sections/…</code></td><td>Шардований Runtime IR для телефону.</td></tr>
+                  <tr><td><code>_renault/runtime-ir-coverage.json</code></td><td>Аудит покриття меню, дій і документів.</td></tr>
+                  <tr><td><code>_renault/fast-content-*.zip</code></td><td>Fast Pack для швидкого локального читання.</td></tr>
+                  <tr><td><code>HTM / PDF / GIF</code></td><td>Документація Renault після нормалізації шляхів.</td></tr>
+                </tbody>
+              </table>
+
+              <h2>Renault Docs</h2>
+              <p>Застосунок читає manifest, додає dataset до бібліотеки та відкриває PDF у власному viewer.</p>
+
+              <h2>Важливо</h2>
+              <p class="muted">Не перейменовуй внутрішні папки після конвертації: це може зламати зв’язки між Classic-файлами.</p>
+            </body>
+            </html>
+        """.trimIndent()
+    }
+
+    private fun decodeSimpleHtmlText(
+        value: String,
+    ): String =
+        value
+            .replace(
+                Regex(
+                    "(?is)<[^>]+>",
+                ),
+                " ",
+            )
+            .replace(
+                "&nbsp;",
+                " ",
+                ignoreCase = true,
+            )
+            .replace(
+                "&quot;",
+                "\"",
+                ignoreCase = true,
+            )
+            .replace(
+                "&#39;",
+                "'",
+                ignoreCase = true,
+            )
+            .replace(
+                "&lt;",
+                "<",
+                ignoreCase = true,
+            )
+            .replace(
+                "&gt;",
+                ">",
+                ignoreCase = true,
+            )
+            .replace(
+                "&amp;",
+                "&",
+                ignoreCase = true,
+            )
+            .replace(
+                Regex(
+                    "\\s+",
+                ),
+                " ",
+            )
+            .trim()
+
     private fun sortClassicCatalogByDate(
         view: WebView?,
     ) {
@@ -3489,6 +3944,11 @@ class SafDatasetWebViewClient(
         .replace("\"", "&quot;")
 
     companion object {
+        private const val README_LAYOUT_QUERY =
+            "rdhelp"
+        private const val README_LAYOUT_VERSION =
+            "compact-v2"
+
         const val PDF_SAVE_SCHEME =
             "renaultsavepdf"
 

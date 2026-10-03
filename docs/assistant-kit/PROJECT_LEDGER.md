@@ -1834,3 +1834,250 @@ Both packages imported into Laguna II, opened in native mode, and representative
 
 Conclusion:
 the 10-volume batch has representative compatibility coverage at both ends of the Laguna II date range; no `.rdpkg` rebuild is required before importing the remaining eight packages.
+
+
+### Laguna II remaining package import
+
+User reports the remaining eight Laguna II `.rdpkg` packages were added after the edge-package checks.
+
+Final exact 10-volume / no-duplicate screen sanity remains part of the next phone gate.
+
+### v0.5.54 UI/lifecycle audit implementation
+
+User-requested UX:
+- Home add subtitle becomes `До проєкту`;
+- empty project becomes `Порожній · додай том`;
+- Project add actions become one `Додати` tile with `Авто` and `Вручну`.
+
+Lifecycle work:
+- shared `LifecycleHelpDialogController`;
+- contextual Help IDs survive rotation and reopen above the same Activity;
+- Help restoration never starts the underlying action;
+- CreateProject typed name survives rotation;
+- Project volume action/removal/multi-volume/mismatch dialogs restore presentation state without automatic mutation;
+- pending manual import mode survives recreation.
+
+Help surfaces:
+Home, Project, Add, raw builder, Converter, Modern volume, Native section, Volume documentation.
+
+Audit finding kept open:
+`RISK-LIFE-001` — direct `.rdpkg` import uses an Activity-owned Thread and should move to a durable service/run-store lifecycle.
+
+
+Final v0.5.54 PR-head CI:
+- Tests `36664711140` — PASS;
+- Android PR Check `36664711278` — PASS;
+- PR #13 remains open for phone acceptance.
+
+
+### Overnight checkpoint — v0.5.54 phone QA pending
+
+Session stopped at 2026-09-30 06:42 +03:00.
+
+State:
+- PR #13 is open and mergeable;
+- v0.5.54 implementation complete for the planned UX/Help/lifecycle scope;
+- final code-bearing PR head before checkpoint docs: `5660b6f29f24d91c62abd16d1824a96b6b121c36`;
+- Tests `36664899562` PASS;
+- Android PR Check `36664899564` PASS;
+- no merge yet;
+- phone candidate not installed/accepted yet.
+
+Resume:
+Menu 5 → Menu 16 → PR #13 → install candidate → visual gate → Help/dialog rotation gate → merge only after phone PASS.
+
+
+v0.5.54 visual refinement after first phone screenshots:
+- unified Add tile kept;
+- `Авто` now shows `.rdpkg · один том`;
+- `Вручну` now shows `Папка / SAF`;
+- Help dialogs use Renault Docs dark surface/border/accent styling instead of default system gray.
+
+
+v0.5.54 phone typography refinement:
+- introduced shared compact action subtitle token `Ui.actionSubtitleSp = 11sp`;
+- applied to Home and Project action-card secondary labels;
+- avoids forced/manual wrapping of `.rdpkg · один том` while keeping titles unchanged.
+
+
+Settings typography refinement from phone review:
+- descriptions → 12sp shared secondary token;
+- selected values → 13sp;
+- small labels/warnings → 11sp;
+- Backup buttons → 14sp;
+- `Backup` section localized to `Резервні копії`.
+
+
+Settings backup button refinement from phone review:
+- Backup action button text reduced to 12sp;
+- kept a practical tap height while reducing visual weight;
+- replaced default gray Android Button background with Renault Docs themed surfaces;
+- primary folder action uses accent border/text;
+- reset action uses neutral border/text.
+
+
+### Full v0.5.54 app-dialog consolidation
+
+After phone screenshots exposed remaining system-gray dialogs, all app-owned AlertDialogs were audited.
+
+Inventory:
+- Help controller: 1;
+- Settings: 3;
+- Project: 5;
+- total: 9.
+
+All 9 now use shared `DialogUi` with explicit roles (HELP / CHOICE / CONFIRM / DANGER / PROGRESS).
+
+The Settings bug where styling had been applied repeatedly to only one chooser is removed; each of the three Settings choosers now receives the shared theme exactly once.
+
+Home tool cards also replace the folder word with `ic_folder`:
+- Converter: `+ стару Renault` + icon;
+- Legacy: `+ готова` + icon.
+
+External Android SAF/DocumentsUI is not app-owned and cannot be themed by Renault Docs.
+
+
+### v0.5.54 final visual hierarchy pass
+
+Final phone-review package:
+- Home Add converted to one parent tile with New Volume / New Project child actions;
+- Home Tools converted to one parent tile with Converter / Legacy child actions;
+- folder icon enlarged and right-aligned inside tool child actions;
+- entity titles across project/volume/dataset/native surfaces use shared `Ui.entityTitle`;
+- shared `Ui.actionButton` replaces audited gray app-owned buttons;
+- Modern dataset/volume search fields receive accent outline for readability;
+- Modern active mode is visually highlighted;
+- Create Project form and action are themed;
+- all changes remain in PR #13 pending one final phone regression.
+
+
+### v0.5.54 header and mode polish
+
+Phone-review follow-up:
+- tool folder icons moved to bottom-right overlay;
+- tool titles no longer lose width to the icon;
+- one shared `Ui.modeButton` now styles Classic/Modern controls;
+- ModernDataset, ModernVolume, NativeSection and Viewer use the shared mode control;
+- Viewer toolbar titles reduced to 16sp and use entity-title color for long titles;
+- legacy `Як користуватись` pages explicitly warn that their volume count belongs to the opened Classic dataset, not the current project.
+
+
+### v0.5.54 converter + stale legacy phone findings
+
+Phone screenshots found:
+- Converter actions still rendered as default gray Android Buttons;
+- stale `Старі бібліотеки` records could enter Modern after the old SAF folder had been moved/deleted, producing raw `renault-dataset.json` read failure.
+
+Resolution:
+- Converter action buttons use shared Renault Docs styling;
+- stale legacy records are validated before navigation;
+- inaccessible records stay on Home with a clear re-add-via-Legacy message;
+- Modern direct stale-path failure now uses the same clear explanation rather than exposing the raw manifest error.
+
+
+### New-chat handoff 2026-10-01
+
+Checkpoint saved for v0.5.54 / PR #13.
+
+- PR remains open and must not be merged yet.
+- Android PR Check `36790097812` passed.
+- Tests `36790097841` failed on one stale contract assertion in `test_v0513_modern_section_tiles_contract.py` after the shared `Ui.modeButton` refactor; runtime/phone failure is not indicated by this test.
+- Latest phone-driven fixes before handoff: Converter button theming, stale Legacy SAF pre-open validation, clearer stale Modern failure, bottom-right Home tool folder icons, shared Classic/Modern switch styling, legacy help-page relevance note.
+- Resume by fixing only that stale test expectation, rerunning CI, then installing one fresh PR #13 candidate for the full phone regression.
+
+
+### v0.5.54 stale contract-test recovery — 2026-10-01
+
+The remaining PR #13 CI failure was confirmed as a stale source-format assertion, not a runtime defect.
+
+Change:
+- `tests/test_v0513_modern_section_tiles_contract.py` now validates the shared `Ui.modeButton` contract with whitespace-tolerant regexes for Modern(active) and Classic(inactive);
+- no Android runtime file changed in the fix commit.
+
+Evidence:
+- fix commit `c3073d44f381c8160829abdc6cee707353711b32`;
+- Tests `36794236208` PASS;
+- Android PR Check `36794236168` PASS.
+
+Release state:
+PR #13 remains open/not merged. One fresh candidate and the full v0.5.54 phone regression are still required before merge.
+
+
+### v0.5.54 Classic help-page mobile layout — 2026-10-01
+
+Real-phone screenshot showed that legacy `README_UA.html` is visually oversized and inefficient on a narrow screen.
+
+Resolution:
+- existing package HTML is adapted at runtime in `SafDatasetWebViewClient`, so already imported Laguna II data changes presentation without package regeneration;
+- Viewer toolbar uses dataset identity on info/help pages and places a trailing `YYYY–YYYY` range on line 2;
+- the Classic scope note is shortened;
+- the help page uses smaller headings, a compact catalog action and a wrapping two-column `Файл | Призначення` table;
+- stale `Android` explanatory copy is shortened to current Renault Docs behavior;
+- both Python and Android package writers emit the compact layout for future datasets.
+
+Implementation commit:
+`24a99325157b1871b9e3d8dd53e7253f046bc237`.
+
+CI:
+Tests `36797661478` PASS; Android PR Check `36797661499` PASS.
+
+This is presentation-only. Dataset schema, Runtime IR and current Laguna II `.rdpkg` payloads are unchanged.
+
+
+### Classic help page first-attempt failure and deterministic replacement — 2026-10-01
+
+The first v0.5.54 mobile-help implementation was rejected by real-phone evidence.
+
+Observed:
+- app-owned Viewer toolbar reflected new code;
+- `_renault/README_UA.html` still rendered the legacy body unchanged;
+- post-load JavaScript adaptation was therefore not reliable enough for this screen.
+
+Final implementation contract:
+- README requests are intercepted before generic Fast Pack delivery;
+- already-imported legacy README files are replaced by an app-rendered compact HTML response;
+- no package rebuild/reimport is needed;
+- the response contains smaller typography, compact catalog action, two-column file table, current Renault Docs copy and concise warning;
+- toolbar gets its identity from the README page title and formats `Laguna II` / `2001–2006`;
+- `rdhelp=compact-v2` prevents the previous 24-hour Fast Pack/WebView cache entry from masking the fix.
+
+Commits:
+`874648c5ea851926f5f5443e15688948a6c87ac8` + `d36dd3b8343d514733ec88b14235c7f38a956968`.
+
+CI:
+Tests `36811029640` PASS; Android PR Check `36811029609` PASS.
+
+Status:
+phone recheck required; PR #13 remains unmerged.
+
+
+### Laguna dataset metadata parity final PASS — 2026-10-01
+
+After the seven preserved prepared volumes had been restored, the physical build root contained all 10 Laguna II volumes, but the old package metadata still described only 3. That stale metadata explained why `Старі бібліотеки` continued to display `Томів: 3`.
+
+Package generation was rerun against the restored build root. Final real-phone integrity evidence:
+
+- HTML/CSS scanned: 48307;
+- local references checked: 264793;
+- missing: 0;
+- live build volumes: 10;
+- manifest volumes: 10 / PASS;
+- `_renault/volumes.json`: 10 / PASS;
+- `_renault/modern-index.json`: 10 / PASS;
+- source/build parity: 10/10;
+- missing/extra: 0/0;
+- overall: **PASS**.
+
+Report:
+`/storage/emulated/0/Documents/Renault/reports/dataset-links-20261001-074659.json`.
+
+The integrity checker was hardened in commit
+`82491c108f5a75352edd6466d27c0f9f0b475114`
+so a future state such as “10 live folders but 3 manifest volumes” is a FAIL rather than a false PASS.
+
+CI:
+Tests `36813567420` PASS;
+Android PR Check `36813567450` PASS.
+
+Architecture clarification recorded from phone investigation:
+legacy `*_android` datasets and Project-installed `.rdpkg` volumes are independent storage flows. Project Classic reads the app-private installed package copy via `LocalDatasetDocumentsProvider`; Legacy Classic reads the SAF-linked public dataset folder.

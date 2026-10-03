@@ -29,6 +29,7 @@ class ModernDatasetActivity : Activity() {
     private var fallbackTitle: String = "Renault dataset"
     private var focusEntrypoint: String = ""
     private var restoredQuery: String = ""
+    private var restoredScrollY: Int = 0
     private var baseStatus: String = ""
 
     override fun onCreate(
@@ -67,6 +68,18 @@ class ModernDatasetActivity : Activity() {
                 )
                 .orEmpty()
 
+        restoredScrollY =
+            savedInstanceState
+                ?.getInt(
+                    STATE_SCROLL_Y,
+                    0,
+                )
+                ?: 0
+
+        catalog =
+            lastNonConfigurationInstance
+                as? ModernCatalog
+
         if (treeUriText.isBlank()) {
             showFatalError(
                 "Dataset не передав SAF URI.",
@@ -87,8 +100,33 @@ class ModernDatasetActivity : Activity() {
             )
         }
 
-        loadCatalog()
+        val retainedCatalog =
+            catalog
+
+        if (
+            retainedCatalog != null
+        ) {
+            baseStatus =
+                buildStatus(
+                    retainedCatalog,
+                )
+            statusText.setTextColor(
+                Ui.muted,
+            )
+            statusText.text =
+                baseStatus
+            renderVolumes(
+                searchInput.text
+                    .toString(),
+            )
+            restoreVolumeScroll()
+        } else {
+            loadCatalog()
+        }
     }
+
+    override fun onRetainNonConfigurationInstance(): Any? =
+        catalog
 
     override fun onSaveInstanceState(
         outState: Bundle,
@@ -102,6 +140,16 @@ class ModernDatasetActivity : Activity() {
                     .toString()
             } else {
                 restoredQuery
+            },
+        )
+        outState.putInt(
+            STATE_SCROLL_Y,
+            if (
+                ::volumeScroll.isInitialized
+            ) {
+                volumeScroll.scrollY
+            } else {
+                restoredScrollY
             },
         )
 
@@ -183,49 +231,82 @@ class ModernDatasetActivity : Activity() {
             )
         )
 
-        topBar.addView(
-            Ui.textView(
-                context = this,
-                value = "Modern",
-                sizeSp = 20f,
+        val modeSwitch =
+            LinearLayout(
+                this,
             ).apply {
-                setTypeface(
-                    typeface,
-                    android.graphics.Typeface.BOLD,
-                )
+                orientation =
+                    LinearLayout.HORIZONTAL
+                gravity =
+                    Gravity.CENTER_VERTICAL
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernDatasetActivity,
+                        fill =
+                            Ui.surface,
+                        stroke =
+                            Ui.border,
+                        radiusDp =
+                            12,
+                    )
                 setPadding(
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        8,
+                        2,
                     ),
-                    0,
                     Ui.dp(
                         this@ModernDatasetActivity,
-                        8,
+                        2,
                     ),
-                    0,
+                    Ui.dp(
+                        this@ModernDatasetActivity,
+                        2,
+                    ),
+                    Ui.dp(
+                        this@ModernDatasetActivity,
+                        2,
+                    ),
                 )
+            }
+
+        modeSwitch.addView(
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Modern",
+                active =
+                    true,
+            ) {},
+        )
+
+        modeSwitch.addView(
+            Ui.modeButton(
+                context =
+                    this,
+                label =
+                    "Classic",
+                active =
+                    false,
+            ) {
+                openClassic()
             },
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f,
-            )
         )
 
         topBar.addView(
-            Button(this).apply {
-                text = "Classic"
-                isAllCaps = false
-                minimumHeight =
-                    Ui.dp(
-                        this@ModernDatasetActivity,
-                        44,
-                    )
-                setOnClickListener {
-                    openClassic()
-                }
-            }
+            View(
+                this,
+            ),
+            LinearLayout.LayoutParams(
+                0,
+                1,
+                1f,
+            ),
+        )
+
+        topBar.addView(
+            modeSwitch,
         )
 
         root.addView(topBar)
@@ -235,6 +316,7 @@ class ModernDatasetActivity : Activity() {
                 context = this,
                 value = fallbackTitle,
                 sizeSp = 27f,
+                color = Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -276,9 +358,17 @@ class ModernDatasetActivity : Activity() {
                 setHintTextColor(
                     Ui.muted,
                 )
-                setBackgroundColor(
-                    Ui.surface,
-                )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernDatasetActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.accent,
+                        radiusDp =
+                            11,
+                    )
                 setPadding(
                     Ui.dp(
                         this@ModernDatasetActivity,
@@ -388,6 +478,28 @@ class ModernDatasetActivity : Activity() {
         return root
     }
 
+    private fun restoreVolumeScroll() {
+        if (
+            restoredScrollY <=
+            0 ||
+            !::volumeScroll.isInitialized
+        ) {
+            return
+        }
+
+        val scrollY =
+            restoredScrollY
+        restoredScrollY =
+            0
+
+        volumeScroll.post {
+            volumeScroll.scrollTo(
+                0,
+                scrollY,
+            )
+        }
+    }
+
     private fun loadCatalog() {
         statusText.text =
             "Читаю швидкий індекс…"
@@ -420,6 +532,7 @@ class ModernDatasetActivity : Activity() {
                             searchInput.text
                                 .toString(),
                         )
+                        restoreVolumeScroll()
 
                         prewarmFastPack()
                     }
@@ -427,9 +540,24 @@ class ModernDatasetActivity : Activity() {
                         statusText.setTextColor(
                             Ui.danger,
                         )
-                        statusText.text =
+
+                        val detail =
                             error.message
                                 ?: "Не вдалося прочитати Modern index."
+
+                        statusText.text =
+                            if (
+                                detail.contains(
+                                    "renault-dataset.json",
+                                    ignoreCase =
+                                        true,
+                                )
+                            ) {
+                                "Ця стара бібліотека більше не читається за збереженим шляхом. " +
+                                    "Якщо папку перенесено або видалено — додай її знову через Legacy."
+                            } else {
+                                detail
+                            }
                     }
             }
         }.start()
@@ -734,6 +862,8 @@ class ModernDatasetActivity : Activity() {
                     value =
                         volume.title,
                     sizeSp = 19f,
+                    color =
+                        Ui.entityTitle,
                 ).apply {
                     setTypeface(
                         typeface,
@@ -889,6 +1019,8 @@ class ModernDatasetActivity : Activity() {
             "focusEntrypoint"
         private const val STATE_QUERY =
             "query"
+        private const val STATE_SCROLL_Y =
+            "datasetScrollY"
 
         fun intent(
             context: Context,

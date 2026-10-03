@@ -4102,3 +4102,256 @@ Next development patch:
 - terminal COMPLETE/CANCELLED/FAILED dismiss `×`;
 - fix `1 файлів` → `1 файл`;
 - then perform read-only audit of legacy `*_android` folders.
+
+
+### v0.5.54 sleep handoff — 2026-10-01
+
+Active repository:
+`faric-ua/renault-docs-android`
+
+Branch / PR:
+- `feat/v0.5.54-ux-help-audit`;
+- PR #13 open, mergeable, **NOT MERGED**.
+
+Latest code-bearing head before this checkpoint:
+`82491c108f5a75352edd6466d27c0f9f0b475114`.
+
+CI on that head:
+- Tests `36813567420` PASS;
+- Android PR Check `36813567450` PASS.
+
+Accepted phone evidence this session:
+- compact Classic `Як користуватись` response-level layout is visibly working;
+- old giant help layout is gone;
+- file info is now a wrapping `Файл | Призначення` table;
+- Laguna public prepared dataset is restored to 10 physical volumes;
+- final item 22 integrity result: 48307 HTML/CSS, 264793 local refs, 0 missing;
+- live / manifest / volumes.json / modern-index.json all report 10 volumes with metadata parity PASS;
+- source/build parity is 10/10 with 0 missing and 0 extra.
+
+Critical architecture distinction:
+1. `Старі бібліотеки` Laguna II is a SAF-linked **legacy public dataset** at the old `*_android` location. Classic opened from that record reads the public dataset directly.
+2. Project `Laguna II` built from `.rdpkg` uses **installed app-private packages** under `noBackupFilesDir/rdpkg/<packageId>` exposed through `LocalDatasetDocumentsProvider`. Classic opened from a Project volume reads that private installed copy.
+3. Files in `Documents/Renault/packages/rdpkg` are install archives. All 10 Laguna II archives are present, but that alone does not prove all 10 are already installed into the Project.
+
+All 10 Laguna II `.rdpkg` archives observed:
+NT8183A, NT8218A, NT8236A, NT8240A, NT8254A, NT8282A, NT8283A, NT8307A, NT8327A, NT8328A.
+
+Resume:
+1. open old `Старі бібліотеки → Renault Laguna II 2001–2006`, then return Home; verify its card refreshes to `Томів: 10`;
+2. separately open Project `Laguna II` and count its installed volumes;
+3. if fewer than 10, determine which `.rdpkg` archives are not installed; do **not** confuse this with the repaired legacy `*_android` dataset;
+4. continue v0.5.54 regression: Converter styling/stale Legacy handling, then Help/dialog rotation/lifecycle;
+5. keep `RISK-LIFE-001` as a separate follow-up;
+6. do not merge PR #13 until full phone PASS.
+
+
+### Legacy Laguna refresh phone PASS — 2026-10-01
+
+Real-phone evidence after metadata repair:
+- legacy Laguna II opened successfully;
+- Modern/legacy dataset shows `томів: 10`;
+- Home `Старі бібліотеки` card now shows `Томів: 10 · відкриття: Classic`;
+- all 10 physical prepared volume folders are present in the public `*_android` dataset;
+- all 10 Laguna II `.rdpkg` archives are present in the public package folder.
+
+This closes the old `Томів: 3` legacy symptom.
+
+Next phone step is intentionally separate:
+open the normal Project `Laguna II` and count **installed Project volumes**. Presence of 10 public archives does not prove 10 packages are installed into the Project.
+
+
+### Project Laguna II 10-volume phone PASS — 2026-10-01
+
+Normal Project `Laguna II` now independently confirms:
+- project opens;
+- header shows `томів: 10`;
+- installed volume list is populated;
+- no additional Laguna II `.rdpkg` import is needed.
+
+Both storage paths are now verified:
+- Legacy public dataset: 10/10;
+- Project app-private installed packages: 10/10.
+
+Next phone regression target: Converter styling and stale-Legacy behavior, then lifecycle/rotation.
+
+
+### Converter visual phone PASS — 2026-10-01
+
+Real-device screenshot confirms:
+- source/destination selectors use Renault Docs dark bordered controls;
+- validate/start/clear actions no longer use default system-gray Android buttons;
+- primary start action uses accent styling;
+- cancelled-state status text renders normally.
+
+Still pending:
+- Cancel danger styling while an operation is actively running;
+- Converter Help rotation/lifecycle.
+
+Minor non-blocking copy polish observed: `source` / `destination` remain English inside Ukrainian UI.
+
+
+### Converter Help lifecycle phone PASS — 2026-10-01
+
+Real-device screenshot after the requested rotation cycle confirms:
+- Converter Help remains open above the same Converter screen;
+- Help uses Renault Docs dark dialog styling;
+- no SAF picker is visible;
+- no conversion/action auto-started under the dialog.
+
+Final micro-check after closing Help:
+the same Converter state should remain visible with its selected source/destination unchanged.
+
+
+### Converter Help close-state phone PASS — 2026-10-01
+
+After closing the rotated Help dialog:
+- Converter remained on the same screen;
+- selected source stayed `Documents/Renault/Megane II`;
+- destination stayed `Documents/Renault`;
+- cancelled-state status text remained;
+- no picker, validation or conversion started automatically.
+
+Converter Help lifecycle is fully accepted.
+
+
+### Stale Legacy guard phone PASS — 2026-10-01
+
+Real-device Megane II stale-library test:
+- tapping the stale `Старі бібліотеки` record does not navigate into Modern;
+- Home remains visible;
+- no raw `renault-dataset.json` read failure is exposed;
+- user-facing message explains that the old saved path is unavailable and the folder should be added again through Legacy.
+
+Minor copy-polish follow-up:
+the appended technical detail `Вибраний об'єкт не є папкою` is useful diagnostically but can be softened or hidden from the primary user message later.
+
+
+### Home Help + stale status rotation phone PASS — 2026-10-01
+
+Real-device recheck on fixed candidate `c5c322b73183afb67c34744144328674a2a75c66`:
+- stale Megane II danger message is visible before rotation;
+- Home Help opens with Renault Docs dark styling;
+- Help remains open after rotation;
+- stale danger message remains present behind the Help after Activity recreation;
+- status text/color persistence fix is therefore phone-accepted.
+
+CI on this head:
+- Tests `36885079913` PASS;
+- Android PR Check `36885079690` PASS.
+
+One final close-state micro-check remains:
+close Help and confirm Home stays on the same stale-status state with no action launched.
+
+
+### Home Help close-state phone PASS — 2026-10-01
+
+User-confirmed close-state:
+- closing Help returns to the same Home screen;
+- stale Megane II danger status remains visible;
+- no picker, navigation or other action launches automatically.
+
+Home Help lifecycle is fully accepted.
+
+
+### Project Add Help rotation phone PASS — 2026-10-01
+
+Real-device Project Laguna II check:
+- Add Help opens with Renault Docs dark styling;
+- Help remains open after rotation;
+- Project context remains Laguna II;
+- no .rdpkg picker, SAF picker or import action launches automatically.
+
+One close-state micro-check remains:
+close Help and confirm the same Project stays visible with no automatic action.
+
+
+### Project Add Help close-state phone PASS — 2026-10-01
+
+User-confirmed close-state:
+- Help closes back to the same Laguna II Project;
+- no .rdpkg picker, SAF picker or import starts automatically.
+
+Project Add Help lifecycle is fully accepted.
+
+
+### Project scroll rotation finding from video — 2026-10-01
+
+User video `380089.mp4` exposed a gap in the previously accepted Project Add Help lifecycle:
+- before rotation the Project list was scrolled near the last Laguna volumes (`NT8307A / NT8327A / NT8328A`);
+- after returning to portrait the list jumped back near `NT8183A`;
+- Help/picker lifecycle itself remained correct, but Project list position was not persisted.
+
+Root cause:
+`ProjectActivity` created its `ScrollView` as a local view and did not save/restore `scrollY`.
+
+Fix:
+- commit `60773e69eef197581600dcbea03908e7529215cd`: Project ScrollView is now an Activity field, `STATE_SCROLL_Y` is saved, and position is restored after `render()`;
+- commit `52a612f11c0d5a85f2280ddc2489060bd0c0cf75`: contract-test for Project scroll restoration;
+- Tests `36895716256` PASS;
+- Android PR Check `36895715833` pending at time of this checkpoint.
+
+Phone recheck required:
+scroll Project Laguna II near the bottom → rotate landscape → rotate portrait → same volume area must remain visible.
+
+Also user-confirmed the current Modern volume Help rotation as PASS.
+
+
+### Project scroll restoration phone PASS — 2026-10-01
+
+User-confirmed recheck after the scroll-state fix:
+- Project Laguna II remains at approximately the same volume position through landscape/portrait rotation;
+- the previous jump back to the start of the volume list is gone.
+
+CI on checkpoint head `ab433db654d42e3d8d285477675c512cd8d58d2d`:
+- Tests `36895818976` PASS;
+- Android PR Check `36895819104` PASS.
+
+Project scroll lifecycle issue is closed.
+
+
+### Native section detail-navigation + rotation-cache audit — 2026-10-01
+
+Phone/video evidence:
+- Native section Help itself survives portrait/landscape rotation and remains over the same section — PASS;
+- section 130 exposed a separate UX defect: opening `Критерії / скорочення` from either Schemes or Connector replaced the whole active panel, so the upper selectable fields/options disappeared until the user tapped Schemes/Connector again.
+
+Root cause:
+`renderStructuredDocument()` cleared `bodyContainer` and rendered the structured table as a replacement screen instead of a child/detail of the active panel.
+
+Implemented correction:
+- preserve the active parent panel id and detail label;
+- structured/composite detail is rendered below the current panel controls when launched from a panel;
+- `Зберегти таблицю PDF` and the table remain available below the preserved controls;
+- current detail + parent panel id + scroll position are saved across recreation;
+- parsed Native section Runtime IR and already-loaded volume documentation are retained in memory across configuration recreation, avoiding repeat reads;
+- VolumeDocumentationActivity now retains parsed Runtime IR + panel stack and restores scroll;
+- ModernDatasetActivity now retains the parsed catalog and restores scroll rather than rereading the index on recreation;
+- ModernVolumeActivity was already hardened earlier to keep the 383-section view alive on normal rotation.
+
+Lifecycle/cache contract after this audit:
+- presentation state (Help/dialog) → LifecycleHelpDialogController / Bundle;
+- expensive parsed Runtime/Modern data → retained across configuration recreation;
+- scroll position → Bundle;
+- long-running work (Converter / native package preparation) → service/store, not Activity cache;
+- Viewer and ModernVolume use configChanges for normal orientation changes where preserving the live view is preferable.
+
+Code path commits in this correction include:
+`e09ec092d49f308cb241caaee1e942baa0230c45`,
+`22ba6837365726e96d0b41d9f85c64a9665d3a5c`,
+`3685aa0be94c189eb27ceddf79d5932ba39a498b`,
+`905c6182ff1076705c579994ec13fe5bdf10f06b`,
+`975c42b52a07e9f9bad8ce5995ac1902f37cb5b7`,
+`4fb56b907ecb0e3e2302dbb35de638a5776336a3`,
+`67a5209accda8c37610854894bd95be17c77875d`,
+`b39c66f278f99a2c68cb1fb608bebe73c1277505`,
+`3e4f45017d16baad641f516ee33f9aa6d861d2b3`.
+
+Contract tests for the Native detail parent-panel behavior and runtime-heavy rotation retention were added in `a48a5829dcf89aa2cc3f4a96b76def4718b6f45b`.
+
+Phone recheck after one fresh candidate:
+1. section 130 → Schemes (or Connector) → open `Критерії / скорочення`;
+2. original panel fields/options must remain visible above the detail;
+3. detail heading + PDF action + table appear below;
+4. rotate with this state open — same parent panel/detail and approximate scroll must remain; no Runtime IR reload flash;
+5. quick rotation smoke on volume Documentation and top-level Modern dataset should preserve panel/list position without a reread/loading flash.

@@ -30,6 +30,19 @@ class CreateProjectActivity : Activity() {
         setContentView(
             buildContent(),
         )
+
+        savedInstanceState
+            ?.getString(
+                STATE_PROJECT_NAME,
+            )
+            ?.let {
+                nameInput.setText(
+                    it,
+                )
+                nameInput.setSelection(
+                    nameInput.text.length,
+                )
+            }
     }
 
     private fun buildContent():
@@ -100,6 +113,8 @@ class CreateProjectActivity : Activity() {
                     "Новий проєкт Renault",
                 sizeSp =
                     24f,
+                color =
+                    Ui.entityTitle,
             ).apply {
                 setTypeface(
                     typeface,
@@ -161,6 +176,41 @@ class CreateProjectActivity : Activity() {
                 setSingleLine(
                     true,
                 )
+                setTextColor(
+                    Ui.text,
+                )
+                setHintTextColor(
+                    Ui.muted,
+                )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@CreateProjectActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.border,
+                        radiusDp =
+                            11,
+                    )
+                setPadding(
+                    Ui.dp(
+                        this@CreateProjectActivity,
+                        14,
+                    ),
+                    Ui.dp(
+                        this@CreateProjectActivity,
+                        10,
+                    ),
+                    Ui.dp(
+                        this@CreateProjectActivity,
+                        14,
+                    ),
+                    Ui.dp(
+                        this@CreateProjectActivity,
+                        10,
+                    ),
+                )
             }
 
         root.addView(
@@ -172,16 +222,15 @@ class CreateProjectActivity : Activity() {
         )
 
         root.addView(
-            Button(
-                this,
-            ).apply {
-                text =
-                    "Створити проєкт"
-                isAllCaps =
-                    false
-                setOnClickListener {
-                    createProject()
-                }
+            Ui.actionButton(
+                context =
+                    this,
+                label =
+                    "Створити проєкт",
+                primary =
+                    true,
+            ) {
+                createProject()
             },
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -224,6 +273,19 @@ class CreateProjectActivity : Activity() {
         return root
     }
 
+    override fun onSaveInstanceState(
+        outState: Bundle,
+    ) {
+        outState.putString(
+            STATE_PROJECT_NAME,
+            nameInput.text
+                .toString(),
+        )
+        super.onSaveInstanceState(
+            outState,
+        )
+    }
+
     private fun createProject() {
         runCatching {
             store.createProject(
@@ -250,4 +312,10 @@ class CreateProjectActivity : Activity() {
                         ?: "Не вдалося створити проєкт."
             }
     }
+
+    companion object {
+        private const val STATE_PROJECT_NAME =
+            "projectName"
+    }
+
 }
