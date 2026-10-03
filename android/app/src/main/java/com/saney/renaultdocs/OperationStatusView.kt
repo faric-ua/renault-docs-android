@@ -13,6 +13,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     private val detailView: TextView
     private val progressView: ProgressBar
     private val closeView: TextView
+    private val cancelView: TextView
 
     init {
         orientation = VERTICAL
@@ -28,6 +29,13 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             setTypeface(typeface, Typeface.BOLD)
         }
         header.addView(titleView, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+        cancelView = Ui.textView(context, "Скасувати", 13f, Ui.muted).apply {
+            gravity = Gravity.CENTER
+            visibility = View.GONE
+            minHeight = Ui.dp(context, 44)
+            setPadding(Ui.dp(context, 10), 0, Ui.dp(context, 10), 0)
+        }
+        header.addView(cancelView, LayoutParams(LayoutParams.WRAP_CONTENT, Ui.dp(context, 44)))
         closeView = Ui.textView(context, "×", 24f, Ui.muted).apply {
             gravity = Gravity.CENTER
             visibility = View.GONE
@@ -55,11 +63,19 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         })
     }
 
-    fun showRunning(title: String, detail: String, current: Int? = null, total: Int? = null) {
+    fun showRunning(
+        title: String,
+        detail: String,
+        current: Int? = null,
+        total: Int? = null,
+        onCancel: (() -> Unit)? = null,
+    ) {
         visibility = View.VISIBLE
         titleView.text = title
         detailView.text = detail
         closeView.visibility = View.GONE
+        cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
+        cancelView.setOnClickListener(if (onCancel == null) null else View.OnClickListener { onCancel() })
         progressView.visibility = View.VISIBLE
         val determinate = current != null && total != null && total > 0
         progressView.isIndeterminate = !determinate
@@ -76,6 +92,8 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         progressView.isIndeterminate = false
         progressView.max = 1
         progressView.progress = 1
+        cancelView.visibility = View.GONE
+        cancelView.setOnClickListener(null)
         closeView.visibility = View.VISIBLE
         closeView.setOnClickListener {
             visibility = View.GONE
@@ -86,5 +104,6 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     fun hide() {
         visibility = View.GONE
         closeView.setOnClickListener(null)
+        cancelView.setOnClickListener(null)
     }
 }
