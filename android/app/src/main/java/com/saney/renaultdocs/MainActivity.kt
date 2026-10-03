@@ -354,7 +354,6 @@ class MainActivity : Activity() {
                 )
             }
         )
-        )
 
         scrollContent.addView(
             buildHomeAddPanel(),
