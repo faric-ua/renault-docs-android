@@ -26,6 +26,7 @@ class ProjectActivity : Activity() {
     private lateinit var settings: AppSettings
     private lateinit var nativeRunStore: NativeRdpkgRunStore
     private lateinit var rdpkgImportRunStore: RdpkgImportRunStore
+    private lateinit var rdpkgExportRunStore: RdpkgExportRunStore
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
     private lateinit var project: RenaultProject
@@ -79,6 +80,7 @@ class ProjectActivity : Activity() {
             override fun run() {
                 refreshNativeRunState()
                 refreshRdpkgImportRunState()
+                refreshRdpkgExportRunState()
                 nativeRunHandler.postDelayed(
                     this,
                     NATIVE_RUN_REFRESH_MS,
@@ -173,6 +175,10 @@ class ProjectActivity : Activity() {
             )
         rdpkgImportRunStore =
             RdpkgImportRunStore(
+                this,
+            )
+        rdpkgExportRunStore =
+            RdpkgExportRunStore(
                 this,
             )
 
@@ -523,76 +529,55 @@ class ProjectActivity : Activity() {
         }
 
         statusText.text = DEFAULT_STATUS_TEXT
-        operationStatus.showRunning("Експорт тому", "Експортую .rdpkg…")
+        val started =
+            RdpkgExportService.start(
+                context = this,
+                projectId = project.id,
+                volumeId = volume.id,
+                destinationUri = uri,
+            )
+        if (!started) {
+            statusText.text = "Не вдалося запустити експорт .rdpkg."
+        }
+    }
 
-        val appContext =
-            applicationContext
+    private fun refreshRdpkgExportRunState() {
+        if (!::rdpkgExportRunStore.isInitialized || !::project.isInitialized || !::operationStatus.isInitialized) return
+        val state = rdpkgExportRunStore.load()
+        if (state.projectId != project.id) return
 
-        Thread {
-            val result =
-                RdpkgExporter.export(
-                    context =
-                        appContext,
-                    volume =
-                        volume,
-                    destinationUri =
-                        uri,
-                    progress = {
-                        message ->
-                        runOnUiThread {
-                            if (
-                                !isFinishing &&
-                                !isDestroyed
-                            ) {
-                                statusText.text = DEFAULT_STATUS_TEXT
-                                operationStatus.showRunning("Експорт тому", message)
-                            }
-                        }
-                    },
-                )
+        if (state.isRunning) {
+            statusText.text = DEFAULT_STATUS_TEXT
+            operationStatus.showRunning(
+                "Експорт тому",
+                state.message.ifBlank { "Експортую .rdpkg…" },
+            )
+            return
+        }
 
-            runOnUiThread {
-                if (
-                    isFinishing ||
-                    isDestroyed
-                ) {
-                    return@runOnUiThread
+        if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalDismissed) return
+
+        statusText.text = DEFAULT_STATUS_TEXT
+        if (state.phase == RdpkgExportRunPhase.COMPLETE) {
+            val detail =
+                buildString {
+                    append(state.message.ifBlank { "Експорт .rdpkg завершено." })
+                    state.sha256?.takeIf { it.isNotBlank() }?.let {
+                        append("\nSHA-256: ")
+                        append(it)
+                    }
                 }
-
-                result
-                    .onSuccess {
-                        exported ->
-                        val label =
-                            listOfNotNull(
-                                volume.documentCode,
-                                volume.date,
-                            )
-                                .joinToString(
-                                    " · ",
-                                )
-                                .ifBlank {
-                                    volume.title
-                                }
-
-                        statusText.text =
-                            "Пакет .rdpkg збережено: " +
-                                label +
-                                " · " +
-                                exported.fileCount +
-                                " файлів\nSHA-256: " +
-                                exported.sha256
-                    }
-                    .onFailure {
-                        error ->
-                        statusText.text =
-                            "Не вдалося експортувати .rdpkg: " +
-                                (
-                                    error.message
-                                        ?: "невідома помилка"
-                                )
-                    }
+            operationStatus.showTerminal("Експорт тому завершено", detail) {
+                rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
             }
-        }.start()
+        } else {
+            val detail = "Не вдалося експортувати .rdpkg: " + state.message
+            operationStatus.showTerminal("Експорт тому · помилка", detail) {
+                rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        }
     }
 
     private fun handleNativeRdpkgSourceResult(
