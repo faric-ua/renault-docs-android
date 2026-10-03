@@ -946,6 +946,7 @@ class ProjectActivity : Activity() {
             project.id
         ) {
             hideNativeTerminalStatus()
+            if (::operationStatus.isInitialized) operationStatus.hide()
             return
         }
 
@@ -1009,6 +1010,7 @@ class ProjectActivity : Activity() {
             state.isTerminalDismissed
         ) {
             hideNativeTerminalStatus()
+            if (::operationStatus.isInitialized) operationStatus.hide()
             return
         }
 
@@ -1038,10 +1040,7 @@ class ProjectActivity : Activity() {
     private fun showNativeTerminalStatus(
         state: NativeRdpkgRunState,
     ) {
-        if (
-            !::nativeTerminalStatusRow.isInitialized ||
-            !::nativeTerminalStatusText.isInitialized
-        ) {
+        if (!::operationStatus.isInitialized) {
             return
         }
 
@@ -1389,143 +1388,12 @@ class ProjectActivity : Activity() {
             },
         )
 
+        // Native preparation terminal state is rendered by operationStatus.
         nativeTerminalStatusText =
-            Ui.textView(
-                context =
-                    this,
-                value =
-                    "",
-                sizeSp =
-                    14f,
-                color =
-                    Ui.text,
-            )
-
+            Ui.textView(this, "", 14f, Ui.text)
         nativeTerminalStatusRow =
-            LinearLayout(
-                this,
-            ).apply {
-                orientation =
-                    LinearLayout.HORIZONTAL
-                gravity =
-                    Gravity.CENTER_VERTICAL
-                visibility =
-                    View.GONE
-                background =
-                    Ui.roundedBackground(
-                        context =
-                            this@ProjectActivity,
-                        fill =
-                            Ui.surface,
-                        stroke =
-                            Ui.border,
-                    )
-                setPadding(
-                    Ui.dp(
-                        this@ProjectActivity,
-                        12,
-                    ),
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    ),
-                    Ui.dp(
-                        this@ProjectActivity,
-                        4,
-                    ),
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    ),
-                )
-
-                addView(
-                    nativeTerminalStatusText,
-                    LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f,
-                    ),
-                )
-
-                addView(
-                    Ui.textView(
-                        context =
-                            this@ProjectActivity,
-                        value =
-                            "×",
-                        sizeSp =
-                            24f,
-                        color =
-                            Ui.muted,
-                    ).apply {
-                        contentDescription =
-                            "Закрити статус"
-                        gravity =
-                            Gravity.CENTER
-                        isClickable =
-                            true
-                        isFocusable =
-                            true
-                        setPadding(
-                            Ui.dp(
-                                this@ProjectActivity,
-                                12,
-                            ),
-                            0,
-                            Ui.dp(
-                                this@ProjectActivity,
-                                12,
-                            ),
-                            0,
-                        )
-                        setOnClickListener {
-                            val state =
-                                nativeRunStore.load()
-
-                            if (
-                                state.projectId ==
-                                    project.id &&
-                                state.isTerminal
-                            ) {
-                                nativeRunStore.dismissTerminal(
-                                    state.finishedAtMs,
-                                )
-                            }
-
-                            hideNativeTerminalStatus()
-                        }
-                    },
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        Ui.dp(
-                            this@ProjectActivity,
-                            44,
-                        ),
-                    ),
-                )
-            }
-
-        root.addView(
-            nativeTerminalStatusRow,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                bottomMargin =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    )
-            },
-        )
-
-        projectScroll =
-            ScrollView(
-                this,
-            ).apply {
-                isFillViewport =
-                    true
+            LinearLayout(this).apply {
+                visibility = View.GONE
             }
 
         volumeContainer =
