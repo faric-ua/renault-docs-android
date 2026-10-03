@@ -74,7 +74,11 @@ class V0549RdpkgContractTests(unittest.TestCase):
         self.assertIn('"Авто"', activity)
         self.assertIn("openPackagePicker()", activity)
         self.assertIn("Intent.ACTION_OPEN_DOCUMENT,", activity)
-        self.assertIn("RdpkgImporter.install(", activity)
+        self.assertIn("RdpkgImportService.start(", activity)
+        service = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgImportService.kt"
+        )
+        self.assertIn("RdpkgImporter.install(", service)
         self.assertIn('"Вручну"', activity)
         self.assertIn("Intent.ACTION_OPEN_DOCUMENT_TREE,", activity)
         self.assertIn("PreparedVolumeReader.readAll(", activity)
