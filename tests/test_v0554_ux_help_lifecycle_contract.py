@@ -322,35 +322,36 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             prepared_volume,
         )
 
-    def test_prepared_volume_delete_restores_parent_action_dialog_stack(self):
+    def test_prepared_volume_delete_uses_single_dialog_and_returns_to_actions(self):
         project = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
         )
         self.assertIn("STATE_ACTIVE_DIALOG_PARENT_KIND", project)
-        self.assertIn(
-            "activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS",
-            project,
-        )
         delete_action = project.split(
             'title = "Видалити підготовлений .rdpkg"', 1
         )[1].split('addAction("Перемістити в інший проєкт")', 1)[0]
         self.assertIn(
-            "showVolumeActionsBehindPreparedDelete(volume)",
-            delete_action,
-        )
-        self.assertNotIn(
-            "confirmDeletePreparedVolume(volume)",
+            "clearProjectDialogState(DIALOG_VOLUME_ACTIONS)",
             delete_action,
         )
         self.assertIn(
-            "showVolumeActionsBehindPreparedDelete(volume)",
+            "activeProjectDialogParentKind = DIALOG_VOLUME_ACTIONS",
+            delete_action,
+        )
+        self.assertIn(
+            "confirmDeletePreparedVolume(volume)",
+            delete_action,
+        )
+        self.assertNotIn(
+            "showVolumeActionsBehindPreparedDelete",
             project,
         )
-        helper = project.split(
-            "private fun showVolumeActionsBehindPreparedDelete", 1
-        )[1].split("private fun confirmDeletePreparedVolume", 1)[0]
-        self.assertIn("showVolumeActions(volume)", helper)
-        self.assertIn("confirmDeletePreparedVolume(volume)", helper)
+        restore = project.split("private fun restoreProjectDialog()", 1)[1]
+        restore = restore.split("private fun restorePreparedVolumeChooser", 1)[0]
+        self.assertIn(
+            "DIALOG_DELETE_PREPARED_VOLUME ->\n                        confirmDeletePreparedVolume(volume)",
+            restore,
+        )
         prepared = project.split(
             "private fun confirmDeletePreparedVolume", 1
         )[1].split("private fun sharePreparedRdpkg", 1)[0]
