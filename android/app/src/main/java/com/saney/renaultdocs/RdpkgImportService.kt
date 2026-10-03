@@ -1,0 +1,106 @@
+package com.saney.renaultdocs
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.IBinder
+import java.util.concurrent.atomic.AtomicBoolean
+
+class RdpkgImportService : Service() {
+    private lateinit var runStore: RdpkgImportRunStore
+    private val workerRunning = AtomicBoolean(false)
+
+    override fun onCreate() {
+        super.onCreate()
+        runStore = RdpkgImportRunStore(this)
+        val channel = NotificationChannel(CHANNEL_ID, "Renault .rdpkg import", NotificationManager.IMPORTANCE_LOW)
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action != ACTION_START || !workerRunning.compareAndSet(false, true)) return START_NOT_STICKY
+        val projectId = intent.getStringExtra(EXTRA_PROJECT_ID)
+        val packageUri = intent.getStringExtra(EXTRA_PACKAGE_URI)
+        if (projectId.isNullOrBlank() || packageUri.isNullOrBlank()) {
+            workerRunning.set(false)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        if (!runStore.begin(projectId, packageUri)) {
+            workerRunning.set(false)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        startForeground(NOTIFICATION_ID, notification("Імпортую .rdpkg…", true))
+        Thread {
+            try {
+                val result = RdpkgImporter.install(
+                    context = applicationContext,
+                    packageUri = Uri.parse(packageUri),
+                    progress = { message ->
+                        runStore.update(message)
+                        getSystemService(NotificationManager::class.java)
+                            .notify(NOTIFICATION_ID, notification(message, true))
+                    },
+                ).getOrThrow()
+                runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
+                getSystemService(NotificationManager::class.java)
+                    .notify(NOTIFICATION_ID, notification("Пакет .rdpkg імпортовано.", false))
+            } catch (error: Throwable) {
+                val message = error.message ?: "Невідома помилка імпорту."
+                runStore.fail(message)
+                getSystemService(NotificationManager::class.java)
+                    .notify(NOTIFICATION_ID, notification("Помилка імпорту: $message", false))
+            } finally {
+                workerRunning.set(false)
+                stopForeground(STOP_FOREGROUND_DETACH)
+                stopSelf()
+            }
+        }.start()
+        return START_NOT_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun notification(text: String, ongoing: Boolean): Notification {
+        val state = runStore.load()
+        val openIntent = if (!state.projectId.isNullOrBlank()) {
+            ProjectActivity.intent(this, state.projectId!!)
+        } else {
+            Intent(this, MainActivity::class.java)
+        }
+        val pending = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        return Notification.Builder(this, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setContentTitle("Renault Docs · .rdpkg")
+            .setContentText(text)
+            .setContentIntent(pending)
+            .setOnlyAlertOnce(true)
+            .setOngoing(ongoing)
+            .apply { if (ongoing) setProgress(0, 0, true) }
+            .build()
+    }
+
+    companion object {
+        private const val ACTION_START = "com.saney.renaultdocs.action.RDPKG_IMPORT_START"
+        private const val EXTRA_PROJECT_ID = "projectId"
+        private const val EXTRA_PACKAGE_URI = "packageUri"
+        private const val CHANNEL_ID = "renault_rdpkg_import"
+        private const val NOTIFICATION_ID = 3703
+
+        fun start(context: Context, projectId: String, packageUri: Uri) {
+            val intent = Intent(context, RdpkgImportService::class.java).apply {
+                action = ACTION_START
+                putExtra(EXTRA_PROJECT_ID, projectId)
+                putExtra(EXTRA_PACKAGE_URI, packageUri.toString())
+            }
+            context.startForegroundService(intent)
+        }
+    }
+}
