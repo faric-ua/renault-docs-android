@@ -19,6 +19,7 @@ class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
     private lateinit var statusText: TextView
     private lateinit var operationProgress: ProgressBar
+    private lateinit var operationStatus: OperationStatusView
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
     private lateinit var settings: AppSettings
@@ -67,16 +68,29 @@ class MainActivity : Activity() {
                     renderLibrary()
                 },
                 onShareProgress = { current, total, message ->
-                    operationProgress.visibility = View.VISIBLE
-                    operationProgress.max = total.coerceAtLeast(1)
-                    operationProgress.progress =
-                        current.coerceIn(0, total.coerceAtLeast(1))
+                    operationProgress.visibility = View.GONE
                     statusText.text = message
+                    if (::operationStatus.isInitialized) {
+                        operationStatus.showRunning(
+                            "Підготовка проєкту",
+                            message,
+                            current,
+                            total,
+                        )
+                    }
                 },
                 onShareFinished = { message ->
                     operationProgress.visibility = View.GONE
                     operationProgress.progress = 0
                     statusText.text = message
+                    if (::operationStatus.isInitialized) {
+                        operationStatus.showTerminal(
+                            "Підготовка проєкту завершена",
+                            message,
+                        ) {
+                            operationStatus.hide()
+                        }
+                    }
                 },
             )
         projectDialogs.restore(
@@ -356,6 +370,17 @@ class MainActivity : Activity() {
             )
         }
         root.addView(statusText)
+
+        operationStatus = OperationStatusView(this)
+        root.addView(
+            operationStatus,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                bottomMargin = Ui.dp(this@MainActivity, 10)
+            },
+        )
 
         operationProgress =
             ProgressBar(
