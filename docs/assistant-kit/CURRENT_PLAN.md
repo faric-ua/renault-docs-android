@@ -499,3 +499,33 @@ Next regression block:
 1. Converter visual/buttons;
 2. stale Legacy guard;
 3. remaining Help/dialog rotation lifecycle.
+
+
+## v0.5.56 — shared operation status UI / phone evidence
+
+Status: **PHONE QA IN PROGRESS — 2026-10-03**.
+
+Candidate under test:
+- branch: `feat/v0.5.56-operation-status-ui`;
+- phone-installed exact source: `9de7ebc761f0cadf268870632c3c6eeb95d93422`;
+- Tests `37120745185` — PASS;
+- Android PR Check `37120745176` — PASS;
+- Android Debug APK `37126617668` — PASS;
+- artifact: `Renault-Docs-v0.5.56-Debug`.
+
+Phone evidence:
+- [x] install/update of the exact-head v0.5.56 candidate — PASS;
+- [x] Home → Project `Kangoo II` opens without crash — PASS.
+  - This specifically verifies the `projectScroll` initialization regression fix.
+- [ ] Native raw → .rdpkg running/terminal single-card transition.
+- [ ] FAILED run replaces running state; no orphan running card remains.
+- [ ] terminal `×` dismisses presentation state.
+- [ ] PREPARING Cancel reaches CANCELLED and does not remain stuck.
+- [ ] rotation/recreation while native preparation is active preserves one coherent status surface.
+
+Important earlier phone finding now fixed in code:
+- an invalid/mixed raw folder could show a FAILED terminal card while the running `Створення .rdpkg` card remained orphaned;
+- the v0.5.56 contract is one native-run status surface: `Running → Complete / Failed / Cancelled`.
+
+Next phone gate:
+- reproduce the invalid/mixed raw-folder failure once and verify that the same status card becomes FAILED, with no second/orphan running card.
