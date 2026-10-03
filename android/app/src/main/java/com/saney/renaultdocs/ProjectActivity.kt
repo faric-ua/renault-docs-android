@@ -414,11 +414,14 @@ class ProjectActivity : Activity() {
         }
 
         statusText.text = "Імпортую .rdpkg…"
-        RdpkgImportService.start(
+        val started = RdpkgImportService.start(
             context = this,
             projectId = project.id,
             packageUri = uri,
         )
+        if (!started) {
+            statusText.text = "Не вдалося запустити імпорт .rdpkg."
+        }
     }
 
     private fun refreshRdpkgImportRunState() {
@@ -433,10 +436,10 @@ class ProjectActivity : Activity() {
         }
 
         if (!state.isTerminal || state.finishedAtMs <= 0L) return
-        if (!rdpkgImportRunStore.consume(state.finishedAtMs)) return
 
         if (state.phase == RdpkgImportRunPhase.FAILED) {
             statusText.text = "Не вдалося імпортувати .rdpkg: " + state.message
+            rdpkgImportRunStore.consume(state.finishedAtMs)
             return
         }
 
@@ -455,6 +458,7 @@ class ProjectActivity : Activity() {
                 volume = imported,
                 allowOverride = true,
             )
+            rdpkgImportRunStore.consume(state.finishedAtMs)
         }.onFailure { error ->
             statusText.text =
                 "Пакет встановлено, але не вдалося додати том у проєкт: " +
