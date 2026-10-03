@@ -31,7 +31,8 @@ class RdpkgImportService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        if (!runStore.begin(projectId, packageUri)) {
+        val state = runStore.load()
+        if (!state.isRunning || state.projectId != projectId || state.packageUri != packageUri) {
             workerRunning.set(false)
             stopSelf()
             return START_NOT_STICKY
@@ -63,7 +64,7 @@ class RdpkgImportService : Service() {
                 stopSelf()
             }
         }.start()
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -94,13 +95,22 @@ class RdpkgImportService : Service() {
         private const val CHANNEL_ID = "renault_rdpkg_import"
         private const val NOTIFICATION_ID = 3703
 
-        fun start(context: Context, projectId: String, packageUri: Uri) {
+        fun start(context: Context, projectId: String, packageUri: Uri): Boolean {
+            val runStore = RdpkgImportRunStore(context)
+            if (!runStore.begin(projectId, packageUri.toString())) return false
+
             val intent = Intent(context, RdpkgImportService::class.java).apply {
                 action = ACTION_START
                 putExtra(EXTRA_PROJECT_ID, projectId)
                 putExtra(EXTRA_PACKAGE_URI, packageUri.toString())
             }
-            context.startForegroundService(intent)
+            return try {
+                context.startForegroundService(intent)
+                true
+            } catch (error: Throwable) {
+                runStore.fail(error.message ?: "Не вдалося запустити імпорт .rdpkg.")
+                false
+            }
         }
     }
 }
