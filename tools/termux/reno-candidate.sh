@@ -141,6 +141,24 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
+LATEST_PR_SHA="$(
+  gh pr view "$CANDIDATE_PR" \
+    --repo "$GH_REPO" \
+    --json headRefOid \
+    --jq '.headRefOid'
+)"
+LOCAL_SHA="$(git rev-parse HEAD)"
+
+if [ -z "$LATEST_PR_SHA" ] || [ "$LOCAL_SHA" != "$LATEST_PR_SHA" ]; then
+  echo
+  echo "STOP: candidate змінився під час підготовки."
+  echo "local:     $LOCAL_SHA"
+  echo "PR latest: $LATEST_PR_SHA"
+  echo
+  echo "Запусти пункт 16 ще раз — застарілий APK не будується."
+  exit 1
+fi
+
 echo
 echo "Candidate готовий локально:"
 echo "  branch:  $PR_BRANCH"
