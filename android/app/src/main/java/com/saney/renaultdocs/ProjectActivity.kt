@@ -32,6 +32,7 @@ class ProjectActivity : Activity() {
     private lateinit var volumeContainer: LinearLayout
     private lateinit var projectScroll: ScrollView
     private lateinit var statusText: TextView
+    private lateinit var operationStatus: OperationStatusView
     private lateinit var nativeTerminalStatusRow: LinearLayout
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
@@ -431,15 +432,24 @@ class ProjectActivity : Activity() {
         if (state.projectId != project.id || state.isConsumed) return
 
         if (state.isRunning) {
-            statusText.text = state.message.ifBlank { "Імпортую .rdpkg…" }
+            val detail = state.message.ifBlank { "Імпортую .rdpkg…" }
+            statusText.text = detail
+            if (::operationStatus.isInitialized) {
+                operationStatus.showRunning("Імпорт тому", detail)
+            }
             return
         }
 
         if (!state.isTerminal || state.finishedAtMs <= 0L) return
 
         if (state.phase == RdpkgImportRunPhase.FAILED) {
-            statusText.text = "Не вдалося імпортувати .rdpkg: " + state.message
-            rdpkgImportRunStore.consume(state.finishedAtMs)
+            val detail = "Не вдалося імпортувати .rdpkg: " + state.message
+            statusText.text = detail
+            if (::operationStatus.isInitialized) {
+                operationStatus.showTerminal("Імпорт тому · помилка", detail) {
+                    rdpkgImportRunStore.consume(state.finishedAtMs)
+                }
+            }
             return
         }
 
@@ -1085,6 +1095,12 @@ class ProjectActivity : Activity() {
             state.isRunning
         ) {
             hideNativeTerminalStatus()
+            if (::operationStatus.isInitialized) {
+                operationStatus.showRunning(
+                    "Створення .rdpkg",
+                    state.message.ifBlank { "Kotlin-native .rdpkg підготовка виконується…" },
+                )
+            }
             updateNativeRunProgressDialog(
                 state,
             )
@@ -1498,6 +1514,17 @@ class ProjectActivity : Activity() {
 
         root.addView(
             statusText,
+        )
+
+        operationStatus = OperationStatusView(this)
+        root.addView(
+            operationStatus,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                bottomMargin = Ui.dp(this@ProjectActivity, 10)
+            },
         )
 
         nativeTerminalStatusText =
