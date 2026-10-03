@@ -41,6 +41,7 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
         self.assertIn('"×"', self.operation_status)
         self.assertIn('"Закрити статус"', self.operation_status)
         self.assertIn("nativeRunStore.dismissTerminal(", self.project)
+        self.assertNotIn('value =\n                            "×"', self.project)
 
     def test_terminal_dismissal_is_persistent_and_scoped_to_finished_run(self):
         self.assertIn("dismissedFinishedAtMs", self.run_store)
