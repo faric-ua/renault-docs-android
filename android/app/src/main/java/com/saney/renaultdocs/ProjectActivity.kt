@@ -955,8 +955,20 @@ class ProjectActivity : Activity() {
             hideNativeTerminalStatus()
             if (::operationStatus.isInitialized) {
                 operationStatus.showRunning(
-                    "Створення .rdpkg",
-                    state.message.ifBlank { "Kotlin-native .rdpkg підготовка виконується…" },
+                    title = "Створення .rdpkg",
+                    detail = state.message.ifBlank { "Kotlin-native .rdpkg підготовка виконується…" },
+                    onCancel =
+                        if (state.phase == NativeRdpkgRunPhase.PREPARING) {
+                            {
+                                NativeRdpkgPreparationService.requestCancel(this)
+                                operationStatus.showRunning(
+                                    "Створення .rdpkg",
+                                    "Скасовую після поточного безпечного кроку…",
+                                )
+                            }
+                        } else {
+                            null
+                        },
                 )
             }
 
