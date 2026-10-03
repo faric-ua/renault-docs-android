@@ -25,6 +25,7 @@ class ProjectActivity : Activity() {
     private lateinit var store: ProjectStore
     private lateinit var settings: AppSettings
     private lateinit var nativeRunStore: NativeRdpkgRunStore
+    private lateinit var rdpkgImportRunStore: RdpkgImportRunStore
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
     private lateinit var project: RenaultProject
@@ -79,6 +80,7 @@ class ProjectActivity : Activity() {
         object : Runnable {
             override fun run() {
                 refreshNativeRunState()
+                refreshRdpkgImportRunState()
                 nativeRunHandler.postDelayed(
                     this,
                     NATIVE_RUN_REFRESH_MS,
@@ -169,6 +171,10 @@ class ProjectActivity : Activity() {
             )
         nativeRunStore =
             NativeRdpkgRunStore(
+                this,
+            )
+        rdpkgImportRunStore =
+            RdpkgImportRunStore(
                 this,
             )
 
@@ -385,87 +391,79 @@ class ProjectActivity : Activity() {
         resultCode: Int,
         data: Intent?,
     ) {
-        if (
-            resultCode !=
-            RESULT_OK
-        ) {
-            statusText.text =
-                "Імпорт .rdpkg скасовано."
+        if (resultCode != RESULT_OK) {
+            statusText.text = "Імпорт .rdpkg скасовано."
             return
         }
 
-        val uri =
-            data?.data
-
-        if (
-            uri ==
-            null
-        ) {
-            statusText.text =
-                "Android не повернув адресу .rdpkg."
+        val uri = data?.data
+        if (uri == null) {
+            statusText.text = "Android не повернув адресу .rdpkg."
             return
         }
 
         persistReadPermission(
-            uri =
-                uri,
-            returnedFlags =
-                data.flags,
+            uri = uri,
+            returnedFlags = data.flags,
         )
 
-        statusText.text =
-            "Імпортую .rdpkg…"
+        val existing = rdpkgImportRunStore.load()
+        if (existing.isRunning) {
+            statusText.text = "Інший .rdpkg вже імпортується."
+            return
+        }
 
-        Thread {
-            val result =
-                RdpkgImporter.install(
-                    context =
-                        this,
-                    packageUri =
-                        uri,
-                    progress = {
-                        message ->
-                        runOnUiThread {
-                            if (
-                                !isFinishing &&
-                                !isDestroyed
-                            ) {
-                                statusText.text =
-                                    message
-                            }
-                        }
-                    },
-                )
+        statusText.text = "Імпортую .rdpkg…"
+        val started = RdpkgImportService.start(
+            context = this,
+            projectId = project.id,
+            packageUri = uri,
+        )
+        if (!started) {
+            statusText.text = "Не вдалося запустити імпорт .rdpkg."
+        }
+    }
 
-            runOnUiThread {
-                if (
-                    isFinishing ||
-                    isDestroyed
-                ) {
-                    return@runOnUiThread
-                }
+    private fun refreshRdpkgImportRunState() {
+        if (!::rdpkgImportRunStore.isInitialized || !::statusText.isInitialized || !::project.isInitialized) return
 
-                result
-                    .onSuccess {
-                        imported ->
-                        importPreparedVolume(
-                            volume =
-                                imported.volume,
-                            allowOverride =
-                                true,
-                        )
-                    }
-                    .onFailure {
-                        error ->
-                        statusText.text =
-                            "Не вдалося імпортувати .rdpkg: " +
-                                (
-                                    error.message
-                                        ?: "невідома помилка"
-                                )
-                    }
-            }
-        }.start()
+        val state = rdpkgImportRunStore.load()
+        if (state.projectId != project.id || state.isConsumed) return
+
+        if (state.isRunning) {
+            statusText.text = state.message.ifBlank { "Імпортую .rdpkg…" }
+            return
+        }
+
+        if (!state.isTerminal || state.finishedAtMs <= 0L) return
+
+        if (state.phase == RdpkgImportRunPhase.FAILED) {
+            statusText.text = "Не вдалося імпортувати .rdpkg: " + state.message
+            rdpkgImportRunStore.consume(state.finishedAtMs)
+            return
+        }
+
+        val packageId = state.packageId
+        if (packageId.isNullOrBlank()) {
+            statusText.text = "Імпорт .rdpkg завершився без package id."
+            return
+        }
+
+        val treeUri = LocalDatasetDocumentsProvider.treeUriFor(packageId)
+        PreparedVolumeReader.read(
+            context = applicationContext,
+            treeUri = treeUri,
+        ).onSuccess { imported ->
+            importPreparedVolume(
+                volume = imported,
+                allowOverride = true,
+            )
+            rdpkgImportRunStore.consume(state.finishedAtMs)
+        }.onFailure { error ->
+            statusText.text =
+                "Пакет встановлено, але не вдалося додати том у проєкт: " +
+                    (error.message ?: "невідома помилка")
+        }
     }
 
     private fun handleRdpkgExportResult(
