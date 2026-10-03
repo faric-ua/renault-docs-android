@@ -36,6 +36,14 @@ class OperationStatusUiContractTest(unittest.TestCase):
         running = activity[activity.index("private fun refreshNativeRunState"):activity.index("private fun showNativeTerminalStatus")]
         self.assertNotIn("updateNativeRunProgressDialog(\n                state,", running)
 
+    def test_project_content_initializes_scroll_before_use(self):
+        activity = self.read("ProjectActivity.kt")
+        build = activity[activity.index("private fun buildContent"):activity.index("private fun buildAddPanel")]
+        init_pos = build.index("projectScroll =")
+        add_pos = build.index("projectScroll.addView(")
+        self.assertLess(init_pos, add_pos)
+        self.assertIn("ScrollView(this)", build)
+
     def test_home_project_share_uses_shared_surface(self):
         home = self.read("MainActivity.kt")
         self.assertIn('"Підготовка проєкту"', home)
