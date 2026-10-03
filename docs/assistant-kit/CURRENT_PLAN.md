@@ -520,7 +520,7 @@ Phone evidence:
 - [x] Native raw → .rdpkg UI transition on an intentionally invalid source — PHONE PASS for status-surface behavior only; package creation itself FAILED as expected because the selected folder was parent/mixed (2026-10-03).
 - [x] Expected validation failure for parent/mixed source replaces running state; no orphan running card remains — UI/LIFECYCLE PHONE PASS 2026-10-03.
 - [x] FAILED terminal `×` dismisses presentation state and returns to the empty-project screen — PHONE PASS 2026-10-03.
-- [ ] PREPARING Cancel reaches CANCELLED and does not remain stuck.
+- [x] PREPARING Cancel reaches CANCELLED and does not remain stuck — PHONE PASS 2026-10-03: live scan (`500 files · 6 folders`) → Cancel → terminal `Створення .rdpkg скасовано`; source unchanged, private staging cleaned; Kangoo II remains 1 volume / NT8486.
 - [x] Valid inner raw source creates/imports a real native .rdpkg — PHONE PASS 2026-10-03: NT8486 · 2009-08-31 · 276 native; Kangoo II 0 → 1 volume; terminal COMPLETE shown on the same status card with SHA-256.
 - [x] COMPLETE rotation + landscape reachability — PHONE PASS 2026-10-03 on fixed build `1d5e76cd212bac2c1daeba7e8870a57664b26df0`: after rotation the Project screen scrolls to the same COMPLETE card; NT8486 remains exactly one volume and no rerun/duplicate import is observed.
 
