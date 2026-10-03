@@ -1396,6 +1396,11 @@ class ProjectActivity : Activity() {
                 visibility = View.GONE
             }
 
+        projectScroll =
+            ScrollView(this).apply {
+                isFillViewport = true
+            }
+
         volumeContainer =
             LinearLayout(
                 this,
