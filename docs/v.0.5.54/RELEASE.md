@@ -1,6 +1,6 @@
 # Renault Docs v0.5.54 — Add UX + lifecycle-safe Help
 
-Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**
+Status: **READY / PHONE PASS / CLOSEOUT**
 
 ## Scope
 
@@ -27,17 +27,25 @@ Status: **IMPLEMENTED / CI PASS / PHONE TEST PENDING**
 The audit found the direct `.rdpkg` install worker is still Activity-owned. It should become service/run-store backed in a separate lifecycle hardening change.
 
 
-## CI
+## CI / phone acceptance
 
-- Tests `36664711140` — PASS;
-- Android PR Check `36664711278` — PASS;
-- PR #13 phone acceptance is still required before merge.
+Final accepted candidate: `bb92f07f3b1be9ea7003fbe07f263c6758fef7f5`.
 
+- Tests `37082271530` — PASS;
+- Android PR Check `37082271565` — PASS;
+- Android Debug APK `37082374624` — PASS;
+- install-over-existing phone gate — PASS; existing Megane II / Laguna II / Kangoo II state preserved;
+- prepared `.rdproject` delete lifecycle and safe deletion — PHONE PASS;
+- prepared `.rdpkg` delete lifecycle/navigation — PHONE PASS;
+- project destructive confirmations now follow the same single-dialog return-to-parent contract as volume confirmations;
+- Ukrainian project-share volume pluralization uses `том / томи / томів`.
+
+The v0.5.54 phone gate is accepted for this candidate. `RISK-LIFE-001` remains a separate lifecycle-hardening follow-up and is not hidden by this closeout.
 
 ## Final UI consolidation
 
 - all app-owned AlertDialogs are audited and themed through shared `DialogUi`;
-- current inventory: 9 dialogs total (1 Help + 3 Settings + 5 Project);
+- current app-owned AlertDialog inventory is enforced by the v0.5.54 dialog audit tests; prepared-share and project-action confirmations are included;
 - Settings radio/list dialogs, Project confirmations/actions/progress, and Help share one Renault Docs dialog family;
 - OS-owned SAF/DocumentsUI remains outside app theming;
 - Converter/Legacy service cards use a folder pictogram instead of the word "папка" to prevent wrapping and equalize layout.
