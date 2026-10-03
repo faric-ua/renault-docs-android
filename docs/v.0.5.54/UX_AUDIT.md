@@ -68,8 +68,14 @@ Help is added only where the operation is meaningfully ambiguous:
 - Project modal states are restorable:
   - volume actions;
   - remove-volume confirmation;
+  - prepared `.rdpkg` deletion confirmation;
   - multi-volume chooser;
   - wrong-project confirmation.
+- Home project dialogs are restorable:
+  - project actions;
+  - project removal confirmation;
+  - prepared `.rdproject` deletion confirmation.
+- Destructive child confirmations remember their parent action menu. Cancel returns to the same project/volume action context after rotation without performing the destructive action.
 - Project modal restore is presentation-only:
   - no export;
   - no delete;
@@ -159,16 +165,9 @@ Phone review expanded the compact typography rule to Settings:
 
 Phone review showed that styling only Help windows was not enough. The entire app-owned AlertDialog surface was audited.
 
-Inventory on v0.5.54 branch:
+Inventory on the v0.5.54 branch is enforced by `test_v0554_ux_help_lifecycle_contract.py` rather than a stale hand-maintained numeric total. The audit includes Help, Settings, Project, Home project actions, and prepared-share confirmations.
 
-| Owner | Count | Type |
-| --- | ---: | --- |
-| LifecycleHelpDialogController | 1 | Help |
-| SettingsActivity | 3 | single-choice/settings |
-| ProjectActivity | 5 | progress/actions/confirmation/chooser/mismatch |
-| **Total** | **9** | all app-owned AlertDialogs |
-
-All 9 now route through shared `DialogUi.apply(...)`.
+All app-owned AlertDialogs route through shared `DialogUi.apply(...)`.
 
 Roles:
 - `HELP` — contextual Help;
@@ -262,3 +261,24 @@ Viewer chrome contract:
 - the scope note remains app-owned and concise.
 
 This change is presentation-only and does not alter Classic navigation, manifest schema, Runtime IR or Fast Pack semantics.
+
+
+## Closeout phone acceptance — 2026-10-03
+
+Accepted candidate: `bb92f07f3b1be9ea7003fbe07f263c6758fef7f5`.
+
+Phone verification confirmed:
+- update installs over the existing v0.5.54 app without losing the existing project library;
+- Megane II remains at 2 volumes, Laguna II at 10 volumes, and Kangoo II remains empty;
+- prepared `.rdproject` confirmation survives rotation without automatic deletion;
+- deleting only the prepared `.rdproject` leaves the project and its volumes unchanged;
+- prepared `.rdpkg` confirmation/navigation follows the same lifecycle contract as project destructive confirmations;
+- Cancel returns to the relevant parent action context instead of losing navigation state;
+- no destructive operation is triggered merely by Activity recreation.
+
+Final CI for this accepted code candidate:
+- Tests `37082271530` — PASS;
+- Android PR Check `37082271565` — PASS;
+- Android Debug APK `37082374624` — PASS.
+
+`RISK-LIFE-001` remains an explicit future hardening item and is not part of the accepted modal/Help lifecycle scope.
