@@ -371,6 +371,10 @@ class SettingsActivity : Activity() {
         )
 
         body.addView(
+            supportCard(),
+        )
+
+        body.addView(
             infoCard(
                 title =
                     "Renault Docs",
@@ -862,6 +866,104 @@ class SettingsActivity : Activity() {
             )
 
             addView(actions)
+        }
+
+    private fun supportCard():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            isClickable =
+                true
+            isFocusable =
+                true
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@SettingsActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        Ui.accent,
+                )
+            setPadding(
+                Ui.dp(
+                    this@SettingsActivity,
+                    16,
+                ),
+                Ui.dp(
+                    this@SettingsActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@SettingsActivity,
+                    16,
+                ),
+                Ui.dp(
+                    this@SettingsActivity,
+                    14,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@SettingsActivity,
+                    value =
+                        "Підтримати Renault Docs",
+                    sizeSp =
+                        17f,
+                    color =
+                        Ui.entityTitle,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@SettingsActivity,
+                    value =
+                        "Добровільна підтримка розвитку програми. Не відкриває додаткових функцій.",
+                    sizeSp =
+                        Ui.secondaryTextSp,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@SettingsActivity,
+                            5,
+                        ),
+                        0,
+                        0,
+                    )
+                },
+            )
+
+            setOnClickListener {
+                if (
+                    !ExternalLinks.open(
+                        this@SettingsActivity,
+                        ExternalLinks.SUPPORT_URL,
+                    )
+                ) {
+                    android.widget.Toast
+                        .makeText(
+                            this@SettingsActivity,
+                            "Посилання на підтримку ще не налаштовано.",
+                            android.widget.Toast.LENGTH_SHORT,
+                        )
+                        .show()
+                }
+            }
         }
 
     private fun infoCard(
