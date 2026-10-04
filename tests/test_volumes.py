@@ -109,5 +109,37 @@ class VolumeDiscoveryTests(unittest.TestCase):
 
 
 
+    def test_legacy_visu_schema_title_recovers_document_type(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root / "Laguna X74 NT8183A 2001_01_22"
+            folder.mkdir()
+            (folder / "INDEX.HTM").write_text(
+                "<html><head><title>Visu Schema</title></head>"
+                "<body>Laguna 2 NT : 8183A 22.01.2001</body></html>",
+                encoding="latin-1",
+            )
+
+            volume = discover_volumes(root)[0]
+
+            self.assertEqual(
+                ["X74"],
+                volume["vehicle_codes"],
+            )
+            self.assertEqual(
+                "Visu",
+                volume["document_type"],
+            )
+            self.assertNotIn(
+                "document_version",
+                volume,
+            )
+            self.assertEqual(
+                "wiring-diagrams",
+                volume["kind"],
+            )
+
+
+
 if __name__ == "__main__":
     unittest.main()
