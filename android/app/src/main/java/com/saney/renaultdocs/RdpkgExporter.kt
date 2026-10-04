@@ -3,7 +3,6 @@ package com.saney.renaultdocs
 import android.content.Context
 import android.net.Uri
 import java.io.File
-import java.text.Normalizer
 import org.json.JSONObject
 
 object RdpkgExporter {
@@ -34,37 +33,63 @@ object RdpkgExporter {
         project: RenaultProject,
         volume: ProjectVolumeRecord,
     ): String {
-        val parts =
-            buildList {
-                add(
-                    safeFilePart(
-                        project.model,
-                    ),
-                )
-                add(
-                    safeFilePart(
-                        volume.documentCode
-                            ?: volume.id,
-                    ),
-                )
+        val inferred =
+            RenaultVolumeIdentity.parse(
+                volume.entrypoint,
+                volume.openEntrypoint,
+                volume.title,
+                volume.datasetTitle,
+                volume.platform,
+            )
+        val metadata =
+            RenaultVolumeIdentityMetadata(
+                documentCode =
+                    volume.documentCode
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: inferred.documentCode,
+                date =
+                    volume.date
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: inferred.date,
+                vehicleCodes =
+                    volume.vehicleCodes
+                        .takeIf {
+                            it.isNotEmpty()
+                        }
+                        ?: inferred.vehicleCodes,
+                documentType =
+                    volume.documentType
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: inferred.documentType,
+                documentVersion =
+                    volume.documentVersion
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: inferred.documentVersion,
+                region =
+                    volume.region
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: inferred.region,
+            )
 
-                volume.date
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let {
-                        add(
-                            safeFilePart(
-                                it,
-                            ),
-                        )
-                    }
-            }
-
-        return parts.joinToString(
-            "_",
-        ) +
-            ".rdpkg"
+        return RenaultVolumeIdentity
+            .canonicalFileName(
+                model =
+                    project.model,
+                metadata =
+                    metadata,
+                fallbackId =
+                    volume.id,
+            )
     }
 
     fun export(
@@ -228,38 +253,4 @@ object RdpkgExporter {
         }
     }
 
-    private fun safeFilePart(
-        value: String,
-    ): String {
-        val normalized =
-            Normalizer.normalize(
-                value,
-                Normalizer.Form.NFKD,
-            )
-        val ascii =
-            normalized
-                .replace(
-                    Regex(
-                        "\\p{M}+",
-                    ),
-                    "",
-                )
-        val clean =
-            ascii
-                .replace(
-                    Regex(
-                        "[^A-Za-z0-9._-]+",
-                    ),
-                    "-",
-                )
-                .trim(
-                    '-',
-                    '.',
-                    '_',
-                )
-
-        return clean.ifBlank {
-            "Renault"
-        }
-    }
 }
