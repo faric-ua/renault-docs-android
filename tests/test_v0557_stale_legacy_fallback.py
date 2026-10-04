@@ -8,13 +8,7 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
     def read(self, name):
         return (JAVA / name).read_text(encoding="utf-8")
 
-    def test_dataset_store_can_remove_stale_record_without_touching_files(self):
-        store = self.read("DatasetStore.kt")
-        self.assertIn("fun remove(id: String)", store)
-        self.assertIn(".filterNot {", store)
-        self.assertNotIn("DocumentFile", store)
-
-    def test_unavailable_migrated_legacy_record_opens_current_project(self):
+    def test_unavailable_migrated_legacy_record_opens_current_project_without_deleting_tile(self):
         main = self.read("MainActivity.kt")
         start = main.index("private fun openLegacyDataset")
         end = main.index("private fun helpSpec", start)
@@ -22,9 +16,18 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
         self.assertIn("findProjectForModel(", block)
         self.assertIn("projectStore", block)
         self.assertIn(".volumes(", block)
-        self.assertIn("store.remove(", block)
         self.assertIn("ProjectActivity.intent(", block)
-        self.assertIn("renderLibrary()", block)
+        self.assertNotIn("store.remove(", block)
+
+    def test_already_deleted_megane_legacy_tile_self_heals_as_compatibility_alias(self):
+        main = self.read("MainActivity.kt")
+        self.assertIn("LEGACY_COMPAT_PROJECT_IDS", main)
+        self.assertIn('"megane-ii"', main)
+        self.assertIn("compatibilityProjects", main)
+        self.assertIn("buildLegacyProjectAliasTile(project)", main)
+        self.assertIn("Перенесено в актуальний проєкт", main)
+        self.assertIn("Томів: ", main)
+        self.assertIn("відкриття: проєкт", main)
 
     def test_unavailable_unmigrated_legacy_record_keeps_explicit_error(self):
         main = self.read("MainActivity.kt")
