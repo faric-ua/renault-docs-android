@@ -12,11 +12,13 @@ data class RdpkgShareRunState(
     val preparedPath: String? = null,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
-    val consumedFinishedAtMs: Long = 0L,
+    val chooserLaunchedFinishedAtMs: Long = 0L,
+    val dismissedFinishedAtMs: Long = 0L,
 ) {
     val isRunning get() = phase == RdpkgShareRunPhase.PREPARING
     val isTerminal get() = phase == RdpkgShareRunPhase.COMPLETE || phase == RdpkgShareRunPhase.FAILED
-    val isTerminalConsumed get() = isTerminal && finishedAtMs > 0L && consumedFinishedAtMs == finishedAtMs
+    val isChooserLaunched get() = isTerminal && finishedAtMs > 0L && chooserLaunchedFinishedAtMs == finishedAtMs
+    val isTerminalDismissed get() = isTerminal && finishedAtMs > 0L && dismissedFinishedAtMs == finishedAtMs
 }
 
 class RdpkgShareRunStore(context: Context) {
@@ -30,7 +32,8 @@ class RdpkgShareRunStore(context: Context) {
         preparedPath = prefs.getString(KEY_PREPARED_PATH, null),
         startedAtMs = prefs.getLong(KEY_STARTED_AT, 0L),
         finishedAtMs = prefs.getLong(KEY_FINISHED_AT, 0L),
-        consumedFinishedAtMs = prefs.getLong(KEY_CONSUMED_FINISHED_AT, 0L),
+        chooserLaunchedFinishedAtMs = prefs.getLong(KEY_CHOOSER_LAUNCHED_FINISHED_AT, 0L),
+        dismissedFinishedAtMs = prefs.getLong(KEY_DISMISSED_FINISHED_AT, 0L),
     )
 
     @Synchronized
@@ -65,10 +68,17 @@ class RdpkgShareRunStore(context: Context) {
     }
 
     @Synchronized
-    fun consume(finishedAtMs: Long): Boolean {
+    fun markChooserLaunched(finishedAtMs: Long): Boolean {
+        val state = load()
+        if (!state.isTerminal || state.finishedAtMs != finishedAtMs || state.isChooserLaunched) return false
+        return prefs.edit().putLong(KEY_CHOOSER_LAUNCHED_FINISHED_AT, finishedAtMs).commit()
+    }
+
+    @Synchronized
+    fun dismissTerminal(finishedAtMs: Long): Boolean {
         val state = load()
         if (!state.isTerminal || state.finishedAtMs != finishedAtMs) return false
-        return prefs.edit().putLong(KEY_CONSUMED_FINISHED_AT, finishedAtMs).commit()
+        return prefs.edit().putLong(KEY_DISMISSED_FINISHED_AT, finishedAtMs).commit()
     }
 
     companion object {
@@ -80,6 +90,7 @@ class RdpkgShareRunStore(context: Context) {
         private const val KEY_PREPARED_PATH = "prepared_path"
         private const val KEY_STARTED_AT = "started_at"
         private const val KEY_FINISHED_AT = "finished_at"
-        private const val KEY_CONSUMED_FINISHED_AT = "consumed_finished_at"
+        private const val KEY_CHOOSER_LAUNCHED_FINISHED_AT = "chooser_launched_finished_at"
+        private const val KEY_DISMISSED_FINISHED_AT = "dismissed_finished_at"
     }
 }
