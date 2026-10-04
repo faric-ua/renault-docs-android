@@ -21,10 +21,21 @@ class DurableRdpkgShareContractTest(unittest.TestCase):
         self.assertIn("START_REDELIVER_INTENT", service)
         self.assertIn("class RdpkgShareRunStore", store)
 
-    def test_share_terminal_is_consumed_before_chooser_relaunch(self):
+    def test_share_terminal_survives_chooser_and_rotation_without_relaunch(self):
         activity = self.read("ProjectActivity.kt")
-        self.assertIn("rdpkgShareRunStore.consume(state.finishedAtMs)", activity)
-        self.assertIn('startActivity(Intent.createChooser(send, "Поділитися томом"))', activity)
+        store = self.read("RdpkgShareRunStore.kt")
+        self.assertIn("markChooserLaunched(state.finishedAtMs)", activity)
+        self.assertIn("dismissTerminal(state.finishedAtMs)", activity)
+        self.assertIn("isChooserLaunched", store)
+        self.assertIn("isTerminalDismissed", store)
+        self.assertNotIn("consume(state.finishedAtMs)", activity)
+
+    def test_existing_prepared_package_is_reused_instead_of_reexported(self):
+        activity = self.read("ProjectActivity.kt")
+        share = activity[activity.index("private fun shareRdpkg"):activity.index("private fun refreshRdpkgShareRunState")]
+        self.assertIn("PreparedShareStore.volumeFile(", share)
+        self.assertIn("preparedFile.isFile", share)
+        self.assertIn("sharePreparedRdpkg(preparedFile)", share)
 
     def test_manifest_registers_share_service(self):
         manifest = (ROOT / "android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
