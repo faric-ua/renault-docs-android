@@ -1074,6 +1074,11 @@ class MainActivity : Activity() {
                     project.id,
                 )
                 .size
+        val hasPreparedShare =
+            PreparedShareStore.projectFile(
+                this,
+                project,
+            ).isFile
 
         return LinearLayout(this).apply {
             orientation =
@@ -1209,6 +1214,26 @@ class MainActivity : Activity() {
                     1f,
                 )
             )
+
+            if (hasPreparedShare) {
+                addView(
+                    Ui.textView(
+                        context = this@MainActivity,
+                        value = "⇧",
+                        sizeSp = 20f,
+                        color = Ui.accent,
+                    ).apply {
+                        contentDescription = "Підготовлений .rdproject готовий для передачі"
+                        gravity = Gravity.CENTER
+                        setPadding(
+                            Ui.dp(this@MainActivity, 8),
+                            0,
+                            Ui.dp(this@MainActivity, 4),
+                            0,
+                        )
+                    }
+                )
+            }
 
             addView(
                 Ui.textView(
