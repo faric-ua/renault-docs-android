@@ -151,6 +151,10 @@ def build_rdpkg(
                     "title",
                     "document_code",
                     "date",
+                    "vehicle_codes",
+                    "document_type",
+                    "document_version",
+                    "region",
                     "kind",
                     "source_folder",
                     "entrypoint",
@@ -325,16 +329,58 @@ def default_package_filename(
         or dataset.get("title")
         or "Renault"
     )
-    parts = [
+
+    parts: list[str] = [
         _safe_filename_part(model),
+    ]
+
+    vehicle_codes = [
+        str(code).strip()
+        for code in (volume.get("vehicle_codes") or [])
+        if str(code).strip()
+    ]
+    if vehicle_codes:
+        parts.append(
+            "-".join(
+                _safe_filename_part(code)
+                for code in vehicle_codes
+            )
+        )
+
+    region = str(volume.get("region") or "").strip()
+    if region:
+        parts.append(
+            _safe_filename_part(region)
+        )
+
+    parts.append(
         _safe_filename_part(
             str(
                 volume.get("document_code")
                 or volume.get("id")
                 or "volume"
             )
-        ),
-    ]
+        )
+    )
+
+    document_type = str(
+        volume.get("document_type")
+        or ""
+    ).strip()
+    document_version = str(
+        volume.get("document_version")
+        or ""
+    ).strip().removeprefix("v")
+
+    if document_type:
+        descriptor = document_type
+        if document_version:
+            descriptor += "-v" + document_version
+        parts.append(
+            _safe_filename_part(
+                descriptor,
+            )
+        )
 
     date = volume.get("date")
     if date:
