@@ -562,7 +562,10 @@ class ProjectStore(
                     ?.takeIf {
                         it.isNotBlank()
                     }
-                    ?: identity.documentType,
+                    ?: identity.documentType
+                    ?: inferDocumentTypeFromEntrypoint(
+                        volume,
+                    ),
             documentVersion =
                 volume.documentVersion
                     ?.takeIf {
@@ -577,6 +580,64 @@ class ProjectStore(
                     ?: identity.region,
         )
     }
+
+    private fun inferDocumentTypeFromEntrypoint(
+        volume: ProjectVolumeRecord,
+    ): String? =
+        runCatching {
+            val treeUri =
+                Uri.parse(
+                    volume.treeUri,
+                )
+            val resolver =
+                SafDatasetResolver(
+                    context =
+                        appContext,
+                    treeUri =
+                        treeUri,
+                )
+
+            val bytes =
+                resolver
+                    .openInputStream(
+                        volume.entrypoint,
+                    )
+                    ?.buffered()
+                    ?.use {
+                        input ->
+                        val buffer =
+                            ByteArray(
+                                64 * 1024,
+                            )
+                        val read =
+                            input.read(
+                                buffer,
+                            )
+
+                        if (
+                            read <=
+                            0
+                        ) {
+                            ByteArray(
+                                0,
+                            )
+                        } else {
+                            buffer.copyOf(
+                                read,
+                            )
+                        }
+                    }
+                    ?: return@runCatching null
+
+            RenaultVolumeIdentity
+                .documentTypeFromHtml(
+                    bytes.toString(
+                        Charsets.ISO_8859_1,
+                    ),
+                )
+        }
+            .getOrNull()
+
 
     fun findProjectForModel(
         model: String,
