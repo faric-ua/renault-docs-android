@@ -11,7 +11,7 @@ class LegacyQuarantineContractTests(unittest.TestCase):
         cls.text = SCRIPT.read_text(encoding="utf-8")
 
     def test_quarantine_is_move_only_and_reversible(self):
-        self.assertIn('QUARANTINE="\${RENAULT_LEGACY_QUARANTINE:-$ROOT/legacy-quarantine}"', self.text)
+        self.assertIn('QUARANTINE="${RENAULT_LEGACY_QUARANTINE:-$ROOT/legacy-quarantine}"', self.text)
         self.assertIn('mv -- "$src" "$dst"', self.text)
         self.assertIn("RESTORE", self.text)
         self.assertIn("manifest.tsv", self.text)
