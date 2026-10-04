@@ -208,5 +208,48 @@ class RdpkgTests(unittest.TestCase):
         )
 
 
+    def test_default_filename_includes_canonical_volume_identity(self):
+        dataset = {
+            "model": "Megane II",
+        }
+        volume = {
+            "document_code": "NT8340A",
+            "date": "2006-04-18",
+            "vehicle_codes": ["E84", "L84", "K84"],
+            "document_type": "Visu",
+            "document_version": "3.0",
+        }
+
+        self.assertEqual(
+            "Megane-II_E84-L84-K84_NT8340A_Visu-v3.0_2006-04-18.rdpkg",
+            default_package_filename(
+                dataset,
+                volume,
+            ),
+        )
+
+    def test_default_filename_keeps_region_before_document_code(self):
+        dataset = {
+            "model": "Megane II",
+        }
+        volume = {
+            "document_code": "NT8342A",
+            "date": "2006-10-09",
+            "vehicle_codes": ["E84", "L84", "K84"],
+            "document_type": "Visu",
+            "document_version": "3.0",
+            "region": "Europe",
+        }
+
+        self.assertEqual(
+            "Megane-II_E84-L84-K84_Europe_NT8342A_Visu-v3.0_2006-10-09.rdpkg",
+            default_package_filename(
+                dataset,
+                volume,
+            ),
+        )
+
+
+
 if __name__ == "__main__":
     unittest.main()

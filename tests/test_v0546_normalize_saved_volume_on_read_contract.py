@@ -16,11 +16,12 @@ class V0546NormalizeSavedVolumeOnReadContractTests(unittest.TestCase):
             "inferVolumeMetadata(\n                    it.second,\n                )",
             store,
         )
-        self.assertIn('"NT[0-9A-Z]+"', store)
-        self.assertIn(
-            '"(20\\\\d{2})[._-](\\\\d{2})[._-](\\\\d{2})"',
-            store,
+        parser = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RenaultVolumeIdentity.kt"
         )
+        self.assertIn("RenaultVolumeIdentity.parse(", store)
+        self.assertIn("ntRegex", parser)
+        self.assertIn("dateRegex", parser)
 
     def test_release_version(self):
         gradle = self._read("android/app/build.gradle.kts")

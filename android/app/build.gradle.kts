@@ -32,8 +32,8 @@ android {
         applicationId = "com.saney.renaultdocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 73
-        versionName = "0.5.57"
+        versionCode = 74
+        versionName = "0.5.58"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

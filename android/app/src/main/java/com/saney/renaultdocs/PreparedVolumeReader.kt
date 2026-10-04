@@ -118,6 +118,11 @@ object PreparedVolumeReader {
                             )
                                 .trim()
 
+                        val inferredIdentity =
+                            RenaultVolumeIdentity.parse(
+                                sourceFolder,
+                            )
+
                         val documentCode =
                             volume.optString(
                                 "document_code",
@@ -126,6 +131,7 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.documentCode
 
                         val date =
                             volume.optString(
@@ -135,6 +141,69 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.date
+
+                        val vehicleCodes =
+                            volume.optJSONArray(
+                                "vehicle_codes",
+                            )
+                                ?.let {
+                                    array ->
+                                    buildList {
+                                        for (
+                                            codeIndex in
+                                            0 until array.length()
+                                        ) {
+                                            val code =
+                                                array.optString(
+                                                    codeIndex,
+                                                )
+                                                    .trim()
+
+                                            if (
+                                                code.isNotBlank()
+                                            ) {
+                                                add(
+                                                    code,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                ?.takeIf {
+                                    it.isNotEmpty()
+                                }
+                                ?: inferredIdentity.vehicleCodes
+
+                        val declaredDocumentType =
+                            volume.optString(
+                                "document_type",
+                            )
+                                .trim()
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?: inferredIdentity.documentType
+
+                        val documentVersion =
+                            volume.optString(
+                                "document_version",
+                            )
+                                .trim()
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?: inferredIdentity.documentVersion
+
+                        val region =
+                            volume.optString(
+                                "region",
+                            )
+                                .trim()
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?: inferredIdentity.region
 
                         if (
                             shouldIgnoreSyntheticVolume(
@@ -175,6 +244,17 @@ object PreparedVolumeReader {
                                         )
                                     }
                                 }
+
+                        val documentType =
+                            declaredDocumentType
+                                ?: inferDocumentTypeFromEntrypoint(
+                                    context =
+                                        context,
+                                    treeUri =
+                                        treeUri,
+                                    entrypoint =
+                                        volumeEntrypoint,
+                                )
 
                         val volumeTitle =
                             volume.optString(
@@ -235,6 +315,14 @@ object PreparedVolumeReader {
                                     dataset.openEntrypoint,
                                 treeUri =
                                     dataset.treeUri,
+                                vehicleCodes =
+                                    vehicleCodes,
+                                documentType =
+                                    documentType,
+                                documentVersion =
+                                    documentVersion,
+                                region =
+                                    region,
                             ),
                         )
                     }
@@ -248,6 +336,62 @@ object PreparedVolumeReader {
 
             records
         }
+
+    private fun inferDocumentTypeFromEntrypoint(
+        context: Context,
+        treeUri: Uri,
+        entrypoint: String,
+    ): String? =
+        runCatching {
+            val resolver =
+                SafDatasetResolver(
+                    context =
+                        context,
+                    treeUri =
+                        treeUri,
+                )
+
+            val bytes =
+                resolver
+                    .openInputStream(
+                        entrypoint,
+                    )
+                    ?.buffered()
+                    ?.use {
+                        input ->
+                        val buffer =
+                            ByteArray(
+                                64 * 1024,
+                            )
+                        val read =
+                            input.read(
+                                buffer,
+                            )
+
+                        if (
+                            read <=
+                            0
+                        ) {
+                            ByteArray(
+                                0,
+                            )
+                        } else {
+                            buffer.copyOf(
+                                read,
+                            )
+                        }
+                    }
+                    ?: return@runCatching null
+
+            RenaultVolumeIdentity
+                .documentTypeFromHtml(
+                    bytes.toString(
+                        Charsets.ISO_8859_1,
+                    ),
+                )
+        }
+            .getOrNull()
+
 
     private fun shouldIgnoreSyntheticVolume(
         sourceFolder: String,

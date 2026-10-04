@@ -29,6 +29,10 @@ data class ProjectVolumeRecord(
     val entrypoint: String,
     val openEntrypoint: String,
     val treeUri: String,
+    val vehicleCodes: List<String> = emptyList(),
+    val documentType: String? = null,
+    val documentVersion: String? = null,
+    val region: String? = null,
 ) {
     fun asDatasetRecord(): DatasetRecord =
         DatasetRecord(
@@ -503,52 +507,30 @@ class ProjectStore(
                 volume.openEntrypoint,
                 volume.title,
                 volume.datasetTitle,
+                volume.platform,
             )
+                .filterNotNull()
                 .joinToString(
                     " ",
                 )
 
+        val identity =
+            RenaultVolumeIdentity.parse(
+                source,
+            )
+
         val documentCode =
-            Regex(
-                "NT[0-9A-Z]+",
-                RegexOption.IGNORE_CASE,
-            )
-                .find(
-                    source,
-                )
-                ?.value
-                ?.uppercase(
-                    Locale.ROOT,
-                )
-
-        val dateMatch =
-            Regex(
-                "(20\\d{2})[._-](\\d{2})[._-](\\d{2})",
-            )
-                .find(
-                    source,
-                )
-
-        val date =
-            dateMatch
-                ?.groupValues
-                ?.let {
-                    groups ->
-                    groups[1] +
-                        "-" +
-                        groups[2] +
-                        "-" +
-                        groups[3]
+            volume.documentCode
+                ?.takeIf {
+                    it.isNotBlank()
                 }
-
-        if (
-            documentCode ==
-                null &&
-            date ==
-                null
-        ) {
-            return volume
-        }
+                ?: identity.documentCode
+        val date =
+            volume.date
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: identity.date
 
         val title =
             listOfNotNull(
@@ -566,13 +548,96 @@ class ProjectStore(
             title =
                 title,
             documentCode =
-                documentCode
-                    ?: volume.documentCode,
+                documentCode,
             date =
-                date
-                    ?: volume.date,
+                date,
+            vehicleCodes =
+                volume.vehicleCodes
+                    .takeIf {
+                        it.isNotEmpty()
+                    }
+                    ?: identity.vehicleCodes,
+            documentType =
+                volume.documentType
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: identity.documentType
+                    ?: inferDocumentTypeFromEntrypoint(
+                        volume,
+                    ),
+            documentVersion =
+                volume.documentVersion
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: identity.documentVersion,
+            region =
+                volume.region
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: identity.region,
         )
     }
+
+    private fun inferDocumentTypeFromEntrypoint(
+        volume: ProjectVolumeRecord,
+    ): String? =
+        runCatching {
+            val treeUri =
+                Uri.parse(
+                    volume.treeUri,
+                )
+            val resolver =
+                SafDatasetResolver(
+                    context =
+                        appContext,
+                    treeUri =
+                        treeUri,
+                )
+
+            val bytes =
+                resolver
+                    .openInputStream(
+                        volume.entrypoint,
+                    )
+                    ?.buffered()
+                    ?.use {
+                        input ->
+                        val buffer =
+                            ByteArray(
+                                64 * 1024,
+                            )
+                        val read =
+                            input.read(
+                                buffer,
+                            )
+
+                        if (
+                            read <=
+                            0
+                        ) {
+                            ByteArray(
+                                0,
+                            )
+                        } else {
+                            buffer.copyOf(
+                                read,
+                            )
+                        }
+                    }
+                    ?: return@runCatching null
+
+            RenaultVolumeIdentity
+                .documentTypeFromHtml(
+                    bytes.toString(
+                        Charsets.ISO_8859_1,
+                    ),
+                )
+        }
+            .getOrNull()
+
 
     fun findProjectForModel(
         model: String,
@@ -837,6 +902,56 @@ class ProjectStore(
                                     item.getString(
                                         "treeUri",
                                     ),
+                                vehicleCodes =
+                                    item.optJSONArray(
+                                        "vehicleCodes",
+                                    )
+                                        ?.let {
+                                            array ->
+                                            buildList {
+                                                for (
+                                                    codeIndex in
+                                                    0 until array.length()
+                                                ) {
+                                                    array
+                                                        .optString(
+                                                            codeIndex,
+                                                        )
+                                                        .trim()
+                                                        .takeIf {
+                                                            it.isNotBlank()
+                                                        }
+                                                        ?.let {
+                                                            code ->
+                                                            add(
+                                                                code,
+                                                            )
+                                                        }
+                                                }
+                                            }
+                                        }
+                                        ?: emptyList(),
+                                documentType =
+                                    item.optString(
+                                        "documentType",
+                                    )
+                                        .takeIf {
+                                            it.isNotBlank()
+                                        },
+                                documentVersion =
+                                    item.optString(
+                                        "documentVersion",
+                                    )
+                                        .takeIf {
+                                            it.isNotBlank()
+                                        },
+                                region =
+                                    item.optString(
+                                        "region",
+                                    )
+                                        .takeIf {
+                                            it.isNotBlank()
+                                        },
                             ),
                     )
                 }
@@ -925,6 +1040,24 @@ class ProjectStore(
                     .put(
                         "treeUri",
                         record.treeUri,
+                    )
+                    .put(
+                        "vehicleCodes",
+                        JSONArray(
+                            record.vehicleCodes,
+                        ),
+                    )
+                    .put(
+                        "documentType",
+                        record.documentType ?: "",
+                    )
+                    .put(
+                        "documentVersion",
+                        record.documentVersion ?: "",
+                    )
+                    .put(
+                        "region",
+                        record.region ?: "",
                     ),
             )
         }

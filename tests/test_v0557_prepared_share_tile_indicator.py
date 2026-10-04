@@ -17,7 +17,7 @@ class PreparedShareTileIndicatorContractTest(unittest.TestCase):
     def test_volume_tile_reflects_prepared_rdpkg_file(self):
         project = self.read("ProjectActivity.kt")
         card = project[project.index("private fun buildVolumeCard"):project.index("private fun openVolume", project.index("private fun buildVolumeCard"))]
-        self.assertIn("PreparedShareStore.volumeFile(", card)
+        self.assertIn("PreparedShareStore.hasVolumeFile(", card)
         self.assertIn("Підготовлений .rdpkg готовий для передачі", card)
 
     def test_volume_indicator_refreshes_immediately_after_prepared_file_delete(self):

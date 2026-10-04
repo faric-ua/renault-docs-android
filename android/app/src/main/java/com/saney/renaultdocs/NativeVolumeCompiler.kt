@@ -179,18 +179,33 @@ object NativeVolumeCompiler {
 
                     val folderName =
                         child.name
+                    val identity =
+                        RenaultVolumeIdentity.parse(
+                            folderName,
+                        )
                     val date =
-                        extractDate(
-                            folderName,
-                        )
+                        identity.date
                     val documentCode =
-                        extractNtCode(
-                            folderName,
-                        )
+                        identity.documentCode
+                    val documentType =
+                        identity.documentType
+                            ?: inferDocumentTypeFromEntrypoint(
+                                child =
+                                    child,
+                                entrypoint =
+                                    entrypoint,
+                            )
                     val isVisu =
-                        "visu" in
-                            folderName.lowercase(
-                                Locale.ROOT,
+                        documentType
+                            ?.equals(
+                                "Visu",
+                                ignoreCase = true,
+                            )
+                            ?: (
+                                "visu" in
+                                    folderName.lowercase(
+                                        Locale.ROOT,
+                                    )
                             )
 
                     val title =
@@ -270,6 +285,51 @@ object NativeVolumeCompiler {
                                     date,
                                 )
                             }
+
+                            if (
+                                identity.vehicleCodes
+                                    .isNotEmpty()
+                            ) {
+                                put(
+                                    "vehicle_codes",
+                                    JSONArray(
+                                        identity.vehicleCodes,
+                                    ),
+                                )
+                            }
+
+                            documentType
+                                ?.takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?.let {
+                                    put(
+                                        "document_type",
+                                        it,
+                                    )
+                                }
+
+                            identity.documentVersion
+                                ?.takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?.let {
+                                    put(
+                                        "document_version",
+                                        it,
+                                    )
+                                }
+
+                            identity.region
+                                ?.takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?.let {
+                                    put(
+                                        "region",
+                                        it,
+                                    )
+                                }
                         }
                 }
                 .toMutableList()
@@ -358,6 +418,10 @@ object NativeVolumeCompiler {
                 "title",
                 "document_code",
                 "date",
+                "vehicle_codes",
+                "document_type",
+                "document_version",
+                "region",
                 "kind",
                 "source_folder",
                 "entrypoint",
@@ -603,4 +667,59 @@ object NativeVolumeCompiler {
                 "volume"
             }
     }
+    private fun inferDocumentTypeFromEntrypoint(
+        child: File,
+        entrypoint: String,
+    ): String? =
+        runCatching {
+            val file =
+                File(
+                    child,
+                    entrypoint,
+                )
+
+            if (
+                !file.isFile
+            ) {
+                return@runCatching null
+            }
+
+            val bytes =
+                file.inputStream()
+                    .buffered()
+                    .use {
+                        input ->
+                        val buffer =
+                            ByteArray(
+                                64 * 1024,
+                            )
+                        val read =
+                            input.read(
+                                buffer,
+                            )
+
+                        if (
+                            read <=
+                            0
+                        ) {
+                            ByteArray(
+                                0,
+                            )
+                        } else {
+                            buffer.copyOf(
+                                read,
+                            )
+                        }
+                    }
+
+            RenaultVolumeIdentity
+                .documentTypeFromHtml(
+                    bytes.toString(
+                        Charsets.ISO_8859_1,
+                    ),
+                )
+        }
+            .getOrNull()
+
+
 }

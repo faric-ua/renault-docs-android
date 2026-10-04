@@ -23,6 +23,54 @@ Megane II project
 
 The user should not need to understand `*_android` folders, package internals, Python, or Termux.
 
+## Canonical volume identity and filename
+
+Starting with v0.5.58, the volume identity preserves Renault technical applicability codes from the source volume name instead of collapsing the package to only NT + date.
+
+Example source identity:
+
+```text
+Megane II E,L,K 84_NT8340A_Visu v3.0_2006.04.18
+```
+
+Normalized metadata:
+
+```text
+document_code: NT8340A
+date: 2006-04-18
+vehicle_codes: E84, L84, K84
+document_type: Visu
+document_version: 3.0
+```
+
+Canonical filename:
+
+```text
+Megane-II_E84-L84-K84_NT8340A_Visu-v3.0_2006-04-18.rdpkg
+```
+
+Regional metadata is retained when present, for example:
+
+```text
+Megane-II_E84-L84-K84_Europe_NT8342A_Visu-v3.0_2006-10-09.rdpkg
+```
+
+Renault codes such as `E84`, `L84`, `K84`, `X74`, and `X61` are opaque technical identifiers. The application must display and store them as codes; it must not translate or infer a body-style meaning from the code itself.
+
+Project and volume UI are separate levels:
+
+```text
+Project tile
+Megane II
+
+Volume tile
+NT8340A · 2006-04-18
+E84 · L84 · K84
+Visu v3.0
+```
+
+The filename is transport identity, not the source of truth. Structured metadata in `renault-dataset.json` / `rdpkg.json` remains authoritative.
+
 ## RDPKG v1
 
 Current package identity:

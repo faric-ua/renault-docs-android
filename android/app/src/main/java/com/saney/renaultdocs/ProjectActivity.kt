@@ -879,13 +879,17 @@ class ProjectActivity : Activity() {
         sourceName: String,
     ) {
         val defaultName =
-            NativePreparationStager
-                .safeToken(
-                    project.model +
-                        "_" +
+            RenaultVolumeIdentity
+                .canonicalFileName(
+                    model =
+                        project.model,
+                    metadata =
+                        RenaultVolumeIdentity.parse(
+                            sourceName,
+                        ),
+                    fallbackId =
                         sourceName,
-                ) +
-                ".rdpkg"
+                )
 
         val picker =
             Intent(
@@ -2023,11 +2027,22 @@ class ProjectActivity : Activity() {
                 }
 
             val primaryTitle =
-                volume.documentCode
-                    ?.takeIf {
-                        it.isNotBlank()
+                listOfNotNull(
+                    volume.documentCode
+                        ?.takeIf {
+                            it.isNotBlank()
+                        },
+                    volume.date
+                        ?.takeIf {
+                            it.isNotBlank()
+                        },
+                )
+                    .joinToString(
+                        " · ",
+                    )
+                    .ifBlank {
+                        volume.title
                     }
-                    ?: volume.title
 
             textColumn.addView(
                 Ui.textView(
@@ -2047,42 +2062,72 @@ class ProjectActivity : Activity() {
                 },
             )
 
-            val details =
-                buildList {
-                    volume.date
-                        ?.takeIf {
-                            it.isNotBlank()
-                        }
-                        ?.let {
-                            add(
-                                it,
-                            )
-                        }
-
-                    if (
-                        volume.documentCode
-                            .isNullOrBlank() &&
-                        volume.title !=
-                            primaryTitle
-                    ) {
-                        add(
-                            volume.title,
-                        )
+            val vehicleCodes =
+                volume.vehicleCodes
+                    .filter {
+                        it.isNotBlank()
                     }
-                }
                     .joinToString(
                         " · ",
                     )
 
             if (
-                details.isNotBlank()
+                vehicleCodes.isNotBlank()
             ) {
                 textColumn.addView(
                     Ui.textView(
                         context =
                             this@ProjectActivity,
                         value =
-                            details,
+                            vehicleCodes,
+                        sizeSp =
+                            14f,
+                        color =
+                            Ui.muted,
+                    ).apply {
+                        setPadding(
+                            0,
+                            Ui.dp(
+                                this@ProjectActivity,
+                                5,
+                            ),
+                            0,
+                            0,
+                        )
+                    },
+                )
+            }
+
+            val documentDescriptor =
+                RenaultVolumeIdentityMetadata(
+                    documentType =
+                        volume.documentType,
+                    documentVersion =
+                        volume.documentVersion,
+                )
+                    .documentDescriptor()
+
+            val documentLine =
+                listOfNotNull(
+                    volume.region
+                        ?.takeIf {
+                            it.isNotBlank()
+                        },
+                    documentDescriptor,
+                )
+                    .joinToString(
+                        " · ",
+                    )
+
+            if (
+                documentLine.isNotBlank()
+            ) {
+                textColumn.addView(
+                    Ui.textView(
+                        context =
+                            this@ProjectActivity,
+                        value =
+                            documentLine,
                         sizeSp =
                             14f,
                         color =
@@ -2092,7 +2137,7 @@ class ProjectActivity : Activity() {
                             0,
                             Ui.dp(
                                 this@ProjectActivity,
-                                5,
+                                4,
                             ),
                             0,
                             0,
@@ -2110,7 +2155,7 @@ class ProjectActivity : Activity() {
                 ),
             )
 
-            if (PreparedShareStore.volumeFile(this@ProjectActivity, project, volume).isFile) {
+            if (PreparedShareStore.hasVolumeFile(this@ProjectActivity, project, volume)) {
                 addView(
                     Ui.textView(
                         context = this@ProjectActivity,
@@ -2283,12 +2328,12 @@ class ProjectActivity : Activity() {
             shareRdpkg(volume)
         }
         val prepared =
-            PreparedShareStore.volumeFile(
+            PreparedShareStore.existingVolumeFile(
                 this,
                 project,
                 volume,
             )
-        if (prepared.exists()) {
+        if (prepared != null) {
             addAction("Поділитися підготовленим .rdpkg") {
                 clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                 sharePreparedRdpkg(
@@ -2465,8 +2510,13 @@ class ProjectActivity : Activity() {
             return
         }
 
-        val preparedFile = PreparedShareStore.volumeFile(this, project, volume)
-        if (preparedFile.isFile) {
+        val preparedFile =
+            PreparedShareStore.existingVolumeFile(
+                this,
+                project,
+                volume,
+            )
+        if (preparedFile != null) {
             sharePreparedRdpkg(preparedFile)
             return
         }
