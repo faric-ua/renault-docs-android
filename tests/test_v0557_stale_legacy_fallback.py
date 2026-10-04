@@ -8,7 +8,7 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
     def read(self, name):
         return (JAVA / name).read_text(encoding="utf-8")
 
-    def test_unavailable_migrated_legacy_record_opens_current_project_without_deleting_tile(self):
+    def test_unavailable_migrated_legacy_record_can_open_current_project_without_deleting_data(self):
         main = self.read("MainActivity.kt")
         start = main.index("private fun openLegacyDataset")
         end = main.index("private fun helpSpec", start)
@@ -19,15 +19,14 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
         self.assertIn("ProjectActivity.intent(", block)
         self.assertNotIn("store.remove(", block)
 
-    def test_already_deleted_megane_legacy_tile_self_heals_as_compatibility_alias(self):
+    def test_populated_current_project_hides_matching_legacy_dataset_from_home(self):
         main = self.read("MainActivity.kt")
-        self.assertIn("LEGACY_COMPAT_PROJECT_IDS", main)
-        self.assertIn('"megane-ii"', main)
-        self.assertIn("compatibilityProjects", main)
-        self.assertIn("buildLegacyProjectAliasTile(project)", main)
-        self.assertIn("Перенесено в актуальний проєкт", main)
-        self.assertIn("Томів: ", main)
-        self.assertIn("відкриття: проєкт", main)
+        self.assertIn("visibleLegacyRecords", main)
+        self.assertIn("findProjectForModel(", main)
+        self.assertIn(".isEmpty()", main)
+        self.assertIn("visibleLegacyRecords.forEach", main)
+        self.assertNotIn("LEGACY_COMPAT_PROJECT_IDS", main)
+        self.assertNotIn("buildLegacyProjectAliasTile", main)
 
     def test_unavailable_unmigrated_legacy_record_keeps_explicit_error(self):
         main = self.read("MainActivity.kt")
