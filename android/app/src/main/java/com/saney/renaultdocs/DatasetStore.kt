@@ -53,6 +53,15 @@ class DatasetStore(
         save(updated)
     }
 
+    fun remove(id: String) {
+        save(
+            load()
+                .filterNot {
+                    it.id == id
+                },
+        )
+    }
+
     private fun save(records: List<DatasetRecord>) {
         val array = JSONArray()
 
