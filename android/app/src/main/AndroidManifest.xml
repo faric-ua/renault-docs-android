@@ -68,6 +68,18 @@
             android:stopWithTask="false" />
 
         <service
+            android:name=".RdpkgShareService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <service
+            android:name=".RdpkgExportService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <service
             android:name=".RdpkgImportService"
             android:exported="false"
             android:foregroundServiceType="dataSync"

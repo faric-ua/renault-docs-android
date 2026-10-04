@@ -30,9 +30,11 @@ class VolumeActionsContractTest(unittest.TestCase):
 
     def test_share_uses_rdpkg_exporter_and_secure_file_provider(self):
         activity = self.read("android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt")
+        share_service = self.read("android/app/src/main/java/com/saney/renaultdocs/RdpkgShareService.kt")
         manifest = self.read("android/app/src/main/AndroidManifest.xml")
         paths = self.read("android/app/src/main/res/xml/file_paths.xml")
-        self.assertIn("RdpkgExporter.export(", activity)
+        self.assertIn("RdpkgShareService.start(", activity)
+        self.assertIn("RdpkgExporter.export(", share_service)
         self.assertIn("Intent.ACTION_SEND", activity)
         self.assertIn("FileProvider.getUriForFile(", activity)
         self.assertIn("androidx.core.content.FileProvider", manifest)

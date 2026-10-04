@@ -1,6 +1,27 @@
+
+## v0.5.57 — durable .rdpkg export/share lifecycle
+
+Status: **PHONE PASS — 2026-10-04**.
+
+Accepted exact phone candidate: `5d2e39e238114991e052a01a662d882b26a3fbc8`.
+
+Accepted phone evidence:
+- durable Share preparation shows live progress and survives Activity lifecycle;
+- completion opens Android Share Sheet once;
+- terminal card `Підготовка тому завершена` remains visible underneath the Share Sheet and is still present after the Share Sheet is cancelled/closed;
+- terminal status is dismissed only by explicit `×`;
+- already prepared volume package is reused instead of preparing the same volume again;
+- Megane II phone evidence used NT8340A / NT8342A project screen; source project/volumes remained intact.
+
+CI on accepted exact HEAD:
+- Tests run `37166273230` — PASS;
+- Android PR Check run `37166273228` — PASS.
+
+PR: #16 `v0.5.57 — durable .rdpkg export/share lifecycle`.
+
 # Renault Docs — CURRENT PLAN
 
-Останнє оновлення: 2026-09-29.
+Останнє оновлення: 2026-10-04.
 
 Це коротка жива точка відновлення. Історія рішень і старих інцидентів лишається в `CURRENT_HANDOFF.md` та `docs/assistant-kit/PROJECT_LEDGER.md`.
 

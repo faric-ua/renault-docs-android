@@ -34,7 +34,11 @@ class V0550NativeRdpkgExportContractTests(unittest.TestCase):
         self.assertIn('"Експортувати .rdpkg"', activity)
         self.assertIn("Intent.ACTION_CREATE_DOCUMENT", activity)
         self.assertIn("defaultFileName(", activity)
-        self.assertIn("RdpkgExporter.export(", activity)
+        export_service = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgExportService.kt"
+        )
+        self.assertIn("RdpkgExportService.start(", activity)
+        self.assertIn("RdpkgExporter.export(", export_service)
         self.assertIn("REQUEST_RDPKG_EXPORT", activity)
         self.assertIn("STATE_PENDING_RDPKG_EXPORT_VOLUME_ID", activity)
         self.assertIn("override fun onSaveInstanceState", activity)

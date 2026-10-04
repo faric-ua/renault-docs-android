@@ -26,6 +26,8 @@ class ProjectActivity : Activity() {
     private lateinit var settings: AppSettings
     private lateinit var nativeRunStore: NativeRdpkgRunStore
     private lateinit var rdpkgImportRunStore: RdpkgImportRunStore
+    private lateinit var rdpkgExportRunStore: RdpkgExportRunStore
+    private lateinit var rdpkgShareRunStore: RdpkgShareRunStore
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
     private lateinit var project: RenaultProject
@@ -79,6 +81,8 @@ class ProjectActivity : Activity() {
             override fun run() {
                 refreshNativeRunState()
                 refreshRdpkgImportRunState()
+                refreshRdpkgExportRunState()
+                refreshRdpkgShareRunState()
                 nativeRunHandler.postDelayed(
                     this,
                     NATIVE_RUN_REFRESH_MS,
@@ -173,6 +177,14 @@ class ProjectActivity : Activity() {
             )
         rdpkgImportRunStore =
             RdpkgImportRunStore(
+                this,
+            )
+        rdpkgExportRunStore =
+            RdpkgExportRunStore(
+                this,
+            )
+        rdpkgShareRunStore =
+            RdpkgShareRunStore(
                 this,
             )
 
@@ -523,76 +535,55 @@ class ProjectActivity : Activity() {
         }
 
         statusText.text = DEFAULT_STATUS_TEXT
-        operationStatus.showRunning("Експорт тому", "Експортую .rdpkg…")
+        val started =
+            RdpkgExportService.start(
+                context = this,
+                projectId = project.id,
+                volumeId = volume.id,
+                destinationUri = uri,
+            )
+        if (!started) {
+            statusText.text = "Не вдалося запустити експорт .rdpkg."
+        }
+    }
 
-        val appContext =
-            applicationContext
+    private fun refreshRdpkgExportRunState() {
+        if (!::rdpkgExportRunStore.isInitialized || !::project.isInitialized || !::operationStatus.isInitialized) return
+        val state = rdpkgExportRunStore.load()
+        if (state.projectId != project.id) return
 
-        Thread {
-            val result =
-                RdpkgExporter.export(
-                    context =
-                        appContext,
-                    volume =
-                        volume,
-                    destinationUri =
-                        uri,
-                    progress = {
-                        message ->
-                        runOnUiThread {
-                            if (
-                                !isFinishing &&
-                                !isDestroyed
-                            ) {
-                                statusText.text = DEFAULT_STATUS_TEXT
-                                operationStatus.showRunning("Експорт тому", message)
-                            }
-                        }
-                    },
-                )
+        if (state.isRunning) {
+            statusText.text = DEFAULT_STATUS_TEXT
+            operationStatus.showRunning(
+                "Експорт тому",
+                state.message.ifBlank { "Експортую .rdpkg…" },
+            )
+            return
+        }
 
-            runOnUiThread {
-                if (
-                    isFinishing ||
-                    isDestroyed
-                ) {
-                    return@runOnUiThread
+        if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalDismissed) return
+
+        statusText.text = DEFAULT_STATUS_TEXT
+        if (state.phase == RdpkgExportRunPhase.COMPLETE) {
+            val detail =
+                buildString {
+                    append(state.message.ifBlank { "Експорт .rdpkg завершено." })
+                    state.sha256?.takeIf { it.isNotBlank() }?.let {
+                        append("\nSHA-256: ")
+                        append(it)
+                    }
                 }
-
-                result
-                    .onSuccess {
-                        exported ->
-                        val label =
-                            listOfNotNull(
-                                volume.documentCode,
-                                volume.date,
-                            )
-                                .joinToString(
-                                    " · ",
-                                )
-                                .ifBlank {
-                                    volume.title
-                                }
-
-                        statusText.text =
-                            "Пакет .rdpkg збережено: " +
-                                label +
-                                " · " +
-                                exported.fileCount +
-                                " файлів\nSHA-256: " +
-                                exported.sha256
-                    }
-                    .onFailure {
-                        error ->
-                        statusText.text =
-                            "Не вдалося експортувати .rdpkg: " +
-                                (
-                                    error.message
-                                        ?: "невідома помилка"
-                                )
-                    }
+            operationStatus.showTerminal("Експорт тому завершено", detail) {
+                rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
             }
-        }.start()
+        } else {
+            val detail = "Не вдалося експортувати .rdpkg: " + state.message
+            operationStatus.showTerminal("Експорт тому · помилка", detail) {
+                rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        }
     }
 
     private fun handleNativeRdpkgSourceResult(
@@ -2119,6 +2110,28 @@ class ProjectActivity : Activity() {
                 ),
             )
 
+            if (PreparedShareStore.volumeFile(this@ProjectActivity, project, volume).isFile) {
+                addView(
+                    Ui.textView(
+                        context = this@ProjectActivity,
+                        value = "⇧",
+                        sizeSp = 20f,
+                        color = Ui.accent,
+                    ).apply {
+                        contentDescription = "Підготовлений .rdpkg готовий для передачі"
+                        gravity = Gravity.CENTER
+                        setPadding(
+                            Ui.dp(this@ProjectActivity, 8),
+                            0,
+                            Ui.dp(this@ProjectActivity, 4),
+                            0,
+                        )
+                    }
+                )
+            }
+
+
+
             addView(
                 Ui.textView(
                     context =
@@ -2452,53 +2465,84 @@ class ProjectActivity : Activity() {
             return
         }
 
+        val preparedFile = PreparedShareStore.volumeFile(this, project, volume)
+        if (preparedFile.isFile) {
+            sharePreparedRdpkg(preparedFile)
+            return
+        }
+
+        val existing = rdpkgShareRunStore.load()
+        if (existing.isRunning && existing.projectId == project.id && existing.volumeId == volume.id) {
+            refreshRdpkgShareRunState()
+            return
+        }
+
         statusText.text = DEFAULT_STATUS_TEXT
-        operationStatus.showRunning("Підготовка тому", "Готую .rdpkg для поширення…")
+        if (!RdpkgShareService.start(this, project.id, volume.id)) {
+            statusText.text = "Не вдалося запустити підготовку тому."
+        }
+    }
 
-        Thread {
-            val file =
-                PreparedShareStore.volumeFile(
-                    this,
-                    project,
-                    volume,
-                )
-            val uri =
-                FileProvider.getUriForFile(
-                    this,
-                    packageName + ".files",
-                    file,
-                )
+    private fun refreshRdpkgShareRunState() {
+        if (!::rdpkgShareRunStore.isInitialized || !::project.isInitialized || !::operationStatus.isInitialized) return
+        val state = rdpkgShareRunStore.load()
+        if (state.projectId != project.id) return
 
-            val result =
-                RdpkgExporter.export(
-                    context = this,
-                    volume = volume,
-                    destinationUri = uri,
-                )
+        if (state.isRunning) {
+            statusText.text = DEFAULT_STATUS_TEXT
+            operationStatus.showRunning(
+                "Підготовка тому",
+                state.message.ifBlank { "Готую .rdpkg для поширення…" },
+            )
+            return
+        }
 
-            runOnUiThread {
-                result.onSuccess {
-                    val send =
-                        Intent(Intent.ACTION_SEND).apply {
-                            type = "application/octet-stream"
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                    statusText.text = DEFAULT_STATUS_TEXT
-                    operationStatus.showTerminal("Підготовка тому завершена", "Том готовий для поширення.") { operationStatus.hide() }
-                    startActivity(
-                        Intent.createChooser(
-                            send,
-                            "Поділитися томом",
-                        ),
-                    )
-                }.onFailure { error ->
-                    val detail = "Не вдалося підготувати том: " + (error.message ?: "невідома помилка")
-                    statusText.text = DEFAULT_STATUS_TEXT
-                    operationStatus.showTerminal("Підготовка тому · помилка", detail) { operationStatus.hide() }
+        if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalDismissed) return
+
+        statusText.text = DEFAULT_STATUS_TEXT
+        if (state.phase == RdpkgShareRunPhase.COMPLETE) {
+            val path = state.preparedPath
+            val file = path?.let(::File)
+            if (file == null || !file.isFile) {
+                operationStatus.showTerminal(
+                    "Підготовка тому · помилка",
+                    "Підготовлений .rdpkg не знайдено.",
+                ) {
+                    rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
+                    operationStatus.hide()
                 }
+                return
             }
-        }.start()
+            operationStatus.showTerminal(
+                "Підготовка тому завершена",
+                state.message.ifBlank { "Том готовий для поширення." },
+            ) {
+                rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+            if (!state.isChooserLaunched && rdpkgShareRunStore.markChooserLaunched(state.finishedAtMs)) {
+                sharePreparedRdpkg(file)
+            }
+        } else {
+            val detail = "Не вдалося підготувати том: " + state.message
+            operationStatus.showTerminal("Підготовка тому · помилка", detail) {
+                rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        }
+    }
+
+    private fun sharePreparedRdpkg(
+        file: File,
+    ) {
+        val uri = FileProvider.getUriForFile(this, packageName + ".files", file)
+        val send =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        startActivity(Intent.createChooser(send, "Поділитися томом"))
     }
 
     private fun confirmDeletePreparedVolume(
@@ -2535,6 +2579,7 @@ class ProjectActivity : Activity() {
                         )
                     statusText.text =
                         if (deleted) {
+                            render()
                             "Підготовлений .rdpkg видалено. Том і вихідні файли не змінено."
                         } else {
                             "Не вдалося видалити підготовлений .rdpkg."
