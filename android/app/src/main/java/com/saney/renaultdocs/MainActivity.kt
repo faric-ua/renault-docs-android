@@ -67,6 +67,18 @@ class MainActivity : Activity() {
                             ". Файли на телефоні не видалено."
                     renderLibrary()
                 },
+                onPreparedProjectDeleted = {
+                    project,
+                    deleted ->
+                    if (
+                        deleted
+                    ) {
+                        statusText.text =
+                            "Підготовлений файл видалено: " +
+                                project.title
+                    }
+                    renderLibrary()
+                },
                 onShareProgress = { current, total, message ->
                     operationProgress.visibility = View.GONE
                     statusText.text = message
@@ -363,6 +375,20 @@ class MainActivity : Activity() {
             ),
         )
 
+        scrollContent.addView(
+            buildProjectCatalogCard(),
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                topMargin =
+                    Ui.dp(
+                        this@MainActivity,
+                        10,
+                    )
+            },
+        )
+
         statusText = Ui.textView(
             context = this,
             value = "Проєкт = модель Renault · томи додаються окремо.",
@@ -453,6 +479,104 @@ class MainActivity : Activity() {
 
         return root
     }
+
+    private fun buildProjectCatalogCard():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            isClickable =
+                true
+            isFocusable =
+                true
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@MainActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        Ui.border,
+                )
+            setPadding(
+                Ui.dp(
+                    this@MainActivity,
+                    16,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    13,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    16,
+                ),
+                Ui.dp(
+                    this@MainActivity,
+                    13,
+                ),
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        "Готові проєкти",
+                    sizeSp =
+                        18f,
+                    color =
+                        Ui.entityTitle,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@MainActivity,
+                    value =
+                        "Завантажити з Google Drive",
+                    sizeSp =
+                        Ui.secondaryTextSp,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@MainActivity,
+                            4,
+                        ),
+                        0,
+                        0,
+                    )
+                },
+            )
+
+            setOnClickListener {
+                if (
+                    !ExternalLinks.open(
+                        this@MainActivity,
+                        ExternalLinks.PROJECT_CATALOG_URL,
+                    )
+                ) {
+                    android.widget.Toast
+                        .makeText(
+                            this@MainActivity,
+                            "Каталог проєктів зараз недоступний.",
+                            android.widget.Toast.LENGTH_SHORT,
+                        )
+                        .show()
+                }
+            }
+        }
 
     private fun buildHomeAddPanel():
         View =
