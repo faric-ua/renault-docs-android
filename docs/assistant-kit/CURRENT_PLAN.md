@@ -619,3 +619,60 @@ Phone gate:
 2. open Help surfaces and verify implementation jargon is gone;
 3. Home → `Готові проєкти` opens the configured Drive folder;
 4. Settings → `Підтримати Renault Docs` shows the not-configured message until SUPPORT_URL is supplied.
+
+
+## v0.5.59 closeout — 2026-10-05
+
+Status: **PASS / MERGED / INSTALLED FROM MAIN**.
+
+- PR #22 merged to `main`;
+- merge commit: `464beaa1fd030ac18bc563e75dccad811529912e`;
+- Tests PASS;
+- Android Debug APK PASS;
+- final main APK installed on the phone;
+- phone QA PASS, including PDF Viewer landscape fullscreen;
+- Google Drive catalog folder is public read-only.
+
+Follow-ups moved out of v0.5.59:
+- #25 shared real-time progress for long operations;
+- #26 canonical package/project naming and rich project metadata.
+
+
+## v0.5.60 — canonical project/package identity
+
+Status: **IMPLEMENTATION IN PROGRESS**.
+
+Branch:
+- `feat/v0.5.60-canonical-project-packages`.
+
+Scope:
+- keep individual `.rdpkg` export naming on the canonical rich identity path;
+- use one resolved metadata function for both package filenames and project manifests;
+- whole-project bundle filename becomes model + aggregate Renault vehicle codes, e.g.:
+  - `Megane-II_E84-L84-K84.rdproject`;
+  - `Laguna-II_X74.rdproject`;
+  - `Kangoo-II_X61.rdproject`;
+- `rdproject.json` now carries per-volume:
+  - `vehicle_codes`;
+  - `document_code`;
+  - `date`;
+  - `document_type`;
+  - `document_version`;
+  - `region`;
+- project-level manifest also carries aggregate `vehicle_codes`;
+- old prepared `<project-id>.rdproject` is detected and migrated to the canonical name in app-private prepared-share storage;
+- arbitrary user files under public `Documents/Renault` are not silently renamed.
+
+Public catalog:
+- existing Drive archives still need replacement/rebuild from the canonical exporter;
+- do not treat a Drive metadata-only rename as proof that internal package metadata is current.
+
+Release:
+- versionName `0.5.60`;
+- versionCode `76`.
+
+Phone gate after CI:
+1. existing prepared project from v0.5.59 is still detected and migrates without losing the share indicator;
+2. prepare/share Megane II project and verify canonical `.rdproject` filename;
+3. inspect one exported `.rdpkg` filename for the rich E84/L84/K84 or X74/X61 identity;
+4. verify project/volume UI state is unchanged and no duplicate project/volume is created.
