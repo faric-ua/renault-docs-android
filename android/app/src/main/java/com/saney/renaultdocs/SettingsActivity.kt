@@ -950,7 +950,7 @@ class SettingsActivity : Activity() {
 
             setOnClickListener {
                 if (
-                    !ExternalLinks.open(
+                    !ExternalLinks.openWeb(
                         this@SettingsActivity,
                         ExternalLinks.SUPPORT_URL,
                     )
