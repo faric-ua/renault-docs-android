@@ -136,6 +136,62 @@ object PreparedVolumeReader {
                                     it.isNotBlank()
                                 }
 
+                        val vehicleCodes =
+                            volume.optJSONArray(
+                                "vehicle_codes",
+                            )
+                                ?.let {
+                                    array ->
+                                    buildList {
+                                        for (
+                                            codeIndex in
+                                            0 until array.length()
+                                        ) {
+                                            val code =
+                                                array.optString(
+                                                    codeIndex,
+                                                )
+                                                    .trim()
+
+                                            if (
+                                                code.isNotBlank()
+                                            ) {
+                                                add(
+                                                    code,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                ?: emptyList()
+
+                        val documentType =
+                            volume.optString(
+                                "document_type",
+                            )
+                                .trim()
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+
+                        val documentVersion =
+                            volume.optString(
+                                "document_version",
+                            )
+                                .trim()
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+
+                        val region =
+                            volume.optString(
+                                "region",
+                            )
+                                .trim()
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+
                         if (
                             shouldIgnoreSyntheticVolume(
                                 sourceFolder =
@@ -235,6 +291,14 @@ object PreparedVolumeReader {
                                     dataset.openEntrypoint,
                                 treeUri =
                                     dataset.treeUri,
+                                vehicleCodes =
+                                    vehicleCodes,
+                                documentType =
+                                    documentType,
+                                documentVersion =
+                                    documentVersion,
+                                region =
+                                    region,
                             ),
                         )
                     }
