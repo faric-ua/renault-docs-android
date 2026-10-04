@@ -10,7 +10,7 @@ class PreparedShareTileIndicatorContractTest(unittest.TestCase):
 
     def test_project_tile_reflects_prepared_rdproject_file(self):
         main = self.read("MainActivity.kt")
-        self.assertIn("PreparedShareStore.projectFile(", main)
+        self.assertIn("PreparedShareStore.hasProjectFile(", main)
         self.assertIn("hasPreparedShare", main)
         self.assertIn("Підготовлений .rdproject готовий для передачі", main)
 
