@@ -1,11 +1,16 @@
 package com.saney.renaultdocs
 
+import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import kotlin.math.roundToInt
 
 object Ui {
@@ -379,6 +384,47 @@ object Ui {
                 onClick()
             }
         }
+
+    fun applyOrientationSystemBars(
+        activity: Activity,
+    ) {
+        val landscape =
+            activity.resources
+                .configuration
+                .orientation ==
+                Configuration.ORIENTATION_LANDSCAPE
+
+        val window =
+            activity.window
+        val controller =
+            WindowCompat.getInsetsController(
+                window,
+                window.decorView,
+            )
+
+        if (
+            landscape
+        ) {
+            WindowCompat.setDecorFitsSystemWindows(
+                window,
+                false,
+            )
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat
+                    .BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(
+                WindowInsetsCompat.Type.systemBars(),
+            )
+        } else {
+            controller.show(
+                WindowInsetsCompat.Type.systemBars(),
+            )
+            WindowCompat.setDecorFitsSystemWindows(
+                window,
+                true,
+            )
+        }
+    }
 
     fun applySystemInsets(
         view: View,

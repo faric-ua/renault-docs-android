@@ -84,8 +84,17 @@ class V0558VolumeIdentityContractTests(unittest.TestCase):
 
     def test_release_version_is_v0558_or_newer(self):
         gradle = self._read("android/app/build.gradle.kts")
-        self.assertIn('versionName = "0.5.58"', gradle)
-        self.assertIn("versionCode = 74", gradle)
+
+        version_code = int(
+            gradle.split("versionCode = ", 1)[1].splitlines()[0].strip()
+        )
+        version_name = tuple(
+            int(part)
+            for part in gradle.split('versionName = "', 1)[1].split('"', 1)[0].split(".")
+        )
+
+        self.assertGreaterEqual(version_code, 74)
+        self.assertGreaterEqual(version_name, (0, 5, 58))
 
 
 if __name__ == "__main__":

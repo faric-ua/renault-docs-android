@@ -3411,9 +3411,17 @@ class ViewerActivity : Activity() {
                 false
         }
 
-        setSystemBarsHidden(
-            hidden = enabled,
-        )
+        if (
+            enabled
+        ) {
+            setSystemBarsHidden(
+                hidden = true,
+            )
+        } else {
+            Ui.applyOrientationSystemBars(
+                this,
+            )
+        }
         syncPdfFullscreenControl()
         applySplitFocusMode()
 

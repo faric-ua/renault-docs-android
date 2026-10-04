@@ -13,6 +13,7 @@ class HomeProjectDialogController(
     private val activity: Activity,
     private val store: ProjectStore,
     private val onProjectRemoved: (RenaultProject) -> Unit,
+    private val onPreparedProjectDeleted: (RenaultProject, Boolean) -> Unit,
     private val onShareProgress: (Int, Int, String) -> Unit,
     private val onShareFinished: (String) -> Unit,
 ) {
@@ -342,6 +343,10 @@ class HomeProjectDialogController(
                             activity,
                             project,
                         )
+                    onPreparedProjectDeleted(
+                        project,
+                        deleted,
+                    )
                     showMessage(
                         title = "Підготовлений файл",
                         message =
