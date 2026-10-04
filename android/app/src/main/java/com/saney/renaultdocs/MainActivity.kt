@@ -1453,6 +1453,42 @@ class MainActivity : Activity() {
                     }
                     .onFailure {
                         error ->
+                        val migratedProject =
+                            projectStore
+                                .findProjectForModel(
+                                    record.model,
+                                )
+                                ?.takeIf {
+                                    projectStore
+                                        .volumes(
+                                            it.id,
+                                        )
+                                        .isNotEmpty()
+                                }
+
+                        if (migratedProject != null) {
+                            store.remove(
+                                record.id,
+                            )
+                            statusText.setTextColor(
+                                Ui.muted,
+                            )
+                            statusText.text =
+                                "Старий запис «" +
+                                    record.title +
+                                    "» більше не має окремої папки. Відкриваю актуальний проєкт."
+                            renderLibrary()
+                            startActivity(
+                                ProjectActivity.intent(
+                                    context =
+                                        this,
+                                    projectId =
+                                        migratedProject.id,
+                                ),
+                            )
+                            return@onFailure
+                        }
+
                         statusText.setTextColor(
                             Ui.danger,
                         )
