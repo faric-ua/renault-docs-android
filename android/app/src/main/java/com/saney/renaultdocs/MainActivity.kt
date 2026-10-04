@@ -1467,9 +1467,6 @@ class MainActivity : Activity() {
                                 }
 
                         if (migratedProject != null) {
-                            store.remove(
-                                record.id,
-                            )
                             statusText.setTextColor(
                                 Ui.muted,
                             )
@@ -1477,7 +1474,6 @@ class MainActivity : Activity() {
                                 "Старий запис «" +
                                     record.title +
                                     "» більше не має окремої папки. Відкриваю актуальний проєкт."
-                            renderLibrary()
                             startActivity(
                                 ProjectActivity.intent(
                                     context =
