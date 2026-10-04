@@ -2155,7 +2155,7 @@ class ProjectActivity : Activity() {
                 ),
             )
 
-            if (PreparedShareStore.volumeFile(this@ProjectActivity, project, volume).isFile) {
+            if (PreparedShareStore.hasVolumeFile(this@ProjectActivity, project, volume)) {
                 addView(
                     Ui.textView(
                         context = this@ProjectActivity,
@@ -2328,12 +2328,12 @@ class ProjectActivity : Activity() {
             shareRdpkg(volume)
         }
         val prepared =
-            PreparedShareStore.volumeFile(
+            PreparedShareStore.existingVolumeFile(
                 this,
                 project,
                 volume,
             )
-        if (prepared.exists()) {
+        if (prepared != null) {
             addAction("Поділитися підготовленим .rdpkg") {
                 clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                 sharePreparedRdpkg(
@@ -2510,8 +2510,13 @@ class ProjectActivity : Activity() {
             return
         }
 
-        val preparedFile = PreparedShareStore.volumeFile(this, project, volume)
-        if (preparedFile.isFile) {
+        val preparedFile =
+            PreparedShareStore.existingVolumeFile(
+                this,
+                project,
+                volume,
+            )
+        if (preparedFile != null) {
             sharePreparedRdpkg(preparedFile)
             return
         }
