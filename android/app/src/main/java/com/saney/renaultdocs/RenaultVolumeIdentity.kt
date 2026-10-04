@@ -206,6 +206,29 @@ object RenaultVolumeIdentity {
         )
     }
 
+    fun documentTypeFromHtml(
+        html: String,
+    ): String? {
+        val title =
+            Regex(
+                """<title[^>]*>\s*Visu\s+Schema\b""",
+                setOf(
+                    RegexOption.IGNORE_CASE,
+                    RegexOption.DOT_MATCHES_ALL,
+                ),
+            )
+
+        return if (
+            title.containsMatchIn(
+                html,
+            )
+        ) {
+            "Visu"
+        } else {
+            null
+        }
+    }
+
     fun canonicalFileName(
         model: String,
         metadata: RenaultVolumeIdentityMetadata,
