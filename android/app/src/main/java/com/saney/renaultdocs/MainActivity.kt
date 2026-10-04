@@ -1027,8 +1027,32 @@ class MainActivity : Activity() {
         val records =
             store.load()
 
+        val compatibilityProjects =
+            projects.filter {
+                project ->
+                project.id in
+                    LEGACY_COMPAT_PROJECT_IDS &&
+                    projectStore
+                        .volumes(
+                            project.id,
+                        )
+                        .isNotEmpty() &&
+                    records.none {
+                        record ->
+                        record.model.equals(
+                            project.model,
+                            ignoreCase = true,
+                        ) ||
+                            record.title.contains(
+                                project.title,
+                                ignoreCase = true,
+                            )
+                    }
+            }
+
         if (
-            records.isNotEmpty()
+            records.isNotEmpty() ||
+            compatibilityProjects.isNotEmpty()
         ) {
             libraryContainer.addView(
                 Ui.textView(
@@ -1045,6 +1069,23 @@ class MainActivity : Activity() {
                     )
                 }
             )
+
+            compatibilityProjects.forEach {
+                project ->
+                libraryContainer.addView(
+                    buildLegacyProjectAliasTile(project),
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ).apply {
+                        bottomMargin =
+                            Ui.dp(
+                                this@MainActivity,
+                                10,
+                            )
+                    }
+                )
+            }
 
             records.forEach {
                 record ->
@@ -1290,6 +1331,85 @@ class MainActivity : Activity() {
                         projectId =
                             project.id,
                     )
+                )
+            }
+        }
+    }
+
+    private fun buildLegacyProjectAliasTile(
+        project: RenaultProject,
+    ): View {
+        val volumeCount =
+            projectStore
+                .volumes(
+                    project.id,
+                )
+                .size
+
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            isClickable = true
+            isFocusable = true
+            background = Ui.roundedBackground(
+                context = this@MainActivity,
+                fill = Ui.surface,
+            )
+            setPadding(
+                Ui.dp(this@MainActivity, 18),
+                Ui.dp(this@MainActivity, 16),
+                Ui.dp(this@MainActivity, 18),
+                Ui.dp(this@MainActivity, 16),
+            )
+
+            addView(
+                Ui.textView(
+                    context = this@MainActivity,
+                    value = project.title,
+                    sizeSp = 20f,
+                    color = Ui.entityTitle,
+                ).apply {
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                }
+            )
+
+            addView(
+                Ui.textView(
+                    context = this@MainActivity,
+                    value = "Перенесено в актуальний проєкт",
+                    sizeSp = 15f,
+                    color = Ui.muted,
+                ).apply {
+                    setPadding(
+                        0,
+                        Ui.dp(this@MainActivity, 5),
+                        0,
+                        0,
+                    )
+                }
+            )
+
+            addView(
+                Ui.textView(
+                    context = this@MainActivity,
+                    value = "Томів: " + volumeCount + " · відкриття: проєкт",
+                    sizeSp = 13f,
+                    color = Ui.accent,
+                ).apply {
+                    setPadding(
+                        0,
+                        Ui.dp(this@MainActivity, 10),
+                        0,
+                        0,
+                    )
+                }
+            )
+
+            setOnClickListener {
+                startActivity(
+                    ProjectActivity.intent(
+                        context = this@MainActivity,
+                        projectId = project.id,
+                    ),
                 )
             }
         }
@@ -1578,6 +1698,11 @@ class MainActivity : Activity() {
     }
 
     companion object {
+        private val LEGACY_COMPAT_PROJECT_IDS =
+            setOf(
+                "megane-ii",
+            )
+
         private const val REQUEST_DATASET_FOLDER = 4101
         private const val HELP_LIBRARY =
             "library"
