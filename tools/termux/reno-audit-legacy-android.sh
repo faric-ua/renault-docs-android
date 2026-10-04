@@ -55,15 +55,16 @@ if [ -n "$BUILD_ROOT" ]; then
 fi
 
 shopt -s nullglob
-dirs=("$ROOT"/*_android)
+dirs=("$ROOT"/*_android "$ROOT/legacy-quarantine"/*_android)
 
 if [ "${#dirs[@]}" -eq 0 ]; then
-  echo "Папок *_android не знайдено."
+  echo "Папок *_android не знайдено ні в корені, ні в legacy-quarantine."
   exit 0
 fi
 
 keep_count=0
 legacy_count=0
+archived_count=0
 safe_count=0
 
 for dir in "${dirs[@]}"; do
@@ -103,14 +104,21 @@ for dir in "${dirs[@]}"; do
 
   status="LEGACY"
   reason="не є активним build_root; перед видаленням потрібна окрема перевірка runtime/SAF reference"
+  case "$canon" in
+    "$ROOT/legacy-quarantine/"*)
+      status="ARCHIVED"
+      reason="переміщено в reversible legacy-quarantine; не видалено"
+      ;;
+  esac
   if [ -n "$BUILD_ROOT_CANON" ] && [ "$canon" = "$BUILD_ROOT_CANON" ]; then
     status="KEEP"
-    reason="це активний build_root з config/current-device.json"
+    reason="це активний build_root з config/current-device.json (може бути всередині quarantine)"
   fi
 
   case "$status" in
     KEEP) keep_count=$((keep_count + 1)) ;;
     LEGACY) legacy_count=$((legacy_count + 1)) ;;
+    ARCHIVED) archived_count=$((archived_count + 1)) ;;
     SAFE_TO_REMOVE) safe_count=$((safe_count + 1)) ;;
   esac
 
@@ -142,6 +150,7 @@ echo "Підсумок"
 echo "========================================"
 echo "KEEP:           $keep_count"
 echo "LEGACY:         $legacy_count"
+echo "ARCHIVED:       $archived_count"
 echo "SAFE TO REMOVE: $safe_count"
 echo
 echo "Важливо:"

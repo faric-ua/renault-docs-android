@@ -1,6 +1,58 @@
+## v0.5.57 — Project-only Home + reversible Legacy quarantine
+
+Status: **IMPLEMENTED / CODE CI PASS / PHONE MOVE PENDING — 2026-10-04**.
+
+Architecture decision:
+- current Renault projects are `ProjectStore` metadata + per-volume records;
+- imported `.rdpkg` payloads live in app-private `noBackupFilesDir/rdpkg/<packageId>`;
+- legacy `DatasetStore` SAF datasets are a separate compatibility layer and are not the canonical project model;
+- Home no longer shows a Legacy dataset when the same model already has a populated current project;
+- legacy records are retained internally for recovery/compatibility and are not auto-deleted.
+
+Filesystem cleanup:
+- new reversible quarantine root: `/storage/emulated/0/Documents/Renault/legacy-quarantine`;
+- menu item `23 — Legacy quarantine *_android (move/restore, без видалення)`;
+- move is guarded by explicit `MOVE` confirmation, verifies file count + byte size, and writes `manifest.tsv`;
+- restore is available with explicit `RESTORE` confirmation;
+- no `rm`, `rmdir`, `find -delete` or automatic deletion path exists;
+- Laguna legacy `build_root` now points to `.../legacy-quarantine/laguna 2 2001-2006_android`;
+- raw source remains `/storage/emulated/0/Documents/Renault/laguna 2 2001-2006`.
+
+Code CI on exact HEAD `5598e96d818058370b0e7fed3af3afcee81a34c4`:
+- Tests `37214251297` — PASS;
+- Android PR Check `37214251232` — PASS.
+
+Next phone gate:
+1. install fresh candidate;
+2. confirm Home shows only current Project cards (no duplicate migrated Megane/Laguna Legacy tiles);
+3. run menu item 23 and move top-level `*_android` into quarantine;
+4. reopen Megane II, Laguna II and Kangoo II current projects and verify their installed volumes still open;
+5. run menu item 21 and confirm archived/KEEP state.
+
+
+## v0.5.57 — durable .rdpkg export/share lifecycle
+
+Status: **PHONE PASS — 2026-10-04**.
+
+Accepted exact phone candidate: `5d2e39e238114991e052a01a662d882b26a3fbc8`.
+
+Accepted phone evidence:
+- durable Share preparation shows live progress and survives Activity lifecycle;
+- completion opens Android Share Sheet once;
+- terminal card `Підготовка тому завершена` remains visible underneath the Share Sheet and is still present after the Share Sheet is cancelled/closed;
+- terminal status is dismissed only by explicit `×`;
+- already prepared volume package is reused instead of preparing the same volume again;
+- Megane II phone evidence used NT8340A / NT8342A project screen; source project/volumes remained intact.
+
+CI on accepted exact HEAD:
+- Tests run `37166273230` — PASS;
+- Android PR Check run `37166273228` — PASS.
+
+PR: #16 `v0.5.57 — durable .rdpkg export/share lifecycle`.
+
 # Renault Docs — CURRENT PLAN
 
-Останнє оновлення: 2026-09-29.
+Останнє оновлення: 2026-10-04.
 
 Це коротка жива точка відновлення. Історія рішень і старих інцидентів лишається в `CURRENT_HANDOFF.md` та `docs/assistant-kit/PROJECT_LEDGER.md`.
 

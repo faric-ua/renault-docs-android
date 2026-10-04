@@ -2081,3 +2081,21 @@ Android PR Check `36813567450` PASS.
 
 Architecture clarification recorded from phone investigation:
 legacy `*_android` datasets and Project-installed `.rdpkg` volumes are independent storage flows. Project Classic reads the app-private installed package copy via `LocalDatasetDocumentsProvider`; Legacy Classic reads the SAF-linked public dataset folder.
+
+
+### v0.5.57 Project/Legacy separation and quarantine — 2026-10-04
+
+Decision:
+- ProjectStore + app-private installed .rdpkg volumes are canonical.
+- DatasetStore remains compatibility metadata only.
+- A populated current project suppresses the matching Legacy dataset tile on Home without deleting the legacy record.
+- Public top-level *_android outputs move to Documents/Renault/legacy-quarantine rather than being deleted.
+- Termux item 23 provides plan / MOVE / RESTORE and records manifest.tsv.
+- Laguna build_root follows the quarantined prepared dataset path; raw Laguna source stays in place.
+
+Code evidence before docs update:
+- exact HEAD 5598e96d818058370b0e7fed3af3afcee81a34c4;
+- Tests 37214251297 PASS;
+- Android PR Check 37214251232 PASS.
+
+Phone quarantine and post-move reopen verification remain pending.

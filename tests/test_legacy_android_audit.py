@@ -15,10 +15,12 @@ class LegacyAndroidAuditTests(unittest.TestCase):
         self.assertIn("21 — Аудит legacy *_android (read-only)", self.menu)
         self.assertIn('bash "$REPO/tools/termux/reno-audit-legacy-android.sh"', self.menu)
 
-    def test_audit_scans_only_top_level_android_folders(self):
-        self.assertIn('dirs=("$ROOT"/*_android)', self.text)
+    def test_audit_scans_active_and_quarantined_android_folders(self):
+        self.assertIn('"$ROOT"/*_android', self.text)
+        self.assertIn('"$ROOT/legacy-quarantine"/*_android', self.text)
         self.assertIn("KEEP:", self.text)
         self.assertIn("LEGACY:", self.text)
+        self.assertIn("ARCHIVED:", self.text)
         self.assertIn("SAFE TO REMOVE:", self.text)
 
     def test_audit_reports_provenance_signals(self):

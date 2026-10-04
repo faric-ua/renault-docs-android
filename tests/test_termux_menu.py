@@ -28,6 +28,8 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('21 — Аудит legacy *_android (read-only)', text)
         self.assertIn('22 — Перевірити посилання dataset (read-only)', text)
         self.assertIn('bash "$REPO/tools/termux/reno-check-dataset-links.sh"', text)
+        self.assertIn('23 — Legacy quarantine *_android (move/restore, без видалення)', text)
+        self.assertIn('bash "$REPO/tools/termux/reno-quarantine-legacy-android.sh"', text)
         self.assertNotIn('build"\\n  echo "21 —', text)
         self.assertIn('bash "$REPO/tools/termux/reno-restore-accepted-signer.sh"', text)
         self.assertNotIn('Phone Diagnostics Menu', text)
@@ -76,7 +78,7 @@ class TermuxMenuContractTests(unittest.TestCase):
             config,
         )
         self.assertIn(
-            '"build_root": "/storage/emulated/0/Documents/Renault/laguna 2 2001-2006_android"',
+            '"build_root": "/storage/emulated/0/Documents/Renault/legacy-quarantine/laguna 2 2001-2006_android"',
             config,
         )
 
@@ -203,6 +205,7 @@ class TermuxMenuContractTests(unittest.TestCase):
             repo / "tools" / "termux" / "reno-project-status.sh",
             repo / "tools" / "termux" / "reno-restore-accepted-signer.sh",
             repo / "tools" / "termux" / "reno-check-dataset-links.sh",
+            repo / "tools" / "termux" / "reno-quarantine-legacy-android.sh",
         ]
 
         for script in scripts:

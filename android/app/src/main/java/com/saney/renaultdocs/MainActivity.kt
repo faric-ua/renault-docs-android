@@ -1027,8 +1027,26 @@ class MainActivity : Activity() {
         val records =
             store.load()
 
+        val visibleLegacyRecords =
+            records.filter {
+                record ->
+                val currentProject =
+                    projectStore
+                        .findProjectForModel(
+                            record.model,
+                        )
+
+                currentProject ==
+                    null ||
+                    projectStore
+                        .volumes(
+                            currentProject.id,
+                        )
+                        .isEmpty()
+            }
+
         if (
-            records.isNotEmpty()
+            visibleLegacyRecords.isNotEmpty()
         ) {
             libraryContainer.addView(
                 Ui.textView(
@@ -1046,7 +1064,7 @@ class MainActivity : Activity() {
                 }
             )
 
-            records.forEach {
+            visibleLegacyRecords.forEach {
                 record ->
                 libraryContainer.addView(
                     buildDatasetTile(record),
@@ -1074,6 +1092,11 @@ class MainActivity : Activity() {
                     project.id,
                 )
                 .size
+        val hasPreparedShare =
+            PreparedShareStore.projectFile(
+                this,
+                project,
+            ).isFile
 
         return LinearLayout(this).apply {
             orientation =
@@ -1209,6 +1232,26 @@ class MainActivity : Activity() {
                     1f,
                 )
             )
+
+            if (hasPreparedShare) {
+                addView(
+                    Ui.textView(
+                        context = this@MainActivity,
+                        value = "⇧",
+                        sizeSp = 20f,
+                        color = Ui.accent,
+                    ).apply {
+                        contentDescription = "Підготовлений .rdproject готовий для передачі"
+                        gravity = Gravity.CENTER
+                        setPadding(
+                            Ui.dp(this@MainActivity, 8),
+                            0,
+                            Ui.dp(this@MainActivity, 4),
+                            0,
+                        )
+                    }
+                )
+            }
 
             addView(
                 Ui.textView(
@@ -1428,6 +1471,38 @@ class MainActivity : Activity() {
                     }
                     .onFailure {
                         error ->
+                        val migratedProject =
+                            projectStore
+                                .findProjectForModel(
+                                    record.model,
+                                )
+                                ?.takeIf {
+                                    projectStore
+                                        .volumes(
+                                            it.id,
+                                        )
+                                        .isNotEmpty()
+                                }
+
+                        if (migratedProject != null) {
+                            statusText.setTextColor(
+                                Ui.muted,
+                            )
+                            statusText.text =
+                                "Старий запис «" +
+                                    record.title +
+                                    "» більше не має окремої папки. Відкриваю актуальний проєкт."
+                            startActivity(
+                                ProjectActivity.intent(
+                                    context =
+                                        this,
+                                    projectId =
+                                        migratedProject.id,
+                                ),
+                            )
+                            return@onFailure
+                        }
+
                         statusText.setTextColor(
                             Ui.danger,
                         )

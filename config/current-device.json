@@ -2,7 +2,7 @@
   "profile": "current-android-device",
   "repository_root": "/data/data/com.termux/files/home/renault-docs-android",
   "source_root": "/storage/emulated/0/Documents/Renault/laguna 2 2001-2006",
-  "build_root": "/storage/emulated/0/Documents/Renault/laguna 2 2001-2006_android",
+  "build_root": "/storage/emulated/0/Documents/Renault/legacy-quarantine/laguna 2 2001-2006_android",
   "dataset": {
     "id": "renault-laguna-ii-x74-2001-2006",
     "title": "Renault Laguna II 2001–2006",
