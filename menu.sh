@@ -252,6 +252,12 @@ check_dataset_links() {
   pause_menu
 }
 
+quarantine_legacy_android() {
+  clear
+  bash "$REPO/tools/termux/reno-quarantine-legacy-android.sh"
+  pause_menu
+}
+
 refresh_termux_integration() {
   clear
   echo "Оновлюю Renault aliases та Termux:Widget shortcut..."
@@ -275,8 +281,11 @@ show_paths() {
   echo "Оригінал:"
   echo "  /storage/emulated/0/Documents/Renault/laguna 2 2001-2006"
   echo
-  echo "Готовий dataset:"
-  echo "  /storage/emulated/0/Documents/Renault/laguna 2 2001-2006_android"
+  echo "Legacy quarantine:"
+  echo "  /storage/emulated/0/Documents/Renault/legacy-quarantine"
+  echo
+  echo "Готовий legacy dataset (після quarantine):"
+  echo "  /storage/emulated/0/Documents/Renault/legacy-quarantine/laguna 2 2001-2006_android"
   echo
   echo "APK/packages:"
   echo "  /storage/emulated/0/Documents/Renault/packages"
@@ -312,6 +321,7 @@ while true; do
   echo "20 — Відновити accepted signer + build"
   echo "21 — Аудит legacy *_android (read-only)"
   echo "22 — Перевірити посилання dataset (read-only)"
+  echo "23 — Legacy quarantine *_android (move/restore, без видалення)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -384,6 +394,9 @@ while true; do
       ;;
     22)
       check_dataset_links
+      ;;
+    23)
+      quarantine_legacy_android
       ;;
     0)
       clear
