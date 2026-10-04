@@ -11,7 +11,8 @@
 - `APK_BUILD_CONTRACT.md` — build/sign/verify/artifact rules;
 - `RELEASE_DOCUMENTATION_CONTRACT.md` — що має бути в кожному release;
 - `TEST_DIAGRAM_STANDARD.md` — як документувати маршрути та phone QA;
-- `CONTEXT_FILES.txt` — що нова сесія повинна прочитати перед змінами.
+- `CONTEXT_FILES.txt` — що нова сесія повинна прочитати перед змінами;
+- `GIT_BRANCH_PR_MERGE_GUIDE.md` — просте пояснення branch / PR / CI / merge на реальному прикладі v0.5.57 → v0.5.58.
 
 - `PROJECT_LEDGER.md` — canonical consolidated state: architecture, accepted phone behavior, completed work, open bugs, future work and release baseline.
 
