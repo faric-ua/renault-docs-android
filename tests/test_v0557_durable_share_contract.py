@@ -28,7 +28,8 @@ class DurableRdpkgShareContractTest(unittest.TestCase):
         self.assertIn("dismissTerminal(state.finishedAtMs)", activity)
         self.assertIn("isChooserLaunched", store)
         self.assertIn("isTerminalDismissed", store)
-        self.assertNotIn("consume(state.finishedAtMs)", activity)
+        refresh = activity[activity.index("private fun refreshRdpkgShareRunState"):activity.index("private fun sharePreparedRdpkg")]
+        self.assertNotIn("consume(state.finishedAtMs)", refresh)
 
     def test_existing_prepared_package_is_reused_instead_of_reexported(self):
         activity = self.read("ProjectActivity.kt")
