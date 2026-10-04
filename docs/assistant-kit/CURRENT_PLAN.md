@@ -1,3 +1,34 @@
+## v0.5.57 — Project-only Home + reversible Legacy quarantine
+
+Status: **IMPLEMENTED / CODE CI PASS / PHONE MOVE PENDING — 2026-10-04**.
+
+Architecture decision:
+- current Renault projects are `ProjectStore` metadata + per-volume records;
+- imported `.rdpkg` payloads live in app-private `noBackupFilesDir/rdpkg/<packageId>`;
+- legacy `DatasetStore` SAF datasets are a separate compatibility layer and are not the canonical project model;
+- Home no longer shows a Legacy dataset when the same model already has a populated current project;
+- legacy records are retained internally for recovery/compatibility and are not auto-deleted.
+
+Filesystem cleanup:
+- new reversible quarantine root: `/storage/emulated/0/Documents/Renault/legacy-quarantine`;
+- menu item `23 — Legacy quarantine *_android (move/restore, без видалення)`;
+- move is guarded by explicit `MOVE` confirmation, verifies file count + byte size, and writes `manifest.tsv`;
+- restore is available with explicit `RESTORE` confirmation;
+- no `rm`, `rmdir`, `find -delete` or automatic deletion path exists;
+- Laguna legacy `build_root` now points to `.../legacy-quarantine/laguna 2 2001-2006_android`;
+- raw source remains `/storage/emulated/0/Documents/Renault/laguna 2 2001-2006`.
+
+Code CI on exact HEAD `5598e96d818058370b0e7fed3af3afcee81a34c4`:
+- Tests `37214251297` — PASS;
+- Android PR Check `37214251232` — PASS.
+
+Next phone gate:
+1. install fresh candidate;
+2. confirm Home shows only current Project cards (no duplicate migrated Megane/Laguna Legacy tiles);
+3. run menu item 23 and move top-level `*_android` into quarantine;
+4. reopen Megane II, Laguna II and Kangoo II current projects and verify their installed volumes still open;
+5. run menu item 21 and confirm archived/KEEP state.
+
 
 ## v0.5.57 — durable .rdpkg export/share lifecycle
 
