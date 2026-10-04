@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 
 /**
@@ -18,7 +19,15 @@ object ExternalLinks {
     const val SUPPORT_URL =
         ""
 
-    fun open(
+    /**
+     * Opens a public web destination in the user's default browser when possible.
+     *
+     * This intentionally avoids handing the Drive catalog straight to the
+     * Google Drive app, because Drive may show an account chooser on phones
+     * with several Google accounts. A public catalog should not look like an
+     * account connection flow inside Renault Docs.
+     */
+    fun openWeb(
         activity: Activity,
         url: String,
     ): Boolean {
@@ -28,13 +37,48 @@ object ExternalLinks {
             return false
         }
 
+        val parsed =
+            Uri.parse(
+                url,
+            )
         val intent =
             Intent(
                 Intent.ACTION_VIEW,
+                parsed,
+            ).apply {
+                addCategory(
+                    Intent.CATEGORY_BROWSABLE,
+                )
+            }
+
+        val browserProbe =
+            Intent(
+                Intent.ACTION_VIEW,
                 Uri.parse(
-                    url,
+                    "https://example.com",
                 ),
+            ).apply {
+                addCategory(
+                    Intent.CATEGORY_BROWSABLE,
+                )
+            }
+
+        val browserPackage =
+            activity.packageManager
+                .resolveActivity(
+                    browserProbe,
+                    PackageManager.MATCH_DEFAULT_ONLY,
+                )
+                ?.activityInfo
+                ?.packageName
+
+        if (
+            !browserPackage.isNullOrBlank()
+        ) {
+            intent.setPackage(
+                browserPackage,
             )
+        }
 
         return runCatching {
             activity.startActivity(
@@ -42,6 +86,15 @@ object ExternalLinks {
             )
             true
         }
+            .recoverCatching {
+                activity.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        parsed,
+                    )
+                )
+                true
+            }
             .getOrDefault(
                 false,
             )
