@@ -30,7 +30,8 @@ class OperationStatusUiContractTest(unittest.TestCase):
         terminal = activity[activity.index("private fun showNativeTerminalStatus"):activity.index("private fun hideNativeTerminalStatus")]
         self.assertIn("operationStatus.showTerminal", terminal)
         self.assertNotIn("nativeTerminalStatusText.text", terminal)
-        self.assertIn('operationStatus.showRunning("Підготовка тому"', activity)
+        self.assertIn('"Підготовка тому"', activity)
+        self.assertIn("refreshRdpkgShareRunState()", activity)
         self.assertIn('"Експорт тому"', activity)
         self.assertIn("refreshRdpkgExportRunState()", activity)
         self.assertIn("statusText.text = DEFAULT_STATUS_TEXT", activity)
