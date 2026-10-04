@@ -27,6 +27,7 @@ class ProjectActivity : Activity() {
     private lateinit var nativeRunStore: NativeRdpkgRunStore
     private lateinit var rdpkgImportRunStore: RdpkgImportRunStore
     private lateinit var rdpkgExportRunStore: RdpkgExportRunStore
+    private lateinit var rdpkgShareRunStore: RdpkgShareRunStore
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
     private lateinit var project: RenaultProject
@@ -81,6 +82,7 @@ class ProjectActivity : Activity() {
                 refreshNativeRunState()
                 refreshRdpkgImportRunState()
                 refreshRdpkgExportRunState()
+                refreshRdpkgShareRunState()
                 nativeRunHandler.postDelayed(
                     this,
                     NATIVE_RUN_REFRESH_MS,
@@ -179,6 +181,10 @@ class ProjectActivity : Activity() {
             )
         rdpkgExportRunStore =
             RdpkgExportRunStore(
+                this,
+            )
+        rdpkgShareRunStore =
+            RdpkgShareRunStore(
                 this,
             )
 
@@ -2438,52 +2444,64 @@ class ProjectActivity : Activity() {
         }
 
         statusText.text = DEFAULT_STATUS_TEXT
-        operationStatus.showRunning("Підготовка тому", "Готую .rdpkg для поширення…")
+        if (!RdpkgShareService.start(this, project.id, volume.id)) {
+            statusText.text = "Не вдалося запустити підготовку тому."
+        }
+    }
 
-        Thread {
-            val file =
-                PreparedShareStore.volumeFile(
-                    this,
-                    project,
-                    volume,
-                )
-            val uri =
-                FileProvider.getUriForFile(
-                    this,
-                    packageName + ".files",
-                    file,
-                )
+    private fun refreshRdpkgShareRunState() {
+        if (!::rdpkgShareRunStore.isInitialized || !::project.isInitialized || !::operationStatus.isInitialized) return
+        val state = rdpkgShareRunStore.load()
+        if (state.projectId != project.id) return
 
-            val result =
-                RdpkgExporter.export(
-                    context = this,
-                    volume = volume,
-                    destinationUri = uri,
-                )
+        if (state.isRunning) {
+            statusText.text = DEFAULT_STATUS_TEXT
+            operationStatus.showRunning(
+                "Підготовка тому",
+                state.message.ifBlank { "Готую .rdpkg для поширення…" },
+            )
+            return
+        }
 
-            runOnUiThread {
-                result.onSuccess {
-                    val send =
-                        Intent(Intent.ACTION_SEND).apply {
-                            type = "application/octet-stream"
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                    statusText.text = DEFAULT_STATUS_TEXT
-                    operationStatus.showTerminal("Підготовка тому завершена", "Том готовий для поширення.") { operationStatus.hide() }
-                    startActivity(
-                        Intent.createChooser(
-                            send,
-                            "Поділитися томом",
-                        ),
-                    )
-                }.onFailure { error ->
-                    val detail = "Не вдалося підготувати том: " + (error.message ?: "невідома помилка")
-                    statusText.text = DEFAULT_STATUS_TEXT
-                    operationStatus.showTerminal("Підготовка тому · помилка", detail) { operationStatus.hide() }
+        if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalConsumed) return
+
+        statusText.text = DEFAULT_STATUS_TEXT
+        if (state.phase == RdpkgShareRunPhase.COMPLETE) {
+            val path = state.preparedPath
+            val file = path?.let(::File)
+            if (file == null || !file.isFile) {
+                operationStatus.showTerminal(
+                    "Підготовка тому · помилка",
+                    "Підготовлений .rdpkg не знайдено.",
+                ) {
+                    rdpkgShareRunStore.consume(state.finishedAtMs)
+                    operationStatus.hide()
                 }
+                return
             }
-        }.start()
+            val uri = FileProvider.getUriForFile(this, packageName + ".files", file)
+            val send =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "application/octet-stream"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            operationStatus.showTerminal(
+                "Підготовка тому завершена",
+                state.message.ifBlank { "Том готовий для поширення." },
+            ) {
+                rdpkgShareRunStore.consume(state.finishedAtMs)
+                operationStatus.hide()
+            }
+            rdpkgShareRunStore.consume(state.finishedAtMs)
+            startActivity(Intent.createChooser(send, "Поділитися томом"))
+        } else {
+            val detail = "Не вдалося підготувати том: " + state.message
+            operationStatus.showTerminal("Підготовка тому · помилка", detail) {
+                rdpkgShareRunStore.consume(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        }
     }
 
     private fun confirmDeletePreparedVolume(
