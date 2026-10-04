@@ -2579,6 +2579,7 @@ class ProjectActivity : Activity() {
                         )
                     statusText.text =
                         if (deleted) {
+                            render()
                             "Підготовлений .rdpkg видалено. Том і вихідні файли не змінено."
                         } else {
                             "Не вдалося видалити підготовлений .rdpkg."
