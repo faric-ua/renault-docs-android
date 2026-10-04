@@ -588,3 +588,34 @@ Phone finding 2026-10-03 — COMPLETE rotation lifecycle (corrected after frame/
 - Follow-up UX audit requested from phone QA: apply/verify the same full-page vertical scrolling contract on Home, especially landscape/small-height layouts.
 
 - [x] Home full-page landscape scrolling — PHONE PASS 2026-10-03 on v0.5.56: landscape can scroll through the project library to the bottom version label; lower project cards remain reachable.
+
+
+## v0.5.59 — cleanup + catalog + support
+
+Status: **IMPLEMENTED / CI + PHONE QA PENDING**.
+
+Scope:
+- BUG #18: prepared-project `↑` indicator refreshes immediately after deleting the prepared `.rdproject`;
+- UX #19: app-owned Help copy is user-facing and no longer explains Kotlin/Python/Termux/`*_android`/rotation/lifecycle implementation details;
+- FEAT #20: Home gets `Готові проєкти` → Google Drive catalog;
+- FEAT #21: Settings → `Про програму` gets provider-independent `Підтримати Renault Docs` action.
+
+Project catalog:
+- Google Drive folder: `Renault Docs Projects`;
+- URL: `https://drive.google.com/drive/folders/1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y`;
+- the folder still needs owner-side public sharing (`Anyone with the link` / viewer) before it is useful to other users.
+
+Support:
+- UI/action infrastructure is present;
+- `SUPPORT_URL` intentionally remains empty until the owner chooses the final donation/support destination;
+- support must stay voluntary and must not unlock app features/content.
+
+Release:
+- versionName `0.5.59`;
+- versionCode `75`.
+
+Phone gate:
+1. delete prepared project artifact and verify `↑` disappears immediately, after Home re-render, rotation and cold start;
+2. open Help surfaces and verify implementation jargon is gone;
+3. Home → `Готові проєкти` opens the configured Drive folder;
+4. Settings → `Підтримати Renault Docs` shows the not-configured message until SUPPORT_URL is supplied.
