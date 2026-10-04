@@ -12,12 +12,13 @@ class V0547VolumeIdentityAndRemovalContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ProjectStore.kt"
         )
 
-        self.assertIn('"NT[0-9A-Z]+"', store)
-        self.assertIn(
-            '"(20\\\\d{2})[._-](\\\\d{2})[._-](\\\\d{2})"',
-            store,
+        parser = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RenaultVolumeIdentity.kt"
         )
-        self.assertNotIn(r'"\\bNT[0-9A-Z]+\\b"', store)
+        self.assertIn("RenaultVolumeIdentity.parse(", store)
+        self.assertIn("ntRegex", parser)
+        self.assertIn("dateRegex", parser)
+        self.assertNotIn(r'"\\bNT[0-9A-Z]+\\b"', parser)
 
     def test_legacy_dataset_migration_runs_once(self):
         store = self._read(
