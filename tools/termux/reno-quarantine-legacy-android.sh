@@ -47,7 +47,7 @@ show_plan() {
     done
   fi
   echo
-  echo "Це тільки MOVE у quarantine. rm/rmdir/delete тут немає."
+  echo "Це тільки MOVE у quarantine. Команд видалення тут немає."
 }
 
 move_to_quarantine() {
