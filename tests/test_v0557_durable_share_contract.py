@@ -34,8 +34,8 @@ class DurableRdpkgShareContractTest(unittest.TestCase):
     def test_existing_prepared_package_is_reused_instead_of_reexported(self):
         activity = self.read("ProjectActivity.kt")
         share = activity[activity.index("private fun shareRdpkg"):activity.index("private fun refreshRdpkgShareRunState")]
-        self.assertIn("PreparedShareStore.volumeFile(", share)
-        self.assertIn("preparedFile.isFile", share)
+        self.assertIn("PreparedShareStore.existingVolumeFile(", share)
+        self.assertIn("preparedFile != null", share)
         self.assertIn("sharePreparedRdpkg(preparedFile)", share)
 
     def test_manifest_registers_share_service(self):
