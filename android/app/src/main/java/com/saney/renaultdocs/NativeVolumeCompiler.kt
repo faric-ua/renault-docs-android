@@ -187,8 +187,16 @@ object NativeVolumeCompiler {
                         identity.date
                     val documentCode =
                         identity.documentCode
-                    val isVisu =
+                    val documentType =
                         identity.documentType
+                            ?: inferDocumentTypeFromEntrypoint(
+                                child =
+                                    child,
+                                entrypoint =
+                                    entrypoint,
+                            )
+                    val isVisu =
+                        documentType
                             ?.equals(
                                 "Visu",
                                 ignoreCase = true,
@@ -290,7 +298,7 @@ object NativeVolumeCompiler {
                                 )
                             }
 
-                            identity.documentType
+                            documentType
                                 ?.takeIf {
                                     it.isNotBlank()
                                 }
@@ -659,4 +667,59 @@ object NativeVolumeCompiler {
                 "volume"
             }
     }
+    private fun inferDocumentTypeFromEntrypoint(
+        child: File,
+        entrypoint: String,
+    ): String? =
+        runCatching {
+            val file =
+                File(
+                    child,
+                    entrypoint,
+                )
+
+            if (
+                !file.isFile
+            ) {
+                return@runCatching null
+            }
+
+            val bytes =
+                file.inputStream()
+                    .buffered()
+                    .use {
+                        input ->
+                        val buffer =
+                            ByteArray(
+                                64 * 1024,
+                            )
+                        val read =
+                            input.read(
+                                buffer,
+                            )
+
+                        if (
+                            read <=
+                            0
+                        ) {
+                            ByteArray(
+                                0,
+                            )
+                        } else {
+                            buffer.copyOf(
+                                read,
+                            )
+                        }
+                    }
+
+            RenaultVolumeIdentity
+                .documentTypeFromHtml(
+                    bytes.toString(
+                        Charsets.ISO_8859_1,
+                    ),
+                )
+        }
+            .getOrNull()
+
+
 }
