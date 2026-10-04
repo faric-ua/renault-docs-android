@@ -2110,6 +2110,28 @@ class ProjectActivity : Activity() {
                 ),
             )
 
+            if (PreparedShareStore.volumeFile(this@ProjectActivity, project, volume).isFile) {
+                addView(
+                    Ui.textView(
+                        context = this@ProjectActivity,
+                        value = "⇧",
+                        sizeSp = 20f,
+                        color = Ui.accent,
+                    ).apply {
+                        contentDescription = "Підготовлений .rdpkg готовий для передачі"
+                        gravity = Gravity.CENTER
+                        setPadding(
+                            Ui.dp(this@ProjectActivity, 8),
+                            0,
+                            Ui.dp(this@ProjectActivity, 4),
+                            0,
+                        )
+                    }
+                )
+            }
+
+
+
             addView(
                 Ui.textView(
                     context =
