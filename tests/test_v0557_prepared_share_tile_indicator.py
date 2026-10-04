@@ -20,5 +20,11 @@ class PreparedShareTileIndicatorContractTest(unittest.TestCase):
         self.assertIn("PreparedShareStore.volumeFile(", card)
         self.assertIn("Підготовлений .rdpkg готовий для передачі", card)
 
+    def test_volume_indicator_refreshes_immediately_after_prepared_file_delete(self):
+        project = self.read("ProjectActivity.kt")
+        delete = project[project.index("private fun confirmDeletePreparedVolume"):project.index("private fun sharePreparedRdpkg(", project.index("private fun confirmDeletePreparedVolume"))]
+        self.assertIn("if (deleted) {", delete)
+        self.assertIn("render()", delete)
+
 if __name__ == "__main__":
     unittest.main()
