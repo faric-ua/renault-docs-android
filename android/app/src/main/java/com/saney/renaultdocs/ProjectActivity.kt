@@ -2443,6 +2443,18 @@ class ProjectActivity : Activity() {
             return
         }
 
+        val preparedFile = PreparedShareStore.volumeFile(this, project, volume)
+        if (preparedFile.isFile) {
+            sharePreparedRdpkg(preparedFile)
+            return
+        }
+
+        val existing = rdpkgShareRunStore.load()
+        if (existing.isRunning && existing.projectId == project.id && existing.volumeId == volume.id) {
+            refreshRdpkgShareRunState()
+            return
+        }
+
         statusText.text = DEFAULT_STATUS_TEXT
         if (!RdpkgShareService.start(this, project.id, volume.id)) {
             statusText.text = "Не вдалося запустити підготовку тому."
@@ -2463,7 +2475,7 @@ class ProjectActivity : Activity() {
             return
         }
 
-        if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalConsumed) return
+        if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalDismissed) return
 
         statusText.text = DEFAULT_STATUS_TEXT
         if (state.phase == RdpkgShareRunPhase.COMPLETE) {
@@ -2474,34 +2486,41 @@ class ProjectActivity : Activity() {
                     "Підготовка тому · помилка",
                     "Підготовлений .rdpkg не знайдено.",
                 ) {
-                    rdpkgShareRunStore.consume(state.finishedAtMs)
+                    rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
                     operationStatus.hide()
                 }
                 return
             }
-            val uri = FileProvider.getUriForFile(this, packageName + ".files", file)
-            val send =
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "application/octet-stream"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
             operationStatus.showTerminal(
                 "Підготовка тому завершена",
                 state.message.ifBlank { "Том готовий для поширення." },
             ) {
-                rdpkgShareRunStore.consume(state.finishedAtMs)
+                rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
                 operationStatus.hide()
             }
-            rdpkgShareRunStore.consume(state.finishedAtMs)
-            startActivity(Intent.createChooser(send, "Поділитися томом"))
+            if (!state.isChooserLaunched && rdpkgShareRunStore.markChooserLaunched(state.finishedAtMs)) {
+                sharePreparedRdpkg(file)
+            }
         } else {
             val detail = "Не вдалося підготувати том: " + state.message
             operationStatus.showTerminal("Підготовка тому · помилка", detail) {
-                rdpkgShareRunStore.consume(state.finishedAtMs)
+                rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
                 operationStatus.hide()
             }
         }
+    }
+
+    private fun sharePreparedRdpkg(
+        file: File,
+    ) {
+        val uri = FileProvider.getUriForFile(this, packageName + ".files", file)
+        val send =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        startActivity(Intent.createChooser(send, "Поділитися томом"))
     }
 
     private fun confirmDeletePreparedVolume(
