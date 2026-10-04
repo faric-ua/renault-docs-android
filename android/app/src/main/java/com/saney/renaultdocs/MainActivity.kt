@@ -562,7 +562,7 @@ class MainActivity : Activity() {
 
             setOnClickListener {
                 if (
-                    !ExternalLinks.open(
+                    !ExternalLinks.openWeb(
                         this@MainActivity,
                         ExternalLinks.PROJECT_CATALOG_URL,
                     )
