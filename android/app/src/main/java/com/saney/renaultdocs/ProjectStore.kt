@@ -860,9 +860,12 @@ class ProjectStore(
                                                         .takeIf {
                                                             it.isNotBlank()
                                                         }
-                                                        ?.let(
-                                                            ::add,
-                                                        )
+                                                        ?.let {
+                                                            code ->
+                                                            add(
+                                                                code,
+                                                            )
+                                                        }
                                                 }
                                             }
                                         }
