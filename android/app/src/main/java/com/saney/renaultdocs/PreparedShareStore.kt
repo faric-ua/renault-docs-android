@@ -67,10 +67,23 @@ object PreparedShareStore {
                 ),
             )
 
+        if (
+            !legacy.isFile
+        ) {
+            return null
+        }
+
+        if (
+            legacy.absolutePath !=
+                canonical.absolutePath &&
+            legacy.renameTo(
+                canonical,
+            )
+        ) {
+            return canonical
+        }
+
         return legacy
-            .takeIf {
-                it.isFile
-            }
     }
 
     fun hasVolumeFile(
