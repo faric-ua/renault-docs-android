@@ -118,6 +118,11 @@ object PreparedVolumeReader {
                             )
                                 .trim()
 
+                        val inferredIdentity =
+                            RenaultVolumeIdentity.parse(
+                                sourceFolder,
+                            )
+
                         val documentCode =
                             volume.optString(
                                 "document_code",
@@ -126,6 +131,7 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.documentCode
 
                         val date =
                             volume.optString(
@@ -135,6 +141,7 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.date
 
                         val vehicleCodes =
                             volume.optJSONArray(
@@ -163,7 +170,10 @@ object PreparedVolumeReader {
                                         }
                                     }
                                 }
-                                ?: emptyList()
+                                ?.takeIf {
+                                    it.isNotEmpty()
+                                }
+                                ?: inferredIdentity.vehicleCodes
 
                         val documentType =
                             volume.optString(
@@ -173,6 +183,7 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.documentType
 
                         val documentVersion =
                             volume.optString(
@@ -182,6 +193,7 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.documentVersion
 
                         val region =
                             volume.optString(
@@ -191,6 +203,7 @@ object PreparedVolumeReader {
                                 .takeIf {
                                     it.isNotBlank()
                                 }
+                                ?: inferredIdentity.region
 
                         if (
                             shouldIgnoreSyntheticVolume(
