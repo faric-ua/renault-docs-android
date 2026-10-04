@@ -50,3 +50,5 @@ docs/architecture/KOTLIN_NATIVE_RAW_TO_RDPKG.md
 docs/assistant-kit/CURRENT_PLAN.md
 docs/v.0.5.51/RELEASE.md
 docs/v.0.5.51/qa/PHONE_TEST.md
+
+docs/assistant-kit/GIT_BRANCH_PR_MERGE_GUIDE.md
