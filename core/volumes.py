@@ -45,6 +45,10 @@ def discover_volumes(root: Path) -> list[dict[str, Any]]:
         document_code = _extract_nt_code(folder_name)
         vehicle_codes = _extract_vehicle_codes(folder_name)
         document_type, document_version = _extract_document_identity(folder_name)
+        if document_type is None:
+            document_type = _infer_document_type_from_entrypoint(
+                child / entrypoint,
+            )
         region = _extract_region(folder_name)
         is_visu = document_type == "Visu" or "visu" in folder_name.casefold()
 
@@ -138,6 +142,23 @@ def _extract_document_identity(name: str) -> tuple[str | None, str | None]:
         return None, None
 
     return "Visu", match.group("version")
+
+
+def _infer_document_type_from_entrypoint(path: Path) -> str | None:
+    try:
+        raw = path.read_bytes()[: 64 * 1024]
+    except OSError:
+        return None
+
+    text = raw.decode("latin-1", errors="ignore")
+    if re.search(
+        r"<title[^>]*>\s*Visu\s+Schema\b",
+        text,
+        re.IGNORECASE | re.DOTALL,
+    ):
+        return "Visu"
+
+    return None
 
 
 def _extract_region(name: str) -> str | None:
