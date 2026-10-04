@@ -13,11 +13,12 @@ class V0545LegacyVolumeIdentityContractTests(unittest.TestCase):
         )
 
         self.assertIn("inferVolumeMetadata(", store)
-        self.assertIn('"NT[0-9A-Z]+"', store)
-        self.assertIn(
-            '"(20\\\\d{2})[._-](\\\\d{2})[._-](\\\\d{2})"',
-            store,
+        parser = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RenaultVolumeIdentity.kt"
         )
+        self.assertIn("RenaultVolumeIdentity.parse(", store)
+        self.assertIn("ntRegex", parser)
+        self.assertIn("dateRegex", parser)
         self.assertIn("documentCode =", store)
         self.assertIn("date =", store)
 
