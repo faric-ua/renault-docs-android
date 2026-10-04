@@ -61,6 +61,27 @@ class V0558VolumeIdentityContractTests(unittest.TestCase):
             self.assertIn(token, compiler)
             self.assertIn(token, engine)
 
+    def test_legacy_visu_schema_content_is_a_metadata_fallback(self):
+        parser = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RenaultVolumeIdentity.kt"
+        )
+        store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectStore.kt"
+        )
+        reader = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/PreparedVolumeReader.kt"
+        )
+        compiler = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeVolumeCompiler.kt"
+        )
+
+        self.assertIn("documentTypeFromHtml(", parser)
+        self.assertIn("Visu\\s+Schema", parser)
+        self.assertIn("inferDocumentTypeFromEntrypoint(", store)
+        self.assertIn("inferDocumentTypeFromEntrypoint(", reader)
+        self.assertIn("inferDocumentTypeFromEntrypoint(", compiler)
+
+
     def test_release_version_is_v0558_or_newer(self):
         gradle = self._read("android/app/build.gradle.kts")
         self.assertIn('versionName = "0.5.58"', gradle)
