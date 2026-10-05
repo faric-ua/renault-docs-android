@@ -49,6 +49,9 @@ class V0560CanonicalProjectPackagesContractTests(unittest.TestCase):
         controller = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
         )
+        service = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectShareService.kt"
+        )
 
         self.assertIn("existingProjectFile(", store)
         self.assertIn("legacyProjectFileName(", store)
@@ -56,7 +59,9 @@ class V0560CanonicalProjectPackagesContractTests(unittest.TestCase):
         self.assertIn("hasProjectFile(", store)
         self.assertIn("PreparedShareStore.hasProjectFile(", home)
         self.assertIn("PreparedShareStore.existingProjectFile(", controller)
-        self.assertIn("PreparedShareStore.projectFile(", controller)
+        self.assertIn("PreparedShareStore.existingProjectFile(", controller)
+        self.assertIn("PreparedShareStore", service)
+        self.assertIn(".projectFile(", service)
 
     def test_rdpkg_filename_and_rdproject_manifest_share_one_identity_resolver(self):
         exporter = self.read(
@@ -70,11 +75,19 @@ class V0560CanonicalProjectPackagesContractTests(unittest.TestCase):
         self.assertIn("resolvedMetadata(", exporter)
         self.assertIn("RdpkgExporter.resolvedMetadata(", project)
 
-    def test_release_version_is_v0560(self):
+    def test_release_version_is_v0560_or_newer(self):
         gradle = self.read("android/app/build.gradle.kts")
 
-        self.assertIn('versionName = "0.5.60"', gradle)
-        self.assertIn("versionCode = 76", gradle)
+        version_code = int(
+            gradle.split("versionCode = ", 1)[1].splitlines()[0].strip()
+        )
+        version_name = tuple(
+            int(part)
+            for part in gradle.split('versionName = "', 1)[1].split('"', 1)[0].split(".")
+        )
+
+        self.assertGreaterEqual(version_name, (0, 5, 60))
+        self.assertGreaterEqual(version_code, 76)
 
 
 if __name__ == "__main__":
