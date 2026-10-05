@@ -180,7 +180,7 @@ class RdprojectShareRunStore(
             )
             putString(
                 KEY_MESSAGE,
-                progress.compactStage(),
+                progress.displayText(),
             )
 
             if (
