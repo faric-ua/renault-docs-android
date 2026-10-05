@@ -442,7 +442,7 @@ class ProjectActivity : Activity() {
 
         if (state.isRunning) {
             val detail =
-                state.progressStage
+                state.message
                     .ifBlank {
                         "Імпортую…"
                     }
@@ -3602,7 +3602,7 @@ class ProjectActivity : Activity() {
             "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів."
 
         private const val NATIVE_RUN_REFRESH_MS =
-            400L
+            100L
         private const val NATIVE_RUN_STARTUP_GRACE_MS =
             5_000L
 
