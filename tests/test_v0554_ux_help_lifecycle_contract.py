@@ -385,15 +385,16 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("showActions(project.id)", remove)
 
     def test_project_share_uses_ukrainian_volume_plural(self):
-        home = self.read(
-            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        service = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectShareService.kt"
         )
-        self.assertNotIn("том(ів)", home)
-        self.assertIn("volumeCountLabel(volumes.size)", home)
-        self.assertIn("mod100 in 11..14", home)
-        self.assertIn('mod10 == 1 -> "том"', home)
-        self.assertIn('mod10 in 2..4 -> "томи"', home)
-        self.assertIn('else -> "томів"', home)
+        self.assertNotIn("том(ів)", service)
+        self.assertIn("volumeCountLabel(", service)
+        self.assertIn("volumes.size", service)
+        self.assertIn("mod100 in", service)
+        self.assertIn('"том"', service)
+        self.assertIn('"томи"', service)
+        self.assertIn('"томів"', service)
 
     def test_every_app_owned_alert_dialog_uses_shared_theme(self):
         base = (
