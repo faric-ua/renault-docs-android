@@ -236,6 +236,30 @@ if __name__ == "__main__":
 , model)
         self.assertIn('Regex("""\\s+""")', model)
 
+    def test_operation_card_shows_real_target_filename(self):
+        status = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
+        )
+        main = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+        project = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgExporter.kt"
+        )
+
+        self.assertIn("private val subjectView: TextView", status)
+        self.assertIn("TextUtils.TruncateAt.MIDDLE", status)
+        self.assertIn('subject: String = "Renault Docs"', status)
+        self.assertIn("RdprojectExporter.defaultFileName(", main)
+        self.assertIn("subject =", main)
+        self.assertIn("volumeOperationSubject(", project)
+        self.assertIn("DocumentFile", project)
+        self.assertIn("subject =", project)
+        self.assertIn('"Пакую том…"', exporter)
+
     def test_project_bar_matches_current_stage_instead_of_whole_bundle(self):
         exporter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
