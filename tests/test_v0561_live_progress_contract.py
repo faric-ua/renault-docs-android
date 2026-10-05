@@ -175,6 +175,26 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("invalidatePreparedProject(\n            fromProjectId,", store)
         self.assertIn("invalidatePreparedProject(\n            toProjectId,", store)
 
+    def test_progress_identifies_volume_and_adapts_to_orientation(self):
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
+        )
+        status = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
+        )
+
+        self.assertIn("internal fun progressVolumeLabel(", exporter)
+        self.assertIn("volume.documentCode", exporter)
+        self.assertIn("volume.date", exporter)
+        self.assertIn('"Пакую том " +', exporter)
+        self.assertNotIn('(index + 1) +\n                                            "/"', exporter)
+
+        self.assertIn("Configuration.ORIENTATION_LANDSCAPE", status)
+        self.assertIn("detailView.maxLines =", status)
+        self.assertIn("TextUtils.TruncateAt.MIDDLE", status)
+        self.assertIn("TextUtils.TruncateAt.END", status)
+        self.assertIn("configureDetailLayout()", status)
+
     def test_converter_ui_uses_compact_stage_copy(self):
         converter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
