@@ -198,12 +198,15 @@ class NativeRdpkgPreparationService : Service() {
                         runStore.updateProgress(
                             progress,
                         )
+                        runStore.updatePreparing(
+                            progress.displayText(),
+                        )
 
                         updateNotificationThrottled(
                             title =
                                 "Renault Docs · створення .rdpkg",
                             text =
-                                progress.compactStage(),
+                                progress.displayText(),
                             projectId =
                                 request.projectId,
                             cancellable =
@@ -285,7 +288,7 @@ class NativeRdpkgPreparationService : Service() {
                                 title =
                                     "Renault Docs · перевірка .rdpkg",
                                 text =
-                                    progress.compactStage(),
+                                    progress.displayText(),
                                 projectId =
                                     request.projectId,
                                 cancellable =
