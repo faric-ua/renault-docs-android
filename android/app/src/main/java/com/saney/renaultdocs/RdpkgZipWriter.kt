@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import java.io.BufferedInputStream
 import java.io.File
 import java.security.DigestOutputStream
@@ -24,6 +25,9 @@ object RdpkgZipWriter {
 
     private const val ZIP_EPOCH_MILLIS =
         315_532_800_000L
+
+    private const val PROGRESS_THROTTLE_MS =
+        200L
 
     private val textExtensions =
         setOf(
@@ -129,6 +133,8 @@ object RdpkgZipWriter {
                     ByteArray(
                         BUFFER_SIZE,
                     )
+                var lastProgressAt =
+                    0L
 
                 files.forEachIndexed {
                     index,
@@ -198,19 +204,24 @@ object RdpkgZipWriter {
                         index +
                             1
 
+                    val now =
+                        SystemClock.elapsedRealtime()
+
                     if (
                         completed ==
                         1 ||
-                        completed %
-                            500 ==
-                        0 ||
                         completed ==
-                        files.size
+                        files.size ||
+                        now -
+                            lastProgressAt >=
+                            PROGRESS_THROTTLE_MS
                     ) {
                         progress?.invoke(
                             completed,
                             files.size,
                         )
+                        lastProgressAt =
+                            now
                     }
                 }
             }
