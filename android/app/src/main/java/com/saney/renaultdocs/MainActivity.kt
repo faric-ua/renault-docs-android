@@ -97,13 +97,17 @@ class MainActivity : Activity() {
                 onPreparedProjectDeleted = {
                     project,
                     deleted ->
-                    if (
-                        deleted
-                    ) {
-                        statusText.text =
-                            "Підготовлений файл видалено: " +
+                    statusText.text =
+                        if (
+                            deleted
+                        ) {
+                            "Підготовлений .rdproject видалено: " +
+                                project.title +
+                                ". Проєкт і томи не змінено."
+                        } else {
+                            "Не вдалося видалити підготовлений .rdproject: " +
                                 project.title
-                    }
+                        }
                     renderLibrary()
                 },
                 onShareProgress = { current, total, message ->
