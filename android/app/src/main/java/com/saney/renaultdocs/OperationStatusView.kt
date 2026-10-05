@@ -54,7 +54,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         addView(detailView)
 
         progressView = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
-            max = 100
+            max = PROGRESS_SCALE
             progress = 0
             isIndeterminate = true
         }
@@ -80,8 +80,21 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         val determinate = current != null && total != null && total > 0
         progressView.isIndeterminate = !determinate
         if (determinate) {
-            progressView.max = total!!
-            progressView.progress = current!!.coerceIn(0, total)
+            val normalized =
+                ((current!!.coerceIn(0, total!!).toLong() * PROGRESS_SCALE) / total)
+                    .toInt()
+                    .coerceIn(0, PROGRESS_SCALE)
+
+            progressView.max = PROGRESS_SCALE
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                progressView.setProgress(
+                    normalized,
+                    true,
+                )
+            } else {
+                progressView.progress = normalized
+            }
         }
     }
 
@@ -90,8 +103,8 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         titleView.text = title
         detailView.text = detail
         progressView.isIndeterminate = false
-        progressView.max = 1
-        progressView.progress = 1
+        progressView.max = PROGRESS_SCALE
+        progressView.progress = PROGRESS_SCALE
         cancelView.visibility = View.GONE
         cancelView.setOnClickListener(null)
         closeView.visibility = View.VISIBLE
@@ -105,5 +118,10 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         visibility = View.GONE
         closeView.setOnClickListener(null)
         cancelView.setOnClickListener(null)
+    }
+
+    companion object {
+        private const val PROGRESS_SCALE =
+            1_000
     }
 }
