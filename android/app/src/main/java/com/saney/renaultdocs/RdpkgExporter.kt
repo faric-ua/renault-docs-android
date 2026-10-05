@@ -173,7 +173,7 @@ object RdpkgExporter {
                             progressState?.invoke(
                                 OperationProgress.weightedItemsAndBytes(
                                     stage =
-                                        "Пакую…",
+                                        "Пакую том…",
                                     itemsDone =
                                         completedFiles,
                                     itemsTotal =
