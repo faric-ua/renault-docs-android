@@ -1,0 +1,139 @@
+from pathlib import Path
+import unittest
+
+
+class V0561LiveProgressContractTests(unittest.TestCase):
+    def _read(self, path: str) -> str:
+        root = Path(__file__).resolve().parents[1]
+        return (root / path).read_text(encoding="utf-8")
+
+    def test_release_version(self):
+        gradle = self._read("android/app/build.gradle.kts")
+        self.assertIn('versionName = "0.5.61"', gradle)
+        self.assertIn("versionCode = 77", gradle)
+
+    def test_shared_progress_model_is_compact_and_measured(self):
+        model = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationProgress.kt"
+        )
+        self.assertIn("data class OperationProgress", model)
+        self.assertIn("val current: Int?", model)
+        self.assertIn("val total: Int?", model)
+        self.assertIn("fun compactStage()", model)
+        self.assertIn("fun measured(", model)
+        self.assertIn("fun indeterminate(", model)
+
+    def test_operation_status_keeps_thin_bar_and_animates_progress(self):
+        view = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
+        )
+        self.assertIn("progressBarStyleHorizontal", view)
+        self.assertIn("Ui.dp(context, 5)", view)
+        self.assertIn("setProgress(", view)
+        self.assertIn("PROGRESS_SCALE", view)
+
+    def test_rdpkg_import_export_and_share_persist_real_progress(self):
+        importer = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgImporter.kt"
+        )
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgExporter.kt"
+        )
+        import_store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgImportRunStore.kt"
+        )
+        export_store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgExportRunStore.kt"
+        )
+        share_store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgShareRunStore.kt"
+        )
+
+        self.assertIn("progressState: ((OperationProgress) -> Unit)?", importer)
+        self.assertIn('"payload_file_count"', importer)
+        self.assertIn("PROGRESS_THROTTLE_MS", importer)
+
+        self.assertIn("progressState: ((OperationProgress) -> Unit)?", exporter)
+        self.assertIn("OperationProgress.measured(", exporter)
+
+        for store in (import_store, export_store, share_store):
+            self.assertIn("progressCurrent", store)
+            self.assertIn("progressTotal", store)
+            self.assertIn("progressStage", store)
+            self.assertIn("fun updateProgress(", store)
+
+    def test_native_preparation_exposes_staging_and_packaging_progress(self):
+        engine = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeRdpkgPreparationEngine.kt"
+        )
+        store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeRdpkgRunStore.kt"
+        )
+        service = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeRdpkgPreparationService.kt"
+        )
+
+        self.assertIn("onProgressState: (OperationProgress) -> Unit", engine)
+        self.assertIn("progress.filesDone", engine)
+        self.assertIn("progress.filesTotal", engine)
+        self.assertIn('"Пакую…"', engine)
+        self.assertIn("progressCurrent", store)
+        self.assertIn("progressTotal", store)
+        self.assertIn("runStore.updateProgress(", service)
+
+    def test_rdproject_preparation_is_service_owned_and_lifecycle_durable(self):
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
+        )
+        service = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectShareService.kt"
+        )
+        store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectShareRunStore.kt"
+        )
+        controller = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+        main = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+        manifest = self._read("android/app/src/main/AndroidManifest.xml")
+
+        self.assertIn("progressState: ((OperationProgress) -> Unit)?", exporter)
+        self.assertIn("RdprojectShareService.start(", controller)
+        self.assertNotIn("Thread {", controller)
+        self.assertIn("class RdprojectShareRunStore", store)
+        self.assertIn("class RdprojectShareService", service)
+        self.assertIn("refreshRdprojectShareRunState()", main)
+        self.assertIn("markChooserLaunched(", main)
+        self.assertIn('android:name=".RdprojectShareService"', manifest)
+
+    def test_project_screen_feeds_persisted_counts_to_shared_bar(self):
+        project = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+        self.assertIn("state.progressCurrent", project)
+        self.assertIn("state.progressTotal", project)
+        self.assertIn("NATIVE_RUN_REFRESH_MS =", project)
+        self.assertIn("400L", project)
+
+    def test_converter_ui_uses_compact_stage_copy(self):
+        converter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
+        )
+        for label in (
+            '"Сканую…"',
+            '"Готую…"',
+            '"Копіюю…"',
+            '"Пакую…"',
+            '"Перевіряю…"',
+            '"Завершую…"',
+        ):
+            self.assertIn(label, converter)
+
+        self.assertNotIn('" · змінено файлів: "', converter)
+        self.assertNotIn('" · виправлень: "', converter)
+
+
+if __name__ == "__main__":
+    unittest.main()
