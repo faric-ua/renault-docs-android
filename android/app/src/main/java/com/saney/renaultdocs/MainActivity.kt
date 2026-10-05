@@ -1155,6 +1155,37 @@ class MainActivity : Activity() {
             statusText.text =
                 "Проєкт = модель Renault · томи додаються окремо."
 
+            val runningProject =
+                state.projectId
+                    ?.let {
+                        projectStore.project(
+                            it,
+                        )
+                    }
+            val runningVolumes =
+                runningProject
+                    ?.let {
+                        projectStore.volumes(
+                            it.id,
+                        )
+                    }
+                    .orEmpty()
+            val operationSubject =
+                if (
+                    runningProject !=
+                        null &&
+                    runningVolumes.isNotEmpty()
+                ) {
+                    RdprojectExporter.defaultFileName(
+                        project =
+                            runningProject,
+                        volumes =
+                            runningVolumes,
+                    )
+                } else {
+                    "Renault Docs"
+                }
+
             operationStatus.showRunning(
                 title =
                     "Підготовка проєкту",
@@ -1175,6 +1206,8 @@ class MainActivity : Activity() {
                             it >
                                 0
                         },
+                subject =
+                    operationSubject,
             )
             return
         }
