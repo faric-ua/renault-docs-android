@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -181,6 +182,12 @@ object RdprojectExporter {
                                         ),
                                     total =
                                         progressTotal,
+                                    itemCurrent =
+                                        volumeProgress.itemCurrent,
+                                    itemTotal =
+                                        volumeProgress.itemTotal,
+                                    itemLabel =
+                                        volumeProgress.itemLabel,
                                 ),
                             )
                         },
@@ -336,6 +343,15 @@ object RdprojectExporter {
                     ),
                 )
 
+                val projectBytes =
+                    projectFiles.sumOf {
+                        it.length()
+                    }
+                var processedBytes =
+                    0L
+                var lastProgressAt =
+                    0L
+
                 context.contentResolver
                     .openOutputStream(
                         destinationUri,
@@ -345,6 +361,12 @@ object RdprojectExporter {
                         ZipOutputStream(
                             raw.buffered(),
                         ).use { zip ->
+                            val buffer =
+                                ByteArray(
+                                    1024 *
+                                        1024,
+                                )
+
                             projectFiles.forEachIndexed {
                                 index,
                                 file ->
@@ -357,13 +379,93 @@ object RdprojectExporter {
                                         relative,
                                     ),
                                 )
+
                                 file.inputStream()
                                     .buffered()
                                     .use {
                                         input ->
-                                        input.copyTo(
-                                            zip,
-                                        )
+                                        while (
+                                            true
+                                        ) {
+                                            val read =
+                                                input.read(
+                                                    buffer,
+                                                )
+
+                                            if (
+                                                read <
+                                                0
+                                            ) {
+                                                break
+                                            }
+
+                                            if (
+                                                read ==
+                                                0
+                                            ) {
+                                                continue
+                                            }
+
+                                            zip.write(
+                                                buffer,
+                                                0,
+                                                read,
+                                            )
+                                            processedBytes +=
+                                                read
+
+                                            val now =
+                                                SystemClock.elapsedRealtime()
+
+                                            if (
+                                                now -
+                                                    lastProgressAt >=
+                                                    100L
+                                            ) {
+                                                val finalPhaseProgress =
+                                                    if (
+                                                        projectBytes >
+                                                        0L
+                                                    ) {
+                                                        (
+                                                            processedBytes
+                                                                .coerceIn(
+                                                                    0L,
+                                                                    projectBytes,
+                                                                ) *
+                                                                progressUnitsPerPhase /
+                                                                projectBytes
+                                                        ).toInt()
+                                                    } else {
+                                                        0
+                                                    }
+
+                                                progressState?.invoke(
+                                                    OperationProgress.measured(
+                                                        stage =
+                                                            "Пакую проєкт…",
+                                                        current =
+                                                            (
+                                                                volumes.size *
+                                                                    progressUnitsPerPhase +
+                                                                    finalPhaseProgress
+                                                            ).coerceAtMost(
+                                                                progressTotal,
+                                                            ),
+                                                        total =
+                                                            progressTotal,
+                                                        itemCurrent =
+                                                            index,
+                                                        itemTotal =
+                                                            projectFiles.size,
+                                                        itemLabel =
+                                                            "Файлів",
+                                                    ),
+                                                )
+                                                lastProgressAt =
+                                                    now
+                                            }
+                                        }
                                     }
                                 zip.closeEntry()
 
@@ -372,15 +474,20 @@ object RdprojectExporter {
                                         1
                                 val finalPhaseProgress =
                                     if (
-                                        projectFiles.isEmpty()
+                                        projectBytes >
+                                        0L
                                     ) {
-                                        progressUnitsPerPhase
-                                    } else {
                                         (
-                                            completed.toLong() *
+                                            processedBytes
+                                                .coerceIn(
+                                                    0L,
+                                                    projectBytes,
+                                                ) *
                                                 progressUnitsPerPhase /
-                                                projectFiles.size
+                                                projectBytes
                                         ).toInt()
+                                    } else {
+                                        progressUnitsPerPhase
                                     }
 
                                 progressState?.invoke(
@@ -397,6 +504,12 @@ object RdprojectExporter {
                                             ),
                                         total =
                                             progressTotal,
+                                        itemCurrent =
+                                            completed,
+                                        itemTotal =
+                                            projectFiles.size,
+                                        itemLabel =
+                                            "Файлів",
                                     ),
                                 )
                             }
