@@ -59,7 +59,7 @@ class RdpkgShareService : Service() {
                     destinationUri = uri,
                     progressState = { progress ->
                         val stage =
-                            progress.compactStage()
+                            progress.displayText()
                         runStore.update(
                             stage,
                         )
