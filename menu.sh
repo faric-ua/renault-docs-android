@@ -258,6 +258,12 @@ quarantine_legacy_android() {
   pause_menu
 }
 
+migrate_rdpkg_names() {
+  clear
+  bash "$REPO/tools/termux/reno-migrate-rdpkg-names.sh"
+  pause_menu
+}
+
 refresh_termux_integration() {
   clear
   echo "Оновлюю Renault aliases та Termux:Widget shortcut..."
@@ -322,6 +328,7 @@ while true; do
   echo "21 — Аудит legacy *_android (read-only)"
   echo "22 — Перевірити посилання dataset (read-only)"
   echo "23 — Legacy quarantine *_android (move/restore, без видалення)"
+  echo "24 — Міграція назв локальних .rdpkg (безпечне перейменування)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -397,6 +404,9 @@ while true; do
       ;;
     23)
       quarantine_legacy_android
+      ;;
+    24)
+      migrate_rdpkg_names
       ;;
     0)
       clear
