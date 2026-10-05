@@ -441,17 +441,51 @@ class NativeRdpkgPreparationEngine(
                                         "/" +
                                         total,
                                 )
-                                onProgressState(
-                                    OperationProgress.measured(
-                                        stage =
-                                            "Пакую…",
-                                        current =
-                                            completed,
-                                        total =
-                                            total,
-                                    ),
-                                )
                             }
+                        },
+                        byteProgress = {
+                            completedFiles,
+                            totalFiles,
+                            processedBytes,
+                            totalBytes ->
+                            checkCancelled()
+
+                            val scale =
+                                10_000
+                            val normalized =
+                                if (
+                                    totalBytes >
+                                    0L
+                                ) {
+                                    (
+                                        processedBytes
+                                            .coerceIn(
+                                                0L,
+                                                totalBytes,
+                                            ) *
+                                            scale /
+                                            totalBytes
+                                    ).toInt()
+                                } else {
+                                    0
+                                }
+
+                            onProgressState(
+                                OperationProgress.measured(
+                                    stage =
+                                        "Пакую…",
+                                    current =
+                                        normalized,
+                                    total =
+                                        scale,
+                                    itemCurrent =
+                                        completedFiles,
+                                    itemTotal =
+                                        totalFiles,
+                                    itemLabel =
+                                        "Файлів",
+                                ),
+                            )
                         },
                     )
 
