@@ -195,7 +195,11 @@ class RdprojectShareService : Service() {
                     message =
                         "Проєкт " +
                             project.title +
-                            " підготовлено.",
+                            " підготовлено · " +
+                            volumeCountLabel(
+                                volumes.size,
+                            ) +
+                            ".",
                 )
 
                 notificationManager()
@@ -365,6 +369,40 @@ class RdprojectShareService : Service() {
                 }
             }
             .build()
+    }
+
+    private fun volumeCountLabel(
+        count: Int,
+    ): String {
+        val mod100 =
+            count %
+                100
+        val mod10 =
+            count %
+                10
+
+        val noun =
+            when {
+                mod100 in
+                    11..14 ->
+                    "томів"
+
+                mod10 ==
+                    1 ->
+                    "том"
+
+                mod10 in
+                    2..4 ->
+                    "томи"
+
+                else ->
+                    "томів"
+            }
+
+        return count
+            .toString() +
+            " " +
+            noun
     }
 
     private fun notificationManager():
