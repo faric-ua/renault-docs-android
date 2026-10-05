@@ -113,16 +113,20 @@ class RdpkgImportService : Service() {
             .setOngoing(ongoing)
             .apply {
                 if (ongoing) {
-                    val determinate =
-                        current != null &&
-                            total != null &&
-                            total > 0
-                    if (determinate) {
+                    val resolvedTotal =
+                        total ?: 0
+                    val resolvedCurrent =
+                        current ?: 0
+
+                    if (
+                        resolvedTotal >
+                        0
+                    ) {
                         setProgress(
-                            total!!,
-                            current!!.coerceIn(
+                            resolvedTotal,
+                            resolvedCurrent.coerceIn(
                                 0,
-                                total,
+                                resolvedTotal,
                             ),
                             false,
                         )
