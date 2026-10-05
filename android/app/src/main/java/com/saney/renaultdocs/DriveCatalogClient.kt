@@ -10,10 +10,13 @@ object DriveCatalogClient {
     private const val CONNECT_TIMEOUT_MS = 20_000
     private const val READ_TIMEOUT_MS = 60_000
 
-    fun loadCatalog(): DriveCatalog =
-        open(
-            ExternalLinks.PROJECT_CATALOG_MANIFEST_URL,
-        ).use { connection ->
+    fun loadCatalog(): DriveCatalog {
+        val connection =
+            open(
+                ExternalLinks.PROJECT_CATALOG_MANIFEST_URL,
+            )
+
+        return try {
             val raw =
                 connection.inputStream
                     .bufferedReader(
@@ -22,8 +25,14 @@ object DriveCatalogClient {
                     .use {
                         it.readText()
                     }
-            DriveCatalogParser.parse(raw)
+
+            DriveCatalogParser.parse(
+                raw,
+            )
+        } finally {
+            connection.disconnect()
         }
+    }
 
     fun downloadPackage(
         driveFileId: String,
@@ -39,11 +48,14 @@ object DriveCatalogClient {
             )
         temporary.delete()
 
-        open(
-            ExternalLinks.driveDownloadUrl(
-                driveFileId,
-            ),
-        ).use { connection ->
+        val connection =
+            open(
+                ExternalLinks.driveDownloadUrl(
+                    driveFileId,
+                ),
+            )
+
+        try {
             val contentType =
                 connection.contentType
                     .orEmpty()
@@ -107,6 +119,8 @@ object DriveCatalogClient {
                     }
                 }
             }
+        } finally {
+            connection.disconnect()
         }
 
         require(
