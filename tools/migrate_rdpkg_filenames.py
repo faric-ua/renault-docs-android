@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,6 +46,57 @@ def _read_json_entry(
             f"{name} must contain a JSON object"
         )
     return value
+
+
+def _infer_document_type_from_archive(
+    archive: ZipFile,
+    volume: dict,
+) -> str | None:
+    entrypoint = str(
+        volume.get("entrypoint")
+        or ""
+    ).strip()
+
+    if not entrypoint:
+        return None
+
+    names = archive.namelist()
+    exact = entrypoint if entrypoint in names else None
+
+    if exact is None:
+        needle = entrypoint.casefold()
+        exact = next(
+            (
+                name
+                for name in names
+                if name.casefold() == needle
+            ),
+            None,
+        )
+
+    if exact is None:
+        return None
+
+    try:
+        raw = archive.read(
+            exact,
+        )[: 64 * 1024]
+    except KeyError:
+        return None
+
+    text = raw.decode(
+        "latin-1",
+        errors="ignore",
+    )
+
+    if re.search(
+        r"<title[^>]*>\s*Visu\s+Schema\b",
+        text,
+        re.IGNORECASE | re.DOTALL,
+    ):
+        return "Visu"
+
+    return None
 
 
 def _merge_volume_metadata(
@@ -173,6 +225,36 @@ def inspect_package(
                 archive,
                 dataset_name,
             )
+
+            merged_volume =
+                _merge_volume_metadata(
+                    package,
+                    dataset,
+                )
+
+            if not merged_volume.get(
+                "document_type"
+            ):
+                inferred_document_type =
+                    _infer_document_type_from_archive(
+                        archive,
+                        merged_volume,
+                    )
+                if inferred_document_type:
+                    package_volume =
+                        package.get(
+                            "volume"
+                        )
+                    if not isinstance(
+                        package_volume,
+                        dict,
+                    ):
+                        package_volume = {}
+                        package["volume"] =
+                            package_volume
+                    package_volume[
+                        "document_type"
+                    ] = inferred_document_type
     except (
         BadZipFile,
         KeyError,
