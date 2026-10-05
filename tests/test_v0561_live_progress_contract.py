@@ -20,6 +20,9 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("val current: Int?", model)
         self.assertIn("val total: Int?", model)
         self.assertIn("fun compactStage()", model)
+        self.assertIn("fun displayText()", model)
+        self.assertIn("itemCurrent", model)
+        self.assertIn("itemTotal", model)
         self.assertIn("fun measured(", model)
         self.assertIn("fun indeterminate(", model)
 
@@ -52,6 +55,8 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("progressState: ((OperationProgress) -> Unit)?", importer)
         self.assertIn('"payload_file_count"', importer)
         self.assertIn("PROGRESS_THROTTLE_MS", importer)
+        self.assertIn("CountingInputStream", importer)
+        self.assertIn('"Файлів"', importer)
 
         self.assertIn("progressState: ((OperationProgress) -> Unit)?", exporter)
         self.assertIn("OperationProgress.measured(", exporter)
@@ -76,6 +81,8 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("onProgressState: (OperationProgress) -> Unit", engine)
         self.assertIn("progress.filesDone", engine)
         self.assertIn("progress.filesTotal", engine)
+        self.assertIn("progress.bytesDone", engine)
+        self.assertIn("progress.bytesTotal", engine)
         self.assertIn('"Пакую…"', engine)
         self.assertIn("progressCurrent", store)
         self.assertIn("progressTotal", store)
@@ -106,6 +113,8 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("class RdprojectShareService", service)
         self.assertIn("refreshRdprojectShareRunState()", main)
         self.assertIn("markChooserLaunched(", main)
+        self.assertIn("RDPROJECT_RUN_REFRESH_MS", main)
+        self.assertIn("100L", main)
         self.assertIn('android:name=".RdprojectShareService"', manifest)
 
     def test_project_screen_feeds_persisted_counts_to_shared_bar(self):
@@ -115,7 +124,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("state.progressCurrent", project)
         self.assertIn("state.progressTotal", project)
         self.assertIn("NATIVE_RUN_REFRESH_MS =", project)
-        self.assertIn("400L", project)
+        self.assertIn("100L", project)
 
     def test_converter_ui_uses_compact_stage_copy(self):
         converter = self._read(
@@ -131,6 +140,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         ):
             self.assertIn(label, converter)
 
+        self.assertIn('" · Файлів: "', converter)
         self.assertNotIn('" · змінено файлів: "', converter)
         self.assertNotIn('" · виправлень: "', converter)
 
