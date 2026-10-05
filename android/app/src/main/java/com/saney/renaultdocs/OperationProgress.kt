@@ -179,7 +179,7 @@ data class OperationProgress(
         }
 
         private const val PROGRESS_SCALE =
-            10_000L
+            10_000
         private const val ITEM_WEIGHT =
             7_500L
         private const val BYTE_WEIGHT =
