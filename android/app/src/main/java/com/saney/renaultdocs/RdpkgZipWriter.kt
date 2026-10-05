@@ -27,7 +27,7 @@ object RdpkgZipWriter {
         315_532_800_000L
 
     private const val PROGRESS_THROTTLE_MS =
-        200L
+        100L
 
     private val textExtensions =
         setOf(
@@ -53,6 +53,12 @@ object RdpkgZipWriter {
         sourceRoot: File,
         destinationUri: Uri,
         progress: ((completed: Int, total: Int) -> Unit)? = null,
+        byteProgress: ((
+            completedFiles: Int,
+            totalFiles: Int,
+            processedBytes: Long,
+            totalBytes: Long,
+        ) -> Unit)? = null,
     ): WriteResult {
         val root =
             sourceRoot.canonicalFile
@@ -119,6 +125,12 @@ object RdpkgZipWriter {
             0,
             files.size,
         )
+        byteProgress?.invoke(
+            0,
+            files.size,
+            0L,
+            sourceBytes,
+        )
 
         DigestOutputStream(
             rawOutput.buffered(),
@@ -134,6 +146,8 @@ object RdpkgZipWriter {
                         BUFFER_SIZE,
                     )
                 var lastProgressAt =
+                    0L
+                var processedBytes =
                     0L
 
                 files.forEachIndexed {
@@ -195,6 +209,27 @@ object RdpkgZipWriter {
                                 0,
                                 read,
                             )
+
+                            processedBytes +=
+                                read
+
+                            val byteNow =
+                                SystemClock.elapsedRealtime()
+
+                            if (
+                                byteNow -
+                                    lastProgressAt >=
+                                    PROGRESS_THROTTLE_MS
+                            ) {
+                                byteProgress?.invoke(
+                                    index,
+                                    files.size,
+                                    processedBytes,
+                                    sourceBytes,
+                                )
+                                lastProgressAt =
+                                    byteNow
+                            }
                         }
                     }
 
@@ -219,6 +254,12 @@ object RdpkgZipWriter {
                         progress?.invoke(
                             completed,
                             files.size,
+                        )
+                        byteProgress?.invoke(
+                            completed,
+                            files.size,
+                            processedBytes,
+                            sourceBytes,
                         )
                         lastProgressAt =
                             now
