@@ -278,7 +278,7 @@ class RdprojectShareService : Service() {
                 NOTIFICATION_ID,
                 notification(
                     text =
-                        progress.compactStage(),
+                        progress.displayText(),
                     ongoing =
                         true,
                     current =
