@@ -112,21 +112,21 @@ object RdprojectExporter {
                         progressUnitsPerPhase
 
                 volumes.forEachIndexed { index, volume ->
-                    val progressVolumeLabel =
+                    val volumeLabel =
                         progressVolumeLabel(
                             volume,
                         )
 
                     progress?.invoke(
                         "Готую том " +
-                            progressVolumeLabel +
+                            volumeLabel +
                             "…",
                     )
                     progressState?.invoke(
                         OperationProgress.measured(
                             stage =
                                 "Готую том " +
-                                    progressVolumeLabel +
+                                    volumeLabel +
                                     "…",
                             current =
                                 index *
@@ -181,7 +181,7 @@ object RdprojectExporter {
                                 OperationProgress.measured(
                                     stage =
                                         "Пакую том " +
-                                            progressVolumeLabel +
+                                            volumeLabel +
                                             "…",
                                     current =
                                         (
