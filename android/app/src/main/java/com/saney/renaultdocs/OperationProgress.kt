@@ -4,6 +4,9 @@ data class OperationProgress(
     val stage: String,
     val current: Int? = null,
     val total: Int? = null,
+    val itemCurrent: Int? = null,
+    val itemTotal: Int? = null,
+    val itemLabel: String? = null,
 ) {
     val isDeterminate: Boolean
         get() =
@@ -24,6 +27,41 @@ data class OperationProgress(
             } else {
                 null
             }
+
+    fun displayText(): String {
+        val compact =
+            compactStage()
+        val currentItem =
+            itemCurrent
+        val totalItems =
+            itemTotal
+        val label =
+            itemLabel
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+
+        return if (
+            currentItem != null &&
+            totalItems != null &&
+            totalItems > 0 &&
+            label != null
+        ) {
+            compact +
+                " · " +
+                label +
+                ": " +
+                currentItem.coerceIn(
+                    0,
+                    totalItems,
+                ) +
+                " / " +
+                totalItems
+        } else {
+            compact
+        }
+    }
 
     fun compactStage(): String =
         stage
@@ -54,6 +92,9 @@ data class OperationProgress(
             stage: String,
             current: Int,
             total: Int,
+            itemCurrent: Int? = null,
+            itemTotal: Int? = null,
+            itemLabel: String? = null,
         ): OperationProgress =
             OperationProgress(
                 stage =
@@ -62,6 +103,12 @@ data class OperationProgress(
                     current,
                 total =
                     total,
+                itemCurrent =
+                    itemCurrent,
+                itemTotal =
+                    itemTotal,
+                itemLabel =
+                    itemLabel,
             )
     }
 }
