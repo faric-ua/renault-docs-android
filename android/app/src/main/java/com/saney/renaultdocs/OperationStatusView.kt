@@ -12,6 +12,7 @@ import android.widget.TextView
 
 class OperationStatusView(context: Context) : LinearLayout(context) {
     private val titleView: TextView
+    private val subjectView: TextView
     private val detailView: TextView
     private val progressView: ProgressBar
     private val closeView: TextView
@@ -48,9 +49,30 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         header.addView(closeView, LayoutParams(Ui.dp(context, 44), Ui.dp(context, 44)))
         addView(header)
 
-        addView(Ui.textView(context, "Renault Docs", 12f, Ui.muted).apply {
-            setPadding(0, 0, 0, Ui.dp(context, 6))
-        })
+        subjectView =
+            Ui.textView(
+                context,
+                "Renault Docs",
+                12f,
+                Ui.muted,
+            ).apply {
+                maxLines =
+                    1
+                ellipsize =
+                    TextUtils.TruncateAt.MIDDLE
+                setPadding(
+                    0,
+                    0,
+                    0,
+                    Ui.dp(
+                        context,
+                        6,
+                    ),
+                )
+            }
+        addView(
+            subjectView,
+        )
 
         detailView = Ui.textView(context, "", 13f, Ui.muted)
         configureDetailLayout()
@@ -72,9 +94,16 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         current: Int? = null,
         total: Int? = null,
         onCancel: (() -> Unit)? = null,
+        subject: String = "Renault Docs",
     ) {
         visibility = View.VISIBLE
         titleView.text = title
+        subjectView.text =
+            subject
+                .trim()
+                .ifBlank {
+                    "Renault Docs"
+                }
         configureDetailLayout()
         detailView.text = detail
         closeView.visibility = View.GONE
@@ -151,9 +180,20 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         }
     }
 
-    fun showTerminal(title: String, detail: String, onClose: () -> Unit) {
+    fun showTerminal(
+        title: String,
+        detail: String,
+        subject: String = "Renault Docs",
+        onClose: () -> Unit,
+    ) {
         visibility = View.VISIBLE
         titleView.text = title
+        subjectView.text =
+            subject
+                .trim()
+                .ifBlank {
+                    "Renault Docs"
+                }
         configureDetailLayout()
         detailView.text = detail
         progressView.isIndeterminate = false
