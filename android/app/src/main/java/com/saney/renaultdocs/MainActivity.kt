@@ -1210,17 +1210,19 @@ class MainActivity : Activity() {
     private fun buildProjectTile(
         project: RenaultProject,
     ): View {
-        val volumeCount =
+        val volumes =
             projectStore
                 .volumes(
                     project.id,
                 )
-                .size
+        val volumeCount =
+            volumes.size
         val hasPreparedShare =
-            PreparedShareStore.projectFile(
+            PreparedShareStore.hasProjectFile(
                 this,
                 project,
-            ).isFile
+                volumes,
+            )
 
         return LinearLayout(this).apply {
             orientation =

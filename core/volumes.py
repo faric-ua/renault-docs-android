@@ -25,6 +25,50 @@ VISU_RE = re.compile(
 EUROPE_RE = re.compile(r"(?<![A-Z0-9])EUROPE(?![A-Z0-9])", re.IGNORECASE)
 
 
+def infer_volume_identity(
+    *values: object,
+) -> dict[str, Any]:
+    source = " ".join(
+        str(value)
+        for value in values
+        if value is not None
+        and str(value).strip()
+    )
+
+    document_type, document_version = (
+        _extract_document_identity(
+            source,
+        )
+    )
+
+    identity = {
+        "document_code": _extract_nt_code(
+            source,
+        ),
+        "date": _extract_date(
+            source,
+        ),
+        "vehicle_codes": _extract_vehicle_codes(
+            source,
+        ),
+        "document_type": document_type,
+        "document_version": document_version,
+        "region": _extract_region(
+            source,
+        ),
+    }
+
+    return {
+        key: value
+        for key, value in identity.items()
+        if value not in (
+            None,
+            "",
+            [],
+        )
+    }
+
+
 def discover_volumes(root: Path) -> list[dict[str, Any]]:
     """Discover top-level documentation volumes with their own entrypoint."""
     volumes: list[dict[str, Any]] = []

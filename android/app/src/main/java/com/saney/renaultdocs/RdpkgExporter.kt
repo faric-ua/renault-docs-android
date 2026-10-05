@@ -29,10 +29,9 @@ object RdpkgExporter {
             ) !=
             null
 
-    fun defaultFileName(
-        project: RenaultProject,
+    fun resolvedMetadata(
         volume: ProjectVolumeRecord,
-    ): String {
+    ): RenaultVolumeIdentityMetadata {
         val inferred =
             RenaultVolumeIdentity.parse(
                 volume.entrypoint,
@@ -41,56 +40,62 @@ object RdpkgExporter {
                 volume.datasetTitle,
                 volume.platform,
             )
-        val metadata =
-            RenaultVolumeIdentityMetadata(
-                documentCode =
-                    volume.documentCode
-                        ?.takeIf {
-                            it.isNotBlank()
-                        }
-                        ?: inferred.documentCode,
-                date =
-                    volume.date
-                        ?.takeIf {
-                            it.isNotBlank()
-                        }
-                        ?: inferred.date,
-                vehicleCodes =
-                    volume.vehicleCodes
-                        .takeIf {
-                            it.isNotEmpty()
-                        }
-                        ?: inferred.vehicleCodes,
-                documentType =
-                    volume.documentType
-                        ?.takeIf {
-                            it.isNotBlank()
-                        }
-                        ?: inferred.documentType,
-                documentVersion =
-                    volume.documentVersion
-                        ?.takeIf {
-                            it.isNotBlank()
-                        }
-                        ?: inferred.documentVersion,
-                region =
-                    volume.region
-                        ?.takeIf {
-                            it.isNotBlank()
-                        }
-                        ?: inferred.region,
-            )
 
-        return RenaultVolumeIdentity
+        return RenaultVolumeIdentityMetadata(
+            documentCode =
+                volume.documentCode
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: inferred.documentCode,
+            date =
+                volume.date
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: inferred.date,
+            vehicleCodes =
+                volume.vehicleCodes
+                    .takeIf {
+                        it.isNotEmpty()
+                    }
+                    ?: inferred.vehicleCodes,
+            documentType =
+                volume.documentType
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: inferred.documentType,
+            documentVersion =
+                volume.documentVersion
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: inferred.documentVersion,
+            region =
+                volume.region
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: inferred.region,
+        )
+    }
+
+    fun defaultFileName(
+        project: RenaultProject,
+        volume: ProjectVolumeRecord,
+    ): String =
+        RenaultVolumeIdentity
             .canonicalFileName(
                 model =
                     project.model,
                 metadata =
-                    metadata,
+                    resolvedMetadata(
+                        volume,
+                    ),
                 fallbackId =
                     volume.id,
             )
-    }
 
     fun export(
         context: Context,

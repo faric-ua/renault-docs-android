@@ -143,12 +143,17 @@ class HomeProjectDialogController(
             clear(DIALOG_ACTIONS)
             shareProject(project)
         }
+        val projectVolumes =
+            store.volumes(
+                project.id,
+            )
         val prepared =
-            PreparedShareStore.projectFile(
+            PreparedShareStore.existingProjectFile(
                 activity,
                 project,
+                projectVolumes,
             )
-        if (prepared.exists()) {
+        if (prepared != null) {
             addAction("Поділитися підготовленим .rdproject") {
                 clear(DIALOG_ACTIONS)
                 sharePreparedProject(
@@ -250,6 +255,7 @@ class HomeProjectDialogController(
                 PreparedShareStore.projectFile(
                     activity,
                     project,
+                    volumes,
                 )
             val uri =
                 FileProvider.getUriForFile(
@@ -342,6 +348,9 @@ class HomeProjectDialogController(
                         PreparedShareStore.deleteProject(
                             activity,
                             project,
+                            store.volumes(
+                                project.id,
+                            ),
                         )
                     onPreparedProjectDeleted(
                         project,

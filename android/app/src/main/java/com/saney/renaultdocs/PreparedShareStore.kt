@@ -18,11 +18,78 @@ object PreparedShareStore {
     fun projectFile(
         context: Context,
         project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
     ): File =
         File(
-            directory(context, PROJECTS),
-            RdprojectExporter.defaultFileName(project),
+            directory(
+                context,
+                PROJECTS,
+            ),
+            RdprojectExporter.defaultFileName(
+                project,
+                volumes,
+            ),
         )
+
+    fun existingProjectFile(
+        context: Context,
+        project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
+    ): File? {
+        val canonical =
+            projectFile(
+                context,
+                project,
+                volumes,
+            )
+
+        if (
+            canonical.isFile
+        ) {
+            return canonical
+        }
+
+        val legacy =
+            File(
+                directory(
+                    context,
+                    PROJECTS,
+                ),
+                legacyProjectFileName(
+                    project,
+                ),
+            )
+
+        if (
+            !legacy.isFile
+        ) {
+            return null
+        }
+
+        if (
+            legacy.absolutePath !=
+                canonical.absolutePath &&
+            legacy.renameTo(
+                canonical,
+            )
+        ) {
+            return canonical
+        }
+
+        return legacy
+    }
+
+    fun hasProjectFile(
+        context: Context,
+        project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
+    ): Boolean =
+        existingProjectFile(
+            context,
+            project,
+            volumes,
+        ) !=
+            null
 
     fun volumeFile(
         context: Context,
@@ -101,10 +168,36 @@ object PreparedShareStore {
     fun deleteProject(
         context: Context,
         project: RenaultProject,
-    ): Boolean =
-        deleteIfPresent(
-            projectFile(context, project),
+        volumes: List<ProjectVolumeRecord>,
+    ): Boolean {
+        val canonical =
+            projectFile(
+                context,
+                project,
+                volumes,
+            )
+        val legacy =
+            File(
+                directory(
+                    context,
+                    PROJECTS,
+                ),
+                legacyProjectFileName(
+                    project,
+                ),
+            )
+
+        return listOf(
+            canonical,
+            legacy,
         )
+            .distinctBy {
+                it.absolutePath
+            }
+            .all(
+                ::deleteIfPresent,
+            )
+    }
 
     fun deleteVolume(
         context: Context,
@@ -140,6 +233,14 @@ object PreparedShareStore {
                 ::deleteIfPresent,
             )
     }
+
+    private fun legacyProjectFileName(
+        project: RenaultProject,
+    ): String =
+        project.id.ifBlank {
+            "renault-project"
+        } +
+            ".rdproject"
 
     private fun legacyVolumeFileName(
         project: RenaultProject,

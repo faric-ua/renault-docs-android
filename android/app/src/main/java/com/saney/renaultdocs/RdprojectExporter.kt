@@ -12,8 +12,63 @@ object RdprojectExporter {
     const val FORMAT = "renault-docs-project"
     const val SCHEMA_VERSION = 1
 
-    fun defaultFileName(project: RenaultProject): String =
-        project.id.ifBlank { "renault-project" } + ".rdproject"
+    fun defaultFileName(
+        project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
+    ): String {
+        val model =
+            project.model
+                .takeIf {
+                    it.isNotBlank()
+                }
+                ?: project.title
+                    .takeIf {
+                        it.isNotBlank()
+                    }
+                ?: project.id
+                    .takeIf {
+                        it.isNotBlank()
+                    }
+                ?: "Renault-project"
+
+        val vehicleCodes =
+            projectVehicleCodes(
+                volumes,
+            )
+
+        val parts =
+            buildList {
+                add(
+                    RenaultVolumeIdentity.safeFilePart(
+                        model,
+                    ),
+                )
+
+                if (
+                    vehicleCodes.isNotEmpty()
+                ) {
+                    add(
+                        vehicleCodes
+                            .joinToString(
+                                "-",
+                            ) {
+                                RenaultVolumeIdentity.safeFilePart(
+                                    it,
+                                )
+                            },
+                    )
+                }
+            }
+
+        return parts
+            .filter {
+                it.isNotBlank()
+            }
+            .joinToString(
+                "_",
+            ) +
+            ".rdproject"
+    }
 
     fun blockingVolumes(
         volumes: List<ProjectVolumeRecord>,
@@ -53,70 +108,217 @@ object RdprojectExporter {
                     progress?.invoke(
                         "Готую том " + (index + 1) + "/" + volumes.size + "…",
                     )
+
+                    val metadata =
+                        RdpkgExporter.resolvedMetadata(
+                            volume,
+                        )
                     val fileName =
-                        RdpkgExporter.defaultFileName(project, volume)
-                    val outFile = File(volumeDir, fileName)
+                        RdpkgExporter.defaultFileName(
+                            project,
+                            volume,
+                        )
+                    val outFile =
+                        File(
+                            volumeDir,
+                            fileName,
+                        )
                     val outUri =
                         androidx.core.content.FileProvider.getUriForFile(
                             context,
                             context.packageName + ".files",
                             outFile,
                         )
+
                     RdpkgExporter.export(
                         context = context,
                         volume = volume,
                         destinationUri = outUri,
                     ).getOrThrow()
 
-                    manifestVolumes.put(
+                    val manifestVolume =
                         JSONObject()
-                            .put("id", volume.id)
-                            .put("document_code", volume.documentCode)
-                            .put("date", volume.date)
-                            .put("file", "volumes/" + fileName),
+                            .put(
+                                "id",
+                                volume.id,
+                            )
+                            .put(
+                                "title",
+                                volume.title,
+                            )
+                            .put(
+                                "vehicle_codes",
+                                JSONArray(
+                                    metadata.vehicleCodes,
+                                ),
+                            )
+                            .put(
+                                "file",
+                                "volumes/" + fileName,
+                            )
+
+                    metadata.documentCode
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            manifestVolume.put(
+                                "document_code",
+                                it,
+                            )
+                        }
+                    metadata.date
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            manifestVolume.put(
+                                "date",
+                                it,
+                            )
+                        }
+                    metadata.documentType
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            manifestVolume.put(
+                                "document_type",
+                                it,
+                            )
+                        }
+                    metadata.documentVersion
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            manifestVolume.put(
+                                "document_version",
+                                it,
+                            )
+                        }
+                    metadata.region
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            manifestVolume.put(
+                                "region",
+                                it,
+                            )
+                        }
+
+                    manifestVolumes.put(
+                        manifestVolume,
                     )
                 }
+
+                val projectJson =
+                    JSONObject()
+                        .put(
+                            "id",
+                            project.id,
+                        )
+                        .put(
+                            "title",
+                            project.title,
+                        )
+                        .put(
+                            "model",
+                            project.model,
+                        )
+                        .put(
+                            "vehicle_codes",
+                            JSONArray(
+                                projectVehicleCodes(
+                                    volumes,
+                                ),
+                            ),
+                        )
 
                 File(tempRoot, "rdproject.json")
                     .writeText(
                         JSONObject()
-                            .put("format", FORMAT)
-                            .put("schema_version", SCHEMA_VERSION)
+                            .put(
+                                "format",
+                                FORMAT,
+                            )
+                            .put(
+                                "schema_version",
+                                SCHEMA_VERSION,
+                            )
                             .put(
                                 "project",
-                                JSONObject()
-                                    .put("id", project.id)
-                                    .put("title", project.title)
-                                    .put("model", project.model),
+                                projectJson,
                             )
-                            .put("volumes", manifestVolumes)
+                            .put(
+                                "volumes",
+                                manifestVolumes,
+                            )
                             .toString(2),
                         Charsets.UTF_8,
                     )
 
                 context.contentResolver
-                    .openOutputStream(destinationUri, "w")
+                    .openOutputStream(
+                        destinationUri,
+                        "w",
+                    )
                     ?.use { raw ->
-                        ZipOutputStream(raw.buffered()).use { zip ->
+                        ZipOutputStream(
+                            raw.buffered(),
+                        ).use { zip ->
                             tempRoot.walkTopDown()
-                                .filter(File::isFile)
-                                .sortedBy { it.relativeTo(tempRoot).invariantSeparatorsPath }
+                                .filter(
+                                    File::isFile,
+                                )
+                                .sortedBy {
+                                    it.relativeTo(
+                                        tempRoot,
+                                    ).invariantSeparatorsPath
+                                }
                                 .forEach { file ->
                                     val relative =
-                                        file.relativeTo(tempRoot).invariantSeparatorsPath
-                                    zip.putNextEntry(ZipEntry(relative))
-                                    file.inputStream().buffered().use {
-                                        input -> input.copyTo(zip)
-                                    }
+                                        file.relativeTo(
+                                            tempRoot,
+                                        ).invariantSeparatorsPath
+                                    zip.putNextEntry(
+                                        ZipEntry(
+                                            relative,
+                                        ),
+                                    )
+                                    file.inputStream()
+                                        .buffered()
+                                        .use {
+                                            input ->
+                                            input.copyTo(
+                                                zip,
+                                            )
+                                        }
                                     zip.closeEntry()
                                 }
                         }
                     }
-                    ?: error("Android не відкрив файл .rdproject для запису.")
+                    ?: error(
+                        "Android не відкрив файл .rdproject для запису."
+                    )
 
                 volumes.size
             } finally {
                 tempRoot.deleteRecursively()
             }
         }
+
+    private fun projectVehicleCodes(
+        volumes: List<ProjectVolumeRecord>,
+    ): List<String> =
+        volumes
+            .flatMap {
+                RdpkgExporter
+                    .resolvedMetadata(
+                        it,
+                    )
+                    .vehicleCodes
+            }
+            .distinct()
 }
