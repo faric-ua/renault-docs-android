@@ -76,34 +76,20 @@ class NativeRdpkgPreparationEngine(
                         when {
                             progress.bytesTotal >
                                 0L -> {
-                                val scale =
-                                    10_000
-                                val normalized =
-                                    (
-                                        progress.bytesDone
-                                            .coerceIn(
-                                                0L,
-                                                progress.bytesTotal,
-                                            ) *
-                                            scale /
-                                            progress.bytesTotal
-                                    ).toInt()
-
-                                OperationProgress.measured(
+                                OperationProgress.weightedItemsAndBytes(
                                     stage =
                                         stage,
-                                    current =
-                                        normalized,
-                                    total =
-                                        scale,
-                                    itemCurrent =
+                                    itemsDone =
                                         progress.filesDone,
-                                    itemTotal =
+                                    itemsTotal =
                                         progress.filesTotal
-                                            .takeIf {
-                                                it >
-                                                    0
-                                            },
+                                            .coerceAtLeast(
+                                                1,
+                                            ),
+                                    bytesDone =
+                                        progress.bytesDone,
+                                    bytesTotal =
+                                        progress.bytesTotal,
                                     itemLabel =
                                         "Файлів",
                                 )
@@ -494,38 +480,18 @@ class NativeRdpkgPreparationEngine(
                             totalBytes ->
                             checkCancelled()
 
-                            val scale =
-                                10_000
-                            val normalized =
-                                if (
-                                    totalBytes >
-                                    0L
-                                ) {
-                                    (
-                                        processedBytes
-                                            .coerceIn(
-                                                0L,
-                                                totalBytes,
-                                            ) *
-                                            scale /
-                                            totalBytes
-                                    ).toInt()
-                                } else {
-                                    0
-                                }
-
                             onProgressState(
-                                OperationProgress.measured(
+                                OperationProgress.weightedItemsAndBytes(
                                     stage =
                                         "Пакую…",
-                                    current =
-                                        normalized,
-                                    total =
-                                        scale,
-                                    itemCurrent =
+                                    itemsDone =
                                         completedFiles,
-                                    itemTotal =
+                                    itemsTotal =
                                         totalFiles,
+                                    bytesDone =
+                                        processedBytes,
+                                    bytesTotal =
+                                        totalBytes,
                                     itemLabel =
                                         "Файлів",
                                 ),
