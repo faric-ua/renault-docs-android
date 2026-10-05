@@ -58,45 +58,89 @@ class NativeRdpkgPreparationEngine(
                         progress.message,
                     )
 
-                    val state =
-                        if (
-                            progress.filesTotal >
-                            0
+                    val stage =
+                        when (
+                            progress.phase
                         ) {
-                            OperationProgress.measured(
-                                stage =
-                                    when (
-                                        progress.phase
-                                    ) {
-                                        NativePreparationStager.Phase.SCANNING ->
-                                            "Сканую…"
-                                        NativePreparationStager.Phase.PREPARING ->
-                                            "Готую…"
-                                        NativePreparationStager.Phase.COPYING ->
-                                            "Копіюю…"
-                                        NativePreparationStager.Phase.READY ->
-                                            "Готую…"
-                                    },
-                                current =
-                                    progress.filesDone,
-                                total =
-                                    progress.filesTotal,
-                            )
-                        } else {
-                            OperationProgress.indeterminate(
-                                when (
-                                    progress.phase
-                                ) {
-                                    NativePreparationStager.Phase.SCANNING ->
-                                        "Сканую…"
-                                    NativePreparationStager.Phase.PREPARING ->
-                                        "Готую…"
-                                    NativePreparationStager.Phase.COPYING ->
-                                        "Копіюю…"
-                                    NativePreparationStager.Phase.READY ->
-                                        "Готую…"
-                                },
-                            )
+                            NativePreparationStager.Phase.SCANNING ->
+                                "Сканую…"
+                            NativePreparationStager.Phase.PREPARING ->
+                                "Готую…"
+                            NativePreparationStager.Phase.COPYING ->
+                                "Копіюю…"
+                            NativePreparationStager.Phase.READY ->
+                                "Готую…"
+                        }
+
+                    val state =
+                        when {
+                            progress.bytesTotal >
+                                0L -> {
+                                val scale =
+                                    10_000
+                                val normalized =
+                                    (
+                                        progress.bytesDone
+                                            .coerceIn(
+                                                0L,
+                                                progress.bytesTotal,
+                                            ) *
+                                            scale /
+                                            progress.bytesTotal
+                                    ).toInt()
+
+                                OperationProgress.measured(
+                                    stage =
+                                        stage,
+                                    current =
+                                        normalized,
+                                    total =
+                                        scale,
+                                    itemCurrent =
+                                        progress.filesDone,
+                                    itemTotal =
+                                        progress.filesTotal
+                                            .takeIf {
+                                                it >
+                                                    0
+                                            },
+                                    itemLabel =
+                                        "Файлів",
+                                )
+                            }
+
+                            progress.filesTotal >
+                                0 ->
+                                OperationProgress.measured(
+                                    stage =
+                                        stage,
+                                    current =
+                                        progress.filesDone,
+                                    total =
+                                        progress.filesTotal,
+                                    itemCurrent =
+                                        progress.filesDone,
+                                    itemTotal =
+                                        progress.filesTotal,
+                                    itemLabel =
+                                        "Файлів",
+                                )
+
+                            progress.filesFound >
+                                0 ->
+                                OperationProgress(
+                                    stage =
+                                        stage,
+                                    itemCurrent =
+                                        progress.filesFound,
+                                    itemLabel =
+                                        "Файлів",
+                                )
+
+                            else ->
+                                OperationProgress.indeterminate(
+                                    stage,
+                                )
                         }
 
                     onProgressState(
