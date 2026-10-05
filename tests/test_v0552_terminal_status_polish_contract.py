@@ -75,9 +75,11 @@ class V0552TerminalStatusPolishContractTests(unittest.TestCase):
             1,
         )[0]
         self.assertIn("operationStatus.showRunning(", refresh)
-        self.assertIn("state.message.ifBlank", refresh)
+        self.assertIn("state.progressStage", refresh)
+        self.assertIn("state.progressCurrent", refresh)
+        self.assertIn("state.progressTotal", refresh)
         self.assertIn(
-            "private const val NATIVE_RUN_REFRESH_MS =\n            750L",
+            "private const val NATIVE_RUN_REFRESH_MS =\n            400L",
             self.project,
         )
         self.assertNotIn("nativeRunProgressDialog", self.project)
