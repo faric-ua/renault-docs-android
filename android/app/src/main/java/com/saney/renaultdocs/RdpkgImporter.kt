@@ -523,33 +523,30 @@ object RdpkgImporter {
             totalBytes >
             0L
         ) {
-            val scale =
-                10_000
-            val normalized =
-                (
-                    archiveBytes
-                        .coerceIn(
-                            0L,
-                            totalBytes,
-                        ) *
-                        scale /
-                        totalBytes
-                ).toInt()
-
             progressState?.invoke(
-                OperationProgress.measured(
+                OperationProgress.weightedItemsAndBytes(
                     stage =
                         "Імпортую…",
-                    current =
-                        normalized,
-                    total =
-                        scale,
-                    itemCurrent =
+                    itemsDone =
                         fileCount,
-                    itemTotal =
-                        expectedFiles,
+                    itemsTotal =
+                        expectedFiles
+                            ?.coerceAtLeast(
+                                1,
+                            )
+                            ?: fileCount
+                                .coerceAtLeast(
+                                    1,
+                                ),
+                    bytesDone =
+                        archiveBytes,
+                    bytesTotal =
+                        totalBytes,
                     itemLabel =
                         "Файлів",
+                ).copy(
+                    itemTotal =
+                        expectedFiles,
                 ),
             )
             return
