@@ -1,5 +1,33 @@
 # Renault Docs — Master Project Ledger
 
+## v0.5.61 — shared live progress — CLOSED 2026-10-05
+
+Final app source:
+`c36e10ddb5fb1a24e9a37d2dc21321a577ed69ed`.
+
+Final main CI:
+- Tests #443 — PASS;
+- Android Debug APK #116 — PASS.
+
+Phone acceptance:
+- final `main` APK installed over the existing app;
+- version `v0.5.61` confirmed;
+- Megane II 2 / Laguna II 10 / Kangoo II 1 retained;
+- no project data loss.
+
+Durable contracts accepted:
+- one shared thin progress component for long operations;
+- visible file counters;
+- progress uses measured work with file/byte weighting;
+- no bouncing indeterminate bar before real totals are known;
+- .rdproject preparation is service-owned and lifecycle durable;
+- prepared project is reused for normal Share unless explicitly repacked;
+- project progress names the current volume and output filename;
+- project/volume deletion flows use the same actions → confirm → inline-result sequence.
+
+Issue #25: complete.
+
+
 Last consolidated: 2026-09-25
 
 This file is the canonical human-readable project ledger.
