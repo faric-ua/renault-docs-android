@@ -523,31 +523,55 @@ object RdpkgImporter {
             totalBytes >
             0L
         ) {
+            val knownFiles =
+                expectedFiles
+
             progressState?.invoke(
-                OperationProgress.weightedItemsAndBytes(
-                    stage =
-                        "Імпортую…",
-                    itemsDone =
-                        fileCount,
-                    itemsTotal =
-                        expectedFiles
-                            ?.coerceAtLeast(
-                                1,
-                            )
-                            ?: fileCount
-                                .coerceAtLeast(
-                                    1,
-                                ),
-                    bytesDone =
-                        archiveBytes,
-                    bytesTotal =
-                        totalBytes,
-                    itemLabel =
-                        "Файлів",
-                ).copy(
-                    itemTotal =
-                        expectedFiles,
-                ),
+                if (
+                    knownFiles !=
+                    null &&
+                    knownFiles >
+                    0
+                ) {
+                    OperationProgress.weightedItemsAndBytes(
+                        stage =
+                            "Імпортую…",
+                        itemsDone =
+                            fileCount,
+                        itemsTotal =
+                            knownFiles,
+                        bytesDone =
+                            archiveBytes,
+                        bytesTotal =
+                            totalBytes,
+                        itemLabel =
+                            "Файлів",
+                    )
+                } else {
+                    val byteCurrent =
+                        (
+                            archiveBytes
+                                .coerceIn(
+                                    0L,
+                                    totalBytes,
+                                ) *
+                                2_500L /
+                                totalBytes
+                        ).toInt()
+
+                    OperationProgress.measured(
+                        stage =
+                            "Імпортую…",
+                        current =
+                            byteCurrent,
+                        total =
+                            10_000,
+                        itemCurrent =
+                            fileCount,
+                        itemLabel =
+                            "Файлів",
+                    )
+                },
             )
             return
         }
