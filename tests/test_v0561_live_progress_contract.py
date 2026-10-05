@@ -126,6 +126,55 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("NATIVE_RUN_REFRESH_MS =", project)
         self.assertIn("100L", project)
 
+    def test_user_video_feedback_keeps_progress_balanced_and_non_bouncing(self):
+        model = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationProgress.kt"
+        )
+        status = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
+        )
+        project_export = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
+        )
+
+        self.assertIn("fun weightedItemsAndBytes(", model)
+        self.assertIn("ITEM_WEIGHT", model)
+        self.assertIn("7_500L", model)
+        self.assertIn("BYTE_WEIGHT", model)
+        self.assertIn("2_500L", model)
+        self.assertIn("progressView.isIndeterminate =", status)
+        self.assertIn("false", status)
+        self.assertNotIn("progressView.isIndeterminate = !determinate", status)
+        self.assertIn('"Пакую том " +', project_export)
+        self.assertIn("(index + 1)", project_export)
+        self.assertIn("volumes.size", project_export)
+
+    def test_project_share_reuses_current_prepared_bundle(self):
+        controller = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+        store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectStore.kt"
+        )
+
+        share = controller.split(
+            'addAction("Поділитися проєктом")',
+            1,
+        )[1].split(
+            'addAction("Перепакувати .rdproject")',
+            1,
+        )[0]
+
+        self.assertIn("prepared !=", share)
+        self.assertIn("sharePreparedProject(", share)
+        self.assertIn("shareProject(", share)
+        self.assertIn('"Перепакувати .rdproject"', controller)
+
+        self.assertIn("private fun invalidatePreparedProject(", store)
+        self.assertIn("invalidatePreparedProject(\n            projectId,", store)
+        self.assertIn("invalidatePreparedProject(\n            fromProjectId,", store)
+        self.assertIn("invalidatePreparedProject(\n            toProjectId,", store)
+
     def test_converter_ui_uses_compact_stage_copy(self):
         converter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
