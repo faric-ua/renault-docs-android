@@ -124,7 +124,7 @@ class MainActivity : Activity() {
                     statusText.text = message
                     if (::operationStatus.isInitialized) {
                         operationStatus.showTerminal(
-                            "Підготовка проєкту завершена",
+                            "Підготовка проєкту · помилка",
                             message,
                         ) {
                             operationStatus.hide()
