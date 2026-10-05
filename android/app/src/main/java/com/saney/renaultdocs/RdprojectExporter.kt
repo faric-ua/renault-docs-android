@@ -112,16 +112,21 @@ object RdprojectExporter {
                         progressUnitsPerPhase
 
                 volumes.forEachIndexed { index, volume ->
+                    val progressVolumeLabel =
+                        progressVolumeLabel(
+                            volume,
+                        )
+
                     progress?.invoke(
-                        "Готую том " + (index + 1) + "/" + volumes.size + "…",
+                        "Готую том " +
+                            progressVolumeLabel +
+                            "…",
                     )
                     progressState?.invoke(
                         OperationProgress.measured(
                             stage =
                                 "Готую том " +
-                                    (index + 1) +
-                                    "/" +
-                                    volumes.size +
+                                    progressVolumeLabel +
                                     "…",
                             current =
                                 index *
@@ -176,9 +181,7 @@ object RdprojectExporter {
                                 OperationProgress.measured(
                                     stage =
                                         "Пакую том " +
-                                            (index + 1) +
-                                            "/" +
-                                            volumes.size +
+                                            progressVolumeLabel +
                                             "…",
                                     current =
                                         (
@@ -555,6 +558,32 @@ object RdprojectExporter {
                 tempRoot.deleteRecursively()
             }
         }
+
+    internal fun progressVolumeLabel(
+        volume: ProjectVolumeRecord,
+    ): String =
+        listOfNotNull(
+            volume.documentCode
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                },
+            volume.date
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                },
+        )
+            .joinToString(
+                " · ",
+            )
+            .ifBlank {
+                volume.title
+                    .trim()
+                    .ifBlank {
+                        volume.id
+                    }
+            }
 
     private fun projectVehicleCodes(
         volumes: List<ProjectVolumeRecord>,
