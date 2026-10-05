@@ -40,16 +40,39 @@ class RdpkgExportService : Service() {
             workerRunning.set(false); stopSelf(); return START_NOT_STICKY
         }
 
-        startForeground(NOTIFICATION_ID, notification("Експортую .rdpkg…", true))
+        startForeground(
+            NOTIFICATION_ID,
+            notification(
+                text = "Готую…",
+                ongoing = true,
+            ),
+        )
         Thread {
             try {
                 val result = RdpkgExporter.export(
                     context = applicationContext,
                     volume = volume,
                     destinationUri = Uri.parse(destinationUri),
-                    progress = { message ->
-                        runStore.update(message)
-                        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification(message, true))
+                    progressState = { progress ->
+                        val stage =
+                            progress.compactStage()
+                        runStore.update(
+                            stage,
+                        )
+                        runStore.updateProgress(
+                            progress,
+                        )
+                        getSystemService(
+                            NotificationManager::class.java,
+                        ).notify(
+                            NOTIFICATION_ID,
+                            notification(
+                                text = stage,
+                                ongoing = true,
+                                current = progress.current,
+                                total = progress.total,
+                            ),
+                        )
                     },
                 ).getOrThrow()
                 val label = listOfNotNull(volume.documentCode, volume.date).joinToString(" · ").ifBlank { volume.title }
@@ -71,7 +94,12 @@ class RdpkgExportService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun notification(text: String, ongoing: Boolean): Notification {
+    private fun notification(
+        text: String,
+        ongoing: Boolean,
+        current: Int? = null,
+        total: Int? = null,
+    ): Notification {
         val state = runStore.load()
         val openIntent = state.projectId?.takeIf { it.isNotBlank() }?.let { ProjectActivity.intent(this, it) } ?: Intent(this, MainActivity::class.java)
         val pending = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -82,7 +110,30 @@ class RdpkgExportService : Service() {
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
-            .apply { if (ongoing) setProgress(0, 0, true) }
+            .apply {
+                if (ongoing) {
+                    val determinate =
+                        current != null &&
+                            total != null &&
+                            total > 0
+                    if (determinate) {
+                        setProgress(
+                            total!!,
+                            current!!.coerceIn(
+                                0,
+                                total,
+                            ),
+                            false,
+                        )
+                    } else {
+                        setProgress(
+                            0,
+                            0,
+                            true,
+                        )
+                    }
+                }
+            }
             .build()
     }
 
