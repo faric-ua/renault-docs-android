@@ -145,7 +145,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("progressView.isIndeterminate =", status)
         self.assertIn("false", status)
         self.assertNotIn("progressView.isIndeterminate = !determinate", status)
-        self.assertIn('"Пакую том " +', project_export)
+        self.assertIn('"Пакую том"', project_export)
         self.assertIn("(index + 1)", project_export)
         self.assertIn("volumes.size", project_export)
 
@@ -174,6 +174,16 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("invalidatePreparedProject(\n            projectId,", store)
         self.assertIn("invalidatePreparedProject(\n            fromProjectId,", store)
         self.assertIn("invalidatePreparedProject(\n            toProjectId,", store)
+
+    def test_project_bar_matches_current_stage_instead_of_whole_bundle(self):
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
+        )
+
+        self.assertNotIn("progressUnitsPerPhase", exporter)
+        self.assertNotIn("progressTotal", exporter)
+        self.assertIn("volumeProgress.normalizedCurrent", exporter)
+        self.assertIn("weighted.normalizedCurrent", exporter)
 
     def test_progress_identifies_volume_and_adapts_to_orientation(self):
         exporter = self._read(
