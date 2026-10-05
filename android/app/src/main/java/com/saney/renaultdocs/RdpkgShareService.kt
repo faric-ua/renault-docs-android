@@ -42,7 +42,13 @@ class RdpkgShareService : Service() {
             workerRunning.set(false); stopSelf(); return START_NOT_STICKY
         }
 
-        startForeground(NOTIFICATION_ID, notification("Готую .rdpkg для поширення…", true))
+        startForeground(
+            NOTIFICATION_ID,
+            notification(
+                text = "Готую…",
+                ongoing = true,
+            ),
+        )
         Thread {
             try {
                 val file = PreparedShareStore.volumeFile(applicationContext, project, volume)
@@ -51,9 +57,26 @@ class RdpkgShareService : Service() {
                     context = applicationContext,
                     volume = volume,
                     destinationUri = uri,
-                    progress = { message ->
-                        runStore.update(message)
-                        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification(message, true))
+                    progressState = { progress ->
+                        val stage =
+                            progress.compactStage()
+                        runStore.update(
+                            stage,
+                        )
+                        runStore.updateProgress(
+                            progress,
+                        )
+                        getSystemService(
+                            NotificationManager::class.java,
+                        ).notify(
+                            NOTIFICATION_ID,
+                            notification(
+                                text = stage,
+                                ongoing = true,
+                                current = progress.current,
+                                total = progress.total,
+                            ),
+                        )
                     },
                 ).getOrThrow()
                 runStore.complete(file.absolutePath)
@@ -73,7 +96,12 @@ class RdpkgShareService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun notification(text: String, ongoing: Boolean) =
+    private fun notification(
+        text: String,
+        ongoing: Boolean,
+        current: Int? = null,
+        total: Int? = null,
+    ) =
         android.app.Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_upload)
             .setContentTitle("Renault Docs · підготовка тому")
@@ -87,7 +115,30 @@ class RdpkgShareService : Service() {
             )
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
-            .apply { if (ongoing) setProgress(0, 0, true) }
+            .apply {
+                if (ongoing) {
+                    val determinate =
+                        current != null &&
+                            total != null &&
+                            total > 0
+                    if (determinate) {
+                        setProgress(
+                            total!!,
+                            current!!.coerceIn(
+                                0,
+                                total,
+                            ),
+                            false,
+                        )
+                    } else {
+                        setProgress(
+                            0,
+                            0,
+                            true,
+                        )
+                    }
+                }
+            }
             .build()
 
     companion object {
