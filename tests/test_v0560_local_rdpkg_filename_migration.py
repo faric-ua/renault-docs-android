@@ -149,6 +149,51 @@ class V0560LocalRdpkgFilenameMigrationTests(unittest.TestCase):
                 canonical_name(path),
             )
 
+    def test_legacy_laguna_visu_type_is_recovered_from_entrypoint_html(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            path = root / "Laguna-II_NT8183A_2001-01-22.rdpkg"
+
+            volume = {
+                "id": "laguna-ii-nt8183a",
+                "title": "NT8183A · 2001-01-22",
+                "document_code": "NT8183A",
+                "date": "2001-01-22",
+                "vehicle_codes": ["X74"],
+                "source_folder": "X74 NT8183A 2001.01.22",
+                "entrypoint": "X74 NT8183A 2001.01.22/INDEX.HTM",
+            }
+            package = {
+                "schema_version": 1,
+                "format": "renault-volume-package-v1",
+                "package_id": "laguna-ii-nt8183a-2001-01-22",
+                "dataset_title": "Laguna II",
+                "volume": volume,
+                "dataset_manifest": "renault-dataset.json",
+            }
+            dataset = {
+                "id": "laguna-ii-nt8183a",
+                "title": "Laguna II",
+                "model": "Laguna II",
+                "volumes": [volume],
+            }
+
+            with ZipFile(path, "w") as archive:
+                archive.writestr("rdpkg.json", json.dumps(package))
+                archive.writestr(
+                    "renault-dataset.json",
+                    json.dumps(dataset),
+                )
+                archive.writestr(
+                    volume["entrypoint"],
+                    "<html><head><title>Visu Schema</title></head><body></body></html>",
+                )
+
+            self.assertEqual(
+                "Laguna-II_X74_NT8183A_Visu_2001-01-22.rdpkg",
+                canonical_name(path),
+            )
+
     def test_menu_exposes_explicit_migration_action(self):
         repo = Path(__file__).resolve().parents[1]
         menu = (repo / "menu.sh").read_text(encoding="utf-8")
