@@ -81,6 +81,7 @@ object RdprojectExporter {
         volumes: List<ProjectVolumeRecord>,
         destinationUri: Uri,
         progress: ((String) -> Unit)? = null,
+        progressState: ((OperationProgress) -> Unit)? = null,
     ): Result<Int> =
         runCatching {
             require(volumes.isNotEmpty()) {
@@ -103,10 +104,26 @@ object RdprojectExporter {
                         mkdirs()
                     }
                 val manifestVolumes = JSONArray()
+                val progressUnitsPerPhase =
+                    1_000
+                val progressTotal =
+                    (volumes.size + 1) *
+                        progressUnitsPerPhase
 
                 volumes.forEachIndexed { index, volume ->
                     progress?.invoke(
                         "Готую том " + (index + 1) + "/" + volumes.size + "…",
+                    )
+                    progressState?.invoke(
+                        OperationProgress.measured(
+                            stage =
+                                "Готую том…",
+                            current =
+                                index *
+                                    progressUnitsPerPhase,
+                            total =
+                                progressTotal,
+                        ),
                     )
 
                     val metadata =
@@ -134,6 +151,39 @@ object RdprojectExporter {
                         context = context,
                         volume = volume,
                         destinationUri = outUri,
+                        progressState = {
+                            volumeProgress ->
+                            val subCurrent =
+                                if (
+                                    volumeProgress.isDeterminate
+                                ) {
+                                    (
+                                        volumeProgress.normalizedCurrent!!
+                                            .toLong() *
+                                            progressUnitsPerPhase /
+                                            volumeProgress.total!!
+                                    ).toInt()
+                                } else {
+                                    0
+                                }
+
+                            progressState?.invoke(
+                                OperationProgress.measured(
+                                    stage =
+                                        "Пакую том…",
+                                    current =
+                                        (
+                                            index *
+                                                progressUnitsPerPhase +
+                                                subCurrent
+                                        ).coerceAtMost(
+                                            progressTotal,
+                                        ),
+                                    total =
+                                        progressTotal,
+                                ),
+                            )
+                        },
                     ).getOrThrow()
 
                     val manifestVolume =
@@ -259,6 +309,33 @@ object RdprojectExporter {
                         Charsets.UTF_8,
                     )
 
+                val projectFiles =
+                    tempRoot.walkTopDown()
+                        .filter(
+                            File::isFile,
+                        )
+                        .sortedBy {
+                            it.relativeTo(
+                                tempRoot,
+                            ).invariantSeparatorsPath
+                        }
+                        .toList()
+
+                progress?.invoke(
+                    "Пакую .rdproject…",
+                )
+                progressState?.invoke(
+                    OperationProgress.measured(
+                        stage =
+                            "Пакую проєкт…",
+                        current =
+                            volumes.size *
+                                progressUnitsPerPhase,
+                        total =
+                            progressTotal,
+                    ),
+                )
+
                 context.contentResolver
                     .openOutputStream(
                         destinationUri,
@@ -268,40 +345,77 @@ object RdprojectExporter {
                         ZipOutputStream(
                             raw.buffered(),
                         ).use { zip ->
-                            tempRoot.walkTopDown()
-                                .filter(
-                                    File::isFile,
-                                )
-                                .sortedBy {
-                                    it.relativeTo(
+                            projectFiles.forEachIndexed {
+                                index,
+                                file ->
+                                val relative =
+                                    file.relativeTo(
                                         tempRoot,
                                     ).invariantSeparatorsPath
-                                }
-                                .forEach { file ->
-                                    val relative =
-                                        file.relativeTo(
-                                            tempRoot,
-                                        ).invariantSeparatorsPath
-                                    zip.putNextEntry(
-                                        ZipEntry(
-                                            relative,
-                                        ),
-                                    )
-                                    file.inputStream()
-                                        .buffered()
-                                        .use {
-                                            input ->
-                                            input.copyTo(
-                                                zip,
-                                            )
-                                        }
-                                    zip.closeEntry()
-                                }
+                                zip.putNextEntry(
+                                    ZipEntry(
+                                        relative,
+                                    ),
+                                )
+                                file.inputStream()
+                                    .buffered()
+                                    .use {
+                                        input ->
+                                        input.copyTo(
+                                            zip,
+                                        )
+                                    }
+                                zip.closeEntry()
+
+                                val completed =
+                                    index +
+                                        1
+                                val finalPhaseProgress =
+                                    if (
+                                        projectFiles.isEmpty()
+                                    ) {
+                                        progressUnitsPerPhase
+                                    } else {
+                                        (
+                                            completed.toLong() *
+                                                progressUnitsPerPhase /
+                                                projectFiles.size
+                                        ).toInt()
+                                    }
+
+                                progressState?.invoke(
+                                    OperationProgress.measured(
+                                        stage =
+                                            "Пакую проєкт…",
+                                        current =
+                                            (
+                                                volumes.size *
+                                                    progressUnitsPerPhase +
+                                                    finalPhaseProgress
+                                            ).coerceAtMost(
+                                                progressTotal,
+                                            ),
+                                        total =
+                                            progressTotal,
+                                    ),
+                                )
+                            }
                         }
                     }
                     ?: error(
                         "Android не відкрив файл .rdproject для запису."
                     )
+
+                progressState?.invoke(
+                    OperationProgress.measured(
+                        stage =
+                            "Готово",
+                        current =
+                            progressTotal,
+                        total =
+                            progressTotal,
+                    ),
+                )
 
                 volumes.size
             } finally {
