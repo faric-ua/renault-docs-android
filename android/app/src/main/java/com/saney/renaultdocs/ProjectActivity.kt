@@ -576,7 +576,7 @@ class ProjectActivity : Activity() {
             operationStatus.showRunning(
                 title = "Експорт тому",
                 detail =
-                    state.progressStage
+                    state.message
                         .ifBlank {
                             "Експортую…"
                         },
@@ -988,7 +988,7 @@ class ProjectActivity : Activity() {
                 operationStatus.showRunning(
                     title = "Створення .rdpkg",
                     detail =
-                        state.progressStage
+                        state.message
                             .ifBlank {
                                 "Готую…"
                             },
@@ -2594,7 +2594,7 @@ class ProjectActivity : Activity() {
             operationStatus.showRunning(
                 title = "Підготовка тому",
                 detail =
-                    state.progressStage
+                    state.message
                         .ifBlank {
                             "Готую…"
                         },
