@@ -16,6 +16,7 @@ import org.json.JSONObject
 class NativeRdpkgPreparationEngine(
     private val context: Context,
     private val onProgress: (String) -> Unit = {},
+    private val onProgressState: (OperationProgress) -> Unit = {},
     private val isCancelled: () -> Boolean = { false },
 ) {
     data class Request(
@@ -55,6 +56,51 @@ class NativeRdpkgPreparationEngine(
                     progress ->
                     onProgress(
                         progress.message,
+                    )
+
+                    val state =
+                        if (
+                            progress.filesTotal >
+                            0
+                        ) {
+                            OperationProgress.measured(
+                                stage =
+                                    when (
+                                        progress.phase
+                                    ) {
+                                        NativePreparationStager.Phase.SCANNING ->
+                                            "Сканую…"
+                                        NativePreparationStager.Phase.PREPARING ->
+                                            "Готую…"
+                                        NativePreparationStager.Phase.COPYING ->
+                                            "Копіюю…"
+                                        NativePreparationStager.Phase.READY ->
+                                            "Готую…"
+                                    },
+                                current =
+                                    progress.filesDone,
+                                total =
+                                    progress.filesTotal,
+                            )
+                        } else {
+                            OperationProgress.indeterminate(
+                                when (
+                                    progress.phase
+                                ) {
+                                    NativePreparationStager.Phase.SCANNING ->
+                                        "Сканую…"
+                                    NativePreparationStager.Phase.PREPARING ->
+                                        "Готую…"
+                                    NativePreparationStager.Phase.COPYING ->
+                                        "Копіюю…"
+                                    NativePreparationStager.Phase.READY ->
+                                        "Готую…"
+                                },
+                            )
+                        }
+
+                    onProgressState(
+                        state,
                     )
                 },
                 isCancelled =
@@ -139,6 +185,11 @@ class NativeRdpkgPreparationEngine(
             onProgress(
                 "Компілюю volume metadata / Modern index…",
             )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Готую структуру…",
+                ),
+            )
 
             val volumeResult =
                 NativeVolumeCompiler
@@ -161,6 +212,11 @@ class NativeRdpkgPreparationEngine(
             onProgress(
                 "Компілюю native section index…",
             )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Готую індекс…",
+                ),
+            )
 
             val sections =
                 NativeSectionCompiler
@@ -177,6 +233,11 @@ class NativeRdpkgPreparationEngine(
 
             onProgress(
                 "Компілюю Runtime IR…",
+            )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Готую дані…",
+                ),
             )
 
             val runtime =
@@ -215,6 +276,11 @@ class NativeRdpkgPreparationEngine(
 
             onProgress(
                 "Будую Fast Pack…",
+            )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Пакую дані…",
+                ),
             )
 
             val fastPack =
@@ -340,6 +406,11 @@ class NativeRdpkgPreparationEngine(
             onProgress(
                 "Пакую .rdpkg…",
             )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Пакую…",
+                ),
+            )
 
             val archive =
                 RdpkgZipWriter
@@ -369,6 +440,16 @@ class NativeRdpkgPreparationEngine(
                                         completed +
                                         "/" +
                                         total,
+                                )
+                                onProgressState(
+                                    OperationProgress.measured(
+                                        stage =
+                                            "Пакую…",
+                                        current =
+                                            completed,
+                                        total =
+                                            total,
+                                    ),
                                 )
                             }
                         },
