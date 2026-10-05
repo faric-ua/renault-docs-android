@@ -164,14 +164,46 @@ object RdpkgExporter {
                                     "/" +
                                     total
                             )
+                        },
+                        byteProgress = {
+                            completedFiles,
+                            totalFiles,
+                            processedBytes,
+                            totalBytes ->
+                            val scale =
+                                10_000
+                            val normalized =
+                                if (
+                                    totalBytes >
+                                    0L
+                                ) {
+                                    (
+                                        processedBytes
+                                            .coerceIn(
+                                                0L,
+                                                totalBytes,
+                                            ) *
+                                            scale /
+                                            totalBytes
+                                    ).toInt()
+                                } else {
+                                    0
+                                }
+
                             progressState?.invoke(
                                 OperationProgress.measured(
                                     stage =
                                         "Пакую…",
                                     current =
-                                        completed,
+                                        normalized,
                                     total =
-                                        total,
+                                        scale,
+                                    itemCurrent =
+                                        completedFiles,
+                                    itemTotal =
+                                        totalFiles,
+                                    itemLabel =
+                                        "Файлів",
                                 ),
                             )
                         },
