@@ -105,12 +105,6 @@ object RdprojectExporter {
                         mkdirs()
                     }
                 val manifestVolumes = JSONArray()
-                val progressUnitsPerPhase =
-                    1_000
-                val progressTotal =
-                    (volumes.size + 1) *
-                        progressUnitsPerPhase
-
                 volumes.forEachIndexed { index, volume ->
                     val volumeLabel =
                         progressVolumeLabel(
@@ -137,10 +131,9 @@ object RdprojectExporter {
                             stage =
                                 preparingStage,
                             current =
-                                index *
-                                    progressUnitsPerPhase,
+                                0,
                             total =
-                                progressTotal,
+                                10_000,
                         ),
                     )
 
@@ -171,19 +164,16 @@ object RdprojectExporter {
                         destinationUri = outUri,
                         progressState = {
                             volumeProgress ->
-                            val subCurrent =
-                                if (
-                                    volumeProgress.isDeterminate
-                                ) {
-                                    (
-                                        volumeProgress.normalizedCurrent!!
-                                            .toLong() *
-                                            progressUnitsPerPhase /
-                                            volumeProgress.total!!
-                                    ).toInt()
-                                } else {
-                                    0
-                                }
+                            val current =
+                                volumeProgress.normalizedCurrent
+                                    ?: 0
+                            val total =
+                                volumeProgress.total
+                                    ?.takeIf {
+                                        it >
+                                            0
+                                    }
+                                    ?: 10_000
 
                             progressState?.invoke(
                                 OperationProgress.measured(
@@ -199,15 +189,9 @@ object RdprojectExporter {
                                                 volumeLabel,
                                         ),
                                     current =
-                                        (
-                                            index *
-                                                progressUnitsPerPhase +
-                                                subCurrent
-                                        ).coerceAtMost(
-                                            progressTotal,
-                                        ),
+                                        current,
                                     total =
-                                        progressTotal,
+                                        total,
                                     itemCurrent =
                                         volumeProgress.itemCurrent,
                                     itemTotal =
@@ -362,10 +346,9 @@ object RdprojectExporter {
                         stage =
                             "Пакую проєкт…",
                         current =
-                            volumes.size *
-                                progressUnitsPerPhase,
+                            0,
                         total =
-                            progressTotal,
+                            10_000,
                     ),
                 )
 
@@ -464,28 +447,16 @@ object RdprojectExporter {
                                                             itemLabel =
                                                                 "Файлів",
                                                         )
-                                                val finalPhaseProgress =
-                                                    (
-                                                        weighted.normalizedCurrent!!
-                                                            .toLong() *
-                                                            progressUnitsPerPhase /
-                                                            weighted.total!!
-                                                    ).toInt()
-
                                                 progressState?.invoke(
                                                     OperationProgress.measured(
                                                         stage =
                                                             "Пакую проєкт…",
                                                         current =
-                                                            (
-                                                                volumes.size *
-                                                                    progressUnitsPerPhase +
-                                                                    finalPhaseProgress
-                                                            ).coerceAtMost(
-                                                                progressTotal,
-                                                            ),
+                                                            weighted.normalizedCurrent
+                                                                ?: 0,
                                                         total =
-                                                            progressTotal,
+                                                            weighted.total
+                                                                ?: 10_000,
                                                         itemCurrent =
                                                             index,
                                                         itemTotal =
@@ -520,28 +491,16 @@ object RdprojectExporter {
                                             itemLabel =
                                                 "Файлів",
                                         )
-                                val finalPhaseProgress =
-                                    (
-                                        weighted.normalizedCurrent!!
-                                            .toLong() *
-                                            progressUnitsPerPhase /
-                                            weighted.total!!
-                                    ).toInt()
-
                                 progressState?.invoke(
                                     OperationProgress.measured(
                                         stage =
                                             "Пакую проєкт…",
                                         current =
-                                            (
-                                                volumes.size *
-                                                    progressUnitsPerPhase +
-                                                    finalPhaseProgress
-                                            ).coerceAtMost(
-                                                progressTotal,
-                                            ),
+                                            weighted.normalizedCurrent
+                                                ?: 0,
                                         total =
-                                            progressTotal,
+                                            weighted.total
+                                                ?: 10_000,
                                         itemCurrent =
                                             completed,
                                         itemTotal =
@@ -562,9 +521,9 @@ object RdprojectExporter {
                         stage =
                             "Готово",
                         current =
-                            progressTotal,
+                            10_000,
                         total =
-                            progressTotal,
+                            10_000,
                     ),
                 )
 
