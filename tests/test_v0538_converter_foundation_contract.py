@@ -68,8 +68,9 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
             "state.phase ==\n                ConversionRunPhase.SCANNING",
             activity,
         )
-        self.assertIn("Знайдено файлів:", activity)
+        self.assertIn('"Сканую…"', activity)
         self.assertIn("progressBar.isIndeterminate", activity)
+        self.assertIn('"Знайдено файлів: "', activity)
 
     def test_saf_paths_are_user_friendly(self):
         activity = self._read(

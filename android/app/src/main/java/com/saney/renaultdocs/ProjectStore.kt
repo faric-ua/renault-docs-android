@@ -167,6 +167,32 @@ class ProjectStore(
                 },
             )
 
+    private fun invalidatePreparedProject(
+        projectId: String,
+    ) {
+        val project =
+            loadProjects()
+                .firstOrNull {
+                    it.id ==
+                        projectId
+                }
+                ?: return
+        val currentVolumes =
+            volumes(
+                projectId,
+            )
+
+        if (
+            currentVolumes.isNotEmpty()
+        ) {
+            PreparedShareStore.deleteProject(
+                appContext,
+                project,
+                currentVolumes,
+            )
+        }
+    }
+
     fun upsertVolume(
         projectId: String,
         volume: ProjectVolumeRecord,
@@ -179,6 +205,10 @@ class ProjectStore(
             "Проєкт не знайдено: " +
                 projectId
         }
+
+        invalidatePreparedProject(
+            projectId,
+        )
 
         val updated =
             loadVolumes()
@@ -221,6 +251,10 @@ class ProjectStore(
     fun removeProject(
         projectId: String,
     ) {
+        invalidatePreparedProject(
+            projectId,
+        )
+
         saveProjects(
             loadProjects()
                 .filterNot {
@@ -241,6 +275,10 @@ class ProjectStore(
         projectId: String,
         volumeId: String,
     ) {
+        invalidatePreparedProject(
+            projectId,
+        )
+
         saveVolumes(
             loadVolumes()
                 .filterNot {
@@ -264,6 +302,13 @@ class ProjectStore(
         require(project(toProjectId) != null) {
             "Проєкт призначення не знайдено: " + toProjectId
         }
+
+        invalidatePreparedProject(
+            fromProjectId,
+        )
+        invalidatePreparedProject(
+            toProjectId,
+        )
 
         val all = loadVolumes()
         val volume =

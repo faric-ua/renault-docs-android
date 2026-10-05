@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -81,6 +82,7 @@ object RdprojectExporter {
         volumes: List<ProjectVolumeRecord>,
         destinationUri: Uri,
         progress: ((String) -> Unit)? = null,
+        progressState: ((OperationProgress) -> Unit)? = null,
     ): Result<Int> =
         runCatching {
             require(volumes.isNotEmpty()) {
@@ -103,10 +105,36 @@ object RdprojectExporter {
                         mkdirs()
                     }
                 val manifestVolumes = JSONArray()
-
                 volumes.forEachIndexed { index, volume ->
+                    val volumeLabel =
+                        progressVolumeLabel(
+                            volume,
+                        )
+
+                    val preparingStage =
+                        volumeProgressStage(
+                            action =
+                                "Готую том",
+                            index =
+                                index,
+                            total =
+                                volumes.size,
+                            volumeLabel =
+                                volumeLabel,
+                        )
+
                     progress?.invoke(
-                        "Готую том " + (index + 1) + "/" + volumes.size + "…",
+                        preparingStage,
+                    )
+                    progressState?.invoke(
+                        OperationProgress.measured(
+                            stage =
+                                preparingStage,
+                            current =
+                                0,
+                            total =
+                                10_000,
+                        ),
                     )
 
                     val metadata =
@@ -134,6 +162,45 @@ object RdprojectExporter {
                         context = context,
                         volume = volume,
                         destinationUri = outUri,
+                        progressState = {
+                            volumeProgress ->
+                            val current =
+                                volumeProgress.normalizedCurrent
+                                    ?: 0
+                            val total =
+                                volumeProgress.total
+                                    ?.takeIf {
+                                        it >
+                                            0
+                                    }
+                                    ?: 10_000
+
+                            progressState?.invoke(
+                                OperationProgress.measured(
+                                    stage =
+                                        volumeProgressStage(
+                                            action =
+                                                "Пакую том",
+                                            index =
+                                                index,
+                                            total =
+                                                volumes.size,
+                                            volumeLabel =
+                                                volumeLabel,
+                                        ),
+                                    current =
+                                        current,
+                                    total =
+                                        total,
+                                    itemCurrent =
+                                        volumeProgress.itemCurrent,
+                                    itemTotal =
+                                        volumeProgress.itemTotal,
+                                    itemLabel =
+                                        volumeProgress.itemLabel,
+                                ),
+                            )
+                        },
                     ).getOrThrow()
 
                     val manifestVolume =
@@ -259,6 +326,41 @@ object RdprojectExporter {
                         Charsets.UTF_8,
                     )
 
+                val projectFiles =
+                    tempRoot.walkTopDown()
+                        .filter(
+                            File::isFile,
+                        )
+                        .sortedBy {
+                            it.relativeTo(
+                                tempRoot,
+                            ).invariantSeparatorsPath
+                        }
+                        .toList()
+
+                progress?.invoke(
+                    "Пакую .rdproject…",
+                )
+                progressState?.invoke(
+                    OperationProgress.measured(
+                        stage =
+                            "Пакую проєкт…",
+                        current =
+                            0,
+                        total =
+                            10_000,
+                    ),
+                )
+
+                val projectBytes =
+                    projectFiles.sumOf {
+                        it.length()
+                    }
+                var processedBytes =
+                    0L
+                var lastProgressAt =
+                    0L
+
                 context.contentResolver
                     .openOutputStream(
                         destinationUri,
@@ -268,46 +370,209 @@ object RdprojectExporter {
                         ZipOutputStream(
                             raw.buffered(),
                         ).use { zip ->
-                            tempRoot.walkTopDown()
-                                .filter(
-                                    File::isFile,
+                            val buffer =
+                                ByteArray(
+                                    1024 *
+                                        1024,
                                 )
-                                .sortedBy {
-                                    it.relativeTo(
+
+                            projectFiles.forEachIndexed {
+                                index,
+                                file ->
+                                val relative =
+                                    file.relativeTo(
                                         tempRoot,
                                     ).invariantSeparatorsPath
-                                }
-                                .forEach { file ->
-                                    val relative =
-                                        file.relativeTo(
-                                            tempRoot,
-                                        ).invariantSeparatorsPath
-                                    zip.putNextEntry(
-                                        ZipEntry(
-                                            relative,
-                                        ),
-                                    )
-                                    file.inputStream()
-                                        .buffered()
-                                        .use {
-                                            input ->
-                                            input.copyTo(
-                                                zip,
+                                zip.putNextEntry(
+                                    ZipEntry(
+                                        relative,
+                                    ),
+                                )
+
+                                file.inputStream()
+                                    .buffered()
+                                    .use {
+                                        input ->
+                                        while (
+                                            true
+                                        ) {
+                                            val read =
+                                                input.read(
+                                                    buffer,
+                                                )
+
+                                            if (
+                                                read <
+                                                0
+                                            ) {
+                                                break
+                                            }
+
+                                            if (
+                                                read ==
+                                                0
+                                            ) {
+                                                continue
+                                            }
+
+                                            zip.write(
+                                                buffer,
+                                                0,
+                                                read,
                                             )
+                                            processedBytes +=
+                                                read
+
+                                            val now =
+                                                SystemClock.elapsedRealtime()
+
+                                            if (
+                                                now -
+                                                    lastProgressAt >=
+                                                    100L
+                                            ) {
+                                                val weighted =
+                                                    OperationProgress
+                                                        .weightedItemsAndBytes(
+                                                            stage =
+                                                                "Пакую проєкт…",
+                                                            itemsDone =
+                                                                index,
+                                                            itemsTotal =
+                                                                projectFiles.size,
+                                                            bytesDone =
+                                                                processedBytes,
+                                                            bytesTotal =
+                                                                projectBytes,
+                                                            itemLabel =
+                                                                "Файлів",
+                                                        )
+                                                progressState?.invoke(
+                                                    OperationProgress.measured(
+                                                        stage =
+                                                            "Пакую проєкт…",
+                                                        current =
+                                                            weighted.normalizedCurrent
+                                                                ?: 0,
+                                                        total =
+                                                            weighted.total
+                                                                ?: 10_000,
+                                                        itemCurrent =
+                                                            index,
+                                                        itemTotal =
+                                                            projectFiles.size,
+                                                        itemLabel =
+                                                            "Файлів",
+                                                    ),
+                                                )
+                                                lastProgressAt =
+                                                    now
+                                            }
                                         }
-                                    zip.closeEntry()
-                                }
+                                    }
+                                zip.closeEntry()
+
+                                val completed =
+                                    index +
+                                        1
+                                val weighted =
+                                    OperationProgress
+                                        .weightedItemsAndBytes(
+                                            stage =
+                                                "Пакую проєкт…",
+                                            itemsDone =
+                                                completed,
+                                            itemsTotal =
+                                                projectFiles.size,
+                                            bytesDone =
+                                                processedBytes,
+                                            bytesTotal =
+                                                projectBytes,
+                                            itemLabel =
+                                                "Файлів",
+                                        )
+                                progressState?.invoke(
+                                    OperationProgress.measured(
+                                        stage =
+                                            "Пакую проєкт…",
+                                        current =
+                                            weighted.normalizedCurrent
+                                                ?: 0,
+                                        total =
+                                            weighted.total
+                                                ?: 10_000,
+                                        itemCurrent =
+                                            completed,
+                                        itemTotal =
+                                            projectFiles.size,
+                                        itemLabel =
+                                            "Файлів",
+                                    ),
+                                )
+                            }
                         }
                     }
                     ?: error(
                         "Android не відкрив файл .rdproject для запису."
                     )
 
+                progressState?.invoke(
+                    OperationProgress.measured(
+                        stage =
+                            "Готово",
+                        current =
+                            10_000,
+                        total =
+                            10_000,
+                    ),
+                )
+
                 volumes.size
             } finally {
                 tempRoot.deleteRecursively()
             }
         }
+
+    internal fun volumeProgressStage(
+        action: String,
+        index: Int,
+        total: Int,
+        volumeLabel: String,
+    ): String =
+        action +
+            " " +
+            (index + 1) +
+            "/" +
+            total +
+            " - " +
+            volumeLabel +
+            "…"
+
+    internal fun progressVolumeLabel(
+        volume: ProjectVolumeRecord,
+    ): String =
+        listOfNotNull(
+            volume.documentCode
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                },
+            volume.date
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                },
+        )
+            .joinToString(
+                " · ",
+            )
+            .ifBlank {
+                volume.title
+                    .trim()
+                    .ifBlank {
+                        volume.id
+                    }
+            }
 
     private fun projectVehicleCodes(
         volumes: List<ProjectVolumeRecord>,

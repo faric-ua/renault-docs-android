@@ -65,7 +65,9 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
 
         self.assertIn("VALIDATION_PROGRESS_EVERY", engine)
         self.assertIn('"Перевіряю output…"', engine)
-        self.assertIn('"Перевірка"', activity)
+        self.assertIn('"Перевіряю…"', activity)
+        self.assertIn("state.filesDone", activity)
+        self.assertIn("state.filesTotal", activity)
         self.assertIn("ConversionRunPhase.VALIDATING", service)
 
     def test_interrupted_finalized_output_is_recovered(self):

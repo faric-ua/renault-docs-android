@@ -1,3 +1,53 @@
+# Renault Docs — CURRENT PLAN
+
+Останнє оновлення: 2026-10-05.
+
+## v0.5.61 — shared live progress / issue #25
+
+Status: **IMPLEMENTATION IN PROGRESS / CI NOT YET RUN**.
+
+Accepted UX contract:
+- keep the existing thin progress bar visual style;
+- normal UI shows only a short stage such as `Готую…`, `Копіюю…`, `Пакую…`, `Перевіряю…`;
+- no filename/byte/speed/ETA telemetry in normal UI;
+- use measured determinate progress whenever a real total is known;
+- use indeterminate only while a real total is unavailable;
+- coalesce/throttle progress publication rather than redraw on every file;
+- rotation/reopen must reattach to the same durable run instead of restarting it.
+
+Current implementation wave:
+- shared `OperationProgress` model;
+- smooth normalized progress in `OperationStatusView`;
+- measured progress persisted for native raw → .rdpkg, .rdpkg import, export and share;
+- .rdproject preparation moved from Activity-owned Thread to foreground service + persistent run store;
+- Home reattaches to .rdproject progress and launches Share Sheet once after completion;
+- converter keeps its current thin bar but uses compact stage text and animated measured progress.
+
+Next gate:
+1. open draft PR for `feat/v0.5.61-live-progress`;
+2. require Tests PASS + Android PR Check PASS;
+3. fix compile/contract failures before any phone install;
+4. install one fresh candidate and run representative phone lifecycle/progress checks;
+5. do not merge until phone PASS.
+
+## v0.5.60 — canonical project/package identity
+
+Status: **MERGED / FINAL MAIN CI PASS / PHONE PASS / CLOSED — 2026-10-05**.
+
+Final main commit:
+`1c546f15b8e037e81a705b880e3a2f9364fc2bd8`.
+
+Accepted:
+- canonical .rdpkg and .rdproject naming;
+- rich volume identity in rdproject metadata;
+- local public .rdpkg rename migration applied 13/13 without conflicts/skips;
+- public Drive catalog cleaned to canonical Megane II packages only;
+- final in-place v0.5.60 install preserved Megane II 2 / Laguna II 10 / Kangoo II 1.
+
+Final main CI:
+- Tests #395 — PASS;
+- Android Debug APK #105 — PASS.
+
 ## v0.5.57 — Project-only Home + reversible Legacy quarantine
 
 Status: **IMPLEMENTED / CODE CI PASS / PHONE MOVE PENDING — 2026-10-04**.

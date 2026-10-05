@@ -38,16 +38,38 @@ class RdpkgImportService : Service() {
             return START_NOT_STICKY
         }
 
-        startForeground(NOTIFICATION_ID, notification("Імпортую .rdpkg…", true))
+        startForeground(
+            NOTIFICATION_ID,
+            notification(
+                text = "Читаю пакет…",
+                ongoing = true,
+            ),
+        )
         Thread {
             try {
                 val result = RdpkgImporter.install(
                     context = applicationContext,
                     packageUri = Uri.parse(packageUri),
-                    progress = { message ->
-                        runStore.update(message)
-                        getSystemService(NotificationManager::class.java)
-                            .notify(NOTIFICATION_ID, notification(message, true))
+                    progressState = { progress ->
+                        val stage =
+                            progress.displayText()
+                        runStore.update(
+                            stage,
+                        )
+                        runStore.updateProgress(
+                            progress,
+                        )
+                        getSystemService(
+                            NotificationManager::class.java,
+                        ).notify(
+                            NOTIFICATION_ID,
+                            notification(
+                                text = stage,
+                                ongoing = true,
+                                current = progress.current,
+                                total = progress.total,
+                            ),
+                        )
                     },
                 ).getOrThrow()
                 runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
@@ -69,7 +91,12 @@ class RdpkgImportService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun notification(text: String, ongoing: Boolean): Notification {
+    private fun notification(
+        text: String,
+        ongoing: Boolean,
+        current: Int? = null,
+        total: Int? = null,
+    ): Notification {
         val state = runStore.load()
         val openIntent = if (!state.projectId.isNullOrBlank()) {
             ProjectActivity.intent(this, state.projectId!!)
@@ -84,7 +111,34 @@ class RdpkgImportService : Service() {
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
-            .apply { if (ongoing) setProgress(0, 0, true) }
+            .apply {
+                if (ongoing) {
+                    val resolvedTotal =
+                        total ?: 0
+                    val resolvedCurrent =
+                        current ?: 0
+
+                    if (
+                        resolvedTotal >
+                        0
+                    ) {
+                        setProgress(
+                            resolvedTotal,
+                            resolvedCurrent.coerceIn(
+                                0,
+                                resolvedTotal,
+                            ),
+                            false,
+                        )
+                    } else {
+                        setProgress(
+                            0,
+                            0,
+                            true,
+                        )
+                    }
+                }
+            }
             .build()
     }
 

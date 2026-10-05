@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import java.io.BufferedInputStream
@@ -35,6 +36,8 @@ class NativePreparationStager(
         val filesFound: Int = 0,
         val filesDone: Int = 0,
         val filesTotal: Int = 0,
+        val bytesDone: Long = 0L,
+        val bytesTotal: Long = 0L,
     )
 
     data class Result(
@@ -248,6 +251,16 @@ class NativePreparationStager(
                 0
             var changesTotal =
                 0
+            var bytesDone =
+                0L
+            val bytesTotal =
+                scan.files.sumOf {
+                    it.size.coerceAtLeast(
+                        0L,
+                    )
+                }
+            var lastProgressAt =
+                0L
 
             scan.files
                 .forEachIndexed {
@@ -265,6 +278,39 @@ class NativePreparationStager(
                                 exactFiles,
                             lowerMap =
                                 lowerMap,
+                            onBytesCopied = {
+                                delta ->
+                                bytesDone +=
+                                    delta
+
+                                val now =
+                                    SystemClock.elapsedRealtime()
+
+                                if (
+                                    now -
+                                        lastProgressAt >=
+                                        COPY_PROGRESS_THROTTLE_MS
+                                ) {
+                                    emit(
+                                        phase =
+                                            Phase.COPYING,
+                                        message =
+                                            "Копіюю і нормалізую raw source…",
+                                        filesFound =
+                                            scan.files.size,
+                                        filesDone =
+                                            index,
+                                        filesTotal =
+                                            scan.files.size,
+                                        bytesDone =
+                                            bytesDone,
+                                        bytesTotal =
+                                            bytesTotal,
+                                    )
+                                    lastProgressAt =
+                                        now
+                                }
+                            },
                         )
 
                     if (
@@ -304,6 +350,10 @@ class NativePreparationStager(
                                 completed,
                             filesTotal =
                                 scan.files.size,
+                            bytesDone =
+                                bytesDone,
+                            bytesTotal =
+                                bytesTotal,
                         )
                     }
                 }
@@ -323,6 +373,10 @@ class NativePreparationStager(
                     scan.files.size,
                 filesTotal =
                     scan.files.size,
+                bytesDone =
+                    bytesDone,
+                bytesTotal =
+                    bytesTotal,
             )
 
             return Result(
@@ -678,6 +732,7 @@ class NativePreparationStager(
         staging: File,
         exactFiles: Set<String>,
         lowerMap: Map<String, List<String>>,
+        onBytesCopied: (Long) -> Unit = {},
     ): Int {
         val target =
             File(
@@ -730,11 +785,22 @@ class NativePreparationStager(
                             lowerMap,
                     )
 
-            target.writeBytes(
+            val outputBytes =
                 patched.text
                     .toByteArray(
                         Charsets.ISO_8859_1,
                     )
+
+            target.writeBytes(
+                outputBytes,
+            )
+            onBytesCopied(
+                source.size
+                    .takeIf {
+                        it >
+                            0L
+                    }
+                    ?: outputBytes.size.toLong(),
             )
 
             return patched
@@ -796,6 +862,9 @@ class NativePreparationStager(
                         0,
                         read,
                     )
+                    onBytesCopied(
+                        read.toLong(),
+                    )
                 }
             }
         }
@@ -809,6 +878,8 @@ class NativePreparationStager(
         filesFound: Int = 0,
         filesDone: Int = 0,
         filesTotal: Int = 0,
+        bytesDone: Long = 0L,
+        bytesTotal: Long = 0L,
     ) {
         onProgress(
             Progress(
@@ -822,6 +893,10 @@ class NativePreparationStager(
                     filesDone,
                 filesTotal =
                     filesTotal,
+                bytesDone =
+                    bytesDone,
+                bytesTotal =
+                    bytesTotal,
             )
         )
     }
@@ -852,6 +927,9 @@ class NativePreparationStager(
 
         private const val COPY_PROGRESS_EVERY =
             100
+
+        private const val COPY_PROGRESS_THROTTLE_MS =
+            100L
 
         fun isPatchableText(
             relativePath: String,

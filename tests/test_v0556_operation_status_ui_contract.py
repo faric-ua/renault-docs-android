@@ -22,7 +22,9 @@ class OperationStatusUiContractTest(unittest.TestCase):
 
     def test_project_activity_uses_shared_surface_for_durable_volume_flows(self):
         activity = self.read("ProjectActivity.kt")
-        self.assertIn('operationStatus.showRunning("Імпорт тому"', activity)
+        self.assertIn('title = "Імпорт тому"', activity)
+        self.assertIn("state.progressCurrent", activity)
+        self.assertIn("state.progressTotal", activity)
         self.assertIn('"Створення .rdpkg"', activity)
         self.assertIn("NativeRdpkgPreparationService.requestCancel(this)", activity)
         self.assertIn("if (!::operationStatus.isInitialized)", activity)

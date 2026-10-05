@@ -441,10 +441,29 @@ class ProjectActivity : Activity() {
         if (state.projectId != project.id || state.isConsumed) return
 
         if (state.isRunning) {
-            val detail = state.message.ifBlank { "Імпортую .rdpkg…" }
+            val detail =
+                state.message
+                    .ifBlank {
+                        "Імпортую…"
+                    }
             statusText.text = DEFAULT_STATUS_TEXT
             if (::operationStatus.isInitialized) {
-                operationStatus.showRunning("Імпорт тому", detail)
+                operationStatus.showRunning(
+                    title = "Імпорт тому",
+                    detail = detail,
+                    current =
+                        state.progressCurrent
+                            .takeIf {
+                                state.progressTotal >
+                                    0
+                            },
+                    total =
+                        state.progressTotal
+                            .takeIf {
+                                it >
+                                    0
+                            },
+                )
             }
             return
         }
@@ -555,8 +574,40 @@ class ProjectActivity : Activity() {
         if (state.isRunning) {
             statusText.text = DEFAULT_STATUS_TEXT
             operationStatus.showRunning(
-                "Експорт тому",
-                state.message.ifBlank { "Експортую .rdpkg…" },
+                title = "Експорт тому",
+                detail =
+                    state.message
+                        .ifBlank {
+                            "Експортую…"
+                        },
+                current =
+                    state.progressCurrent
+                        .takeIf {
+                            state.progressTotal >
+                                0
+                        },
+                total =
+                    state.progressTotal
+                        .takeIf {
+                            it >
+                                0
+                        },
+                subject =
+                    state.destinationUri
+                        ?.let {
+                            uriText ->
+                            DocumentFile
+                                .fromSingleUri(
+                                    this,
+                                    Uri.parse(
+                                        uriText,
+                                    ),
+                                )
+                                ?.name
+                        }
+                        ?: volumeOperationSubject(
+                            state.volumeId,
+                        ),
             )
             return
         }
@@ -950,9 +1001,40 @@ class ProjectActivity : Activity() {
         ) {
             hideNativeTerminalStatus()
             if (::operationStatus.isInitialized) {
+                val operationSubject =
+                    state.destinationUri
+                        ?.let {
+                            uriText ->
+                            DocumentFile
+                                .fromSingleUri(
+                                    this,
+                                    Uri.parse(
+                                        uriText,
+                                    ),
+                                )
+                                ?.name
+                        }
+                        ?: "Renault Docs"
+
                 operationStatus.showRunning(
                     title = "Створення .rdpkg",
-                    detail = state.message.ifBlank { "Kotlin-native .rdpkg підготовка виконується…" },
+                    detail =
+                        state.message
+                            .ifBlank {
+                                "Готую…"
+                            },
+                    current =
+                        state.progressCurrent
+                            .takeIf {
+                                state.progressTotal >
+                                    0
+                            },
+                    total =
+                        state.progressTotal
+                            .takeIf {
+                                it >
+                                    0
+                            },
                     onCancel =
                         if (state.phase == NativeRdpkgRunPhase.PREPARING) {
                             {
@@ -965,6 +1047,8 @@ class ProjectActivity : Activity() {
                         } else {
                             null
                         },
+                    subject =
+                        operationSubject,
                 )
             }
 
@@ -2240,7 +2324,7 @@ class ProjectActivity : Activity() {
             }
 
             setOnLongClickListener {
-                confirmRemoveVolume(
+                showVolumeActions(
                     volume,
                 )
                 true
@@ -2357,7 +2441,14 @@ class ProjectActivity : Activity() {
             title = "Видалити з проєкту",
             danger = true,
         ) {
-            confirmRemoveVolume(volume)
+            clearProjectDialogState(
+                DIALOG_VOLUME_ACTIONS,
+            )
+            activeProjectDialogParentKind =
+                DIALOG_VOLUME_ACTIONS
+            confirmRemoveVolume(
+                volume,
+            )
         }
         addAction("Скасувати") {
             clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
@@ -2500,6 +2591,31 @@ class ProjectActivity : Activity() {
         )
     }
 
+    private fun volumeOperationSubject(
+        volumeId: String?,
+    ): String =
+        volumeId
+            ?.let {
+                id ->
+                store.volumes(
+                    project.id,
+                )
+                    .firstOrNull {
+                        it.id ==
+                            id
+                    }
+            }
+            ?.let {
+                volume ->
+                RdpkgExporter.defaultFileName(
+                    project =
+                        project,
+                    volume =
+                        volume,
+                )
+            }
+            ?: "Renault Docs"
+
     private fun shareRdpkg(
         volume: ProjectVolumeRecord,
     ) {
@@ -2541,8 +2657,28 @@ class ProjectActivity : Activity() {
         if (state.isRunning) {
             statusText.text = DEFAULT_STATUS_TEXT
             operationStatus.showRunning(
-                "Підготовка тому",
-                state.message.ifBlank { "Готую .rdpkg для поширення…" },
+                title = "Підготовка тому",
+                detail =
+                    state.message
+                        .ifBlank {
+                            "Готую…"
+                        },
+                current =
+                    state.progressCurrent
+                        .takeIf {
+                            state.progressTotal >
+                                0
+                        },
+                total =
+                    state.progressTotal
+                        .takeIf {
+                            it >
+                                0
+                        },
+                subject =
+                    volumeOperationSubject(
+                        state.volumeId,
+                    ),
             )
             return
         }
@@ -2772,8 +2908,25 @@ class ProjectActivity : Activity() {
                 )
                 .setNegativeButton(
                     "Скасувати",
-                    null,
-                )
+                ) {
+                    _,
+                    _ ->
+                    val returnToActions =
+                        activeProjectDialogParentKind ==
+                            DIALOG_VOLUME_ACTIONS
+
+                    clearProjectDialogState(
+                        DIALOG_REMOVE_VOLUME,
+                    )
+
+                    if (
+                        returnToActions
+                    ) {
+                        showVolumeActions(
+                            volume,
+                        )
+                    }
+                }
                 .setPositiveButton(
                     "Видалити з проєкту",
                 ) {
@@ -3532,10 +3685,10 @@ class ProjectActivity : Activity() {
             "raw"
 
         private const val DEFAULT_STATUS_TEXT =
-            "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів."
+            "Натисни на том, щоб відкрити. Утримуй том — щоб відкрити ті самі дії, що й через ⋮."
 
         private const val NATIVE_RUN_REFRESH_MS =
-            750L
+            100L
         private const val NATIVE_RUN_STARTUP_GRACE_MS =
             5_000L
 

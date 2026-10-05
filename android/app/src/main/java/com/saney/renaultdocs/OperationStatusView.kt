@@ -1,6 +1,8 @@
 package com.saney.renaultdocs
 
 import android.content.Context
+import android.content.res.Configuration
+import android.text.TextUtils
 import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
@@ -10,6 +12,7 @@ import android.widget.TextView
 
 class OperationStatusView(context: Context) : LinearLayout(context) {
     private val titleView: TextView
+    private val subjectView: TextView
     private val detailView: TextView
     private val progressView: ProgressBar
     private val closeView: TextView
@@ -46,15 +49,37 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         header.addView(closeView, LayoutParams(Ui.dp(context, 44), Ui.dp(context, 44)))
         addView(header)
 
-        addView(Ui.textView(context, "Renault Docs", 12f, Ui.muted).apply {
-            setPadding(0, 0, 0, Ui.dp(context, 6))
-        })
+        subjectView =
+            Ui.textView(
+                context,
+                "Renault Docs",
+                12f,
+                Ui.muted,
+            ).apply {
+                maxLines =
+                    1
+                ellipsize =
+                    TextUtils.TruncateAt.MIDDLE
+                setPadding(
+                    0,
+                    0,
+                    0,
+                    Ui.dp(
+                        context,
+                        6,
+                    ),
+                )
+            }
+        addView(
+            subjectView,
+        )
 
         detailView = Ui.textView(context, "", 13f, Ui.muted)
+        configureDetailLayout()
         addView(detailView)
 
         progressView = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
-            max = 100
+            max = PROGRESS_SCALE
             progress = 0
             isIndeterminate = true
         }
@@ -69,29 +94,111 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         current: Int? = null,
         total: Int? = null,
         onCancel: (() -> Unit)? = null,
+        subject: String = "Renault Docs",
     ) {
         visibility = View.VISIBLE
         titleView.text = title
+        subjectView.text =
+            subject
+                .trim()
+                .ifBlank {
+                    "Renault Docs"
+                }
+        configureDetailLayout()
         detailView.text = detail
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
         cancelView.setOnClickListener(if (onCancel == null) null else View.OnClickListener { onCancel() })
         progressView.visibility = View.VISIBLE
-        val determinate = current != null && total != null && total > 0
-        progressView.isIndeterminate = !determinate
-        if (determinate) {
-            progressView.max = total!!
-            progressView.progress = current!!.coerceIn(0, total)
+        val determinate =
+            current !=
+                null &&
+                total !=
+                    null &&
+                total >
+                    0
+
+        if (
+            determinate
+        ) {
+            progressView.isIndeterminate =
+                false
+
+            val normalized =
+                (
+                    current!!
+                        .coerceIn(
+                            0,
+                            total!!,
+                        )
+                        .toLong() *
+                        PROGRESS_SCALE /
+                        total
+                )
+                    .toInt()
+                    .coerceIn(
+                        0,
+                        PROGRESS_SCALE,
+                    )
+
+            progressView.max =
+                PROGRESS_SCALE
+
+            if (
+                android.os.Build.VERSION.SDK_INT >=
+                android.os.Build.VERSION_CODES.N
+            ) {
+                progressView.setProgress(
+                    normalized,
+                    true,
+                )
+            } else {
+                progressView.progress =
+                    normalized
+            }
+        } else {
+            val isNewRun =
+                titleView.text
+                    .toString() !=
+                    title ||
+                    closeView.visibility ==
+                        View.VISIBLE ||
+                    visibility !=
+                        View.VISIBLE
+
+            progressView.isIndeterminate =
+                false
+            progressView.max =
+                PROGRESS_SCALE
+
+            if (
+                isNewRun
+            ) {
+                progressView.progress =
+                    0
+            }
         }
     }
 
-    fun showTerminal(title: String, detail: String, onClose: () -> Unit) {
+    fun showTerminal(
+        title: String,
+        detail: String,
+        subject: String = "Renault Docs",
+        onClose: () -> Unit,
+    ) {
         visibility = View.VISIBLE
         titleView.text = title
+        subjectView.text =
+            subject
+                .trim()
+                .ifBlank {
+                    "Renault Docs"
+                }
+        configureDetailLayout()
         detailView.text = detail
         progressView.isIndeterminate = false
-        progressView.max = 1
-        progressView.progress = 1
+        progressView.max = PROGRESS_SCALE
+        progressView.progress = PROGRESS_SCALE
         cancelView.visibility = View.GONE
         cancelView.setOnClickListener(null)
         closeView.visibility = View.VISIBLE
@@ -101,9 +208,34 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         }
     }
 
+    private fun configureDetailLayout() {
+        val landscape =
+            resources.configuration.orientation ==
+                Configuration.ORIENTATION_LANDSCAPE
+
+        if (
+            landscape
+        ) {
+            detailView.maxLines =
+                1
+            detailView.ellipsize =
+                TextUtils.TruncateAt.MIDDLE
+        } else {
+            detailView.maxLines =
+                2
+            detailView.ellipsize =
+                TextUtils.TruncateAt.END
+        }
+    }
+
     fun hide() {
         visibility = View.GONE
         closeView.setOnClickListener(null)
         cancelView.setOnClickListener(null)
+    }
+
+    companion object {
+        private const val PROGRESS_SCALE =
+            1_000
     }
 }

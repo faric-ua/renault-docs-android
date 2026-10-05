@@ -1091,6 +1091,32 @@ class ConversionActivity : Activity() {
                 View.GONE
             }
 
+        val phaseLabel =
+            when (
+                state.phase
+            ) {
+                ConversionRunPhase.SCANNING ->
+                    "Сканую…"
+
+                ConversionRunPhase.PREPARING ->
+                    "Готую…"
+
+                ConversionRunPhase.COPYING ->
+                    "Копіюю…"
+
+                ConversionRunPhase.PACKAGING ->
+                    "Пакую…"
+
+                ConversionRunPhase.VALIDATING ->
+                    "Перевіряю…"
+
+                ConversionRunPhase.FINALIZING ->
+                    "Завершую…"
+
+                else ->
+                    "Готую…"
+            }
+
         if (
             state.phase ==
                 ConversionRunPhase.SCANNING
@@ -1099,19 +1125,22 @@ class ConversionActivity : Activity() {
                 true
             progressText.text =
                 if (
-                    state.filesTotal > 0
+                    state.filesTotal >
+                    0
                 ) {
                     "Знайдено файлів: " +
                         state.filesTotal
                 } else {
-                    "Сканую папки…"
+                    phaseLabel
                 }
         } else if (
-            state.filesTotal > 0
+            state.filesTotal >
+                0
         ) {
             progressBar.isIndeterminate =
                 false
-            progressBar.progress =
+
+            val normalized =
                 (
                     state.filesDone
                         .coerceIn(
@@ -1126,41 +1155,34 @@ class ConversionActivity : Activity() {
                             )
                 ).toInt()
 
-            val phaseLabel =
-                when (
-                    state.phase
-                ) {
-                    ConversionRunPhase.COPYING ->
-                        "Копіювання"
-
-                    ConversionRunPhase.VALIDATING ->
-                        "Перевірка"
-
-                    ConversionRunPhase.PACKAGING ->
-                        "Пакування"
-
-                    ConversionRunPhase.FINALIZING ->
-                        "Завершення"
-
-                    else ->
-                        "Прогрес"
-                }
+            if (
+                android.os.Build.VERSION.SDK_INT >=
+                android.os.Build.VERSION_CODES.N
+            ) {
+                progressBar.setProgress(
+                    normalized,
+                    true,
+                )
+            } else {
+                progressBar.progress =
+                    normalized
+            }
 
             progressText.text =
                 phaseLabel +
-                    ": " +
-                    state.filesDone +
+                    " · Файлів: " +
+                    state.filesDone
+                        .coerceIn(
+                            0,
+                            state.filesTotal,
+                        ) +
                     " / " +
-                    state.filesTotal +
-                    " · змінено файлів: " +
-                    state.changedFiles +
-                    " · виправлень: " +
-                    state.changesTotal
+                    state.filesTotal
         } else if (running) {
             progressBar.isIndeterminate =
                 true
             progressText.text =
-                "Підготовка…"
+                phaseLabel
         } else {
             progressBar.isIndeterminate =
                 false
@@ -1208,7 +1230,7 @@ class ConversionActivity : Activity() {
                     Ui.muted,
                 )
                 statusText.text =
-                    state.message
+                    phaseLabel
             }
         }
 
@@ -1757,7 +1779,7 @@ class ConversionActivity : Activity() {
             4202
 
         private const val REFRESH_INTERVAL_MS =
-            500L
+            100L
         private const val INTERRUPTED_RUN_RECHECK_MS =
             1500L
     }

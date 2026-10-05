@@ -17,8 +17,6 @@ class HomeProjectDialogController(
     private val onShareProgress: (Int, Int, String) -> Unit,
     private val onShareFinished: (String) -> Unit,
 ) {
-    @Volatile
-    private var shareInProgress: Boolean = false
     private var activeKind: String = ""
     private var activeProjectId: String? = null
     private var activeParentKind: String? = null
@@ -139,10 +137,6 @@ class HomeProjectDialogController(
             )
         }
 
-        addAction("Поділитися проєктом") {
-            clear(DIALOG_ACTIONS)
-            shareProject(project)
-        }
         val projectVolumes =
             store.volumes(
                 project.id,
@@ -153,12 +147,30 @@ class HomeProjectDialogController(
                 project,
                 projectVolumes,
             )
-        if (prepared != null) {
-            addAction("Поділитися підготовленим .rdproject") {
-                clear(DIALOG_ACTIONS)
+
+        addAction("Поділитися проєктом") {
+            clear(DIALOG_ACTIONS)
+
+            if (
+                prepared !=
+                null
+            ) {
                 sharePreparedProject(
                     project,
                     prepared,
+                )
+            } else {
+                shareProject(
+                    project,
+                )
+            }
+        }
+
+        if (prepared != null) {
+            addAction("Перепакувати .rdproject") {
+                clear(DIALOG_ACTIONS)
+                shareProject(
+                    project,
                 )
             }
             addAction(
@@ -234,91 +246,40 @@ class HomeProjectDialogController(
             return
         }
 
-        if (shareInProgress) {
+        val existing =
+            RdprojectShareRunStore(
+                activity,
+            ).load()
+
+        if (
+            existing.isRunning
+        ) {
             showMessage(
                 title = "Поділитися проєктом",
                 message = "Пакування проєкту вже виконується.",
             )
             return
         }
-        shareInProgress = true
-        activity.runOnUiThread {
+
+        val started =
+            RdprojectShareService.start(
+                context = activity,
+                projectId = project.id,
+            )
+
+        if (
+            started
+        ) {
             onShareProgress(
                 0,
-                volumes.size,
-                "Готую проєкт 0/" + volumes.size + "…",
+                0,
+                "Готую…",
+            )
+        } else {
+            onShareFinished(
+                "Не вдалося запустити підготовку проєкту.",
             )
         }
-
-        Thread {
-            val file =
-                PreparedShareStore.projectFile(
-                    activity,
-                    project,
-                    volumes,
-                )
-            val uri =
-                FileProvider.getUriForFile(
-                    activity,
-                    activity.packageName + ".files",
-                    file,
-                )
-            val result =
-                RdprojectExporter.export(
-                    context = activity,
-                    project = project,
-                    volumes = volumes,
-                    destinationUri = uri,
-                    progress = { message ->
-                        val current =
-                            Regex("""Готую том (\d+)/""")
-                                .find(message)
-                                ?.groupValues
-                                ?.getOrNull(1)
-                                ?.toIntOrNull()
-                                ?: 0
-                        activity.runOnUiThread {
-                            if (shareInProgress) {
-                                onShareProgress(
-                                    current,
-                                    volumes.size,
-                                    message,
-                                )
-                            }
-                        }
-                    },
-                )
-
-            activity.runOnUiThread {
-                shareInProgress = false
-                result.onSuccess {
-                    onShareFinished(
-                        "Проєкт " + project.title +
-                            " підготовлено · " + volumeCountLabel(volumes.size) + ".",
-                    )
-                    val send =
-                        Intent(Intent.ACTION_SEND).apply {
-                            type = "application/zip"
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                    activity.startActivity(
-                        Intent.createChooser(
-                            send,
-                            "Поділитися проєктом",
-                        ),
-                    )
-                }.onFailure { error ->
-                    onShareFinished("Не вдалося підготувати проєкт.")
-                    showMessage(
-                        title = "Не вдалося поділитися",
-                        message =
-                            error.message
-                                ?: "Невідома помилка.",
-                    )
-                }
-            }
-        }.start()
     }
 
     private fun confirmDeletePreparedProject(
@@ -355,16 +316,6 @@ class HomeProjectDialogController(
                     onPreparedProjectDeleted(
                         project,
                         deleted,
-                    )
-                    showMessage(
-                        title = "Підготовлений файл",
-                        message =
-                            if (deleted) {
-                                "Підготовлений .rdproject видалено. " +
-                                    "Сам проєкт і його томи не змінено."
-                            } else {
-                                "Не вдалося видалити підготовлений .rdproject."
-                            },
                     )
                 }
                 .create()

@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -14,6 +16,8 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.content.FileProvider
+import java.io.File
 
 class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
@@ -27,6 +31,25 @@ class MainActivity : Activity() {
         LifecycleHelpDialogController
     private lateinit var projectDialogs:
         HomeProjectDialogController
+    private lateinit var rdprojectShareRunStore:
+        RdprojectShareRunStore
+    private var lastRenderedRdprojectFinishedAt =
+        0L
+    private val rdprojectRunHandler by lazy {
+        Handler(
+            Looper.getMainLooper(),
+        )
+    }
+    private val rdprojectRunRefresh =
+        object : Runnable {
+            override fun run() {
+                refreshRdprojectShareRunState()
+                rdprojectRunHandler.postDelayed(
+                    this,
+                    RDPROJECT_RUN_REFRESH_MS,
+                )
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +77,10 @@ class MainActivity : Activity() {
 
         store = DatasetStore(this)
         projectStore = ProjectStore(this)
+        rdprojectShareRunStore =
+            RdprojectShareRunStore(
+                this,
+            )
         settings = AppSettings(this)
         projectDialogs =
             HomeProjectDialogController(
@@ -70,13 +97,17 @@ class MainActivity : Activity() {
                 onPreparedProjectDeleted = {
                     project,
                     deleted ->
-                    if (
-                        deleted
-                    ) {
-                        statusText.text =
-                            "Підготовлений файл видалено: " +
+                    statusText.text =
+                        if (
+                            deleted
+                        ) {
+                            "Підготовлений .rdproject видалено: " +
+                                project.title +
+                                ". Проєкт і томи не змінено."
+                        } else {
+                            "Не вдалося видалити підготовлений .rdproject: " +
                                 project.title
-                    }
+                        }
                     renderLibrary()
                 },
                 onShareProgress = { current, total, message ->
@@ -97,7 +128,7 @@ class MainActivity : Activity() {
                     statusText.text = message
                     if (::operationStatus.isInitialized) {
                         operationStatus.showTerminal(
-                            "Підготовка проєкту завершена",
+                            "Підготовка проєкту · помилка",
                             message,
                         ) {
                             operationStatus.hide()
@@ -141,11 +172,29 @@ class MainActivity : Activity() {
         repairSavedVolumeMetadata()
     }
 
+    override fun onStart() {
+        super.onStart()
+        rdprojectRunHandler.removeCallbacks(
+            rdprojectRunRefresh,
+        )
+        rdprojectRunHandler.post(
+            rdprojectRunRefresh,
+        )
+    }
+
+    override fun onStop() {
+        rdprojectRunHandler.removeCallbacks(
+            rdprojectRunRefresh,
+        )
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         if (::libraryContainer.isInitialized) {
             renderLibrary()
         }
+        refreshRdprojectShareRunState()
     }
 
     override fun onSaveInstanceState(
@@ -1090,6 +1139,211 @@ class MainActivity : Activity() {
             }
         }
 
+    private fun refreshRdprojectShareRunState() {
+        if (
+            !::rdprojectShareRunStore.isInitialized ||
+            !::operationStatus.isInitialized ||
+            !::statusText.isInitialized
+        ) {
+            return
+        }
+
+        val state =
+            rdprojectShareRunStore.load()
+
+        if (
+            state.isRunning
+        ) {
+            operationProgress.visibility =
+                View.GONE
+            statusText.text =
+                "Проєкт = модель Renault · томи додаються окремо."
+
+            val runningProject =
+                state.projectId
+                    ?.let {
+                        projectStore.project(
+                            it,
+                        )
+                    }
+            val runningVolumes =
+                runningProject
+                    ?.let {
+                        projectStore.volumes(
+                            it.id,
+                        )
+                    }
+                    .orEmpty()
+            val operationSubject =
+                if (
+                    runningProject !=
+                        null &&
+                    runningVolumes.isNotEmpty()
+                ) {
+                    RdprojectExporter.defaultFileName(
+                        project =
+                            runningProject,
+                        volumes =
+                            runningVolumes,
+                    )
+                } else {
+                    "Renault Docs"
+                }
+
+            operationStatus.showRunning(
+                title =
+                    "Підготовка проєкту",
+                detail =
+                    state.message
+                        .ifBlank {
+                            "Готую…"
+                        },
+                current =
+                    state.progressCurrent
+                        .takeIf {
+                            state.progressTotal >
+                                0
+                        },
+                total =
+                    state.progressTotal
+                        .takeIf {
+                            it >
+                                0
+                        },
+                subject =
+                    operationSubject,
+            )
+            return
+        }
+
+        if (
+            !state.isTerminal ||
+            state.finishedAtMs <=
+                0L ||
+            state.isTerminalDismissed
+        ) {
+            return
+        }
+
+        if (
+            state.finishedAtMs >
+            lastRenderedRdprojectFinishedAt
+        ) {
+            lastRenderedRdprojectFinishedAt =
+                state.finishedAtMs
+            renderLibrary()
+        }
+
+        if (
+            state.phase ==
+            RdprojectShareRunPhase.COMPLETE
+        ) {
+            val file =
+                state.preparedPath
+                    ?.let(
+                        ::File,
+                    )
+
+            if (
+                file ==
+                    null ||
+                !file.isFile
+            ) {
+                operationStatus.showTerminal(
+                    title =
+                        "Підготовка проєкту · помилка",
+                    detail =
+                        "Підготовлений .rdproject не знайдено.",
+                ) {
+                    rdprojectShareRunStore
+                        .dismissTerminal(
+                            state.finishedAtMs,
+                        )
+                    operationStatus.hide()
+                }
+                return
+            }
+
+            operationStatus.showTerminal(
+                title =
+                    "Підготовка проєкту завершена",
+                detail =
+                    state.message
+                        .ifBlank {
+                            "Проєкт готовий для поширення."
+                        },
+            ) {
+                rdprojectShareRunStore
+                    .dismissTerminal(
+                        state.finishedAtMs,
+                    )
+                operationStatus.hide()
+            }
+
+            if (
+                !state.isChooserLaunched &&
+                rdprojectShareRunStore
+                    .markChooserLaunched(
+                        state.finishedAtMs,
+                    )
+            ) {
+                sharePreparedRdproject(
+                    file,
+                )
+            }
+        } else {
+            operationStatus.showTerminal(
+                title =
+                    "Підготовка проєкту · помилка",
+                detail =
+                    state.message
+                        .ifBlank {
+                            "Не вдалося підготувати .rdproject."
+                        },
+            ) {
+                rdprojectShareRunStore
+                    .dismissTerminal(
+                        state.finishedAtMs,
+                    )
+                operationStatus.hide()
+            }
+        }
+    }
+
+    private fun sharePreparedRdproject(
+        file: File,
+    ) {
+        val uri =
+            FileProvider.getUriForFile(
+                this,
+                packageName +
+                    ".files",
+                file,
+            )
+
+        val send =
+            Intent(
+                Intent.ACTION_SEND,
+            ).apply {
+                type =
+                    "application/zip"
+                putExtra(
+                    Intent.EXTRA_STREAM,
+                    uri,
+                )
+                addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            }
+
+        startActivity(
+            Intent.createChooser(
+                send,
+                "Поділитися проєктом",
+            ),
+        )
+    }
+
     private fun renderLibrary() {
         libraryContainer.removeAllViews()
 
@@ -1722,6 +1976,8 @@ class MainActivity : Activity() {
     }
 
     companion object {
+        private const val RDPROJECT_RUN_REFRESH_MS =
+            100L
         private const val REQUEST_DATASET_FOLDER = 4101
         private const val HELP_LIBRARY =
             "library"

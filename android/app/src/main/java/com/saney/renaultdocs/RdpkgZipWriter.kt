@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import java.io.BufferedInputStream
 import java.io.File
 import java.security.DigestOutputStream
@@ -24,6 +25,9 @@ object RdpkgZipWriter {
 
     private const val ZIP_EPOCH_MILLIS =
         315_532_800_000L
+
+    private const val PROGRESS_THROTTLE_MS =
+        100L
 
     private val textExtensions =
         setOf(
@@ -49,6 +53,12 @@ object RdpkgZipWriter {
         sourceRoot: File,
         destinationUri: Uri,
         progress: ((completed: Int, total: Int) -> Unit)? = null,
+        byteProgress: ((
+            completedFiles: Int,
+            totalFiles: Int,
+            processedBytes: Long,
+            totalBytes: Long,
+        ) -> Unit)? = null,
     ): WriteResult {
         val root =
             sourceRoot.canonicalFile
@@ -115,6 +125,12 @@ object RdpkgZipWriter {
             0,
             files.size,
         )
+        byteProgress?.invoke(
+            0,
+            files.size,
+            0L,
+            sourceBytes,
+        )
 
         DigestOutputStream(
             rawOutput.buffered(),
@@ -129,6 +145,10 @@ object RdpkgZipWriter {
                     ByteArray(
                         BUFFER_SIZE,
                     )
+                var lastProgressAt =
+                    0L
+                var processedBytes =
+                    0L
 
                 files.forEachIndexed {
                     index,
@@ -189,6 +209,27 @@ object RdpkgZipWriter {
                                 0,
                                 read,
                             )
+
+                            processedBytes +=
+                                read
+
+                            val byteNow =
+                                SystemClock.elapsedRealtime()
+
+                            if (
+                                byteNow -
+                                    lastProgressAt >=
+                                    PROGRESS_THROTTLE_MS
+                            ) {
+                                byteProgress?.invoke(
+                                    index,
+                                    files.size,
+                                    processedBytes,
+                                    sourceBytes,
+                                )
+                                lastProgressAt =
+                                    byteNow
+                            }
                         }
                     }
 
@@ -198,19 +239,30 @@ object RdpkgZipWriter {
                         index +
                             1
 
+                    val now =
+                        SystemClock.elapsedRealtime()
+
                     if (
                         completed ==
                         1 ||
-                        completed %
-                            500 ==
-                        0 ||
                         completed ==
-                        files.size
+                        files.size ||
+                        now -
+                            lastProgressAt >=
+                            PROGRESS_THROTTLE_MS
                     ) {
                         progress?.invoke(
                             completed,
                             files.size,
                         )
+                        byteProgress?.invoke(
+                            completed,
+                            files.size,
+                            processedBytes,
+                            sourceBytes,
+                        )
+                        lastProgressAt =
+                            now
                     }
                 }
             }

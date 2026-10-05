@@ -10,6 +10,9 @@ data class RdpkgImportRunState(
     val projectId: String? = null,
     val packageUri: String? = null,
     val packageId: String? = null,
+    val progressStage: String = "",
+    val progressCurrent: Int = 0,
+    val progressTotal: Int = 0,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
     val consumedFinishedAtMs: Long = 0L,
@@ -29,6 +32,9 @@ class RdpkgImportRunStore(context: Context) {
         projectId = prefs.getString(KEY_PROJECT_ID, null),
         packageUri = prefs.getString(KEY_PACKAGE_URI, null),
         packageId = prefs.getString(KEY_PACKAGE_ID, null),
+        progressStage = prefs.getString(KEY_PROGRESS_STAGE, "").orEmpty(),
+        progressCurrent = prefs.getInt(KEY_PROGRESS_CURRENT, 0),
+        progressTotal = prefs.getInt(KEY_PROGRESS_TOTAL, 0),
         startedAtMs = prefs.getLong(KEY_STARTED_AT, 0L),
         finishedAtMs = prefs.getLong(KEY_FINISHED_AT, 0L),
         consumedFinishedAtMs = prefs.getLong(KEY_CONSUMED_FINISHED_AT, 0L),
@@ -42,13 +48,48 @@ class RdpkgImportRunStore(context: Context) {
             .putString(KEY_MESSAGE, "Імпортую .rdpkg…")
             .putString(KEY_PROJECT_ID, projectId)
             .putString(KEY_PACKAGE_URI, packageUri)
+            .putString(KEY_PROGRESS_STAGE, "Читаю пакет…")
+            .putInt(KEY_PROGRESS_CURRENT, 0)
+            .putInt(KEY_PROGRESS_TOTAL, 0)
             .putLong(KEY_STARTED_AT, System.currentTimeMillis())
             .commit()
         return true
     }
 
     fun update(message: String) {
-        prefs.edit().putString(KEY_MESSAGE, message).apply()
+        prefs.edit()
+            .putString(KEY_MESSAGE, message)
+            .apply()
+    }
+
+    fun updateProgress(
+        progress: OperationProgress,
+    ) {
+        prefs.edit().apply {
+            putString(
+                KEY_PROGRESS_STAGE,
+                progress.compactStage(),
+            )
+            if (progress.isDeterminate) {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    progress.normalizedCurrent ?: 0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    progress.total ?: 0,
+                )
+            } else {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    0,
+                )
+            }
+        }.apply()
     }
 
     fun complete(packageId: String, message: String) {
@@ -56,6 +97,7 @@ class RdpkgImportRunStore(context: Context) {
             .putString(KEY_PHASE, RdpkgImportRunPhase.COMPLETE.name)
             .putString(KEY_MESSAGE, message)
             .putString(KEY_PACKAGE_ID, packageId)
+            .putString(KEY_PROGRESS_STAGE, "Готово")
             .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
             .apply()
     }
@@ -82,6 +124,9 @@ class RdpkgImportRunStore(context: Context) {
         private const val KEY_PROJECT_ID = "project_id"
         private const val KEY_PACKAGE_URI = "package_uri"
         private const val KEY_PACKAGE_ID = "package_id"
+        private const val KEY_PROGRESS_STAGE = "progress_stage"
+        private const val KEY_PROGRESS_CURRENT = "progress_current"
+        private const val KEY_PROGRESS_TOTAL = "progress_total"
         private const val KEY_STARTED_AT = "started_at"
         private const val KEY_FINISHED_AT = "finished_at"
         private const val KEY_CONSUMED_FINISHED_AT = "consumed_finished_at"

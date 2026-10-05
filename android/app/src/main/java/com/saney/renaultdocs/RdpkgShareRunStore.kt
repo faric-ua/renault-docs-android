@@ -10,6 +10,9 @@ data class RdpkgShareRunState(
     val projectId: String? = null,
     val volumeId: String? = null,
     val preparedPath: String? = null,
+    val progressStage: String = "",
+    val progressCurrent: Int = 0,
+    val progressTotal: Int = 0,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
     val chooserLaunchedFinishedAtMs: Long = 0L,
@@ -30,6 +33,9 @@ class RdpkgShareRunStore(context: Context) {
         projectId = prefs.getString(KEY_PROJECT_ID, null),
         volumeId = prefs.getString(KEY_VOLUME_ID, null),
         preparedPath = prefs.getString(KEY_PREPARED_PATH, null),
+        progressStage = prefs.getString(KEY_PROGRESS_STAGE, "").orEmpty(),
+        progressCurrent = prefs.getInt(KEY_PROGRESS_CURRENT, 0),
+        progressTotal = prefs.getInt(KEY_PROGRESS_TOTAL, 0),
         startedAtMs = prefs.getLong(KEY_STARTED_AT, 0L),
         finishedAtMs = prefs.getLong(KEY_FINISHED_AT, 0L),
         chooserLaunchedFinishedAtMs = prefs.getLong(KEY_CHOOSER_LAUNCHED_FINISHED_AT, 0L),
@@ -44,17 +50,55 @@ class RdpkgShareRunStore(context: Context) {
             .putString(KEY_MESSAGE, "Готую .rdpkg для поширення…")
             .putString(KEY_PROJECT_ID, projectId)
             .putString(KEY_VOLUME_ID, volumeId)
+            .putString(KEY_PROGRESS_STAGE, "Готую…")
+            .putInt(KEY_PROGRESS_CURRENT, 0)
+            .putInt(KEY_PROGRESS_TOTAL, 0)
             .putLong(KEY_STARTED_AT, System.currentTimeMillis())
             .commit()
     }
 
-    fun update(message: String) { prefs.edit().putString(KEY_MESSAGE, message).apply() }
+    fun update(message: String) {
+        prefs.edit()
+            .putString(KEY_MESSAGE, message)
+            .apply()
+    }
+
+    fun updateProgress(
+        progress: OperationProgress,
+    ) {
+        prefs.edit().apply {
+            putString(
+                KEY_PROGRESS_STAGE,
+                progress.compactStage(),
+            )
+            if (progress.isDeterminate) {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    progress.normalizedCurrent ?: 0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    progress.total ?: 0,
+                )
+            } else {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    0,
+                )
+            }
+        }.apply()
+    }
 
     fun complete(preparedPath: String) {
         prefs.edit()
             .putString(KEY_PHASE, RdpkgShareRunPhase.COMPLETE.name)
             .putString(KEY_MESSAGE, "Том готовий для поширення.")
             .putString(KEY_PREPARED_PATH, preparedPath)
+            .putString(KEY_PROGRESS_STAGE, "Готово")
             .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
             .apply()
     }
@@ -88,6 +132,9 @@ class RdpkgShareRunStore(context: Context) {
         private const val KEY_PROJECT_ID = "project_id"
         private const val KEY_VOLUME_ID = "volume_id"
         private const val KEY_PREPARED_PATH = "prepared_path"
+        private const val KEY_PROGRESS_STAGE = "progress_stage"
+        private const val KEY_PROGRESS_CURRENT = "progress_current"
+        private const val KEY_PROGRESS_TOTAL = "progress_total"
         private const val KEY_STARTED_AT = "started_at"
         private const val KEY_FINISHED_AT = "finished_at"
         private const val KEY_CHOOSER_LAUNCHED_FINISHED_AT = "chooser_launched_finished_at"

@@ -16,6 +16,7 @@ import org.json.JSONObject
 class NativeRdpkgPreparationEngine(
     private val context: Context,
     private val onProgress: (String) -> Unit = {},
+    private val onProgressState: (OperationProgress) -> Unit = {},
     private val isCancelled: () -> Boolean = { false },
 ) {
     data class Request(
@@ -55,6 +56,81 @@ class NativeRdpkgPreparationEngine(
                     progress ->
                     onProgress(
                         progress.message,
+                    )
+
+                    val stage =
+                        when (
+                            progress.phase
+                        ) {
+                            NativePreparationStager.Phase.SCANNING ->
+                                "Сканую…"
+                            NativePreparationStager.Phase.PREPARING ->
+                                "Готую…"
+                            NativePreparationStager.Phase.COPYING ->
+                                "Копіюю…"
+                            NativePreparationStager.Phase.READY ->
+                                "Готую…"
+                        }
+
+                    val state =
+                        when {
+                            progress.bytesTotal >
+                                0L -> {
+                                OperationProgress.weightedItemsAndBytes(
+                                    stage =
+                                        stage,
+                                    itemsDone =
+                                        progress.filesDone,
+                                    itemsTotal =
+                                        progress.filesTotal
+                                            .coerceAtLeast(
+                                                1,
+                                            ),
+                                    bytesDone =
+                                        progress.bytesDone,
+                                    bytesTotal =
+                                        progress.bytesTotal,
+                                    itemLabel =
+                                        "Файлів",
+                                )
+                            }
+
+                            progress.filesTotal >
+                                0 ->
+                                OperationProgress.measured(
+                                    stage =
+                                        stage,
+                                    current =
+                                        progress.filesDone,
+                                    total =
+                                        progress.filesTotal,
+                                    itemCurrent =
+                                        progress.filesDone,
+                                    itemTotal =
+                                        progress.filesTotal,
+                                    itemLabel =
+                                        "Файлів",
+                                )
+
+                            progress.filesFound >
+                                0 ->
+                                OperationProgress(
+                                    stage =
+                                        stage,
+                                    itemCurrent =
+                                        progress.filesFound,
+                                    itemLabel =
+                                        "Файлів",
+                                )
+
+                            else ->
+                                OperationProgress.indeterminate(
+                                    stage,
+                                )
+                        }
+
+                    onProgressState(
+                        state,
                     )
                 },
                 isCancelled =
@@ -139,6 +215,11 @@ class NativeRdpkgPreparationEngine(
             onProgress(
                 "Компілюю volume metadata / Modern index…",
             )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Готую структуру…",
+                ),
+            )
 
             val volumeResult =
                 NativeVolumeCompiler
@@ -161,6 +242,11 @@ class NativeRdpkgPreparationEngine(
             onProgress(
                 "Компілюю native section index…",
             )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Готую індекс…",
+                ),
+            )
 
             val sections =
                 NativeSectionCompiler
@@ -177,6 +263,11 @@ class NativeRdpkgPreparationEngine(
 
             onProgress(
                 "Компілюю Runtime IR…",
+            )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Готую дані…",
+                ),
             )
 
             val runtime =
@@ -215,6 +306,11 @@ class NativeRdpkgPreparationEngine(
 
             onProgress(
                 "Будую Fast Pack…",
+            )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Пакую дані…",
+                ),
             )
 
             val fastPack =
@@ -340,6 +436,11 @@ class NativeRdpkgPreparationEngine(
             onProgress(
                 "Пакую .rdpkg…",
             )
+            onProgressState(
+                OperationProgress.indeterminate(
+                    "Пакую…",
+                ),
+            )
 
             val archive =
                 RdpkgZipWriter
@@ -371,6 +472,30 @@ class NativeRdpkgPreparationEngine(
                                         total,
                                 )
                             }
+                        },
+                        byteProgress = {
+                            completedFiles,
+                            totalFiles,
+                            processedBytes,
+                            totalBytes ->
+                            checkCancelled()
+
+                            onProgressState(
+                                OperationProgress.weightedItemsAndBytes(
+                                    stage =
+                                        "Пакую…",
+                                    itemsDone =
+                                        completedFiles,
+                                    itemsTotal =
+                                        totalFiles,
+                                    bytesDone =
+                                        processedBytes,
+                                    bytesTotal =
+                                        totalBytes,
+                                    itemLabel =
+                                        "Файлів",
+                                ),
+                            )
                         },
                     )
 

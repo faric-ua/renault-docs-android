@@ -2,8 +2,11 @@ package com.saney.renaultdocs
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FilterInputStream
+import java.io.InputStream
 import java.util.UUID
 import java.util.zip.ZipInputStream
 import org.json.JSONObject
@@ -19,6 +22,8 @@ object RdpkgImporter {
         "renault-dataset.json"
     private const val MAX_ENTRY_COUNT =
         250_000
+    private const val PROGRESS_THROTTLE_MS =
+        100L
 
     data class ImportResult(
         val packageId: String,
@@ -32,6 +37,7 @@ object RdpkgImporter {
         context: Context,
         packageUri: Uri,
         progress: ((String) -> Unit)? = null,
+        progressState: ((OperationProgress) -> Unit)? = null,
     ): Result<ImportResult> =
         runCatching {
             val appContext =
@@ -65,6 +71,11 @@ object RdpkgImporter {
                 progress?.invoke(
                     "Імпортую .rdpkg…",
                 )
+                progressState?.invoke(
+                    OperationProgress.indeterminate(
+                        "Читаю пакет…",
+                    ),
+                )
 
                 val extraction =
                     extract(
@@ -76,7 +87,15 @@ object RdpkgImporter {
                             staging,
                         progress =
                             progress,
+                        progressState =
+                            progressState,
                     )
+
+                progressState?.invoke(
+                    OperationProgress.indeterminate(
+                        "Перевіряю…",
+                    ),
+                )
 
                 val packageMetadata =
                     readPackageMetadata(
@@ -88,6 +107,12 @@ object RdpkgImporter {
                         staging,
                     packageMetadata =
                         packageMetadata,
+                )
+
+                progressState?.invoke(
+                    OperationProgress.indeterminate(
+                        "Встановлюю…",
+                    ),
                 )
 
                 val finalDirectory =
@@ -208,6 +233,7 @@ object RdpkgImporter {
         packageUri: Uri,
         staging: File,
         progress: ((String) -> Unit)?,
+        progressState: ((OperationProgress) -> Unit)?,
     ): ExtractionResult {
         val input =
             context.contentResolver
@@ -218,13 +244,40 @@ object RdpkgImporter {
                     "Android не зміг відкрити вибраний .rdpkg."
                 )
 
+        val archiveBytesTotal =
+            runCatching {
+                context.contentResolver
+                    .openAssetFileDescriptor(
+                        packageUri,
+                        "r",
+                    )
+                    ?.use {
+                        descriptor ->
+                        descriptor.length
+                    }
+            }.getOrNull()
+                ?.takeIf {
+                    it >
+                        0L
+                }
+
+        val countingInput =
+            CountingInputStream(
+                input.buffered(),
+            )
+
         var fileCount =
             0
         var bytes =
             0L
+        var expectedFiles:
+            Int? =
+            null
+        var lastProgressAt =
+            0L
 
         ZipInputStream(
-            input.buffered(),
+            countingInput,
         ).use {
             archive ->
             while (
@@ -341,15 +394,75 @@ object RdpkgImporter {
                         )
                         bytes +=
                             read
+
+                        val now =
+                            SystemClock.elapsedRealtime()
+
+                        if (
+                            now -
+                                lastProgressAt >=
+                                PROGRESS_THROTTLE_MS
+                        ) {
+                            publishImportProgress(
+                                fileCount =
+                                    fileCount,
+                                expectedFiles =
+                                    expectedFiles,
+                                archiveBytes =
+                                    countingInput.bytesRead,
+                                archiveBytesTotal =
+                                    archiveBytesTotal,
+                                progressState =
+                                    progressState,
+                            )
+                            lastProgressAt =
+                                now
+                        }
                     }
                 }
 
                 if (
+                    normalized ==
+                    PACKAGE_MANIFEST
+                ) {
+                    expectedFiles =
+                        runCatching {
+                            JSONObject(
+                                destination.readText(
+                                    Charsets.UTF_8,
+                                ),
+                            )
+                                .optInt(
+                                    "payload_file_count",
+                                    0,
+                                )
+                                .takeIf {
+                                    it >
+                                        0
+                                }
+                                ?.plus(
+                                    1,
+                                )
+                        }.getOrNull()
+                }
+
+                val now =
+                    SystemClock.elapsedRealtime()
+                val shouldPublish =
                     fileCount ==
-                    1 ||
-                    fileCount %
-                    500 ==
-                    0
+                        1 ||
+                        (
+                            expectedFiles !=
+                                null &&
+                                fileCount >=
+                                expectedFiles!!
+                        ) ||
+                        now -
+                            lastProgressAt >=
+                            PROGRESS_THROTTLE_MS
+
+                if (
+                    shouldPublish
                 ) {
                     progress?.invoke(
                         "Імпортую .rdpkg… " +
@@ -357,6 +470,22 @@ object RdpkgImporter {
                                 fileCount,
                             ),
                     )
+
+                    publishImportProgress(
+                        fileCount =
+                            fileCount,
+                        expectedFiles =
+                            expectedFiles,
+                        archiveBytes =
+                            countingInput.bytesRead,
+                        archiveBytesTotal =
+                            archiveBytesTotal,
+                        progressState =
+                            progressState,
+                    )
+
+                    lastProgressAt =
+                        now
                 }
 
                 archive.closeEntry()
@@ -375,6 +504,112 @@ object RdpkgImporter {
                 fileCount,
             bytes =
                 bytes,
+        )
+    }
+
+    private fun publishImportProgress(
+        fileCount: Int,
+        expectedFiles: Int?,
+        archiveBytes: Long,
+        archiveBytesTotal: Long?,
+        progressState: ((OperationProgress) -> Unit)?,
+    ) {
+        val totalBytes =
+            archiveBytesTotal
+
+        if (
+            totalBytes !=
+            null &&
+            totalBytes >
+            0L
+        ) {
+            val knownFiles =
+                expectedFiles
+
+            progressState?.invoke(
+                if (
+                    knownFiles !=
+                    null &&
+                    knownFiles >
+                    0
+                ) {
+                    OperationProgress.weightedItemsAndBytes(
+                        stage =
+                            "Імпортую…",
+                        itemsDone =
+                            fileCount,
+                        itemsTotal =
+                            knownFiles,
+                        bytesDone =
+                            archiveBytes,
+                        bytesTotal =
+                            totalBytes,
+                        itemLabel =
+                            "Файлів",
+                    )
+                } else {
+                    val byteCurrent =
+                        (
+                            archiveBytes
+                                .coerceIn(
+                                    0L,
+                                    totalBytes,
+                                ) *
+                                2_500L /
+                                totalBytes
+                        ).toInt()
+
+                    OperationProgress.measured(
+                        stage =
+                            "Імпортую…",
+                        current =
+                            byteCurrent,
+                        total =
+                            10_000,
+                        itemCurrent =
+                            fileCount,
+                        itemLabel =
+                            "Файлів",
+                    )
+                },
+            )
+            return
+        }
+
+        if (
+            expectedFiles !=
+            null &&
+            expectedFiles >
+            0
+        ) {
+            progressState?.invoke(
+                OperationProgress.measured(
+                    stage =
+                        "Імпортую…",
+                    current =
+                        fileCount,
+                    total =
+                        expectedFiles,
+                    itemCurrent =
+                        fileCount,
+                    itemTotal =
+                        expectedFiles,
+                    itemLabel =
+                        "Файлів",
+                ),
+            )
+            return
+        }
+
+        progressState?.invoke(
+            OperationProgress(
+                stage =
+                    "Імпортую…",
+                itemCurrent =
+                    fileCount,
+                itemLabel =
+                    "Файлів",
+            ),
         )
     }
 
@@ -625,6 +860,54 @@ object RdpkgImporter {
         return parts.joinToString(
             "/",
         )
+    }
+
+    private class CountingInputStream(
+        input: InputStream,
+    ) : FilterInputStream(
+        input,
+    ) {
+        var bytesRead: Long =
+            0L
+            private set
+
+        override fun read(): Int {
+            val value =
+                super.read()
+
+            if (
+                value >=
+                0
+            ) {
+                bytesRead +=
+                    1L
+            }
+
+            return value
+        }
+
+        override fun read(
+            buffer: ByteArray,
+            offset: Int,
+            length: Int,
+        ): Int {
+            val read =
+                super.read(
+                    buffer,
+                    offset,
+                    length,
+                )
+
+            if (
+                read >
+                0
+            ) {
+                bytesRead +=
+                    read
+            }
+
+            return read
+        }
     }
 
     private data class PackageMetadata(
