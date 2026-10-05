@@ -77,23 +77,72 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
         cancelView.setOnClickListener(if (onCancel == null) null else View.OnClickListener { onCancel() })
         progressView.visibility = View.VISIBLE
-        val determinate = current != null && total != null && total > 0
-        progressView.isIndeterminate = !determinate
-        if (determinate) {
+        val determinate =
+            current !=
+                null &&
+                total !=
+                    null &&
+                total >
+                    0
+
+        if (
+            determinate
+        ) {
+            progressView.isIndeterminate =
+                false
+
             val normalized =
-                ((current!!.coerceIn(0, total!!).toLong() * PROGRESS_SCALE) / total)
+                (
+                    current!!
+                        .coerceIn(
+                            0,
+                            total!!,
+                        )
+                        .toLong() *
+                        PROGRESS_SCALE /
+                        total
+                )
                     .toInt()
-                    .coerceIn(0, PROGRESS_SCALE)
+                    .coerceIn(
+                        0,
+                        PROGRESS_SCALE,
+                    )
 
-            progressView.max = PROGRESS_SCALE
+            progressView.max =
+                PROGRESS_SCALE
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            if (
+                android.os.Build.VERSION.SDK_INT >=
+                android.os.Build.VERSION_CODES.N
+            ) {
                 progressView.setProgress(
                     normalized,
                     true,
                 )
             } else {
-                progressView.progress = normalized
+                progressView.progress =
+                    normalized
+            }
+        } else {
+            val isNewRun =
+                titleView.text
+                    .toString() !=
+                    title ||
+                    closeView.visibility ==
+                        View.VISIBLE ||
+                    visibility !=
+                        View.VISIBLE
+
+            progressView.isIndeterminate =
+                false
+            progressView.max =
+                PROGRESS_SCALE
+
+            if (
+                isNewRun
+            ) {
+                progressView.progress =
+                    0
             }
         }
     }
