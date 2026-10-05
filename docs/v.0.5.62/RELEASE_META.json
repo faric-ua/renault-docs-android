@@ -1,0 +1,12 @@
+{
+  "versionName": "0.5.62",
+  "versionCode": 78,
+  "phase": "development",
+  "feature": "Drive Catalog v1 + guided import",
+  "branch": "feat/v0.5.62-drive-catalog",
+  "issue": 29,
+  "source_pipeline_issue": 30,
+  "catalog_file_id": "1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA",
+  "qa_status": "NOT_TESTED",
+  "merge_blocked_until_phone_pass": true
+}
