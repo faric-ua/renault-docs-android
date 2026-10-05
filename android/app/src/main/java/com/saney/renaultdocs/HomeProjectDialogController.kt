@@ -137,10 +137,6 @@ class HomeProjectDialogController(
             )
         }
 
-        addAction("Поділитися проєктом") {
-            clear(DIALOG_ACTIONS)
-            shareProject(project)
-        }
         val projectVolumes =
             store.volumes(
                 project.id,
@@ -151,12 +147,30 @@ class HomeProjectDialogController(
                 project,
                 projectVolumes,
             )
-        if (prepared != null) {
-            addAction("Поділитися підготовленим .rdproject") {
-                clear(DIALOG_ACTIONS)
+
+        addAction("Поділитися проєктом") {
+            clear(DIALOG_ACTIONS)
+
+            if (
+                prepared !=
+                null
+            ) {
                 sharePreparedProject(
                     project,
                     prepared,
+                )
+            } else {
+                shareProject(
+                    project,
+                )
+            }
+        }
+
+        if (prepared != null) {
+            addAction("Перепакувати .rdproject") {
+                clear(DIALOG_ACTIONS)
+                shareProject(
+                    project,
                 )
             }
             addAction(
