@@ -186,8 +186,10 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("internal fun progressVolumeLabel(", exporter)
         self.assertIn("volume.documentCode", exporter)
         self.assertIn("volume.date", exporter)
-        self.assertIn('"Пакую том " +', exporter)
-        self.assertNotIn('(index + 1) +\n                                            "/"', exporter)
+        self.assertIn("internal fun volumeProgressStage(", exporter)
+        self.assertIn('"Пакую том"', exporter)
+        self.assertIn('(index + 1)', exporter)
+        self.assertIn('" - "', exporter)
 
         self.assertIn("Configuration.ORIENTATION_LANDSCAPE", status)
         self.assertIn("detailView.maxLines =", status)
