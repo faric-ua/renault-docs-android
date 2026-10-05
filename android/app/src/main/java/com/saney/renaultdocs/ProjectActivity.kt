@@ -2324,7 +2324,7 @@ class ProjectActivity : Activity() {
             }
 
             setOnLongClickListener {
-                confirmRemoveVolume(
+                showVolumeActions(
                     volume,
                 )
                 true
@@ -3685,7 +3685,7 @@ class ProjectActivity : Activity() {
             "raw"
 
         private const val DEFAULT_STATUS_TEXT =
-            "Натисни на том, щоб відкрити. Утримуй том — щоб видалити його з проєкту без видалення файлів."
+            "Натисни на том, щоб відкрити. Утримуй том — щоб відкрити ті самі дії, що й через ⋮."
 
         private const val NATIVE_RUN_REFRESH_MS =
             100L
