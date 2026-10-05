@@ -117,17 +117,25 @@ object RdprojectExporter {
                             volume,
                         )
 
+                    val preparingStage =
+                        volumeProgressStage(
+                            action =
+                                "Готую том",
+                            index =
+                                index,
+                            total =
+                                volumes.size,
+                            volumeLabel =
+                                volumeLabel,
+                        )
+
                     progress?.invoke(
-                        "Готую том " +
-                            volumeLabel +
-                            "…",
+                        preparingStage,
                     )
                     progressState?.invoke(
                         OperationProgress.measured(
                             stage =
-                                "Готую том " +
-                                    volumeLabel +
-                                    "…",
+                                preparingStage,
                             current =
                                 index *
                                     progressUnitsPerPhase,
@@ -180,9 +188,16 @@ object RdprojectExporter {
                             progressState?.invoke(
                                 OperationProgress.measured(
                                     stage =
-                                        "Пакую том " +
-                                            volumeLabel +
-                                            "…",
+                                        volumeProgressStage(
+                                            action =
+                                                "Пакую том",
+                                            index =
+                                                index,
+                                            total =
+                                                volumes.size,
+                                            volumeLabel =
+                                                volumeLabel,
+                                        ),
                                     current =
                                         (
                                             index *
@@ -558,6 +573,21 @@ object RdprojectExporter {
                 tempRoot.deleteRecursively()
             }
         }
+
+    internal fun volumeProgressStage(
+        action: String,
+        index: Int,
+        total: Int,
+        volumeLabel: String,
+    ): String =
+        action +
+            " " +
+            (index + 1) +
+            "/" +
+            total +
+            " - " +
+            volumeLabel +
+            "…"
 
     internal fun progressVolumeLabel(
         volume: ProjectVolumeRecord,
