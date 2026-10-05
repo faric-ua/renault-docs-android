@@ -25,6 +25,9 @@ data class NativeRdpkgRunState(
     val filesTotal: Int = 0,
     val changedFiles: Int = 0,
     val changesTotal: Int = 0,
+    val progressStage: String = "",
+    val progressCurrent: Int = 0,
+    val progressTotal: Int = 0,
     val cancelRequested: Boolean = false,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
@@ -173,6 +176,21 @@ class NativeRdpkgRunStore(
                     KEY_CHANGES_TOTAL,
                     0,
                 ),
+            progressStage =
+                prefs.getString(
+                    KEY_PROGRESS_STAGE,
+                    "",
+                ).orEmpty(),
+            progressCurrent =
+                prefs.getInt(
+                    KEY_PROGRESS_CURRENT,
+                    0,
+                ),
+            progressTotal =
+                prefs.getInt(
+                    KEY_PROGRESS_TOTAL,
+                    0,
+                ),
             cancelRequested =
                 prefs.getBoolean(
                     KEY_CANCEL_REQUESTED,
@@ -250,6 +268,18 @@ class NativeRdpkgRunStore(
                 KEY_CHANGES_TOTAL,
                 0,
             )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Готую…",
+            )
+            .putInt(
+                KEY_PROGRESS_CURRENT,
+                0,
+            )
+            .putInt(
+                KEY_PROGRESS_TOTAL,
+                0,
+            )
             .putBoolean(
                 KEY_CANCEL_REQUESTED,
                 false,
@@ -266,6 +296,36 @@ class NativeRdpkgRunStore(
                 KEY_DISMISSED_FINISHED_AT,
             )
             .apply()
+    }
+
+    fun updateProgress(
+        progress: OperationProgress,
+    ) {
+        prefs.edit().apply {
+            putString(
+                KEY_PROGRESS_STAGE,
+                progress.compactStage(),
+            )
+            if (progress.isDeterminate) {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    progress.normalizedCurrent ?: 0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    progress.total ?: 0,
+                )
+            } else {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    0,
+                )
+            }
+        }.apply()
     }
 
     fun updatePreparing(
@@ -344,6 +404,10 @@ class NativeRdpkgRunStore(
             .putInt(
                 KEY_CHANGES_TOTAL,
                 changesTotal,
+            )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Готово",
             )
             .putBoolean(
                 KEY_CANCEL_REQUESTED,
@@ -485,6 +549,12 @@ class NativeRdpkgRunStore(
             "changed_files"
         private const val KEY_CHANGES_TOTAL =
             "changes_total"
+        private const val KEY_PROGRESS_STAGE =
+            "progress_stage"
+        private const val KEY_PROGRESS_CURRENT =
+            "progress_current"
+        private const val KEY_PROGRESS_TOTAL =
+            "progress_total"
         private const val KEY_CANCEL_REQUESTED =
             "cancel_requested"
         private const val KEY_STARTED_AT =
