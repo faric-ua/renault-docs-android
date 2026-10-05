@@ -118,7 +118,11 @@ object RdprojectExporter {
                     progressState?.invoke(
                         OperationProgress.measured(
                             stage =
-                                "Готую том…",
+                                "Готую том " +
+                                    (index + 1) +
+                                    "/" +
+                                    volumes.size +
+                                    "…",
                             current =
                                 index *
                                     progressUnitsPerPhase,
@@ -171,7 +175,11 @@ object RdprojectExporter {
                             progressState?.invoke(
                                 OperationProgress.measured(
                                     stage =
-                                        "Пакую том…",
+                                        "Пакую том " +
+                                            (index + 1) +
+                                            "/" +
+                                            volumes.size +
+                                            "…",
                                     current =
                                         (
                                             index *
@@ -422,23 +430,29 @@ object RdprojectExporter {
                                                     lastProgressAt >=
                                                     100L
                                             ) {
+                                                val weighted =
+                                                    OperationProgress
+                                                        .weightedItemsAndBytes(
+                                                            stage =
+                                                                "Пакую проєкт…",
+                                                            itemsDone =
+                                                                index,
+                                                            itemsTotal =
+                                                                projectFiles.size,
+                                                            bytesDone =
+                                                                processedBytes,
+                                                            bytesTotal =
+                                                                projectBytes,
+                                                            itemLabel =
+                                                                "Файлів",
+                                                        )
                                                 val finalPhaseProgress =
-                                                    if (
-                                                        projectBytes >
-                                                        0L
-                                                    ) {
-                                                        (
-                                                            processedBytes
-                                                                .coerceIn(
-                                                                    0L,
-                                                                    projectBytes,
-                                                                ) *
-                                                                progressUnitsPerPhase /
-                                                                projectBytes
-                                                        ).toInt()
-                                                    } else {
-                                                        0
-                                                    }
+                                                    (
+                                                        weighted.normalizedCurrent!!
+                                                            .toLong() *
+                                                            progressUnitsPerPhase /
+                                                            weighted.total!!
+                                                    ).toInt()
 
                                                 progressState?.invoke(
                                                     OperationProgress.measured(
@@ -472,23 +486,29 @@ object RdprojectExporter {
                                 val completed =
                                     index +
                                         1
+                                val weighted =
+                                    OperationProgress
+                                        .weightedItemsAndBytes(
+                                            stage =
+                                                "Пакую проєкт…",
+                                            itemsDone =
+                                                completed,
+                                            itemsTotal =
+                                                projectFiles.size,
+                                            bytesDone =
+                                                processedBytes,
+                                            bytesTotal =
+                                                projectBytes,
+                                            itemLabel =
+                                                "Файлів",
+                                        )
                                 val finalPhaseProgress =
-                                    if (
-                                        projectBytes >
-                                        0L
-                                    ) {
-                                        (
-                                            processedBytes
-                                                .coerceIn(
-                                                    0L,
-                                                    projectBytes,
-                                                ) *
-                                                progressUnitsPerPhase /
-                                                projectBytes
-                                        ).toInt()
-                                    } else {
-                                        progressUnitsPerPhase
-                                    }
+                                    (
+                                        weighted.normalizedCurrent!!
+                                            .toLong() *
+                                            progressUnitsPerPhase /
+                                            weighted.total!!
+                                    ).toInt()
 
                                 progressState?.invoke(
                                     OperationProgress.measured(
