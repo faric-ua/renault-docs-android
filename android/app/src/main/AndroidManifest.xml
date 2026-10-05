@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -43,6 +44,11 @@
             android:screenOrientation="unspecified" />
 
         <activity
+            android:name=".DriveCatalogActivity"
+            android:exported="false"
+            android:screenOrientation="unspecified" />
+
+        <activity
             android:name=".ProjectChooserActivity"
             android:exported="false"
             android:screenOrientation="unspecified" />
@@ -61,6 +67,12 @@
             android:name=".ConversionActivity"
             android:exported="false"
             android:screenOrientation="unspecified" />
+
+        <service
+            android:name=".CatalogImportService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
 
         <service
             android:name=".ConversionService"
