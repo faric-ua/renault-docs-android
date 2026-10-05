@@ -1,5 +1,35 @@
 # Renault Docs — CURRENT HANDOFF
 
+## v0.5.61 closeout — 2026-10-05
+
+Status: **CLOSED / PHONE PASS / MAIN VERIFIED**.
+
+Final app source:
+`c36e10ddb5fb1a24e9a37d2dc21321a577ed69ed`.
+
+Final main CI:
+- Tests #443 — PASS;
+- Android Debug APK #116 — PASS.
+
+Final install-over-existing on phone:
+- app shows `v0.5.61`;
+- Megane II: 2 volumes;
+- Laguna II: 10 volumes;
+- Kangoo II: 1 volume;
+- existing project data preserved.
+
+Accepted v0.5.61 behavior:
+- shared live progress with visible file counts;
+- balanced/smoother progress;
+- lifecycle-safe .rdpkg/.rdproject operations;
+- named per-volume project stages;
+- canonical output filename shown during preparation;
+- prepared .rdproject reuse;
+- unified project/volume deletion dialog flow.
+
+Issue #25 is complete.
+
+
 Останнє оновлення: 2026-09-25.
 
 ## Stable foundation
