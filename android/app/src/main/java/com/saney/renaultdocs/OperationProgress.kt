@@ -42,24 +42,34 @@ data class OperationProgress(
                     it.isNotBlank()
                 }
 
-        return if (
+        return when {
             currentItem != null &&
-            totalItems != null &&
-            totalItems > 0 &&
-            label != null
-        ) {
-            compact +
-                " · " +
-                label +
-                ": " +
-                currentItem.coerceIn(
-                    0,
-                    totalItems,
-                ) +
-                " / " +
-                totalItems
-        } else {
-            compact
+                totalItems != null &&
+                totalItems > 0 &&
+                label != null ->
+                compact +
+                    " · " +
+                    label +
+                    ": " +
+                    currentItem.coerceIn(
+                        0,
+                        totalItems,
+                    ) +
+                    " / " +
+                    totalItems
+
+            currentItem != null &&
+                label != null ->
+                compact +
+                    " · " +
+                    label +
+                    ": " +
+                    currentItem.coerceAtLeast(
+                        0,
+                    )
+
+            else ->
+                compact
         }
     }
 
