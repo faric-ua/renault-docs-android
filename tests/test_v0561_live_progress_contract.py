@@ -59,7 +59,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn('"Файлів"', importer)
 
         self.assertIn("progressState: ((OperationProgress) -> Unit)?", exporter)
-        self.assertIn("OperationProgress.measured(", exporter)
+        self.assertIn("OperationProgress.weightedItemsAndBytes(", exporter)
 
         for store in (import_store, export_store, share_store):
             self.assertIn("progressCurrent", store)
