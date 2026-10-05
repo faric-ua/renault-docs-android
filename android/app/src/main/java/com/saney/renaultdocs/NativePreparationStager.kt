@@ -928,6 +928,9 @@ class NativePreparationStager(
         private const val COPY_PROGRESS_EVERY =
             100
 
+        private const val COPY_PROGRESS_THROTTLE_MS =
+            100L
+
         fun isPatchableText(
             relativePath: String,
         ): Boolean =
