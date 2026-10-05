@@ -192,12 +192,18 @@ class NativeRdpkgPreparationService : Service() {
                         runStore.updatePreparing(
                             message,
                         )
+                    },
+                    onProgressState = {
+                        progress ->
+                        runStore.updateProgress(
+                            progress,
+                        )
 
                         updateNotificationThrottled(
                             title =
                                 "Renault Docs · створення .rdpkg",
                             text =
-                                message,
+                                progress.compactStage(),
                             projectId =
                                 request.projectId,
                             cancellable =
@@ -239,6 +245,11 @@ class NativeRdpkgPreparationService : Service() {
             runStore.updateImporting(
                 "Перевіряю та встановлюю створений .rdpkg…",
             )
+            runStore.updateProgress(
+                OperationProgress.indeterminate(
+                    "Перевіряю…",
+                ),
+            )
 
             updateNotification(
                 title =
@@ -263,12 +274,18 @@ class NativeRdpkgPreparationService : Service() {
                             runStore.updateImporting(
                                 message,
                             )
+                        },
+                        progressState = {
+                            progress ->
+                            runStore.updateProgress(
+                                progress,
+                            )
 
                             updateNotificationThrottled(
                                 title =
                                     "Renault Docs · перевірка .rdpkg",
                                 text =
-                                    message,
+                                    progress.compactStage(),
                                 projectId =
                                     request.projectId,
                                 cancellable =
@@ -631,13 +648,35 @@ class NativeRdpkgPreparationService : Service() {
                 runStore.load()
                     .isRunning,
             )
-            .setProgress(
-                0,
-                0,
-                runStore.load()
-                    .isRunning,
-            )
             .apply {
+                val state =
+                    runStore.load()
+
+                if (
+                    state.isRunning
+                ) {
+                    if (
+                        state.progressTotal >
+                        0
+                    ) {
+                        setProgress(
+                            state.progressTotal,
+                            state.progressCurrent
+                                .coerceIn(
+                                    0,
+                                    state.progressTotal,
+                                ),
+                            false,
+                        )
+                    } else {
+                        setProgress(
+                            0,
+                            0,
+                            true,
+                        )
+                    }
+                }
+
                 if (
                     cancellable
                 ) {
