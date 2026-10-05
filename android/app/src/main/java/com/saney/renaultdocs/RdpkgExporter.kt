@@ -170,38 +170,18 @@ object RdpkgExporter {
                             totalFiles,
                             processedBytes,
                             totalBytes ->
-                            val scale =
-                                10_000
-                            val normalized =
-                                if (
-                                    totalBytes >
-                                    0L
-                                ) {
-                                    (
-                                        processedBytes
-                                            .coerceIn(
-                                                0L,
-                                                totalBytes,
-                                            ) *
-                                            scale /
-                                            totalBytes
-                                    ).toInt()
-                                } else {
-                                    0
-                                }
-
                             progressState?.invoke(
-                                OperationProgress.measured(
+                                OperationProgress.weightedItemsAndBytes(
                                     stage =
                                         "Пакую…",
-                                    current =
-                                        normalized,
-                                    total =
-                                        scale,
-                                    itemCurrent =
+                                    itemsDone =
                                         completedFiles,
-                                    itemTotal =
+                                    itemsTotal =
                                         totalFiles,
+                                    bytesDone =
+                                        processedBytes,
+                                    bytesTotal =
+                                        totalBytes,
                                     itemLabel =
                                         "Файлів",
                                 ),
