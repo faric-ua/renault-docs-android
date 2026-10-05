@@ -1,0 +1,12 @@
+{
+  "versionName": "0.5.61",
+  "versionCode": 77,
+  "phase": "development",
+  "feature": "Shared real-time progress for long-running operations",
+  "branch": "feat/v0.5.61-live-progress",
+  "qa_status": "NOT_TESTED",
+  "public_repo": "faric-ua/renault-docs-android",
+  "issue": 25,
+  "merge_blocked_until_phone_pass": true,
+  "next_action": "Implement shared compact progress model and wire measured progress into long-running operation run stores/UI."
+}
