@@ -2441,7 +2441,14 @@ class ProjectActivity : Activity() {
             title = "Видалити з проєкту",
             danger = true,
         ) {
-            confirmRemoveVolume(volume)
+            clearProjectDialogState(
+                DIALOG_VOLUME_ACTIONS,
+            )
+            activeProjectDialogParentKind =
+                DIALOG_VOLUME_ACTIONS
+            confirmRemoveVolume(
+                volume,
+            )
         }
         addAction("Скасувати") {
             clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
@@ -2901,8 +2908,25 @@ class ProjectActivity : Activity() {
                 )
                 .setNegativeButton(
                     "Скасувати",
-                    null,
-                )
+                ) {
+                    _,
+                    _ ->
+                    val returnToActions =
+                        activeProjectDialogParentKind ==
+                            DIALOG_VOLUME_ACTIONS
+
+                    clearProjectDialogState(
+                        DIALOG_REMOVE_VOLUME,
+                    )
+
+                    if (
+                        returnToActions
+                    ) {
+                        showVolumeActions(
+                            volume,
+                        )
+                    }
+                }
                 .setPositiveButton(
                     "Видалити з проєкту",
                 ) {
