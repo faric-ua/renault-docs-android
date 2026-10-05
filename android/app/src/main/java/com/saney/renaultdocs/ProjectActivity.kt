@@ -592,6 +592,22 @@ class ProjectActivity : Activity() {
                             it >
                                 0
                         },
+                subject =
+                    state.destinationUri
+                        ?.let {
+                            uriText ->
+                            DocumentFile
+                                .fromSingleUri(
+                                    this,
+                                    Uri.parse(
+                                        uriText,
+                                    ),
+                                )
+                                ?.name
+                        }
+                        ?: volumeOperationSubject(
+                            state.volumeId,
+                        ),
             )
             return
         }
@@ -985,6 +1001,21 @@ class ProjectActivity : Activity() {
         ) {
             hideNativeTerminalStatus()
             if (::operationStatus.isInitialized) {
+                val operationSubject =
+                    state.destinationUri
+                        ?.let {
+                            uriText ->
+                            DocumentFile
+                                .fromSingleUri(
+                                    this,
+                                    Uri.parse(
+                                        uriText,
+                                    ),
+                                )
+                                ?.name
+                        }
+                        ?: "Renault Docs"
+
                 operationStatus.showRunning(
                     title = "Створення .rdpkg",
                     detail =
@@ -1016,6 +1047,8 @@ class ProjectActivity : Activity() {
                         } else {
                             null
                         },
+                    subject =
+                        operationSubject,
                 )
             }
 
@@ -2551,6 +2584,31 @@ class ProjectActivity : Activity() {
         )
     }
 
+    private fun volumeOperationSubject(
+        volumeId: String?,
+    ): String =
+        volumeId
+            ?.let {
+                id ->
+                store.volumes(
+                    project.id,
+                )
+                    .firstOrNull {
+                        it.id ==
+                            id
+                    }
+            }
+            ?.let {
+                volume ->
+                RdpkgExporter.defaultFileName(
+                    project =
+                        project,
+                    volume =
+                        volume,
+                )
+            }
+            ?: "Renault Docs"
+
     private fun shareRdpkg(
         volume: ProjectVolumeRecord,
     ) {
@@ -2610,6 +2668,10 @@ class ProjectActivity : Activity() {
                             it >
                                 0
                         },
+                subject =
+                    volumeOperationSubject(
+                        state.volumeId,
+                    ),
             )
             return
         }
