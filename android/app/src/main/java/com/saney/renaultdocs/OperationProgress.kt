@@ -77,14 +77,9 @@ data class OperationProgress(
         stage
             .trim()
             .replace(
-                Regex("""\s+\d+\s*/\s*\d+.*$"""),
-                "",
+                Regex("""\s+"""),
+                " ",
             )
-            .replace(
-                Regex("""\s+\d+\s+(?:файл|файли|файлів).*$"""),
-                "",
-            )
-            .trim()
             .ifBlank {
                 "Виконую…"
             }
