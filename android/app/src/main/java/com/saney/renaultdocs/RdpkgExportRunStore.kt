@@ -12,6 +12,9 @@ data class RdpkgExportRunState(
     val destinationUri: String? = null,
     val sha256: String? = null,
     val fileCount: Int = 0,
+    val progressStage: String = "",
+    val progressCurrent: Int = 0,
+    val progressTotal: Int = 0,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
     val dismissedFinishedAtMs: Long = 0L,
@@ -32,6 +35,9 @@ class RdpkgExportRunStore(context: Context) {
         destinationUri = prefs.getString(KEY_DESTINATION_URI, null),
         sha256 = prefs.getString(KEY_SHA256, null),
         fileCount = prefs.getInt(KEY_FILE_COUNT, 0),
+        progressStage = prefs.getString(KEY_PROGRESS_STAGE, "").orEmpty(),
+        progressCurrent = prefs.getInt(KEY_PROGRESS_CURRENT, 0),
+        progressTotal = prefs.getInt(KEY_PROGRESS_TOTAL, 0),
         startedAtMs = prefs.getLong(KEY_STARTED_AT, 0L),
         finishedAtMs = prefs.getLong(KEY_FINISHED_AT, 0L),
         dismissedFinishedAtMs = prefs.getLong(KEY_DISMISSED_FINISHED_AT, 0L),
@@ -46,11 +52,51 @@ class RdpkgExportRunStore(context: Context) {
             .putString(KEY_PROJECT_ID, projectId)
             .putString(KEY_VOLUME_ID, volumeId)
             .putString(KEY_DESTINATION_URI, destinationUri)
+            .putString(KEY_PROGRESS_STAGE, "Готую…")
+            .putInt(KEY_PROGRESS_CURRENT, 0)
+            .putInt(KEY_PROGRESS_TOTAL, 0)
             .putLong(KEY_STARTED_AT, System.currentTimeMillis())
             .commit()
     }
 
-    fun update(message: String) { prefs.edit().putString(KEY_MESSAGE, message).apply() }
+    fun update(message: String) {
+        prefs.edit()
+            .putString(KEY_MESSAGE, message)
+            .apply()
+    }
+
+    fun updateProgress(
+        progress: OperationProgress,
+    ) {
+        prefs.edit().apply {
+            putString(
+                KEY_PROGRESS_STAGE,
+                progress.compactStage(),
+            )
+            progress.current?.let {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    it,
+                )
+            }
+            progress.total?.let {
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    it,
+                )
+            }
+            if (!progress.isDeterminate) {
+                putInt(
+                    KEY_PROGRESS_CURRENT,
+                    0,
+                )
+                putInt(
+                    KEY_PROGRESS_TOTAL,
+                    0,
+                )
+            }
+        }.apply()
+    }
 
     fun complete(sha256: String, fileCount: Int, message: String) {
         prefs.edit()
@@ -58,6 +104,9 @@ class RdpkgExportRunStore(context: Context) {
             .putString(KEY_MESSAGE, message)
             .putString(KEY_SHA256, sha256)
             .putInt(KEY_FILE_COUNT, fileCount)
+            .putString(KEY_PROGRESS_STAGE, "Готово")
+            .putInt(KEY_PROGRESS_CURRENT, fileCount)
+            .putInt(KEY_PROGRESS_TOTAL, fileCount.coerceAtLeast(1))
             .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
             .apply()
     }
@@ -86,6 +135,9 @@ class RdpkgExportRunStore(context: Context) {
         private const val KEY_DESTINATION_URI = "destination_uri"
         private const val KEY_SHA256 = "sha256"
         private const val KEY_FILE_COUNT = "file_count"
+        private const val KEY_PROGRESS_STAGE = "progress_stage"
+        private const val KEY_PROGRESS_CURRENT = "progress_current"
+        private const val KEY_PROGRESS_TOTAL = "progress_total"
         private const val KEY_STARTED_AT = "started_at"
         private const val KEY_FINISHED_AT = "finished_at"
         private const val KEY_DISMISSED_FINISHED_AT = "dismissed_finished_at"
