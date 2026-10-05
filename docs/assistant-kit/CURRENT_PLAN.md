@@ -4,31 +4,33 @@
 
 ## v0.5.61 — shared live progress / issue #25
 
-Status: **IMPLEMENTATION IN PROGRESS / CI NOT YET RUN**.
+Status: **MERGED / FINAL MAIN CI PASS / PHONE PASS / CLOSED — 2026-10-05**.
 
-Accepted UX contract:
-- keep the existing thin progress bar visual style;
-- normal UI shows only a short stage such as `Готую…`, `Копіюю…`, `Пакую…`, `Перевіряю…`;
-- no filename/byte/speed/ETA telemetry in normal UI;
-- use measured determinate progress whenever a real total is known;
-- use indeterminate only while a real total is unavailable;
-- coalesce/throttle progress publication rather than redraw on every file;
-- rotation/reopen must reattach to the same durable run instead of restarting it.
+Final app source:
+`c36e10ddb5fb1a24e9a37d2dc21321a577ed69ed`.
 
-Current implementation wave:
-- shared `OperationProgress` model;
-- smooth normalized progress in `OperationStatusView`;
-- measured progress persisted for native raw → .rdpkg, .rdpkg import, export and share;
-- .rdproject preparation moved from Activity-owned Thread to foreground service + persistent run store;
-- Home reattaches to .rdproject progress and launches Share Sheet once after completion;
-- converter keeps its current thin bar but uses compact stage text and animated measured progress.
+Final CI:
+- Tests #443 — PASS;
+- Android Debug APK #116 — PASS.
 
-Next gate:
-1. open draft PR for `feat/v0.5.61-live-progress`;
-2. require Tests PASS + Android PR Check PASS;
-3. fix compile/contract failures before any phone install;
-4. install one fresh candidate and run representative phone lifecycle/progress checks;
-5. do not merge until phone PASS.
+Final phone install-over-existing:
+- v0.5.61 visible in app;
+- Megane II = 2 volumes;
+- Laguna II = 10 volumes;
+- Kangoo II = 1 volume;
+- project data preserved.
+
+Accepted:
+- shared thin live progress with visible file counters;
+- smoother balanced progress;
+- lifecycle-safe .rdpkg/.rdproject operations;
+- named current-volume progress;
+- canonical output filename shown during preparation;
+- prepared-project reuse;
+- unified project/volume deletion dialog sequence.
+
+Next:
+- select the next independent Renault Docs issue from current `main`; do not reopen #25 unless a regression is found.
 
 ## v0.5.60 — canonical project/package identity
 
