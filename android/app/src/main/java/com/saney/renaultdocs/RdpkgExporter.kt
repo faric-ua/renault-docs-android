@@ -102,6 +102,7 @@ object RdpkgExporter {
         volume: ProjectVolumeRecord,
         destinationUri: Uri,
         progress: ((String) -> Unit)? = null,
+        progressState: ((OperationProgress) -> Unit)? = null,
     ): Result<ExportResult> =
         runCatching {
             val appContext =
@@ -132,6 +133,12 @@ object RdpkgExporter {
                     packageId
             }
 
+            progressState?.invoke(
+                OperationProgress.indeterminate(
+                    "Перевіряю…",
+                ),
+            )
+
             validateManagedPackage(
                 sourceRoot =
                     sourceRoot,
@@ -156,6 +163,16 @@ object RdpkgExporter {
                                     completed +
                                     "/" +
                                     total
+                            )
+                            progressState?.invoke(
+                                OperationProgress.measured(
+                                    stage =
+                                        "Пакую…",
+                                    current =
+                                        completed,
+                                    total =
+                                        total,
+                                ),
                             )
                         },
                     )
