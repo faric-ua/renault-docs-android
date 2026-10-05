@@ -20,6 +20,8 @@ object RdpkgImporter {
         "renault-dataset.json"
     private const val MAX_ENTRY_COUNT =
         250_000
+    private const val PROGRESS_THROTTLE_MS =
+        200L
 
     data class ImportResult(
         val packageId: String,
