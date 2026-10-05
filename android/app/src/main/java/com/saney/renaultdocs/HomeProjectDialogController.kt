@@ -317,16 +317,6 @@ class HomeProjectDialogController(
                         project,
                         deleted,
                     )
-                    showMessage(
-                        title = "Підготовлений файл",
-                        message =
-                            if (deleted) {
-                                "Підготовлений .rdproject видалено. " +
-                                    "Сам проєкт і його томи не змінено."
-                            } else {
-                                "Не вдалося видалити підготовлений .rdproject."
-                            },
-                    )
                 }
                 .create()
         track(
