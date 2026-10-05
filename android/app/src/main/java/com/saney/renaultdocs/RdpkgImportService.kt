@@ -52,7 +52,7 @@ class RdpkgImportService : Service() {
                     packageUri = Uri.parse(packageUri),
                     progressState = { progress ->
                         val stage =
-                            progress.compactStage()
+                            progress.displayText()
                         runStore.update(
                             stage,
                         )
