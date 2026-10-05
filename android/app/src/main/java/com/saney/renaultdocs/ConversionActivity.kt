@@ -1124,7 +1124,15 @@ class ConversionActivity : Activity() {
             progressBar.isIndeterminate =
                 true
             progressText.text =
-                phaseLabel
+                if (
+                    state.filesTotal >
+                    0
+                ) {
+                    "Знайдено файлів: " +
+                        state.filesTotal
+                } else {
+                    phaseLabel
+                }
         } else if (
             state.filesTotal >
                 0
@@ -1161,7 +1169,15 @@ class ConversionActivity : Activity() {
             }
 
             progressText.text =
-                phaseLabel
+                phaseLabel +
+                    " · Файлів: " +
+                    state.filesDone
+                        .coerceIn(
+                            0,
+                            state.filesTotal,
+                        ) +
+                    " / " +
+                    state.filesTotal
         } else if (running) {
             progressBar.isIndeterminate =
                 true
@@ -1763,7 +1779,7 @@ class ConversionActivity : Activity() {
             4202
 
         private const val REFRESH_INTERVAL_MS =
-            500L
+            100L
         private const val INTERRUPTED_RUN_RECHECK_MS =
             1500L
     }
