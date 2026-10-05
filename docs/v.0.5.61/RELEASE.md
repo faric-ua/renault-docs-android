@@ -1,27 +1,49 @@
 # Renault Docs v0.5.61 — shared live progress
 
-Status: **DEVELOPMENT**
+Status: **MERGED / FINAL MAIN CI PASS / PHONE PASS / CLOSED — 2026-10-05**
 
-## Scope
+## Final source
 
-- issue #25: shared real-progress contract for long-running operations;
-- keep the existing thin progress bar visual style;
-- compact human-readable stage text only;
-- measured determinate progress whenever totals are known;
-- indeterminate only while a real total is unavailable;
-- smooth/coalesced UI updates without per-file redraw storms;
-- preserve durable run-store/service lifecycle behavior.
+- PR #28: `v0.5.61 — shared live progress`
+- merge commit: `c36e10ddb5fb1a24e9a37d2dc21321a577ed69ed`
+- versionName: `0.5.61`
+- versionCode: `77`
 
-## Initial target surfaces
+## Final CI
+
+- Tests #443 — PASS
+- Android Debug APK #116 — PASS
+- final main artifact run: `37347713735`
+
+## Phone acceptance
+
+Final `main` APK was installed over the existing app without uninstall/data reset.
+
+Confirmed after install:
+- app reports `v0.5.61`;
+- Megane II remains at 2 volumes;
+- Laguna II remains at 10 volumes;
+- Kangoo II remains at 1 volume;
+- existing data/projects are preserved.
+
+Accepted UX/runtime behavior:
+- shared thin live-progress presentation;
+- visible file counters;
+- smoother measured progress with balanced file/byte weighting;
+- durable lifecycle-safe progress for long operations;
+- named project-volume stages such as `Пакую том 1/2 - NT8340A · 2006-04-18…`;
+- canonical target filename shown while preparing `.rdpkg` / `.rdproject`;
+- prepared project reuse on normal Share;
+- explicit repack action when rebuild is desired;
+- project/volume deletion flows aligned to the same dialog sequence.
+
+## Scope completed
 
 - native raw → .rdpkg preparation;
 - .rdpkg import;
 - .rdpkg export/share;
 - .rdproject preparation/share;
-- converter.
+- converter progress presentation;
+- shared persistent progress model and lifecycle reattachment.
 
-## Non-goals
-
-- no large progress dashboard;
-- no filename/bytes/speed/ETA telemetry in normal UI;
-- no fake progress when work cannot be measured.
+Issue #25 is complete.
