@@ -1,6 +1,8 @@
 package com.saney.renaultdocs
 
 import android.content.Context
+import android.content.res.Configuration
+import android.text.TextUtils
 import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
@@ -51,6 +53,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         })
 
         detailView = Ui.textView(context, "", 13f, Ui.muted)
+        configureDetailLayout()
         addView(detailView)
 
         progressView = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
@@ -72,6 +75,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     ) {
         visibility = View.VISIBLE
         titleView.text = title
+        configureDetailLayout()
         detailView.text = detail
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
@@ -150,6 +154,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     fun showTerminal(title: String, detail: String, onClose: () -> Unit) {
         visibility = View.VISIBLE
         titleView.text = title
+        configureDetailLayout()
         detailView.text = detail
         progressView.isIndeterminate = false
         progressView.max = PROGRESS_SCALE
@@ -160,6 +165,26 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         closeView.setOnClickListener {
             visibility = View.GONE
             onClose()
+        }
+    }
+
+    private fun configureDetailLayout() {
+        val landscape =
+            resources.configuration.orientation ==
+                Configuration.ORIENTATION_LANDSCAPE
+
+        if (
+            landscape
+        ) {
+            detailView.maxLines =
+                1
+            detailView.ellipsize =
+                TextUtils.TruncateAt.MIDDLE
+        } else {
+            detailView.maxLines =
+                2
+            detailView.ellipsize =
+                TextUtils.TruncateAt.END
         }
     }
 
