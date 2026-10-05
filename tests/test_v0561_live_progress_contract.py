@@ -175,6 +175,67 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("invalidatePreparedProject(\n            fromProjectId,", store)
         self.assertIn("invalidatePreparedProject(\n            toProjectId,", store)
 
+    def test_compact_stage_preserves_volume_index_and_identity(self):
+        model = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationProgress.kt"
+        )
+
+        self.assertNotIn(r'\\s+\\d+\\s*/\\s*\\d+.*
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
+        )
+
+        self.assertNotIn("progressUnitsPerPhase", exporter)
+        self.assertNotIn("progressTotal", exporter)
+        self.assertIn("volumeProgress.normalizedCurrent", exporter)
+        self.assertIn("weighted.normalizedCurrent", exporter)
+
+    def test_progress_identifies_volume_and_adapts_to_orientation(self):
+        exporter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
+        )
+        status = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
+        )
+
+        self.assertIn("internal fun progressVolumeLabel(", exporter)
+        self.assertIn("volume.documentCode", exporter)
+        self.assertIn("volume.date", exporter)
+        self.assertIn("internal fun volumeProgressStage(", exporter)
+        self.assertIn('"Пакую том"', exporter)
+        self.assertIn('(index + 1)', exporter)
+        self.assertIn('" - "', exporter)
+
+        self.assertIn("Configuration.ORIENTATION_LANDSCAPE", status)
+        self.assertIn("detailView.maxLines =", status)
+        self.assertIn("TextUtils.TruncateAt.MIDDLE", status)
+        self.assertIn("TextUtils.TruncateAt.END", status)
+        self.assertIn("configureDetailLayout()", status)
+
+    def test_converter_ui_uses_compact_stage_copy(self):
+        converter = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
+        )
+        for label in (
+            '"Сканую…"',
+            '"Готую…"',
+            '"Копіюю…"',
+            '"Пакую…"',
+            '"Перевіряю…"',
+            '"Завершую…"',
+        ):
+            self.assertIn(label, converter)
+
+        self.assertIn('" · Файлів: "', converter)
+        self.assertNotIn('" · змінено файлів: "', converter)
+        self.assertNotIn('" · виправлень: "', converter)
+
+
+if __name__ == "__main__":
+    unittest.main()
+, model)
+        self.assertIn('Regex("""\\s+""")', model)
+
     def test_project_bar_matches_current_stage_instead_of_whole_bundle(self):
         exporter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt"
