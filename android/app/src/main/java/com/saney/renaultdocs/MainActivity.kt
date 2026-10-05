@@ -1159,7 +1159,7 @@ class MainActivity : Activity() {
                 title =
                     "Підготовка проєкту",
                 detail =
-                    state.progressStage
+                    state.message
                         .ifBlank {
                             "Готую…"
                         },
@@ -1940,7 +1940,7 @@ class MainActivity : Activity() {
 
     companion object {
         private const val RDPROJECT_RUN_REFRESH_MS =
-            400L
+            100L
         private const val REQUEST_DATASET_FOLDER = 4101
         private const val HELP_LIBRARY =
             "library"
