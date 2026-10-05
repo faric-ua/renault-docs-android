@@ -239,6 +239,46 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("TextUtils.TruncateAt.END", status)
         self.assertIn("configureDetailLayout()", status)
 
+    def test_project_and_volume_deletion_use_one_shared_dialog_sequence(self):
+        home = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"
+        )
+        main = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
+        )
+        project = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+
+        # Both entity flows are actions -> one danger confirmation -> inline result.
+        self.assertIn('title = "Видалити проєкт"', home)
+        self.assertIn('"Видалити проєкт?"', home)
+        self.assertNotIn(
+            'showMessage(\n                        title = "Підготовлений файл"',
+            home,
+        )
+        self.assertIn("onPreparedProjectDeleted(", home)
+        self.assertIn('"Підготовлений .rdproject видалено: "', main)
+
+        self.assertIn('title = "Видалити з проєкту"', project)
+        self.assertIn('"Видалити том з проєкту?"', project)
+        self.assertIn(
+            "activeProjectDialogParentKind =\n                DIALOG_VOLUME_ACTIONS",
+            project,
+        )
+        self.assertIn("showVolumeActions(\n                            volume,", project)
+
+        # Long press must not skip the same actions window.
+        self.assertIn(
+            "setOnLongClickListener {\n                showVolumeActions(",
+            project,
+        )
+        self.assertNotIn(
+            "setOnLongClickListener {\n                confirmRemoveVolume(",
+            project,
+        )
+        self.assertIn("ті самі дії, що й через ⋮", project)
+
     def test_converter_ui_uses_compact_stage_copy(self):
         converter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
