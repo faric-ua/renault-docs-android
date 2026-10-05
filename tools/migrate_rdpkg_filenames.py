@@ -226,32 +226,28 @@ def inspect_package(
                 dataset_name,
             )
 
-            merged_volume =
-                _merge_volume_metadata(
-                    package,
-                    dataset,
-                )
+            merged_volume = _merge_volume_metadata(
+                package,
+                dataset,
+            )
 
             if not merged_volume.get(
                 "document_type"
             ):
-                inferred_document_type =
-                    _infer_document_type_from_archive(
-                        archive,
-                        merged_volume,
-                    )
+                inferred_document_type = _infer_document_type_from_archive(
+                    archive,
+                    merged_volume,
+                )
                 if inferred_document_type:
-                    package_volume =
-                        package.get(
-                            "volume"
-                        )
+                    package_volume = package.get(
+                        "volume"
+                    )
                     if not isinstance(
                         package_volume,
                         dict,
                     ):
                         package_volume = {}
-                        package["volume"] =
-                            package_volume
+                        package["volume"] = package_volume
                     package_volume[
                         "document_type"
                     ] = inferred_document_type
