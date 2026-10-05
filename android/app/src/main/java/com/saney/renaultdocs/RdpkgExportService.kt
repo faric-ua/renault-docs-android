@@ -55,7 +55,7 @@ class RdpkgExportService : Service() {
                     destinationUri = Uri.parse(destinationUri),
                     progressState = { progress ->
                         val stage =
-                            progress.compactStage()
+                            progress.displayText()
                         runStore.update(
                             stage,
                         )
