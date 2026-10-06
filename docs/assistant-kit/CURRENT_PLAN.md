@@ -822,3 +822,13 @@ Status: TOOLING MERGED / DRIVE PACKAGES UPLOADED / PHONE CATALOG BUILD PENDING.
 ## Catalog v3 blocker — reconcile Megane II packages
 
 Current generated v3 candidate is valid JSON and Laguna II is fully aligned 10/10, but the two Megane II local packages differ in byte size from the package files currently served by their Drive IDs. Public catalog replacement is blocked until these package bytes are reconciled. Do not publish the current catalog candidate unchanged.
+
+## Catalog v4 current gate — 15 packages
+
+Status: PLAN MERGED / DRIVE PACKAGES UPLOADED / PHONE CATALOG BUILD PENDING.
+
+1. Phone Renault menu → 5, update main.
+2. Phone Renault menu → 25, build public Catalog v4.
+3. Require Laguna II 10 + Megane II 5 + vehicle_codes 15/15 + SHA-256 15/15.
+4. Inspect generated JSON.
+5. Replace existing public catalog in place only after PASS.
