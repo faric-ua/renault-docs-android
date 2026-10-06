@@ -237,11 +237,11 @@ class DriveCatalogPublisherTests(unittest.TestCase):
                 ).hexdigest(),
             )
 
-    def test_public_catalog_v3_plan_is_complete(self):
-        plan_path = REPO_ROOT / "config" / "catalog-publish-plan.v3.json"
+    def test_public_catalog_v4_plan_is_complete(self):
+        plan_path = REPO_ROOT / "config" / "catalog-publish-plan.v4.json"
         plan = load_publish_plan(plan_path)
 
-        self.assertEqual(plan["catalog_version"], 3)
+        self.assertEqual(plan["catalog_version"], 4)
         self.assertEqual(len(plan["packages"]), 12)
 
         expected_codes = {
