@@ -28,14 +28,20 @@ class V0567NotificationIconContractTests(unittest.TestCase):
     def test_notification_icon_is_monochrome_vector(self):
         text = ICON.read_text(encoding="utf-8")
         self.assertIn("<vector", text)
-        self.assertIn('android:viewportWidth="24"', text)
-        self.assertIn('android:viewportHeight="24"', text)
+        self.assertIn('android:width="24dp"', text)
+        self.assertIn('android:height="24dp"', text)
+        self.assertIn('android:viewportWidth="108"', text)
+        self.assertIn('android:viewportHeight="108"', text)
+        self.assertIn('android:strokeColor="#FFFFFFFF"', text)
         self.assertIn('android:fillColor="#FFFFFFFF"', text)
+        self.assertIn('M31,22 L67,22 L82,37 L82,86 L31,86 Z', text)
+        self.assertIn('M67,22 L67,39 L82,39', text)
+        self.assertIn('M41,51 L64,51 M41,63 L71,63 M41,75 L59,75', text)
 
     def test_release_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.67"', gradle)
-        self.assertIn("versionCode = 83", gradle)
+        self.assertIn('versionName = "0.5.68"', gradle)
+        self.assertIn("versionCode = 84", gradle)
 
 
 if __name__ == "__main__":
