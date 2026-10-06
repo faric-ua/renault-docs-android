@@ -818,3 +818,7 @@ Status: TOOLING MERGED / DRIVE PACKAGES UPLOADED / PHONE CATALOG BUILD PENDING.
 - Catalog SHA-256: `b071a45a7302c55d933fedd89a4d7a76312e521e634e6d2b7bf0c7d9c91d9dd4`.
 - Public Drive catalog has NOT been replaced yet.
 - Next: validate the generated JSON file itself, replace the existing Drive catalog in place, then verify Catalog phone behavior.
+
+## Catalog v3 blocker — reconcile Megane II packages
+
+Current generated v3 candidate is valid JSON and Laguna II is fully aligned 10/10, but the two Megane II local packages differ in byte size from the package files currently served by their Drive IDs. Public catalog replacement is blocked until these package bytes are reconciled. Do not publish the current catalog candidate unchanged.
