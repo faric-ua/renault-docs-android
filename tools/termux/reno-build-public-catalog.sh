@@ -23,7 +23,7 @@ echo
 echo "Вихід:"
 echo "  $OUTPUT"
 echo
-echo "Перевіряю 12 canonical .rdpkg і рахую SHA-256..."
+echo "Перевіряю 15 canonical .rdpkg і рахую SHA-256..."
 echo
 
 cd "$REPO"
@@ -55,7 +55,7 @@ if not isinstance(projects, list):
 
 expected = {
     "laguna-ii": ("Laguna II", 10),
-    "megane-ii": ("Megane II", 2),
+    "megane-ii": ("Megane II", 5),
 }
 
 actual = {}
@@ -94,9 +94,9 @@ if actual != expected:
 
 print("Перевірка catalog: PASS")
 print("  Laguna II: 10 томів")
-print("  Megane II: 2 томи")
-print("  Vehicle codes: 12/12")
-print("  SHA-256: 12/12")
+print("  Megane II: 5 томів")
+print("  Vehicle codes: 15/15")
+print("  SHA-256: 15/15")
 PY
 
 echo
