@@ -264,6 +264,12 @@ migrate_rdpkg_names() {
   pause_menu
 }
 
+build_public_catalog() {
+  clear
+  bash "$REPO/tools/termux/reno-build-public-catalog.sh"
+  pause_menu
+}
+
 refresh_termux_integration() {
   clear
   echo "Оновлюю Renault aliases та Termux:Widget shortcut..."
@@ -329,6 +335,7 @@ while true; do
   echo "22 — Перевірити посилання dataset (read-only)"
   echo "23 — Legacy quarantine *_android (move/restore, без видалення)"
   echo "24 — Міграція назв локальних .rdpkg (безпечне перейменування)"
+  echo "25 — Створити public Catalog v3 (12 пакетів)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -407,6 +414,9 @@ while true; do
       ;;
     24)
       migrate_rdpkg_names
+      ;;
+    25)
+      build_public_catalog
       ;;
     0)
       clear
