@@ -1,16 +1,33 @@
 # Renault Docs — Master Project Ledger
 
-## v0.5.62 — Drive Catalog v1 — PHONE PASS 2026-10-06
+## v0.5.62 — Drive Catalog v1 — CLOSED 2026-10-06
+
+Final status: **PHONE PASS / MAIN VERIFIED / CLOSED**.
 
 Exact accepted runtime head:
-`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`.
+
+Final main runtime merge:
+`2fe05f18618718e5ef16521ad0411734fb1b89f5`.
 
 PR:
-`#31 — v0.5.62 — Drive Catalog v1` (draft; closeout pending).
+`#31 — v0.5.62 — Drive Catalog v1` — MERGED.
+
+Issue:
+`#29 — Drive Catalog v1 + guided Renault Docs import` — COMPLETE.
 
 CI:
 - Tests #451 — PASS;
-- Android PR Check #369 — PASS.
+- Android PR Check #369 — PASS;
+- PR closeout Tests #454 — PASS;
+- PR closeout Android PR Check #372 — PASS;
+- final main Tests #455 — PASS;
+- final main Android Debug APK #123 — PASS.
+
+Final main APK:
+- `Renault-Docs-v0.5.62-Debug`;
+- SHA-256 `939f69b3dd70ab5043304286f132b6c9151f694133d3de7169fc82079f609de9`;
+- installed over existing app with data preserved.
 
 Accepted product/runtime contracts:
 - Google Drive is backend storage; Renault Docs owns the user-facing catalog UI;
@@ -18,19 +35,19 @@ Accepted product/runtime contracts:
 - public catalog manifest is `renault-docs-catalog.json`;
 - current catalog groups Megane II / E84 · L84 · K84 and lists NT8340A + NT8342A;
 - installed state is computed locally and shown as `✓ Встановлено`;
-- selected .rdpkg packages download from Drive and reuse the existing validated/atomic RdpkgImporter path;
+- selected `.rdpkg` packages download from Drive and reuse the validated/atomic RdpkgImporter path;
 - successful import upserts the volume into the matching Renault project;
 - catalog selection survives configuration change;
 - terminal import result survives rotation;
 - loaded catalog state is retained during rotation to avoid a visible network reload delay;
 - absent optional metadata is omitted instead of displayed as `null`.
 
-Phone evidence:
-- NT8340A was removed from Megane II;
-- Catalog exposed it as selectable while NT8342A stayed installed;
-- NT8340A downloaded/imported successfully;
-- Megane II returned to 2 volumes;
-- NT8340A opened successfully after import.
+Final phone evidence:
+- v0.5.62 / build 78 installed from final main build;
+- in-place update preserved project data;
+- Megane II = 2 volumes;
+- NT8340A · 2006-04-18 opens successfully;
+- NT8342A remains present.
 
 Data/source separation:
 - original Windows-only archives stay on separate source storage;
@@ -38,7 +55,7 @@ Data/source separation:
 - issue #30 owns the Windows source → conversion → validation → publish pipeline.
 
 Next gate:
-v0.5.62 closeout/merge only; no repeated phone QA unless runtime changes.
+issue #30 — expand the source/conversion/publish pipeline and Catalog. Do not reopen #29 unless a regression is found.
 
 ## v0.5.61 — shared live progress — CLOSED 2026-10-05
 
