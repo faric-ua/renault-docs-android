@@ -89,7 +89,10 @@ class V0559CleanupCatalogSupportContractTests(unittest.TestCase):
         )
         self.assertIn('"Готові проєкти"', main)
         self.assertIn('"Завантажити з Google Drive"', main)
-        self.assertIn("ExternalLinks.PROJECT_CATALOG_URL", main)
+        self.assertTrue(
+            "DriveCatalogActivity::class.java" in main
+            or "ExternalLinks.PROJECT_CATALOG_URL" in main
+        )
 
     def test_support_action_is_provider_independent(self):
         links = self.read(

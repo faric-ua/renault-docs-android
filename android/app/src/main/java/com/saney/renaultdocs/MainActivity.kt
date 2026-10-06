@@ -610,20 +610,12 @@ class MainActivity : Activity() {
             )
 
             setOnClickListener {
-                if (
-                    !ExternalLinks.openWeb(
+                startActivity(
+                    Intent(
                         this@MainActivity,
-                        ExternalLinks.PROJECT_CATALOG_URL,
-                    )
-                ) {
-                    android.widget.Toast
-                        .makeText(
-                            this@MainActivity,
-                            "Каталог проєктів зараз недоступний.",
-                            android.widget.Toast.LENGTH_SHORT,
-                        )
-                        .show()
-                }
+                        DriveCatalogActivity::class.java,
+                    ),
+                )
             }
         }
 

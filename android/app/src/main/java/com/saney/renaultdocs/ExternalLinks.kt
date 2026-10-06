@@ -16,8 +16,25 @@ object ExternalLinks {
     const val PROJECT_CATALOG_URL =
         "https://drive.google.com/drive/folders/1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y"
 
+    const val PROJECT_CATALOG_MANIFEST_FILE_ID =
+        "1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA"
+
+    const val PROJECT_CATALOG_MANIFEST_URL =
+        "https://drive.usercontent.google.com/download?id=" +
+            PROJECT_CATALOG_MANIFEST_FILE_ID +
+            "&export=download&confirm=t"
+
     const val SUPPORT_URL =
         ""
+
+    fun driveDownloadUrl(
+        fileId: String,
+    ): String =
+        "https://drive.usercontent.google.com/download?id=" +
+            Uri.encode(
+                fileId,
+            ) +
+            "&export=download&confirm=t"
 
     /**
      * Opens a public web destination in the user's default browser when possible.

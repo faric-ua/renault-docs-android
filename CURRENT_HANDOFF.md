@@ -1,5 +1,52 @@
 # Renault Docs — CURRENT HANDOFF
 
+## v0.5.62 checkpoint — 2026-10-06
+
+Status: **PHONE PASS / CI PASS / CLOSEOUT PENDING**.
+
+Branch:
+`feat/v0.5.62-drive-catalog`
+
+Draft PR:
+`#31 — v0.5.62 — Drive Catalog v1`
+
+Exact phone-tested runtime head:
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+
+CI on the exact phone-tested runtime head:
+- Tests #451 — PASS;
+- Android PR Check #369 — PASS.
+
+Phone-accepted v0.5.62 behavior:
+- Home → `Готові проєкти` opens native `Каталог Renault Docs`;
+- catalog is loaded from public `renault-docs-catalog.json`;
+- Megane II groups E84 / L84 / K84 and current documentation year metadata;
+- NT8340A and NT8342A are shown as human-readable volumes;
+- installed volumes show `✓ Встановлено`;
+- removed NT8340A became selectable and was downloaded/imported from Google Drive;
+- round-trip Drive → download → .rdpkg validation/install → ProjectStore upsert → reopen passed;
+- Megane II returned to 2 volumes and NT8340A opens successfully;
+- nullable region no longer renders literal `null`;
+- selected volume IDs survive portrait ↔ landscape recreation;
+- completed import status survives rotation;
+- already-loaded catalog data is retained across configuration change, so the project/checkbox block restores promptly without another network wait.
+
+Public catalog:
+- file: `renault-docs-catalog.json`;
+- Drive file id: `1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA`;
+- current catalog version: 2;
+- current entries: Megane II NT8340A + NT8342A.
+
+Storage contract:
+- raw Windows-only Renault archives stay on separate source storage;
+- `Renault Docs Projects` contains only runtime-ready Renault Docs packages/catalog metadata;
+- physical canonical filenames remain implementation detail and are hidden from normal catalog UX.
+
+Next action:
+- perform v0.5.62 closeout for PR #31;
+- do not repeat the accepted phone round-trip/rotation tests unless runtime code changes;
+- after closeout, continue issue #30 Windows-source intake/conversion and expand the catalog with newly validated Android-ready packages.
+
 ## v0.5.61 closeout — 2026-10-05
 
 Status: **CLOSED / PHONE PASS / MAIN VERIFIED**.

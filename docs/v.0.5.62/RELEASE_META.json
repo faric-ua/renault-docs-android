@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.62",
+  "versionCode": 78,
+  "phase": "phone_pass_closeout_pending",
+  "feature": "Drive Catalog v1 + guided import",
+  "branch": "feat/v0.5.62-drive-catalog",
+  "pr": 31,
+  "issue": 29,
+  "source_pipeline_issue": 30,
+  "catalog_file_id": "1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA",
+  "catalog_version": 2,
+  "exact_phone_tested_runtime_head": "e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f",
+  "ci": {
+    "tests": {
+      "run_number": 451,
+      "status": "PASS"
+    },
+    "android_pr_check": {
+      "run_number": 369,
+      "status": "PASS"
+    }
+  },
+  "qa_status": "PASS",
+  "merge_blocked_until_phone_pass": false,
+  "next": "closeout_pr_31_then_continue_issue_30"
+}

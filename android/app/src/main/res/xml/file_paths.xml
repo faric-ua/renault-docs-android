@@ -4,6 +4,9 @@
         name="shared_rdpkg"
         path="shared-rdpkg/" />
     <cache-path
+        name="catalog_downloads"
+        path="catalog-downloads/" />
+    <cache-path
         name="rdproject_export"
         path="rdproject-export/" />
     <cache-path

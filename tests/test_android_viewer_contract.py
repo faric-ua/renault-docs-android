@@ -69,7 +69,7 @@ class AndroidViewerContractTests(unittest.TestCase):
         self.assertIn("Frame debug", viewer)
         self.assertIn("showFrameDebugReport", viewer)
         self.assertIn("ClipboardManager", viewer)
-        self.assertNotIn("android.permission.INTERNET", manifest)
+        self.assertIn("android.permission.INTERNET", manifest)
         self.assertNotIn("MANAGE_EXTERNAL_STORAGE", manifest)
 
 

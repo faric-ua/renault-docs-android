@@ -1,5 +1,45 @@
 # Renault Docs — Master Project Ledger
 
+## v0.5.62 — Drive Catalog v1 — PHONE PASS 2026-10-06
+
+Exact accepted runtime head:
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+
+PR:
+`#31 — v0.5.62 — Drive Catalog v1` (draft; closeout pending).
+
+CI:
+- Tests #451 — PASS;
+- Android PR Check #369 — PASS.
+
+Accepted product/runtime contracts:
+- Google Drive is backend storage; Renault Docs owns the user-facing catalog UI;
+- normal users see model/project + volume metadata, not long physical package filenames;
+- public catalog manifest is `renault-docs-catalog.json`;
+- current catalog groups Megane II / E84 · L84 · K84 and lists NT8340A + NT8342A;
+- installed state is computed locally and shown as `✓ Встановлено`;
+- selected .rdpkg packages download from Drive and reuse the existing validated/atomic RdpkgImporter path;
+- successful import upserts the volume into the matching Renault project;
+- catalog selection survives configuration change;
+- terminal import result survives rotation;
+- loaded catalog state is retained during rotation to avoid a visible network reload delay;
+- absent optional metadata is omitted instead of displayed as `null`.
+
+Phone evidence:
+- NT8340A was removed from Megane II;
+- Catalog exposed it as selectable while NT8342A stayed installed;
+- NT8340A downloaded/imported successfully;
+- Megane II returned to 2 volumes;
+- NT8340A opened successfully after import.
+
+Data/source separation:
+- original Windows-only archives stay on separate source storage;
+- Android/runtime-ready `.rdpkg/.rdproject` and catalog metadata live separately in `Renault Docs Projects`;
+- issue #30 owns the Windows source → conversion → validation → publish pipeline.
+
+Next gate:
+v0.5.62 closeout/merge only; no repeated phone QA unless runtime changes.
+
 ## v0.5.61 — shared live progress — CLOSED 2026-10-05
 
 Final app source:
