@@ -64,7 +64,7 @@ class ConversionService : Service() {
                     true,
                 )
         ) {
-            return START_NOT_STICKY
+            return START_REDELIVER_INTENT
         }
 
         val sourceUri =
@@ -147,7 +147,7 @@ class ConversionService : Service() {
             )
         }.start()
 
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     override fun onBind(

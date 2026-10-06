@@ -9,7 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -1020,18 +1019,6 @@ class ConversionActivity : Activity() {
 
         val running =
             state.isRunning
-
-        if (running) {
-            window.addFlags(
-                WindowManager.LayoutParams
-                    .FLAG_KEEP_SCREEN_ON,
-            )
-        } else {
-            window.clearFlags(
-                WindowManager.LayoutParams
-                    .FLAG_KEEP_SCREEN_ON,
-            )
-        }
 
         val outputRegistered =
             state.outputTreeUri

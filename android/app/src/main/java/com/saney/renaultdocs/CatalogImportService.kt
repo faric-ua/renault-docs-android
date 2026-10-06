@@ -14,11 +14,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class CatalogImportService : Service() {
     private lateinit var runStore: CatalogImportRunStore
+    private lateinit var workWakeLock: BackgroundWorkWakeLock
     private val workerRunning = AtomicBoolean(false)
 
     override fun onCreate() {
         super.onCreate()
 
+        workWakeLock =
+            BackgroundWorkWakeLock(
+                this,
+                "CatalogImport",
+            )
         runStore = CatalogImportRunStore(this)
 
         getSystemService(NotificationManager::class.java)
@@ -37,10 +43,15 @@ class CatalogImportService : Service() {
         startId: Int,
     ): Int {
         if (
-            intent?.action != ACTION_START ||
-            !workerRunning.compareAndSet(false, true)
+            intent?.action != ACTION_START
         ) {
             return START_NOT_STICKY
+        }
+
+        if (
+            !workerRunning.compareAndSet(false, true)
+        ) {
+            return START_REDELIVER_INTENT
         }
 
         val state = runStore.load()
@@ -59,6 +70,8 @@ class CatalogImportService : Service() {
             ),
         )
 
+        workWakeLock.acquire()
+
         Thread {
             try {
                 importItems(state.items)
@@ -73,6 +86,7 @@ class CatalogImportService : Service() {
                     false,
                 )
             } finally {
+                workWakeLock.release()
                 workerRunning.set(false)
                 stopForeground(STOP_FOREGROUND_DETACH)
                 stopSelf()
@@ -84,6 +98,11 @@ class CatalogImportService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? =
         null
+
+    override fun onDestroy() {
+        workWakeLock.release()
+        super.onDestroy()
+    }
 
     private fun importItems(
         items: List<CatalogImportItem>,

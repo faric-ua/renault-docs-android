@@ -107,19 +107,18 @@ class V0551NativeRdpkgLifecycleContractTests(unittest.TestCase):
         self.assertIn("Автоматичне відновлення не вдалося", activity)
         self.assertIn("30_000L", activity)
 
-    def test_native_packager_prevents_automatic_screen_timeout(self):
+    def test_native_packager_does_not_require_screen_to_stay_on(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
         )
-
-        self.assertIn("FLAG_KEEP_SCREEN_ON", activity)
-        self.assertIn("setNativeKeepScreenOn(", activity)
-        self.assertIn("window.addFlags(", activity)
-        self.assertIn("window.clearFlags(", activity)
-        self.assertIn(
-            "override fun onStop()",
-            activity,
+        service = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeRdpkgPreparationService.kt"
         )
+
+        self.assertNotIn("FLAG_KEEP_SCREEN_ON", activity)
+        self.assertNotIn("setNativeKeepScreenOn(", activity)
+        self.assertIn("PowerManager.PARTIAL_WAKE_LOCK", service)
+        self.assertIn("START_REDELIVER_INTENT", service)
 
     def test_process_restart_rebuild_is_safe_for_staging_and_destination(self):
         stager = self._read(
