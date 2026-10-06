@@ -4540,3 +4540,12 @@ Megane II is NOT byte-aligned with the current Drive files:
 - NT8342A local/catalog size `76,688,037`; current Drive size `91,856,389`.
 
 Therefore do not replace the public catalog yet. The two Megane package bytes must be reconciled first; publishing the current v3 manifest would attach local SHA/size metadata to different remote bytes.
+
+## Catalog v4 — Megane II 5-volume phone gate
+
+- Three new Megane II Android-native .rdpkg packages are uploaded to `Renault Docs Projects`: NT8341A, NT8344, NT8393.
+- PR #39 merged as `9e33e224598ec46f5e23d10cdfdce19b1ab37500`.
+- PR Tests #466 PASS; main Tests #467 PASS.
+- Catalog v4 target is now 15 packages total: Laguna II 10 + Megane II 5.
+- Menu item 25 now requires vehicle_codes 15/15 and SHA-256 15/15.
+- Next gate: phone menu 5, then 25; inspect generated Catalog v4 JSON before replacing the public Drive catalog.
