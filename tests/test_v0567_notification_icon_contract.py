@@ -34,8 +34,8 @@ class V0567NotificationIconContractTests(unittest.TestCase):
 
     def test_release_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.67"', gradle)
-        self.assertIn("versionCode = 83", gradle)
+        self.assertIn('versionName = "0.5.68"', gradle)
+        self.assertIn("versionCode = 84", gradle)
 
 
 if __name__ == "__main__":
