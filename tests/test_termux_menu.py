@@ -238,13 +238,14 @@ class TermuxMenuContractTests(unittest.TestCase):
             repo / "tools" / "termux" / "reno-project-status.sh"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("Renault Docs · Status", text)
-        self.assertIn("CURRENT_PLAN.md", text)
-        self.assertIn("RELEASE_META.json", text)
-        self.assertIn('show_workflow "  Android Debug APK" "android-debug.yml"', text)
-        self.assertIn('show_workflow "  Tests" "tests.yml"', text)
-        self.assertIn("SIGNER_CONTINUITY_PENDING", text)
-        self.assertIn("PASS build ≠ готовність до встановлення.", text)
+        self.assertIn("Renault Docs · Статус", text)
+        self.assertIn('show_workflow_state "APK build" "android-debug.yml"', text)
+        self.assertIn('show_workflow_state "Tests" "tests.yml"', text)
+        self.assertIn("✓ МОЖНА ЗАВАНТАЖУВАТИ", text)
+        self.assertIn("Натисни: 8", text)
+        self.assertNotIn("CURRENT_PLAN.md", text)
+        self.assertNotIn("RELEASE_META.json", text)
+        self.assertNotIn("SIGNER_CONTINUITY_PENDING", text)
 
 
     def test_restore_accepted_signer_helper_is_private_archive_to_github_secrets_only(self):
