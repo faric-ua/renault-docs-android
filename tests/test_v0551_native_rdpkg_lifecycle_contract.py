@@ -104,6 +104,37 @@ class V0551NativeRdpkgLifecycleContractTests(unittest.TestCase):
         self.assertIn("NATIVE_RUN_STARTUP_GRACE_MS", activity)
         self.assertIn("nativeRunStore.fail(", activity)
         self.assertIn("Попередню native .rdpkg підготовку було перервано", activity)
+        self.assertIn("30_000L", activity)
+
+    def test_native_packager_prevents_automatic_screen_timeout(self):
+        activity = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        )
+
+        self.assertIn("FLAG_KEEP_SCREEN_ON", activity)
+        self.assertIn("setNativeKeepScreenOn(", activity)
+        self.assertIn("window.addFlags(", activity)
+        self.assertIn("window.clearFlags(", activity)
+        self.assertIn(
+            "override fun onStop()",
+            activity,
+        )
+
+    def test_process_restart_rebuild_is_safe_for_staging_and_destination(self):
+        stager = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativePreparationStager.kt"
+        )
+        writer = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/RdpkgZipWriter.kt"
+        )
+        store = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/NativeRdpkgRunStore.kt"
+        )
+
+        self.assertIn("staging.deleteRecursively()", stager)
+        self.assertIn('"w"', writer)
+        self.assertIn("resumeAfterProcessRestart()", store)
+        self.assertIn("Відновлюю підготовку після перезапуску Android", store)
 
     def test_runtime_ir_json_is_streamed_without_giant_string(self):
         repo = Path(__file__).resolve().parents[1]
@@ -155,7 +186,9 @@ class V0551NativeRdpkgLifecycleContractTests(unittest.TestCase):
         self.assertIn("startInFlight.compareAndSet(", service)
         self.assertIn("persistedState.isRunning", service)
         self.assertIn("workerRunning.compareAndSet(", service)
-        self.assertIn("START_NOT_STICKY", service)
+        self.assertIn("START_REDELIVER_INTENT", service)
+        self.assertIn("resumeAfterProcessRestart()", service)
+        self.assertIn("resumingAfterProcessRestart", service)
 
     def test_completed_request_id_cannot_be_replayed_after_window_handoff(self):
         activity = self._read(
