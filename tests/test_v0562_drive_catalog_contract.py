@@ -96,5 +96,25 @@ class V0562DriveCatalogContractTests(unittest.TestCase):
         self.assertIn('path="catalog-downloads/"', paths)
 
 
+    def test_catalog_omits_json_null_optional_metadata(self):
+        catalog = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/DriveCatalog.kt"
+        )
+        self.assertIn("optNullableString(", catalog)
+        self.assertIn("isNull(", catalog)
+        self.assertIn('!it.equals(', catalog)
+        self.assertIn('"null"', catalog)
+
+    def test_catalog_selection_survives_rotation_recreation(self):
+        activity = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/DriveCatalogActivity.kt"
+        )
+        self.assertIn("STATE_SELECTED_IDS", activity)
+        self.assertIn("onSaveInstanceState(", activity)
+        self.assertIn("onRetainNonConfigurationInstance", activity)
+        self.assertIn("lastNonConfigurationInstance", activity)
+        self.assertIn("selectedIds.addAll(", activity)
+
+
 if __name__ == "__main__":
     unittest.main()
