@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -23,7 +22,7 @@ class DriveCatalogActivity : Activity() {
     private lateinit var statusText:
         TextView
     private lateinit var importButton:
-        Button
+        TextView
     private lateinit var operationStatus:
         OperationStatusView
 
