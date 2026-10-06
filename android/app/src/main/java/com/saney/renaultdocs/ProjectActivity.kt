@@ -1074,9 +1074,28 @@ class ProjectActivity : Activity() {
                 !serviceActive &&
                 !withinStartupGrace
             ) {
+                val recoveryStarted =
+                    NativeRdpkgPreparationService
+                        .resumePersisted(
+                            context =
+                                this,
+                            state =
+                                state,
+                            project =
+                                project,
+                        )
+
+                if (
+                    recoveryStarted
+                ) {
+                    statusText.text =
+                        "Відновлюю створення .rdpkg…"
+                    return
+                }
+
                 nativeRunStore.fail(
                     "Попередню native .rdpkg підготовку було перервано. " +
-                        "Source не змінено. Запусти її ще раз.",
+                        "Автоматичне відновлення не вдалося. Source не змінено.",
                 )
                 refreshNativeRunState()
                 return
