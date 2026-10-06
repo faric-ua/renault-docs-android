@@ -14,16 +14,23 @@ import java.util.concurrent.atomic.AtomicBoolean
 class RdpkgImportService : Service() {
     private lateinit var runStore: RdpkgImportRunStore
     private val workerRunning = AtomicBoolean(false)
+    private lateinit var workWakeLock: BackgroundWorkWakeLock
 
     override fun onCreate() {
         super.onCreate()
+        workWakeLock =
+            BackgroundWorkWakeLock(
+                this,
+                "RdpkgImport",
+            )
         runStore = RdpkgImportRunStore(this)
         val channel = NotificationChannel(CHANNEL_ID, "Renault .rdpkg import", NotificationManager.IMPORTANCE_LOW)
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action != ACTION_START || !workerRunning.compareAndSet(false, true)) return START_NOT_STICKY
+        if (intent?.action != ACTION_START) return START_NOT_STICKY
+        if (!workerRunning.compareAndSet(false, true)) return START_REDELIVER_INTENT
         val projectId = intent.getStringExtra(EXTRA_PROJECT_ID)
         val packageUri = intent.getStringExtra(EXTRA_PACKAGE_URI)
         if (projectId.isNullOrBlank() || packageUri.isNullOrBlank()) {
@@ -45,6 +52,8 @@ class RdpkgImportService : Service() {
                 ongoing = true,
             ),
         )
+        workWakeLock.acquire()
+
         Thread {
             try {
                 val result = RdpkgImporter.install(
@@ -81,6 +90,7 @@ class RdpkgImportService : Service() {
                 getSystemService(NotificationManager::class.java)
                     .notify(NOTIFICATION_ID, notification("Помилка імпорту: $message", false))
             } finally {
+                workWakeLock.release()
                 workerRunning.set(false)
                 stopForeground(STOP_FOREGROUND_DETACH)
                 stopSelf()
@@ -90,6 +100,11 @@ class RdpkgImportService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        workWakeLock.release()
+        super.onDestroy()
+    }
 
     private fun notification(
         text: String,
