@@ -4,14 +4,14 @@ set -euo pipefail
 REPO="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
 ROOT="/storage/emulated/0/Documents/Renault"
 PACKAGES_DIR="$ROOT/packages/rdpkg"
-PLAN="$REPO/config/catalog-publish-plan.v3.json"
+PLAN="$REPO/config/catalog-publish-plan.v4.json"
 OUTPUT_DIR="$ROOT/packages/catalog"
 OUTPUT="$OUTPUT_DIR/renault-docs-catalog.json"
 
 mkdir -p "$OUTPUT_DIR"
 
 echo "============================================================"
-echo " Renault Docs · Public Catalog v3"
+echo " Renault Docs · Public Catalog v4"
 echo "============================================================"
 echo
 echo "Пакети:"
@@ -46,8 +46,8 @@ from pathlib import Path
 path = Path(sys.argv[1])
 catalog = json.loads(path.read_text(encoding="utf-8"))
 
-if catalog.get("catalog_version") != 3:
-    raise SystemExit("Catalog verification failed: catalog_version != 3")
+if catalog.get("catalog_version") != 4:
+    raise SystemExit("Catalog verification failed: catalog_version != 4")
 
 projects = catalog.get("projects")
 if not isinstance(projects, list):
