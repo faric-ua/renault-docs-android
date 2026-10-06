@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class RdprojectShareService : Service() {
     private lateinit var runStore:
         RdprojectShareRunStore
+    private lateinit var workWakeLock:
+        BackgroundWorkWakeLock
 
     private val workerRunning =
         AtomicBoolean(
@@ -26,6 +28,12 @@ class RdprojectShareService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+
+        workWakeLock =
+            BackgroundWorkWakeLock(
+                this,
+                "RdprojectShare",
+            )
 
         runStore =
             RdprojectShareRunStore(
@@ -50,13 +58,18 @@ class RdprojectShareService : Service() {
     ): Int {
         if (
             intent?.action !=
-                ACTION_START ||
+                ACTION_START
+        ) {
+            return START_NOT_STICKY
+        }
+
+        if (
             !workerRunning.compareAndSet(
                 false,
                 true,
             )
         ) {
-            return START_NOT_STICKY
+            return START_REDELIVER_INTENT
         }
 
         val projectId =
@@ -145,6 +158,8 @@ class RdprojectShareService : Service() {
                     true,
             ),
         )
+
+        workWakeLock.acquire()
 
         Thread {
             try {
@@ -236,6 +251,7 @@ class RdprojectShareService : Service() {
                         ),
                     )
             } finally {
+                workWakeLock.release()
                 workerRunning.set(
                     false,
                 )
@@ -253,6 +269,11 @@ class RdprojectShareService : Service() {
         intent: Intent?,
     ): IBinder? =
         null
+
+    override fun onDestroy() {
+        workWakeLock.release()
+        super.onDestroy()
+    }
 
     private fun notifyProgress(
         progress: OperationProgress,
