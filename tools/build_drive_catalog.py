@@ -494,6 +494,7 @@ def build_catalog(
                 "id": metadata["package_id"],
                 "document_code": metadata["document_code"],
                 "date": metadata["date"],
+                "vehicle_codes": metadata["vehicle_codes"],
                 "document_type": metadata["document_type"],
                 "document_version": metadata["document_version"],
                 "region": metadata["region"],
