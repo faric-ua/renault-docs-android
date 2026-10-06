@@ -472,17 +472,6 @@ class DriveCatalogActivity : Activity() {
 
             val meta =
                 buildList {
-                    if (
-                        project.vehicleCodes.isNotEmpty()
-                    ) {
-                        add(
-                            project.vehicleCodes
-                                .joinToString(
-                                    " · ",
-                                ),
-                        )
-                    }
-
                     val years =
                         when {
                             project.documentYearFrom !=
@@ -663,6 +652,17 @@ class DriveCatalogActivity : Activity() {
 
             val detail =
                 buildList {
+                    if (
+                        volume.vehicleCodes.isNotEmpty()
+                    ) {
+                        add(
+                            volume.vehicleCodes
+                                .joinToString(
+                                    " · ",
+                                ),
+                        )
+                    }
+
                     volume.documentType
                         ?.let {
                             type ->
