@@ -120,7 +120,7 @@ class RdpkgImportService : Service() {
         }
         val pending = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         return Notification.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setSmallIcon(R.drawable.ic_notification_document)
             .setContentTitle("Renault Docs · .rdpkg")
             .setContentText(text)
             .setContentIntent(pending)
