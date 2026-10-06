@@ -1,5 +1,40 @@
 # Renault Docs — CURRENT PLAN
 
+Останнє оновлення: 2026-10-06.
+
+## v0.5.62 — Drive Catalog v1 / issue #29
+
+Status: **PHONE PASS / CI PASS / CLOSEOUT PENDING**.
+
+Branch:
+`feat/v0.5.62-drive-catalog`
+
+Draft PR:
+`#31`
+
+Exact accepted runtime head:
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+
+CI:
+- Tests #451 — PASS;
+- Android PR Check #369 — PASS.
+
+Phone PASS:
+- native Catalog opens from Home;
+- NT8340A can be selected after removal from Megane II;
+- download + import completes through the existing .rdpkg validator/installer;
+- Megane II returns to 2 volumes;
+- NT8340A reopens successfully;
+- selection survives rotation;
+- final result survives rotation;
+- catalog cards restore immediately after rotation from retained catalog state;
+- optional JSON null values are not rendered as `null`.
+
+Next:
+1. close out PR #31 / v0.5.62;
+2. do not repeat accepted phone tests unless runtime changes;
+3. then continue issue #30: Windows-source inventory → convert → validate → publish Android-ready packages → regenerate Catalog.
+
 Останнє оновлення: 2026-10-05.
 
 ## v0.5.61 — shared live progress / issue #25
