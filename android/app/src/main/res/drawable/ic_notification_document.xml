@@ -2,9 +2,37 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Renault Docs technical document outline -->
     <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M6,2h8l4,4v14c0,1.1 -0.9,2 -2,2H6c-1.1,0 -2,-0.9 -2,-2V4c0,-1.1 0.9,-2 2,-2zM13,3.5V7h3.5zM7,11h8v2H7zM7,15h8v2H7z" />
+        android:pathData="M31,22 L67,22 L82,37 L82,86 L31,86 Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Folded page corner -->
+    <path
+        android:pathData="M67,22 L67,39 L82,39"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Schematic traces -->
+    <path
+        android:pathData="M41,51 L64,51 M41,63 L71,63 M41,75 L59,75"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+
+    <!-- Connector node -->
+    <path
+        android:pathData="M72,57 A6,6 0,1 1,71.9 57"
+        android:fillColor="#FFFFFFFF" />
 </vector>
