@@ -4517,3 +4517,14 @@ Phone recheck after one fresh candidate:
 - Termux menu item 25 builds `/storage/emulated/0/Documents/Renault/packages/catalog/renault-docs-catalog.json` from the actual local package bytes and requires SHA-256 12/12.
 - External source folder `laguna2` remains unchanged; project/display identity is `Laguna II`.
 - Current gate: phone must update main, then run menu item 25. Do not replace the public Drive catalog until that local build reports PASS.
+
+## Catalog v3 phone build PASS — 2026-10-06
+
+- Renault menu item 25 completed successfully on phone.
+- Result: 2 projects / 12 volumes.
+- Laguna II: 10 volumes; Megane II: 2 volumes.
+- Package SHA-256 coverage: 12/12.
+- Generated catalog path: `/storage/emulated/0/Documents/Renault/packages/catalog/renault-docs-catalog.json`.
+- Generated catalog file SHA-256: `b071a45a7302c55d933fedd89a4d7a76312e521e634e6d2b7bf0c7d9c91d9dd4`.
+- No Google Drive write occurred during the phone build.
+- Next gate: inspect exact generated JSON bytes, then replace public Drive catalog in place preserving file ID `1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA`, verify Drive readback, then phone-smoke Catalog Laguna II.
