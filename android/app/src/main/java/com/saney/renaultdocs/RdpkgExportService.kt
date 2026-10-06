@@ -14,16 +14,23 @@ import java.util.concurrent.atomic.AtomicBoolean
 class RdpkgExportService : Service() {
     private lateinit var runStore: RdpkgExportRunStore
     private val workerRunning = AtomicBoolean(false)
+    private lateinit var workWakeLock: BackgroundWorkWakeLock
 
     override fun onCreate() {
         super.onCreate()
+        workWakeLock =
+            BackgroundWorkWakeLock(
+                this,
+                "RdpkgExport",
+            )
         runStore = RdpkgExportRunStore(this)
         val channel = NotificationChannel(CHANNEL_ID, "Renault .rdpkg export", NotificationManager.IMPORTANCE_LOW)
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action != ACTION_START || !workerRunning.compareAndSet(false, true)) return START_NOT_STICKY
+        if (intent?.action != ACTION_START) return START_NOT_STICKY
+        if (!workerRunning.compareAndSet(false, true)) return START_REDELIVER_INTENT
         val projectId = intent.getStringExtra(EXTRA_PROJECT_ID)
         val volumeId = intent.getStringExtra(EXTRA_VOLUME_ID)
         val destinationUri = intent.getStringExtra(EXTRA_DESTINATION_URI)
@@ -47,6 +54,8 @@ class RdpkgExportService : Service() {
                 ongoing = true,
             ),
         )
+        workWakeLock.acquire()
+
         Thread {
             try {
                 val result = RdpkgExporter.export(
@@ -84,6 +93,7 @@ class RdpkgExportService : Service() {
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка експорту: $message", false))
             } finally {
+                workWakeLock.release()
                 workerRunning.set(false)
                 stopForeground(STOP_FOREGROUND_DETACH)
                 stopSelf()
@@ -93,6 +103,11 @@ class RdpkgExportService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        workWakeLock.release()
+        super.onDestroy()
+    }
 
     private fun notification(
         text: String,
