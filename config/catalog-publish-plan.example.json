@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "catalog_id": "renault-docs-public",
+  "catalog_version": 3,
+  "generated_at": "2026-10-06T20:00:00+03:00",
+  "packages": [
+    {
+      "file_name": "Laguna-II_X74_NT8183A_Visu-v1.0_2001-01-22.rdpkg",
+      "drive_file_id": "GOOGLE_DRIVE_FILE_ID"
+    }
+  ]
+}
