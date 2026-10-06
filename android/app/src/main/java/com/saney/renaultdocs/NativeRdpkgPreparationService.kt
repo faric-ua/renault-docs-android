@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.os.PowerManager
 import android.provider.DocumentsContract
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 class NativeRdpkgPreparationService : Service() {
@@ -997,6 +998,65 @@ class NativeRdpkgPreparationService : Service() {
                 )
                 throw error
             }
+        }
+
+        fun resumePersisted(
+            context: Context,
+            state: NativeRdpkgRunState,
+            project: RenaultProject,
+        ): Boolean {
+            val sourceUri =
+                state.sourceUri
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: return false
+            val destinationUri =
+                state.destinationUri
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: return false
+
+            if (
+                !state.isRunning ||
+                state.projectId !=
+                    project.id
+            ) {
+                return false
+            }
+
+            return runCatching {
+                start(
+                    context = context,
+                    request =
+                        StartRequest(
+                            requestId =
+                                "resume-" +
+                                    UUID.randomUUID()
+                                        .toString(),
+                            sourceTreeUri =
+                                sourceUri,
+                            sourceName =
+                                state.sourceName
+                                    ?.takeIf {
+                                        it.isNotBlank()
+                                    }
+                                    ?: project.title,
+                            destinationUri =
+                                destinationUri,
+                            projectId =
+                                project.id,
+                            projectTitle =
+                                project.title,
+                            model =
+                                project.model,
+                        ),
+                )
+                true
+            }.getOrDefault(
+                false,
+            )
         }
 
         fun requestCancel(
