@@ -12,6 +12,11 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 
+private data class DriveCatalogRetainedState(
+    val catalog: DriveCatalog?,
+    val selectedIds: ArrayList<String>,
+)
+
 class DriveCatalogActivity : Activity() {
     private lateinit var projectStore:
         ProjectStore
@@ -75,22 +80,42 @@ class DriveCatalogActivity : Activity() {
                 )
             }
 
-        (
+        val retainedState =
             lastNonConfigurationInstance
-                as? Collection<*>
-        )
-            ?.filterIsInstance<String>()
+                as? DriveCatalogRetainedState
+
+        retainedState
+            ?.selectedIds
             ?.let {
                 selectedIds.addAll(
                     it,
                 )
             }
 
+        catalog =
+            retainedState
+                ?.catalog
+
         setContentView(
             buildContent(),
         )
 
-        loadCatalog()
+        val retainedCatalog =
+            catalog
+
+        if (
+            retainedCatalog != null
+        ) {
+            statusText.setTextColor(
+                Ui.accent,
+            )
+            statusText.text =
+                "Каталог v" +
+                    retainedCatalog.catalogVersion
+            renderCatalog()
+        } else {
+            loadCatalog()
+        }
     }
 
     override fun onStart() {
@@ -127,8 +152,13 @@ class DriveCatalogActivity : Activity() {
 
     override fun onRetainNonConfigurationInstance():
         Any =
-        ArrayList(
-            selectedIds,
+        DriveCatalogRetainedState(
+            catalog =
+                catalog,
+            selectedIds =
+                ArrayList(
+                    selectedIds,
+                ),
         )
 
     private fun buildContent():
