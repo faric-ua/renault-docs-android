@@ -339,7 +339,7 @@ class RdprojectShareService : Service() {
             CHANNEL_ID,
         )
             .setSmallIcon(
-                android.R.drawable.stat_sys_upload,
+                R.drawable.ic_notification_document,
             )
             .setContentTitle(
                 "Renault Docs · підготовка проєкту",
