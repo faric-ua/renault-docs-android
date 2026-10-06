@@ -34,6 +34,7 @@ class V0562DriveCatalogContractTests(unittest.TestCase):
         for field in (
             "documentCode",
             "date",
+            "vehicleCodes",
             "documentType",
             "documentVersion",
             "region",
@@ -63,7 +64,9 @@ class V0562DriveCatalogContractTests(unittest.TestCase):
         self.assertIn('"✓ Встановлено"', activity)
         self.assertIn("selectedIds", activity)
         self.assertIn("documentYearFrom", activity)
-        self.assertIn("vehicleCodes", activity)
+        self.assertIn("volume.vehicleCodes", activity)
+        project_meta = activity.split("val meta =", 1)[1].split("addView(", 1)[0]
+        self.assertNotIn("project.vehicleCodes", project_meta)
 
     def test_catalog_import_uses_existing_rdpkg_validator_and_project_store(self):
         service = self.read(
