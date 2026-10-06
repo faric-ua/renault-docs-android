@@ -298,6 +298,44 @@ class NativeRdpkgRunStore(
             .apply()
     }
 
+    fun resumeAfterProcessRestart() {
+        val state =
+            load()
+
+        if (
+            !state.isRunning
+        ) {
+            return
+        }
+
+        prefs.edit()
+            .putString(
+                KEY_PHASE,
+                NativeRdpkgRunPhase.PREPARING.name,
+            )
+            .putString(
+                KEY_MESSAGE,
+                "Відновлюю підготовку після перезапуску Android…",
+            )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Відновлюю…",
+            )
+            .putInt(
+                KEY_PROGRESS_CURRENT,
+                0,
+            )
+            .putInt(
+                KEY_PROGRESS_TOTAL,
+                0,
+            )
+            .putBoolean(
+                KEY_CANCEL_REQUESTED,
+                false,
+            )
+            .apply()
+    }
+
     fun updateProgress(
         progress: OperationProgress,
     ) {
