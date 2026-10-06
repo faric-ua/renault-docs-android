@@ -215,6 +215,10 @@ class DriveCatalogPublisherTests(unittest.TestCase):
 
             first_volume = project["volumes"][0]
             self.assertEqual(
+                first_volume["vehicle_codes"],
+                ["X74"],
+            )
+            self.assertEqual(
                 first_volume["drive_file_id"],
                 "drive-first",
             )
