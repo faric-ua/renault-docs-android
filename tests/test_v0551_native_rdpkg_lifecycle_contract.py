@@ -102,8 +102,9 @@ class V0551NativeRdpkgLifecycleContractTests(unittest.TestCase):
         self.assertIn("NativeRdpkgPreparationService", activity)
         self.assertIn(".isActive()", activity)
         self.assertIn("NATIVE_RUN_STARTUP_GRACE_MS", activity)
-        self.assertIn("nativeRunStore.fail(", activity)
-        self.assertIn("Попередню native .rdpkg підготовку було перервано", activity)
+        self.assertIn(".resumePersisted(", activity)
+        self.assertIn("recoveryStarted", activity)
+        self.assertIn("Автоматичне відновлення не вдалося", activity)
         self.assertIn("30_000L", activity)
 
     def test_native_packager_prevents_automatic_screen_timeout(self):
@@ -189,6 +190,8 @@ class V0551NativeRdpkgLifecycleContractTests(unittest.TestCase):
         self.assertIn("START_REDELIVER_INTENT", service)
         self.assertIn("resumeAfterProcessRestart()", service)
         self.assertIn("resumingAfterProcessRestart", service)
+        self.assertIn("fun resumePersisted(", service)
+        self.assertIn("UUID.randomUUID()", service)
 
     def test_completed_request_id_cannot_be_replayed_after_window_handoff(self):
         activity = self._read(
