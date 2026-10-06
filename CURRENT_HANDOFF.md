@@ -1,5 +1,63 @@
 # Renault Docs — CURRENT HANDOFF
 
+## Issue #30 checkpoint — Catalog publish pipeline — 2026-10-06
+
+Status: **TOOLING MERGED / MAIN TESTS PASS / LAGUNA UPLOAD PENDING**.
+
+Issue:
+`#30 — DATA: Windows-source intake → convert → validate → publish Android packages`.
+
+Read-only Drive inventory:
+- Windows/source root `MEGANE II`: `1LLDp8bvgS8UGRoQvc1kjAdgsYEG70H1n`;
+- Windows/source root `laguna2`: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
+- runtime-ready public `Renault Docs Projects`: `1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y`;
+- source roots are separate from the public runtime-ready catalog and remain read-only.
+
+Current public Catalog:
+- `renault-docs-catalog.json`;
+- Megane II NT8340A;
+- Megane II NT8342A;
+- no Laguna II .rdpkg files currently found anywhere in accessible Drive search.
+
+Tooling:
+- PR #32 `Issue #30 — deterministic Drive catalog publisher` — MERGED;
+- merge commit: `f1def74bc7a2c5748e4ec886bf00beb0dc23c179`;
+- PR Tests #456 — PASS;
+- final main Tests #457 — PASS;
+- no Android runtime/version change.
+
+New deterministic generator:
+`tools/build_drive_catalog.py`.
+
+Contract:
+- reads canonical validated `.rdpkg` only;
+- reads embedded project/volume identity;
+- computes actual byte size + SHA-256;
+- requires explicit Drive file IDs in a publish plan;
+- rejects missing packages, non-canonical filenames and duplicate Drive IDs;
+- emits stable `renault-docs-catalog.json`;
+- does not modify Windows source, package bytes or Google Drive.
+
+First publish candidate:
+Laguna II 10-volume accepted package batch:
+`NT8183A, NT8218A, NT8236A, NT8240A, NT8254A, NT8282A, NT8283A, NT8307A, NT8327A, NT8328A`.
+
+Existing acceptance:
+- source/build parity 10/10;
+- local-reference integrity PASS;
+- Runtime IR coverage 2174/2174;
+- package batch 10/10;
+- oldest NT8183A and newest NT8328A package import/open PASS;
+- final Laguna II project = 10 volumes;
+- canonical local public package rename migration previously passed 13/13.
+
+Next physical gate:
+1. update phone repo to current `main`;
+2. upload the exact 10 canonical Laguna II `.rdpkg` files from `Documents/Renault/packages/rdpkg` to `Renault Docs Projects`;
+3. do not upload raw Windows source folders;
+4. after upload, capture Drive file IDs, generate catalog v3, verify SHA-256 against accepted batch evidence, then phone-smoke an early + late Laguna volume from Catalog.
+
+
 ## v0.5.62 closeout — 2026-10-06
 
 Status: **CLOSED / PHONE PASS / MAIN VERIFIED**.
