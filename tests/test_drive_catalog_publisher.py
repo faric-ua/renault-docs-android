@@ -242,7 +242,7 @@ class DriveCatalogPublisherTests(unittest.TestCase):
         plan = load_publish_plan(plan_path)
 
         self.assertEqual(plan["catalog_version"], 4)
-        self.assertEqual(len(plan["packages"]), 12)
+        self.assertEqual(len(plan["packages"]), 15)
 
         expected_codes = {
             "NT8183A",
@@ -256,7 +256,10 @@ class DriveCatalogPublisherTests(unittest.TestCase):
             "NT8327A",
             "NT8328A",
             "NT8340A",
+            "NT8341A",
             "NT8342A",
+            "NT8344",
+            "NT8393",
         }
         actual_codes = {
             next(
@@ -270,7 +273,7 @@ class DriveCatalogPublisherTests(unittest.TestCase):
         self.assertEqual(actual_codes, expected_codes)
         self.assertEqual(
             len({package["drive_file_id"] for package in plan["packages"]}),
-            12,
+            15,
         )
 
     def test_rejects_non_canonical_filename(self):
