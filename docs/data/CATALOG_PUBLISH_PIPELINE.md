@@ -129,3 +129,25 @@ Before production catalog update:
 5. compare generated SHA-256 values with the accepted batch evidence;
 6. replace the public catalog file only after the generated manifest passes validation;
 7. phone-smoke one early and one late Laguna II volume from Catalog download/import.
+
+## Catalog v3 production batch
+
+For the accepted 2026-10-06 batch, the repository contains:
+
+- `config/catalog-publish-plan.v3.json` with all 12 public packages: 2 Megane II + 10 Laguna II;
+- `tools/termux/reno-build-public-catalog.sh` for the phone-side build from the actual local package bytes;
+- Renault menu item `25 — Створити public Catalog v3 (12 пакетів)`.
+
+The helper writes:
+
+`/storage/emulated/0/Documents/Renault/packages/catalog/renault-docs-catalog.json`
+
+and fails unless the result contains exactly:
+
+- Laguna II: 10 volumes;
+- Megane II: 2 volumes;
+- valid SHA-256 values for all 12 volumes.
+
+This batch does not rename or modify the external Windows/source folder `laguna2`. That source-folder name remains untouched; Renault Docs project/display identity is `Laguna II`.
+
+The production plan intentionally includes the two already-published Megane II packages. Catalog v3 is a full catalog replacement, not a Laguna-only append, so omitting the Megane packages would remove them from the public catalog.
