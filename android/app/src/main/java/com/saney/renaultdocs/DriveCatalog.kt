@@ -97,15 +97,42 @@ object DriveCatalogParser {
         return DriveCatalogVolume(
             id = id,
             documentCode = documentCode,
-            date = json.optString("date").trim().takeIf { it.isNotBlank() },
-            documentType = json.optString("document_type").trim().takeIf { it.isNotBlank() },
-            documentVersion = json.optString("document_version").trim().takeIf { it.isNotBlank() },
-            region = json.optString("region").trim().takeIf { it.isNotBlank() },
+            date = json.optNullableString("date"),
+            documentType = json.optNullableString("document_type"),
+            documentVersion = json.optNullableString("document_version"),
+            region = json.optNullableString("region"),
             fileName = fileName,
             driveFileId = driveFileId,
             sizeBytes = json.optLong("size_bytes", 0L).coerceAtLeast(0L),
-            sha256 = json.optString("sha256").trim().takeIf { it.isNotBlank() },
+            sha256 = json.optNullableString("sha256"),
         )
+    }
+
+    private fun JSONObject.optNullableString(
+        key: String,
+    ): String? {
+        if (
+            !has(
+                key,
+            ) ||
+            isNull(
+                key,
+            )
+        ) {
+            return null
+        }
+
+        return optString(
+            key,
+        )
+            .trim()
+            .takeIf {
+                it.isNotBlank() &&
+                    !it.equals(
+                        "null",
+                        ignoreCase = true,
+                    )
+            }
     }
 
     private fun JSONArray?.toStrings(): List<String> {
