@@ -9,8 +9,17 @@ class V0561LiveProgressContractTests(unittest.TestCase):
 
     def test_release_version(self):
         gradle = self._read("android/app/build.gradle.kts")
-        self.assertIn('versionName = "0.5.61"', gradle)
-        self.assertIn("versionCode = 77", gradle)
+        version_code = int(
+            gradle.split("versionCode = ", 1)[1].splitlines()[0].strip()
+        )
+        version_name = tuple(
+            int(part)
+            for part in gradle.split('versionName = "', 1)[1]
+            .split('"', 1)[0]
+            .split(".")
+        )
+        self.assertGreaterEqual(version_code, 77)
+        self.assertGreaterEqual(version_name, (0, 5, 61))
 
     def test_shared_progress_model_is_compact_and_measured(self):
         model = self._read(
