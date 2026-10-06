@@ -12,7 +12,7 @@ Merged foundation:
 - no Android runtime/version change.
 
 Drive boundary:
-- `MEGANE II` and `Laguna II` are Windows/source archives;
+- `MEGANE II` and external source folder `laguna2` are Windows/source archives; `laguna2` is preserved as the source-folder name, while the Renault Docs project/display identity is `Laguna II`;
 - `Renault Docs Projects` is runtime-ready output only;
 - raw source remains read-only and is never copied directly into Catalog.
 
