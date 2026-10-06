@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.62",
   "versionCode": 78,
-  "phase": "phone_pass_closeout_pending",
+  "phase": "closed_main_verified",
   "feature": "Drive Catalog v1 + guided import",
   "branch": "feat/v0.5.62-drive-catalog",
   "pr": 31,
@@ -22,5 +22,32 @@
   },
   "qa_status": "PASS",
   "merge_blocked_until_phone_pass": false,
-  "next": "closeout_pr_31_then_continue_issue_30"
+  "next": "continue_issue_30_windows_source_pipeline",
+  "pr_status": "MERGED",
+  "issue_status": "COMPLETE",
+  "final_main_runtime_merge": "2fe05f18618718e5ef16521ad0411734fb1b89f5",
+  "final_main_ci": {
+    "tests": {
+      "run_number": 455,
+      "status": "PASS"
+    },
+    "android_debug_apk": {
+      "run_number": 123,
+      "status": "PASS"
+    }
+  },
+  "final_main_artifact": {
+    "name": "Renault-Docs-v0.5.62-Debug",
+    "sha256": "939f69b3dd70ab5043304286f132b6c9151f694133d3de7169fc82079f609de9"
+  },
+  "final_phone_install": {
+    "status": "PASS",
+    "versionName": "0.5.62",
+    "versionCode": 78,
+    "installed_over_existing": true,
+    "data_preserved": true,
+    "megane_ii_volumes": 2,
+    "nt8340a_opens": true,
+    "nt8342a_present": true
+  }
 }
