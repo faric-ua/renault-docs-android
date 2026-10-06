@@ -4,36 +4,39 @@
 
 ## v0.5.62 — Drive Catalog v1 / issue #29
 
-Status: **PHONE PASS / CI PASS / CLOSEOUT PENDING**.
+Status: **CLOSED / PHONE PASS / MAIN VERIFIED — 2026-10-06**.
 
-Branch:
-`feat/v0.5.62-drive-catalog`
-
-Draft PR:
-`#31`
+Final main runtime merge:
+`2fe05f18618718e5ef16521ad0411734fb1b89f5`.
 
 Exact accepted runtime head:
-`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`.
 
 CI:
-- Tests #451 — PASS;
-- Android PR Check #369 — PASS.
+- accepted runtime: Tests #451 — PASS; Android PR Check #369 — PASS;
+- final main: Tests #455 — PASS; Android Debug APK #123 — PASS.
 
-Phone PASS:
+Final phone install-over-existing:
+- `v0.5.62 / build 78` confirmed;
+- project data preserved;
+- Megane II = 2 volumes;
+- NT8340A · 2006-04-18 opens;
+- NT8342A remains present.
+
+Accepted:
 - native Catalog opens from Home;
-- NT8340A can be selected after removal from Megane II;
-- download + import completes through the existing .rdpkg validator/installer;
-- Megane II returns to 2 volumes;
-- NT8340A reopens successfully;
-- selection survives rotation;
-- final result survives rotation;
-- catalog cards restore immediately after rotation from retained catalog state;
-- optional JSON null values are not rendered as `null`.
+- Drive round-trip import uses existing validated `.rdpkg` path;
+- selection and terminal state survive rotation;
+- loaded catalog is retained across rotation for immediate card restore;
+- optional JSON null values are omitted.
+
+Issue #29: complete.
 
 Next:
-1. close out PR #31 / v0.5.62;
-2. do not repeat accepted phone tests unless runtime changes;
-3. then continue issue #30: Windows-source inventory → convert → validate → publish Android-ready packages → regenerate Catalog.
+1. continue issue #30;
+2. inventory Windows-source documentation;
+3. convert → validate → publish Android-ready packages;
+4. regenerate and expand the Renault Docs Catalog.
 
 Останнє оновлення: 2026-10-05.
 
