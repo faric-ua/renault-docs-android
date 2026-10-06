@@ -118,7 +118,7 @@ class RdpkgShareService : Service() {
         total: Int? = null,
     ) =
         android.app.Notification.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_upload)
+            .setSmallIcon(R.drawable.ic_notification_document)
             .setContentTitle("Renault Docs · підготовка тому")
             .setContentText(text)
             .setContentIntent(
