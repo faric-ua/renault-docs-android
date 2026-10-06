@@ -4528,3 +4528,15 @@ Phone recheck after one fresh candidate:
 - Generated catalog file SHA-256: `b071a45a7302c55d933fedd89a4d7a76312e521e634e6d2b7bf0c7d9c91d9dd4`.
 - No Google Drive write occurred during the phone build.
 - Next gate: inspect exact generated JSON bytes, then replace public Drive catalog in place preserving file ID `1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA`, verify Drive readback, then phone-smoke Catalog Laguna II.
+
+## Catalog v3 publish blocker — Megane II byte mismatch
+
+Uploaded/generated `renault-docs-catalog.json` was inspected and its file SHA-256 exactly matches the phone result: `b071a45a7302c55d933fedd89a4d7a76312e521e634e6d2b7bf0c7d9c91d9dd4`.
+
+Laguna II is clean: all 10 Drive sizes match the catalog and all 10 SHA-256 values match the previously accepted batch hashes.
+
+Megane II is NOT byte-aligned with the current Drive files:
+- NT8340A local/catalog size `73,250,913`; current Drive size `87,295,030`.
+- NT8342A local/catalog size `76,688,037`; current Drive size `91,856,389`.
+
+Therefore do not replace the public catalog yet. The two Megane package bytes must be reconciled first; publishing the current v3 manifest would attach local SHA/size metadata to different remote bytes.
