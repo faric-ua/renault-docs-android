@@ -21,4 +21,29 @@
 - rotate/reopen Catalog during download/import;
 - operation must reattach instead of starting a second import.
 
-Pending CI and phone execution.
+Result: **PASS — 2026-10-06**.
+
+
+## Accepted evidence
+
+Exact accepted runtime head:
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+
+CI:
+- Tests #451 — PASS;
+- Android PR Check #369 — PASS.
+
+Gate A — PASS.
+Gate B — PASS.
+Gate C — PASS.
+
+Additional phone findings closed in the same candidate:
+- literal `null` optional region text removed;
+- selected checkbox survives rotation;
+- completed import card survives rotation;
+- catalog project/volume cards restore promptly after rotation without a second network wait.
+
+Final state:
+- Megane II = 2 volumes;
+- NT8340A opens successfully;
+- NT8342A remains installed.
