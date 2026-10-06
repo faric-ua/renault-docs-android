@@ -4549,3 +4549,44 @@ Therefore do not replace the public catalog yet. The two Megane package bytes mu
 - Catalog v4 target is now 15 packages total: Laguna II 10 + Megane II 5.
 - Menu item 25 now requires vehicle_codes 15/15 and SHA-256 15/15.
 - Next gate: phone menu 5, then 25; inspect generated Catalog v4 JSON before replacing the public Drive catalog.
+
+
+## New-chat checkpoint — v0.5.68 → Archive Intake — 2026-10-07
+
+### Accepted code baseline
+- Release: **v0.5.68 / build 84**.
+- Main SHA: `41e6801b985a344922169b8e8e2b60b535f7b60e`.
+- Main Tests #481: **PASS**.
+- Signed Android Debug APK #131: **PASS**.
+- v0.5.66 phone QA already confirmed:
+  - full terminal SHA-256 visible in landscape;
+  - tap-to-copy full operation status works;
+  - foreground Renault Docs notification is visible with live progress and Cancel.
+- v0.5.68 changes the foreground small icon to the branded Renault Docs document mark. **Visual phone QA is currently in progress**; do not block the next feature branch on this unless a regression is reported.
+
+### Next development stage
+Issue **#51 — FEAT: archive intake → automatic raw detection → .rdpkg**.
+
+Goal: user selects an old Renault archive directly; Renault Docs extracts it in app-private staging, discovers valid Renault raw root(s), and hands the selected root to the existing native raw → .rdpkg pipeline. No manual unpacking.
+
+Target UX/formats: **ZIP / 7Z / RAR**.
+
+Hard contracts:
+- source archive is read-only and never renamed/deleted;
+- safe extraction only inside app-private staging;
+- reject path traversal and corrupt/encrypted/unsupported archives with a clear terminal reason;
+- foreground notification + partial wake lock + screen-off/background operation;
+- reuse existing native package builder/import validation rather than fork package logic;
+- exactly one detected volume may auto-handoff; multiple detected volumes require explicit selection/batch plan;
+- cleanup removes only app-private staging;
+- no duplicate installed volume or duplicate rerun after lifecycle recreation.
+
+### Immediate implementation order
+1. Archive picker/intake model + format detection + safe staging.
+2. ZIP extraction foundation and Renault raw-root discovery.
+3. 7Z and RAR backends with the same extraction contract.
+4. Integrate archive extraction with the existing native .rdpkg run/state UI.
+5. Lifecycle/cancel/recovery tests.
+6. Phone QA with a real old Renault archive, including lock/background test.
+
+Do not mix this feature with Catalog issue #30 or change opaque Renault IDs.

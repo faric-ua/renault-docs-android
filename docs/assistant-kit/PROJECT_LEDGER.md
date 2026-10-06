@@ -2212,3 +2212,22 @@ Code evidence before docs update:
 - Android PR Check 37214251232 PASS.
 
 Phone quarantine and post-move reopen verification remain pending.
+
+
+## 2026-10-07 — v0.5.68 baseline and Archive Intake handoff
+
+Recorded baseline:
+- v0.5.68 / build 84;
+- main SHA `41e6801b985a344922169b8e8e2b60b535f7b60e`;
+- main Tests #481 PASS;
+- signed Android Debug APK #131 PASS.
+- branded foreground notification icon is installed for phone visual QA.
+
+New development item:
+- issue #51: direct archive intake for old Renault documentation;
+- target UX: ZIP / 7Z / RAR → safe private extraction → Renault raw detection → existing native .rdpkg builder/importer;
+- source archives remain untouched;
+- archive extraction must be traversal-safe and lifecycle-safe;
+- long-running archive work must follow the v0.5.65+ foreground/background contract.
+
+This is the canonical continuation after v0.5.68. Catalog rolling issue #30 remains separate and open.

@@ -832,3 +832,34 @@ Status: PLAN MERGED / DRIVE PACKAGES UPLOADED / PHONE CATALOG BUILD PENDING.
 3. Require Laguna II 10 + Megane II 5 + vehicle_codes 15/15 + SHA-256 15/15.
 4. Inspect generated JSON.
 5. Replace existing public catalog in place only after PASS.
+
+
+## v0.5.68 checkpoint / v0.5.69 Archive Intake — 2026-10-07
+
+Status: **v0.5.68 MAIN BUILD PASS / ICON PHONE QA IN PROGRESS / ARCHIVE INTAKE NEXT**.
+
+Baseline:
+- v0.5.68 / build 84;
+- main `41e6801b985a344922169b8e8e2b60b535f7b60e`;
+- Tests #481 PASS;
+- signed Android Debug APK #131 PASS.
+
+Next feature: **#51 Archive Intake**.
+
+Target release: **v0.5.69 / build 85**.
+
+Plan:
+- [ ] add SAF archive-file intake without changing existing raw-folder flow;
+- [ ] app-private staging with explicit cleanup;
+- [ ] safe ZIP extraction + traversal protection;
+- [ ] Renault raw-root discovery after extraction;
+- [ ] one valid root → existing native raw→.rdpkg handoff;
+- [ ] multiple roots → explicit chooser/batch plan;
+- [ ] 7Z backend under the same extraction interface;
+- [ ] RAR backend under the same extraction interface;
+- [ ] clear encrypted/corrupt/unsupported errors;
+- [ ] progress + foreground notification + wake-lock lifecycle;
+- [ ] cancellation/restart/recreation contracts;
+- [ ] real-device archive phone QA including screen lock.
+
+Acceptance: user can choose a supported old Renault archive and receive the canonical installed .rdpkg without manually unpacking the archive; source archive remains unchanged.

@@ -20,3 +20,22 @@ Resume rule:
 3. continue from the single **Поточний наступний крок** in CURRENT_PLAN.
 
 This file exists only as a stable root-level pointer for older tooling and context instructions.
+
+
+## ACTIVE — Archive Intake after v0.5.68 — 2026-10-07
+
+**Baseline:** v0.5.68 / build 84, main `41e6801b985a344922169b8e8e2b60b535f7b60e`, Tests #481 PASS, signed APK #131 PASS.
+
+**Now:** implement issue #51, target v0.5.69 / build 85.
+
+Desired flow:
+`archive file (ZIP/7Z/RAR) → private safe staging → detect Renault raw root(s) → existing native raw→.rdpkg → validate/install → cleanup staging`.
+
+Rules:
+- never mutate the source archive;
+- do not duplicate the package builder;
+- no writes outside app-private staging and explicit destination;
+- prevent archive path traversal;
+- multiple detected volumes require explicit user selection;
+- preserve foreground notification/background/screen-lock behavior;
+- keep opaque Renault IDs unchanged.
