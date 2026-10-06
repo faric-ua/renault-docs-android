@@ -9,7 +9,7 @@ Issue:
 
 Read-only Drive inventory:
 - Windows/source root `MEGANE II`: `1LLDp8bvgS8UGRoQvc1kjAdgsYEG70H1n`;
-- Windows/source root `laguna2`: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
+- Windows/source root `Laguna II`: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
 - runtime-ready public `Renault Docs Projects`: `1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y`;
 - source roots are separate from the public runtime-ready catalog and remain read-only.
 
