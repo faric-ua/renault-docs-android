@@ -19,7 +19,7 @@ Durable data contract:
 
 Read-only Drive roots confirmed:
 - MEGANE II source: `1LLDp8bvgS8UGRoQvc1kjAdgsYEG70H1n`;
-- laguna2 source: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
+- Laguna II source: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
 - Renault Docs Projects: `1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y`.
 
 Laguna II is the first publish batch because all 10 packages already have accepted conversion/package evidence.
