@@ -1,5 +1,38 @@
 # Renault Docs — CURRENT PLAN
 
+## Issue #30 — Windows-source → publish pipeline
+
+Status: **TOOLING MERGED / MAIN TESTS PASS / LAGUNA UPLOAD PENDING — 2026-10-06**.
+
+Merged foundation:
+- PR #32 — deterministic Drive catalog publisher;
+- main merge: `f1def74bc7a2c5748e4ec886bf00beb0dc23c179`;
+- Tests #456 — PASS;
+- final main Tests #457 — PASS;
+- no Android runtime/version change.
+
+Drive boundary:
+- `MEGANE II` and `laguna2` are Windows/source archives;
+- `Renault Docs Projects` is runtime-ready output only;
+- raw source remains read-only and is never copied directly into Catalog.
+
+Publisher:
+- `tools/build_drive_catalog.py`;
+- canonical .rdpkg metadata → size/SHA-256 → stable Catalog JSON;
+- explicit Drive IDs supplied via publish-plan;
+- production Catalog is not hand-edited in the normal workflow.
+
+First publish batch:
+Laguna II 10 accepted canonical packages.
+
+Next:
+1. phone repo → current `main`;
+2. upload the exact 10 canonical Laguna II .rdpkg files from `Documents/Renault/packages/rdpkg` into `Renault Docs Projects`;
+3. capture Drive IDs;
+4. generate catalog v3 and verify hashes;
+5. phone-smoke NT8183A + NT8328A through Catalog.
+
+
 Останнє оновлення: 2026-10-06.
 
 ## v0.5.62 — Drive Catalog v1 / issue #29
