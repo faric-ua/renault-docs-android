@@ -65,7 +65,7 @@ class AndroidPdfPerformanceContractTests(unittest.TestCase):
         self.assertIn("WebSettings.LOAD_DEFAULT", viewer)
         self.assertIn("AndroidPdfLayer", client)
 
-        self.assertNotIn("android.permission.INTERNET", manifest)
+        self.assertIn("android.permission.INTERNET", manifest)
         self.assertNotIn("MANAGE_EXTERNAL_STORAGE", manifest)
 
 
