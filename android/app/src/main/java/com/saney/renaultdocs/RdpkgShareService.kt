@@ -14,9 +14,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 class RdpkgShareService : Service() {
     private lateinit var runStore: RdpkgShareRunStore
     private val workerRunning = AtomicBoolean(false)
+    private lateinit var workWakeLock: BackgroundWorkWakeLock
 
     override fun onCreate() {
         super.onCreate()
+        workWakeLock =
+            BackgroundWorkWakeLock(
+                this,
+                "RdpkgShare",
+            )
         runStore = RdpkgShareRunStore(this)
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(CHANNEL_ID, "Renault .rdpkg share preparation", NotificationManager.IMPORTANCE_LOW),
@@ -24,7 +30,8 @@ class RdpkgShareService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action != ACTION_START || !workerRunning.compareAndSet(false, true)) return START_NOT_STICKY
+        if (intent?.action != ACTION_START) return START_NOT_STICKY
+        if (!workerRunning.compareAndSet(false, true)) return START_REDELIVER_INTENT
         val projectId = intent.getStringExtra(EXTRA_PROJECT_ID)
         val volumeId = intent.getStringExtra(EXTRA_VOLUME_ID)
         if (projectId.isNullOrBlank() || volumeId.isNullOrBlank()) {
@@ -49,6 +56,8 @@ class RdpkgShareService : Service() {
                 ongoing = true,
             ),
         )
+        workWakeLock.acquire()
+
         Thread {
             try {
                 val file = PreparedShareStore.volumeFile(applicationContext, project, volume)
@@ -86,6 +95,7 @@ class RdpkgShareService : Service() {
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка підготовки: $message", false))
             } finally {
+                workWakeLock.release()
                 workerRunning.set(false)
                 stopForeground(STOP_FOREGROUND_DETACH)
                 stopSelf()
@@ -95,6 +105,11 @@ class RdpkgShareService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        workWakeLock.release()
+        super.onDestroy()
+    }
 
     private fun notification(
         text: String,
