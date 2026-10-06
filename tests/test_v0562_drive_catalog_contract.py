@@ -105,15 +105,21 @@ class V0562DriveCatalogContractTests(unittest.TestCase):
         self.assertIn('!it.equals(', catalog)
         self.assertIn('"null"', catalog)
 
-    def test_catalog_selection_survives_rotation_recreation(self):
+    def test_catalog_selection_and_cards_survive_rotation_recreation(self):
         activity = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/DriveCatalogActivity.kt"
         )
         self.assertIn("STATE_SELECTED_IDS", activity)
         self.assertIn("onSaveInstanceState(", activity)
+        self.assertIn("DriveCatalogRetainedState", activity)
         self.assertIn("onRetainNonConfigurationInstance", activity)
         self.assertIn("lastNonConfigurationInstance", activity)
         self.assertIn("selectedIds.addAll(", activity)
+        self.assertIn("retainedState", activity)
+        self.assertIn("retainedState\n                ?.catalog", activity)
+        self.assertIn("if (\n            retainedCatalog != null", activity)
+        self.assertIn("renderCatalog()", activity)
+        self.assertIn("else {\n            loadCatalog()", activity)
 
 
 if __name__ == "__main__":
