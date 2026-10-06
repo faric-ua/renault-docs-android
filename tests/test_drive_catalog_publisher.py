@@ -233,6 +233,42 @@ class DriveCatalogPublisherTests(unittest.TestCase):
                 ).hexdigest(),
             )
 
+    def test_public_catalog_v3_plan_is_complete(self):
+        plan_path = REPO_ROOT / "config" / "catalog-publish-plan.v3.json"
+        plan = load_publish_plan(plan_path)
+
+        self.assertEqual(plan["catalog_version"], 3)
+        self.assertEqual(len(plan["packages"]), 12)
+
+        expected_codes = {
+            "NT8183A",
+            "NT8218A",
+            "NT8236A",
+            "NT8240A",
+            "NT8254A",
+            "NT8282A",
+            "NT8283A",
+            "NT8307A",
+            "NT8327A",
+            "NT8328A",
+            "NT8340A",
+            "NT8342A",
+        }
+        actual_codes = {
+            next(
+                code
+                for code in expected_codes
+                if code in package["file_name"]
+            )
+            for package in plan["packages"]
+        }
+
+        self.assertEqual(actual_codes, expected_codes)
+        self.assertEqual(
+            len({package["drive_file_id"] for package in plan["packages"]}),
+            12,
+        )
+
     def test_rejects_non_canonical_filename(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
