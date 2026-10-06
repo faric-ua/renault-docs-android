@@ -1095,10 +1095,6 @@ class ProjectActivity : Activity() {
             return
         }
 
-        setNativeKeepScreenOn(
-            false,
-        )
-
         if (
             !state.isTerminal ||
             state.finishedAtMs <=
