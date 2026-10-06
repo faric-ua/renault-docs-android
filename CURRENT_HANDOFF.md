@@ -9,7 +9,7 @@ Issue:
 
 Read-only Drive inventory:
 - Windows/source root `MEGANE II`: `1LLDp8bvgS8UGRoQvc1kjAdgsYEG70H1n`;
-- Windows/source root `Laguna II`: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
+- external Windows/source root `laguna2`: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`; this external source-folder name is preserved; Renault Docs project/display identity remains `Laguna II`;
 - runtime-ready public `Renault Docs Projects`: `1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y`;
 - source roots are separate from the public runtime-ready catalog and remain read-only.
 
