@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.os.PowerManager
 import android.provider.DocumentsContract
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 class NativeRdpkgPreparationService : Service() {
@@ -99,7 +100,7 @@ class NativeRdpkgPreparationService : Service() {
                 true,
             )
         ) {
-            return START_NOT_STICKY
+            return START_REDELIVER_INTENT
         }
 
         val request =
@@ -111,8 +112,18 @@ class NativeRdpkgPreparationService : Service() {
         val persistedState =
             runStore.load()
 
+        val resumingAfterProcessRestart =
+            persistedState.isRunning &&
+                persistedState.projectId ==
+                    request.projectId &&
+                persistedState.sourceUri ==
+                    request.sourceTreeUri &&
+                persistedState.destinationUri ==
+                    request.destinationUri
+
         if (
-            persistedState.isRunning
+            persistedState.isRunning &&
+            !resumingAfterProcessRestart
         ) {
             startInFlight.set(
                 false,
@@ -123,20 +134,22 @@ class NativeRdpkgPreparationService : Service() {
             return START_NOT_STICKY
         }
 
-        runStore.begin(
-            projectId =
-                request.projectId,
-            sourceUri =
-                request.sourceTreeUri,
-            sourceName =
-                request.sourceName,
-            destinationUri =
-                request.destinationUri,
-        )
-
-        startInFlight.set(
-            false,
-        )
+        if (
+            resumingAfterProcessRestart
+        ) {
+            runStore.resumeAfterProcessRestart()
+        } else {
+            runStore.begin(
+                projectId =
+                    request.projectId,
+                sourceUri =
+                    request.sourceTreeUri,
+                sourceName =
+                    request.sourceName,
+                destinationUri =
+                    request.destinationUri,
+            )
+        }
 
         startForeground(
             NOTIFICATION_ID,
@@ -163,7 +176,11 @@ class NativeRdpkgPreparationService : Service() {
             )
         }.start()
 
-        return START_NOT_STICKY
+        startInFlight.set(
+            false,
+        )
+
+        return START_REDELIVER_INTENT
     }
 
     override fun onBind(
@@ -981,6 +998,65 @@ class NativeRdpkgPreparationService : Service() {
                 )
                 throw error
             }
+        }
+
+        fun resumePersisted(
+            context: Context,
+            state: NativeRdpkgRunState,
+            project: RenaultProject,
+        ): Boolean {
+            val sourceUri =
+                state.sourceUri
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: return false
+            val destinationUri =
+                state.destinationUri
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: return false
+
+            if (
+                !state.isRunning ||
+                state.projectId !=
+                    project.id
+            ) {
+                return false
+            }
+
+            return runCatching {
+                start(
+                    context = context,
+                    request =
+                        StartRequest(
+                            requestId =
+                                "resume-" +
+                                    UUID.randomUUID()
+                                        .toString(),
+                            sourceTreeUri =
+                                sourceUri,
+                            sourceName =
+                                state.sourceName
+                                    ?.takeIf {
+                                        it.isNotBlank()
+                                    }
+                                    ?: project.title,
+                            destinationUri =
+                                destinationUri,
+                            projectId =
+                                project.id,
+                            projectTitle =
+                                project.title,
+                            model =
+                                project.model,
+                        ),
+                )
+                true
+            }.getOrDefault(
+                false,
+            )
         }
 
         fun requestCancel(
