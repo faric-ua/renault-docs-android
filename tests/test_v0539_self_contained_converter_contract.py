@@ -7,7 +7,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
         repo = Path(__file__).resolve().parents[1]
         return (repo / path).read_text(encoding="utf-8")
 
-    def test_converter_keeps_screen_and_cpu_awake_while_running(self):
+    def test_converter_keeps_cpu_awake_without_forcing_screen_on(self):
         manifest = self._read(
             "android/app/src/main/AndroidManifest.xml"
         )
@@ -20,8 +20,9 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
 
         self.assertIn("android.permission.WAKE_LOCK", manifest)
         self.assertIn('android:stopWithTask="false"', manifest)
-        self.assertIn("FLAG_KEEP_SCREEN_ON", activity)
+        self.assertNotIn("FLAG_KEEP_SCREEN_ON", activity)
         self.assertIn("PowerManager.PARTIAL_WAKE_LOCK", service)
+        self.assertIn("START_REDELIVER_INTENT", service)
         self.assertIn("acquireWakeLock()", service)
         self.assertIn("releaseWakeLock()", service)
 
