@@ -335,7 +335,7 @@ while true; do
   echo "22 — Перевірити посилання dataset (read-only)"
   echo "23 — Legacy quarantine *_android (move/restore, без видалення)"
   echo "24 — Міграція назв локальних .rdpkg (безпечне перейменування)"
-  echo "25 — Створити public Catalog v4 (12 пакетів)"
+  echo "25 — Створити public Catalog v4 (15 пакетів)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
