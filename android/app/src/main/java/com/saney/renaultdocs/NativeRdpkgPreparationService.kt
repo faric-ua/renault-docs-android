@@ -99,7 +99,7 @@ class NativeRdpkgPreparationService : Service() {
                 true,
             )
         ) {
-            return START_NOT_STICKY
+            return START_REDELIVER_INTENT
         }
 
         val request =
@@ -111,8 +111,18 @@ class NativeRdpkgPreparationService : Service() {
         val persistedState =
             runStore.load()
 
+        val resumingAfterProcessRestart =
+            persistedState.isRunning &&
+                persistedState.projectId ==
+                    request.projectId &&
+                persistedState.sourceUri ==
+                    request.sourceTreeUri &&
+                persistedState.destinationUri ==
+                    request.destinationUri
+
         if (
-            persistedState.isRunning
+            persistedState.isRunning &&
+            !resumingAfterProcessRestart
         ) {
             startInFlight.set(
                 false,
@@ -123,20 +133,22 @@ class NativeRdpkgPreparationService : Service() {
             return START_NOT_STICKY
         }
 
-        runStore.begin(
-            projectId =
-                request.projectId,
-            sourceUri =
-                request.sourceTreeUri,
-            sourceName =
-                request.sourceName,
-            destinationUri =
-                request.destinationUri,
-        )
-
-        startInFlight.set(
-            false,
-        )
+        if (
+            resumingAfterProcessRestart
+        ) {
+            runStore.resumeAfterProcessRestart()
+        } else {
+            runStore.begin(
+                projectId =
+                    request.projectId,
+                sourceUri =
+                    request.sourceTreeUri,
+                sourceName =
+                    request.sourceName,
+                destinationUri =
+                    request.destinationUri,
+            )
+        }
 
         startForeground(
             NOTIFICATION_ID,
@@ -163,7 +175,11 @@ class NativeRdpkgPreparationService : Service() {
             )
         }.start()
 
-        return START_NOT_STICKY
+        startInFlight.set(
+            false,
+        )
+
+        return START_REDELIVER_INTENT
     }
 
     override fun onBind(
