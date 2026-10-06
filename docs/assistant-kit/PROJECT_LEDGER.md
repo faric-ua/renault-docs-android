@@ -1,5 +1,33 @@
 # Renault Docs — Master Project Ledger
 
+## Issue #30 — deterministic Catalog publish pipeline — 2026-10-06
+
+PR #32 merged:
+`f1def74bc7a2c5748e4ec886bf00beb0dc23c179`.
+
+CI:
+- PR Tests #456 — PASS;
+- main Tests #457 — PASS.
+
+Durable data contract:
+- Windows/source Drive roots remain read-only and separate;
+- public `Renault Docs Projects` contains runtime-ready packages + catalog metadata only;
+- production Catalog is generated from canonical validated .rdpkg files plus explicit Drive IDs;
+- generator computes actual file size and SHA-256;
+- non-canonical filenames, missing packages and duplicate Drive IDs fail closed;
+- no Android runtime/version change was required.
+
+Read-only Drive roots confirmed:
+- MEGANE II source: `1LLDp8bvgS8UGRoQvc1kjAdgsYEG70H1n`;
+- laguna2 source: `1j8Rm2f1Abk_0hFHI6bsTbq26rbF-rjKo`;
+- Renault Docs Projects: `1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y`.
+
+Laguna II is the first publish batch because all 10 packages already have accepted conversion/package evidence.
+
+Next gate:
+upload the exact 10 canonical Laguna II .rdpkg files, capture Drive IDs, build catalog v3, verify SHA evidence, then Catalog-import smoke the oldest and newest volumes.
+
+
 ## v0.5.62 — Drive Catalog v1 — CLOSED 2026-10-06
 
 Final status: **PHONE PASS / MAIN VERIFIED / CLOSED**.
