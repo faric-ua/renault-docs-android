@@ -441,7 +441,7 @@ class ConversionService : Service() {
             CHANNEL_ID,
         )
             .setSmallIcon(
-                android.R.drawable.stat_sys_download,
+                R.drawable.ic_notification_document,
             )
             .setContentTitle(
                 title,
