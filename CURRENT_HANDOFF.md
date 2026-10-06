@@ -4507,3 +4507,13 @@ Phone recheck after one fresh candidate:
 3. detail heading + PDF action + table appear below;
 4. rotate with this state open — same parent panel/detail and approximate scroll must remain; no Runtime IR reload flash;
 5. quick rotation smoke on volume Documentation and top-level Modern dataset should preserve panel/list position without a reread/loading flash.
+
+## Catalog v3 phone gate — 2026-10-06
+
+- PR #33 merged to main as `349f877f0e3475c1b2839960902cb81092b65224`.
+- PR Tests #458 PASS; main Tests #459 PASS.
+- All 10 Laguna II packages are uploaded to `Renault Docs Projects` and their Drive IDs are locked in `config/catalog-publish-plan.v3.json`.
+- Public v3 plan contains 12 packages total: Megane II 2 + Laguna II 10.
+- Termux menu item 25 builds `/storage/emulated/0/Documents/Renault/packages/catalog/renault-docs-catalog.json` from the actual local package bytes and requires SHA-256 12/12.
+- External source folder `laguna2` remains unchanged; project/display identity is `Laguna II`.
+- Current gate: phone must update main, then run menu item 25. Do not replace the public Drive catalog until that local build reports PASS.
