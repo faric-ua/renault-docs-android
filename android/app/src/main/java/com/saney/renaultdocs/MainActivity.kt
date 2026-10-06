@@ -253,7 +253,7 @@ class MainActivity : Activity() {
             ::statusText.isInitialized
         ) {
             statusText.setTextColor(
-                Ui.warning,
+                Ui.danger,
             )
             statusText.text =
                 "Сповіщення Renault Docs вимкнені. " +
