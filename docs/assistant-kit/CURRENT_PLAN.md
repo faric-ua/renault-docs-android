@@ -799,3 +799,13 @@ Phone gate after CI:
 2. prepare/share Megane II project and verify canonical `.rdproject` filename;
 3. inspect one exported `.rdpkg` filename for the rich E84/L84/K84 or X74/X61 identity;
 4. verify project/volume UI state is unchanged and no duplicate project/volume is created.
+
+## Catalog v3 current gate — 2026-10-06
+
+Status: TOOLING MERGED / DRIVE PACKAGES UPLOADED / PHONE CATALOG BUILD PENDING.
+
+1. Phone: Renault menu → 5, update main.
+2. Phone: Renault menu → 25, build public Catalog v3 from local canonical packages.
+3. Require Laguna II 10 + Megane II 2 + SHA-256 12/12.
+4. Only after PASS: replace existing public `renault-docs-catalog.json` in place, preserving Drive file ID `1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA`.
+5. Verify Catalog shows Laguna II and smoke early/late volumes.
