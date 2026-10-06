@@ -1,40 +1,58 @@
 # Renault Docs — CURRENT HANDOFF
 
-## v0.5.62 checkpoint — 2026-10-06
+## v0.5.62 closeout — 2026-10-06
 
-Status: **PHONE PASS / CI PASS / CLOSEOUT PENDING**.
+Status: **CLOSED / PHONE PASS / MAIN VERIFIED**.
 
-Branch:
-`feat/v0.5.62-drive-catalog`
-
-Draft PR:
-`#31 — v0.5.62 — Drive Catalog v1`
+Release:
+- version: `v0.5.62`;
+- build: `78`;
+- PR: `#31 — v0.5.62 — Drive Catalog v1` — MERGED;
+- issue: `#29 — Drive Catalog v1 + guided Renault Docs import` — COMPLETE.
 
 Exact phone-tested runtime head:
-`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`
+`e215ed9a29ccf7cd7e36d083e2579e24bd2a9c3f`.
 
-CI on the exact phone-tested runtime head:
-- Tests #451 — PASS;
-- Android PR Check #369 — PASS.
+Final main runtime merge:
+`2fe05f18618718e5ef16521ad0411734fb1b89f5`.
 
-Phone-accepted v0.5.62 behavior:
+Runtime delta between accepted phone head and PR closeout head:
+- none;
+- only documentation / closeout files changed before merge.
+
+CI:
+- accepted runtime head: Tests #451 — PASS; Android PR Check #369 — PASS;
+- PR closeout head: Tests #454 — PASS; Android PR Check #372 — PASS;
+- final main: Tests #455 — PASS; Android Debug APK #123 — PASS.
+
+Final main APK:
+- artifact: `Renault-Docs-v0.5.62-Debug`;
+- artifact SHA-256: `939f69b3dd70ab5043304286f132b6c9151f694133d3de7169fc82079f609de9`;
+- stable development signer restored and verified in main build;
+- installed over the existing app without clearing data.
+
+Final phone verification:
+- app is `v0.5.62 / build 78`;
+- existing Renault Docs data survived in-place update;
+- Megane II remains at 2 volumes;
+- NT8340A · 2006-04-18 opens successfully;
+- NT8342A remains present;
+- Drive Catalog v1 round-trip and rotation lifecycle gates remain accepted.
+
+Accepted v0.5.62 behavior:
 - Home → `Готові проєкти` opens native `Каталог Renault Docs`;
-- catalog is loaded from public `renault-docs-catalog.json`;
-- Megane II groups E84 / L84 / K84 and current documentation year metadata;
-- NT8340A and NT8342A are shown as human-readable volumes;
+- public `renault-docs-catalog.json` drives discovery;
+- Megane II groups E84 / L84 / K84 and documentation-year metadata;
 - installed volumes show `✓ Встановлено`;
-- removed NT8340A became selectable and was downloaded/imported from Google Drive;
-- round-trip Drive → download → .rdpkg validation/install → ProjectStore upsert → reopen passed;
-- Megane II returned to 2 volumes and NT8340A opens successfully;
-- nullable region no longer renders literal `null`;
-- selected volume IDs survive portrait ↔ landscape recreation;
-- completed import status survives rotation;
-- already-loaded catalog data is retained across configuration change, so the project/checkbox block restores promptly without another network wait.
+- selected volume IDs survive configuration changes;
+- terminal import state survives rotation;
+- retained in-memory catalog restores cards immediately after rotation without another network wait;
+- nullable optional metadata is omitted instead of rendering literal `null`;
+- selected Drive packages reuse the existing validated `.rdpkg` import/install path and upsert into the correct project.
 
 Public catalog:
-- file: `renault-docs-catalog.json`;
 - Drive file id: `1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA`;
-- current catalog version: 2;
+- catalog version: 2;
 - current entries: Megane II NT8340A + NT8342A.
 
 Storage contract:
@@ -42,10 +60,9 @@ Storage contract:
 - `Renault Docs Projects` contains only runtime-ready Renault Docs packages/catalog metadata;
 - physical canonical filenames remain implementation detail and are hidden from normal catalog UX.
 
-Next action:
-- perform v0.5.62 closeout for PR #31;
-- do not repeat the accepted phone round-trip/rotation tests unless runtime code changes;
-- after closeout, continue issue #30 Windows-source intake/conversion and expand the catalog with newly validated Android-ready packages.
+Next:
+- continue issue #30: Windows-source intake → conversion → validation → publish Android-ready packages → regenerate/expand Catalog;
+- do not reopen #29 unless a regression is found.
 
 ## v0.5.61 closeout — 2026-10-05
 
