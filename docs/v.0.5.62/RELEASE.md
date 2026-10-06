@@ -1,6 +1,6 @@
 # Renault Docs v0.5.62 — Drive Catalog v1
 
-Status: **PHONE PASS / CI PASS / CLOSEOUT PENDING**
+Status: **CLOSED / PHONE PASS / MAIN VERIFIED**
 
 ## Goal
 
@@ -53,5 +53,29 @@ Accepted:
 - selection + terminal state survive rotation;
 - already-loaded catalog is retained during configuration change so project cards/checkboxes restore promptly.
 
+## Final closeout — 2026-10-06
+
+PR #31 was merged to `main`.
+
+Final main runtime merge:
+`2fe05f18618718e5ef16521ad0411734fb1b89f5`.
+
+Final main CI:
+- Tests #455 — PASS;
+- Android Debug APK #123 — PASS.
+
+Final main artifact:
+- `Renault-Docs-v0.5.62-Debug`;
+- SHA-256: `939f69b3dd70ab5043304286f132b6c9151f694133d3de7169fc82079f609de9`.
+
+Final phone install-over-existing:
+- `v0.5.62 / build 78` confirmed;
+- existing data preserved;
+- Megane II remains at 2 volumes;
+- NT8340A · 2006-04-18 opens successfully;
+- NT8342A remains present.
+
+Issue #29 is complete.
+
 Next:
-close out PR #31. Do not repeat the accepted phone tests unless runtime code changes.
+continue issue #30 Windows-source intake/conversion and expand the catalog with newly validated Android-ready packages.
