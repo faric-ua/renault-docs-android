@@ -119,7 +119,7 @@ class RdpkgExportService : Service() {
         val openIntent = state.projectId?.takeIf { it.isNotBlank() }?.let { ProjectActivity.intent(this, it) } ?: Intent(this, MainActivity::class.java)
         val pending = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         return Notification.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_upload)
+            .setSmallIcon(R.drawable.ic_notification_document)
             .setContentTitle("Renault Docs · експорт .rdpkg")
             .setContentText(text)
             .setContentIntent(pending)
