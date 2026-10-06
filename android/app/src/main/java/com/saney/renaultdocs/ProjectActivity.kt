@@ -11,6 +11,7 @@ import android.os.Looper
 import android.provider.DocumentsContract
 import android.view.Gravity
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -259,6 +260,9 @@ class ProjectActivity : Activity() {
     override fun onStop() {
         nativeRunHandler.removeCallbacks(
             nativeRunRefresh,
+        )
+        setNativeKeepScreenOn(
+            false,
         )
 
         super.onStop()
@@ -991,6 +995,9 @@ class ProjectActivity : Activity() {
             state.projectId !=
             project.id
         ) {
+            setNativeKeepScreenOn(
+                false,
+            )
             hideNativeTerminalStatus()
             if (::operationStatus.isInitialized) operationStatus.hide()
             return
@@ -999,6 +1006,9 @@ class ProjectActivity : Activity() {
         if (
             state.isRunning
         ) {
+            setNativeKeepScreenOn(
+                true,
+            )
             hideNativeTerminalStatus()
             if (::operationStatus.isInitialized) {
                 val operationSubject =
@@ -1076,6 +1086,10 @@ class ProjectActivity : Activity() {
             return
         }
 
+        setNativeKeepScreenOn(
+            false,
+        )
+
         if (
             !state.isTerminal ||
             state.finishedAtMs <=
@@ -1114,6 +1128,22 @@ class ProjectActivity : Activity() {
         showNativeTerminalStatus(
             state,
         )
+    }
+
+    private fun setNativeKeepScreenOn(
+        enabled: Boolean,
+    ) {
+        if (
+            enabled
+        ) {
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            )
+        } else {
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            )
+        }
     }
 
     private fun showNativeTerminalStatus(
@@ -3690,7 +3720,7 @@ class ProjectActivity : Activity() {
         private const val NATIVE_RUN_REFRESH_MS =
             100L
         private const val NATIVE_RUN_STARTUP_GRACE_MS =
-            5_000L
+            30_000L
 
         fun intent(
             context: Context,
