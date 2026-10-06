@@ -70,6 +70,13 @@ for project in projects:
     actual[project_id] = (title, len(volumes))
 
     for volume in volumes:
+        codes = volume.get("vehicle_codes")
+        if not isinstance(codes, list) or not codes:
+            raise SystemExit(
+                "Catalog verification failed: missing vehicle_codes for "
+                + str(volume.get("document_code") or volume.get("id") or "?")
+            )
+
         digest = str(volume.get("sha256") or "")
         if not re.fullmatch(r"[0-9a-f]{64}", digest):
             raise SystemExit(
@@ -88,6 +95,7 @@ if actual != expected:
 print("Перевірка catalog: PASS")
 print("  Laguna II: 10 томів")
 print("  Megane II: 2 томи")
+print("  Vehicle codes: 12/12")
 print("  SHA-256: 12/12")
 PY
 
