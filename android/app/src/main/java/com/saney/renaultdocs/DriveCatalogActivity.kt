@@ -75,6 +75,17 @@ class DriveCatalogActivity : Activity() {
                 )
             }
 
+        (
+            lastNonConfigurationInstance
+                as? Collection<*>
+        )
+            ?.filterIsInstance<String>()
+            ?.let {
+                selectedIds.addAll(
+                    it,
+                )
+            }
+
         setContentView(
             buildContent(),
         )
@@ -113,6 +124,12 @@ class DriveCatalogActivity : Activity() {
             outState,
         )
     }
+
+    override fun onRetainNonConfigurationInstance():
+        Any =
+        ArrayList(
+            selectedIds,
+        )
 
     private fun buildContent():
         View {
