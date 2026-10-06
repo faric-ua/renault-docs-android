@@ -151,3 +151,28 @@ and fails unless the result contains exactly:
 This batch does not rename or modify the external Windows/source folder `laguna2`. That source-folder name remains untouched; Renault Docs project/display identity is `Laguna II`.
 
 The production plan intentionally includes the two already-published Megane II packages. Catalog v3 is a full catalog replacement, not a Laguna-only append, so omitting the Megane packages would remove them from the public catalog.
+
+
+## Catalog v4 — Megane II expanded to 5 volumes
+
+The next public Catalog v4 batch contains 15 packages total:
+
+- Laguna II: 10 volumes;
+- Megane II: 5 volumes.
+
+New Megane II packages added to the production publish plan:
+
+- `NT8341A · 2006-10-09 · B84/C84/S84 · Europe · Visu v3.0`;
+- `NT8344 · 2007-05-02 · E84/L84/K84 · Europe · Visu v4.0`;
+- `NT8393 · 2007-06-04 · E84/L84/K84 · Europe · Visu v5.0`.
+
+The document codes are preserved exactly as detected from the source; `NT8344` and `NT8393` do not receive an inferred `A` suffix.
+
+Menu item 25 builds Catalog v4 from the 15 local canonical package bytes and requires:
+
+- Laguna II: 10;
+- Megane II: 5;
+- per-volume vehicle codes: 15/15;
+- SHA-256: 15/15.
+
+The public Drive catalog must not be replaced until the phone-side build passes and the generated JSON is inspected.
