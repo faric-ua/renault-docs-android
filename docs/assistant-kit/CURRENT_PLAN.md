@@ -809,3 +809,12 @@ Status: TOOLING MERGED / DRIVE PACKAGES UPLOADED / PHONE CATALOG BUILD PENDING.
 3. Require Laguna II 10 + Megane II 2 + SHA-256 12/12.
 4. Only after PASS: replace existing public `renault-docs-catalog.json` in place, preserving Drive file ID `1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA`.
 5. Verify Catalog shows Laguna II and smoke early/late volumes.
+
+## Catalog v3 phone build result — PASS
+
+- Phone build from local canonical packages passed: 2 projects / 12 volumes.
+- Laguna II 10 + Megane II 2.
+- SHA-256 present for all 12 package entries.
+- Catalog SHA-256: `b071a45a7302c55d933fedd89a4d7a76312e521e634e6d2b7bf0c7d9c91d9dd4`.
+- Public Drive catalog has NOT been replaced yet.
+- Next: validate the generated JSON file itself, replace the existing Drive catalog in place, then verify Catalog phone behavior.
