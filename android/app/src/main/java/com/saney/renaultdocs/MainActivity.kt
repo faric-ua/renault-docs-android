@@ -1,8 +1,11 @@
 package com.saney.renaultdocs
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -154,6 +157,7 @@ class MainActivity : Activity() {
         )
         setContentView(buildContent())
         renderLibrary()
+        requestNotificationPermissionIfNeeded()
 
         if (
             !restoredStatusText.isNullOrBlank()
@@ -195,6 +199,66 @@ class MainActivity : Activity() {
             renderLibrary()
         }
         refreshRdprojectShareRunState()
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (
+            Build.VERSION.SDK_INT <
+            Build.VERSION_CODES.TIRAMISU
+        ) {
+            return
+        }
+
+        if (
+            checkSelfPermission(
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        requestPermissions(
+            arrayOf(
+                Manifest.permission.POST_NOTIFICATIONS,
+            ),
+            REQUEST_POST_NOTIFICATIONS,
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults,
+        )
+
+        if (
+            requestCode !=
+            REQUEST_POST_NOTIFICATIONS
+        ) {
+            return
+        }
+
+        val granted =
+            grantResults.firstOrNull() ==
+                PackageManager.PERMISSION_GRANTED
+
+        if (
+            !granted &&
+            ::statusText.isInitialized
+        ) {
+            statusText.setTextColor(
+                Ui.danger,
+            )
+            statusText.text =
+                "Сповіщення Renault Docs вимкнені. " +
+                    "Фонові процеси працюватимуть, але прогрес може не показуватися у шторці."
+        }
     }
 
     override fun onSaveInstanceState(
@@ -1971,6 +2035,7 @@ class MainActivity : Activity() {
         private const val RDPROJECT_RUN_REFRESH_MS =
             100L
         private const val REQUEST_DATASET_FOLDER = 4101
+        private const val REQUEST_POST_NOTIFICATIONS = 4102
         private const val HELP_LIBRARY =
             "library"
         private const val STATE_STATUS_TEXT =

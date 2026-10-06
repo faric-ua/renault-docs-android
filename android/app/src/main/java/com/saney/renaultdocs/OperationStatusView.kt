@@ -1,5 +1,7 @@
 package com.saney.renaultdocs
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
 import android.text.TextUtils
@@ -9,6 +11,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 
 class OperationStatusView(context: Context) : LinearLayout(context) {
     private val titleView: TextView
@@ -30,6 +33,10 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         }
         titleView = Ui.textView(context, "", 16f, Ui.text).apply {
             setTypeface(typeface, Typeface.BOLD)
+            contentDescription = "Натисни, щоб скопіювати весь статус"
+            setOnClickListener {
+                copyCurrentText()
+            }
         }
         header.addView(titleView, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         cancelView = Ui.textView(context, "Скасувати", 13f, Ui.muted).apply {
@@ -60,6 +67,11 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                     1
                 ellipsize =
                     TextUtils.TruncateAt.MIDDLE
+                contentDescription =
+                    "Натисни, щоб скопіювати весь статус"
+                setOnClickListener {
+                    copyCurrentText()
+                }
                 setPadding(
                     0,
                     0,
@@ -74,8 +86,15 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             subjectView,
         )
 
-        detailView = Ui.textView(context, "", 13f, Ui.muted)
-        configureDetailLayout()
+        detailView = Ui.textView(context, "", 13f, Ui.muted).apply {
+            contentDescription = "Натисни, щоб скопіювати весь статус"
+            setOnClickListener {
+                copyCurrentText()
+            }
+        }
+        configureDetailLayout(
+            terminal = false,
+        )
         addView(detailView)
 
         progressView = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
@@ -104,7 +123,9 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                 .ifBlank {
                     "Renault Docs"
                 }
-        configureDetailLayout()
+        configureDetailLayout(
+            terminal = false,
+        )
         detailView.text = detail
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
@@ -194,7 +215,9 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                 .ifBlank {
                     "Renault Docs"
                 }
-        configureDetailLayout()
+        configureDetailLayout(
+            terminal = true,
+        )
         detailView.text = detail
         progressView.isIndeterminate = false
         progressView.max = PROGRESS_SCALE
@@ -208,7 +231,26 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         }
     }
 
-    private fun configureDetailLayout() {
+    private fun configureDetailLayout(
+        terminal: Boolean,
+    ) {
+        if (
+            terminal
+        ) {
+            detailView.maxLines =
+                if (
+                    resources.configuration.orientation ==
+                    Configuration.ORIENTATION_LANDSCAPE
+                ) {
+                    4
+                } else {
+                    6
+                }
+            detailView.ellipsize =
+                null
+            return
+        }
+
         val landscape =
             resources.configuration.orientation ==
                 Configuration.ORIENTATION_LANDSCAPE
@@ -226,6 +268,49 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             detailView.ellipsize =
                 TextUtils.TruncateAt.END
         }
+    }
+
+    private fun copyCurrentText() {
+        val fullText =
+            listOf(
+                titleView.text
+                    .toString()
+                    .trim(),
+                subjectView.text
+                    .toString()
+                    .trim(),
+                detailView.text
+                    .toString()
+                    .trim(),
+            )
+                .filter {
+                    it.isNotBlank()
+                }
+                .joinToString(
+                    "\n",
+                )
+
+        if (
+            fullText.isBlank()
+        ) {
+            return
+        }
+
+        context.getSystemService(
+            ClipboardManager::class.java,
+        )
+            .setPrimaryClip(
+                ClipData.newPlainText(
+                    "Renault Docs status",
+                    fullText,
+                ),
+            )
+
+        Toast.makeText(
+            context,
+            "Статус скопійовано",
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
     fun hide() {

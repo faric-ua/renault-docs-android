@@ -246,7 +246,8 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("detailView.maxLines =", status)
         self.assertIn("TextUtils.TruncateAt.MIDDLE", status)
         self.assertIn("TextUtils.TruncateAt.END", status)
-        self.assertIn("configureDetailLayout()", status)
+        self.assertIn("configureDetailLayout(", status)
+        self.assertIn("terminal: Boolean", status)
 
     def test_project_and_volume_deletion_use_one_shared_dialog_sequence(self):
         home = self._read(
