@@ -2231,3 +2231,22 @@ New development item:
 - long-running archive work must follow the v0.5.65+ foreground/background contract.
 
 This is the canonical continuation after v0.5.68. Catalog rolling issue #30 remains separate and open.
+
+
+## 2026-10-07 — v0.5.69 archive intake sleep checkpoint
+
+Feature work is preserved on draft PR #53 / `feat/v0.5.69-archive-intake`, head `8de99f551ad56e6ec61b9a2372514217dc08cb7c`.
+
+Validated at checkpoint:
+- Tests #497 PASS;
+- Android PR Check #395 PASS;
+- archive formats ZIP/7Z/RAR;
+- safe private staging/extraction;
+- reuse of native raw→.rdpkg engine;
+- persisted archive source kind;
+- installed-volume duplicate preflight before conversion;
+- terminal `ALREADY_PRESENT` result for exact duplicates.
+
+Release remains blocked on explicit multi-volume chooser, feature-branch sync with latest main/Termux fixes, lifecycle/cleanup acceptance, and real-device archive QA.
+
+Normal phone delivery remains `5 → 19 → 8 → 13`.
