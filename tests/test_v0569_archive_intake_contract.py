@@ -60,6 +60,23 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
         self.assertIn("state.sourceKind", service)
         self.assertIn("EXTRA_SOURCE_KIND", service)
 
+    def test_duplicate_fast_path_can_skip_full_extraction(self):
+        intake = self.read_java("ArchiveIntake.kt")
+        stager = self.read_java("ArchiveIntakeStager.kt")
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+
+        self.assertIn("fun inspectRawRoots(", intake)
+        self.assertIn("data class RawRootHint", intake)
+        self.assertIn("fun stageSource(", stager)
+        self.assertIn("fun extract(", stager)
+        self.assertIn("ArchiveIntake.inspectRawRoots(", service)
+        self.assertIn("installedVolumesForArchiveHints(", service)
+        self.assertIn("Розпакування і конвертацію пропущено", service)
+        self.assertLess(
+            service.index("ArchiveIntake.inspectRawRoots("),
+            service.index("stager.extract("),
+        )
+
     def test_duplicate_preflight_runs_before_native_conversion(self):
         preflight = self.read_java("VolumeDuplicatePreflight.kt")
         service = self.read_java("NativeRdpkgPreparationService.kt")
