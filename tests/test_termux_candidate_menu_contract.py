@@ -70,10 +70,11 @@ class TermuxCandidateMenuContractTests(unittest.TestCase):
 
         self.assertIn('EXPECTED_ARTIFACT="Renault-Docs-v${VERSION}-Debug"', downloader)
         self.assertIn(
-            "Старішу версію або artifact з іншої гілки автоматично НЕ завантажую.",
+            "Старішу версію з іншим Android-кодом або artifact з іншої гілки НЕ завантажую.",
             downloader,
         )
-        self.assertIn('if [ "$RUN_SHA" != "$HEAD_SHA" ]; then', downloader)
+        self.assertIn('if [ "$RUN_BRANCH" != "$BRANCH" ]; then', downloader)
+        self.assertIn('reno_android_build_compatible "$RUN_SHA" "$HEAD_SHA"', downloader)
 
     def test_apk_lookup_does_not_abort_under_pipefail(self):
         downloader = self._read("tools/termux/reno-download-apk.sh")
