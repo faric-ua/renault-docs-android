@@ -395,6 +395,8 @@ class NativeRdpkgPreparationService : Service() {
             false
 
         try {
+            cleanupStaleArchiveOutput()
+
             val stager =
                 ArchiveIntakeStager(
                     context =
@@ -625,6 +627,9 @@ class NativeRdpkgPreparationService : Service() {
                         destination,
                     progressPrefix =
                         "",
+                    archiveCandidatePath =
+                        candidates.single()
+                            .relativePath,
                 )
 
             completeSingleVolume(
@@ -755,6 +760,8 @@ class NativeRdpkgPreparationService : Service() {
             mutableListOf<String>()
 
         try {
+            cleanupStaleArchiveOutput()
+
             val extractionRoot =
                 resolvePersistedArchiveRoot(
                     initialState.archiveExtractionRoot,
@@ -843,6 +850,8 @@ class NativeRdpkgPreparationService : Service() {
                                 "/" +
                                 selected.size +
                                 " · ",
+                        archiveCandidatePath =
+                            candidate.relativePath,
                     )
             }
 
@@ -951,7 +960,19 @@ class NativeRdpkgPreparationService : Service() {
         sourceName: String,
         destination: Uri,
         progressPrefix: String,
+        archiveCandidatePath: String? = null,
     ): ProcessedVolume {
+        archiveCandidatePath
+            ?.let {
+                candidatePath ->
+                runStore.setArchiveCurrentOutput(
+                    candidatePath =
+                        candidatePath,
+                    outputUri =
+                        destination.toString(),
+                )
+            }
+
         var packageValidated =
             false
 
@@ -1106,6 +1127,13 @@ class NativeRdpkgPreparationService : Service() {
             packageValidated =
                 true
 
+            if (
+                archiveCandidatePath !=
+                null
+            ) {
+                runStore.clearArchiveCurrentOutput()
+            }
+
             val projectStore =
                 ProjectStore(
                     this,
@@ -1163,6 +1191,13 @@ class NativeRdpkgPreparationService : Service() {
                     )
 
                 if (
+                    archiveCandidatePath !=
+                    null
+                ) {
+                    runStore.clearArchiveCurrentOutput()
+                }
+
+                if (
                     !destinationCleaned
                 ) {
                     throw IllegalStateException(
@@ -1174,6 +1209,11 @@ class NativeRdpkgPreparationService : Service() {
                         error,
                     )
                 }
+            } else if (
+                archiveCandidatePath !=
+                null
+            ) {
+                runStore.clearArchiveCurrentOutput()
             }
 
             throw error
@@ -1538,6 +1578,24 @@ class NativeRdpkgPreparationService : Service() {
         }
 
         return target
+    }
+
+    private fun cleanupStaleArchiveOutput() {
+        val state =
+            runStore.load()
+        val uriText =
+            state.archiveCurrentOutputUri
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: return
+
+        deleteDestination(
+            Uri.parse(
+                uriText,
+            ),
+        )
+        runStore.clearArchiveCurrentOutput()
     }
 
     private fun cleanupPersistedArchiveWorkspace(
