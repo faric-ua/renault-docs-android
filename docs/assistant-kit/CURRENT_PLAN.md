@@ -1,3 +1,34 @@
+# v0.5.71 — top-level archive raw-root fast-path fix — 2026-10-07
+
+Status: **IMPLEMENTATION IN PROGRESS**.
+
+Phone evidence:
+- v0.5.70 / build 86 is installed;
+- the exact same duplicate ZIP still entered `Розпаковую ZIP...` and extracted files before reporting `Том уже є`;
+- therefore v0.5.70 phone re-test = **FAIL for early duplicate fast-path**; final duplicate prevention still works.
+
+Root cause found in code:
+- archive inspection computed `leafName` with `parent.substringAfterLast('/', "")`;
+- when a Renault raw root is a direct top-level folder in the archive, e.g. `NT8266A.../INDEX.HTM`, `parent` contains no `/`;
+- the explicit missing-delimiter fallback `""` made `leafName` empty;
+- the hint was then filtered out before duplicate matching;
+- after full extraction the real folder name was available again, so the later duplicate check succeeded.
+
+Fix target:
+- preserve the whole parent string as `leafName` when no slash exists;
+- add a regression test for a top-level `NT8266A.../INDEX.HTM` ZIP;
+- target **v0.5.71 / build 87**.
+
+UX note:
+- the collapsible/pinnable `Додати` panel is already recorded in the plan;
+- it has **not been implemented yet** because it was intentionally deferred during Archive Intake phone QA;
+- keep it as the next UI follow-up after the archive duplicate path is accepted.
+
+Current next step:
+implement the one-line leaf-name fix + regression test, run CI, build v0.5.71, then repeat the same ZIP once more.
+
+---
+
 # v0.5.70 — Archive duplicate identity fast-path — 2026-10-07
 
 Status: **MERGED / MAIN CI PASS / PHONE RE-TEST NEXT**.
