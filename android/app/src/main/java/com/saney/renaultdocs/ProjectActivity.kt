@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -41,7 +43,7 @@ class ProjectActivity : Activity() {
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
     private lateinit var addPanelBody: LinearLayout
-    private lateinit var addPanelPinButton: TextView
+    private lateinit var addPanelPinButton: ImageButton
     private lateinit var addPanelToggleButton: TextView
     private var addPanelExpanded =
         false
@@ -1938,22 +1940,6 @@ class ProjectActivity : Activity() {
             ),
         )
 
-        statusText =
-            Ui.textView(
-                context =
-                    this,
-                value =
-                    DEFAULT_STATUS_TEXT,
-                sizeSp =
-                    14f,
-                color =
-                    Ui.muted,
-            )
-
-        scrollContent.addView(
-            statusText,
-        )
-
         operationStatus = OperationStatusView(this)
         scrollContent.addView(
             operationStatus,
@@ -2098,23 +2084,65 @@ class ProjectActivity : Activity() {
             )
 
             addPanelPinButton =
-                addPanelHeaderButton(
-                    label =
-                        "📌",
+                ImageButton(
+                    this@ProjectActivity,
+                ).apply {
+                    setImageResource(
+                        R.drawable.ic_push_pin,
+                    )
+                    setColorFilter(
+                        Ui.muted,
+                    )
+                    scaleType =
+                        android.widget.ImageView.ScaleType.CENTER_INSIDE
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@ProjectActivity,
+                            fill =
+                                Ui.surface,
+                            stroke =
+                                Ui.border,
+                            radiusDp =
+                                12,
+                        )
+                    setPadding(
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        ),
+                    )
                     contentDescription =
-                        "Закріпити панель Додати",
-                ) {
-                    addPanelPinned =
-                        !addPanelPinned
-                    settings.projectAddPanelPinned =
-                        addPanelPinned
-                    if (
-                        addPanelPinned
-                    ) {
-                        addPanelExpanded =
-                            true
+                        "Закріпити панель Додати"
+                    isClickable =
+                        true
+                    isFocusable =
+                        true
+                    setOnClickListener {
+                        addPanelPinned =
+                            !addPanelPinned
+                        settings.projectAddPanelPinned =
+                            addPanelPinned
+                        if (
+                            addPanelPinned
+                        ) {
+                            addPanelExpanded =
+                                true
+                        }
+                        updateAddPanelUi()
                     }
-                    updateAddPanelUi()
                 }
 
             titleRow.addView(
@@ -2140,7 +2168,7 @@ class ProjectActivity : Activity() {
             addPanelToggleButton =
                 addPanelHeaderButton(
                     label =
-                        "⌄",
+                        "▼",
                     contentDescription =
                         "Розгорнути або згорнути панель Додати",
                 ) {
@@ -2328,29 +2356,94 @@ class ProjectActivity : Activity() {
                 },
             )
 
-            addPanelBody.addView(
+            statusText =
                 Ui.textView(
                     context =
                         this@ProjectActivity,
                     value =
-                        ADD_GUIDANCE_TEXT,
+                        DEFAULT_STATUS_TEXT,
                     sizeSp =
-                        14f,
+                        13f,
                     color =
-                        Ui.muted,
+                        Ui.statusWarmText,
                 ).apply {
+                    visibility =
+                        View.GONE
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@ProjectActivity,
+                            fill =
+                                Ui.statusWarmFill,
+                            stroke =
+                                Ui.statusWarmBorder,
+                            radiusDp =
+                                10,
+                        )
                     setPadding(
-                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            12,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            12,
+                        ),
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        ),
+                    )
+                    addTextChangedListener(
+                        object : TextWatcher {
+                            override fun beforeTextChanged(
+                                value: CharSequence?,
+                                start: Int,
+                                count: Int,
+                                after: Int,
+                            ) = Unit
+
+                            override fun onTextChanged(
+                                value: CharSequence?,
+                                start: Int,
+                                before: Int,
+                                count: Int,
+                            ) {
+                                visibility =
+                                    if (
+                                        value
+                                            ?.toString()
+                                            .orEmpty()
+                                            .isBlank()
+                                    ) {
+                                        View.GONE
+                                    } else {
+                                        View.VISIBLE
+                                    }
+                            }
+
+                            override fun afterTextChanged(
+                                value: Editable?,
+                            ) = Unit
+                        },
+                    )
+                }
+
+            addPanelBody.addView(
+                statusText,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    topMargin =
                         Ui.dp(
                             this@ProjectActivity,
                             10,
-                        ),
-                        0,
-                        Ui.dp(
-                            this@ProjectActivity,
-                            2,
-                        ),
-                    )
+                        )
                 },
             )
 
@@ -2378,6 +2471,10 @@ class ProjectActivity : Activity() {
             color =
                 Ui.accent,
         ).apply {
+            setTypeface(
+                typeface,
+                android.graphics.Typeface.BOLD,
+            )
             gravity =
                 Gravity.CENTER
             this.contentDescription =
@@ -2418,23 +2515,17 @@ class ProjectActivity : Activity() {
                 View.GONE
             }
 
-        addPanelPinButton.setTextColor(
+        addPanelPinButton.setColorFilter(
             if (
                 addPanelPinned
             ) {
-                Ui.accent
+                Ui.danger
             } else {
                 Ui.muted
             },
         )
         addPanelPinButton.alpha =
-            if (
-                addPanelPinned
-            ) {
-                1f
-            } else {
-                0.75f
-            }
+            1f
         addPanelPinButton.contentDescription =
             if (
                 addPanelPinned
@@ -2448,9 +2539,9 @@ class ProjectActivity : Activity() {
             if (
                 addPanelExpanded
             ) {
-                "⌃"
+                "▲"
             } else {
-                "⌄"
+                "▼"
             }
         addPanelToggleButton.isClickable =
             !addPanelPinned
@@ -4490,8 +4581,6 @@ class ProjectActivity : Activity() {
         private const val HELP_ARCHIVE =
             "archive"
 
-        private const val ADD_GUIDANCE_TEXT =
-            "Натисни на том, щоб відкрити. Утримуй том — щоб відкрити ті самі дії, що й через ⋮."
         private const val DEFAULT_STATUS_TEXT =
             ""
 

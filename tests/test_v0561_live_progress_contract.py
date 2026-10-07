@@ -287,7 +287,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
             "setOnLongClickListener {\n                confirmRemoveVolume(",
             project,
         )
-        self.assertIn("ті самі дії, що й через ⋮", project)
+        self.assertIn("showVolumeActions(", project)
 
     def test_converter_ui_uses_compact_stage_copy(self):
         converter = self._read(

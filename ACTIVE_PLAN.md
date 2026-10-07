@@ -1,3 +1,18 @@
+## ACTIVE — v0.5.74 Add panel status refinement — 2026-10-08
+
+Current implementation:
+- transient status card inside expanded Add;
+- hidden when blank;
+- guidance removed;
+- vector pin: neutral inactive / red pinned;
+- heavier ▲ / ▼;
+- progress remains outside.
+
+Next gate:
+CI → merge → phone QA.
+
+---
+
 ## ACTIVE — v0.5.73 Add panel phone QA — 2026-10-08
 
 - runtime: `871d93c6f0416f9b98ea78edbab06a9ddcce8eba`
