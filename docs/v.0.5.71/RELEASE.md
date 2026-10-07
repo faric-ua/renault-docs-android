@@ -1,6 +1,6 @@
 # Renault Docs v0.5.71 — top-level archive raw-root duplicate fast-path fix
 
-Status: **DEVELOPMENT**
+Status: **MERGED / MAIN CI PASS / PHONE RE-TEST PENDING**
 
 ## Phone evidence that triggered this release
 
@@ -29,3 +29,12 @@ A regression test now verifies that a top-level Renault raw root keeps:
 - no extraction side effect.
 
 Phone acceptance requires the exact same NT8266A ZIP to reach `Том уже є` without `Розпаковую ZIP...`.
+
+
+## CI evidence
+
+- PR #65 merged;
+- runtime source: `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`;
+- Tests #532 PASS;
+- Android Debug APK #134 PASS;
+- artifact `Renault-Docs-v0.5.71-Debug`, id `11510676847`.
