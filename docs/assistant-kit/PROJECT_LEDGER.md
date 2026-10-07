@@ -2351,3 +2351,22 @@ Contract:
 
 Phone acceptance pending: repeat the same NT8266A ZIP and verify no `Розпаковую ZIP...` phase occurs.
 
+## 2026-10-07 — v0.5.71 top-level archive root fast-path
+
+v0.5.70 phone re-test still showed full extraction for the duplicate NT8266A ZIP.
+
+Root cause:
+`RawRootHint.leafName` used `substringAfterLast('/', "")`; a top-level raw root had no slash in its parent path, so the leaf became empty and the hint was discarded.
+
+v0.5.71 / build 87:
+- PR #65 merged;
+- runtime source `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`;
+- Tests #532 PASS;
+- Android Debug APK #134 PASS;
+- artifact `Renault-Docs-v0.5.71-Debug`, id `11510676847`;
+- digest `sha256:47ff40990048cd7e275bdd6677c438996693843b409dae6b65101e3c63230e37`.
+
+Phone re-test pending with the exact same NT8266A ZIP.
+
+UX queue remains unchanged: collapsible/pinnable `Додати` panel is saved and is the next UI follow-up after Archive Intake acceptance.
+
