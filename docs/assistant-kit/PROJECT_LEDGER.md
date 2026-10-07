@@ -2250,3 +2250,34 @@ Validated at checkpoint:
 Release remains blocked on explicit multi-volume chooser, feature-branch sync with latest main/Termux fixes, lifecycle/cleanup acceptance, and real-device archive QA.
 
 Normal phone delivery remains `5 → 19 → 8 → 13`.
+
+## 2026-10-07 — v0.5.69 Archive Intake merged; phone gate starts with ZIP
+
+PR #53 merged to main as `53f4208b4b2e4d27e4bb55094c855eaf13fb2442`.
+
+Release evidence:
+- v0.5.69 / build 85;
+- feature head `f9f11e4a3770b4d098a134217f32c036cfe21613`;
+- PR Tests #525 PASS;
+- Android PR Check #423 PASS;
+- main Tests #526 PASS;
+- main Android Debug APK #132 PASS;
+- artifact `Renault-Docs-v0.5.69-Debug`, id `11489564391`;
+- artifact digest `sha256:328d897a8c484931d08c6e6fa3e00fd718034cc0c7514581a23394d9f2bdcdba`.
+
+Architecture now implemented in code/CI:
+- direct SAF archive intake for ZIP/7Z/RAR;
+- private safe staging, traversal protection and bounded extraction;
+- pre-extraction root inspection and exact-duplicate fast path;
+- persisted multi-volume `WAITING_SELECTION` state;
+- installed candidates disabled by default;
+- explicit one-or-many new-volume selection;
+- resume from extracted staging;
+- foreground service / wake lock / cancel / process-redelivery;
+- stale partial destination cleanup;
+- canonical per-volume .rdpkg output into explicit user destination;
+- source archive never mutated;
+- private staging cleaned on terminal success/cancel/failure.
+
+Phone evidence is still required. First real-device gate is a ZIP archive; issue #51 remains open until phone PASS.
+
