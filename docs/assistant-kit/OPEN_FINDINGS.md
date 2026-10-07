@@ -1723,7 +1723,7 @@ service/run-store-backed import with reattach semantics, comparable to native ra
 
 ## PERF-ARCHIVE-001 — duplicate ZIP still extracts before skip
 
-Status: **IMPLEMENTED IN v0.5.70 · MAIN CI PASS · PHONE RE-TEST PENDING — 2026-10-07**
+Status: **v0.5.70 PHONE FAIL · ROOT CAUSE FIXED IN v0.5.71 · PHONE RE-TEST PENDING — 2026-10-07**
 
 Phone evidence on v0.5.69:
 - project: Megane II;
@@ -1754,4 +1754,10 @@ v0.5.70 implementation evidence:
 - Android Debug APK #133 PASS.
 
 Phone re-test remains required with the same NT8266A archive.
+
+v0.5.71 root-cause correction:
+- v0.5.70 still extracted the same archive on phone;
+- root cause was `substringAfterLast('/', "")` producing an empty leaf for a top-level raw folder;
+- v0.5.71 preserves the top-level folder name and adds regression coverage;
+- main Tests #532 PASS; Android Debug APK #134 PASS.
 

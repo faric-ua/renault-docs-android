@@ -1,3 +1,23 @@
+## ACTIVE — v0.5.71 duplicate ZIP phone re-test — 2026-10-07
+
+- runtime source: `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`
+- version: `0.5.71` / build `87`
+- Tests #532: PASS
+- Android Debug APK #134: PASS
+
+Current action:
+`5 → 19 → 8 → 13` → install → repeat exact NT8266A duplicate ZIP.
+
+Expected:
+- copy/inspection may appear;
+- `Розпаковую ZIP...` must NOT appear;
+- terminal `Том уже є`;
+- Megane II stays at 9 volumes.
+
+Next after this gate: collapsible/pinnable `Додати` panel.
+
+---
+
 ## ACTIVE — v0.5.70 duplicate ZIP phone re-test — 2026-10-07
 
 - runtime source: `b9c763237b7aceede742c6aa559f53abf4c83444`

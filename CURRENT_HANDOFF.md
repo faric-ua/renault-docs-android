@@ -1,3 +1,23 @@
+## v0.5.71 top-level archive fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
+
+- runtime source: `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`;
+- v0.5.71 / build 87;
+- PR #65 MERGED;
+- Tests #532 PASS;
+- Android Debug APK #134 PASS;
+- artifact `Renault-Docs-v0.5.71-Debug`, id `11510676847`;
+- digest `sha256:47ff40990048cd7e275bdd6677c438996693843b409dae6b65101e3c63230e37`.
+
+Root cause fixed:
+top-level raw-root parents without `/` previously produced an empty `leafName`, so the early duplicate hint was discarded. Regression coverage now locks the top-level `NT8266A.../INDEX.HTM` case.
+
+Exact continuation:
+`5 → 19 → 8 → 13` → install → run the same NT8266A ZIP. No `Розпаковую ZIP...` should appear.
+
+The collapsible/pinnable `Додати` panel remains saved and unimplemented by design; it is the next UI follow-up after Archive Intake acceptance.
+
+---
+
 ## v0.5.70 duplicate ZIP fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
 
 Runtime source:
