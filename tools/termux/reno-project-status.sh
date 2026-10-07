@@ -47,16 +47,19 @@ workflow_row_for_current_commit() {
     sed -n '1p'
 }
 
-show_workflow_state() {
-  local title="$1"
-  local workflow="$2"
+show_tests_state() {
   local row run_id status conclusion
 
-  row="$(workflow_row_for_current_commit "$workflow")"
+  row="$(workflow_row_for_current_commit "tests.yml")"
 
   if [ -z "$row" ]; then
-    bad "$title: build для поточного commit не знайдено"
-    return 2
+    if reno_current_commit_tests_ignored "$LOCAL_SHA"; then
+      ok "Tests: не потрібні · лише docs/markdown"
+      return 0
+    fi
+
+    pending "Tests: очікую запуск"
+    return 1
   fi
 
   IFS='|' read -r run_id status conclusion <<EOF
@@ -64,38 +67,60 @@ $row
 EOF
 
   if [ "$status" != "completed" ]; then
-    case "$status" in
-      in_progress)
-        pending "$title: ще виконується"
-        ;;
-      queued|pending|requested|waiting)
-        pending "$title: у черзі"
-        ;;
-      *)
-        pending "$title: $status"
-        ;;
-    esac
+    pending "Tests: ще виконується"
     return 1
   fi
 
-  case "$conclusion" in
-    success)
-      ok "$title: PASS"
+  if [ "$conclusion" = "success" ]; then
+    ok "Tests: PASS"
+    return 0
+  fi
+
+  bad "Tests: ${conclusion:-FAIL}"
+  return 2
+}
+
+show_apk_state() {
+  local row run_id status conclusion compatible
+
+  row="$(workflow_row_for_current_commit "android-debug.yml")"
+
+  if [ -n "$row" ]; then
+    IFS='|' read -r run_id status conclusion <<EOF
+$row
+EOF
+
+    if [ "$status" != "completed" ]; then
+      pending "APK build: ще виконується"
+      return 1
+    fi
+
+    if [ "$conclusion" = "success" ]; then
+      ok "APK build: PASS"
       return 0
-      ;;
-    failure)
-      bad "$title: FAIL"
-      return 2
-      ;;
-    cancelled)
-      bad "$title: скасовано"
-      return 2
-      ;;
-    *)
-      bad "$title: ${conclusion:-невідомий результат}"
-      return 2
-      ;;
-  esac
+    fi
+
+    bad "APK build: ${conclusion:-FAIL}"
+    return 2
+  fi
+
+  compatible="$(
+    reno_find_compatible_android_run \
+      "$GH_REPO" \
+      "android-debug.yml" \
+      "$BRANCH" \
+      "$LOCAL_SHA" \
+      "$EXPECTED_ARTIFACT" \
+      2>/dev/null || true
+  )"
+
+  if [ -n "$compatible" ]; then
+    ok "APK build: PASS · Android-код без змін"
+    return 0
+  fi
+
+  bad "APK build: готового artifact для цього Android-коду немає"
+  return 2
 }
 
 BRANCH="$(git branch --show-current 2>/dev/null || true)"
@@ -105,6 +130,7 @@ LOCAL_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
 SHORT_SHA="$(git rev-parse --short=10 HEAD 2>/dev/null || true)"
 VERSION_NAME="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android/app/build.gradle.kts | sed -n '1p')"
 VERSION_CODE="$(sed -n 's/.*versionCode = \([0-9][0-9]*\).*/\1/p' android/app/build.gradle.kts | sed -n '1p')"
+EXPECTED_ARTIFACT="Renault-Docs-v${VERSION_NAME}-Debug"
 
 echo "========================================"
 echo "     Renault Docs · Статус"
@@ -151,8 +177,8 @@ fi
 TESTS_STATE=0
 APK_STATE=0
 
-show_workflow_state "Tests" "tests.yml" || TESTS_STATE=$?
-show_workflow_state "APK build" "android-debug.yml" || APK_STATE=$?
+show_tests_state || TESTS_STATE=$?
+show_apk_state || APK_STATE=$?
 
 echo
 
@@ -164,13 +190,13 @@ if [ "$UPDATED" -eq 1 ] &&
 else
   if [ "$APK_STATE" -eq 1 ] || [ "$TESTS_STATE" -eq 1 ]; then
     printf "%b%b… ЩЕ НЕ ГОТОВО%b\n" "$YELLOW" "$BOLD" "$RESET"
-    echo "  Build ще виконується. Через трохи знову натисни 19."
+    echo "  Build ще виконується або очікує запуск. Через трохи знову натисни 19."
   else
     printf "%b%b✗ ЩЕ НЕ ГОТОВО%b\n" "$RED" "$BOLD" "$RESET"
     if [ "$UPDATED" -ne 1 ]; then
       echo "  Спочатку натисни: 5"
     elif [ "$APK_STATE" -eq 2 ]; then
-      echo "  Якщо APK build відсутній — натисни: 7"
+      echo "  Для Android-коду потрібен новий build → натисни: 7"
     else
       echo "  Перевір Tests / APK build."
     fi
