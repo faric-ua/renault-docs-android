@@ -41,3 +41,12 @@ Regression coverage now includes a root-level `INDEX.HTM` with `NT8266A`.
 - Digest: `sha256:c670621c76309294d15c6a1f8335a2e5578fd8c9425314cf592d033a07378c62`.
 
 Next UI after phone acceptance: issue #68.
+
+
+## Phone acceptance
+
+Status: **PASS — 2026-10-08**
+
+The exact NT8266A duplicate ZIP was re-tested on the phone. The flow copied/inspected the archive and then reached `Том уже є` without entering a `Розпаковую ZIP...` file-counter phase.
+
+PERF-ARCHIVE-001 is accepted/closed for this release.

@@ -1,3 +1,29 @@
+# v0.5.73 — compact collapsible/pinnable Add panel — 2026-10-08
+
+Status: **IMPLEMENTATION IN PROGRESS**.
+
+Prerequisite phone gate:
+- v0.5.72 duplicate NT8266A fast-path: **PASS**;
+- video evidence shows archive copy/inspection followed directly by `Том уже є`;
+- no `Розпаковую ZIP...` counter appears;
+- Megane II remains at 9 volumes.
+
+Current implementation:
+- issue #68;
+- target v0.5.73 / build 89;
+- one full-width `Додати` header;
+- unpinned default collapsed;
+- pin persists expanded state;
+- rotation preserves transient expanded/collapsed state;
+- Auto / Manual / raw / archive actions stay unchanged inside expanded body;
+- volume tap/long-press guidance moved inside Add;
+- operation/progress status remains outside and visible.
+
+Next:
+CI → merge → phone QA of collapse / expand / pin / rotation / unchanged actions.
+
+---
+
 # v0.5.72 — archive-root duplicate fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
 
 Phone video evidence before v0.5.72:

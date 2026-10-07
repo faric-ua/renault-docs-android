@@ -40,6 +40,13 @@ class ProjectActivity : Activity() {
     private lateinit var nativeTerminalStatusRow: LinearLayout
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
+    private lateinit var addPanelBody: LinearLayout
+    private lateinit var addPanelPinButton: TextView
+    private lateinit var addPanelToggleButton: TextView
+    private var addPanelExpanded =
+        false
+    private var addPanelPinned =
+        false
     private var pendingManualImport =
         false
     private var restoredScrollY =
@@ -191,6 +198,22 @@ class ProjectActivity : Activity() {
             AppSettings(
                 this,
             )
+        addPanelPinned =
+            settings.projectAddPanelPinned
+        addPanelExpanded =
+            savedInstanceState
+                ?.getBoolean(
+                    STATE_ADD_PANEL_EXPANDED,
+                    addPanelPinned,
+                )
+                ?: addPanelPinned
+        if (
+            addPanelPinned
+        ) {
+            addPanelExpanded =
+                true
+        }
+
         nativeRunStore =
             NativeRdpkgRunStore(
                 this,
@@ -313,6 +336,10 @@ class ProjectActivity : Activity() {
         outState.putBoolean(
             STATE_PENDING_MANUAL_IMPORT,
             pendingManualImport,
+        )
+        outState.putBoolean(
+            STATE_ADD_PANEL_EXPANDED,
+            addPanelExpanded,
         )
         outState.putInt(
             STATE_SCROLL_Y,
@@ -1911,56 +1938,6 @@ class ProjectActivity : Activity() {
             ),
         )
 
-        scrollContent.addView(
-            buildProjectActionCard(
-                title =
-                    "Створити .rdpkg з raw",
-                subtitle =
-                    "Kotlin · без Python/Termux · без *_android",
-                primary =
-                    true,
-                helpId =
-                    HELP_RAW,
-            ) {
-                startNativeRdpkgFlow()
-            },
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                topMargin =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        10,
-                    )
-            },
-        )
-
-        scrollContent.addView(
-            buildProjectActionCard(
-                title =
-                    "Створити .rdpkg з архіву",
-                subtitle =
-                    "ZIP · 7Z · RAR · без ручної розпаковки",
-                primary =
-                    false,
-                helpId =
-                    HELP_ARCHIVE,
-            ) {
-                startNativeArchiveRdpkgFlow()
-            },
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                topMargin =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        8,
-                    )
-            },
-        )
-
         statusText =
             Ui.textView(
                 context =
@@ -1971,20 +1948,7 @@ class ProjectActivity : Activity() {
                     14f,
                 color =
                     Ui.muted,
-            ).apply {
-                setPadding(
-                    0,
-                    Ui.dp(
-                        this@ProjectActivity,
-                        12,
-                    ),
-                    0,
-                    Ui.dp(
-                        this@ProjectActivity,
-                        12,
-                    ),
-                )
-            }
+            )
 
         scrollContent.addView(
             statusText,
@@ -2075,7 +2039,7 @@ class ProjectActivity : Activity() {
                 ),
                 Ui.dp(
                     this@ProjectActivity,
-                    10,
+                    8,
                 ),
                 Ui.dp(
                     this@ProjectActivity,
@@ -2083,7 +2047,7 @@ class ProjectActivity : Activity() {
                 ),
                 Ui.dp(
                     this@ProjectActivity,
-                    12,
+                    8,
                 ),
             )
 
@@ -2095,6 +2059,19 @@ class ProjectActivity : Activity() {
                         LinearLayout.HORIZONTAL
                     gravity =
                         Gravity.CENTER_VERTICAL
+                    isClickable =
+                        true
+                    isFocusable =
+                        true
+                    setOnClickListener {
+                        if (
+                            !addPanelPinned
+                        ) {
+                            addPanelExpanded =
+                                !addPanelExpanded
+                            updateAddPanelUi()
+                        }
+                    }
                 }
 
             titleRow.addView(
@@ -2118,6 +2095,82 @@ class ProjectActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     1f,
                 ),
+            )
+
+            addPanelPinButton =
+                addPanelHeaderButton(
+                    label =
+                        "📌",
+                    contentDescription =
+                        "Закріпити панель Додати",
+                ) {
+                    addPanelPinned =
+                        !addPanelPinned
+                    settings.projectAddPanelPinned =
+                        addPanelPinned
+                    if (
+                        addPanelPinned
+                    ) {
+                        addPanelExpanded =
+                            true
+                    }
+                    updateAddPanelUi()
+                }
+
+            titleRow.addView(
+                addPanelPinButton,
+                LinearLayout.LayoutParams(
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            6,
+                        )
+                },
+            )
+
+            addPanelToggleButton =
+                addPanelHeaderButton(
+                    label =
+                        "⌄",
+                    contentDescription =
+                        "Розгорнути або згорнути панель Додати",
+                ) {
+                    if (
+                        !addPanelPinned
+                    ) {
+                        addPanelExpanded =
+                            !addPanelExpanded
+                        updateAddPanelUi()
+                    }
+                }
+
+            titleRow.addView(
+                addPanelToggleButton,
+                LinearLayout.LayoutParams(
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        40,
+                    ),
+                ).apply {
+                    marginEnd =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            6,
+                        )
+                },
             )
 
             titleRow.addView(
@@ -2144,6 +2197,14 @@ class ProjectActivity : Activity() {
             addView(
                 titleRow,
             )
+
+            addPanelBody =
+                LinearLayout(
+                    this@ProjectActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.VERTICAL
+                }
 
             val choices =
                 LinearLayout(
@@ -2213,10 +2274,205 @@ class ProjectActivity : Activity() {
                 },
             )
 
-            addView(
+            addPanelBody.addView(
                 choices,
             )
+
+            addPanelBody.addView(
+                buildProjectActionCard(
+                    title =
+                        "Створити .rdpkg з raw",
+                    subtitle =
+                        "Kotlin · без Python/Termux · без *_android",
+                    primary =
+                        true,
+                    helpId =
+                        HELP_RAW,
+                ) {
+                    startNativeRdpkgFlow()
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    topMargin =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            10,
+                        )
+                },
+            )
+
+            addPanelBody.addView(
+                buildProjectActionCard(
+                    title =
+                        "Створити .rdpkg з архіву",
+                    subtitle =
+                        "ZIP · 7Z · RAR · без ручної розпаковки",
+                    primary =
+                        false,
+                    helpId =
+                        HELP_ARCHIVE,
+                ) {
+                    startNativeArchiveRdpkgFlow()
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    topMargin =
+                        Ui.dp(
+                            this@ProjectActivity,
+                            8,
+                        )
+                },
+            )
+
+            addPanelBody.addView(
+                Ui.textView(
+                    context =
+                        this@ProjectActivity,
+                    value =
+                        ADD_GUIDANCE_TEXT,
+                    sizeSp =
+                        14f,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            10,
+                        ),
+                        0,
+                        Ui.dp(
+                            this@ProjectActivity,
+                            2,
+                        ),
+                    )
+                },
+            )
+
+            addView(
+                addPanelBody,
+            )
+
+            post {
+                updateAddPanelUi()
+            }
         }
+
+    private fun addPanelHeaderButton(
+        label: String,
+        contentDescription: String,
+        onClick: () -> Unit,
+    ): TextView =
+        Ui.textView(
+            context =
+                this,
+            value =
+                label,
+            sizeSp =
+                17f,
+            color =
+                Ui.accent,
+        ).apply {
+            gravity =
+                Gravity.CENTER
+            this.contentDescription =
+                contentDescription
+            isClickable =
+                true
+            isFocusable =
+                true
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@ProjectActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        Ui.border,
+                    radiusDp =
+                        12,
+                )
+            setOnClickListener {
+                onClick()
+            }
+        }
+
+    private fun updateAddPanelUi() {
+        if (
+            !::addPanelBody.isInitialized
+        ) {
+            return
+        }
+
+        addPanelBody.visibility =
+            if (
+                addPanelExpanded
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+
+        addPanelPinButton.setTextColor(
+            if (
+                addPanelPinned
+            ) {
+                Ui.accent
+            } else {
+                Ui.muted
+            },
+        )
+        addPanelPinButton.alpha =
+            if (
+                addPanelPinned
+            ) {
+                1f
+            } else {
+                0.75f
+            }
+        addPanelPinButton.contentDescription =
+            if (
+                addPanelPinned
+            ) {
+                "Відкріпити панель Додати"
+            } else {
+                "Закріпити панель Додати"
+            }
+
+        addPanelToggleButton.text =
+            if (
+                addPanelExpanded
+            ) {
+                "⌃"
+            } else {
+                "⌄"
+            }
+        addPanelToggleButton.isClickable =
+            !addPanelPinned
+        addPanelToggleButton.isFocusable =
+            !addPanelPinned
+        addPanelToggleButton.alpha =
+            if (
+                addPanelPinned
+            ) {
+                0.45f
+            } else {
+                1f
+            }
+        addPanelToggleButton.contentDescription =
+            if (
+                addPanelExpanded
+            ) {
+                "Згорнути панель Додати"
+            } else {
+                "Розгорнути панель Додати"
+            }
+    }
 
     private fun addChoiceButton(
         label: String,
@@ -4029,10 +4285,14 @@ class ProjectActivity : Activity() {
             HELP_ADD ->
                 HelpDialogSpec(
                     title =
-                        "Як додати том",
+                        "Додати",
                     message =
-                        "Авто — рекомендований спосіб: вибери один .rdpkg. Програма перевірить пакет і додасть том до проєкту.\n\n" +
-                            "Вручну — вибери вже підготовлену папку. Цей варіант потрібен переважно для старих або зовнішніх наборів документації.",
+                        "Розгорни панель «Додати», щоб побачити всі способи.\n\n" +
+                            "Авто — вибрати один готовий .rdpkg.\n" +
+                            "Вручну — вибрати вже підготовлену папку через SAF.\n" +
+                            "Створити .rdpkg з raw — підготувати пакет з оригінальної Renault-папки.\n" +
+                            "Створити .rdpkg з архіву — використати ZIP, 7Z або RAR без ручної розпаковки.\n\n" +
+                            "📌 закріплює панель у розгорнутому стані. Після відкріплення її знову можна згортати.",
                 )
 
             HELP_RAW ->
@@ -4186,6 +4446,8 @@ class ProjectActivity : Activity() {
             "pendingManualImport"
         private const val STATE_SCROLL_Y =
             "projectScrollY"
+        private const val STATE_ADD_PANEL_EXPANDED =
+            "addPanelExpanded"
         private const val STATE_ACTIVE_DIALOG_KIND =
             "activeProjectDialogKind"
         private const val STATE_ACTIVE_DIALOG_VOLUME_ID =
@@ -4228,8 +4490,10 @@ class ProjectActivity : Activity() {
         private const val HELP_ARCHIVE =
             "archive"
 
-        private const val DEFAULT_STATUS_TEXT =
+        private const val ADD_GUIDANCE_TEXT =
             "Натисни на том, щоб відкрити. Утримуй том — щоб відкрити ті самі дії, що й через ⋮."
+        private const val DEFAULT_STATUS_TEXT =
+            ""
 
         private const val NATIVE_RUN_REFRESH_MS =
             100L

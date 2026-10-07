@@ -1,3 +1,24 @@
+## v0.5.72 phone PASS → v0.5.73 Add panel implementation — 2026-10-08
+
+v0.5.72 phone evidence:
+- exact NT8266A duplicate ZIP;
+- archive copy/inspection occurred;
+- no full ZIP extraction counter;
+- terminal result `Том уже є`;
+- duplicate fast-path accepted.
+
+Current task:
+GitHub issue #68 — compact/pinnable Project `Додати` panel, target v0.5.73 / build 89.
+
+Exact UI contract:
+- collapsed unpinned by default;
+- pin persists expanded state;
+- expanded body preserves all four actions and their existing Help;
+- guidance moves inside panel;
+- running operation status remains outside.
+
+---
+
 ## v0.5.72 — archive-root duplicate fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
 
 Phone video evidence before v0.5.72:

@@ -56,8 +56,8 @@ class V0566StatusNotificationContractTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn('versionName = "0.5.72"', gradle)
-        self.assertIn("versionCode = 88", gradle)
+        self.assertIn('versionName = "0.5.73"', gradle)
+        self.assertIn("versionCode = 89", gradle)
 
 
 if __name__ == "__main__":

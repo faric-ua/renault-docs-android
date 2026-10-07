@@ -1,12 +1,12 @@
 {
   "versionName": "0.5.72",
   "versionCode": 88,
-  "phase": "merged_phone_retest_pending",
+  "phase": "phone_pass",
   "feature": "Archive-root raw duplicate fast-path",
   "branch": "fix/v0.5.72-root-archive-fastpath",
   "source_finding": "PERF-ARCHIVE-001",
-  "qa_status": "PENDING_PHONE_RETEST",
-  "next": "phone_retest_same_nt8266a_zip_no_extraction",
+  "qa_status": "PASS",
+  "next": "v0.5.73_issue_68_compact_add_panel",
   "pr": 67,
   "main_runtime_source": "eacbbc1f914d4f35564724501a3edb126fd71963",
   "ci": {
@@ -24,5 +24,13 @@
     "id": 11511521715,
     "digest": "sha256:c670621c76309294d15c6a1f8335a2e5578fd8c9425314cf592d033a07378c62"
   },
-  "next_ui_issue": 68
+  "next_ui_issue": 68,
+  "phone_acceptance": {
+    "date": "2026-10-08",
+    "duplicate_fast_path": "PASS",
+    "archive": "NT8266A",
+    "extraction_counter_seen": false,
+    "terminal": "Том уже є",
+    "project_volume_count": 9
+  }
 }
