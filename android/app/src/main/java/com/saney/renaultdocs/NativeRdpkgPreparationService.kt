@@ -11,6 +11,8 @@ import android.net.Uri
 import android.os.IBinder
 import android.os.PowerManager
 import android.provider.DocumentsContract
+import androidx.documentfile.provider.DocumentFile
+import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -19,6 +21,7 @@ class NativeRdpkgPreparationService : Service() {
         val requestId: String,
         val sourceTreeUri: String,
         val sourceName: String,
+        val sourceKind: NativeRdpkgSourceKind = NativeRdpkgSourceKind.RAW_TREE,
         val destinationUri: String,
         val projectId: String,
         val projectTitle: String,
@@ -64,6 +67,28 @@ class NativeRdpkgPreparationService : Service() {
                     runStore.load()
 
                 if (
+                    state.isWaitingForSelection
+                ) {
+                    cleanupPersistedArchiveWorkspace(
+                        state.archiveExtractionRoot,
+                    )
+                    runStore.clearArchiveSelectionData()
+                    runStore.markCancelled(
+                        "Вибір томів скасовано. Оригінальний архів не змінено, private staging очищено.",
+                    )
+
+                    notifyFinal(
+                        title =
+                            "Archive intake скасовано",
+                        text =
+                            "Оригінальний архів не змінено.",
+                        projectId =
+                            state.projectId
+                                ?: "",
+                    )
+
+                    stopSelf()
+                } else if (
                     state.phase ==
                     NativeRdpkgRunPhase.PREPARING
                 ) {
@@ -87,6 +112,9 @@ class NativeRdpkgPreparationService : Service() {
 
                 return START_NOT_STICKY
             }
+
+            ACTION_RESUME_ARCHIVE ->
+                return startArchiveResumeCommand()
 
             ACTION_START -> Unit
 
@@ -118,6 +146,8 @@ class NativeRdpkgPreparationService : Service() {
                     request.projectId &&
                 persistedState.sourceUri ==
                     request.sourceTreeUri &&
+                persistedState.sourceKind ==
+                    request.sourceKind &&
                 persistedState.destinationUri ==
                     request.destinationUri
 
@@ -146,6 +176,8 @@ class NativeRdpkgPreparationService : Service() {
                     request.sourceTreeUri,
                 sourceName =
                     request.sourceName,
+                sourceKind =
+                    request.sourceKind,
                 destinationUri =
                     request.destinationUri,
             )
@@ -157,7 +189,14 @@ class NativeRdpkgPreparationService : Service() {
                 title =
                     "Renault Docs · створення .rdpkg",
                 text =
-                    "Починаю Kotlin-native підготовку…",
+                    if (
+                        request.sourceKind ==
+                        NativeRdpkgSourceKind.ARCHIVE_FILE
+                    ) {
+                        "Починаю підготовку архіву…"
+                    } else {
+                        "Починаю Kotlin-native підготовку…"
+                    },
                 projectId =
                     request.projectId,
                 cancellable =
@@ -183,34 +222,192 @@ class NativeRdpkgPreparationService : Service() {
         return START_REDELIVER_INTENT
     }
 
+    private fun startArchiveResumeCommand():
+        Int {
+        if (
+            !workerRunning.compareAndSet(
+                false,
+                true,
+            )
+        ) {
+            return START_REDELIVER_INTENT
+        }
+
+        val state =
+            runStore.load()
+
+        if (
+            state.sourceKind !=
+                NativeRdpkgSourceKind.ARCHIVE_FILE ||
+            !state.isRunning ||
+            state.archiveExtractionRoot
+                .isNullOrBlank() ||
+            state.archiveCandidates
+                .isEmpty()
+        ) {
+            workerRunning.set(
+                false,
+            )
+            runStore.fail(
+                "Не вдалося відновити вибрані томи архіву."
+            )
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        startForeground(
+            NOTIFICATION_ID,
+            buildNotification(
+                title =
+                    "Renault Docs · archive batch",
+                text =
+                    "Продовжую вибрані томи…",
+                projectId =
+                    state.projectId,
+                cancellable =
+                    true,
+            ),
+        )
+
+        active =
+            true
+
+        acquireWakeLock()
+
+        Thread {
+            runArchiveSelection()
+        }.start()
+
+        return START_REDELIVER_INTENT
+    }
+
     override fun onBind(
         intent: Intent?,
     ): IBinder? =
         null
 
+    private data class ProcessedVolume(
+        val prepared: NativeRdpkgPreparationEngine.Result,
+        val imported: RdpkgImporter.ImportResult,
+        val label: String,
+        val destination: Uri,
+    )
+
     private fun runPreparation(
         request: StartRequest,
     ) {
-        val destination =
-            Uri.parse(
-                request.destinationUri,
+        when (
+            request.sourceKind
+        ) {
+            NativeRdpkgSourceKind.RAW_TREE ->
+                runRawPreparation(
+                    request,
+                )
+
+            NativeRdpkgSourceKind.ARCHIVE_FILE ->
+                runArchiveInitial(
+                    request,
+                )
+        }
+    }
+
+    private fun runRawPreparation(
+        request: StartRequest,
+    ) {
+        try {
+            val processed =
+                processPreparedSource(
+                    request =
+                        request,
+                    sourceTreeUri =
+                        Uri.parse(
+                            request.sourceTreeUri,
+                        ),
+                    sourceRoot =
+                        null,
+                    sourceName =
+                        request.sourceName,
+                    destination =
+                        Uri.parse(
+                            request.destinationUri,
+                        ),
+                    progressPrefix =
+                        "",
+                )
+
+            completeSingleVolume(
+                request =
+                    request,
+                processed =
+                    processed,
+            )
+        } catch (
+            cancelled:
+                ConversionCancelledException,
+        ) {
+            runStore.markCancelled(
+                "Підготовку .rdpkg скасовано. Source не змінено, private staging очищено.",
             )
 
-        var validatedDestination =
+            notifyFinal(
+                title =
+                    "Створення .rdpkg скасовано",
+                text =
+                    "Source не змінено.",
+                projectId =
+                    request.projectId,
+            )
+        } catch (
+            error:
+                Throwable,
+        ) {
+            val message =
+                error.message
+                    ?: "Невідома помилка Kotlin-native підготовки."
+
+            runStore.fail(
+                message,
+            )
+
+            notifyFinal(
+                title =
+                    "Не вдалося створити .rdpkg",
+                text =
+                    message,
+                projectId =
+                    request.projectId,
+            )
+        } finally {
+            finishWorker()
+        }
+    }
+
+    private fun runArchiveInitial(
+        request: StartRequest,
+    ) {
+        var archiveSourceStage:
+            ArchiveIntakeStager.StagedSource? =
+            null
+        var archiveStage:
+            ArchiveIntakeStager.Result? =
+            null
+        var preserveArchiveStage =
             false
 
         try {
-            val engine =
-                NativeRdpkgPreparationEngine(
+            cleanupStaleArchiveOutput()
+
+            val stager =
+                ArchiveIntakeStager(
                     context =
                         this,
-                    onProgress = {
+                    onMessage = {
                         message ->
                         runStore.updatePreparing(
                             message,
                         )
                     },
-                    onProgressState = {
+                    onProgress = {
                         progress ->
                         runStore.updateProgress(
                             progress,
@@ -221,7 +418,7 @@ class NativeRdpkgPreparationService : Service() {
 
                         updateNotificationThrottled(
                             title =
-                                "Renault Docs · створення .rdpkg",
+                                "Renault Docs · архів → .rdpkg",
                             text =
                                 progress.displayText(),
                             projectId =
@@ -235,26 +432,626 @@ class NativeRdpkgPreparationService : Service() {
                     },
                 )
 
-            val prepared =
-                engine.prepare(
-                    NativeRdpkgPreparationEngine
-                        .Request(
-                            sourceTreeUri =
-                                Uri.parse(
-                                    request.sourceTreeUri,
+            val stagedSource =
+                stager.stageSource(
+                    sourceUri =
+                        Uri.parse(
+                            request.sourceTreeUri,
+                        ),
+                    sourceName =
+                        request.sourceName,
+                    stagingToken =
+                        listOf(
+                            request.projectId,
+                            request.sourceName,
+                        )
+                            .joinToString(
+                                "-",
+                            ),
+                )
+
+            archiveSourceStage =
+                stagedSource
+
+            runStore.updatePreparing(
+                "Перевіряю склад архіву без розпакування…",
+            )
+            updateNotification(
+                title =
+                    "Renault Docs · перевірка архіву",
+                text =
+                    "Шукаю Renault томи без розпакування…",
+                projectId =
+                    request.projectId,
+                cancellable =
+                    true,
+            )
+
+            val inspection =
+                ArchiveIntake.inspectRawRoots(
+                    stagedSource.sourceCopy,
+                )
+            val installedFromHints =
+                installedVolumesForArchiveHints(
+                    projectId =
+                        request.projectId,
+                    hints =
+                        inspection.rawRoots,
+                )
+
+            if (
+                inspection.rawRoots.isNotEmpty() &&
+                installedFromHints !=
+                    null
+            ) {
+                markArchiveHintsAlreadyInstalled(
+                    request =
+                        request,
+                    installed =
+                        installedFromHints,
+                )
+                return
+            }
+
+            val staged =
+                stager.extract(
+                    stagedSource,
+                )
+
+            archiveStage =
+                staged
+
+            val candidates =
+                buildArchiveCandidates(
+                    projectId =
+                        request.projectId,
+                    extractionRoot =
+                        staged.extractionRoot,
+                    rawRoots =
+                        staged.rawRoots,
+                )
+
+            if (
+                candidates.all {
+                    it.installed
+                }
+            ) {
+                markArchiveAllInstalled(
+                    request =
+                        request,
+                    candidates =
+                        candidates,
+                )
+                return
+            }
+
+            if (
+                candidates.size >
+                1
+            ) {
+                runStore.markWaitingForArchiveSelection(
+                    extractionRoot =
+                        staged.extractionRoot
+                            .canonicalPath,
+                    candidates =
+                        candidates,
+                )
+
+                preserveArchiveStage =
+                    true
+
+                notifyFinal(
+                    title =
+                        "Renault Docs · вибери томи",
+                    text =
+                        "Знайдено томів: " +
+                            candidates.size,
+                    projectId =
+                        request.projectId,
+                )
+
+                return
+            }
+
+            val rawRoot =
+                staged.rawRoots.single()
+            val duplicate =
+                VolumeDuplicatePreflight
+                    .check(
+                        existing =
+                            ProjectStore(
+                                this,
+                            ).volumes(
+                                request.projectId,
+                            ),
+                        rawRoot =
+                            rawRoot,
+                    )
+
+            duplicate.exact
+                ?.let {
+                    existing ->
+                    val label =
+                        VolumeDuplicatePreflight
+                            .label(
+                                existing,
+                            )
+
+                    runStore.markAlreadyPresent(
+                        message =
+                            "Том уже є в проєкті: " +
+                                label +
+                                ". Конвертацію пропущено.",
+                        volumeId =
+                            existing.id,
+                        volumeTitle =
+                            label,
+                    )
+
+                    notifyFinal(
+                        title =
+                            "Renault Docs · том уже є",
+                        text =
+                            label +
+                                " · конвертацію пропущено",
+                        projectId =
+                            request.projectId,
+                    )
+
+                    return
+                }
+
+            val destination =
+                createArchiveDestination(
+                    destinationTreeUri =
+                        Uri.parse(
+                            request.destinationUri,
+                        ),
+                    request =
+                        request,
+                    rawRoot =
+                        rawRoot,
+                )
+
+            val processed =
+                processPreparedSource(
+                    request =
+                        request,
+                    sourceTreeUri =
+                        null,
+                    sourceRoot =
+                        rawRoot,
+                    sourceName =
+                        rawRoot.name,
+                    destination =
+                        destination,
+                    progressPrefix =
+                        "",
+                    archiveCandidatePath =
+                        candidates.single()
+                            .relativePath,
+                )
+
+            completeSingleVolume(
+                request =
+                    request,
+                processed =
+                    processed,
+            )
+        } catch (
+            cancelled:
+                ConversionCancelledException,
+        ) {
+            runStore.markCancelled(
+                "Підготовку архіву скасовано. Оригінальний архів не змінено, private staging очищено.",
+            )
+
+            notifyFinal(
+                title =
+                    "Архів → .rdpkg скасовано",
+                text =
+                    "Оригінальний архів не змінено.",
+                projectId =
+                    request.projectId,
+            )
+        } catch (
+            error:
+                Throwable,
+        ) {
+            val message =
+                error.message
+                    ?: "Невідома помилка archive intake."
+
+            runStore.fail(
+                message,
+            )
+
+            notifyFinal(
+                title =
+                    "Не вдалося обробити архів",
+                text =
+                    message,
+                projectId =
+                    request.projectId,
+            )
+        } finally {
+            if (
+                !preserveArchiveStage
+            ) {
+                if (
+                    archiveStage !=
+                    null
+                ) {
+                    archiveStage
+                        ?.cleanup()
+                } else {
+                    archiveSourceStage
+                        ?.cleanup()
+                }
+                runStore.clearArchiveSelectionData()
+            }
+
+            finishWorker()
+        }
+    }
+
+    private fun runArchiveSelection() {
+        val initialState =
+            runStore.load()
+        val projectId =
+            initialState.projectId
+                ?: run {
+                    runStore.fail(
+                        "Втрачено project id для archive batch."
+                    )
+                    finishWorker()
+                    return
+                }
+        val project =
+            ProjectStore(
+                this,
+            ).project(
+                projectId,
+            )
+                ?: run {
+                    runStore.fail(
+                        "Проєкт більше не існує: " +
+                            projectId,
+                    )
+                    cleanupPersistedArchiveWorkspace(
+                        initialState.archiveExtractionRoot,
+                    )
+                    runStore.clearArchiveSelectionData()
+                    finishWorker()
+                    return
+                }
+
+        val request =
+            StartRequest(
+                requestId =
+                    "archive-resume-" +
+                        UUID.randomUUID()
+                            .toString(),
+                sourceTreeUri =
+                    initialState.sourceUri
+                        .orEmpty(),
+                sourceName =
+                    initialState.sourceName
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: project.title,
+                sourceKind =
+                    NativeRdpkgSourceKind.ARCHIVE_FILE,
+                destinationUri =
+                    initialState.destinationUri
+                        .orEmpty(),
+                projectId =
+                    project.id,
+                projectTitle =
+                    project.title,
+                model =
+                    project.model,
+            )
+
+        val processed =
+            mutableListOf<ProcessedVolume>()
+        val skipped =
+            mutableListOf<String>()
+
+        try {
+            cleanupStaleArchiveOutput()
+
+            val extractionRoot =
+                resolvePersistedArchiveRoot(
+                    initialState.archiveExtractionRoot,
+                )
+            val selected =
+                initialState.archiveCandidates
+                    .filter {
+                        it.selected &&
+                            !it.installed
+                    }
+
+            require(
+                selected.isNotEmpty(),
+            ) {
+                "Не вибрано жодного нового тому."
+            }
+
+            selected.forEachIndexed {
+                index,
+                candidate ->
+                if (
+                    runStore.isCancelRequested()
+                ) {
+                    throw ConversionCancelledException()
+                }
+
+                val rawRoot =
+                    resolveArchiveCandidateRoot(
+                        extractionRoot =
+                            extractionRoot,
+                        relativePath =
+                            candidate.relativePath,
+                    )
+
+                val duplicate =
+                    VolumeDuplicatePreflight
+                        .check(
+                            existing =
+                                ProjectStore(
+                                    this,
+                                ).volumes(
+                                    request.projectId,
                                 ),
-                            sourceName =
-                                request.sourceName,
+                            rawRoot =
+                                rawRoot,
+                        )
+
+                duplicate.exact
+                    ?.let {
+                        existing ->
+                        skipped +=
+                            VolumeDuplicatePreflight
+                                .label(
+                                    existing,
+                                )
+                        return@forEachIndexed
+                    }
+
+                val destination =
+                    createArchiveDestination(
+                        destinationTreeUri =
+                            Uri.parse(
+                                request.destinationUri,
+                            ),
+                        request =
+                            request,
+                        rawRoot =
+                            rawRoot,
+                    )
+
+                processed +=
+                    processPreparedSource(
+                        request =
+                            request,
+                        sourceTreeUri =
+                            null,
+                        sourceRoot =
+                            rawRoot,
+                        sourceName =
+                            rawRoot.name,
+                        destination =
+                            destination,
+                        progressPrefix =
+                            "Том " +
+                                (index + 1) +
+                                "/" +
+                                selected.size +
+                                " · ",
+                        archiveCandidatePath =
+                            candidate.relativePath,
+                    )
+            }
+
+            if (
+                runStore.isCancelRequested()
+            ) {
+                throw ConversionCancelledException()
+            }
+
+            if (
+                processed.isEmpty()
+            ) {
+                runStore.markAlreadyPresent(
+                    message =
+                        "Усі вибрані томи вже є в проєкті. Конвертацію пропущено.",
+                    volumeId =
+                        initialState.archiveCandidates
+                            .firstNotNullOfOrNull {
+                                it.existingVolumeId
+                            }
+                            ?: "archive-existing",
+                    volumeTitle =
+                        "Усі вибрані томи вже встановлено",
+                )
+
+                notifyFinal(
+                    title =
+                        "Renault Docs · томи вже є",
+                    text =
+                        "Конвертацію пропущено.",
+                    projectId =
+                        request.projectId,
+                )
+            } else {
+                completeArchiveBatch(
+                    request =
+                        request,
+                    processed =
+                        processed,
+                    skipped =
+                        skipped,
+                )
+            }
+        } catch (
+            cancelled:
+                ConversionCancelledException,
+        ) {
+            runStore.markCancelled(
+                "Archive batch скасовано. Уже завершені томи залишено встановленими; незавершений пакет очищено.",
+            )
+
+            notifyFinal(
+                title =
+                    "Archive batch скасовано",
+                text =
+                    "Завершені томи збережено.",
+                projectId =
+                    request.projectId,
+            )
+        } catch (
+            error:
+                Throwable,
+        ) {
+            val prefix =
+                if (
+                    processed.isNotEmpty()
+                ) {
+                    "Завершено томів: " +
+                        processed.size +
+                        ". "
+                } else {
+                    ""
+                }
+            val message =
+                prefix +
+                    (
+                        error.message
+                            ?: "Невідома помилка archive batch."
+                    )
+
+            runStore.fail(
+                message,
+            )
+
+            notifyFinal(
+                title =
+                    "Archive batch · помилка",
+                text =
+                    message,
+                projectId =
+                    request.projectId,
+            )
+        } finally {
+            cleanupPersistedArchiveWorkspace(
+                initialState.archiveExtractionRoot,
+            )
+            runStore.clearArchiveSelectionData()
+            finishWorker()
+        }
+    }
+
+    private fun processPreparedSource(
+        request: StartRequest,
+        sourceTreeUri: Uri?,
+        sourceRoot: File?,
+        sourceName: String,
+        destination: Uri,
+        progressPrefix: String,
+        archiveCandidatePath: String? = null,
+    ): ProcessedVolume {
+        archiveCandidatePath
+            ?.let {
+                candidatePath ->
+                runStore.setArchiveCurrentOutput(
+                    candidatePath =
+                        candidatePath,
+                    outputUri =
+                        destination.toString(),
+                )
+            }
+
+        var packageValidated =
+            false
+
+        try {
+            val engine =
+                NativeRdpkgPreparationEngine(
+                    context =
+                        this,
+                    onProgress = {
+                        message ->
+                        val display =
+                            progressPrefix +
+                                message
+                        runStore.updatePreparing(
+                            display,
+                        )
+                    },
+                    onProgressState = {
+                        progress ->
+                        val display =
+                            progressPrefix +
+                                progress.displayText()
+
+                        runStore.updateProgress(
+                            progress,
+                        )
+                        runStore.updatePreparing(
+                            display,
+                        )
+
+                        updateNotificationThrottled(
+                            title =
+                                "Renault Docs · створення .rdpkg",
+                            text =
+                                display,
                             projectId =
                                 request.projectId,
-                            model =
-                                request.model,
-                            destinationUri =
-                                destination,
-                            title =
-                                request.projectTitle,
-                        ),
+                            cancellable =
+                                true,
+                        )
+                    },
+                    isCancelled = {
+                        runStore.isCancelRequested()
+                    },
                 )
+
+            val engineRequest =
+                NativeRdpkgPreparationEngine
+                    .Request(
+                        sourceTreeUri =
+                            sourceTreeUri,
+                        sourceName =
+                            sourceName,
+                        projectId =
+                            request.projectId,
+                        model =
+                            request.model,
+                        destinationUri =
+                            destination,
+                        title =
+                            request.projectTitle,
+                    )
+
+            val prepared =
+                if (
+                    sourceRoot !=
+                    null
+                ) {
+                    engine.prepareLocal(
+                        request =
+                            engineRequest,
+                        sourceRoot =
+                            sourceRoot,
+                    )
+                } else {
+                    engine.prepare(
+                        engineRequest,
+                    )
+                }
 
             if (
                 runStore.isCancelRequested()
@@ -263,11 +1060,13 @@ class NativeRdpkgPreparationService : Service() {
             }
 
             runStore.updateImporting(
-                "Перевіряю та встановлюю створений .rdpkg…",
+                progressPrefix +
+                    "Перевіряю та встановлюю створений .rdpkg…",
             )
             runStore.updateProgress(
                 OperationProgress.indeterminate(
-                    "Перевіряю…",
+                    progressPrefix +
+                        "Перевіряю…",
                 ),
             )
 
@@ -275,7 +1074,8 @@ class NativeRdpkgPreparationService : Service() {
                 title =
                     "Renault Docs · перевірка .rdpkg",
                 text =
-                    "Перевіряю та встановлюю створений пакет…",
+                    progressPrefix +
+                        "Перевіряю та встановлюю пакет…",
                 projectId =
                     request.projectId,
                 cancellable =
@@ -292,7 +1092,8 @@ class NativeRdpkgPreparationService : Service() {
                         progress = {
                             message ->
                             runStore.updateImporting(
-                                message,
+                                progressPrefix +
+                                    message,
                             )
                         },
                         progressState = {
@@ -305,7 +1106,8 @@ class NativeRdpkgPreparationService : Service() {
                                 title =
                                     "Renault Docs · перевірка .rdpkg",
                                 text =
-                                    progress.displayText(),
+                                    progressPrefix +
+                                        progress.displayText(),
                                 projectId =
                                     request.projectId,
                                 cancellable =
@@ -322,8 +1124,15 @@ class NativeRdpkgPreparationService : Service() {
                 "Generated package_id не збігається після validation/import."
             }
 
-            validatedDestination =
+            packageValidated =
                 true
+
+            if (
+                archiveCandidatePath !=
+                null
+            ) {
+                runStore.clearArchiveCurrentOutput()
+            }
 
             val projectStore =
                 ProjectStore(
@@ -359,125 +1168,643 @@ class NativeRdpkgPreparationService : Service() {
                         imported.volume.title
                     }
 
-            val message =
-                "Готово · " +
-                    label +
-                    " · " +
-                    prepared.sectionCount +
-                    " native" +
-                    "\nSHA-256: " +
-                    prepared.sha256
-
-            runStore.complete(
-                message =
-                    message,
-                packageId =
-                    imported.packageId,
-                volumeId =
-                    imported.volume.id,
-                volumeTitle =
+            return ProcessedVolume(
+                prepared =
+                    prepared,
+                imported =
+                    imported,
+                label =
                     label,
-                sha256 =
-                    prepared.sha256,
-                filesTotal =
-                    prepared.sourceFiles,
-                changedFiles =
-                    prepared.changedFiles,
-                changesTotal =
-                    prepared.changesTotal,
-            )
-
-            notifyFinal(
-                title =
-                    "Renault Docs · .rdpkg готовий",
-                text =
-                    label +
-                    " · " +
-                    prepared.sectionCount +
-                    " native",
-                projectId =
-                    request.projectId,
-            )
-        } catch (
-            cancelled:
-                ConversionCancelledException,
-        ) {
-            val destinationCleaned =
-                validatedDestination ||
-                    deleteDestination(
-                        destination,
-                    )
-
-            runStore.markCancelled(
-                "Підготовку .rdpkg скасовано. Source не змінено, private staging очищено." +
-                    if (
-                        destinationCleaned
-                    ) {
-                        ""
-                    } else {
-                        "\nУвага: неповний .rdpkg не вдалося видалити автоматично."
-                    },
-            )
-
-            notifyFinal(
-                title =
-                    "Створення .rdpkg скасовано",
-                text =
-                    "Source не змінено.",
-                projectId =
-                    request.projectId,
+                destination =
+                    destination,
             )
         } catch (
             error:
                 Throwable,
         ) {
-            val destinationCleaned =
-                validatedDestination ||
+            if (
+                !packageValidated
+            ) {
+                val destinationCleaned =
                     deleteDestination(
                         destination,
                     )
 
-            val message =
-                (
-                    error.message
-                        ?: "Невідома помилка Kotlin-native підготовки."
-                ) +
-                    if (
-                        destinationCleaned
-                    ) {
-                        ""
-                    } else {
-                        "\nУвага: неповний .rdpkg не вдалося видалити автоматично."
-                    }
+                if (
+                    archiveCandidatePath !=
+                    null
+                ) {
+                    runStore.clearArchiveCurrentOutput()
+                }
 
-            runStore.fail(
-                message,
-            )
+                if (
+                    !destinationCleaned
+                ) {
+                    throw IllegalStateException(
+                        (
+                            error.message
+                                ?: "Не вдалося створити .rdpkg."
+                        ) +
+                            "\nУвага: неповний .rdpkg не вдалося видалити автоматично.",
+                        error,
+                    )
+                }
+            } else if (
+                archiveCandidatePath !=
+                null
+            ) {
+                runStore.clearArchiveCurrentOutput()
+            }
 
-            notifyFinal(
-                title =
-                    "Не вдалося створити .rdpkg",
-                text =
-                    message,
-                projectId =
-                    request.projectId,
-            )
-        } finally {
-            releaseWakeLock()
-
-            active =
-                false
-
-            workerRunning.set(
-                false,
-            )
-
-            stopForeground(
-                STOP_FOREGROUND_DETACH,
-            )
-
-            stopSelf()
+            throw error
         }
+    }
+
+    private fun completeSingleVolume(
+        request: StartRequest,
+        processed: ProcessedVolume,
+    ) {
+        val message =
+            "Готово · " +
+                processed.label +
+                " · " +
+                processed.prepared.sectionCount +
+                " native" +
+                "\nSHA-256: " +
+                processed.prepared.sha256
+
+        runStore.complete(
+            message =
+                message,
+            packageId =
+                processed.imported.packageId,
+            volumeId =
+                processed.imported.volume.id,
+            volumeTitle =
+                processed.label,
+            sha256 =
+                processed.prepared.sha256,
+            filesTotal =
+                processed.prepared.sourceFiles,
+            changedFiles =
+                processed.prepared.changedFiles,
+            changesTotal =
+                processed.prepared.changesTotal,
+        )
+
+        notifyFinal(
+            title =
+                "Renault Docs · .rdpkg готовий",
+            text =
+                processed.label +
+                    " · " +
+                    processed.prepared.sectionCount +
+                    " native",
+            projectId =
+                request.projectId,
+        )
+    }
+
+    private fun completeArchiveBatch(
+        request: StartRequest,
+        processed: List<ProcessedVolume>,
+        skipped: List<String>,
+    ) {
+        val last =
+            processed.last()
+
+        val message =
+            buildString {
+                append(
+                    "Готово · створено томів: ",
+                )
+                append(
+                    processed.size,
+                )
+
+                if (
+                    skipped.isNotEmpty()
+                ) {
+                    append(
+                        " · уже було: ",
+                    )
+                    append(
+                        skipped.size,
+                    )
+                }
+
+                processed.forEach {
+                    item ->
+                    append(
+                        "\n✓ ",
+                    )
+                    append(
+                        item.label,
+                    )
+                }
+
+                skipped.forEach {
+                    label ->
+                    append(
+                        "\n• Уже є: ",
+                    )
+                    append(
+                        label,
+                    )
+                }
+            }
+
+        runStore.complete(
+            message =
+                message,
+            packageId =
+                last.imported.packageId,
+            volumeId =
+                last.imported.volume.id,
+            volumeTitle =
+                if (
+                    processed.size ==
+                    1
+                ) {
+                    last.label
+                } else {
+                    processed.size
+                        .toString() +
+                        " томів"
+                },
+            sha256 =
+                if (
+                    processed.size ==
+                    1
+                ) {
+                    last.prepared.sha256
+                } else {
+                    ""
+                },
+            filesTotal =
+                processed.sumOf {
+                    it.prepared.sourceFiles
+                },
+            changedFiles =
+                processed.sumOf {
+                    it.prepared.changedFiles
+                },
+            changesTotal =
+                processed.sumOf {
+                    it.prepared.changesTotal
+                },
+        )
+
+        notifyFinal(
+            title =
+                "Renault Docs · archive batch готовий",
+            text =
+                "Створено: " +
+                    processed.size +
+                    if (
+                        skipped.isNotEmpty()
+                    ) {
+                        " · уже було: " +
+                            skipped.size
+                    } else {
+                        ""
+                    },
+            projectId =
+                request.projectId,
+        )
+    }
+
+    private fun buildArchiveCandidates(
+        projectId: String,
+        extractionRoot: File,
+        rawRoots: List<File>,
+    ): List<ArchiveVolumeCandidate> {
+        val existing =
+            ProjectStore(
+                this,
+            ).volumes(
+                projectId,
+            )
+
+        return rawRoots
+            .map {
+                rawRoot ->
+                val preflight =
+                    VolumeDuplicatePreflight
+                        .check(
+                            existing =
+                                existing,
+                            rawRoot =
+                                rawRoot,
+                        )
+                val relativePath =
+                    extractionRoot
+                        .canonicalFile
+                        .toPath()
+                        .relativize(
+                            rawRoot.canonicalFile
+                                .toPath(),
+                        )
+                        .toString()
+                        .replace(
+                            File.separatorChar,
+                            '/',
+                        )
+
+                require(
+                    relativePath.isNotBlank() &&
+                        !relativePath.startsWith(
+                            "../",
+                        )
+                ) {
+                    "Некоректний raw-root path в archive staging."
+                }
+
+                ArchiveVolumeCandidate(
+                    relativePath =
+                        relativePath,
+                    label =
+                        archiveCandidateLabel(
+                            rawRoot,
+                        ),
+                    installed =
+                        preflight.exact !=
+                            null,
+                    possibleDuplicate =
+                        preflight.exact ==
+                            null &&
+                            preflight.possible
+                                .isNotEmpty(),
+                    selected =
+                        preflight.exact ==
+                            null,
+                    existingVolumeId =
+                        preflight.exact
+                            ?.id,
+                )
+            }
+    }
+
+    private fun archiveCandidateLabel(
+        rawRoot: File,
+    ): String {
+        val identity =
+            RenaultVolumeIdentity
+                .parse(
+                    rawRoot.name,
+                )
+
+        return listOfNotNull(
+            identity.documentCode,
+            identity.date,
+        )
+            .joinToString(
+                " · ",
+            )
+            .ifBlank {
+                rawRoot.name
+            }
+    }
+
+    private fun createArchiveDestination(
+        destinationTreeUri: Uri,
+        request: StartRequest,
+        rawRoot: File,
+    ): Uri {
+        val destinationTree =
+            DocumentFile.fromTreeUri(
+                this,
+                destinationTreeUri,
+            )
+                ?: error(
+                    "Папка для готових .rdpkg недоступна."
+                )
+
+        require(
+            destinationTree.isDirectory &&
+                destinationTree.canWrite(),
+        ) {
+            "Папка для готових .rdpkg недоступна для запису."
+        }
+
+        val fileName =
+            RenaultVolumeIdentity
+                .canonicalFileName(
+                    model =
+                        request.model,
+                    metadata =
+                        RenaultVolumeIdentity
+                            .parse(
+                                rawRoot.name,
+                            ),
+                    fallbackId =
+                        rawRoot.name,
+                )
+
+        return destinationTree
+            .createFile(
+                "application/octet-stream",
+                fileName,
+            )
+            ?.uri
+            ?: error(
+                "Не вдалося створити " +
+                    fileName,
+            )
+    }
+
+    private fun resolvePersistedArchiveRoot(
+        path: String?,
+    ): File {
+        val rawPath =
+            path
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: error(
+                    "Втрачено archive extraction staging."
+                )
+
+        val base =
+            File(
+                noBackupFilesDir,
+                "archive-intake",
+            )
+                .canonicalFile
+        val root =
+            File(
+                rawPath,
+            )
+                .canonicalFile
+        val prefix =
+            base.path +
+                File.separator
+
+        require(
+            root.isDirectory &&
+                root.path.startsWith(
+                    prefix,
+                )
+        ) {
+            "Archive staging більше не доступний."
+        }
+
+        return root
+    }
+
+    private fun resolveArchiveCandidateRoot(
+        extractionRoot: File,
+        relativePath: String,
+    ): File {
+        val target =
+            File(
+                extractionRoot,
+                relativePath,
+            )
+                .canonicalFile
+        val prefix =
+            extractionRoot
+                .canonicalFile
+                .path +
+                File.separator
+
+        require(
+            target.isDirectory &&
+                target.path.startsWith(
+                    prefix,
+                )
+        ) {
+            "Втрачено вибраний raw-том архіву."
+        }
+
+        return target
+    }
+
+    private fun cleanupStaleArchiveOutput() {
+        val state =
+            runStore.load()
+        val uriText =
+            state.archiveCurrentOutputUri
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: return
+
+        deleteDestination(
+            Uri.parse(
+                uriText,
+            ),
+        )
+        runStore.clearArchiveCurrentOutput()
+    }
+
+    private fun cleanupPersistedArchiveWorkspace(
+        extractionRootPath: String?,
+    ) {
+        val extractionRoot =
+            runCatching {
+                resolvePersistedArchiveRoot(
+                    extractionRootPath,
+                )
+            }.getOrNull()
+                ?: return
+
+        val workRoot =
+            extractionRoot.parentFile
+                ?: return
+        val base =
+            File(
+                noBackupFilesDir,
+                "archive-intake",
+            )
+                .canonicalFile
+        val safeWorkRoot =
+            runCatching {
+                workRoot.canonicalFile
+            }.getOrNull()
+                ?: return
+        val prefix =
+            base.path +
+                File.separator
+
+        if (
+            safeWorkRoot.path.startsWith(
+                prefix,
+            )
+        ) {
+            safeWorkRoot.deleteRecursively()
+        }
+    }
+
+    private fun installedVolumesForArchiveHints(
+        projectId: String,
+        hints: List<ArchiveIntake.RawRootHint>,
+    ): List<ProjectVolumeRecord>? {
+        if (
+            hints.isEmpty()
+        ) {
+            return null
+        }
+
+        val existing =
+            ProjectStore(
+                this,
+            ).volumes(
+                projectId,
+            )
+
+        val matches =
+            mutableListOf<ProjectVolumeRecord>()
+
+        hints.forEach {
+            hint ->
+            val exact =
+                VolumeDuplicatePreflight
+                    .check(
+                        existing =
+                            existing,
+                        rawRoot =
+                            File(
+                                hint.leafName,
+                            ),
+                    )
+                    .exact
+                    ?: return null
+
+            matches +=
+                exact
+        }
+
+        return matches
+    }
+
+    private fun markArchiveHintsAlreadyInstalled(
+        request: StartRequest,
+        installed: List<ProjectVolumeRecord>,
+    ) {
+        val labels =
+            installed
+                .map {
+                    VolumeDuplicatePreflight
+                        .label(
+                            it,
+                        )
+                }
+                .distinct()
+
+        val message =
+            if (
+                labels.size ==
+                1
+            ) {
+                "Том уже є в проєкті: " +
+                    labels.single() +
+                    ". Розпакування і конвертацію пропущено."
+            } else {
+                "Усі " +
+                    labels.size +
+                    " томів з архіву вже є в проєкті. " +
+                    "Розпакування і конвертацію пропущено."
+            }
+
+        runStore.markAlreadyPresent(
+            message =
+                message,
+            volumeId =
+                installed.firstOrNull()
+                    ?.id
+                    ?: "archive-existing",
+            volumeTitle =
+                if (
+                    labels.size ==
+                    1
+                ) {
+                    labels.single()
+                } else {
+                    labels.size
+                        .toString() +
+                        " томів"
+                },
+        )
+
+        notifyFinal(
+            title =
+                "Renault Docs · томи вже є",
+            text =
+                "Розпакування не потрібне.",
+            projectId =
+                request.projectId,
+        )
+    }
+
+    private fun markArchiveAllInstalled(
+        request: StartRequest,
+        candidates: List<ArchiveVolumeCandidate>,
+    ) {
+        val label =
+            if (
+                candidates.size ==
+                1
+            ) {
+                candidates.single()
+                    .label
+            } else {
+                candidates.size
+                    .toString() +
+                    " томів"
+            }
+
+        runStore.markAlreadyPresent(
+            message =
+                if (
+                    candidates.size ==
+                    1
+                ) {
+                    "Том уже є в проєкті: " +
+                        candidates.single()
+                            .label +
+                        ". Конвертацію пропущено."
+                } else {
+                    "Усі " +
+                        candidates.size +
+                        " томів з архіву вже є в проєкті. Конвертацію пропущено."
+                },
+            volumeId =
+                candidates
+                    .firstNotNullOfOrNull {
+                        it.existingVolumeId
+                    }
+                    ?: "archive-existing",
+            volumeTitle =
+                label,
+        )
+
+        notifyFinal(
+            title =
+                "Renault Docs · томи вже є",
+            text =
+                label +
+                    " · конвертацію пропущено",
+            projectId =
+                request.projectId,
+        )
+    }
+
+    private fun finishWorker() {
+        releaseWakeLock()
+
+        active =
+            false
+
+        workerRunning.set(
+            false,
+        )
+
+        stopForeground(
+            STOP_FOREGROUND_DETACH,
+        )
+
+        stopSelf()
     }
 
     private fun parseRequest(
@@ -498,6 +1825,17 @@ class NativeRdpkgPreparationService : Service() {
                 EXTRA_SOURCE_NAME,
             )
                 ?: "Renault"
+        val sourceKind =
+            runCatching {
+                NativeRdpkgSourceKind.valueOf(
+                    intent.getStringExtra(
+                        EXTRA_SOURCE_KIND,
+                    )
+                        ?: NativeRdpkgSourceKind.RAW_TREE.name,
+                )
+            }.getOrDefault(
+                NativeRdpkgSourceKind.RAW_TREE,
+            )
         val destinationUri =
             intent.getStringExtra(
                 EXTRA_DESTINATION_URI,
@@ -526,6 +1864,8 @@ class NativeRdpkgPreparationService : Service() {
                 sourceTreeUri,
             sourceName =
                 sourceName,
+            sourceKind =
+                sourceKind,
             destinationUri =
                 destinationUri,
             projectId =
@@ -738,7 +2078,7 @@ class NativeRdpkgPreparationService : Service() {
                     NotificationManager.IMPORTANCE_LOW,
                 ).apply {
                     description =
-                        "Kotlin-native підготовка Renault raw folder у .rdpkg"
+                        "Підготовка Renault raw folder або архіву у .rdpkg"
                 },
             )
     }
@@ -879,6 +2219,9 @@ class NativeRdpkgPreparationService : Service() {
         private const val ACTION_CANCEL =
             "com.saney.renaultdocs.action.NATIVE_RDPKG_CANCEL"
 
+        private const val ACTION_RESUME_ARCHIVE =
+            "com.saney.renaultdocs.action.NATIVE_RDPKG_RESUME_ARCHIVE"
+
         private const val EXTRA_REQUEST_ID =
             "requestId"
 
@@ -887,6 +2230,9 @@ class NativeRdpkgPreparationService : Service() {
 
         private const val EXTRA_SOURCE_NAME =
             "sourceName"
+
+        private const val EXTRA_SOURCE_KIND =
+            "sourceKind"
 
         private const val EXTRA_DESTINATION_URI =
             "destinationUri"
@@ -968,6 +2314,10 @@ class NativeRdpkgPreparationService : Service() {
                         request.sourceName,
                     )
                     putExtra(
+                        EXTRA_SOURCE_KIND,
+                        request.sourceKind.name,
+                    )
+                    putExtra(
                         EXTRA_DESTINATION_URI,
                         request.destinationUri,
                     )
@@ -1026,6 +2376,19 @@ class NativeRdpkgPreparationService : Service() {
                 return false
             }
 
+            if (
+                state.sourceKind ==
+                    NativeRdpkgSourceKind.ARCHIVE_FILE &&
+                !state.archiveExtractionRoot
+                    .isNullOrBlank() &&
+                state.archiveCandidates
+                    .isNotEmpty()
+            ) {
+                return startArchiveResumeService(
+                    context,
+                )
+            }
+
             return runCatching {
                 start(
                     context = context,
@@ -1043,6 +2406,8 @@ class NativeRdpkgPreparationService : Service() {
                                         it.isNotBlank()
                                     }
                                     ?: project.title,
+                            sourceKind =
+                                state.sourceKind,
                             destinationUri =
                                 destinationUri,
                             projectId =
@@ -1059,9 +2424,95 @@ class NativeRdpkgPreparationService : Service() {
             )
         }
 
+        fun resumeArchiveSelection(
+            context: Context,
+        ): Boolean {
+            val store =
+                NativeRdpkgRunStore(
+                    context,
+                )
+
+            val selected =
+                runCatching {
+                    store.beginArchiveSelectionProcessing()
+                }.getOrNull()
+                    ?: return false
+
+            if (
+                selected.isEmpty()
+            ) {
+                store.restoreArchiveWaitingSelection()
+                return false
+            }
+
+            val started =
+                startArchiveResumeService(
+                    context,
+                )
+
+            if (
+                !started
+            ) {
+                store.restoreArchiveWaitingSelection()
+            }
+
+            return started
+        }
+
+        private fun startArchiveResumeService(
+            context: Context,
+        ): Boolean =
+            runCatching {
+                val intent =
+                    Intent(
+                        context,
+                        NativeRdpkgPreparationService::class.java,
+                    ).apply {
+                        action =
+                            ACTION_RESUME_ARCHIVE
+                    }
+
+                context.startForegroundService(
+                    intent,
+                )
+                true
+            }.getOrDefault(
+                false,
+            )
+
         fun requestCancel(
             context: Context,
         ) {
+            val store =
+                NativeRdpkgRunStore(
+                    context,
+                )
+            val state =
+                store.load()
+
+            if (
+                state.isWaitingForSelection
+            ) {
+                cleanupWaitingArchiveWorkspace(
+                    context =
+                        context,
+                    extractionRootPath =
+                        state.archiveExtractionRoot,
+                )
+                store.clearArchiveSelectionData()
+                store.markCancelled(
+                    "Вибір томів скасовано. Оригінальний архів не змінено, private staging очищено.",
+                )
+
+                context.getSystemService(
+                    NotificationManager::class.java,
+                )
+                    ?.cancel(
+                        NOTIFICATION_ID,
+                    )
+                return
+            }
+
             val intent =
                 Intent(
                     context,
@@ -1074,6 +2525,57 @@ class NativeRdpkgPreparationService : Service() {
             context.startService(
                 intent,
             )
+        }
+
+        private fun cleanupWaitingArchiveWorkspace(
+            context: Context,
+            extractionRootPath: String?,
+        ) {
+            val path =
+                extractionRootPath
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: return
+            val base =
+                File(
+                    context.noBackupFilesDir,
+                    "archive-intake",
+                )
+                    .canonicalFile
+            val extraction =
+                runCatching {
+                    File(
+                        path,
+                    ).canonicalFile
+                }.getOrNull()
+                    ?: return
+            val prefix =
+                base.path +
+                    File.separator
+
+            if (
+                !extraction.path
+                    .startsWith(
+                        prefix,
+                    )
+            ) {
+                return
+            }
+
+            val workRoot =
+                extraction.parentFile
+                    ?.canonicalFile
+                    ?: return
+
+            if (
+                workRoot.path
+                    .startsWith(
+                        prefix,
+                    )
+            ) {
+                workRoot.deleteRecursively()
+            }
         }
     }
 }

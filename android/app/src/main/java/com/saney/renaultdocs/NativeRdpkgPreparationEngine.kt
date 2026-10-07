@@ -20,7 +20,7 @@ class NativeRdpkgPreparationEngine(
     private val isCancelled: () -> Boolean = { false },
 ) {
     data class Request(
-        val sourceTreeUri: Uri,
+        val sourceTreeUri: Uri?,
         val sourceName: String,
         val projectId: String,
         val model: String,
@@ -48,112 +48,165 @@ class NativeRdpkgPreparationEngine(
     ): Result {
         checkCancelled()
 
-        val stager =
-            NativePreparationStager(
-                context =
-                    context,
-                onProgress = {
-                    progress ->
-                    onProgress(
-                        progress.message,
-                    )
-
-                    val stage =
-                        when (
-                            progress.phase
-                        ) {
-                            NativePreparationStager.Phase.SCANNING ->
-                                "Сканую…"
-                            NativePreparationStager.Phase.PREPARING ->
-                                "Готую…"
-                            NativePreparationStager.Phase.COPYING ->
-                                "Копіюю…"
-                            NativePreparationStager.Phase.READY ->
-                                "Готую…"
-                        }
-
-                    val state =
-                        when {
-                            progress.bytesTotal >
-                                0L -> {
-                                OperationProgress.weightedItemsAndBytes(
-                                    stage =
-                                        stage,
-                                    itemsDone =
-                                        progress.filesDone,
-                                    itemsTotal =
-                                        progress.filesTotal
-                                            .coerceAtLeast(
-                                                1,
-                                            ),
-                                    bytesDone =
-                                        progress.bytesDone,
-                                    bytesTotal =
-                                        progress.bytesTotal,
-                                    itemLabel =
-                                        "Файлів",
-                                )
-                            }
-
-                            progress.filesTotal >
-                                0 ->
-                                OperationProgress.measured(
-                                    stage =
-                                        stage,
-                                    current =
-                                        progress.filesDone,
-                                    total =
-                                        progress.filesTotal,
-                                    itemCurrent =
-                                        progress.filesDone,
-                                    itemTotal =
-                                        progress.filesTotal,
-                                    itemLabel =
-                                        "Файлів",
-                                )
-
-                            progress.filesFound >
-                                0 ->
-                                OperationProgress(
-                                    stage =
-                                        stage,
-                                    itemCurrent =
-                                        progress.filesFound,
-                                    itemLabel =
-                                        "Файлів",
-                                )
-
-                            else ->
-                                OperationProgress.indeterminate(
-                                    stage,
-                                )
-                        }
-
-                    onProgressState(
-                        state,
-                    )
-                },
-                isCancelled =
-                    isCancelled,
-            )
+        val sourceTreeUri =
+            requireNotNull(
+                request.sourceTreeUri,
+            ) {
+                "Raw SAF source URI відсутній."
+            }
 
         val staged =
-            stager.prepare(
-                sourceTreeUri =
-                    request.sourceTreeUri,
-                stagingToken =
-                    listOf(
-                        request.projectId,
-                        request.sourceName,
-                    )
-                        .filter {
-                            it.isNotBlank()
-                        }
-                        .joinToString(
-                            "-",
+            createStager()
+                .prepare(
+                    sourceTreeUri =
+                        sourceTreeUri,
+                    stagingToken =
+                        stagingToken(
+                            request,
                         ),
+                )
+
+        return prepareStaged(
+            request =
+                request,
+            staged =
+                staged,
+        )
+    }
+
+    fun prepareLocal(
+        request: Request,
+        sourceRoot: File,
+    ): Result {
+        checkCancelled()
+
+        val staged =
+            createStager()
+                .prepareLocal(
+                    sourceRoot =
+                        sourceRoot,
+                    stagingToken =
+                        stagingToken(
+                            request,
+                        ),
+                )
+
+        return prepareStaged(
+            request =
+                request,
+            staged =
+                staged,
+        )
+    }
+
+    private fun createStager():
+        NativePreparationStager =
+                    NativePreparationStager(
+                        context =
+                            context,
+                        onProgress = {
+                            progress ->
+                            onProgress(
+                                progress.message,
+                            )
+        
+                            val stage =
+                                when (
+                                    progress.phase
+                                ) {
+                                    NativePreparationStager.Phase.SCANNING ->
+                                        "Сканую…"
+                                    NativePreparationStager.Phase.PREPARING ->
+                                        "Готую…"
+                                    NativePreparationStager.Phase.COPYING ->
+                                        "Копіюю…"
+                                    NativePreparationStager.Phase.READY ->
+                                        "Готую…"
+                                }
+        
+                            val state =
+                                when {
+                                    progress.bytesTotal >
+                                        0L -> {
+                                        OperationProgress.weightedItemsAndBytes(
+                                            stage =
+                                                stage,
+                                            itemsDone =
+                                                progress.filesDone,
+                                            itemsTotal =
+                                                progress.filesTotal
+                                                    .coerceAtLeast(
+                                                        1,
+                                                    ),
+                                            bytesDone =
+                                                progress.bytesDone,
+                                            bytesTotal =
+                                                progress.bytesTotal,
+                                            itemLabel =
+                                                "Файлів",
+                                        )
+                                    }
+        
+                                    progress.filesTotal >
+                                        0 ->
+                                        OperationProgress.measured(
+                                            stage =
+                                                stage,
+                                            current =
+                                                progress.filesDone,
+                                            total =
+                                                progress.filesTotal,
+                                            itemCurrent =
+                                                progress.filesDone,
+                                            itemTotal =
+                                                progress.filesTotal,
+                                            itemLabel =
+                                                "Файлів",
+                                        )
+        
+                                    progress.filesFound >
+                                        0 ->
+                                        OperationProgress(
+                                            stage =
+                                                stage,
+                                            itemCurrent =
+                                                progress.filesFound,
+                                            itemLabel =
+                                                "Файлів",
+                                        )
+        
+                                    else ->
+                                        OperationProgress.indeterminate(
+                                            stage,
+                                        )
+                                }
+        
+                            onProgressState(
+                                state,
+                            )
+                        },
+                        isCancelled =
+                            isCancelled,
+                    )
+
+    private fun stagingToken(
+        request: Request,
+    ): String =
+        listOf(
+            request.projectId,
+            request.sourceName,
+        )
+            .filter {
+                it.isNotBlank()
+            }
+            .joinToString(
+                "-",
             )
 
+    private fun prepareStaged(
+        request: Request,
+        staged: NativePreparationStager.Result,
+    ): Result {
         val root =
             staged.stagingRoot
 
@@ -538,6 +591,7 @@ class NativeRdpkgPreparationEngine(
         } finally {
             root.deleteRecursively()
         }
+
     }
 
     private fun buildDatasetMetadata(
