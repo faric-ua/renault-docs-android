@@ -153,6 +153,65 @@ class ArchiveIntakeTest {
     }
 
     @Test
+    fun keepsArchiveRootRawHintForDuplicateFastPath() {
+        val root = createTempDirectory("archive-root-volume-").toFile()
+        val archive = File(root, "generic-renault.zip")
+
+        try {
+            ZipOutputStream(archive.outputStream()).use { zip ->
+                zip.putNextEntry(
+                    ZipEntry(
+                        "INDEX.HTM",
+                    ),
+                )
+                zip.write(
+                    "<html><title>Renault NT8266A</title></html>"
+                        .toByteArray(),
+                )
+                zip.closeEntry()
+
+                zip.putNextEntry(
+                    ZipEntry(
+                        "data/file.bin",
+                    ),
+                )
+                zip.write(byteArrayOf(1, 2, 3))
+                zip.closeEntry()
+            }
+
+            val hint =
+                ArchiveIntake
+                    .inspectRawRoots(
+                        source = archive,
+                        sourceNameHint = "generic-renault.zip",
+                    )
+                    .rawRoots
+                    .single()
+
+            assertEquals(
+                "",
+                hint.relativePath,
+            )
+            assertEquals(
+                "generic-renault",
+                hint.leafName,
+            )
+            assertEquals(
+                "NT8266A",
+                hint.documentCode,
+            )
+            assertTrue(
+                !File(
+                    root,
+                    "data",
+                ).exists(),
+            )
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun preservesTopLevelRawRootLeafNameForDuplicateFastPath() {
         val root = createTempDirectory("archive-top-level-root-").toFile()
         val archive = File(root, "renault.zip")

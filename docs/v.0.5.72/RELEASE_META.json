@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.72",
+  "versionCode": 88,
+  "phase": "development",
+  "feature": "Archive-root raw duplicate fast-path",
+  "branch": "fix/v0.5.72-root-archive-fastpath",
+  "source_finding": "PERF-ARCHIVE-001",
+  "qa_status": "PENDING",
+  "next": "ci_then_phone_retest_same_nt8266a_zip"
+}
