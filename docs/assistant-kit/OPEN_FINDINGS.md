@@ -1720,3 +1720,27 @@ rotation/process recreation during package copy can detach the final UI/project-
 
 This is separate from Help/modal restoration. Durable target:
 service/run-store-backed import with reattach semantics, comparable to native raw → `.rdpkg` preparation.
+
+## PERF-ARCHIVE-001 — duplicate ZIP still extracts before skip
+
+Status: **OPEN · REAL-PHONE FINDING — 2026-10-07**
+
+Phone evidence on v0.5.69:
+- project: Megane II;
+- source archive ultimately identified as already-installed `NT8266A · 2004-06-28`;
+- UI showed active ZIP extraction at `3732 / 4378` files before terminal result;
+- terminal result then correctly reported `Том уже є` and `Конвертацію пропущено`.
+
+Interpretation:
+the current pre-extraction fast path is too conservative for this archive. It scans archive entry names and can skip extraction only when those path/root hints alone prove exact installed identity. This ZIP did not provide enough identity through that hint path, so the app extracted first and only then proved the duplicate.
+
+Required optimization:
+1. add a zero/low-cost archive identity probe before full extraction;
+2. first inspect SAF/archive filename and archive entry paths for a Renault NT document code;
+3. when needed, read only bounded small metadata/index entries directly from the archive (for example root `INDEX.HTM`, `INDEX.HTML`, `ACCUEIL.HTM`, or another proven identity file), without materializing the whole archive;
+4. compare the detected NT code against installed project volumes;
+5. if the NT identity is unambiguous and already installed, end as `ALREADY_PRESENT` before full extraction;
+6. keep full extraction fallback when identity cannot be proven safely.
+
+Do not weaken traversal/size safety or silently skip on ambiguous metadata.
+

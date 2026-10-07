@@ -67,3 +67,20 @@ If real samples are available:
 - [ ] RAR opens through the same archive flow.
 
 Do not close issue #51 until the required ZIP + lifecycle gates pass.
+
+## Phone evidence 2026-10-07 — exact duplicate ZIP
+
+Observed on Megane II:
+- archive ultimately identified as `NT8266A · 2004-06-28`;
+- terminal result: `Том уже є`;
+- message: `Том уже є в проєкті: NT8266A · 2004-06-28. Конвертацію пропущено.`.
+
+Functional duplicate result: **PASS**.
+
+Performance/fast-path finding:
+- before the terminal duplicate result, the UI visibly showed `Розпаковую ZIP… Файлів: 3732 / 4378`;
+- therefore this archive was not rejected at the pre-extraction stage;
+- tracked separately as `PERF-ARCHIVE-001`.
+
+Do not mark the whole Archive Intake release PASS yet; single-new-volume, multi-volume chooser, lifecycle/background/lock/cancel and cleanup gates remain.
+

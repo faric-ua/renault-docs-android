@@ -2299,3 +2299,20 @@ Home:
 Priority rule:
 finish v0.5.69 Archive Intake phone acceptance first. The immediate phone test is an archive whose volume is already installed, to verify exact-duplicate rejection/skip without creating a second volume.
 
+## 2026-10-07 — Archive duplicate fast-path + NT list ordering decision
+
+Real-phone v0.5.69 evidence:
+- duplicate archive for `NT8266A · 2004-06-28` eventually ended in `Том уже є · Конвертацію пропущено`;
+- however the app visibly extracted the ZIP first (`3732 / 4378` files observed).
+
+Follow-up contract:
+- improve Archive Intake preflight so a unique Renault NT identity can be discovered from archive filename/path and, where required, a bounded direct read of small index/metadata entries without extracting the full archive;
+- full extraction remains the safe fallback when identity is not provable;
+- do not trade correctness for speed on ambiguous archives.
+
+Project-volume presentation decision:
+- support natural NT-number sorting;
+- smaller NT first is the preferred default, with reverse order available;
+- sorting is UI-only and does not change opaque Renault/package identity;
+- add display toggles so date, vehicle codes and document type/version can be hidden when a more compact list is desired.
+
