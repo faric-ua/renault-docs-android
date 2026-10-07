@@ -385,6 +385,9 @@ class NativeRdpkgPreparationService : Service() {
     private fun runArchiveInitial(
         request: StartRequest,
     ) {
+        var archiveSourceStage:
+            ArchiveIntakeStager.StagedSource? =
+            null
         var archiveStage:
             ArchiveIntakeStager.Result? =
             null
@@ -392,7 +395,7 @@ class NativeRdpkgPreparationService : Service() {
             false
 
         try {
-            val staged =
+            val stager =
                 ArchiveIntakeStager(
                     context =
                         this,
@@ -426,22 +429,72 @@ class NativeRdpkgPreparationService : Service() {
                         runStore.isCancelRequested()
                     },
                 )
-                    .prepare(
-                        sourceUri =
-                            Uri.parse(
-                                request.sourceTreeUri,
-                            ),
-                        sourceName =
+
+            val stagedSource =
+                stager.stageSource(
+                    sourceUri =
+                        Uri.parse(
+                            request.sourceTreeUri,
+                        ),
+                    sourceName =
+                        request.sourceName,
+                    stagingToken =
+                        listOf(
+                            request.projectId,
                             request.sourceName,
-                        stagingToken =
-                            listOf(
-                                request.projectId,
-                                request.sourceName,
-                            )
-                                .joinToString(
-                                    "-",
-                                ),
-                    )
+                        )
+                            .joinToString(
+                                "-",
+                            ),
+                )
+
+            archiveSourceStage =
+                stagedSource
+
+            runStore.updatePreparing(
+                "Перевіряю склад архіву без розпакування…",
+            )
+            updateNotification(
+                title =
+                    "Renault Docs · перевірка архіву",
+                text =
+                    "Шукаю Renault томи без розпакування…",
+                projectId =
+                    request.projectId,
+                cancellable =
+                    true,
+            )
+
+            val inspection =
+                ArchiveIntake.inspectRawRoots(
+                    stagedSource.sourceCopy,
+                )
+            val installedFromHints =
+                installedVolumesForArchiveHints(
+                    projectId =
+                        request.projectId,
+                    hints =
+                        inspection.rawRoots,
+                )
+
+            if (
+                inspection.rawRoots.isNotEmpty() &&
+                installedFromHints !=
+                    null
+            ) {
+                markArchiveHintsAlreadyInstalled(
+                    request =
+                        request,
+                    installed =
+                        installedFromHints,
+                )
+                return
+            }
+
+            val staged =
+                stager.extract(
+                    stagedSource,
+                )
 
             archiveStage =
                 staged
@@ -620,8 +673,16 @@ class NativeRdpkgPreparationService : Service() {
             if (
                 !preserveArchiveStage
             ) {
-                archiveStage
-                    ?.cleanup()
+                if (
+                    archiveStage !=
+                    null
+                ) {
+                    archiveStage
+                        ?.cleanup()
+                } else {
+                    archiveSourceStage
+                        ?.cleanup()
+                }
                 runStore.clearArchiveSelectionData()
             }
 
@@ -1515,6 +1576,107 @@ class NativeRdpkgPreparationService : Service() {
         ) {
             safeWorkRoot.deleteRecursively()
         }
+    }
+
+    private fun installedVolumesForArchiveHints(
+        projectId: String,
+        hints: List<ArchiveIntake.RawRootHint>,
+    ): List<ProjectVolumeRecord>? {
+        if (
+            hints.isEmpty()
+        ) {
+            return null
+        }
+
+        val existing =
+            ProjectStore(
+                this,
+            ).volumes(
+                projectId,
+            )
+
+        val matches =
+            mutableListOf<ProjectVolumeRecord>()
+
+        hints.forEach {
+            hint ->
+            val exact =
+                VolumeDuplicatePreflight
+                    .check(
+                        existing =
+                            existing,
+                        rawRoot =
+                            File(
+                                hint.leafName,
+                            ),
+                    )
+                    .exact
+                    ?: return null
+
+            matches +=
+                exact
+        }
+
+        return matches
+    }
+
+    private fun markArchiveHintsAlreadyInstalled(
+        request: StartRequest,
+        installed: List<ProjectVolumeRecord>,
+    ) {
+        val labels =
+            installed
+                .map {
+                    VolumeDuplicatePreflight
+                        .label(
+                            it,
+                        )
+                }
+                .distinct()
+
+        val message =
+            if (
+                labels.size ==
+                1
+            ) {
+                "Том уже є в проєкті: " +
+                    labels.single() +
+                    ". Розпакування і конвертацію пропущено."
+            } else {
+                "Усі " +
+                    labels.size +
+                    " томів з архіву вже є в проєкті. " +
+                    "Розпакування і конвертацію пропущено."
+            }
+
+        runStore.markAlreadyPresent(
+            message =
+                message,
+            volumeId =
+                installed.firstOrNull()
+                    ?.id
+                    ?: "archive-existing",
+            volumeTitle =
+                if (
+                    labels.size ==
+                    1
+                ) {
+                    labels.single()
+                } else {
+                    labels.size
+                        .toString() +
+                        " томів"
+                },
+        )
+
+        notifyFinal(
+            title =
+                "Renault Docs · томи вже є",
+            text =
+                "Розпакування не потрібне.",
+            projectId =
+                request.projectId,
+        )
     }
 
     private fun markArchiveAllInstalled(
