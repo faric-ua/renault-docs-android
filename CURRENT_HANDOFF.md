@@ -4590,3 +4590,19 @@ Hard contracts:
 6. Phone QA with a real old Renault archive, including lock/background test.
 
 Do not mix this feature with Catalog issue #30 or change opaque Renault IDs.
+
+
+### Mandatory Termux release/install flow
+
+For every new Renault Docs Android release, do not skip the established Renault Menu path:
+
+1. `5 — Оновити проєкт з GitHub`
+2. `19 — Статус проєкту / build`
+3. Wait until the **exact current commit** shows Tests PASS + APK build PASS and `✓ МОЖНА ЗАВАНТАЖУВАТИ`
+4. `8 — Download APK для поточного commit`
+5. `13 — Відкрити папку останнього APK`
+6. Install **over** the current app; never clear app data for a normal update.
+
+`7 — Build + Download APK` is not the normal install step. Use it only when a fresh build for the current commit is intentionally needed.
+
+Archive Intake (#51 / v0.5.69) remains an Android-app feature; no separate Termux archive conversion command is required unless a future tooling need is explicitly approved.
