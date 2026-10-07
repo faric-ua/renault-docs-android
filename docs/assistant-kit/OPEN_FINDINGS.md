@@ -1743,7 +1743,7 @@ service/run-store-backed import with reattach semantics, comparable to native ra
 
 ## PERF-ARCHIVE-001 — duplicate ZIP still extracts before skip
 
-Status: **v0.5.70/v0.5.71 PHONE FAST-PATH NOT ACCEPTED · v0.5.72 MAIN CI PASS · PHONE RE-TEST PENDING — 2026-10-07**
+Status: **CLOSED / v0.5.72 PHONE PASS — 2026-10-08**
 
 Phone evidence on v0.5.69:
 - project: Megane II;
@@ -1774,6 +1774,11 @@ v0.5.70 implementation evidence:
 - Android Debug APK #133 PASS.
 
 Phone re-test remains required with the same NT8266A archive.
+
+v0.5.72 phone acceptance evidence:
+- provided phone video shows the same NT8266A archive reaching `Том уже є` after copy/inspection;
+- no `Розпаковую ZIP...` file counter appears;
+- early duplicate fast-path is accepted and PERF-ARCHIVE-001 is closed.
 
 v0.5.72 archive-root correction:
 - supplied phone video still showed extraction at 261/4378 and 894/4378;
