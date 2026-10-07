@@ -1,3 +1,21 @@
+## ACTIVE — v0.5.72 duplicate ZIP phone re-test — 2026-10-07
+
+- runtime: `eacbbc1f914d4f35564724501a3edb126fd71963`
+- v0.5.72 / build 88
+- Tests #535 PASS
+- Android Debug APK #135 PASS
+- artifact `Renault-Docs-v0.5.72-Debug`
+
+Current user action:
+`5 → 19 → 8 → 13` → install → repeat exact NT8266A duplicate ZIP.
+
+PASS requires **no `Розпаковую ZIP...` stage**.
+
+After PASS:
+Issue #68 — compact collapsible/pinnable `Додати` panel.
+
+---
+
 ## ACTIVE — v0.5.71 duplicate ZIP phone re-test — 2026-10-07
 
 - runtime source: `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`
