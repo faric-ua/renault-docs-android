@@ -1,3 +1,18 @@
+## v0.5.74 Add panel visual refinement — 2026-10-08
+
+Input phone screenshots from v0.5.73 confirm the compact layout works, but requested refinements are now active:
+- remove bare `Імпорт .rdpkg скасовано.` text between panel and volumes;
+- show transient add/import messages in a small warm status card inside expanded Add;
+- remove volume tap/long-press guidance from Add;
+- use monochrome neutral pin when unpinned and red pin when pinned;
+- use heavier `▲ / ▼` chevrons.
+
+Running operation/progress remains outside the collapsible panel.
+
+Target: v0.5.74 / build 90.
+
+---
+
 ## v0.5.73 compact Add panel — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
 
 - runtime source: `871d93c6f0416f9b98ea78edbab06a9ddcce8eba`;
