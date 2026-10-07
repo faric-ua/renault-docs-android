@@ -76,6 +76,54 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
         )
         self.assertIn("ALREADY_PRESENT", store)
 
+    def test_multi_volume_archive_waits_for_explicit_selection(self):
+        store = self.read_java("NativeRdpkgRunStore.kt")
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+        project = self.read_java("ProjectActivity.kt")
+
+        self.assertIn("WAITING_SELECTION", store)
+        self.assertIn("markWaitingForArchiveSelection", store)
+        self.assertIn("archiveCandidates", store)
+        self.assertIn("updateArchiveCandidateSelection", store)
+        self.assertIn("beginArchiveSelectionProcessing", store)
+        self.assertIn("candidates.size >", service)
+        self.assertIn("resumeArchiveSelection", service)
+        self.assertIn("runArchiveSelection()", service)
+        self.assertIn('"Створити вибрані"', project)
+        self.assertIn('"✓ Уже встановлено"', project)
+        self.assertIn('"⚠ Схожий том уже є"', project)
+
+    def test_archive_multi_volume_uses_destination_folder_and_per_volume_files(self):
+        project = self.read_java("ProjectActivity.kt")
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+
+        self.assertIn("Intent.ACTION_OPEN_DOCUMENT_TREE", project)
+        self.assertIn("createArchiveDestination(", service)
+        self.assertIn("DocumentFile.fromTreeUri(", service)
+        self.assertIn(".createFile(", service)
+        self.assertIn("RenaultVolumeIdentity", service)
+        self.assertIn("canonicalFileName", service)
+
+    def test_archive_chooser_state_survives_activity_recreation(self):
+        store = self.read_java("NativeRdpkgRunStore.kt")
+        project = self.read_java("ProjectActivity.kt")
+
+        self.assertIn("KEY_ARCHIVE_CANDIDATES", store)
+        self.assertIn("KEY_ARCHIVE_EXTRACTION_ROOT", store)
+        self.assertIn("encodeArchiveCandidates", store)
+        self.assertIn("decodeArchiveCandidates", store)
+        self.assertIn("state.isWaitingForSelection", project)
+        self.assertIn("showArchiveVolumeChooser(", project)
+
+    def test_archive_batch_resume_reuses_extracted_staging(self):
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+
+        self.assertIn("ACTION_RESUME_ARCHIVE", service)
+        self.assertIn("resolvePersistedArchiveRoot", service)
+        self.assertIn("resolveArchiveCandidateRoot", service)
+        self.assertIn("startArchiveResumeService", service)
+        self.assertIn("cleanupPersistedArchiveWorkspace", service)
+
     def test_project_ui_exposes_archive_picker(self):
         project = self.read_java("ProjectActivity.kt")
 
