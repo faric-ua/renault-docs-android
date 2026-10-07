@@ -15,3 +15,16 @@
 ## Phone evidence
 
 Pending. Do not reconstruct screenshots or claim PASS before real-device execution.
+
+## Exact duplicate ZIP phone evidence — 2026-10-07
+
+User screenshots show:
+- active ZIP extraction at `3732 / 4378` files;
+- final terminal card `Том уже є`;
+- final message identifies `NT8266A · 2004-06-28` and states conversion was skipped.
+
+Evidence classification:
+- final duplicate prevention: PASS;
+- pre-extraction duplicate fast path for this archive: NOT HIT / optimization required;
+- no claim yet for full v0.5.69 phone acceptance.
+
