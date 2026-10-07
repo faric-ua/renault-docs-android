@@ -53,7 +53,8 @@ class NativePreparationStager(
 
     private data class SourceFile(
         val relativePath: String,
-        val uri: Uri,
+        val uri: Uri? = null,
+        val localFile: File? = null,
         val mimeType: String?,
         val size: Long,
     )
@@ -97,6 +98,52 @@ class NativePreparationStager(
                     root,
             )
 
+        return stageScan(
+            scan = scan,
+            sourceName =
+                root.name
+                    ?: stagingToken,
+            stagingToken =
+                stagingToken,
+        )
+    }
+
+    fun prepareLocal(
+        sourceRoot: File,
+        stagingToken: String,
+    ): Result {
+        checkCancelled()
+
+        require(
+            sourceRoot.isDirectory,
+        ) {
+            "Archive raw root більше не є папкою."
+        }
+
+        emit(
+            Phase.SCANNING,
+            "Сканую розпакований Renault raw…",
+        )
+
+        val scan =
+            scanLocalSource(
+                sourceRoot,
+            )
+
+        return stageScan(
+            scan = scan,
+            sourceName =
+                sourceRoot.name,
+            stagingToken =
+                stagingToken,
+        )
+    }
+
+    private fun stageScan(
+        scan: SourceScan,
+        sourceName: String,
+        stagingToken: String,
+    ): Result {
         checkCancelled()
 
         require(
@@ -142,8 +189,10 @@ class NativePreparationStager(
 
         val singleVolumeSourceFolder =
             safeLeafName(
-                root.name
-                    ?: stagingToken,
+                sourceName
+                    .ifBlank {
+                        stagingToken
+                    },
             )
 
         val stagingBase =
@@ -404,6 +453,88 @@ class NativePreparationStager(
             staging.deleteRecursively()
             throw error
         }
+
+    }
+
+    private fun scanLocalSource(
+        sourceRoot: File,
+    ): SourceScan {
+        val files =
+            mutableListOf<SourceFile>()
+        val directories =
+            linkedSetOf<String>()
+
+        sourceRoot
+            .walkTopDown()
+            .forEach {
+                entry ->
+                checkCancelled()
+
+                if (
+                    entry ==
+                    sourceRoot
+                ) {
+                    return@forEach
+                }
+
+                val relative =
+                    sourceRoot
+                        .toPath()
+                        .relativize(
+                            entry.toPath(),
+                        )
+                        .toString()
+                        .replace(
+                            File.separatorChar,
+                            '/',
+                        )
+
+                when {
+                    entry.isDirectory -> {
+                        directories +=
+                            relative
+                    }
+
+                    entry.isFile -> {
+                        files +=
+                            SourceFile(
+                                relativePath =
+                                    relative,
+                                localFile =
+                                    entry,
+                                mimeType =
+                                    null,
+                                size =
+                                    entry.length(),
+                            )
+
+                        if (
+                            files.size %
+                                FALLBACK_SCAN_PROGRESS_EVERY ==
+                            0
+                        ) {
+                            emit(
+                                phase =
+                                    Phase.SCANNING,
+                                message =
+                                    "Сканую розпакований raw · файлів: " +
+                                        files.size +
+                                        " · папок: " +
+                                        directories.size,
+                                filesFound =
+                                    files.size,
+                            )
+                        }
+                    }
+                }
+            }
+
+        return SourceScan(
+            files =
+                files,
+            directories =
+                directories,
+        )
     }
 
     private fun scanSource(
@@ -727,6 +858,34 @@ class NativePreparationStager(
         )
     }
 
+    private fun openSource(
+        source: SourceFile,
+    ): java.io.InputStream {
+        source.localFile
+            ?.let {
+                file ->
+                return file.inputStream()
+            }
+
+        source.uri
+            ?.let {
+                uri ->
+                return context.contentResolver
+                    .openInputStream(
+                        uri,
+                    )
+                    ?: error(
+                        "Не вдалося прочитати: " +
+                            source.relativePath
+                    )
+            }
+
+        error(
+            "Source не має доступного backing file: " +
+                source.relativePath
+        )
+    }
+
     private fun copyAndPatch(
         source: SourceFile,
         staging: File,
@@ -758,17 +917,11 @@ class NativePreparationStager(
             )
         ) {
             val raw =
-                context.contentResolver
-                    .openInputStream(
-                        source.uri,
-                    )
-                    ?.use {
-                        it.readBytes()
-                    }
-                    ?: error(
-                        "Не вдалося прочитати: " +
-                            source.relativePath
-                    )
+                openSource(
+                    source,
+                ).use {
+                    it.readBytes()
+                }
 
             val patched =
                 ConverterPathNormalizer
@@ -809,14 +962,9 @@ class NativePreparationStager(
         }
 
         val input =
-            context.contentResolver
-                .openInputStream(
-                    source.uri,
-                )
-                ?: error(
-                    "Не вдалося прочитати: " +
-                        source.relativePath
-                )
+            openSource(
+                source,
+            )
 
         BufferedInputStream(
             input,
