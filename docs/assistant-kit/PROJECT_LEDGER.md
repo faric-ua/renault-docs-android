@@ -2447,3 +2447,17 @@ CI:
 
 Phone acceptance pending.
 
+## 2026-10-08 — v0.5.74 Add panel refinement decision
+
+v0.5.73 real-phone screenshots confirm the compact Add panel concept works in both collapsed and expanded states.
+
+Refinement requested before final acceptance:
+- loose transient status text must not sit between Add and volume cards;
+- transient add/import status moves inside Add as a subtle warm card and disappears when blank;
+- volume tap/long-press guidance is removed;
+- inactive pin becomes neutral monochrome; pinned pin becomes red;
+- chevron becomes heavier using ▲ / ▼;
+- active operation/progress stays outside the collapsible body.
+
+Target: v0.5.74 / build 90.
+
