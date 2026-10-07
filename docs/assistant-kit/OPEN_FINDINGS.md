@@ -1,3 +1,23 @@
+## UX-ADD-001 — compact collapsible/pinnable Add panel
+
+Status: **PLANNED / SPEC LOCKED — 2026-10-07**
+
+Phone layout currently spends too much vertical space on four add/create entry points plus permanent instruction text.
+
+Locked UX:
+- one full-width `Додати` header tile;
+- header controls: pin + expand/collapse + Help `?`;
+- collapsed by default when unpinned;
+- expanded body preserves Auto / Manual / raw→.rdpkg / archive→.rdpkg and all current per-action Help buttons;
+- pin persists expanded state across reopen;
+- instruction text moves inside expanded/help content;
+- operation/progress status stays visible outside the collapsible body;
+- first implement on Project screen; Home adaptation is a separate follow-up.
+
+No runtime implementation is part of the current archive fast-path fix.
+
+---
+
 # Open findings
 
 ## BUG-001 — PDF toolbar/control frame does not expand with PDF viewport
