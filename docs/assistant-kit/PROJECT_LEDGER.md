@@ -2461,3 +2461,25 @@ Refinement requested before final acceptance:
 
 Target: v0.5.74 / build 90.
 
+## 2026-10-08 — v0.5.74 Add panel refinement merged
+
+Phone-requested refinement implemented:
+- transient add/import messages render inside a subtle warm status card at the bottom of expanded Add;
+- blank status is hidden;
+- permanent volume interaction guidance removed;
+- emoji pin replaced with monochrome vector;
+- unpinned pin = neutral gray, pinned pin = red;
+- expand/collapse control uses heavier ▲ / ▼;
+- active operation/progress remains outside Add.
+
+Merged runtime:
+`8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`.
+
+CI:
+- Tests #542 PASS;
+- Android Debug APK #137 PASS;
+- artifact `Renault-Docs-v0.5.74-Debug`, id `11518058878`;
+- digest `sha256:a391f4c16a0ce7f3c7b79a9fd9383e1e0e386f07e7d5268e1b4938eaf657f230`.
+
+Phone acceptance pending.
+
