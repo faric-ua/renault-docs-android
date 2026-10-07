@@ -19,6 +19,7 @@ class NativeRdpkgPreparationService : Service() {
         val requestId: String,
         val sourceTreeUri: String,
         val sourceName: String,
+        val sourceKind: NativeRdpkgSourceKind = NativeRdpkgSourceKind.RAW_TREE,
         val destinationUri: String,
         val projectId: String,
         val projectTitle: String,
@@ -118,6 +119,8 @@ class NativeRdpkgPreparationService : Service() {
                     request.projectId &&
                 persistedState.sourceUri ==
                     request.sourceTreeUri &&
+                persistedState.sourceKind ==
+                    request.sourceKind &&
                 persistedState.destinationUri ==
                     request.destinationUri
 
@@ -146,6 +149,8 @@ class NativeRdpkgPreparationService : Service() {
                     request.sourceTreeUri,
                 sourceName =
                     request.sourceName,
+                sourceKind =
+                    request.sourceKind,
                 destinationUri =
                     request.destinationUri,
             )
@@ -157,7 +162,14 @@ class NativeRdpkgPreparationService : Service() {
                 title =
                     "Renault Docs · створення .rdpkg",
                 text =
-                    "Починаю Kotlin-native підготовку…",
+                    if (
+                        request.sourceKind ==
+                        NativeRdpkgSourceKind.ARCHIVE_FILE
+                    ) {
+                        "Починаю підготовку архіву…"
+                    } else {
+                        "Починаю Kotlin-native підготовку…"
+                    },
                 projectId =
                     request.projectId,
                 cancellable =
@@ -198,6 +210,9 @@ class NativeRdpkgPreparationService : Service() {
 
         var validatedDestination =
             false
+        var archiveStage:
+            ArchiveIntakeStager.Result? =
+            null
 
         try {
             val engine =
@@ -235,26 +250,120 @@ class NativeRdpkgPreparationService : Service() {
                     },
                 )
 
-            val prepared =
-                engine.prepare(
-                    NativeRdpkgPreparationEngine
-                        .Request(
-                            sourceTreeUri =
+            val engineRequest =
+                NativeRdpkgPreparationEngine
+                    .Request(
+                        sourceTreeUri =
+                            if (
+                                request.sourceKind ==
+                                NativeRdpkgSourceKind.RAW_TREE
+                            ) {
                                 Uri.parse(
                                     request.sourceTreeUri,
-                                ),
-                            sourceName =
-                                request.sourceName,
-                            projectId =
-                                request.projectId,
-                            model =
-                                request.model,
-                            destinationUri =
-                                destination,
-                            title =
-                                request.projectTitle,
-                        ),
-                )
+                                )
+                            } else {
+                                null
+                            },
+                        sourceName =
+                            request.sourceName,
+                        projectId =
+                            request.projectId,
+                        model =
+                            request.model,
+                        destinationUri =
+                            destination,
+                        title =
+                            request.projectTitle,
+                    )
+
+            val prepared =
+                when (
+                    request.sourceKind
+                ) {
+                    NativeRdpkgSourceKind.RAW_TREE ->
+                        engine.prepare(
+                            engineRequest,
+                        )
+
+                    NativeRdpkgSourceKind.ARCHIVE_FILE -> {
+                        val staged =
+                            ArchiveIntakeStager(
+                                context =
+                                    this,
+                                onMessage = {
+                                    message ->
+                                    runStore.updatePreparing(
+                                        message,
+                                    )
+                                },
+                                onProgress = {
+                                    progress ->
+                                    runStore.updateProgress(
+                                        progress,
+                                    )
+                                    runStore.updatePreparing(
+                                        progress.displayText(),
+                                    )
+
+                                    updateNotificationThrottled(
+                                        title =
+                                            "Renault Docs · архів → .rdpkg",
+                                        text =
+                                            progress.displayText(),
+                                        projectId =
+                                            request.projectId,
+                                        cancellable =
+                                            true,
+                                    )
+                                },
+                                isCancelled = {
+                                    runStore.isCancelRequested()
+                                },
+                            )
+                                .prepare(
+                                    sourceUri =
+                                        Uri.parse(
+                                            request.sourceTreeUri,
+                                        ),
+                                    sourceName =
+                                        request.sourceName,
+                                    stagingToken =
+                                        listOf(
+                                            request.projectId,
+                                            request.sourceName,
+                                        )
+                                            .joinToString(
+                                                "-",
+                                            ),
+                                )
+
+                        archiveStage =
+                            staged
+
+                        require(
+                            staged.rawRoots.size ==
+                                1
+                        ) {
+                            if (
+                                staged.rawRoots.size >
+                                1
+                            ) {
+                                "В архіві знайдено Renault томів: " +
+                                    staged.rawRoots.size +
+                                    ". Потрібен вибір конкретного тому; multi-volume chooser ще готується."
+                            } else {
+                                "В архіві не знайдено Renault raw тому."
+                            }
+                        }
+
+                        engine.prepareLocal(
+                            request =
+                                engineRequest,
+                            sourceRoot =
+                                staged.rawRoots.single(),
+                        )
+                    }
+                }
 
             if (
                 runStore.isCancelRequested()
@@ -463,6 +572,9 @@ class NativeRdpkgPreparationService : Service() {
                     request.projectId,
             )
         } finally {
+            archiveStage
+                ?.cleanup()
+
             releaseWakeLock()
 
             active =
@@ -498,6 +610,17 @@ class NativeRdpkgPreparationService : Service() {
                 EXTRA_SOURCE_NAME,
             )
                 ?: "Renault"
+        val sourceKind =
+            runCatching {
+                NativeRdpkgSourceKind.valueOf(
+                    intent.getStringExtra(
+                        EXTRA_SOURCE_KIND,
+                    )
+                        ?: NativeRdpkgSourceKind.RAW_TREE.name,
+                )
+            }.getOrDefault(
+                NativeRdpkgSourceKind.RAW_TREE,
+            )
         val destinationUri =
             intent.getStringExtra(
                 EXTRA_DESTINATION_URI,
@@ -526,6 +649,8 @@ class NativeRdpkgPreparationService : Service() {
                 sourceTreeUri,
             sourceName =
                 sourceName,
+            sourceKind =
+                sourceKind,
             destinationUri =
                 destinationUri,
             projectId =
@@ -738,7 +863,7 @@ class NativeRdpkgPreparationService : Service() {
                     NotificationManager.IMPORTANCE_LOW,
                 ).apply {
                     description =
-                        "Kotlin-native підготовка Renault raw folder у .rdpkg"
+                        "Підготовка Renault raw folder або архіву у .rdpkg"
                 },
             )
     }
@@ -888,6 +1013,9 @@ class NativeRdpkgPreparationService : Service() {
         private const val EXTRA_SOURCE_NAME =
             "sourceName"
 
+        private const val EXTRA_SOURCE_KIND =
+            "sourceKind"
+
         private const val EXTRA_DESTINATION_URI =
             "destinationUri"
 
@@ -968,6 +1096,10 @@ class NativeRdpkgPreparationService : Service() {
                         request.sourceName,
                     )
                     putExtra(
+                        EXTRA_SOURCE_KIND,
+                        request.sourceKind.name,
+                    )
+                    putExtra(
                         EXTRA_DESTINATION_URI,
                         request.destinationUri,
                     )
@@ -1043,6 +1175,8 @@ class NativeRdpkgPreparationService : Service() {
                                         it.isNotBlank()
                                     }
                                     ?: project.title,
+                            sourceKind =
+                                state.sourceKind,
                             destinationUri =
                                 destinationUri,
                             projectId =
