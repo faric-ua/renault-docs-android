@@ -583,6 +583,46 @@ class NativeRdpkgRunStore(
         return selected
     }
 
+    fun restoreArchiveWaitingSelection() {
+        val state =
+            load()
+
+        if (
+            state.archiveCandidates.isEmpty() ||
+            state.archiveExtractionRoot
+                .isNullOrBlank()
+        ) {
+            return
+        }
+
+        prefs.edit()
+            .putString(
+                KEY_PHASE,
+                NativeRdpkgRunPhase.WAITING_SELECTION.name,
+            )
+            .putString(
+                KEY_MESSAGE,
+                "Вибери томи для створення .rdpkg.",
+            )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Очікую вибір",
+            )
+            .putInt(
+                KEY_PROGRESS_CURRENT,
+                0,
+            )
+            .putInt(
+                KEY_PROGRESS_TOTAL,
+                0,
+            )
+            .putBoolean(
+                KEY_CANCEL_REQUESTED,
+                false,
+            )
+            .apply()
+    }
+
     fun clearArchiveSelectionData() {
         prefs.edit()
             .remove(
