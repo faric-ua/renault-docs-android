@@ -2281,3 +2281,21 @@ Architecture now implemented in code/CI:
 
 Phone evidence is still required. First real-device gate is a ZIP archive; issue #51 remains open until phone PASS.
 
+## 2026-10-07 — Collapsible Add panel UX decision
+
+Future UX direction recorded from phone use; **not part of the current v0.5.69 implementation/QA wave**.
+
+Project screen:
+- consolidate `Авто`, `Вручну`, raw→.rdpkg and archive→.rdpkg under one compact `Додати` panel;
+- default compact presentation is a collapsed `Додати` header with Help `?`;
+- tap toggles expansion;
+- expanded state can be pinned so the user can choose persistent expanded vs compact/collapsed presentation;
+- move the current tap/long-press instructional paragraph into Add Help/panel content to reclaim vertical space;
+- keep all existing workflows/semantics unchanged.
+
+Home:
+- later evaluate the same collapsible/pinnable panel pattern for the main project/action area.
+
+Priority rule:
+finish v0.5.69 Archive Intake phone acceptance first. The immediate phone test is an archive whose volume is already installed, to verify exact-duplicate rejection/skip without creating a second volume.
+

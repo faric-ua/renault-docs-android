@@ -40,6 +40,26 @@ Current next step — **phone QA, starting with a real ZIP archive**:
 
 Do not reopen implementation work unless phone evidence finds a regression. Catalog issue #30 remains separate.
 
+
+## FUTURE UX — collapsible Add panel
+
+Do **not** implement during the current v0.5.69 Archive Intake phone QA.
+
+Project screen follow-up:
+- replace the current tall cluster of `Додати`, `Авто`, `Вручну`, `Створити .rdpkg з raw`, and `Створити .rdpkg з архіву` with one compact collapsible `Додати` panel;
+- collapsed state shows only the `Додати` header plus its Help `?`;
+- tapping `Додати` expands/collapses the actions;
+- expanded panel offers a pin control so the user can keep it permanently expanded; pinned/collapsed preference should persist;
+- the explanatory text currently shown below the Add actions (`Натисни на том...`, long-press guidance, etc.) should move into this Add/Help area so the normal project screen does not waste vertical space;
+- Help `?` explains all available add/create paths without expanding the panel;
+- preserve the existing actions and semantics; this is a layout/UX consolidation, not a workflow rewrite.
+
+Home follow-up:
+- evaluate the same collapsible + optional pinned-panel pattern for the large Home project/tools/action area where it reduces vertical space without hiding core navigation.
+
+This remains backlog until v0.5.69 ZIP/duplicate/multi-volume/lifecycle phone QA is complete.
+
+
 ---
 
 # Renault Docs — CURRENT PLAN
