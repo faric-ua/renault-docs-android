@@ -170,15 +170,14 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('android/app/build.gradle.kts', download)
         self.assertIn('versionName[[:space:]]*=', download)
         self.assertIn('EXPECTED_ARTIFACT="Renault-Docs-v${VERSION}-Debug"', download)
-        self.assertIn(
-            'actions/workflows/$WORKFLOW/runs?head_sha=$HEAD_SHA&status=success&per_page=20',
-            download,
-        )
+        self.assertIn('reno_find_compatible_android_run', download)
+        self.assertIn('reno_android_build_compatible', download)
         self.assertIn('actions/runs/$RUN_ID/artifacts?per_page=100', download)
         self.assertIn(
-            'Старішу версію або artifact з іншої гілки автоматично НЕ завантажую.',
+            'Старішу версію з іншим Android-кодом або artifact з іншої гілки НЕ завантажую.',
             download,
         )
+        self.assertIn('if [ "$RUN_BRANCH" != "$BRANCH" ]; then', download)
         self.assertIn('if [ "$RUN_SHA" != "$HEAD_SHA" ]; then', download)
         self.assertIn('gh run download "$RUN_ID"', download)
         self.assertIn('--name "$EXPECTED_ARTIFACT"', download)
@@ -239,8 +238,9 @@ class TermuxMenuContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("Renault Docs · Статус", text)
-        self.assertIn('show_workflow_state "APK build" "android-debug.yml"', text)
-        self.assertIn('show_workflow_state "Tests" "tests.yml"', text)
+        self.assertIn('show_apk_state', text)
+        self.assertIn('show_tests_state', text)
+        self.assertIn('reno_find_compatible_android_run', text)
         self.assertIn("✓ МОЖНА ЗАВАНТАЖУВАТИ", text)
         self.assertIn("Натисни: 8", text)
         self.assertNotIn("CURRENT_PLAN.md", text)
