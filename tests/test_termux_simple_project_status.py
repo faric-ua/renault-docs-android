@@ -26,13 +26,16 @@ class SimpleTermuxStatusContractTests(unittest.TestCase):
         self.assertIn('…', text)
         self.assertIn('✗', text)
 
-    def test_status_checks_exact_current_commit(self):
+    def test_status_checks_exact_commit_then_allows_safe_android_reuse(self):
         text = SCRIPT.read_text(encoding="utf-8")
 
         self.assertIn('headSha ==', text)
         self.assertIn('"$LOCAL_SHA"', text)
         self.assertIn('"tests.yml"', text)
         self.assertIn('"android-debug.yml"', text)
+        self.assertIn('reno_current_commit_tests_ignored', text)
+        self.assertIn('reno_find_compatible_android_run', text)
+        self.assertIn('Android-код без змін', text)
 
     def test_default_view_hides_old_verbose_release_metadata(self):
         text = SCRIPT.read_text(encoding="utf-8")
