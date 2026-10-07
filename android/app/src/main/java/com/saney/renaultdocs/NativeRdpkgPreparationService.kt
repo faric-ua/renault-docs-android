@@ -1096,9 +1096,23 @@ class NativeRdpkgPreparationService : Service() {
             if (
                 !packageValidated
             ) {
-                deleteDestination(
-                    destination,
-                )
+                val destinationCleaned =
+                    deleteDestination(
+                        destination,
+                    )
+
+                if (
+                    !destinationCleaned
+                ) {
+                    throw IllegalStateException(
+                        (
+                            error.message
+                                ?: "Не вдалося створити .rdpkg."
+                        ) +
+                            "\nУвага: неповний .rdpkg не вдалося видалити автоматично.",
+                        error,
+                    )
+                }
             }
 
             throw error
