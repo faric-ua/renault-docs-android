@@ -1,3 +1,21 @@
+## ACTIVE — v0.5.70 duplicate ZIP phone re-test — 2026-10-07
+
+- runtime source: `b9c763237b7aceede742c6aa559f53abf4c83444`
+- version: `0.5.70` / build `86`
+- Tests #530: PASS
+- Android Debug APK #133: PASS
+- artifact: `Renault-Docs-v0.5.70-Debug`
+
+**Current next action:**
+`5 → 19 → 8 → 13` → install over current Renault Docs → repeat the exact same NT8266A duplicate ZIP.
+
+Expected phone evidence:
+- `Том уже є`;
+- no `Розпаковую ZIP...` progress card;
+- Megane II remains 9 volumes.
+
+---
+
 ## ACTIVE — v0.5.69 Archive Intake phone gate — 2026-10-07
 
 **Code is merged. Do not continue old implementation TODOs.**
