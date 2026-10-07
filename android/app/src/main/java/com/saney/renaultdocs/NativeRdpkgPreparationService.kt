@@ -67,6 +67,28 @@ class NativeRdpkgPreparationService : Service() {
                     runStore.load()
 
                 if (
+                    state.isWaitingForSelection
+                ) {
+                    cleanupPersistedArchiveWorkspace(
+                        state.archiveExtractionRoot,
+                    )
+                    runStore.clearArchiveSelectionData()
+                    runStore.markCancelled(
+                        "Вибір томів скасовано. Оригінальний архів не змінено, private staging очищено.",
+                    )
+
+                    notifyFinal(
+                        title =
+                            "Archive intake скасовано",
+                        text =
+                            "Оригінальний архів не змінено.",
+                        projectId =
+                            state.projectId
+                                ?: "",
+                    )
+
+                    stopSelf()
+                } else if (
                     state.phase ==
                     NativeRdpkgRunPhase.PREPARING
                 ) {
@@ -90,6 +112,9 @@ class NativeRdpkgPreparationService : Service() {
 
                 return START_NOT_STICKY
             }
+
+            ACTION_RESUME_ARCHIVE ->
+                return startArchiveResumeCommand()
 
             ACTION_START -> Unit
 
@@ -193,6 +218,65 @@ class NativeRdpkgPreparationService : Service() {
         startInFlight.set(
             false,
         )
+
+        return START_REDELIVER_INTENT
+    }
+
+    private fun startArchiveResumeCommand():
+        Int {
+        if (
+            !workerRunning.compareAndSet(
+                false,
+                true,
+            )
+        ) {
+            return START_REDELIVER_INTENT
+        }
+
+        val state =
+            runStore.load()
+
+        if (
+            state.sourceKind !=
+                NativeRdpkgSourceKind.ARCHIVE_FILE ||
+            !state.isRunning ||
+            state.archiveExtractionRoot
+                .isNullOrBlank() ||
+            state.archiveCandidates
+                .isEmpty()
+        ) {
+            workerRunning.set(
+                false,
+            )
+            runStore.fail(
+                "Не вдалося відновити вибрані томи архіву."
+            )
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        startForeground(
+            NOTIFICATION_ID,
+            buildNotification(
+                title =
+                    "Renault Docs · archive batch",
+                text =
+                    "Продовжую вибрані томи…",
+                projectId =
+                    state.projectId,
+                cancellable =
+                    true,
+            ),
+        )
+
+        active =
+            true
+
+        acquireWakeLock()
+
+        Thread {
+            runArchiveSelection()
+        }.start()
 
         return START_REDELIVER_INTENT
     }
@@ -1901,6 +1985,9 @@ class NativeRdpkgPreparationService : Service() {
         private const val ACTION_CANCEL =
             "com.saney.renaultdocs.action.NATIVE_RDPKG_CANCEL"
 
+        private const val ACTION_RESUME_ARCHIVE =
+            "com.saney.renaultdocs.action.NATIVE_RDPKG_RESUME_ARCHIVE"
+
         private const val EXTRA_REQUEST_ID =
             "requestId"
 
@@ -2055,6 +2142,19 @@ class NativeRdpkgPreparationService : Service() {
                 return false
             }
 
+            if (
+                state.sourceKind ==
+                    NativeRdpkgSourceKind.ARCHIVE_FILE &&
+                !state.archiveExtractionRoot
+                    .isNullOrBlank() &&
+                state.archiveCandidates
+                    .isNotEmpty()
+            ) {
+                return startArchiveResumeService(
+                    context,
+                )
+            }
+
             return runCatching {
                 start(
                     context = context,
@@ -2090,9 +2190,95 @@ class NativeRdpkgPreparationService : Service() {
             )
         }
 
+        fun resumeArchiveSelection(
+            context: Context,
+        ): Boolean {
+            val store =
+                NativeRdpkgRunStore(
+                    context,
+                )
+
+            val selected =
+                runCatching {
+                    store.beginArchiveSelectionProcessing()
+                }.getOrNull()
+                    ?: return false
+
+            if (
+                selected.isEmpty()
+            ) {
+                store.restoreArchiveWaitingSelection()
+                return false
+            }
+
+            val started =
+                startArchiveResumeService(
+                    context,
+                )
+
+            if (
+                !started
+            ) {
+                store.restoreArchiveWaitingSelection()
+            }
+
+            return started
+        }
+
+        private fun startArchiveResumeService(
+            context: Context,
+        ): Boolean =
+            runCatching {
+                val intent =
+                    Intent(
+                        context,
+                        NativeRdpkgPreparationService::class.java,
+                    ).apply {
+                        action =
+                            ACTION_RESUME_ARCHIVE
+                    }
+
+                context.startForegroundService(
+                    intent,
+                )
+                true
+            }.getOrDefault(
+                false,
+            )
+
         fun requestCancel(
             context: Context,
         ) {
+            val store =
+                NativeRdpkgRunStore(
+                    context,
+                )
+            val state =
+                store.load()
+
+            if (
+                state.isWaitingForSelection
+            ) {
+                cleanupWaitingArchiveWorkspace(
+                    context =
+                        context,
+                    extractionRootPath =
+                        state.archiveExtractionRoot,
+                )
+                store.clearArchiveSelectionData()
+                store.markCancelled(
+                    "Вибір томів скасовано. Оригінальний архів не змінено, private staging очищено.",
+                )
+
+                context.getSystemService(
+                    NotificationManager::class.java,
+                )
+                    ?.cancel(
+                        NOTIFICATION_ID,
+                    )
+                return
+            }
+
             val intent =
                 Intent(
                     context,
@@ -2105,6 +2291,57 @@ class NativeRdpkgPreparationService : Service() {
             context.startService(
                 intent,
             )
+        }
+
+        private fun cleanupWaitingArchiveWorkspace(
+            context: Context,
+            extractionRootPath: String?,
+        ) {
+            val path =
+                extractionRootPath
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?: return
+            val base =
+                File(
+                    context.noBackupFilesDir,
+                    "archive-intake",
+                )
+                    .canonicalFile
+            val extraction =
+                runCatching {
+                    File(
+                        path,
+                    ).canonicalFile
+                }.getOrNull()
+                    ?: return
+            val prefix =
+                base.path +
+                    File.separator
+
+            if (
+                !extraction.path
+                    .startsWith(
+                        prefix,
+                    )
+            ) {
+                return
+            }
+
+            val workRoot =
+                extraction.parentFile
+                    ?.canonicalFile
+                    ?: return
+
+            if (
+                workRoot.path
+                    .startsWith(
+                        prefix,
+                    )
+            ) {
+                workRoot.deleteRecursively()
+            }
         }
     }
 }
