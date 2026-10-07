@@ -6,6 +6,8 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
 import java.util.Locale
 import java.util.zip.ZipFile
 import org.apache.commons.compress.archivers.sevenz.SevenZFile
@@ -46,6 +48,7 @@ object ArchiveIntake {
     data class RawRootHint(
         val relativePath: String,
         val leafName: String,
+        val documentCode: String? = null,
     )
 
     data class Inspection(
@@ -193,6 +196,7 @@ object ArchiveIntake {
 
     fun inspectRawRoots(
         source: File,
+        sourceNameHint: String? = null,
     ): Inspection {
         require(
             source.isFile,
@@ -208,12 +212,16 @@ object ArchiveIntake {
             linkedSetOf<String>()
         val preparedParents =
             linkedSetOf<String>()
+        val entryNames =
+            mutableListOf<String>()
+        val identityTextByParent =
+            mutableMapOf<String, MutableList<String>>()
         var count =
             0
 
         fun inspectEntry(
             entryName: String,
-        ) {
+        ): String? {
             count +=
                 1
             checkEntryCount(
@@ -228,8 +236,13 @@ object ArchiveIntake {
             if (
                 segments.isEmpty()
             ) {
-                return
+                return null
             }
+
+            entryNames +=
+                segments.joinToString(
+                    "/",
+                )
 
             val fileName =
                 segments.last()
@@ -252,19 +265,26 @@ object ArchiveIntake {
                 } >
                 MAX_DISCOVERY_DEPTH
             ) {
-                return
+                return null
             }
 
-            when {
+            return when {
                 fileName in
-                    RAW_ENTRYPOINTS ->
+                    RAW_ENTRYPOINTS -> {
                     rawParents +=
                         parent
+                    parent
+                }
 
                 fileName ==
-                    "renault-dataset.json" ->
+                    "renault-dataset.json" -> {
                     preparedParents +=
                         parent
+                    null
+                }
+
+                else ->
+                    null
             }
         }
 
@@ -288,9 +308,41 @@ object ArchiveIntake {
                         if (
                             !entry.isDirectory
                         ) {
-                            inspectEntry(
-                                entry.name,
-                            )
+                            val rawParent =
+                                inspectEntry(
+                                    entry.name,
+                                )
+
+                            if (
+                                rawParent !=
+                                null
+                            ) {
+                                runCatching {
+                                    archive.getInputStream(
+                                        entry,
+                                    ).use {
+                                        input ->
+                                        readIdentityProbeText(
+                                            input,
+                                        )
+                                    }
+                                }.getOrNull()
+                                    ?.takeIf {
+                                        it.isNotBlank()
+                                    }
+                                    ?.let {
+                                        text ->
+                                        identityTextByParent
+                                            .getOrPut(
+                                                rawParent,
+                                            ) {
+                                                mutableListOf()
+                                            }
+                                            .add(
+                                                text,
+                                            )
+                                    }
+                            }
                         }
                     }
                 }
@@ -363,15 +415,83 @@ object ArchiveIntake {
                 }
                 .map {
                     parent ->
+                    val leafName =
+                        parent
+                            .substringAfterLast(
+                                '/',
+                                "",
+                            )
+                    val documentCodes =
+                        linkedSetOf<String>()
+
+                    fun collectDocumentCode(
+                        value: String?,
+                    ) {
+                        RenaultVolumeIdentity
+                            .parse(
+                                value,
+                            )
+                            .documentCode
+                            ?.takeIf {
+                                it.isNotBlank()
+                            }
+                            ?.let {
+                                documentCodes +=
+                                    it
+                            }
+                    }
+
+                    collectDocumentCode(
+                        parent,
+                    )
+                    collectDocumentCode(
+                        leafName,
+                    )
+
+                    if (
+                        rawParents.size ==
+                        1
+                    ) {
+                        collectDocumentCode(
+                            sourceNameHint,
+                        )
+                    }
+
+                    entryNames
+                        .asSequence()
+                        .filter {
+                            name ->
+                            name ==
+                                parent ||
+                                name.startsWith(
+                                    parent +
+                                        "/",
+                                )
+                        }
+                        .forEach {
+                            collectDocumentCode(
+                                it,
+                            )
+                        }
+
+                    identityTextByParent[
+                        parent
+                    ]
+                        .orEmpty()
+                        .forEach {
+                            collectDocumentCode(
+                                it,
+                            )
+                        }
+
                     RawRootHint(
                         relativePath =
                             parent,
                         leafName =
-                            parent
-                                .substringAfterLast(
-                                    '/',
-                                    "",
-                                ),
+                            leafName,
+                        documentCode =
+                            documentCodes
+                                .singleOrNull(),
                     )
                 }
                 .filter {
@@ -401,6 +521,47 @@ object ArchiveIntake {
                 format,
             rawRoots =
                 hints,
+        )
+    }
+
+    private fun readIdentityProbeText(
+        input: InputStream,
+    ): String {
+        val buffer =
+            ByteArray(
+                MAX_IDENTITY_PROBE_BYTES,
+            )
+        var total =
+            0
+
+        while (
+            total <
+            buffer.size
+        ) {
+            val read =
+                input.read(
+                    buffer,
+                    total,
+                    buffer.size -
+                        total,
+                )
+
+            if (
+                read <=
+                0
+            ) {
+                break
+            }
+
+            total +=
+                read
+        }
+
+        return String(
+            buffer,
+            0,
+            total,
+            StandardCharsets.ISO_8859_1,
         )
     }
 
