@@ -469,7 +469,10 @@ class NativeRdpkgPreparationService : Service() {
 
             val inspection =
                 ArchiveIntake.inspectRawRoots(
-                    stagedSource.sourceCopy,
+                    source =
+                        stagedSource.sourceCopy,
+                    sourceNameHint =
+                        stagedSource.sourceName,
                 )
             val installedFromHints =
                 installedVolumesForArchiveHints(
@@ -1658,17 +1661,39 @@ class NativeRdpkgPreparationService : Service() {
 
         hints.forEach {
             hint ->
+            val exactByDocumentCode =
+                hint.documentCode
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+                    ?.let {
+                        code ->
+                        existing
+                            .filter {
+                                volume ->
+                                volume.documentCode
+                                    ?.equals(
+                                        code,
+                                        ignoreCase =
+                                            true,
+                                    ) ==
+                                    true
+                            }
+                            .singleOrNull()
+                    }
+
             val exact =
-                VolumeDuplicatePreflight
-                    .check(
-                        existing =
-                            existing,
-                        rawRoot =
-                            File(
-                                hint.leafName,
-                            ),
-                    )
-                    .exact
+                exactByDocumentCode
+                    ?: VolumeDuplicatePreflight
+                        .check(
+                            existing =
+                                existing,
+                            rawRoot =
+                                File(
+                                    hint.leafName,
+                                ),
+                        )
+                        .exact
                     ?: return null
 
             matches +=

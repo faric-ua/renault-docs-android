@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.70",
+  "versionCode": 86,
+  "phase": "development",
+  "feature": "Archive duplicate identity fast-path",
+  "branch": "fix/v0.5.70-archive-duplicate-fastpath",
+  "source_finding": "PERF-ARCHIVE-001",
+  "qa_status": "PENDING",
+  "next": "implement_bounded_archive_identity_probe"
+}

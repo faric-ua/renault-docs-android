@@ -70,6 +70,10 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
         self.assertIn("fun stageSource(", stager)
         self.assertIn("fun extract(", stager)
         self.assertIn("ArchiveIntake.inspectRawRoots(", service)
+        self.assertIn("sourceNameHint", intake)
+        self.assertIn("documentCode", intake)
+        self.assertIn("MAX_IDENTITY_PROBE_BYTES", intake)
+        self.assertIn("hint.documentCode", service)
         self.assertIn("installedVolumesForArchiveHints(", service)
         self.assertIn("Розпакування і конвертацію пропущено", service)
         self.assertLess(
@@ -179,8 +183,8 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
 
     def test_release_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.69"', gradle)
-        self.assertIn("versionCode = 85", gradle)
+        self.assertIn('versionName = "0.5.70"', gradle)
+        self.assertIn("versionCode = 86", gradle)
 
 
 if __name__ == "__main__":
