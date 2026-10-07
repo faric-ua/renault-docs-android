@@ -12,10 +12,12 @@ import android.provider.DocumentsContract
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import androidx.core.content.FileProvider
 import java.io.File
@@ -71,6 +73,9 @@ class ProjectActivity : Activity() {
         NativeRdpkgSourceKind.RAW_TREE
     private var pendingNativeRequestId:
         String? =
+        null
+    private var archiveChooserDialog:
+        AlertDialog? =
         null
     private var lastShownNativeFinishedAt =
         0L
@@ -887,10 +892,11 @@ class ProjectActivity : Activity() {
             nativeRunStore.load()
 
         if (
-            existingRun.isRunning
+            existingRun.isActive
         ) {
             statusText.text =
-                "Інша native .rdpkg підготовка вже виконується."
+                "Інша native .rdpkg підготовка вже виконується або очікує вибір томів."
+            refreshNativeRunState()
             return
         }
 
@@ -1044,7 +1050,7 @@ class ProjectActivity : Activity() {
             nativeRunStore.load()
 
         if (
-            state.isRunning
+            state.isActive
         ) {
             refreshNativeRunState()
             return
@@ -1091,19 +1097,37 @@ class ProjectActivity : Activity() {
     private fun openNativeRdpkgDestinationPicker(
         sourceName: String,
     ) {
-        val identityName =
-            if (
-                pendingNativeSourceKind ==
-                NativeRdpkgSourceKind.ARCHIVE_FILE
-            ) {
-                sourceName
-                    .substringBeforeLast(
-                        '.',
-                        sourceName,
+        if (
+            pendingNativeSourceKind ==
+            NativeRdpkgSourceKind.ARCHIVE_FILE
+        ) {
+            val picker =
+                Intent(
+                    Intent.ACTION_OPEN_DOCUMENT_TREE,
+                ).apply {
+                    addFlags(
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     )
-            } else {
-                sourceName
-            }
+                    addFlags(
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                    )
+                    addFlags(
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
+                    )
+                    addFlags(
+                        Intent.FLAG_GRANT_PREFIX_URI_PERMISSION,
+                    )
+                }
+
+            @Suppress(
+                "DEPRECATION",
+            )
+            startActivityForResult(
+                picker,
+                REQUEST_NATIVE_RDPKG_DESTINATION,
+            )
+            return
+        }
 
         val defaultName =
             RenaultVolumeIdentity
@@ -1112,10 +1136,10 @@ class ProjectActivity : Activity() {
                         project.model,
                     metadata =
                         RenaultVolumeIdentity.parse(
-                            identityName,
+                            sourceName,
                         ),
                     fallbackId =
-                        identityName,
+                        sourceName,
                 )
 
         val picker =
@@ -1173,6 +1197,36 @@ class ProjectActivity : Activity() {
         }
 
         if (
+            state.isWaitingForSelection
+        ) {
+            hideNativeTerminalStatus()
+
+            if (
+                ::operationStatus.isInitialized
+            ) {
+                operationStatus.showRunning(
+                    title =
+                        "Архів · вибір томів",
+                    detail =
+                        state.message.ifBlank {
+                            "Вибери томи для створення .rdpkg."
+                        },
+                    subject =
+                        state.sourceName
+                            ?: "Renault архів",
+                )
+            }
+
+            statusText.text =
+                DEFAULT_STATUS_TEXT
+
+            showArchiveVolumeChooser(
+                state,
+            )
+            return
+        }
+
+        if (
             state.isRunning
         ) {
             hideNativeTerminalStatus()
@@ -1181,14 +1235,28 @@ class ProjectActivity : Activity() {
                     state.destinationUri
                         ?.let {
                             uriText ->
-                            DocumentFile
-                                .fromSingleUri(
-                                    this,
-                                    Uri.parse(
-                                        uriText,
-                                    ),
-                                )
-                                ?.name
+                            if (
+                                state.sourceKind ==
+                                NativeRdpkgSourceKind.ARCHIVE_FILE
+                            ) {
+                                DocumentFile
+                                    .fromTreeUri(
+                                        this,
+                                        Uri.parse(
+                                            uriText,
+                                        ),
+                                    )
+                                    ?.name
+                            } else {
+                                DocumentFile
+                                    .fromSingleUri(
+                                        this,
+                                        Uri.parse(
+                                            uriText,
+                                        ),
+                                    )
+                                    ?.name
+                            }
                         }
                         ?: "Renault Docs"
 
@@ -1309,6 +1377,231 @@ class ProjectActivity : Activity() {
         showNativeTerminalStatus(
             state,
         )
+    }
+
+    private fun showArchiveVolumeChooser(
+        state: NativeRdpkgRunState,
+    ) {
+        if (
+            archiveChooserDialog
+                ?.isShowing ==
+            true
+        ) {
+            return
+        }
+
+        val candidates =
+            state.archiveCandidates
+
+        if (
+            candidates.isEmpty()
+        ) {
+            nativeRunStore.fail(
+                "Втрачено список томів архіву."
+            )
+            return
+        }
+
+        val content =
+            LinearLayout(
+                this,
+            ).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+                setPadding(
+                    Ui.dp(
+                        this@ProjectActivity,
+                        18,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        10,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        18,
+                    ),
+                    Ui.dp(
+                        this@ProjectActivity,
+                        8,
+                    ),
+                )
+            }
+
+        content.addView(
+            Ui.textView(
+                context =
+                    this,
+                value =
+                    "Знайдено томів: " +
+                        candidates.size +
+                        ". Встановлені томи пропускаються. " +
+                        "Вибери один або кілька нових.",
+                sizeSp =
+                    15f,
+                color =
+                    Ui.text,
+            ),
+        )
+
+        val list =
+            LinearLayout(
+                this,
+            ).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+            }
+
+        candidates.forEach {
+            candidate ->
+            val suffix =
+                when {
+                    candidate.installed ->
+                        "  ✓ Уже встановлено"
+
+                    candidate.possibleDuplicate ->
+                        "  ⚠ Схожий том уже є"
+
+                    else ->
+                        ""
+                }
+
+            list.addView(
+                CheckBox(
+                    this,
+                ).apply {
+                    text =
+                        candidate.label +
+                            suffix
+                    isChecked =
+                        candidate.selected &&
+                            !candidate.installed
+                    isEnabled =
+                        !candidate.installed
+                    setOnCheckedChangeListener {
+                            _,
+                            checked ->
+                        nativeRunStore
+                            .updateArchiveCandidateSelection(
+                                relativePath =
+                                    candidate.relativePath,
+                                selected =
+                                    checked,
+                            )
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ),
+            )
+        }
+
+        content.addView(
+            ScrollView(
+                this,
+            ).apply {
+                addView(
+                    list,
+                )
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f,
+            ),
+        )
+
+        val dialog =
+            AlertDialog.Builder(
+                this,
+            )
+                .setTitle(
+                    "Томи в архіві",
+                )
+                .setView(
+                    content,
+                )
+                .setPositiveButton(
+                    "Створити вибрані",
+                    null,
+                )
+                .setNegativeButton(
+                    "Скасувати",
+                ) {
+                        _,
+                        _ ->
+                    NativeRdpkgPreparationService
+                        .requestCancel(
+                            this,
+                        )
+                }
+                .setCancelable(
+                    false,
+                )
+                .create()
+
+        archiveChooserDialog =
+            dialog
+
+        dialog.setOnShowListener {
+            dialog.getButton(
+                AlertDialog.BUTTON_POSITIVE,
+            ).setOnClickListener {
+                val latest =
+                    nativeRunStore
+                        .load()
+                val selected =
+                    latest.archiveCandidates
+                        .count {
+                            it.selected &&
+                                !it.installed
+                        }
+
+                if (
+                    selected <=
+                    0
+                ) {
+                    Toast.makeText(
+                        this,
+                        "Вибери хоча б один новий том.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    return@setOnClickListener
+                }
+
+                dialog.dismiss()
+                archiveChooserDialog =
+                    null
+
+                val started =
+                    NativeRdpkgPreparationService
+                        .resumeArchiveSelection(
+                            context =
+                                this,
+                        )
+
+                if (
+                    !started
+                ) {
+                    nativeRunStore.fail(
+                        "Не вдалося продовжити вибрані томи архіву."
+                    )
+                }
+            }
+        }
+
+        dialog.setOnDismissListener {
+            if (
+                archiveChooserDialog ==
+                dialog
+            ) {
+                archiveChooserDialog =
+                    null
+            }
+        }
+
+        dialog.show()
     }
 
     private fun showNativeTerminalStatus(
