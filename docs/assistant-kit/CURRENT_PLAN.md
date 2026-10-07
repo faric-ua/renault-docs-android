@@ -927,3 +927,37 @@ Plan:
 - [ ] real-device archive phone QA including screen lock.
 
 Acceptance: user can choose a supported old Renault archive and receive the canonical installed .rdpkg without manually unpacking the archive; source archive remains unchanged.
+
+## FUTURE UX — NT volume sorting / display controls
+
+Do **not** interrupt the current v0.5.69 Archive Intake phone QA to implement this.
+
+Project volume-list follow-up:
+- add explicit sort control for Renault document number (`NT...`);
+- natural NT key: numeric part first, suffix second, e.g. `NT8266A < NT8340A < NT8344 < NT8393`;
+- provide ascending and descending modes;
+- preferred default: **smaller NT first**;
+- NT sorting is a presentation order and must not rewrite package/runtime identity;
+- volumes without a parseable NT code use a deterministic fallback after coded volumes.
+
+Add a compact `Вигляд томів` / display menu:
+- show/hide date;
+- show/hide vehicle codes;
+- show/hide document type/version (e.g. Visu v2.2);
+- sort NT ascending/descending;
+- later consider date-based sort as an alternate mode, with NT fallback for missing dates.
+
+Current code renders `ProjectStore.volumes()` in stored order, so this is a UI-only sorting/display layer.
+
+## FOLLOW-UP — archive duplicate fast path from NT/index metadata
+
+Real-phone v0.5.69 finding:
+a duplicate `NT8266A · 2004-06-28` ZIP was correctly rejected, but only after ZIP extraction had progressed through thousands of entries.
+
+Target:
+- prove an installed duplicate before extraction whenever archive filename/path/index metadata exposes a unique NT code;
+- use bounded direct archive-entry reads, not full extraction;
+- retain conservative fallback when the identity is ambiguous.
+
+This is an optimization/follow-up after the current QA sequence; the existing final duplicate result is functionally correct.
+
