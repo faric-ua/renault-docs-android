@@ -422,7 +422,6 @@ object ArchiveIntake {
                         parent
                             .substringAfterLast(
                                 '/',
-                                "",
                             )
                     val strongDocumentCodes =
                         linkedSetOf<String>()
