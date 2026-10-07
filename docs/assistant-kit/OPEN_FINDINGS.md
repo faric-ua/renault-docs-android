@@ -1,3 +1,24 @@
+## UX-ADD-002 — transient status placement and Add header control styling
+
+Status: **IMPLEMENTING IN v0.5.74 — 2026-10-08**
+
+Phone screenshots from v0.5.73:
+- compact collapse/expand layout is visually accepted;
+- bare transient status text (`Імпорт .rdpkg скасовано.`) appears between Add and the first volume;
+- emoji pin remains colored even when not pinned;
+- chevron is visually too light;
+- permanent volume interaction guidance is unnecessary inside Add.
+
+Required:
+- move transient add/import status into a compact warm-toned card at the bottom of expanded Add;
+- hide it when blank;
+- remove permanent guidance;
+- use a neutral monochrome inactive pin and a red active pin;
+- make expand/collapse indicator heavier;
+- keep active operation/progress outside the collapsible body.
+
+---
+
 ## UX-ADD-001 — compact collapsible/pinnable Add panel
 
 Status: **IMPLEMENTED IN v0.5.73 · MAIN CI PASS · PHONE QA PENDING · GitHub issue #68 — 2026-10-08**
