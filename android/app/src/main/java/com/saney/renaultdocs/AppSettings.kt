@@ -79,6 +79,21 @@ class AppSettings(
                 .apply()
         }
 
+    var projectAddPanelPinned: Boolean
+        get() =
+            prefs.getBoolean(
+                KEY_PROJECT_ADD_PANEL_PINNED,
+                false,
+            )
+        set(value) {
+            prefs.edit()
+                .putBoolean(
+                    KEY_PROJECT_ADD_PANEL_PINNED,
+                    value,
+                )
+                .apply()
+        }
+
     val backupTreeUri: String?
         get() =
             prefs.getString(
