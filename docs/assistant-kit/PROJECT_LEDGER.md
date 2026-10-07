@@ -2410,3 +2410,18 @@ Phone re-test is required with the exact same NT8266A ZIP.
 
 The compact/pinnable Add panel is now tracked as GitHub issue #68 and remains the next UI task after this archive gate.
 
+## 2026-10-08 — v0.5.72 duplicate fast-path phone PASS
+
+Real-phone video acceptance:
+- same duplicate NT8266A archive used for the previous failing runs;
+- archive copy/inspection is visible;
+- no `Розпаковую ZIP...` counter appears;
+- flow ends in `Том уже є`;
+- project remains at 9 volumes.
+
+Result:
+PERF-ARCHIVE-001 is CLOSED for v0.5.72.
+
+Next runtime task:
+issue #68 — compact collapsible/pinnable Project `Додати` panel, target v0.5.73 / build 89.
+
