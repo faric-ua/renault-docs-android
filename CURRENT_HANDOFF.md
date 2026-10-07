@@ -1,3 +1,38 @@
+## v0.5.69 Archive Intake — MERGED / PHONE QA NEXT — 2026-10-07
+
+Status: **MAIN CI PASS / PHONE ACCEPTANCE PENDING**.
+
+- release: **v0.5.69 / build 85**;
+- PR #53 — MERGED;
+- feature head: `f9f11e4a3770b4d098a134217f32c036cfe21613`;
+- main merge: `53f4208b4b2e4d27e4bb55094c855eaf13fb2442`;
+- PR Tests #525 PASS; Android PR Check #423 PASS;
+- main Tests #526 PASS; Android Debug APK #132 PASS;
+- artifact: `Renault-Docs-v0.5.69-Debug`, id `11489564391`;
+- artifact digest: `sha256:328d897a8c484931d08c6e6fa3e00fd718034cc0c7514581a23394d9f2bdcdba`.
+
+The screenshot-recovered implementation checkpoint is now complete in code:
+- ZIP / 7Z / RAR;
+- pre-extraction duplicate inspection;
+- persisted `WAITING_SELECTION` multi-volume chooser;
+- already-installed candidates disabled/unselected;
+- one-or-many selected new volumes;
+- resume from extracted staging without re-extraction;
+- rotation/process-redelivery-safe state;
+- foreground service + wake lock + cancel;
+- stale partial output cleanup;
+- source archive unchanged;
+- private staging cleanup on terminal outcomes.
+
+**Resume here:** phone QA only. Start with a real ZIP archive.
+
+Delivery/install path remains:
+`5 → 19 → 8 → 13`.
+
+Do not return to the old “implement chooser” TODO unless phone evidence shows a regression. Issue #51 remains open until real-phone PASS.
+
+---
+
 # Renault Docs — CURRENT HANDOFF
 
 ## Issue #30 checkpoint — Catalog publish pipeline — 2026-10-06

@@ -1,3 +1,28 @@
+## ACTIVE — v0.5.69 Archive Intake phone gate — 2026-10-07
+
+**Code is merged. Do not continue old implementation TODOs.**
+
+- main: `53f4208b4b2e4d27e4bb55094c855eaf13fb2442`
+- version: `0.5.69` / build `85`
+- PR #53: MERGED
+- Tests #526: PASS
+- Android Debug APK #132: PASS
+- issue #51 stays open until phone acceptance
+
+Current next action:
+`Renault Menu 5 → 19 → 8 → 13` → install over existing app → run first real **ZIP** Archive Intake test.
+
+Phone QA order:
+1. install/startup/data preservation;
+2. single-volume ZIP;
+3. exact duplicate ZIP;
+4. multi-volume ZIP chooser;
+5. rotation + background + screen lock;
+6. Cancel and cleanup;
+7. verify source archive unchanged and selected/new volumes installed exactly once.
+
+---
+
 # Renault Docs — ACTIVE PLAN
 
 Updated: 2026-09-29
