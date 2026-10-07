@@ -22,6 +22,7 @@ docs/assistant-kit/PERMISSIONS_STORAGE_CONTRACT.md
 docs/assistant-kit/APK_BUILD_CONTRACT.md
 docs/assistant-kit/RELEASE_DOCUMENTATION_CONTRACT.md
 docs/assistant-kit/TEST_DIAGRAM_STANDARD.md
+docs/assistant-kit/RESPONSE_CONTRACT.md
 docs/assistant-kit/SESSION_CHECKPOINT_2026-09-24.md
 docs/architecture/CLASSIC_ARCHITECTURE.md
 docs/architecture/MODERN_CURRENT_ARCHITECTURE.md

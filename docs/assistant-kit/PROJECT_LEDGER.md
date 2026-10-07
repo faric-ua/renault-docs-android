@@ -2316,3 +2316,15 @@ Project-volume presentation decision:
 - sorting is UI-only and does not change opaque Renault/package identity;
 - add display toggles so date, vehicle codes and document type/version can be hidden when a more compact list is desired.
 
+## 2026-10-07 — Assistant response / Renault Menu communication contract
+
+Project-wide communication rule:
+- assistant replies contain the substantive answer first;
+- every actionable reply ends with a short explicit `Від тебе зараз` block;
+- phone-side user work should be routed through the Renault Termux menu whenever a menu action exists;
+- raw shell/Git commands are reserved for diagnostics or missing menu capabilities;
+- phone QA replies should record evidence/checkpoints, then give the next exact phone action instead of burying it in long prose.
+
+Canonical contract:
+`docs/assistant-kit/RESPONSE_CONTRACT.md`.
+

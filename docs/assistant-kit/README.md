@@ -11,6 +11,7 @@
 - `APK_BUILD_CONTRACT.md` — build/sign/verify/artifact rules;
 - `RELEASE_DOCUMENTATION_CONTRACT.md` — що має бути в кожному release;
 - `TEST_DIAGRAM_STANDARD.md` — як документувати маршрути та phone QA;
+- `RESPONSE_CONTRACT.md` — формат відповідей асистента, короткий фінальний блок дій користувача та пріоритет Renault Menu;
 - `CONTEXT_FILES.txt` — що нова сесія повинна прочитати перед змінами;
 - `GIT_BRANCH_PR_MERGE_GUIDE.md` — просте пояснення branch / PR / CI / merge на реальному прикладі v0.5.57 → v0.5.58.
 
