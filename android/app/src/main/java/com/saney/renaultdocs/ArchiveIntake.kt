@@ -421,10 +421,13 @@ object ArchiveIntake {
                                 '/',
                                 "",
                             )
-                    val documentCodes =
+                    val strongDocumentCodes =
+                        linkedSetOf<String>()
+                    val pathDocumentCodes =
                         linkedSetOf<String>()
 
                     fun collectDocumentCode(
+                        target: MutableSet<String>,
                         value: String?,
                     ) {
                         RenaultVolumeIdentity
@@ -436,15 +439,17 @@ object ArchiveIntake {
                                 it.isNotBlank()
                             }
                             ?.let {
-                                documentCodes +=
+                                target +=
                                     it
                             }
                     }
 
                     collectDocumentCode(
+                        strongDocumentCodes,
                         parent,
                     )
                     collectDocumentCode(
+                        strongDocumentCodes,
                         leafName,
                     )
 
@@ -453,9 +458,21 @@ object ArchiveIntake {
                         1
                     ) {
                         collectDocumentCode(
+                            strongDocumentCodes,
                             sourceNameHint,
                         )
                     }
+
+                    identityTextByParent[
+                        parent
+                    ]
+                        .orEmpty()
+                        .forEach {
+                            collectDocumentCode(
+                                strongDocumentCodes,
+                                it,
+                            )
+                        }
 
                     entryNames
                         .asSequence()
@@ -470,18 +487,26 @@ object ArchiveIntake {
                         }
                         .forEach {
                             collectDocumentCode(
+                                pathDocumentCodes,
                                 it,
                             )
                         }
 
-                    identityTextByParent[
-                        parent
-                    ]
-                        .orEmpty()
-                        .forEach {
-                            collectDocumentCode(
-                                it,
-                            )
+                    val documentCode =
+                        when {
+                            strongDocumentCodes.size ==
+                                1 ->
+                                strongDocumentCodes
+                                    .single()
+
+                            strongDocumentCodes.isEmpty() &&
+                                pathDocumentCodes.size ==
+                                1 ->
+                                pathDocumentCodes
+                                    .single()
+
+                            else ->
+                                null
                         }
 
                     RawRootHint(
@@ -490,8 +515,7 @@ object ArchiveIntake {
                         leafName =
                             leafName,
                         documentCode =
-                            documentCodes
-                                .singleOrNull(),
+                            documentCode,
                     )
                 }
                 .filter {
