@@ -1,6 +1,6 @@
 # v0.5.74 — Add panel status/pin/chevron refinement — 2026-10-08
 
-Status: **IMPLEMENTATION IN PROGRESS**.
+Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
 
 v0.5.73 phone visual evidence:
 - collapsed Add layout: PASS;
@@ -19,6 +19,18 @@ Target:
 - active operation/progress remains outside Add.
 
 Target release: **v0.5.74 / build 90**.
+
+Merged / CI:
+- PR #72 — MERGED;
+- runtime source: `8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`;
+- Tests #542 — PASS;
+- Android Debug APK #137 — PASS;
+- artifact: `Renault-Docs-v0.5.74-Debug`;
+- artifact id: `11518058878`;
+- digest: `sha256:a391f4c16a0ce7f3c7b79a9fd9383e1e0e386f07e7d5268e1b4938eaf657f230`.
+
+Next:
+phone QA of status-card placement, pin colors, chevron weight, pin persistence and rotation.
 
 ---
 
