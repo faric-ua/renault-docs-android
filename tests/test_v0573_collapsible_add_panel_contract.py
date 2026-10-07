@@ -53,9 +53,12 @@ class V0573CollapsibleAddPanelContractTests(unittest.TestCase):
     def test_operation_status_remains_outside_add_panel(self):
         project = self.read_java("ProjectActivity.kt")
 
-        panel_end = project.index("private fun addChoiceButton")
-        status_index = project.index("operationStatus = OperationStatusView")
-        self.assertLess(panel_end, status_index)
+        build_start = project.index("private fun buildAddPanel")
+        build_end = project.index("private fun addChoiceButton", build_start)
+        panel = project[build_start:build_end]
+
+        self.assertNotIn("operationStatus = OperationStatusView", panel)
+        self.assertIn("operationStatus = OperationStatusView", project)
 
 
 if __name__ == "__main__":
