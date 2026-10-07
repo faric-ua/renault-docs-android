@@ -1,3 +1,15 @@
+## ACTIVE — v0.5.74 Add panel phone QA — 2026-10-08
+
+- runtime: `8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`
+- version: v0.5.74 / build 90
+- Tests #542 PASS
+- Android Debug APK #137 PASS
+
+Current action:
+`5 → 19 → 8 → 13` → install → open Megane II → verify visual/status refinements.
+
+---
+
 ## ACTIVE — v0.5.74 Add panel status refinement — 2026-10-08
 
 Current implementation:

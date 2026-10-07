@@ -1,10 +1,27 @@
 {
   "versionName": "0.5.74",
   "versionCode": 90,
-  "phase": "development",
+  "phase": "merged_phone_qa_pending",
   "feature": "Add panel status/pin/chevron refinement",
   "branch": "feat/v0.5.74-add-panel-status-refinement",
   "parent_issue": 68,
-  "qa_status": "PENDING",
-  "next": "ci_then_phone_qa_refined_add_panel"
+  "qa_status": "PENDING_PHONE_QA",
+  "next": "phone_qa_add_panel_status_pin_chevron",
+  "pr": 72,
+  "main_runtime_source": "8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a",
+  "ci": {
+    "tests": {
+      "run_number": 542,
+      "status": "PASS"
+    },
+    "android_debug_apk": {
+      "run_number": 137,
+      "status": "PASS"
+    }
+  },
+  "artifact": {
+    "name": "Renault-Docs-v0.5.74-Debug",
+    "id": 11518058878,
+    "digest": "sha256:a391f4c16a0ce7f3c7b79a9fd9383e1e0e386f07e7d5268e1b4938eaf657f230"
+  }
 }
