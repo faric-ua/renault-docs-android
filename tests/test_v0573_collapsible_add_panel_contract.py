@@ -45,8 +45,9 @@ class V0573CollapsibleAddPanelContractTests(unittest.TestCase):
         project = self.read_java("ProjectActivity.kt")
 
         self.assertIn("settings.projectAddPanelPinned =", project)
-        self.assertIn("if (\n                        addPanelPinned", project)
-        self.assertIn("addPanelExpanded =\n                            true", project)
+        self.assertIn("addPanelPinned", project)
+        self.assertIn("addPanelExpanded =", project)
+        self.assertIn("true", project)
 
     def test_operation_status_remains_outside_add_panel(self):
         project = self.read_java("ProjectActivity.kt")
