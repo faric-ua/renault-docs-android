@@ -36,26 +36,36 @@ fi
 HEAD_SHA="$(git rev-parse HEAD)"
 BRANCH="$(git branch --show-current)"
 EXPECTED_ARTIFACT="Renault-Docs-v${VERSION}-Debug"
+COMPATIBLE_ARTIFACT_ID=""
 
 if [ -z "$RUN_ID" ]; then
   echo "GitHub: $GH_REPO"
   echo "Поточна версія коду: v$VERSION"
   echo "Поточний commit: $HEAD_SHA"
-  echo "Шукаю успішний Android build саме для цього commit..."
+  echo "Шукаю безпечний APK для поточного Android-коду..."
   echo
 
-  RUN_ID="$(
-    gh api \
-      "repos/$GH_REPO/actions/workflows/$WORKFLOW/runs?head_sha=$HEAD_SHA&status=success&per_page=20" \
-      --jq '.workflow_runs[0].id // empty'
+  COMPATIBLE="$(
+    reno_find_compatible_android_run \
+      "$GH_REPO" \
+      "$WORKFLOW" \
+      "$BRANCH" \
+      "$HEAD_SHA" \
+      "$EXPECTED_ARTIFACT" \
+      2>/dev/null || true
   )"
+
+  if [ -n "$COMPATIBLE" ]; then
+    IFS='|' read -r RUN_ID COMPATIBLE_SHA COMPATIBLE_ARTIFACT_ID <<EOF
+$COMPATIBLE
+EOF
+  fi
 fi
 
 if [ -z "$RUN_ID" ]; then
-  echo "Не знайдено успішного APK build для поточного commit:"
-  echo "  $HEAD_SHA"
+  echo "Не знайдено безпечного APK artifact для поточного Android-коду."
   echo
-  echo "Старішу версію або artifact з іншої гілки автоматично НЕ завантажую."
+  echo "Старішу версію з іншим Android-кодом або artifact з іншої гілки НЕ завантажую."
   echo "Запусти Renault Menu → 7 для нового build."
   exit 1
 fi
@@ -69,11 +79,25 @@ IFS="$(printf '\t')" read -r RUN_SHA RUN_BRANCH RUN_CONCLUSION RUN_EVENT <<EOF
 $RUN_INFO
 EOF
 
-if [ "$RUN_SHA" != "$HEAD_SHA" ]; then
-  echo "STOP: Run ID $RUN_ID належить іншому commit."
-  echo "Поточний: $HEAD_SHA"
-  echo "Run:      $RUN_SHA"
+if [ "$RUN_BRANCH" != "$BRANCH" ]; then
+  echo "STOP: APK build належить іншій гілці."
+  echo "Поточна: $BRANCH"
+  echo "Build:    $RUN_BRANCH"
   exit 1
+fi
+
+if [ "$RUN_SHA" != "$HEAD_SHA" ]; then
+  if ! reno_android_build_compatible "$RUN_SHA" "$HEAD_SHA"; then
+    echo "STOP: APK build має інший Android-код."
+    echo "Поточний commit: $HEAD_SHA"
+    echo "Build commit:    $RUN_SHA"
+    exit 1
+  fi
+
+  echo "✓ Використовую попередній build з тим самим Android-кодом."
+  echo "  Build commit: $RUN_SHA"
+  echo "  Current:      $HEAD_SHA"
+  echo
 fi
 
 if [ "$RUN_CONCLUSION" != "success" ]; then
@@ -82,14 +106,18 @@ if [ "$RUN_CONCLUSION" != "success" ]; then
   exit 1
 fi
 
-ARTIFACT_ID="$(
-  gh api "repos/$GH_REPO/actions/runs/$RUN_ID/artifacts?per_page=100" \
-    --jq ".artifacts[] | select(.expired == false and .name == \"$EXPECTED_ARTIFACT\") | .id" \
-    | sed -n '1p'
-)"
+ARTIFACT_ID="$COMPATIBLE_ARTIFACT_ID"
 
 if [ -z "$ARTIFACT_ID" ]; then
-  echo "У точному run не знайдено очікуваний artifact:"
+  ARTIFACT_ID="$(
+    gh api "repos/$GH_REPO/actions/runs/$RUN_ID/artifacts?per_page=100" \
+      --jq ".artifacts[] | select(.expired == false and .name == \"$EXPECTED_ARTIFACT\") | .id" \
+      | sed -n '1p'
+  )"
+fi
+
+if [ -z "$ARTIFACT_ID" ]; then
+  echo "У вибраному run не знайдено очікуваний не прострочений artifact:"
   echo "  $EXPECTED_ARTIFACT"
   echo "Run ID: $RUN_ID"
   exit 1
@@ -102,7 +130,11 @@ echo "Renault Docs"
 echo "GitHub:   $GH_REPO"
 echo "Версія:  v$VERSION"
 echo "Branch:   ${RUN_BRANCH:-$BRANCH}"
-echo "Commit:   $RUN_SHA"
+echo "Build commit: $RUN_SHA"
+if [ "$RUN_SHA" != "$HEAD_SHA" ]; then
+  echo "Current commit: $HEAD_SHA"
+  echo "Android-код:    без змін"
+fi
 echo "Artifact: $EXPECTED_ARTIFACT"
 echo "Run ID:   $RUN_ID"
 echo
