@@ -1602,6 +1602,12 @@ class ProjectActivity : Activity() {
         }
 
         dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
     }
 
     private fun showNativeTerminalStatus(
