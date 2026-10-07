@@ -20,3 +20,14 @@ This is classified as early duplicate fast-path FAIL before v0.5.72.
 - Artifact digest: `sha256:c670621c76309294d15c6a1f8335a2e5578fd8c9425314cf592d033a07378c62`.
 
 Phone evidence for v0.5.72 remains pending.
+
+
+## Phone acceptance evidence
+
+Provided phone video:
+- archive picker returns to Megane II;
+- `Копіюю архів...` is visible;
+- next terminal state is `Том уже є`;
+- no full-extraction file counter is visible.
+
+Classification: **PHONE PASS** for duplicate early fast-path.
