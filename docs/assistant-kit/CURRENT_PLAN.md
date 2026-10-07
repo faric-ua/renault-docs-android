@@ -1,3 +1,47 @@
+# v0.5.69 Archive Intake — MERGED / PHONE QA NEXT — 2026-10-07
+
+Status: **MAIN CI PASS / PHONE ACCEPTANCE PENDING**.
+
+Authoritative code state:
+- release: **v0.5.69 / build 85**;
+- issue: **#51 — Archive Intake** remains open until phone PASS;
+- PR: **#53 — v0.5.69 — direct ZIP / 7Z / RAR archive intake** — MERGED;
+- feature head before merge: `f9f11e4a3770b4d098a134217f32c036cfe21613`;
+- main merge: `53f4208b4b2e4d27e4bb55094c855eaf13fb2442`;
+- PR CI: Tests #525 PASS; Android PR Check #423 PASS;
+- main CI: Tests #526 PASS; Android Debug APK #132 PASS;
+- artifact: `Renault-Docs-v0.5.69-Debug`, id `11489564391`;
+- artifact digest: `sha256:328d897a8c484931d08c6e6fa3e00fd718034cc0c7514581a23394d9f2bdcdba`.
+
+Implemented and merged:
+- ZIP / 7Z / RAR SAF intake;
+- source archive is read-only and never renamed/deleted;
+- app-private staging + safe extraction containment;
+- file-count / expanded-size / free-space guards;
+- Renault raw-root discovery;
+- pre-extraction archive listing inspection;
+- exact duplicate preflight and skip;
+- persisted multi-volume `WAITING_SELECTION` chooser;
+- installed volumes disabled/unselected; possible duplicates warned, not silently skipped;
+- one or more selected new volumes supported;
+- selected volumes resume from already-extracted staging without re-extraction;
+- foreground notification + partial wake lock + cancellation;
+- process-redelivery/idempotent duplicate checks;
+- stale partial output cleanup after process loss;
+- canonical .rdpkg written to the user-selected destination;
+- private staging cleanup on success/cancel/failure.
+
+Current next step — **phone QA, starting with a real ZIP archive**:
+1. phone Renault Menu: `5 → 19 → 8 → 13`;
+2. install v0.5.69 over v0.5.68 without clearing app data;
+3. smoke app startup/project data;
+4. run `Створити .rdpkg з архіву` with a real ZIP;
+5. then cover duplicate, multi-volume chooser, rotation, background/lock, cancel, source-unchanged and cleanup gates.
+
+Do not reopen implementation work unless phone evidence finds a regression. Catalog issue #30 remains separate.
+
+---
+
 # Renault Docs — CURRENT PLAN
 
 ## Issue #30 — Windows-source → publish pipeline
