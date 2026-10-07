@@ -1,6 +1,6 @@
 ## UX-ADD-001 — compact collapsible/pinnable Add panel
 
-Status: **PLANNED / SPEC LOCKED — 2026-10-07**
+Status: **PLANNED / SPEC LOCKED · GitHub issue #68 — 2026-10-07**
 
 Phone layout currently spends too much vertical space on four add/create entry points plus permanent instruction text.
 
@@ -1743,7 +1743,7 @@ service/run-store-backed import with reattach semantics, comparable to native ra
 
 ## PERF-ARCHIVE-001 — duplicate ZIP still extracts before skip
 
-Status: **v0.5.70 PHONE FAIL · ROOT CAUSE FIXED IN v0.5.71 · PHONE RE-TEST PENDING — 2026-10-07**
+Status: **v0.5.70/v0.5.71 PHONE FAST-PATH NOT ACCEPTED · v0.5.72 MAIN CI PASS · PHONE RE-TEST PENDING — 2026-10-07**
 
 Phone evidence on v0.5.69:
 - project: Megane II;
@@ -1774,6 +1774,12 @@ v0.5.70 implementation evidence:
 - Android Debug APK #133 PASS.
 
 Phone re-test remains required with the same NT8266A archive.
+
+v0.5.72 archive-root correction:
+- supplied phone video still showed extraction at 261/4378 and 894/4378;
+- inspector now preserves a root-level raw hint when INDEX/ACCUEIL lives directly at archive root;
+- bounded INDEX probe can carry NT8266A into duplicate matching without extraction;
+- Tests #535 PASS; Android Debug APK #135 PASS.
 
 v0.5.71 root-cause correction:
 - v0.5.70 still extracted the same archive on phone;
