@@ -4590,3 +4590,83 @@ Hard contracts:
 6. Phone QA with a real old Renault archive, including lock/background test.
 
 Do not mix this feature with Catalog issue #30 or change opaque Renault IDs.
+
+
+### Mandatory Termux release/install flow
+
+For every new Renault Docs Android release, do not skip the established Renault Menu path:
+
+1. `5 — Оновити проєкт з GitHub`
+2. `19 — Статус проєкту / build`
+3. Wait until the **exact current commit** shows Tests PASS + APK build PASS and `✓ МОЖНА ЗАВАНТАЖУВАТИ`
+4. `8 — Download APK для поточного commit`
+5. `13 — Відкрити папку останнього APK`
+6. Install **over** the current app; never clear app data for a normal update.
+
+`7 — Build + Download APK` is not the normal install step. Use it only when a fresh build for the current commit is intentionally needed.
+
+Archive Intake (#51 / v0.5.69) remains an Android-app feature; no separate Termux archive conversion command is required unless a future tooling need is explicitly approved.
+
+
+## Sleep checkpoint — v0.5.69 Archive Intake — 2026-10-07
+
+### Stable installed baseline
+- Phone baseline: **v0.5.68 / build 84**.
+- Current main: `b8cd2047b93b8ef6c8c4e160a9848c30ead113b0`.
+- Termux item 19/8 docs-only commit bug is fixed on main: status/download may safely reuse a successful same-Android-source artifact only when the build commit is an ancestor, branch matches, Android paths did not change, and the artifact is non-expired/current-version.
+- Normal phone release path remains: **5 → 19 → 8 → 13**.
+- Item 7 is only for intentionally starting a fresh build when required.
+
+### v0.5.69 feature state
+Canonical branch: `feat/v0.5.69-archive-intake`
+Draft PR: **#53**
+Issue: **#51 — Archive Intake**
+Feature head: `8de99f551ad56e6ec61b9a2372514217dc08cb7c`
+Target: **v0.5.69 / build 85**
+
+Latest CI on the feature head:
+- Tests #497 — **PASS**
+- Android PR Check #395 — **PASS**
+
+Implemented:
+- ZIP / 7Z / RAR signature detection and extraction backends;
+- SAF archive file → app-private `noBackupFilesDir` staging;
+- source archive remains read-only / unchanged;
+- safe extraction path containment (Zip Slip/path traversal defense);
+- expanded-size / file-count / free-space guards;
+- cancellation hooks and cleanup of app-private staging;
+- Renault raw-root discovery by root `INDEX.HTM` / `INDEX.HTML` / `ACCUEIL.HTM`;
+- extracted local raw root reuses existing `NativePreparationStager` and `NativeRdpkgPreparationEngine`;
+- archive source kind persists across service redelivery/restart;
+- Project UI contains `Створити .rdpkg з архіву` with ZIP/7Z/RAR help/picker;
+- foreground/background notification/progress/cancel stays on the existing native service lifecycle;
+- exact installed-volume duplicate preflight now runs **after raw-root discovery but before raw → .rdpkg conversion**;
+- duplicate identity uses stable volume id, or `document_code + date`; if dates are absent, matching vehicle codes are additionally required;
+- same document code with uncertain/different identity is NOT silently skipped;
+- exact duplicate ends in terminal `ALREADY_PRESENT` with user-facing `Том уже є · Конвертацію пропущено`, and the pre-created destination is removed when possible.
+
+### Still TODO before phone candidate / merge
+1. **Sync/rebase PR #53 onto current main** so it includes the latest Termux item 19/8 compatibility fix.
+2. Implement explicit **multi-volume archive chooser/batch plan**. Never silently choose one raw root.
+   - show discovered volumes;
+   - mark already-installed volumes;
+   - already-installed volumes should be unselected by default;
+   - allow user to select one or more new volumes.
+3. Improve duplicate optimization further: inspect archive entry names/metadata before full extraction where safely possible, so an obvious already-installed single volume can skip even the extraction step.
+4. Finish lifecycle/cleanup contracts for archive intake:
+   - rotation-safe chooser/status;
+   - screen lock/background continuation;
+   - safe cancel;
+   - no duplicate restart/run;
+   - staging cleanup on success/cancel/failure.
+5. Final CI after main sync.
+6. Build phone candidate and install only through **5 → 19 → 8 → 13**.
+7. Phone QA with a real old Renault archive:
+   - single-volume archive;
+   - duplicate already-installed archive;
+   - multi-volume archive;
+   - lock phone for several minutes during extraction/conversion;
+   - confirm source archive unchanged;
+   - confirm only selected/new volumes are converted/installed.
+
+Do not merge PR #53 or call v0.5.69 ready until the above is complete.
