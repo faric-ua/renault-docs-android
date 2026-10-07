@@ -60,6 +60,22 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
         self.assertIn("state.sourceKind", service)
         self.assertIn("EXTRA_SOURCE_KIND", service)
 
+    def test_duplicate_preflight_runs_before_native_conversion(self):
+        preflight = self.read_java("VolumeDuplicatePreflight.kt")
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+        store = self.read_java("NativeRdpkgRunStore.kt")
+
+        self.assertIn("documentCode", preflight)
+        self.assertIn("sourceDate", preflight)
+        self.assertIn("VolumeDuplicatePreflight", service)
+        self.assertIn("ProjectStore(", service)
+        self.assertIn("markAlreadyPresent(", service)
+        self.assertLess(
+            service.index("VolumeDuplicatePreflight"),
+            service.index("engine.prepareLocal("),
+        )
+        self.assertIn("ALREADY_PRESENT", store)
+
     def test_project_ui_exposes_archive_picker(self):
         project = self.read_java("ProjectActivity.kt")
 
