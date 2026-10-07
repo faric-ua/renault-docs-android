@@ -419,10 +419,24 @@ object ArchiveIntake {
                 .map {
                     parent ->
                     val leafName =
-                        parent
-                            .substringAfterLast(
-                                '/',
-                            )
+                        if (
+                            parent.isBlank()
+                        ) {
+                            sourceNameHint
+                                ?.substringBeforeLast(
+                                    '.',
+                                    sourceNameHint,
+                                )
+                                ?.takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?: "archive-root"
+                        } else {
+                            parent
+                                .substringAfterLast(
+                                    '/',
+                                )
+                        }
                     val strongDocumentCodes =
                         linkedSetOf<String>()
                     val pathDocumentCodes =
@@ -521,10 +535,8 @@ object ArchiveIntake {
                     )
                 }
                 .filter {
-                    it.relativePath
-                        .isNotBlank() &&
-                        it.leafName
-                            .isNotBlank()
+                    it.leafName
+                        .isNotBlank()
                 }
                 .sortedWith(
                     compareBy<RawRootHint> {
