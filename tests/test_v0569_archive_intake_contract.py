@@ -107,8 +107,8 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
         self.assertIn("resumeArchiveSelection", service)
         self.assertIn("runArchiveSelection()", service)
         self.assertIn('"Створити вибрані"', project)
-        self.assertIn('"✓ Уже встановлено"', project)
-        self.assertIn('"⚠ Схожий том уже є"', project)
+        self.assertIn("✓ Уже встановлено", project)
+        self.assertIn("⚠ Схожий том уже є", project)
 
     def test_archive_multi_volume_uses_destination_folder_and_per_volume_files(self):
         project = self.read_java("ProjectActivity.kt")
