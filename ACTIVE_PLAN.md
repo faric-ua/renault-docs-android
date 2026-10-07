@@ -1,3 +1,19 @@
+## ACTIVE — v0.5.73 compact Add panel — 2026-10-08
+
+v0.5.72 duplicate fast-path: **PHONE PASS**.
+
+Current code work:
+- issue #68;
+- version v0.5.73 / build 89;
+- implement one collapsible/pinnable `Додати` panel;
+- preserve all existing add/create flows;
+- keep operation status outside the collapsible body.
+
+Next gate:
+CI, merge, then phone visual/lifecycle QA.
+
+---
+
 ## ACTIVE — v0.5.72 duplicate ZIP phone re-test — 2026-10-07
 
 - runtime: `eacbbc1f914d4f35564724501a3edb126fd71963`
