@@ -1,3 +1,34 @@
+# v0.5.70 — Archive duplicate identity fast-path — 2026-10-07
+
+Status: **IMPLEMENTATION IN PROGRESS**.
+
+Trigger:
+- real-phone v0.5.69 duplicate ZIP test for `NT8266A · 2004-06-28`;
+- duplicate prevention was functionally correct, but the app still extracted thousands of files before proving the volume was already installed.
+
+Goal:
+- identify an unambiguous Renault `NT...` document code before full archive extraction whenever possible;
+- use archive filename/path metadata first;
+- for ZIP, use bounded direct reads of small index/metadata entries without materializing the whole archive;
+- if exactly one installed project volume matches the detected NT code, terminate as `ALREADY_PRESENT` before extraction;
+- preserve conservative fallback to full extraction when identity is ambiguous.
+
+Release:
+- target: **v0.5.70 / build 86**;
+- branch: `fix/v0.5.70-archive-duplicate-fastpath`.
+
+Acceptance:
+- same NT8266A duplicate ZIP no longer reaches `Розпаковую ZIP...`;
+- terminal result remains `Том уже є`;
+- project count remains unchanged;
+- source ZIP remains unchanged;
+- non-duplicate and ambiguous archives still fall back safely.
+
+Current next step:
+implement bounded archive identity probing + unit/contract tests, then CI and one phone re-test of the same duplicate ZIP.
+
+---
+
 # v0.5.69 Archive Intake — MERGED / PHONE QA NEXT — 2026-10-07
 
 Status: **MAIN CI PASS / PHONE ACCEPTANCE PENDING**.
