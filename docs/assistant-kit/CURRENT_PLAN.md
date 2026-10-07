@@ -40,6 +40,38 @@ After this archive gate passes, the next planned UI follow-up is the already-rec
 
 ---
 
+## NEXT UI — compact collapsible/pinnable `Додати` panel
+
+Status: **SPEC LOCKED / IMPLEMENT AFTER CURRENT ARCHIVE FAST-PATH PHONE GATE**.
+
+Project screen target from real-phone layout:
+- replace the current tall add/create cluster with **one full-width compact header tile** named `Додати`;
+- collapsed header contains:
+  - `Додати` title;
+  - pin control;
+  - expand/collapse chevron;
+  - the existing overall Help `?`;
+- default unpinned presentation is compact/collapsed to reclaim vertical space;
+- tapping the header/chevron expands the panel;
+- expanded body contains the existing controls **without changing their workflows**:
+  - `Авто` (.rdpkg · один том);
+  - `Вручну` (Папка / SAF);
+  - `Створити .rdpkg з raw`;
+  - `Створити .rdpkg з архіву`;
+- existing per-action Help `?` buttons stay with their actions inside the expanded body;
+- current instruction text `Натисни на том… / Утримуй том…` moves inside this expanded/help area so it disappears when the panel is collapsed;
+- pin means **keep this panel expanded persistently** across activity recreation/reopen;
+- unpin returns it to normal collapsible behavior; after unpin the user can collapse it;
+- rotation must preserve current expanded/collapsed state;
+- persistent pin state must survive app/page reopen;
+- active operation status cards remain outside the collapsed body so an in-progress import/conversion is never hidden.
+
+Later Home follow-up:
+- evaluate the same full-width collapsible + pin pattern for large Home action/project panels after the Project screen version is accepted.
+
+This is a layout compaction only; no add/import/raw/archive semantics are to be rewritten.
+
+
 # v0.5.70 — Archive duplicate identity fast-path — 2026-10-07
 
 Status: **MERGED / MAIN CI PASS / PHONE RE-TEST NEXT**.
