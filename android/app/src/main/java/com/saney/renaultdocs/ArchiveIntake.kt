@@ -43,6 +43,16 @@ object ArchiveIntake {
         val rawRoots: List<File>,
     )
 
+    data class RawRootHint(
+        val relativePath: String,
+        val leafName: String,
+    )
+
+    data class Inspection(
+        val format: Format,
+        val rawRoots: List<RawRootHint>,
+    )
+
     fun detectFormat(
         source: File,
     ): Format {
@@ -179,6 +189,274 @@ object ArchiveIntake {
         error(
             "Непідтримуваний архів. Потрібен ZIP, 7Z або RAR."
         )
+    }
+
+    fun inspectRawRoots(
+        source: File,
+    ): Inspection {
+        require(
+            source.isFile,
+        ) {
+            "Архів недоступний."
+        }
+
+        val format =
+            detectFormat(
+                source,
+            )
+        val rawParents =
+            linkedSetOf<String>()
+        val preparedParents =
+            linkedSetOf<String>()
+        var count =
+            0
+
+        fun inspectEntry(
+            entryName: String,
+        ) {
+            count +=
+                1
+            checkEntryCount(
+                count,
+            )
+
+            val segments =
+                validatedEntrySegments(
+                    entryName,
+                )
+
+            if (
+                segments.isEmpty()
+            ) {
+                return
+            }
+
+            val fileName =
+                segments.last()
+                    .lowercase(
+                        Locale.ROOT,
+                    )
+            val parent =
+                segments
+                    .dropLast(
+                        1,
+                    )
+                    .joinToString(
+                        "/",
+                    )
+
+            if (
+                parent.count {
+                    it ==
+                        '/'
+                } >
+                MAX_DISCOVERY_DEPTH
+            ) {
+                return
+            }
+
+            when {
+                fileName in
+                    RAW_ENTRYPOINTS ->
+                    rawParents +=
+                        parent
+
+                fileName ==
+                    "renault-dataset.json" ->
+                    preparedParents +=
+                        parent
+            }
+        }
+
+        when (
+            format
+        ) {
+            Format.ZIP ->
+                ZipFile(
+                    source,
+                ).use {
+                    archive ->
+                    val entries =
+                        archive.entries()
+
+                    while (
+                        entries.hasMoreElements()
+                    ) {
+                        val entry =
+                            entries.nextElement()
+
+                        if (
+                            !entry.isDirectory
+                        ) {
+                            inspectEntry(
+                                entry.name,
+                            )
+                        }
+                    }
+                }
+
+            Format.SEVEN_Z -> {
+                @Suppress(
+                    "DEPRECATION",
+                )
+                val archive =
+                    SevenZFile(
+                        source,
+                    )
+
+                archive.use {
+                    sevenZ ->
+                    while (
+                        true
+                    ) {
+                        val entry =
+                            sevenZ.nextEntry
+                                ?: break
+
+                        if (
+                            !entry.isDirectory
+                        ) {
+                            val name =
+                                entry.name
+                                    ?: error(
+                                        "7Z містить запис без назви."
+                                    )
+
+                            inspectEntry(
+                                name,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Format.RAR ->
+                Archive(
+                    source,
+                ).use {
+                    archive ->
+                    require(
+                        !archive.isPasswordProtected,
+                    ) {
+                        "RAR захищений паролем. Парольні архіви поки не підтримуються."
+                    }
+
+                    archive.fileHeaders
+                        .forEach {
+                            header ->
+                            if (
+                                !header.isDirectory
+                            ) {
+                                inspectEntry(
+                                    header.fileName,
+                                )
+                            }
+                        }
+                }
+        }
+
+        val hints =
+            rawParents
+                .filterNot {
+                    it in
+                        preparedParents
+                }
+                .map {
+                    parent ->
+                    RawRootHint(
+                        relativePath =
+                            parent,
+                        leafName =
+                            parent
+                                .substringAfterLast(
+                                    '/',
+                                    "",
+                                ),
+                    )
+                }
+                .filter {
+                    it.relativePath
+                        .isNotBlank() &&
+                        it.leafName
+                            .isNotBlank()
+                }
+                .sortedWith(
+                    compareBy<RawRootHint> {
+                        it.relativePath
+                            .count {
+                                char ->
+                                char ==
+                                    '/'
+                            }
+                    }.thenBy {
+                        it.relativePath
+                            .lowercase(
+                                Locale.ROOT,
+                            )
+                    }
+                )
+
+        return Inspection(
+            format =
+                format,
+            rawRoots =
+                hints,
+        )
+    }
+
+    private fun validatedEntrySegments(
+        entryName: String,
+    ): List<String> {
+        val normalized =
+            entryName
+                .replace(
+                    '\\',
+                    '/',
+                )
+                .trim()
+
+        require(
+            normalized.isNotBlank(),
+        ) {
+            "Архів містить порожній шлях."
+        }
+
+        require(
+            !normalized.startsWith(
+                "/",
+            ) &&
+                !WINDOWS_ABSOLUTE
+                    .containsMatchIn(
+                        normalized,
+                    )
+        ) {
+            "Архів містить абсолютний шлях: " +
+                entryName
+        }
+
+        val segments =
+            normalized
+                .split(
+                    '/',
+                )
+                .filter {
+                    it.isNotEmpty() &&
+                        it !=
+                            "."
+                }
+
+        require(
+            segments.isNotEmpty() &&
+                segments.none {
+                    it ==
+                        ".."
+                }
+        ) {
+            "Архів містить небезпечний шлях: " +
+                entryName
+        }
+
+        return segments
     }
 
     fun extract(
