@@ -4670,3 +4670,51 @@ Implemented:
    - confirm only selected/new volumes are converted/installed.
 
 Do not merge PR #53 or call v0.5.69 ready until the above is complete.
+
+
+## v0.5.69 main candidate / phone QA — 2026-10-07
+
+Archive Intake is now merged to `main`.
+
+Release:
+- **v0.5.69 / build 85**
+- feature PR: **#53 — merged**
+- merge SHA: `53f4208b4b2e4d27e4bb55094c855eaf13fb2442`
+- main Tests #526 — **PASS**
+- signed Android Debug APK #132 — **PASS**
+- issue #51 remains OPEN until real-device archive QA is accepted.
+
+Implemented acceptance scope:
+- direct ZIP / 7Z / RAR intake;
+- private safe staging; source archive remains unchanged;
+- pre-extraction archive listing inspection;
+- exact duplicate fast path can skip full extraction and conversion;
+- post-extraction duplicate preflight before raw→.rdpkg;
+- multi-volume persisted chooser with installed volumes disabled/unselected and possible duplicates warned;
+- one or multiple selected volumes;
+- one canonical .rdpkg per selected volume in the chosen destination folder;
+- chooser survives Activity recreation from persisted run-store state;
+- resume uses already-extracted staging;
+- stale partial output URI is persisted and cleaned after process loss;
+- cancel/terminal cleanup preserves source archive and removes app-private staging;
+- existing native preparation/import pipeline is reused.
+
+Phone delivery must use Renault Menu:
+`5 → 19 → 8 → 13`
+
+Expected item 19:
+- v0.5.69 / build 85;
+- Tests PASS (or safe docs-only equivalent);
+- APK build PASS;
+- `✓ МОЖНА ЗАВАНТАЖУВАТИ`.
+
+Phone QA before closing #51:
+1. single-volume old archive → canonical .rdpkg + installed once;
+2. exact already-installed archive → no unnecessary extraction/conversion when listing identity is sufficient; terminal `Том уже є`;
+3. multi-volume archive → chooser appears; installed volumes disabled; select one or several new volumes;
+4. rotate while chooser is open → same selections restored, no re-extraction/autostart;
+5. lock phone 2–3 minutes during extraction/conversion → operation continues without manual revival;
+6. source archive remains unchanged;
+7. generated .rdpkg files appear in chosen destination folder;
+8. cancel/error/success leaves no stale private archive staging;
+9. branded foreground notification icon remains correct.
