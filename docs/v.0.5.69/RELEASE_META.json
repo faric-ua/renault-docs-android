@@ -9,18 +9,44 @@
   "feature_head": "f9f11e4a3770b4d098a134217f32c036cfe21613",
   "main_merge": "53f4208b4b2e4d27e4bb55094c855eaf13fb2442",
   "ci": {
-    "pr_tests": {"run_number": 525, "status": "PASS"},
-    "android_pr_check": {"run_number": 423, "status": "PASS"},
-    "main_tests": {"run_number": 526, "status": "PASS"},
-    "main_android_debug_apk": {"run_number": 132, "status": "PASS"}
+    "pr_tests": {
+      "run_number": 525,
+      "status": "PASS"
+    },
+    "android_pr_check": {
+      "run_number": 423,
+      "status": "PASS"
+    },
+    "main_tests": {
+      "run_number": 526,
+      "status": "PASS"
+    },
+    "main_android_debug_apk": {
+      "run_number": 132,
+      "status": "PASS"
+    }
   },
   "artifact": {
     "name": "Renault-Docs-v0.5.69-Debug",
     "id": 11489564391,
     "digest": "sha256:328d897a8c484931d08c6e6fa3e00fd718034cc0c7514581a23394d9f2bdcdba"
   },
-  "qa_status": "PENDING",
-  "phone_baseline_before_install": {"versionName": "0.5.68", "versionCode": 84},
+  "qa_status": "IN_PROGRESS",
+  "phone_baseline_before_install": {
+    "versionName": "0.5.68",
+    "versionCode": 84
+  },
   "next": "phone_qa_start_with_real_zip_archive",
-  "issue_status": "OPEN_UNTIL_PHONE_PASS"
+  "issue_status": "OPEN_UNTIL_PHONE_PASS",
+  "phone_checkpoint": {
+    "date": "2026-10-07",
+    "duplicate_zip": {
+      "volume": "NT8266A",
+      "date": "2004-06-28",
+      "duplicate_prevention": "PASS",
+      "early_fast_path": "MISS",
+      "observed_extraction_progress": "3732 / 4378 files"
+    },
+    "next": "verify project remains 9 volumes, then test one not-yet-installed single-volume ZIP"
+  }
 }

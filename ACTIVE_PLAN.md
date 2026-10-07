@@ -91,3 +91,28 @@ Next exact work order:
 6. phone candidate via **5 → 19 → 8 → 13** only.
 
 Already implemented duplicate rule: exact installed volume is detected before `engine.prepareLocal(...)`, conversion is skipped, and UI ends with `Том уже є` rather than wasting time generating/importing the same volume.
+
+## PHONE QA CHECKPOINT — NT8266A duplicate ZIP — 2026-10-07
+
+Status: **duplicate prevention PASS / full v0.5.69 acceptance still in progress**.
+
+Observed on phone:
+- Megane II archive flow processed an archive that resolved to `NT8266A · 2004-06-28`;
+- final terminal result: `Том уже є`;
+- conversion was skipped;
+- no claim yet for the entire release gate.
+
+Performance finding:
+- this archive still reached visible ZIP extraction (`3732 / 4378` files) before duplicate identity was proven;
+- tracked as `PERF-ARCHIVE-001`;
+- functional behavior is correct, early duplicate fast-path needs future optimization.
+
+**Current next action:**
+1. close the terminal status;
+2. confirm Megane II still shows **9 volumes**;
+3. then test a **single-volume ZIP whose volume is NOT installed yet**;
+4. require one canonical .rdpkg + one new installed volume, exactly once;
+5. verify the original ZIP remains unchanged.
+
+After that: multi-volume chooser → rotation → background/lock → Cancel/cleanup.
+
