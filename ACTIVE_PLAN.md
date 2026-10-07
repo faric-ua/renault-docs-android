@@ -1,3 +1,19 @@
+## ACTIVE — v0.5.73 Add panel phone QA — 2026-10-08
+
+- runtime: `871d93c6f0416f9b98ea78edbab06a9ddcce8eba`
+- v0.5.73 / build 89
+- Tests #538 PASS
+- Android Debug APK #136 PASS
+- issue #68 implementation merged
+
+Current user action:
+`5 → 19 → 8 → 13` → install → open Megane II.
+
+First visual gate:
+only one compact full-width `Додати` header should be visible above the volume list.
+
+---
+
 ## ACTIVE — v0.5.73 compact Add panel — 2026-10-08
 
 v0.5.72 duplicate fast-path: **PHONE PASS**.

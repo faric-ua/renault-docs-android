@@ -1,6 +1,6 @@
 # v0.5.73 — compact collapsible/pinnable Add panel — 2026-10-08
 
-Status: **IMPLEMENTATION IN PROGRESS**.
+Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
 
 Prerequisite phone gate:
 - v0.5.72 duplicate NT8266A fast-path: **PASS**;
@@ -19,8 +19,17 @@ Current implementation:
 - volume tap/long-press guidance moved inside Add;
 - operation/progress status remains outside and visible.
 
+Merged / CI:
+- PR #70 — MERGED;
+- runtime source: `871d93c6f0416f9b98ea78edbab06a9ddcce8eba`;
+- Tests #538 — PASS;
+- Android Debug APK #136 — PASS;
+- artifact: `Renault-Docs-v0.5.73-Debug`;
+- artifact id: `11517210871`;
+- digest: `sha256:027f0603e84868e883cc826f8706394f3c40106135bbaa87c97e32a63094f36b`.
+
 Next:
-CI → merge → phone QA of collapse / expand / pin / rotation / unchanged actions.
+phone QA of collapse / expand / pin / reopen / rotation / unchanged actions.
 
 ---
 

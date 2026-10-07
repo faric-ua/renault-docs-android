@@ -1,6 +1,6 @@
 ## UX-ADD-001 — compact collapsible/pinnable Add panel
 
-Status: **PLANNED / SPEC LOCKED · GitHub issue #68 — 2026-10-07**
+Status: **IMPLEMENTED IN v0.5.73 · MAIN CI PASS · PHONE QA PENDING · GitHub issue #68 — 2026-10-08**
 
 Phone layout currently spends too much vertical space on four add/create entry points plus permanent instruction text.
 
@@ -14,7 +14,14 @@ Locked UX:
 - operation/progress status stays visible outside the collapsible body;
 - first implement on Project screen; Home adaptation is a separate follow-up.
 
-No runtime implementation is part of the current archive fast-path fix.
+v0.5.73 implementation evidence:
+- PR #70 merged;
+- runtime `871d93c6f0416f9b98ea78edbab06a9ddcce8eba`;
+- Tests #538 PASS;
+- Android Debug APK #136 PASS;
+- phone QA remains required.
+
+No Home-screen adaptation is included in this release.
 
 ---
 

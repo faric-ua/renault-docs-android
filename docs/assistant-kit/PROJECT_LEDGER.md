@@ -2425,3 +2425,25 @@ PERF-ARCHIVE-001 is CLOSED for v0.5.72.
 Next runtime task:
 issue #68 — compact collapsible/pinnable Project `Додати` panel, target v0.5.73 / build 89.
 
+## 2026-10-08 — v0.5.73 compact Add panel merged
+
+Issue #68 implementation:
+- one full-width `Додати` header;
+- unpinned default collapsed;
+- persistent pin keeps it expanded across reopen;
+- transient expanded/collapsed state survives rotation;
+- Auto / Manual / raw→.rdpkg / archive→.rdpkg remain inside the expanded body with existing Help semantics;
+- volume interaction guidance moved inside Add;
+- operation/progress status stays outside the collapsible body.
+
+Merged runtime:
+`871d93c6f0416f9b98ea78edbab06a9ddcce8eba`.
+
+CI:
+- Tests #538 PASS;
+- Android Debug APK #136 PASS;
+- artifact `Renault-Docs-v0.5.73-Debug`, id `11517210871`;
+- digest `sha256:027f0603e84868e883cc826f8706394f3c40106135bbaa87c97e32a63094f36b`.
+
+Phone acceptance pending.
+
