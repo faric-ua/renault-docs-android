@@ -21,6 +21,9 @@ import org.apache.commons.compress.archivers.sevenz.SevenZFile
  * Every archive member is materialized as a normal file/directory under the
  * supplied extraction root. Link/redirection semantics are deliberately not
  * recreated, which keeps extraction contained inside app-owned staging.
+ *
+ * Duplicate preflight may read only a bounded prefix of ZIP entrypoint HTML
+ * directly from the archive to recover a Renault NT identity before extraction.
  */
 object ArchiveIntake {
     enum class Format {
