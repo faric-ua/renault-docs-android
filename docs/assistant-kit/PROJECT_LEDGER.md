@@ -2370,3 +2370,20 @@ Phone re-test pending with the exact same NT8266A ZIP.
 
 UX queue remains unchanged: collapsible/pinnable `Додати` panel is saved and is the next UI follow-up after Archive Intake acceptance.
 
+## 2026-10-07 — Add panel detailed UX contract locked
+
+Real-phone screenshots confirm the current Project add/create area consumes excessive vertical space.
+
+Locked next-UI contract:
+- one full-width `Додати` header tile replaces the always-expanded cluster;
+- pin + expand/collapse + overall Help live in the header;
+- unpinned default is collapsed;
+- pin keeps the panel expanded persistently;
+- expanded body keeps Auto, Manual, raw→.rdpkg, archive→.rdpkg and every existing per-action Help control;
+- tap/long-press volume guidance moves into Add expanded/help content;
+- operation status remains outside the collapsible body so running work stays visible;
+- rotation preserves transient expansion state; pin persists across reopen;
+- Home may later reuse the same pattern after Project-screen acceptance.
+
+Implementation is queued immediately after the current Archive Intake duplicate fast-path phone gate.
+
