@@ -32,6 +32,7 @@
 - `docs/assistant-kit/APK_BUILD_CONTRACT.md`
 - `docs/assistant-kit/RELEASE_DOCUMENTATION_CONTRACT.md`
 - `docs/assistant-kit/TEST_DIAGRAM_STANDARD.md`
+- `docs/assistant-kit/RESPONSE_CONTRACT.md`
 
 ## Dataset / library
 
