@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import java.io.File
 import java.util.zip.ZipEntry
+import kotlin.io.path.createTempDirectory
 import java.util.zip.ZipOutputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -11,7 +12,7 @@ import org.junit.Test
 class ArchiveIntakeTest {
     @Test
     fun detectsArchiveSignatures() {
-        val root = createTempDir(prefix = "archive-format-")
+        val root = createTempDirectory("archive-format-").toFile()
 
         try {
             val zip = File(root, "source.bin").apply {
@@ -66,7 +67,7 @@ class ArchiveIntakeTest {
 
     @Test
     fun rejectsTraversalAndAbsolutePaths() {
-        val root = createTempDir(prefix = "archive-safe-")
+        val root = createTempDirectory("archive-safe-").toFile()
 
         try {
             for (name in listOf("../evil.txt", "a/../../evil.txt", "/tmp/evil", "C:\\evil.txt")) {
@@ -91,7 +92,7 @@ class ArchiveIntakeTest {
 
     @Test
     fun extractsZipAndFindsNestedRenaultRawRoot() {
-        val root = createTempDir(prefix = "archive-zip-")
+        val root = createTempDirectory("archive-zip-").toFile()
         val archive = File(root, "old-renault.zip")
         val output = File(root, "out")
 
@@ -131,7 +132,7 @@ class ArchiveIntakeTest {
 
     @Test
     fun rejectsZipSlipBeforeWritingOutsideStaging() {
-        val root = createTempDir(prefix = "archive-zipslip-")
+        val root = createTempDirectory("archive-zipslip-").toFile()
         val archive = File(root, "bad.zip")
         val output = File(root, "out")
         val escaped = File(root, "escaped.txt")
@@ -161,7 +162,7 @@ class ArchiveIntakeTest {
 
     @Test
     fun findsMultipleRawRootsWithoutChoosingOneSilently() {
-        val root = createTempDir(prefix = "archive-roots-")
+        val root = createTempDirectory("archive-roots-").toFile()
 
         try {
             File(root, "a").mkdirs()
