@@ -1492,6 +1492,10 @@ object ArchiveIntake {
             "^[A-Za-z]:[/\\\\]"
         )
 
+    private const val MAX_IDENTITY_PROBE_BYTES =
+        64 *
+            1024
+
     private const val BUFFER_SIZE =
         1024 *
             1024
