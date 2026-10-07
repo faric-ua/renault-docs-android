@@ -91,6 +91,97 @@ class ArchiveIntakeTest {
     }
 
     @Test
+    fun inspectsZipRawRootsWithoutExtractingPayload() {
+        val root = createTempDirectory("archive-inspect-").toFile()
+        val archive = File(root, "old-renault.zip")
+
+        try {
+            ZipOutputStream(archive.outputStream()).use { zip ->
+                zip.putNextEntry(ZipEntry("wrapper/NT8344/INDEX.HTM"))
+                zip.write("index".toByteArray())
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("wrapper/NT8393/ACCUEIL.HTM"))
+                zip.write("home".toByteArray())
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("wrapper/NT8393/data/huge.bin"))
+                zip.write(byteArrayOf(1, 2, 3))
+                zip.closeEntry()
+            }
+
+            val inspection =
+                ArchiveIntake.inspectRawRoots(
+                    archive,
+                )
+
+            assertEquals(
+                ArchiveIntake.Format.ZIP,
+                inspection.format,
+            )
+            assertEquals(
+                setOf(
+                    "wrapper/NT8344",
+                    "wrapper/NT8393",
+                ),
+                inspection.rawRoots
+                    .map {
+                        it.relativePath
+                    }
+                    .toSet(),
+            )
+            assertEquals(
+                setOf(
+                    "NT8344",
+                    "NT8393",
+                ),
+                inspection.rawRoots
+                    .map {
+                        it.leafName
+                    }
+                    .toSet(),
+            )
+            assertTrue(
+                !File(
+                    root,
+                    "wrapper",
+                ).exists(),
+            )
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun inspectionIgnoresAlreadyPreparedDatasetRoots() {
+        val root = createTempDirectory("archive-inspect-prepared-").toFile()
+        val archive = File(root, "prepared.zip")
+
+        try {
+            ZipOutputStream(archive.outputStream()).use { zip ->
+                zip.putNextEntry(ZipEntry("NT8344/INDEX.HTM"))
+                zip.write("index".toByteArray())
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("NT8344/renault-dataset.json"))
+                zip.write("{}".toByteArray())
+                zip.closeEntry()
+            }
+
+            val inspection =
+                ArchiveIntake.inspectRawRoots(
+                    archive,
+                )
+
+            assertTrue(
+                inspection.rawRoots.isEmpty(),
+            )
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun extractsZipAndFindsNestedRenaultRawRoot() {
         val root = createTempDirectory("archive-zip-").toFile()
         val archive = File(root, "old-renault.zip")
