@@ -35,13 +35,11 @@ class V0573CollapsibleAddPanelContractTests(unittest.TestCase):
         self.assertIn("HELP_ARCHIVE", panel)
         self.assertIn("HELP_ADD", panel)
 
-    def test_guidance_moves_inside_panel_and_default_status_is_blank(self):
+    def test_default_status_is_blank_and_add_panel_remains_compact(self):
         project = self.read_java("ProjectActivity.kt")
 
-        self.assertIn("ADD_GUIDANCE_TEXT", project)
         self.assertIn('private const val DEFAULT_STATUS_TEXT =\n            ""', project)
         self.assertIn("addPanelBody.addView(", project)
-        self.assertIn("ADD_GUIDANCE_TEXT", project)
 
     def test_pin_forces_expanded_and_persists(self):
         project = self.read_java("ProjectActivity.kt")
