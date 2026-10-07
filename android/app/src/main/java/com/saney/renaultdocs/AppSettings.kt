@@ -148,6 +148,9 @@ class AppSettings(
         private const val KEY_PDF_ZOOM_STEP =
             "pdf_zoom_step_percent"
 
+        private const val KEY_PROJECT_ADD_PANEL_PINNED =
+            "project_add_panel_pinned"
+
         private const val KEY_BACKUP_TREE_URI =
             "backup_tree_uri"
 
