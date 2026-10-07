@@ -39,6 +39,8 @@ data class NativeRdpkgRunState(
     val destinationUri: String? = null,
     val archiveExtractionRoot: String? = null,
     val archiveCandidates: List<ArchiveVolumeCandidate> = emptyList(),
+    val archiveCurrentCandidatePath: String? = null,
+    val archiveCurrentOutputUri: String? = null,
     val packageId: String? = null,
     val volumeId: String? = null,
     val volumeTitle: String? = null,
@@ -197,6 +199,16 @@ class NativeRdpkgRunStore(
                         null,
                     ),
                 ),
+            archiveCurrentCandidatePath =
+                prefs.getString(
+                    KEY_ARCHIVE_CURRENT_CANDIDATE_PATH,
+                    null,
+                ),
+            archiveCurrentOutputUri =
+                prefs.getString(
+                    KEY_ARCHIVE_CURRENT_OUTPUT_URI,
+                    null,
+                ),
             packageId =
                 prefs.getString(
                     KEY_PACKAGE_ID,
@@ -310,6 +322,12 @@ class NativeRdpkgRunStore(
             )
             .remove(
                 KEY_ARCHIVE_CANDIDATES,
+            )
+            .remove(
+                KEY_ARCHIVE_CURRENT_CANDIDATE_PATH,
+            )
+            .remove(
+                KEY_ARCHIVE_CURRENT_OUTPUT_URI,
             )
             .remove(
                 KEY_PACKAGE_ID,
@@ -623,6 +641,33 @@ class NativeRdpkgRunStore(
             .apply()
     }
 
+    fun setArchiveCurrentOutput(
+        candidatePath: String,
+        outputUri: String,
+    ) {
+        prefs.edit()
+            .putString(
+                KEY_ARCHIVE_CURRENT_CANDIDATE_PATH,
+                candidatePath,
+            )
+            .putString(
+                KEY_ARCHIVE_CURRENT_OUTPUT_URI,
+                outputUri,
+            )
+            .apply()
+    }
+
+    fun clearArchiveCurrentOutput() {
+        prefs.edit()
+            .remove(
+                KEY_ARCHIVE_CURRENT_CANDIDATE_PATH,
+            )
+            .remove(
+                KEY_ARCHIVE_CURRENT_OUTPUT_URI,
+            )
+            .apply()
+    }
+
     fun clearArchiveSelectionData() {
         prefs.edit()
             .remove(
@@ -630,6 +675,12 @@ class NativeRdpkgRunStore(
             )
             .remove(
                 KEY_ARCHIVE_CANDIDATES,
+            )
+            .remove(
+                KEY_ARCHIVE_CURRENT_CANDIDATE_PATH,
+            )
+            .remove(
+                KEY_ARCHIVE_CURRENT_OUTPUT_URI,
             )
             .apply()
     }
@@ -976,6 +1027,10 @@ class NativeRdpkgRunStore(
             "archive_extraction_root"
         private const val KEY_ARCHIVE_CANDIDATES =
             "archive_candidates"
+        private const val KEY_ARCHIVE_CURRENT_CANDIDATE_PATH =
+            "archive_current_candidate_path"
+        private const val KEY_ARCHIVE_CURRENT_OUTPUT_URI =
+            "archive_current_output_uri"
         private const val KEY_PACKAGE_ID =
             "package_id"
         private const val KEY_VOLUME_ID =
