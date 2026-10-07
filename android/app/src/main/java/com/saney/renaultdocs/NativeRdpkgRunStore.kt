@@ -7,6 +7,7 @@ enum class NativeRdpkgRunPhase {
     PREPARING,
     IMPORTING,
     COMPLETE,
+    ALREADY_PRESENT,
     FAILED,
     CANCELLED,
 }
@@ -52,6 +53,7 @@ data class NativeRdpkgRunState(
             phase in
                 setOf(
                     NativeRdpkgRunPhase.COMPLETE,
+                    NativeRdpkgRunPhase.ALREADY_PRESENT,
                     NativeRdpkgRunPhase.FAILED,
                     NativeRdpkgRunPhase.CANCELLED,
                 )
@@ -469,6 +471,43 @@ class NativeRdpkgRunStore(
             .putString(
                 KEY_PROGRESS_STAGE,
                 "Готово",
+            )
+            .putBoolean(
+                KEY_CANCEL_REQUESTED,
+                false,
+            )
+            .putLong(
+                KEY_FINISHED_AT,
+                System.currentTimeMillis(),
+            )
+            .apply()
+    }
+
+    fun markAlreadyPresent(
+        message: String,
+        volumeId: String,
+        volumeTitle: String,
+    ) {
+        prefs.edit()
+            .putString(
+                KEY_PHASE,
+                NativeRdpkgRunPhase.ALREADY_PRESENT.name,
+            )
+            .putString(
+                KEY_MESSAGE,
+                message,
+            )
+            .putString(
+                KEY_VOLUME_ID,
+                volumeId,
+            )
+            .putString(
+                KEY_VOLUME_TITLE,
+                volumeTitle,
+            )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Вже є",
             )
             .putBoolean(
                 KEY_CANCEL_REQUESTED,
