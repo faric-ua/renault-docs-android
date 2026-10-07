@@ -1321,6 +1321,7 @@ class ProjectActivity : Activity() {
         val detail =
             when (state.phase) {
                 NativeRdpkgRunPhase.COMPLETE -> state.message
+                NativeRdpkgRunPhase.ALREADY_PRESENT -> state.message
                 NativeRdpkgRunPhase.CANCELLED ->
                     state.message.ifBlank { "Підготовку .rdpkg скасовано." }
                 NativeRdpkgRunPhase.FAILED ->
@@ -1333,6 +1334,7 @@ class ProjectActivity : Activity() {
             val title =
                 when (state.phase) {
                     NativeRdpkgRunPhase.COMPLETE -> "Створення .rdpkg завершено"
+                    NativeRdpkgRunPhase.ALREADY_PRESENT -> "Том уже є"
                     NativeRdpkgRunPhase.CANCELLED -> "Створення .rdpkg скасовано"
                     NativeRdpkgRunPhase.FAILED -> "Створення .rdpkg · помилка"
                     else -> "Створення .rdpkg"
