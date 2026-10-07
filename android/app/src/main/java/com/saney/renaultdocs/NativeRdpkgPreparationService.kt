@@ -356,11 +356,70 @@ class NativeRdpkgPreparationService : Service() {
                             }
                         }
 
+                        val rawRoot =
+                            staged.rawRoots.single()
+                        val duplicate =
+                            VolumeDuplicatePreflight
+                                .check(
+                                    existing =
+                                        ProjectStore(
+                                            this,
+                                        ).volumes(
+                                            request.projectId,
+                                        ),
+                                    rawRoot =
+                                        rawRoot,
+                                )
+
+                        duplicate.exact
+                            ?.let {
+                                existing ->
+                                val label =
+                                    VolumeDuplicatePreflight
+                                        .label(
+                                            existing,
+                                        )
+                                val destinationCleaned =
+                                    deleteDestination(
+                                        destination,
+                                    )
+
+                                runStore.markAlreadyPresent(
+                                    message =
+                                        "Том уже є в проєкті: " +
+                                            label +
+                                            ". Конвертацію пропущено." +
+                                            if (
+                                                destinationCleaned
+                                            ) {
+                                                ""
+                                            } else {
+                                                "\nУвага: порожній файл призначення не вдалося видалити автоматично."
+                                            },
+                                    volumeId =
+                                        existing.id,
+                                    volumeTitle =
+                                        label,
+                                )
+
+                                notifyFinal(
+                                    title =
+                                        "Renault Docs · том уже є",
+                                    text =
+                                        label +
+                                            " · конвертацію пропущено",
+                                    projectId =
+                                        request.projectId,
+                                )
+
+                                return
+                            }
+
                         engine.prepareLocal(
                             request =
                                 engineRequest,
                             sourceRoot =
-                                staged.rawRoots.single(),
+                                rawRoot,
                         )
                     }
                 }
