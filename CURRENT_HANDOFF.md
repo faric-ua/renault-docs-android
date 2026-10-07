@@ -1,3 +1,27 @@
+## v0.5.73 compact Add panel — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
+
+- runtime source: `871d93c6f0416f9b98ea78edbab06a9ddcce8eba`;
+- version: v0.5.73 / build 89;
+- PR #70 MERGED;
+- Tests #538 PASS;
+- Android Debug APK #136 PASS;
+- artifact `Renault-Docs-v0.5.73-Debug`, id `11517210871`;
+- digest `sha256:027f0603e84868e883cc826f8706394f3c40106135bbaa87c97e32a63094f36b`.
+
+Phone QA target:
+- unpinned opens collapsed;
+- tap/chevron expands and collapses;
+- pin keeps expanded across reopen;
+- unpin allows collapse again;
+- rotation preserves transient expansion;
+- Auto / Manual / raw / archive actions and Help still work;
+- operation/progress status remains outside the panel.
+
+Exact continuation:
+Renault Menu `5 → 19 → 8 → 13` → install v0.5.73 → open Megane II and check the compact `Додати` panel first.
+
+---
+
 ## v0.5.72 phone PASS → v0.5.73 Add panel implementation — 2026-10-08
 
 v0.5.72 phone evidence:
