@@ -1,3 +1,27 @@
+# v0.5.74 — Add panel status/pin/chevron refinement — 2026-10-08
+
+Status: **IMPLEMENTATION IN PROGRESS**.
+
+v0.5.73 phone visual evidence:
+- collapsed Add layout: PASS;
+- expanded Add layout: PASS;
+- new UX finding: bare transient status text sits between Add and the volume list;
+- new UX finding: emoji pin does not communicate inactive vs pinned state cleanly;
+- new UX finding: expand/collapse chevron is too light;
+- guidance line inside Add should be removed.
+
+Target:
+- transient status moves to a subtle warm status card at the bottom of expanded Add;
+- blank status is hidden;
+- guidance line is removed;
+- inactive pin = neutral monochrome, pinned pin = red;
+- chevron = heavier `▲ / ▼`;
+- active operation/progress remains outside Add.
+
+Target release: **v0.5.74 / build 90**.
+
+---
+
 # v0.5.73 — compact collapsible/pinnable Add panel — 2026-10-08
 
 Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
