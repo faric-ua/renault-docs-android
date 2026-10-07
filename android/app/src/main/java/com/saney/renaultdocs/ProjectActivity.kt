@@ -284,6 +284,15 @@ class ProjectActivity : Activity() {
         super.onStop()
     }
 
+    override fun onDestroy() {
+        archiveChooserDialog
+            ?.dismiss()
+        archiveChooserDialog =
+            null
+
+        super.onDestroy()
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -1507,8 +1516,7 @@ class ProjectActivity : Activity() {
             },
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1f,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
             ),
         )
 
