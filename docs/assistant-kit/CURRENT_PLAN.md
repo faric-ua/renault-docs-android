@@ -1,6 +1,6 @@
 # v0.5.71 — top-level archive raw-root fast-path fix — 2026-10-07
 
-Status: **IMPLEMENTATION IN PROGRESS**.
+Status: **MERGED / MAIN CI PASS / PHONE RE-TEST NEXT**.
 
 Phone evidence:
 - v0.5.70 / build 86 is installed;
@@ -24,8 +24,19 @@ UX note:
 - it has **not been implemented yet** because it was intentionally deferred during Archive Intake phone QA;
 - keep it as the next UI follow-up after the archive duplicate path is accepted.
 
+Implementation / CI:
+- PR #65 — MERGED;
+- runtime source: `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`;
+- Tests #532 — PASS;
+- Android Debug APK #134 — PASS;
+- artifact: `Renault-Docs-v0.5.71-Debug`;
+- artifact id: `11510676847`;
+- artifact digest: `sha256:47ff40990048cd7e275bdd6677c438996693843b409dae6b65101e3c63230e37`.
+
 Current next step:
-implement the one-line leaf-name fix + regression test, run CI, build v0.5.71, then repeat the same ZIP once more.
+install v0.5.71 through Renault Menu `5 → 19 → 8 → 13` and repeat the exact same NT8266A duplicate ZIP. Expected: no `Розпаковую ZIP...` stage.
+
+After this archive gate passes, the next planned UI follow-up is the already-recorded collapsible/pinnable `Додати` panel.
 
 ---
 
