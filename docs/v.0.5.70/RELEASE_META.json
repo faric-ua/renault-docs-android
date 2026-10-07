@@ -1,10 +1,27 @@
 {
   "versionName": "0.5.70",
   "versionCode": 86,
-  "phase": "development",
+  "phase": "merged_phone_retest_pending",
   "feature": "Archive duplicate identity fast-path",
   "branch": "fix/v0.5.70-archive-duplicate-fastpath",
   "source_finding": "PERF-ARCHIVE-001",
-  "qa_status": "PENDING",
-  "next": "implement_bounded_archive_identity_probe"
+  "qa_status": "PENDING_PHONE_RETEST",
+  "next": "phone_retest_same_nt8266a_duplicate_zip_without_extraction",
+  "pr": 63,
+  "main_runtime_source": "b9c763237b7aceede742c6aa559f53abf4c83444",
+  "ci": {
+    "tests": {
+      "run_number": 530,
+      "status": "PASS"
+    },
+    "android_debug_apk": {
+      "run_number": 133,
+      "status": "PASS"
+    }
+  },
+  "artifact": {
+    "name": "Renault-Docs-v0.5.70-Debug",
+    "id": 11508378680,
+    "digest": "sha256:20b4a7ac2b519a6a701ba688e962a8b51238c535d486eae3621e0db566882c2b"
+  }
 }
