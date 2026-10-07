@@ -132,6 +132,32 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
         self.assertIn("state.isWaitingForSelection", project)
         self.assertIn("showArchiveVolumeChooser(", project)
 
+    def test_archive_partial_output_is_persisted_for_crash_cleanup(self):
+        store = self.read_java("NativeRdpkgRunStore.kt")
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+
+        self.assertIn("archiveCurrentOutputUri", store)
+        self.assertIn("KEY_ARCHIVE_CURRENT_OUTPUT_URI", store)
+        self.assertIn("setArchiveCurrentOutput", store)
+        self.assertIn("clearArchiveCurrentOutput", store)
+        self.assertIn("cleanupStaleArchiveOutput()", service)
+        self.assertIn("runStore.setArchiveCurrentOutput(", service)
+        self.assertIn("runStore.clearArchiveCurrentOutput()", service)
+        self.assertLess(
+            service.index("cleanupStaleArchiveOutput()"),
+            service.index("stager.stageSource("),
+        )
+
+    def test_archive_waiting_cancel_and_activity_destroy_are_safe(self):
+        project = self.read_java("ProjectActivity.kt")
+        service = self.read_java("NativeRdpkgPreparationService.kt")
+
+        self.assertIn("override fun onDestroy()", project)
+        self.assertIn("archiveChooserDialog", project)
+        self.assertIn("state.isWaitingForSelection", service)
+        self.assertIn("cleanupWaitingArchiveWorkspace(", service)
+        self.assertIn("private staging очищено", service)
+
     def test_archive_batch_resume_reuses_extracted_staging(self):
         service = self.read_java("NativeRdpkgPreparationService.kt")
 
