@@ -39,3 +39,11 @@ Rules:
 - multiple detected volumes require explicit user selection;
 - preserve foreground notification/background/screen-lock behavior;
 - keep opaque Renault IDs unchanged.
+
+
+### Release gate — Termux menu
+
+Every phone candidate for this stage must be delivered through Renault Menu:
+`5 → 19 → 8 → 13`.
+
+Do not tell the user to use item 7 as the normal update path. Item 7 is only for deliberately triggering a new build when the exact current commit has no successful APK artifact.
