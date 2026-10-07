@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.74",
+  "versionCode": 90,
+  "phase": "development",
+  "feature": "Add panel status/pin/chevron refinement",
+  "branch": "feat/v0.5.74-add-panel-status-refinement",
+  "parent_issue": 68,
+  "qa_status": "PENDING",
+  "next": "ci_then_phone_qa_refined_add_panel"
+}
