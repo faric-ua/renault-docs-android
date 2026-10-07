@@ -11,12 +11,18 @@ enum class NativeRdpkgRunPhase {
     CANCELLED,
 }
 
+enum class NativeRdpkgSourceKind {
+    RAW_TREE,
+    ARCHIVE_FILE,
+}
+
 data class NativeRdpkgRunState(
     val phase: NativeRdpkgRunPhase = NativeRdpkgRunPhase.IDLE,
     val message: String = "",
     val projectId: String? = null,
     val sourceUri: String? = null,
     val sourceName: String? = null,
+    val sourceKind: NativeRdpkgSourceKind = NativeRdpkgSourceKind.RAW_TREE,
     val destinationUri: String? = null,
     val packageId: String? = null,
     val volumeId: String? = null,
@@ -136,6 +142,18 @@ class NativeRdpkgRunStore(
                     KEY_SOURCE_NAME,
                     null,
                 ),
+            sourceKind =
+                runCatching {
+                    NativeRdpkgSourceKind.valueOf(
+                        prefs.getString(
+                            KEY_SOURCE_KIND,
+                            NativeRdpkgSourceKind.RAW_TREE.name,
+                        )
+                            ?: NativeRdpkgSourceKind.RAW_TREE.name,
+                    )
+                }.getOrDefault(
+                    NativeRdpkgSourceKind.RAW_TREE,
+                ),
             destinationUri =
                 prefs.getString(
                     KEY_DESTINATION_URI,
@@ -217,6 +235,7 @@ class NativeRdpkgRunStore(
         projectId: String,
         sourceUri: String,
         sourceName: String,
+        sourceKind: NativeRdpkgSourceKind = NativeRdpkgSourceKind.RAW_TREE,
         destinationUri: String,
     ) {
         prefs.edit()
@@ -239,6 +258,10 @@ class NativeRdpkgRunStore(
             .putString(
                 KEY_SOURCE_NAME,
                 sourceName,
+            )
+            .putString(
+                KEY_SOURCE_KIND,
+                sourceKind.name,
             )
             .putString(
                 KEY_DESTINATION_URI,
@@ -571,6 +594,8 @@ class NativeRdpkgRunStore(
             "source_uri"
         private const val KEY_SOURCE_NAME =
             "source_name"
+        private const val KEY_SOURCE_KIND =
+            "source_kind"
         private const val KEY_DESTINATION_URI =
             "destination_uri"
         private const val KEY_PACKAGE_ID =
