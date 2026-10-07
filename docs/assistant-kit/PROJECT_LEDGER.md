@@ -2387,3 +2387,26 @@ Locked next-UI contract:
 
 Implementation is queued immediately after the current Archive Intake duplicate fast-path phone gate.
 
+## 2026-10-07 — v0.5.72 archive-root duplicate fast-path merged
+
+Input phone evidence:
+- `Розпаковую ZIP… 261 / 4378`;
+- later `894 / 4378`;
+- previous fast-path therefore remained FAIL.
+
+Additional root case fixed:
+when INDEX/ACCUEIL is directly at archive root, the relative raw-root path is empty. The preflight now keeps that root hint, derives a safe fallback leaf, preserves bounded NT identity from the entrypoint and may match an installed volume before extraction.
+
+Merged runtime:
+`eacbbc1f914d4f35564724501a3edb126fd71963`.
+
+CI:
+- Tests #535 PASS;
+- Android Debug APK #135 PASS;
+- artifact `Renault-Docs-v0.5.72-Debug`, id `11511521715`;
+- digest `sha256:c670621c76309294d15c6a1f8335a2e5578fd8c9425314cf592d033a07378c62`.
+
+Phone re-test is required with the exact same NT8266A ZIP.
+
+The compact/pinnable Add panel is now tracked as GitHub issue #68 and remains the next UI task after this archive gate.
+

@@ -1,6 +1,6 @@
 # Renault Docs v0.5.72 — archive-root raw duplicate fast-path
 
-Status: **DEVELOPMENT**
+Status: **MERGED / MAIN CI PASS / PHONE RE-TEST PENDING**
 
 ## Phone evidence
 
@@ -28,3 +28,16 @@ For that case the raw-root parent is an empty relative path. The inspector filte
 - keep ambiguous archives on the existing safe extraction path.
 
 Regression coverage now includes a root-level `INDEX.HTM` with `NT8266A`.
+
+
+## CI evidence
+
+- PR #67 merged.
+- Runtime source: `eacbbc1f914d4f35564724501a3edb126fd71963`.
+- Tests #535: PASS.
+- Android Debug APK #135: PASS.
+- Artifact: `Renault-Docs-v0.5.72-Debug`.
+- Artifact ID: `11511521715`.
+- Digest: `sha256:c670621c76309294d15c6a1f8335a2e5578fd8c9425314cf592d033a07378c62`.
+
+Next UI after phone acceptance: issue #68.

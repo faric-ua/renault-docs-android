@@ -1,3 +1,38 @@
+## v0.5.72 — archive-root duplicate fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
+
+Phone video evidence before v0.5.72:
+- duplicate NT8266A flow still showed `Розпаковую ZIP… · 261 / 4378`;
+- later `Розпаковую ZIP… · 894 / 4378`;
+- therefore the preceding fast-path attempt was **not accepted**.
+
+v0.5.72 fix:
+- preserve raw-root hints when INDEX/ACCUEIL is directly at archive root;
+- keep the bounded root INDEX identity probe result;
+- allow unique NT match against installed project volumes before extraction;
+- regression test covers root-level `INDEX.HTM` with NT8266A.
+
+Merged / CI:
+- runtime source: `eacbbc1f914d4f35564724501a3edb126fd71963`;
+- Tests #535 — PASS;
+- Android Debug APK #135 — PASS;
+- artifact: `Renault-Docs-v0.5.72-Debug`;
+- artifact id: `11511521715`;
+- digest: `sha256:c670621c76309294d15c6a1f8335a2e5578fd8c9425314cf592d033a07378c62`.
+
+Next phone gate:
+`5 → 19 → 8 → 13` → install v0.5.72 → repeat the exact same NT8266A ZIP.
+
+Expected:
+- copy / “Перевіряю склад архіву…” may appear;
+- **no `Розпаковую ZIP...` counter**;
+- terminal `Том уже є`;
+- Megane II stays at 9 volumes.
+
+Next UI after this gate:
+Issue #68 — compact collapsible/pinnable `Додати` panel.
+
+---
+
 ## v0.5.71 top-level archive fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
 
 - runtime source: `131b4dcef2ed95e35198a8cb03a0ce4322fda64c`;
