@@ -1,6 +1,6 @@
 # v0.5.70 — Archive duplicate identity fast-path — 2026-10-07
 
-Status: **IMPLEMENTATION IN PROGRESS**.
+Status: **MERGED / MAIN CI PASS / PHONE RE-TEST NEXT**.
 
 Trigger:
 - real-phone v0.5.69 duplicate ZIP test for `NT8266A · 2004-06-28`;
@@ -24,8 +24,17 @@ Acceptance:
 - source ZIP remains unchanged;
 - non-duplicate and ambiguous archives still fall back safely.
 
+Implementation / CI:
+- PR #63 merged to main;
+- main runtime source: `b9c763237b7aceede742c6aa559f53abf4c83444`;
+- Tests #530 — PASS;
+- Android Debug APK #133 — PASS;
+- artifact: `Renault-Docs-v0.5.70-Debug`;
+- artifact id: `11508378680`;
+- artifact digest: `sha256:20b4a7ac2b519a6a701ba688e962a8b51238c535d486eae3621e0db566882c2b`.
+
 Current next step:
-implement bounded archive identity probing + unit/contract tests, then CI and one phone re-test of the same duplicate ZIP.
+install v0.5.70 through Renault Menu `5 → 19 → 8 → 13`, then re-run the **same NT8266A duplicate ZIP**. It must reach `Том уже є` without entering `Розпаковую ZIP...`.
 
 ---
 

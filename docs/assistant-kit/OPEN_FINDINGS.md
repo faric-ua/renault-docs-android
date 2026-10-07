@@ -1723,7 +1723,7 @@ service/run-store-backed import with reattach semantics, comparable to native ra
 
 ## PERF-ARCHIVE-001 — duplicate ZIP still extracts before skip
 
-Status: **OPEN · REAL-PHONE FINDING — 2026-10-07**
+Status: **IMPLEMENTED IN v0.5.70 · MAIN CI PASS · PHONE RE-TEST PENDING — 2026-10-07**
 
 Phone evidence on v0.5.69:
 - project: Megane II;
@@ -1743,4 +1743,15 @@ Required optimization:
 6. keep full extraction fallback when identity cannot be proven safely.
 
 Do not weaken traversal/size safety or silently skip on ambiguous metadata.
+
+v0.5.70 implementation evidence:
+- PR #63 merged;
+- runtime source `b9c763237b7aceede742c6aa559f53abf4c83444`;
+- bounded ZIP entrypoint probe: max 64 KiB;
+- a unique NT code can match one installed project volume before full extraction;
+- ambiguous identity still falls back to the original safe extraction path;
+- Tests #530 PASS;
+- Android Debug APK #133 PASS.
+
+Phone re-test remains required with the same NT8266A archive.
 

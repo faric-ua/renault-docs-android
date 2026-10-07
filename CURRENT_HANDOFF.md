@@ -1,3 +1,27 @@
+## v0.5.70 duplicate ZIP fast-path — MAIN CI PASS / PHONE RE-TEST NEXT — 2026-10-07
+
+Runtime source:
+`b9c763237b7aceede742c6aa559f53abf4c83444`
+
+Release:
+- v0.5.70 / build 86;
+- PR #63 — MERGED;
+- Tests #530 — PASS;
+- Android Debug APK #133 — PASS;
+- artifact `Renault-Docs-v0.5.70-Debug`, id `11508378680`;
+- digest `sha256:20b4a7ac2b519a6a701ba688e962a8b51238c535d486eae3621e0db566882c2b`.
+
+Fix:
+- archive inspection now carries a probed Renault NT document code;
+- ZIP preflight reads at most 64 KiB from raw entrypoint HTML directly inside the archive;
+- root/path/archive-name identity is preferred; ambiguous identity still falls back to normal safe extraction;
+- a unique installed project volume with the same NT code ends as `ALREADY_PRESENT` before `stager.extract()`.
+
+Exact continuation:
+Renault Menu `5 → 19 → 8 → 13` → install over existing app → run the exact same `NT8266A · 2004-06-28` ZIP. Expected: no `Розпаковую ZIP...` stage; immediate duplicate terminal after inspection/copy.
+
+---
+
 ## v0.5.69 Archive Intake — MERGED / PHONE QA NEXT — 2026-10-07
 
 Status: **MAIN CI PASS / PHONE ACCEPTANCE PENDING**.

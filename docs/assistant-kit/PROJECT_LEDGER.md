@@ -2328,3 +2328,26 @@ Project-wide communication rule:
 Canonical contract:
 `docs/assistant-kit/RESPONSE_CONTRACT.md`.
 
+## 2026-10-07 — v0.5.70 archive duplicate fast-path merged
+
+Real-phone v0.5.69 finding PERF-ARCHIVE-001 led to v0.5.70 / build 86.
+
+Merged runtime:
+`b9c763237b7aceede742c6aa559f53abf4c83444`.
+
+CI:
+- PR #63 merged;
+- Tests #530 PASS;
+- Android Debug APK #133 PASS;
+- artifact `Renault-Docs-v0.5.70-Debug`, id `11508378680`;
+- digest `sha256:20b4a7ac2b519a6a701ba688e962a8b51238c535d486eae3621e0db566882c2b`.
+
+Contract:
+- ZIP duplicate preflight may directly read only a bounded 64 KiB prefix of the raw entrypoint HTML inside the archive;
+- root path / single-volume source filename / entrypoint content are strong NT identity hints;
+- generic entry-path NT hints are fallback only;
+- only an unambiguous unique installed NT match may skip extraction;
+- ambiguous identity keeps the old full safe-extraction fallback.
+
+Phone acceptance pending: repeat the same NT8266A ZIP and verify no `Розпаковую ZIP...` phase occurs.
+
