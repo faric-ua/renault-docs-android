@@ -1,3 +1,26 @@
+## v0.5.74 Add panel refinement — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
+
+- runtime source: `8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`;
+- v0.5.74 / build 90;
+- PR #72 MERGED;
+- Tests #542 PASS;
+- Android Debug APK #137 PASS;
+- artifact `Renault-Docs-v0.5.74-Debug`, id `11518058878`;
+- digest `sha256:a391f4c16a0ce7f3c7b79a9fd9383e1e0e386f07e7d5268e1b4938eaf657f230`.
+
+Phone QA:
+1. install via Renault Menu `5 → 19 → 8 → 13`;
+2. open Megane II;
+3. confirm neutral monochrome pin and heavier ▼ while collapsed;
+4. expand Add and confirm guidance line is gone;
+5. press Auto and cancel;
+6. confirm `Імпорт .rdpkg скасовано.` appears inside the warm status card at the bottom of Add;
+7. pin → icon red; reopen Project → panel remains expanded;
+8. unpin → icon neutral; collapse works;
+9. rotate while unpinned/expanded → expansion survives.
+
+---
+
 ## v0.5.74 Add panel visual refinement — 2026-10-08
 
 Input phone screenshots from v0.5.73 confirm the compact layout works, but requested refinements are now active:
