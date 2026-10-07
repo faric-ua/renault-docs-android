@@ -153,6 +153,48 @@ class ArchiveIntakeTest {
     }
 
     @Test
+    fun probesNtIdentityFromZipIndexWithoutExtractingPayload() {
+        val root = createTempDirectory("archive-identity-").toFile()
+        val archive = File(root, "generic-renault.zip")
+
+        try {
+            ZipOutputStream(archive.outputStream()).use { zip ->
+                zip.putNextEntry(ZipEntry("wrapper/raw/INDEX.HTM"))
+                zip.write(
+                    "<html><title>Renault NT8266A</title></html>"
+                        .toByteArray(),
+                )
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("wrapper/raw/data/huge.bin"))
+                zip.write(byteArrayOf(1, 2, 3))
+                zip.closeEntry()
+            }
+
+            val inspection =
+                ArchiveIntake.inspectRawRoots(
+                    source = archive,
+                    sourceNameHint = "generic-renault.zip",
+                )
+
+            assertEquals(
+                "NT8266A",
+                inspection.rawRoots
+                    .single()
+                    .documentCode,
+            )
+            assertTrue(
+                !File(
+                    root,
+                    "wrapper",
+                ).exists(),
+            )
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun inspectionIgnoresAlreadyPreparedDatasetRoots() {
         val root = createTempDirectory("archive-inspect-prepared-").toFile()
         val archive = File(root, "prepared.zip")
