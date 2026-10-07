@@ -4705,3 +4705,23 @@ Implemented:
    - confirm only selected/new volumes are converted/installed.
 
 Do not merge PR #53 or call v0.5.69 ready until the above is complete.
+
+## Phone checkpoint — NT8266A duplicate ZIP — 2026-10-07
+
+Real-phone v0.5.69 evidence:
+- archive resolved to `NT8266A · 2004-06-28`;
+- terminal status correctly reported `Том уже є`;
+- conversion was skipped.
+
+Classification:
+- exact duplicate prevention: **PASS**;
+- pre-extraction duplicate optimization for this archive: **MISS** because ZIP extraction was already at `3732 / 4378` files;
+- follow-up is tracked as `PERF-ARCHIVE-001`;
+- do not reopen the release implementation for this performance issue during the current acceptance sequence.
+
+Exact continuation point:
+1. dismiss terminal status;
+2. verify Megane II remains at 9 volumes;
+3. run a real single-volume ZIP for a volume not installed in the project;
+4. then continue multi-volume/lifecycle/background/cancel gates.
+
