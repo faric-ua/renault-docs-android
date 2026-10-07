@@ -34,14 +34,24 @@ class ArchiveIntakeStager(
         }
     }
 
+    data class StagedSource(
+        val workRoot: File,
+        val sourceCopy: File,
+        val sourceName: String,
+    ) {
+        fun cleanup() {
+            workRoot.deleteRecursively()
+        }
+    }
+
     private val appContext =
         context.applicationContext
 
-    fun prepare(
+    fun stageSource(
         sourceUri: Uri,
         sourceName: String,
         stagingToken: String,
-    ): Result {
+    ): StagedSource {
         checkCancelled()
 
         val base =
@@ -163,6 +173,29 @@ class ArchiveIntakeStager(
 
             checkCancelled()
 
+            return StagedSource(
+                workRoot =
+                    workRoot,
+                sourceCopy =
+                    sourceCopy,
+                sourceName =
+                    sourceName,
+            )
+        } catch (
+            error:
+                Throwable,
+        ) {
+            workRoot.deleteRecursively()
+            throw error
+        }
+    }
+
+    fun extract(
+        staged: StagedSource,
+    ): Result {
+        checkCancelled()
+
+        try {
             onMessage(
                 "Перевіряю та розпаковую архів…",
             )
@@ -174,14 +207,14 @@ class ArchiveIntakeStager(
 
             val extractionRoot =
                 File(
-                    workRoot,
+                    staged.workRoot,
                     "extracted",
                 )
 
             val extracted =
                 ArchiveIntake.extract(
                     source =
-                        sourceCopy,
+                        staged.sourceCopy,
                     extractionRoot =
                         extractionRoot,
                     onProgress = {
@@ -244,9 +277,9 @@ class ArchiveIntakeStager(
 
             return Result(
                 workRoot =
-                    workRoot,
+                    staged.workRoot,
                 sourceCopy =
-                    sourceCopy,
+                    staged.sourceCopy,
                 extractionRoot =
                     extractionRoot,
                 format =
@@ -264,10 +297,26 @@ class ArchiveIntakeStager(
             error:
                 Throwable,
         ) {
-            workRoot.deleteRecursively()
+            staged.cleanup()
             throw error
         }
     }
+
+    fun prepare(
+        sourceUri: Uri,
+        sourceName: String,
+        stagingToken: String,
+    ): Result =
+        extract(
+            stageSource(
+                sourceUri =
+                    sourceUri,
+                sourceName =
+                    sourceName,
+                stagingToken =
+                    stagingToken,
+            ),
+        )
 
     private fun copySource(
         sourceUri: Uri,
