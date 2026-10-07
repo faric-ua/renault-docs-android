@@ -1,6 +1,6 @@
 ## UX-ADD-002 — transient status placement and Add header control styling
 
-Status: **IMPLEMENTING IN v0.5.74 — 2026-10-08**
+Status: **IMPLEMENTED IN v0.5.74 · MAIN CI PASS · PHONE QA PENDING — 2026-10-08**
 
 Phone screenshots from v0.5.73:
 - compact collapse/expand layout is visually accepted;
@@ -16,6 +16,13 @@ Required:
 - use a neutral monochrome inactive pin and a red active pin;
 - make expand/collapse indicator heavier;
 - keep active operation/progress outside the collapsible body.
+
+v0.5.74 implementation evidence:
+- PR #72 merged;
+- runtime `8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`;
+- Tests #542 PASS;
+- Android Debug APK #137 PASS;
+- phone QA pending.
 
 ---
 
