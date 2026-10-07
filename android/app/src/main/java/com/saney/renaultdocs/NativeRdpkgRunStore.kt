@@ -1,10 +1,13 @@
 package com.saney.renaultdocs
 
 import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
 
 enum class NativeRdpkgRunPhase {
     IDLE,
     PREPARING,
+    WAITING_SELECTION,
     IMPORTING,
     COMPLETE,
     ALREADY_PRESENT,
@@ -17,6 +20,15 @@ enum class NativeRdpkgSourceKind {
     ARCHIVE_FILE,
 }
 
+data class ArchiveVolumeCandidate(
+    val relativePath: String,
+    val label: String,
+    val installed: Boolean,
+    val possibleDuplicate: Boolean,
+    val selected: Boolean,
+    val existingVolumeId: String? = null,
+)
+
 data class NativeRdpkgRunState(
     val phase: NativeRdpkgRunPhase = NativeRdpkgRunPhase.IDLE,
     val message: String = "",
@@ -25,6 +37,8 @@ data class NativeRdpkgRunState(
     val sourceName: String? = null,
     val sourceKind: NativeRdpkgSourceKind = NativeRdpkgSourceKind.RAW_TREE,
     val destinationUri: String? = null,
+    val archiveExtractionRoot: String? = null,
+    val archiveCandidates: List<ArchiveVolumeCandidate> = emptyList(),
     val packageId: String? = null,
     val volumeId: String? = null,
     val volumeTitle: String? = null,
@@ -47,6 +61,16 @@ data class NativeRdpkgRunState(
                     NativeRdpkgRunPhase.PREPARING,
                     NativeRdpkgRunPhase.IMPORTING,
                 )
+
+    val isWaitingForSelection: Boolean
+        get() =
+            phase ==
+                NativeRdpkgRunPhase.WAITING_SELECTION
+
+    val isActive: Boolean
+        get() =
+            isRunning ||
+                isWaitingForSelection
 
     val isTerminal: Boolean
         get() =
@@ -161,6 +185,18 @@ class NativeRdpkgRunStore(
                     KEY_DESTINATION_URI,
                     null,
                 ),
+            archiveExtractionRoot =
+                prefs.getString(
+                    KEY_ARCHIVE_EXTRACTION_ROOT,
+                    null,
+                ),
+            archiveCandidates =
+                decodeArchiveCandidates(
+                    prefs.getString(
+                        KEY_ARCHIVE_CANDIDATES,
+                        null,
+                    ),
+                ),
             packageId =
                 prefs.getString(
                     KEY_PACKAGE_ID,
@@ -268,6 +304,12 @@ class NativeRdpkgRunStore(
             .putString(
                 KEY_DESTINATION_URI,
                 destinationUri,
+            )
+            .remove(
+                KEY_ARCHIVE_EXTRACTION_ROOT,
+            )
+            .remove(
+                KEY_ARCHIVE_CANDIDATES,
             )
             .remove(
                 KEY_PACKAGE_ID,
@@ -402,6 +444,152 @@ class NativeRdpkgRunStore(
             .putString(
                 KEY_MESSAGE,
                 message,
+            )
+            .apply()
+    }
+
+    fun markWaitingForArchiveSelection(
+        extractionRoot: String,
+        candidates: List<ArchiveVolumeCandidate>,
+    ) {
+        require(
+            candidates.isNotEmpty(),
+        ) {
+            "Archive candidates порожні."
+        }
+
+        prefs.edit()
+            .putString(
+                KEY_PHASE,
+                NativeRdpkgRunPhase.WAITING_SELECTION.name,
+            )
+            .putString(
+                KEY_MESSAGE,
+                "Вибери томи для створення .rdpkg.",
+            )
+            .putString(
+                KEY_ARCHIVE_EXTRACTION_ROOT,
+                extractionRoot,
+            )
+            .putString(
+                KEY_ARCHIVE_CANDIDATES,
+                encodeArchiveCandidates(
+                    candidates,
+                ),
+            )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Очікую вибір",
+            )
+            .putInt(
+                KEY_PROGRESS_CURRENT,
+                0,
+            )
+            .putInt(
+                KEY_PROGRESS_TOTAL,
+                0,
+            )
+            .putBoolean(
+                KEY_CANCEL_REQUESTED,
+                false,
+            )
+            .apply()
+    }
+
+    fun updateArchiveCandidateSelection(
+        relativePath: String,
+        selected: Boolean,
+    ): Boolean {
+        val state =
+            load()
+
+        if (
+            !state.isWaitingForSelection
+        ) {
+            return false
+        }
+
+        val updated =
+            state.archiveCandidates
+                .map {
+                    candidate ->
+                    if (
+                        candidate.relativePath ==
+                        relativePath &&
+                        !candidate.installed
+                    ) {
+                        candidate.copy(
+                            selected =
+                                selected,
+                        )
+                    } else {
+                        candidate
+                    }
+                }
+
+        return prefs.edit()
+            .putString(
+                KEY_ARCHIVE_CANDIDATES,
+                encodeArchiveCandidates(
+                    updated,
+                ),
+            )
+            .commit()
+    }
+
+    fun beginArchiveSelectionProcessing():
+        List<ArchiveVolumeCandidate> {
+        val state =
+            load()
+
+        require(
+            state.isWaitingForSelection,
+        ) {
+            "Archive chooser більше не активний."
+        }
+
+        val selected =
+            state.archiveCandidates
+                .filter {
+                    it.selected &&
+                        !it.installed
+                }
+
+        require(
+            selected.isNotEmpty(),
+        ) {
+            "Не вибрано жодного нового тому."
+        }
+
+        prefs.edit()
+            .putString(
+                KEY_PHASE,
+                NativeRdpkgRunPhase.PREPARING.name,
+            )
+            .putString(
+                KEY_MESSAGE,
+                "Готую вибрані томи…",
+            )
+            .putString(
+                KEY_PROGRESS_STAGE,
+                "Готую…",
+            )
+            .putBoolean(
+                KEY_CANCEL_REQUESTED,
+                false,
+            )
+            .apply()
+
+        return selected
+    }
+
+    fun clearArchiveSelectionData() {
+        prefs.edit()
+            .remove(
+                KEY_ARCHIVE_EXTRACTION_ROOT,
+            )
+            .remove(
+                KEY_ARCHIVE_CANDIDATES,
             )
             .apply()
     }
@@ -605,12 +793,119 @@ class NativeRdpkgRunStore(
 
     fun clearFinished() {
         if (
-            !load().isRunning
+            !load().isActive
         ) {
             prefs.edit()
                 .clear()
                 .apply()
         }
+    }
+
+    private fun encodeArchiveCandidates(
+        candidates: List<ArchiveVolumeCandidate>,
+    ): String =
+        JSONArray().apply {
+            candidates.forEach {
+                candidate ->
+                put(
+                    JSONObject()
+                        .put(
+                            "relative_path",
+                            candidate.relativePath,
+                        )
+                        .put(
+                            "label",
+                            candidate.label,
+                        )
+                        .put(
+                            "installed",
+                            candidate.installed,
+                        )
+                        .put(
+                            "possible_duplicate",
+                            candidate.possibleDuplicate,
+                        )
+                        .put(
+                            "selected",
+                            candidate.selected,
+                        )
+                        .apply {
+                            candidate.existingVolumeId
+                                ?.let {
+                                    put(
+                                        "existing_volume_id",
+                                        it,
+                                    )
+                                }
+                        },
+                )
+            }
+        }.toString()
+
+    private fun decodeArchiveCandidates(
+        raw: String?,
+    ): List<ArchiveVolumeCandidate> {
+        if (
+            raw.isNullOrBlank()
+        ) {
+            return emptyList()
+        }
+
+        return runCatching {
+            val array =
+                JSONArray(
+                    raw,
+                )
+
+            buildList {
+                for (
+                    index in
+                    0 until array.length()
+                ) {
+                    val item =
+                        array.getJSONObject(
+                            index,
+                        )
+
+                    add(
+                        ArchiveVolumeCandidate(
+                            relativePath =
+                                item.getString(
+                                    "relative_path",
+                                ),
+                            label =
+                                item.optString(
+                                    "label",
+                                ),
+                            installed =
+                                item.optBoolean(
+                                    "installed",
+                                    false,
+                                ),
+                            possibleDuplicate =
+                                item.optBoolean(
+                                    "possible_duplicate",
+                                    false,
+                                ),
+                            selected =
+                                item.optBoolean(
+                                    "selected",
+                                    false,
+                                ),
+                            existingVolumeId =
+                                item.optString(
+                                    "existing_volume_id",
+                                )
+                                    .takeIf {
+                                        it.isNotBlank()
+                                    },
+                        ),
+                    )
+                }
+            }
+        }.getOrDefault(
+            emptyList(),
+        )
     }
 
     companion object {
@@ -637,6 +932,10 @@ class NativeRdpkgRunStore(
             "source_kind"
         private const val KEY_DESTINATION_URI =
             "destination_uri"
+        private const val KEY_ARCHIVE_EXTRACTION_ROOT =
+            "archive_extraction_root"
+        private const val KEY_ARCHIVE_CANDIDATES =
+            "archive_candidates"
         private const val KEY_PACKAGE_ID =
             "package_id"
         private const val KEY_VOLUME_ID =
