@@ -35,7 +35,7 @@ class V0574AddPanelStatusRefinementTests(unittest.TestCase):
 
     def test_pin_uses_original_emoji_and_monochrome_inactive_state(self):
         project = self.read_java("ProjectActivity.kt")
-        self.assertIn('label =\\n                        "📌"', project)
+        self.assertIn('label =\n                        "📌"', project)
         self.assertIn("monochromePinPaint", project)
         self.assertIn("setLayerType(", project)
         self.assertIn("setSaturation(0f)", project)
