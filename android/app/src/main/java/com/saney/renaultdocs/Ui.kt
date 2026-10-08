@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
+import android.view.Window
 import android.widget.TextView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -388,44 +389,30 @@ object Ui {
             }
         }
 
-    fun applyOrientationSystemBars(
-        activity: Activity,
-    ) {
-        val landscape =
-            activity.resources
-                .configuration
-                .orientation ==
-                Configuration.ORIENTATION_LANDSCAPE
+    /**
+     * App-owned Activity and dialog windows follow the same orientation rule.
+     * Hide system status/navigation only: do not touch the IME or Android SAF.
+     */
+    fun applyOrientationSystemBars(activity: Activity) {
+        applyOrientationSystemBars(
+            activity.window,
+            activity.resources.configuration.orientation,
+        )
+    }
 
-        val window =
-            activity.window
-        val controller =
-            WindowCompat.getInsetsController(
-                window,
-                window.decorView,
-            )
-
-        if (
-            landscape
-        ) {
-            WindowCompat.setDecorFitsSystemWindows(
-                window,
-                false,
-            )
+    fun applyOrientationSystemBars(window: Window?, orientation: Int) {
+        if (window == null) return
+        val controller = WindowCompat.getInsetsController(
+            window, window.decorView,
+        )
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
             controller.systemBarsBehavior =
-                WindowInsetsControllerCompat
-                    .BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            controller.hide(
-                WindowInsetsCompat.Type.systemBars(),
-            )
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
         } else {
-            controller.show(
-                WindowInsetsCompat.Type.systemBars(),
-            )
-            WindowCompat.setDecorFitsSystemWindows(
-                window,
-                true,
-            )
+            controller.show(WindowInsetsCompat.Type.systemBars())
+            WindowCompat.setDecorFitsSystemWindows(window, true)
         }
     }
 

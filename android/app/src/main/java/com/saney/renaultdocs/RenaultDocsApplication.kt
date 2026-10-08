@@ -35,19 +35,23 @@ class RenaultDocsApplication :
                     !it.isDestroyed
             }
             ?.let {
-                Ui.applyOrientationSystemBars(
-                    it,
-                )
+                applyBarsToActivity(it)
+                DialogUi.reapplyOrientation(it)
             }
+    }
+
+    private fun applyBarsToActivity(activity: Activity) {
+        // Explicit PDF fullscreen takes precedence over portrait system bars.
+        if (activity is ViewerActivity && activity.isPdfFullscreenActive()) return
+        Ui.applyOrientationSystemBars(activity)
     }
 
     override fun onActivityCreated(
         activity: Activity,
         savedInstanceState: Bundle?,
     ) {
-        Ui.applyOrientationSystemBars(
-            activity,
-        )
+        applyBarsToActivity(activity)
+        DialogUi.reapplyOrientation(activity)
     }
 
     override fun onActivityResumed(
@@ -58,9 +62,8 @@ class RenaultDocsApplication :
                 activity,
             )
 
-        Ui.applyOrientationSystemBars(
-            activity,
-        )
+        applyBarsToActivity(activity)
+        DialogUi.reapplyOrientation(activity)
     }
 
     override fun onActivityDestroyed(

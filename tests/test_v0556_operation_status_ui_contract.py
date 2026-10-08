@@ -40,16 +40,17 @@ class OperationStatusUiContractTest(unittest.TestCase):
         running = activity[activity.index("private fun refreshNativeRunState"):activity.index("private fun showNativeTerminalStatus")]
         self.assertNotIn("updateNativeRunProgressDialog(\n                state,", running)
 
-    def test_home_content_uses_one_scroll_surface_below_top_bar(self):
+    def test_home_status_is_fixed_with_add_and_my_projects_scroll_independently(self):
         activity = self.read("MainActivity.kt")
-        build = activity[activity.index("private fun buildContent"):activity.index("private fun buildHomeAddPanel")]
-        self.assertIn("val scrollContent =", build)
-        self.assertIn("scrollContent.addView(\n            buildHomeAddPanel()", build)
-        self.assertIn("scrollContent.addView(statusText)", build)
-        self.assertIn("scrollContent.addView(\n            operationStatus", build)
+        build = activity[activity.index("private fun buildContent"):activity.index("private fun buildProjectCatalogCard")]
+        self.assertIn("root.addView(\n            buildHomeAddPanel()", build)
         self.assertIn("scrollContent.addView(\n            libraryContainer", build)
         self.assertIn("scroll.addView(\n            scrollContent", build)
-        self.assertNotIn("scroll.addView(\n            libraryContainer", build)
+        self.assertNotIn("scrollContent.addView(\n            buildHomeAddPanel()", build)
+        panel = activity[activity.index("private fun buildHomeAddPanel"):activity.index("private fun buildHomeChoiceCard")]
+        self.assertIn("addView(\n                homeAddPanelBody", panel)
+        self.assertLess(panel.index("addView(\n                homeAddPanelBody"), panel.index("operationStatus ="))
+        self.assertIn("useProjectCompactLayout(", panel)
 
     def test_project_status_stays_fixed_above_volume_scroll(self):
         activity = self.read("ProjectActivity.kt")

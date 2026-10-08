@@ -3,6 +3,12 @@ package com.saney.renaultdocs
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Paint
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.text.Editable
+import android.text.TextWatcher
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -24,6 +30,21 @@ import java.io.File
 
 class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
+    private lateinit var legacyAddContainer: LinearLayout
+    private lateinit var homeAddPanelBody: BoundedAddActionsScrollView
+    private lateinit var homeAddPinButton: TextView
+    private lateinit var homeAddToggleButton: TextView
+    private var homeAddPanelPinned = false
+    private var homeAddPanelExpanded = false
+    // Portrait pin preference is never modified by temporary landscape expansion.
+    private var homeAddLandscapeExpanded = false
+    private val monochromePinPaint by lazy {
+        Paint().apply {
+            colorFilter = ColorMatrixColorFilter(
+                ColorMatrix().apply { setSaturation(0f) },
+            )
+        }
+    }
     private lateinit var statusText: TextView
     private lateinit var operationProgress: ProgressBar
     private lateinit var operationStatus: OperationStatusView
@@ -85,6 +106,11 @@ class MainActivity : Activity() {
                 this,
             )
         settings = AppSettings(this)
+        homeAddPanelPinned = settings.homeAddPanelPinned
+        homeAddPanelExpanded = savedInstanceState
+            ?.getBoolean(STATE_HOME_ADD_EXPANDED, homeAddPanelPinned)
+            ?: homeAddPanelPinned
+        if (homeAddPanelPinned) homeAddPanelExpanded = true
         projectDialogs =
             HomeProjectDialogController(
                 activity = this,
@@ -270,6 +296,7 @@ class MainActivity : Activity() {
         projectDialogs.save(
             outState,
         )
+        outState.putBoolean(STATE_HOME_ADD_EXPANDED, homeAddPanelExpanded)
 
         if (
             ::statusText.isInitialized
@@ -464,86 +491,14 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
         }
 
-        scrollContent.addView(
-            Ui.textView(
-                context = this,
-                value = "Бібліотека технічної документації",
-                sizeSp = 15f,
-                color = Ui.muted,
-            ).apply {
-                setPadding(
-                    0,
-                    Ui.dp(this@MainActivity, 4),
-                    0,
-                    Ui.dp(this@MainActivity, 16),
-                )
-            }
-        )
-
-        scrollContent.addView(
+        // Keep the shared Add header and operation status visible.
+        // Only the project library scrolls beneath it.
+        root.addView(
             buildHomeAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-            ),
-        )
-
-        scrollContent.addView(
-            buildProjectCatalogCard(),
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                topMargin =
-                    Ui.dp(
-                        this@MainActivity,
-                        10,
-                    )
-            },
-        )
-
-        statusText = Ui.textView(
-            context = this,
-            value = "Проєкт = модель Renault · томи додаються окремо.",
-            sizeSp = 14f,
-            color = Ui.muted,
-        ).apply {
-            setPadding(
-                0,
-                Ui.dp(this@MainActivity, 12),
-                0,
-                Ui.dp(this@MainActivity, 10),
-            )
-        }
-        scrollContent.addView(statusText)
-
-        operationStatus = OperationStatusView(this)
-        scrollContent.addView(
-            operationStatus,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                bottomMargin = Ui.dp(this@MainActivity, 10)
-            },
-        )
-
-        operationProgress =
-            ProgressBar(
-                this,
-                null,
-                android.R.attr.progressBarStyleHorizontal,
-            ).apply {
-                max = 100
-                progress = 0
-                visibility = View.GONE
-            }
-        scrollContent.addView(
-            operationProgress,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                Ui.dp(this, 4),
-            ),
+            ).apply { topMargin = Ui.dp(this@MainActivity, 8) },
         )
 
         libraryContainer = LinearLayout(this).apply {
@@ -561,15 +516,6 @@ class MainActivity : Activity() {
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
-        )
-
-        scrollContent.addView(
-            Ui.textView(
-                context = this,
-                value = "v" + BuildConfig.VERSION_NAME + " · SAF reference mode",
-                sizeSp = 12f,
-                color = Ui.muted,
             )
         )
 
@@ -683,128 +629,260 @@ class MainActivity : Activity() {
             }
         }
 
-    private fun buildHomeAddPanel():
-        View =
-        LinearLayout(
-            this,
-        ).apply {
-            orientation =
-                LinearLayout.VERTICAL
-            background =
-                Ui.roundedBackground(
-                    context =
-                        this@MainActivity,
-                    fill =
-                        Ui.surfaceAlt,
-                    stroke =
-                        Ui.accent,
-                )
+    private fun buildHomeAddPanel(): View =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = Ui.roundedBackground(
+                context = this@MainActivity,
+                fill = Ui.surfaceAlt,
+                stroke = Ui.accent,
+            )
             setPadding(
-                Ui.dp(
-                    this@MainActivity,
-                    14,
-                ),
-                Ui.dp(
-                    this@MainActivity,
-                    12,
-                ),
-                Ui.dp(
-                    this@MainActivity,
-                    14,
-                ),
-                Ui.dp(
-                    this@MainActivity,
-                    14,
-                ),
+                Ui.dp(this@MainActivity, 14),
+                Ui.dp(this@MainActivity, 8),
+                Ui.dp(this@MainActivity, 14),
+                Ui.dp(this@MainActivity, 8),
             )
 
-            addView(
+            val header = LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { toggleHomeAddPanel() }
+            }
+            header.addView(
                 Ui.textView(
-                    context =
-                        this@MainActivity,
-                    value =
-                        "Додати",
-                    sizeSp =
-                        18f,
-                    color =
-                        Ui.accent,
+                    this@MainActivity, "Додати", 18f, Ui.accent,
                 ).apply {
-                    setTypeface(
-                        typeface,
-                        android.graphics.Typeface.BOLD,
-                    )
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                },
+                LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f,
+                ),
+            )
+            homeAddPinButton = homeAddHeaderButton(
+                "📌", "Закріпити панель Додати",
+            ) {
+                if (!isHomeLandscape()) {
+                    homeAddPanelPinned = !homeAddPanelPinned
+                    settings.homeAddPanelPinned = homeAddPanelPinned
+                    if (homeAddPanelPinned) homeAddPanelExpanded = true
+                    updateHomeAddPanelUi()
+                }
+            }
+            header.addView(
+                homeAddPinButton,
+                LinearLayout.LayoutParams(
+                    Ui.dp(this@MainActivity, 40), Ui.dp(this@MainActivity, 40),
+                ).apply { marginEnd = Ui.dp(this@MainActivity, 6) },
+            )
+            homeAddToggleButton = homeAddHeaderButton(
+                "▼", "Розгорнути або згорнути панель Додати",
+            ) { toggleHomeAddPanel() }
+            header.addView(
+                homeAddToggleButton,
+                LinearLayout.LayoutParams(
+                    Ui.dp(this@MainActivity, 40), Ui.dp(this@MainActivity, 40),
+                ).apply { marginEnd = Ui.dp(this@MainActivity, 6) },
+            )
+            header.addView(
+                Ui.helpButton(this@MainActivity) {
+                    helpDialogs.show(HELP_LIBRARY)
+                },
+                LinearLayout.LayoutParams(
+                    Ui.dp(this@MainActivity, 40), Ui.dp(this@MainActivity, 40),
+                ),
+            )
+            addView(header)
+
+            val actions = LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.VERTICAL
+            }
+            actions.addView(
+                Ui.textView(
+                    this@MainActivity,
+                    "Проєкт = модель Renault · томи додаються окремо.",
+                    14f, Ui.muted,
+                ).apply {
+                    setPadding(0, Ui.dp(this@MainActivity, 10), 0, 0)
                 },
             )
-
-            val row =
-                LinearLayout(
-                    this@MainActivity,
-                ).apply {
-                    orientation =
-                        LinearLayout.HORIZONTAL
-                    setPadding(
-                        0,
-                        Ui.dp(
-                            this@MainActivity,
-                            8,
-                        ),
-                        0,
-                        0,
-                    )
-                }
-
-            row.addView(
-                buildHomeChoiceCard(
-                    title =
-                        "Новий том",
-                    subtitle =
-                        "До проєкту",
-                    primary =
-                        true,
-                ) {
+            val choices = LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, Ui.dp(this@MainActivity, 8), 0, 0)
+            }
+            choices.addView(
+                buildHomeChoiceCard("Новий том", "До проєкту", true) {
                     chooseProjectForVolume()
                 },
                 LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f,
-                ).apply {
-                    marginEnd =
-                        Ui.dp(
-                            this@MainActivity,
-                            5,
-                        )
-                },
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f,
+                ).apply { marginEnd = Ui.dp(this@MainActivity, 5) },
             )
-
-            row.addView(
-                buildHomeChoiceCard(
-                    title =
-                        "Новий проєкт",
-                    subtitle =
-                        "Створити модель",
-                    primary =
-                        false,
-                ) {
+            choices.addView(
+                buildHomeChoiceCard("Новий проєкт", "Створити модель", false) {
                     showCreateProjectDialog()
                 },
                 LinearLayout.LayoutParams(
-                    0,
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f,
+                ).apply { marginStart = Ui.dp(this@MainActivity, 5) },
+            )
+            actions.addView(choices)
+            actions.addView(
+                buildProjectCatalogCard(),
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f,
+                ).apply { topMargin = Ui.dp(this@MainActivity, 10) },
+            )
+            actions.addView(
+                buildToolsPanel(),
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@MainActivity, 10) },
+            )
+            legacyAddContainer = LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.VERTICAL
+            }
+            actions.addView(legacyAddContainer)
+            actions.addView(
+                Ui.textView(
+                    this@MainActivity,
+                    "v" + BuildConfig.VERSION_NAME + " · SAF reference mode",
+                    12f, Ui.muted,
                 ).apply {
-                    marginStart =
-                        Ui.dp(
-                            this@MainActivity,
-                            5,
-                        )
+                    setPadding(0, Ui.dp(this@MainActivity, 12), 0, 0)
                 },
             )
 
+            homeAddPanelBody = BoundedAddActionsScrollView(this@MainActivity).apply {
+                isFillViewport = false
+                clipToPadding = false
+                addView(actions)
+            }
             addView(
-                row,
+                homeAddPanelBody,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ),
             )
+
+            // Home status is inside Add but independent of the expandable actions.
+            statusText = Ui.textView(
+                this@MainActivity, "", 13f, Ui.statusWarmText,
+            ).apply {
+                visibility = View.GONE
+                background = Ui.roundedBackground(
+                    this@MainActivity, Ui.statusWarmFill,
+                    Ui.statusWarmBorder, 10,
+                )
+                setPadding(
+                    Ui.dp(this@MainActivity, 12), Ui.dp(this@MainActivity, 8),
+                    Ui.dp(this@MainActivity, 12), Ui.dp(this@MainActivity, 8),
+                )
+                addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(
+                        s: CharSequence?, start: Int, count: Int, after: Int,
+                    ) = Unit
+                    override fun onTextChanged(
+                        s: CharSequence?, start: Int, before: Int, count: Int,
+                    ) {
+                        visibility = if (s.isNullOrBlank() ||
+                            s.toString() == DEFAULT_HOME_STATUS) View.GONE
+                            else View.VISIBLE
+                    }
+                    override fun afterTextChanged(s: Editable?) = Unit
+                })
+            }
+            addView(
+                statusText,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@MainActivity, 8) },
+            )
+
+            operationStatus = OperationStatusView(this@MainActivity).apply {
+                useProjectCompactLayout(false)
+            }
+            addView(
+                operationStatus,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@MainActivity, 8) },
+            )
+            operationProgress = ProgressBar(
+                this@MainActivity, null, android.R.attr.progressBarStyleHorizontal,
+            ).apply {
+                max = 100
+                progress = 0
+                visibility = View.GONE
+            }
+            addView(
+                operationProgress,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    Ui.dp(this@MainActivity, 4),
+                ),
+            )
+            post { updateHomeAddPanelUi() }
         }
+
+    private fun homeAddHeaderButton(
+        label: String,
+        description: String,
+        onClick: () -> Unit,
+    ): TextView = Ui.textView(this, label, 17f, Ui.accent).apply {
+        setTypeface(typeface, android.graphics.Typeface.BOLD)
+        gravity = Gravity.CENTER
+        contentDescription = description
+        isClickable = true
+        isFocusable = true
+        background = Ui.roundedBackground(this@MainActivity, Ui.surface, Ui.border, 12)
+        setOnClickListener { onClick() }
+    }
+
+    private fun isHomeLandscape(): Boolean =
+        resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    private fun toggleHomeAddPanel() {
+        if (isHomeLandscape()) {
+            homeAddLandscapeExpanded = !homeAddLandscapeExpanded
+        } else if (!homeAddPanelPinned) {
+            homeAddPanelExpanded = !homeAddPanelExpanded
+        }
+        updateHomeAddPanelUi()
+    }
+
+    private fun updateHomeAddPanelUi() {
+        if (!::homeAddPanelBody.isInitialized) return
+        val landscape = isHomeLandscape()
+        val pinnedHere = homeAddPanelPinned && !landscape
+        val expandedHere = if (landscape) homeAddLandscapeExpanded else homeAddPanelExpanded
+        homeAddPanelBody.visibility = if (expandedHere) View.VISIBLE else View.GONE
+        homeAddPinButton.setLayerType(
+            View.LAYER_TYPE_HARDWARE,
+            if (pinnedHere) null else monochromePinPaint,
+        )
+        homeAddPinButton.isEnabled = !landscape
+        homeAddPinButton.isClickable = !landscape
+        homeAddPinButton.isFocusable = !landscape
+        homeAddPinButton.contentDescription = when {
+            landscape -> "Закріплення недоступне в альбомному режимі"
+            pinnedHere -> "Відкріпити панель Додати"
+            else -> "Закріпити панель Додати"
+        }
+        homeAddToggleButton.text = if (expandedHere) "▲" else "▼"
+        homeAddToggleButton.isClickable = !pinnedHere
+        homeAddToggleButton.isFocusable = !pinnedHere
+        homeAddToggleButton.alpha = if (pinnedHere) 0.45f else 1f
+        homeAddToggleButton.contentDescription =
+            if (expandedHere) "Згорнути панель Додати" else "Розгорнути панель Додати"
+    }
 
     private fun buildHomeChoiceCard(
         title: String,
@@ -1444,20 +1522,6 @@ class MainActivity : Activity() {
             )
         }
 
-        libraryContainer.addView(
-            buildToolsPanel(),
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                topMargin =
-                    Ui.dp(
-                        this@MainActivity,
-                        14,
-                    )
-            },
-        )
-
         val records =
             store.load()
 
@@ -1479,10 +1543,11 @@ class MainActivity : Activity() {
                         .isEmpty()
             }
 
+        legacyAddContainer.removeAllViews()
         if (
             visibleLegacyRecords.isNotEmpty()
         ) {
-            libraryContainer.addView(
+            legacyAddContainer.addView(
                 Ui.textView(
                     context = this,
                     value = "Старі бібліотеки",
@@ -1500,7 +1565,7 @@ class MainActivity : Activity() {
 
             visibleLegacyRecords.forEach {
                 record ->
-                libraryContainer.addView(
+                legacyAddContainer.addView(
                     buildDatasetTile(record),
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -2038,6 +2103,9 @@ class MainActivity : Activity() {
         private const val REQUEST_POST_NOTIFICATIONS = 4102
         private const val HELP_LIBRARY =
             "library"
+        private const val DEFAULT_HOME_STATUS =
+            "Проєкт = модель Renault · томи додаються окремо."
+        private const val STATE_HOME_ADD_EXPANDED = "main_home_add_expanded"
         private const val STATE_STATUS_TEXT =
             "main_status_text"
         private const val STATE_STATUS_COLOR =

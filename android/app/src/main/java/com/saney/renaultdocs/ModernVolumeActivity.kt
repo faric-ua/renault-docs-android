@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -39,6 +40,16 @@ class ModernVolumeActivity : Activity() {
     private var restoredQuery: String = ""
     private var restoredScrollY: Int = 0
     private var openSearchRequested: Boolean = false
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        Ui.applyOrientationSystemBars(this)
+        DialogUi.reapplyOrientation(this)
+        window.decorView.post {
+            Ui.applyOrientationSystemBars(this)
+            DialogUi.reapplyOrientation(this)
+        }
+    }
 
     override fun onCreate(
         savedInstanceState: Bundle?,
