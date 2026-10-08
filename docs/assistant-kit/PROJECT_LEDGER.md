@@ -1,3 +1,9 @@
+## GitHub Releases + Termux durable APK fallback — 2026-10-09
+
+User approved GitHub Releases to avoid Actions artifact expiry. PR #90 merged a manifest-gated trusted-main workflow, validating developer-signed source run SHA, immutable artifact and APK sha256. `v0.5.83-debug` published via Actions run 37860223840 (PASS) with original signed APK + checksum; APK SHA256 `8592b1d8aacdc4db8b856d899128d7a84931fad7b69276b3baea7eeadf4f3de9`. Public GitHub prerelease: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.83-debug. No automatic publish on every commit, and no app rebuild/data mutation. PR #91 merged Termux main-branch download fallback if compatible Actions artifact expired; uses reviewed promotion manifest, exact source/Android-code compatibility and sha256 before/after copying. Python/shell CI PASS, device verification on hold. Android installed app remains v0.5.83/build99 with core QA PASS and extended QA paused. Next functional scope issue #40 unified background lifecycle, then #51/#30.
+
+---
+
 ## v0.5.83/build99 — #79 Home New Volume fixed in code — 2026-10-09
 
 PR #89 merged, app SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`. ProjectChooserActivity now calls ProjectActivity.intent(showAddPanel=true) instead of openPicker=true; ProjectActivity expands existing Add choices on fresh navigation, preserves saved pin and rotational expansion, and leaves explicit direct-picker route available. Python Tests #573 PR / #574 main PASS, Android PR #457 and stable-signed APK #146 PASS. Signed artifact ID 11582942367, bundle SHA256 `b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`. **Phone QA PAUSED**, issue #79 remains OPEN until phone acceptance; do not start additional QA or mutate archives. For details see `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md`.
