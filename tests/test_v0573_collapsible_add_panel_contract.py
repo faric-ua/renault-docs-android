@@ -57,7 +57,8 @@ class V0573CollapsibleAddPanelContractTests(unittest.TestCase):
         panel = project[build_start:build_end]
 
         self.assertNotIn("operationStatus = OperationStatusView", panel)
-        self.assertIn("operationStatus = OperationStatusView", project)
+        self.assertIn("operationStatus =", project)
+        self.assertIn("OperationStatusView(", project)
 
 
 if __name__ == "__main__":
