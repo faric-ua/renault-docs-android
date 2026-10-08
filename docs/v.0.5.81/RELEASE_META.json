@@ -1,0 +1,17 @@
+{
+  "versionName": "0.5.81",
+  "versionCode": 97,
+  "phase": "phone_qa",
+  "phone_qa": "PENDING",
+  "feature": "Unified app dialog styling and compact archive source confirmation",
+  "branch": "feat/v0.5.81-unified-dialogs",
+  "pull_request": 87,
+  "source_sha": "309f068bbf92c65ca06c0cc2e38887d6a4664837",
+  "tests_run": 568,
+  "android_apk_run": 144,
+  "artifact_id": 11560786817,
+  "artifact_name": "Renault-Docs-v0.5.81-Debug",
+  "artifact_sha256": "5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79",
+  "artifact_expires_at": "2026-10-11T15:33:11Z",
+  "next": "Install over existing from Renault Menu 5 → 19 → 8 → 13. Phone QA concise/expanded details and rotation/Cancel no-run. Preserve source ZIP/RDPKG/installed volumes."
+}
