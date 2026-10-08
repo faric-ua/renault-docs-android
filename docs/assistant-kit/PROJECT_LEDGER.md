@@ -1,3 +1,9 @@
+## v0.5.82 — CORE HOME/ORIENTATION PHONE PASS — 2026-10-08
+
+After signed build98 (APK #145) user responded «Пасс. Взагалі все чудово.» to the Home portrait→landscape→portrait test: collapsible/pinnable `Додати`, independent `Мої Renault` layout, system bars landscape hide / portrait restore, portrait 📌 state. Record **core phone PASS**; other QA (Tools/Legacy/Drive, scroll/status, Help/Dialog/Viewer/Settings/SAF/IME) still open. Source unchanged `f17b319c4e17d8f7005ae20221dd7bd642cb172b`. No automatic imports or cleanup; see `docs/v.0.5.82/qa/PHONE_TEST_REPORT_2026-10-08.md`.
+
+---
+
 ## v0.5.82 — Home Add parity / global immersive landscape — 2026-10-08
 
 User-requested new UI: on Home outside expandable `Додати` only `Мої Renault` project list (Megane II, Laguna II, Kangoo II). Inside Add: New Volume, New Project, Ready Projects/Drive, project-vs-volume explanation, Tools (Converter/Legacy), legacy dataset records. Home own 📌 portrait pin setting separate from Project, temporary landscape expansion, fixed operations status above independently scrollable My Renault; bounded internal action scroll. Landscape hide status/navigation bars in app-owned Activity/dialog windows, show on portrait; exclude Android system keyboard/SAF; PDF fullscreen takes precedence. PR #88 merged, app SHA `f17b319c4e17d8f7005ae20221dd7bd642cb172b`; PR Tests #571 and Android Check #456 PASS, main Tests #572 and signed APK #145 PASS; artifact ID 11563839781, SHA256 `94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be`. **Phone QA pending, not closed**. Reusable contracts updated. Preserve data; no original ZIP/RDPKG deletion/movement. v0.5.81 screenshots show Modern search and archive dialog but not confirmed Viewer `Розділи` modal; do not mark that gate PASS.
