@@ -1,3 +1,22 @@
+## FINAL PHONE QA — v0.5.77 / build 93 — PASS 6/6 / CLOSED — 2026-10-08
+
+Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:
+1. Portrait: Add expanded, pin red — PASS.
+2. Landscape rotation: Add auto-collapses, pin grayscale — PASS.
+3. Landscape: volume list scrolls freely — PASS.
+4. Landscape: manual expand/collapse — PASS.
+5. Return portrait: pinned red emoji and expanded Add return — PASS.
+6. Reopen Megane II: persistent pinned state — PASS.
+
+Scope: six explicitly reported gates only; separate unpinned rotation, repeated rotations, no auto-action and status-card behavior were not individually asserted in this six-item result.
+
+- PR #77 merged; source `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`.
+- Tests #555 PASS; Android Debug APK #140 PASS, artifact id `11523858486`.
+- v0.5.77 release complete; next separate conversation topic is operation/status-card visual UX.
+- Issue #68 remains open for its separate Home-panel pattern follow-up.
+
+---
+
 ## v0.5.77 landscape Add — 2026-10-08
 
 v0.5.76 phone acceptance **7/7 PASS**. User video confirms landscape usability issue: fixed expanded Add consumes nearly full height. PR #77 merged as v0.5.77/build 93; runtime `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`; Tests #555 PASS, Android Debug APK #140 PASS; signed artifact `Renault-Docs-v0.5.77-Debug` id `11523858486`. Landscape temporarily unpins visually and collapses Add; the persistent portrait pin is not reset and returns when rotated back. Original 3D emoji/color contract preserved. PR #78 duplicate closed. Next: install via `5 → 19 → 8 → 13`, phone QA rotation cycles and independent scrolling; status-card redesign is deferred.

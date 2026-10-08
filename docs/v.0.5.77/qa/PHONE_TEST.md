@@ -1,12 +1,28 @@
-# v0.5.77 real-phone rotation acceptance — PENDING
+# v0.5.77 real-phone rotation acceptance — PASS 6/6 / CLOSED
 
-1. In portrait, pin and expand Add, verify original red 3D 📌.
-2. Rotate to landscape: Add is immediately collapsed; pin grayscale and temporarily unavailable.
-3. Scroll volumes top to bottom; cards and controls remain usable; gap visible.
-4. In landscape, manually expand Add with its header/chevron, then collapse again.
-5. Rotate back to portrait: persistent pin becomes red and panel expands automatically.
-6. Repeat portrait↔landscape several times; ensure no accidental permanent unpin or auto-action launch.
-7. Unpin in portrait, expand temporarily, rotate away/back: previous unpinned portrait state preserved.
-8. Reopen Megane II and confirm pinned portrait persistence; Help and status behavior unchanged.
+Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:
+1. Portrait: Add expanded, pin red — PASS.
+2. Landscape rotation: Add auto-collapses, pin grayscale — PASS.
+3. Landscape: volume list scrolls freely — PASS.
+4. Landscape: manual expand/collapse — PASS.
+5. Return portrait: pinned red emoji and expanded Add return — PASS.
+6. Reopen Megane II: persistent pinned state — PASS.
 
-Mark PASS, FAIL, or SKIP for each item; attach screenshots for failures. No phone acceptance yet.
+Scope: six explicitly reported gates only; separate unpinned rotation, repeated rotations, no auto-action and status-card behavior were not individually asserted in this six-item result.
+
+## Accepted phone-QA checklist
+
+- [x] Portrait pinned/expanded Add displays red original 📌.
+- [x] Rotate into landscape: panel collapses and pin becomes monochrome.
+- [x] Landscape volumes scroll freely.
+- [x] Landscape panel can manually expand and collapse.
+- [x] Return portrait restores red pinned emoji and open panel.
+- [x] Reopen Megane II: pin preference persists.
+
+## Not independently asserted by the user in this six-point report
+
+- [ ] Unpinned portrait expand/collapse across rotation.
+- [ ] Repeated rotation cycles and negative auto-action assertions.
+- [ ] Status-card appearance or Help visual checks (deferred).
+
+Do not conflate these untested supplemental checks with failure. User explicitly accepted the tested release: «Все норм».

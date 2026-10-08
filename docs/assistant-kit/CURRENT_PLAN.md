@@ -1,6 +1,25 @@
+## ACCEPTED CLOSEOUT — v0.5.77 / build 93
+
+Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:
+1. Portrait: Add expanded, pin red — PASS.
+2. Landscape rotation: Add auto-collapses, pin grayscale — PASS.
+3. Landscape: volume list scrolls freely — PASS.
+4. Landscape: manual expand/collapse — PASS.
+5. Return portrait: pinned red emoji and expanded Add return — PASS.
+6. Reopen Megane II: persistent pinned state — PASS.
+
+Scope: six explicitly reported gates only; separate unpinned rotation, repeated rotations, no auto-action and status-card behavior were not individually asserted in this six-item result.
+
+- Release source: `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`.
+- CI: Tests #555 PASS; Android Debug APK #140 PASS.
+- Artifact: `Renault-Docs-v0.5.77-Debug` / `11523858486`.
+- Next: status-window review (not part of this closeout).
+
+---
+
 # v0.5.77 — landscape Add auto-collapse — 2026-10-08
 
-Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
+Status: **PHONE PASS 6/6 / RELEASE CLOSED — 2026-10-08**.
 
 - v0.5.76 build 92: **PHONE PASS 7/7** (original 3D emoji, grayscale unpinned, fixed Add, 10dp gap, reopening, rotation state, Help).
 - User-submitted rotation video demonstrates pinned Add fills the landscape viewport and hides the volume cards.
@@ -11,7 +30,10 @@ Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
 - Portrait pin/expanded preferences persist unchanged; returning to portrait restores red 📌 and expanded Add.
 - No changes to status-card visuals, original emoji or existing 10dp gap.
 - Duplicate competing PR #78 closed unmerged.
-- Next phone gate: install through Renault Menu `5 → 19 → 8 → 13`, test portrait→landscape→portrait cycles and pinned state persistence.
+- Phone gate completed: PASS 6/6; user comment «Все норм».
+- Release closed for the six reported gates. Unchecked supplemental regression scenarios remain outside the six-item acceptance.
+- Next UX work: review operation/status-card appearance separately; do not make further v0.5.77 runtime changes.
+- Issue #68 remains open for the separate Home-panel follow-up.
 
 ---
 

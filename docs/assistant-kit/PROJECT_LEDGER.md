@@ -1,3 +1,22 @@
+## v0.5.77 — landscape pinned Add — PHONE PASS 6/6 / CLOSED — 2026-10-08
+
+Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:
+1. Portrait: Add expanded, pin red — PASS.
+2. Landscape rotation: Add auto-collapses, pin grayscale — PASS.
+3. Landscape: volume list scrolls freely — PASS.
+4. Landscape: manual expand/collapse — PASS.
+5. Return portrait: pinned red emoji and expanded Add return — PASS.
+6. Reopen Megane II: persistent pinned state — PASS.
+
+Scope: six explicitly reported gates only; separate unpinned rotation, repeated rotations, no auto-action and status-card behavior were not individually asserted in this six-item result.
+
+- Implementation: PR #77 merged, source `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`.
+- Tests #555 PASS; Android Debug APK #140 PASS, artifact `Renault-Docs-v0.5.77-Debug` id `11523858486`.
+- v0.5.77 release accepted without new runtime changes.
+- Next: status-card review as independent work. Issue #68 kept open for the Home-panel follow-up.
+
+---
+
 # Renault Docs — Master Project Ledger
 
 ## Issue #30 — deterministic Catalog publish pipeline — 2026-10-06

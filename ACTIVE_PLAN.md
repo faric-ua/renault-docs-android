@@ -1,3 +1,13 @@
+## CURRENT — v0.5.77 CLOSED / status-card review next — 2026-10-08
+
+- Phone QA v0.5.77 / build 93: PASS 6/6; comment «Все норм».
+- Portrait↔landscape pin/collapse/scroll/persistence accepted; no further runtime action for v0.5.77.
+- Main CI: Tests #555 PASS / Android Debug APK #140 PASS.
+- Next product discussion: status-window/status-card layout, previously deferred. Do not implement its redesign without requirements or review.
+- Separate issue #68 Home action-panel follow-up remains pending; don't close based solely on Project-screen acceptance.
+
+---
+
 ## ACTIVE — v0.5.77 phone rotation QA — 2026-10-08
 
 - v0.5.76 build 92: PHONE PASS 7/7.

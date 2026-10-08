@@ -1,10 +1,13 @@
-# v0.5.77 regression checklist
+# v0.5.77 regression checklist — phone QA accepted 6/6
 
-- [ ] Landscape opens Add collapsed regardless of portrait pinned expansion.
-- [ ] Landscape pin displays original emoji in grayscale and does not mutate stored pinned preference.
-- [ ] Volume cards scroll under fixed collapsed Add in landscape.
-- [ ] Manual landscape Add expansion/collapse works.
-- [ ] Return to portrait restores pinned red emoji and expanded panel.
-- [ ] Return to portrait preserves unpinned expanded/collapsed state too.
-- [ ] Multiple rotations do not trigger an import/action automatically.
-- [ ] 10dp gap, existing Help, and unchanged status card verified.
+- [x] Landscape auto-collapses pinned Add and displays grayscale pin.
+- [x] Landscape volume cards scroll below fixed Add header.
+- [x] Landscape Add manually expands/collapses.
+- [x] Portrait restores red pinned emoji and expanded Add.
+- [x] Pinned preference survives closing/reopening Megane II.
+- [x] Portrait expanded and red pinned state confirmed before rotation.
+- [ ] Unpinned portrait state across rotation (not checked in this report).
+- [ ] Multiple repeated rotations and no accidental auto-import (not checked in this report).
+- [ ] Help/status-card appearance (outside this six-gate acceptance).
+
+Acceptance comment: «Все норм». v0.5.77/build 93 marked PHONE PASS 6/6, CLOSED. No runtime rebuild required.

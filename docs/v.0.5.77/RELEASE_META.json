@@ -1,10 +1,14 @@
 {
   "versionName": "0.5.77",
   "versionCode": 93,
-  "phase": "phone_qa",
+  "phase": "closed",
   "feature": "Landscape Add auto-collapse preserving portrait pin",
   "branch": "feat/v0.5.77-landscape-add-panel",
   "main_runtime_sha": "87ab5c2dc20fa14dd7e88ac8cfb81d746c262169",
-  "qa_status": "PENDING",
-  "next": "Install 5 → 19 → 8 → 13 and verify portrait-landscape-portrait pin restoration"
+  "qa_status": "PASS",
+  "next": "Review operation/status-card UX separately; issue #68 Home-panel follow-up remains open",
+  "qa_checks_passed": 6,
+  "qa_checks_reported": 6,
+  "accepted_date": "2026-10-08",
+  "acceptance_comment": "Все норм"
 }
