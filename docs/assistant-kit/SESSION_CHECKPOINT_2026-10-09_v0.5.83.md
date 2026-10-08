@@ -2,7 +2,7 @@
 
 ## Confirmed delivery state
 
-**PR #89 MERGED / PYTHON+ANDROID MAIN CI PASS / STABLE-SIGNED APK READY / PHONE QA PAUSED (NOT CLOSED)**.
+**PR #89 MERGED / PYTHON+ANDROID MAIN CI PASS / STABLE-SIGNED APK READY / CORE ROUTE PHONE PASS / EXTENDED QA PAUSED**.
 
 - PR: https://github.com/faric-ua/renault-docs-android/pull/89; issue #79 remains open until on-phone acceptance.
 - Application source/merge SHA: `b5f1c22d73642d7341943e4320b5fb469cbe9bec`.
@@ -22,7 +22,7 @@
 
 ## Phone QA is intentionally paused
 
-User requested to stop the manual-test sequence after an earlier v0.5.82 video; do not ask for new tests/reinstallation unprompted. v0.5.83 code/tests/CI PASS but has **NO direct device evidence**. If user resumes: very short test only of New Volume → select Megane II → Add options visible, no picker; Back/rotation safe without import. Full acceptance cannot be claimed yet.
+User requested to stop the manual-test sequence after an earlier v0.5.82 video; do not ask for new tests/reinstallation unprompted. User replied «Пасс» (2026-10-09) after v0.5.83 signed build and core Home New Volume route explanation; **core route PHONE PASS** by explicit user feedback, though detailed Back/rotation and each source method lack independent evidence. If user resumes: very short test only of New Volume → select Megane II → Add options visible, no picker; Back/rotation safe without import. Full acceptance cannot be claimed yet.
 
 ## Unfinished unrelated functionality or QA
 
