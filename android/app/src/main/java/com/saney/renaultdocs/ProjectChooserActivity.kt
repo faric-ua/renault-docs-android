@@ -274,7 +274,9 @@ class ProjectChooserActivity : Activity() {
                                         this@ProjectChooserActivity,
                                     projectId =
                                         project.id,
-                                    openPicker =
+                                    // Offer all methods of adding a volume,
+                                    // rather than immediately opening .rdpkg SAF.
+                                    showAddPanel =
                                         true,
                                 ),
                             )
