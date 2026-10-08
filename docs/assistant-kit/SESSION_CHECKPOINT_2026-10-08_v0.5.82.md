@@ -50,6 +50,12 @@ User supplied four photos of Classic NT8340 / `Visu Schema`, search `120` 0/0 on
 
 User supplied three screenshots of NT8340/120 Classic original HTML/frame UI with inline PDF `SE2416-P` zoom 176%; ordinary portrait, fullscreen portrait and fullscreen landscape. User explicitly: Classic original Renault UI is working, unchanged except Android adaptation; do not refactor/merge with Modern. Record **PASS** for entering/exiting fullscreen and presenting the same PDF across orientations. Screenshots alone do not prove exact scroll position or status/nav restore after exit, so retain those as optional unresolved specifics. Prior Viewer hybrid `Розділи` test route remains invalid, not a bug. Next QA: Modern native section screen orientation, then independent operation status/cancel; do not force Classic UI changes.
 
+## Modern native category focus — test 6 PHONE PASS (2026-10-09)
+
+User supplied three phone screenshots of `Megane II / NT8340A / section 120 — ЭБУ СИСТ. ВПР.`: portrait shows complete Modern tab/menu selection (`Схеми`, `Роз’єм`, `Положення на авто`, `Документація`); landscape gives full width to active `Схеми` category; portrait rotation back restores all tabs without losing active section/content. User confirms this is exactly the previously agreed per-category responsive navigation, and says the same applies to connectors when selected before rotation. **PHONE PASS**. Do not modify Modern layout or Classic. Does not prove each data action, PDF/export, or independent operation-status visibility.
+
+Next: where there is already a Home operation status, verify it remains accessible while Home Add actions are collapsed and that rotation does not erase it. **Do not launch any conversion/import/export solely for QA**. If there is no status, mark N/A and defer.
+
 ## Original and extended phone QA checklist
 
 1. Home portrait: only `Додати` + `Мої Renault` blocks outside Add. Confirm Megane/Laguna/Kangoo counters unchanged. Expand Add; check New Volume/Project, Ready Projects, description, Converter/Legacy.
