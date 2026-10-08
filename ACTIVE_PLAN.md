@@ -1,3 +1,14 @@
+## CURRENT — v0.5.78 / build 94 — phone QA next
+
+- PR #80 merged, main app SHA `948d5688646728d53b47327cb56f222d316b6ca5`.
+- Main Tests #557 PASS / Android Debug APK #141 PASS / artifact id `11548219781`.
+- Next: install via Renault Menu 5 → 19 → 8 → 13; perform phone QA for status inside volume Add.
+- Main/Home project panel adaptation is next separate stage, **not yet done**.
+- Home «Новий том» ready-.rdpkg auto-picker route confirmed, issue #79 **OPEN**.
+- Do not assume phone PASS; preserve v0.5.77 accepted pin/orientation behavior.
+
+---
+
 ## ACTIVE — v0.5.78 compact inline progress for volumes
 
 Feature branch: `feat/v0.5.78-inline-volume-operation-status`, target v0.5.78/build 94. PR CI next; only after PASS main APK then phone QA. Keep accepted v0.5.77 pin/orientation unchanged. Home panel reuse and issue #79 later.

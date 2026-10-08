@@ -1,3 +1,9 @@
+## v0.5.78 source and signed CI — PHONE QA NEXT — 2026-10-08
+
+Read `docs/assistant-kit/CURRENT_PLAN.md` first. PR #80 merged; source `948d5688646728d53b47327cb56f222d316b6ca5`. Tests #557 PASS; Android Debug APK #141 PASS; artifact `Renault-Docs-v0.5.78-Debug` id `11548219781`. Main pending gate: phone QA status/progress in fixed Project «Додати». Separate issue #79 remains open; Home-panel refactor later.
+
+---
+
 ## v0.5.78 volume progress UI — feature PR pending
 
 Status nested into fixed volume Add card but outside action body, compact by default with independent details and copy. Home not changed. Confirmed route defect issue #79: Home New volume automatically opens ready-package picker; separate follow-up. CI and phone QA pending.

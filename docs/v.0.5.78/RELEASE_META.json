@@ -1,12 +1,16 @@
 {
   "versionName": "0.5.78",
   "versionCode": 94,
-  "phase": "development",
+  "phase": "phone_qa",
   "qa_status": "PENDING",
   "feature": "Project Add compact inline operation status",
   "followups": [
     "Home panel later",
     "Issue #79 New volume picker"
   ],
-  "next": "PR CI then signed APK and phone QA"
+  "next": "Phone QA through 5 → 19 → 8 → 13; then Home adaptation and separate issue #79",
+  "main_app_sha": "948d5688646728d53b47327cb56f222d316b6ca5",
+  "tests_run": 557,
+  "android_apk_run": 141,
+  "artifact_id": 11548219781
 }

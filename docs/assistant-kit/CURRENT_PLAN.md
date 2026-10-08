@@ -1,3 +1,16 @@
+## MAIN CI PASS — v0.5.78 / build 94 — 2026-10-08
+
+- PR #80 MERGED; app source `948d5688646728d53b47327cb56f222d316b6ca5`.
+- PR Tests #556 PASS / Android PR Check #445 PASS.
+- Main Tests #557 PASS / Android Debug APK #141 PASS.
+- Signed Debug artifact `Renault-Docs-v0.5.78-Debug`, id `11548219781`, digest `sha256:3978ba9494c4860370eea4de40abbc96153a61e064e7515d76e1561123ba7d8c`.
+- Next phone QA: install via Renault Menu `5 → 19 → 8 → 13`. Inspect collapsed Add + visible progress, status expand/copy, Cancel, × and orientation persistence; verify Home screen unchanged.
+- User-approved separate future Home refactor: reuse volume panel's collapse/expand/pin/landscape/status pattern after volume phone acceptance.
+- UX issue #79: Home New volume auto-opens .rdpkg picker due `ProjectChooserActivity` `openPicker=true`; pending separate fix.
+- Do not close v0.5.78 without phone QA. Do not change code simply for documentation.
+
+---
+
 # v0.5.78 — Project volume progress inside fixed Add panel — 2026-10-08
 
 Status: **IMPLEMENTED / PR CI NEXT / PHONE QA PENDING**.
