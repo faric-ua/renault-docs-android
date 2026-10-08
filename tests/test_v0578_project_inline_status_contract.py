@@ -26,9 +26,11 @@ class ProjectInlineStatusTests(unittest.TestCase):
         for text in ["STATE_OPERATION_STATUS_DETAILS_EXPANDED","operationStatus.isProjectDetailsExpanded()","restoredStatusDetailsExpanded","useProjectCompactLayout("]:
             self.assertIn(text,self.p)
 
-    def test_home_status_stays_original(self):
-        self.assertIn("operationStatus = OperationStatusView(this)",self.home)
-        self.assertNotIn("useProjectCompactLayout(",self.home)
+    def test_home_now_uses_same_fixed_add_status_pattern_as_project(self):
+        self.assertIn("operationStatus = OperationStatusView(this@MainActivity)",self.home)
+        self.assertIn("useProjectCompactLayout(false)",self.home)
+        panel=self.home[self.home.index("private fun buildHomeAddPanel"):self.home.index("private fun buildHomeChoiceCard")]
+        self.assertLess(panel.index("addView(\n                homeAddPanelBody"), panel.index("operationStatus ="))
 
 if __name__=="__main__":
     unittest.main()
