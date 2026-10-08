@@ -6,7 +6,8 @@
 - [x] PR Tests #571 PASS / Android PR Check #456 PASS; main Tests #572 PASS / signed APK #145 PASS. Artifact `Renault-Docs-v0.5.82-Debug` ID 11563839781, sha256 `94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be`.
 - [x] Installed/tested on phone; user core acceptance «Пасс. Взагалі все чудово.» 2026-10-08. Do not uninstall/clear data or move/delete archives.
 - [x] Core phone QA: Home Add/My Renault, 📌/expand and portrait→landscape→portrait system-bar hide/restore — PASS.
-- [ ] NEXT extended checks: Add contents, Ready Projects/Drive, Tools/Legacy, independent scroll/status, Help/Dialog, Viewer/Settings landscape and SAF/IME unaffected.
+- [x] Extended Home test 2 PHONE PASS (2026-10-08): visible New Volume/New Project/Ready Projects/Converter/Legacy and independent Add vs. My Renault scroll. User: «Все добре, пас, поїхали далі.»
+- [ ] NEXT: Home `?` Help dialog portrait→landscape→portrait and system bars/restore; then Viewer/Settings, actual route execution and status; SAF/IME remains outside owned UI.
 - [ ] Only after phone evidence: mark accepted/close; do not treat v0.5.81 Viewer pending check as PASS.
 
 Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md` and `docs/v.0.5.82/qa/PHONE_TEST.md`.
