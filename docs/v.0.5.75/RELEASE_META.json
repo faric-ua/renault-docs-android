@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.75",
+  "versionCode": 91,
+  "phase": "development",
+  "feature": "Sticky Add panel and restored pin silhouette",
+  "branch": "feat/v0.5.75-sticky-add-panel-pin",
+  "parent_issue": 68,
+  "qa_status": "PENDING",
+  "next": "ci_then_phone_qa_sticky_add_panel"
+}
