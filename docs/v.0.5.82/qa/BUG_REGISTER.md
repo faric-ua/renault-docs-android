@@ -15,3 +15,8 @@
 ## UX-ADD-VISIBILITY — Possible overlap in Home (2026-10-09)
 
 **Unconfirmed observation, not a reproduced bug.** In a screenshot with Home `Додати` expanded/pinned, its lower edge is near the upper portion of the Megane II tile and the `Мої Renault` heading is not visible. This may be the independent list retaining a scrolled position under a fixed panel. Request a non-destructive check: collapse `Додати` with ▲, confirm `Мої Renault` heading and full Megane II card can be revealed, then expand and scroll the project list. Change no code until visibility is reproduced as a failure.
+
+
+### Video follow-up — 2026-10-09
+
+The user provided a ~32-second video showing expanded and collapsed Home Add states, accessible `Мої Renault` header, Megane II / Laguna II / Kangoo II project tiles, and the same Add toggle inside Megane II. The first project remains accessible after collapse. **UX-ADD-VISIBILITY = NOT REPRODUCED, NO CODE CHANGE NECESSARY.** Do not treat the screenshot's apparent border proximity as proven overlap. Manual UI QA is on hold by user request.
