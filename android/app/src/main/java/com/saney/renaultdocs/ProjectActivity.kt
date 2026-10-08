@@ -1923,16 +1923,11 @@ class ProjectActivity : Activity() {
                 )
             }
 
-        val scrollContent =
-            LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-            }
-
-        scrollContent.addView(
+        root.addView(
             countText,
         )
 
-        scrollContent.addView(
+        root.addView(
             buildAddPanel(),
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1940,14 +1935,21 @@ class ProjectActivity : Activity() {
             ),
         )
 
-        operationStatus = OperationStatusView(this)
-        scrollContent.addView(
+        operationStatus =
+            OperationStatusView(
+                this,
+            )
+        root.addView(
             operationStatus,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
             ).apply {
-                bottomMargin = Ui.dp(this@ProjectActivity, 10)
+                topMargin =
+                    Ui.dp(
+                        this@ProjectActivity,
+                        8,
+                    )
             },
         )
 
@@ -1960,8 +1962,11 @@ class ProjectActivity : Activity() {
             }
 
         projectScroll =
-            ScrollView(this).apply {
-                isFillViewport = true
+            ScrollView(
+                this,
+            ).apply {
+                isFillViewport =
+                    true
             }
 
         volumeContainer =
@@ -1974,16 +1979,8 @@ class ProjectActivity : Activity() {
                     Gravity.TOP
             }
 
-        scrollContent.addView(
-            volumeContainer,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ),
-        )
-
         projectScroll.addView(
-            scrollContent,
+            volumeContainer,
             android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -1996,7 +1993,13 @@ class ProjectActivity : Activity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
                 1f,
-            ),
+            ).apply {
+                topMargin =
+                    Ui.dp(
+                        this@ProjectActivity,
+                        10,
+                    )
+            },
         )
 
         return root
@@ -2521,7 +2524,7 @@ class ProjectActivity : Activity() {
             ) {
                 Ui.danger
             } else {
-                Ui.muted
+                Ui.text
             },
         )
         addPanelPinButton.alpha =
@@ -4383,7 +4386,7 @@ class ProjectActivity : Activity() {
                             "Вручну — вибрати вже підготовлену папку через SAF.\n" +
                             "Створити .rdpkg з raw — підготувати пакет з оригінальної Renault-папки.\n" +
                             "Створити .rdpkg з архіву — використати ZIP, 7Z або RAR без ручної розпаковки.\n\n" +
-                            "📌 закріплює панель у розгорнутому стані. Після відкріплення її знову можна згортати.",
+                            "Кнопка закріплення світла, коли панель вільна, і червона, коли панель закріплена. Після відкріплення її знову можна згортати.",
                 )
 
             HELP_RAW ->
