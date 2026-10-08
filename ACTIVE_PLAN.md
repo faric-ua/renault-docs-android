@@ -10,7 +10,8 @@
 - [x] Home `?` Help dialog (test 3): rotation persistence, system bars landscape hide/portrait restore, close returns Home with no auto-operation — PHONE PASS (2026-10-08, user «Пасс»).
 - [x] Settings screen orientation and non-destructive choice dialog rotation + Close without changes — PHONE PASS (2026-10-08, user «Пасс»).
 - [!] Test 5 `Розділи · …` INVALID ROUTE: user showed Classic Visu Schema, not hybrid Viewer. `NativeSectionActivity.openLegacyFallback()` intentionally opens original Classic without hybrid extras; do not call this an app bug or force nonexistent button. Documented QA-ROUTE-005.
-- [ ] NEXT: test 5A actual Classic Viewer PDF `⛶` fullscreen + portrait/landscape restoration and same document/page; then active status, ModernVolume. SAF/IME Android-owned.
+- [x] Test 5A PHONE PASS (2026-10-08): screenshots show original NT8340/120 Classic inline PDF `SE2416-P` at 176% in ordinary portrait, fullscreen portrait and fullscreen landscape; no need to modify original Classic. [ ] Pixel-level scroll/explicit Android bars after exit not separately attested.
+- [ ] NEXT: Modern native section view portrait↔landscape with system-bar restoration (not Classic); then independent operation status and safe cancellation. SAF/IME Android-owned.
 - [ ] Only after phone evidence: mark accepted/close; do not treat v0.5.81 Viewer pending check as PASS.
 
 Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md` and `docs/v.0.5.82/qa/PHONE_TEST.md`.
