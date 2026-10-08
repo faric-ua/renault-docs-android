@@ -7,7 +7,7 @@
 - [x] Home: Add + My Renault general layout accepted by user (2026-10-08). [ ] Exact counters and legacy navigation not separately demonstrated in v0.5.82.
 - [x] Add content scrolls separately from `Мої Renault` project list — PASS, user confirmed (2026-10-08). [ ] Small-screen landscape clipping not separately documented.
 - [ ] Cancel SAF new volume, no automatic import; existing prepared export progress/terminal remains accessible while Add collapsed.
-- [x] Settings screen portrait→landscape→portrait system bars restore; one non-destructive choice dialog remains open during rotation and closes without changing preferences — PHONE PASS (2026-10-08, user «Пасс»). [ ] Viewer / ModernVolume / PDF fullscreen remain untested.
+- [x] Settings screen portrait→landscape→portrait system bars restore; one non-destructive choice dialog remains open during rotation and closes without changing preferences — PHONE PASS (2026-10-08, user «Пасс»). [x] Classic Viewer PDF fullscreen visually accepted in portrait and landscape (user screenshots 2026-10-08); [ ] ModernVolume and independent system-bar restoration with fullscreen switched off remain separate checks.
 - [ ] Install over existing app, do not clear data, move or delete archives.
 
 ## Acceptance evidence — 2026-10-08
@@ -31,3 +31,10 @@ User responded «Пасс» to Settings: orientation portrait→landscape→port
 - Original instructions assumed Viewer `Розділи` modal was reachable via Modern → Classic. This was **incorrect**. Screenshot sequence shows Classic/Visu Schema, in-page search and PDF; the expected modal is absent by design on this route. Therefore **TEST 5 INVALID ROUTE / NOT PASS OR FAIL**, not a Viewer bug.
 - Static check: `ViewerActivity.showSectionNavigator()` is for `hybridSectionMode` with populated modern section extras, but `NativeSectionActivity.openLegacyFallback()` deliberately launches *unmodified Classic* without the hybrid extras. See `qa/BUG_REGISTER.md` QA-ROUTE-005.
 - **Replacement test 5A pending:** in the user's currently open Classic PDF, tap its square `⛶` fullscreen control, rotate to landscape and back, verify same PDF/page and hidden bars while fullscreen, turn fullscreen off and verify portrait bars return. This requires no new APK or source changes.
+
+## Classic fullscreen — Test 5A: PHONE PASS (2026-10-08)
+
+- User provided three screenshots of untouched Classic Renault NT8340 / section 120 with inline PDF `SE2416-P`, zoom `176%`. Shows standard Viewer toolbar visible in portrait, fullscreen with toolbar hidden in portrait, and fullscreen in landscape with the same PDF and underlying Renault page visible. User explicitly says Classic fullscreen works as it is and must stay original, only adapted for Android.
+- **PASS:** entering/exiting fullscreen and rendering the same original document in both orientations; no visual loss of underlying PDF. No evidence of app crash or navigation reset.
+- **Scope limitation:** exact pixel-level scroll offset, Android system bars restored after explicit fullscreen exit, and other Viewer Modern flows not separately demonstrated. Do not claim a byte-level/full lifecycle invariant on screenshots alone.
+- **Contract:** preserve original Classic HTML, buttons, frame navigation and content. Do not add an app-owned hybrid `Розділи` panel to the original Classic to satisfy an invalid test. Android shell improvements may address insets, orientation, permissions, or crashes only without reworking Renault original logic. Next phone QA focus Modern native section pages or operation status, not arbitrary Classic redesign.
