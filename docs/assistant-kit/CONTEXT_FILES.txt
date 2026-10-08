@@ -1,3 +1,4 @@
+docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.80.md
 docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md
 ACTIVE_PLAN.md
 docs/assistant-kit/PROJECT_LEDGER.md

@@ -1,3 +1,9 @@
+## v0.5.80 / build96 — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
+
+Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.80.md` first. PR #86 merged. Runtime source `5a6ddc060edb4ff452eb1e3e96c1423cc042ddf9`. Main Tests #563 PASS, Android Debug APK #143 PASS; signed artifact `Renault-Docs-v0.5.80-Debug` ID `11557433214` (sha256 `0da82672e308148e5a2178f9fb147705b5ab8f2b96c39da15220e09dde6223b6`). Phone QA PENDING. Preserve source ZIP/.rdpkg and installed volumes; no migration/cleanup. Next: install via Renault Menu 5 → 19 → 8 → 13, test source guard, strong model mismatch, SAF source confirmation, global registered-project NT preview, Cancel/rotation. Issues #85/#82 candidate not closed, #83 picker history unresolved, #81 source preservation, #79 Home picker separate.
+
+---
+
 ## CURRENT — actual source provenance captured from phone / fix scope next
 
 - v0.5.79 read-only diagnostic proves source was `Kangoo-II_X61_NT8486...rdpkg` at `Documents/Renault/packages/rdpkg/`, source kind ARCHIVE_FILE, target Megane II, output `megane-ii-nt8486-2009-08-31`.

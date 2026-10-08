@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.80",
   "versionCode": 96,
-  "phase": "feature",
+  "phase": "phone_qa",
   "phone_qa": "PENDING",
   "branch": "feat/v0.5.80-safe-archive-preflight-global-catalog",
   "issues": [
@@ -10,5 +10,10 @@
     83,
     81
   ],
-  "next": "PR CI then signed main APK then phone regression"
+  "next": "Install over existing; phone test guards, metadata preview and rotation",
+  "source_sha": "5a6ddc060edb4ff452eb1e3e96c1423cc042ddf9",
+  "tests_run": 563,
+  "android_apk_run": 143,
+  "artifact_id": 11557433214,
+  "artifact_sha256": "0da82672e308148e5a2178f9fb147705b5ab8f2b96c39da15220e09dde6223b6"
 }
