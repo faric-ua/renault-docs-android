@@ -1,6 +1,6 @@
 # v0.5.82 Phone QA — CORE HOME/ORIENTATION PHONE PASS; EXTENDED QA OPEN
 
-- [x] Home: status and navigation bars hidden in landscape, visible again in portrait — PASS on phone (2026-10-08). [ ] Other app-owned screens, dialog windows and transient swipe remain unverified.
+- [x] Home: system bars hidden in landscape, restored in portrait — PHONE PASS (2026-10-08). [x] Home `?` Help dialog also survives portrait→landscape→portrait, system bars hide/restore, and Close returns to Home without automatic action — PHONE PASS (2026-10-08). [ ] Other Activity/dialog windows and transient swipe not yet checked.
 - [ ] Android SAF picker and system keyboard remain controlled by Android.
 - [x] Home Add collapses/expands; portrait 📌 pin/expanded state returns after landscape rotation — PASS on phone, user response «Пасс. Взагалі все чудово.» (2026-10-08).
 - [x] User confirmed Home Add action availability: `Новий том`, `Новий проєкт`, `Готові проєкти`, `Конвертер`, `Legacy` — PASS (2026-10-08). [ ] Independently inspect explanatory text and active-operation status later.
@@ -17,3 +17,7 @@ User confirmed «Пасс. Взагалі все чудово.» in direct respo
 ## Additional acceptance — 2026-10-08 (second test)
 
 User: «Все добре, пас, поїхали далі.» in response to checking the expanded Home `Додати` choices (New Volume, New Project, Ready Projects, Converter, Legacy) and independent scrolling of Add content vs. `Мої Renault`. Record as **PHONE PASS** for these visible UI/accessibility scenarios. Does not demonstrate execution of these actions, any SAF import, Google Drive download, active status/cancel, or Viewer/Settings/Help modal orientation. Next isolated test: Home `?` Help modal portrait→landscape→portrait; no auto-action and system bars restore.
+
+## Home Help dialog — test 3 PASS (2026-10-08)
+
+User answered «Пасс» to the explicit five-step check of Home `Додати` → `?` Help window: remains open across rotation, app-owned system bars hidden landscape/restored portrait, no clipped controls, Close returns Home with no automatic operation. PASS applies to this specific Help window only. Next isolated test: Settings screen portrait→landscape→portrait, verify bars, then open and close a non-destructive Settings choice dialog without saving changes. Keep Viewer/PDF fullscreen, other modal dialogs, import and destructive flows pending.
