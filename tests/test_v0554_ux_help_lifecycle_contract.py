@@ -426,12 +426,12 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             {
                 "HomeProjectDialogController.kt": (4, 4),
                 "LifecycleHelpDialogController.kt": (1, 1),
-                "ProjectActivity.kt": (7, 7),
+                "ProjectActivity.kt": (8, 8),
                 "SettingsActivity.kt": (3, 3),
             },
             audited,
         )
-        self.assertEqual(15, total_builders)
+        self.assertEqual(16, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(
