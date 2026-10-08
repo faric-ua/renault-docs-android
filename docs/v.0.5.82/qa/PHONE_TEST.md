@@ -7,7 +7,7 @@
 - [x] Home: Add + My Renault general layout accepted by user (2026-10-08). [ ] Exact counters and legacy navigation not separately demonstrated in v0.5.82.
 - [x] Add content scrolls separately from `Мої Renault` project list — PASS, user confirmed (2026-10-08). [ ] Small-screen landscape clipping not separately documented.
 - [ ] Cancel SAF new volume, no automatic import; existing prepared export progress/terminal remains accessible while Add collapsed.
-- [x] Settings screen portrait→landscape→portrait system bars restore; one non-destructive choice dialog remains open during rotation and closes without changing preferences — PHONE PASS (2026-10-08, user «Пасс»). [x] Classic Viewer PDF fullscreen visually accepted in portrait and landscape (user screenshots 2026-10-08); [ ] ModernVolume and independent system-bar restoration with fullscreen switched off remain separate checks.
+- [x] Settings screen portrait→landscape→portrait system bars restore; one non-destructive choice dialog remains open during rotation and closes without changing preferences — PHONE PASS (2026-10-08, user «Пасс»). [x] Classic Viewer PDF fullscreen visually accepted in portrait and landscape (user screenshots 2026-10-08); [x] Native Modern section 120 adaptive portrait↔landscape→portrait layout, same active `Схеми` section, PHONE PASS (2026-10-09). [ ] Exact fullscreen exit bars remain separate check.
 - [ ] Install over existing app, do not clear data, move or delete archives.
 
 ## Acceptance evidence — 2026-10-08
@@ -38,3 +38,11 @@ User responded «Пасс» to Settings: orientation portrait→landscape→port
 - **PASS:** entering/exiting fullscreen and rendering the same original document in both orientations; no visual loss of underlying PDF. No evidence of app crash or navigation reset.
 - **Scope limitation:** exact pixel-level scroll offset, Android system bars restored after explicit fullscreen exit, and other Viewer Modern flows not separately demonstrated. Do not claim a byte-level/full lifecycle invariant on screenshots alone.
 - **Contract:** preserve original Classic HTML, buttons, frame navigation and content. Do not add an app-owned hybrid `Розділи` panel to the original Classic to satisfy an invalid test. Android shell improvements may address insets, orientation, permissions, or crashes only without reworking Renault original logic. Next phone QA focus Modern native section pages or operation status, not arbitrary Classic redesign.
+
+## Test 6 — Native Modern orientation / active-tab focus PHONE PASS (2026-10-09)
+
+User provided three screenshots: portrait shows section `120 — ЭБУ СИСТ. ВПР.` with full navigation `Схеми`, `Роз’єм`, `Положення на авто`, `Документація`. Landscape displays **only the active `Схеми` content** for wider browsing; after returning to portrait all navigation actions reappear and the same active section/list remains visible. The user explicitly confirms this matches the agreed UX and applies also when switching to another category (e.g. connectors): choose a category in portrait, turn landscape to browse that category, return portrait to access all category tabs again.
+
+**PHONE PASS** for category-aware adaptive navigation, section/content continuity, and orientation handling. Do not construe this as evidence of independently testing every category's individual data/export actions or operation-progress persistence. No code changes required.
+
+**Next**: non-destructive Home operation status independence check only when an existing status is available; do not initiate a new conversion/import just for QA.
