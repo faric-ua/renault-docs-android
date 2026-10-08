@@ -1,3 +1,9 @@
+## CURRENT — v0.5.83/build99 SIGNED MAIN CI PASS / MANUAL PHONE QA PAUSED — 2026-10-09
+
+READ `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md`. #79 Home `Новий том` route fixed in PR #89; choose project → Project Add expands (Auto/Manual/raw/archive) rather than immediate .rdpkg SAF picker. Intentional direct picker untouched. Main source SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`, Tests #574 PASS, Android signed Debug APK #146 PASS. Signed artifact `Renault-Docs-v0.5.83-Debug` ID 11582942367, GitHub artifact bundle digest `sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`; expires 2026-10-11. **Not phone accepted; user paused phone QA**. Do not ask for tests or reinstall unprompted; never uninstall/clear data or touch existing ZIP/RDPKG/volumes. Remaining functionality #40/#51/#30 and optional #21/#50. Older v0.5.82 video Test 8 PASS, status Test 7 N/A.
+
+---
+
 ## Renault Docs — 2026-10-09 VIDEO PASS / MANUAL QA PAUSED
 
 v0.5.82/build98 remains installed/release candidate, app source `f17b319c4e17d8f7005ae20221dd7bd642cb172b`, signed APK #145. User video `607185.mp4` (~32 s) shows Home/Project Add expansion/collapse and accessible project/volume lists: **Test 8 PHONE VIDEO PASS**. Overlap suspicion not reproduced. Test 7 active status **N/A** (none exists). User explicitly asked to PAUSE manual tests and focus on unfinished functionality; do not ask for more QA steps until requested. **Immediate code gap #79**: Home New Volume after project chooser wrongly auto-opens .rdpkg picker; should show Project Add choices. Also #40 lifecycle, #51 archive final acceptance, #30 publishing pipeline; optional #21/#50. See `docs/v.0.5.82/qa/REMAINING_WORK_2026-10-09.md`. Do not delete or move ZIP/RDPKG/volumes, do not re-import for QA.
