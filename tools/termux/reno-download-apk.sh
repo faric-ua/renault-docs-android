@@ -63,10 +63,15 @@ EOF
 fi
 
 if [ -z "$RUN_ID" ]; then
+  # Actions keeps APK artifacts only briefly. Prefer a reviewed GitHub Release
+  # as a safe fallback, but never substitute a different Android build.
+  if [ "$BRANCH" = "main" ] && bash     "$REPO_DIR/tools/termux/reno-download-release-apk.sh"     "$VERSION" "$HEAD_SHA" "$GH_REPO"; then
+    exit 0
+  fi
   echo "Не знайдено безпечного APK artifact для поточного Android-коду."
   echo
   echo "Старішу версію з іншим Android-кодом або artifact з іншої гілки НЕ завантажую."
-  echo "Запусти Renault Menu → 7 для нового build."
+  echo "Немає сумісного GitHub Release. Запусти Renault Menu → 7 для нового build."
   exit 1
 fi
 
