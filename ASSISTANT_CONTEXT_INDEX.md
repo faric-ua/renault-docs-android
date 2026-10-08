@@ -4,6 +4,12 @@
 
 Мета: проєкт повинен відновлюватися з репозиторію без залежності від старого чату.
 
+## Останній checkpoint / відновлення — 2026-10-08
+
+Почніть із `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md` — v0.5.77 / build 93 PHONE PASS 6/6 / CLOSED.
+Далі читайте канонічний `docs/assistant-kit/CURRENT_PLAN.md` та `CURRENT_HANDOFF.md`.
+На паузі: наступний етап — **обговорення** вікна статусу; не починайте зміни коду до вимог.
+
 ## Перед змінами коду
 
 1. Прочитати `docs/assistant-kit/CURRENT_PLAN.md` і взяти його **Поточний наступний крок** як default resume point.

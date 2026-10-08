@@ -1,3 +1,11 @@
+## NEXT CHAT RESUME — 2026-10-08
+
+Full checkpoint: `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md`. v0.5.77 / build 93 PHONE PASS 6/6 / CLOSED.
+Canonical next task: discuss status window/panel UX; **do not start code changes without new requirements**.
+Live plan: `docs/assistant-kit/CURRENT_PLAN.md`.
+
+---
+
 ## CURRENT — v0.5.77 CLOSED / status-card review next — 2026-10-08
 
 - Phone QA v0.5.77 / build 93: PASS 6/6; comment «Все норм».

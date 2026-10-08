@@ -1,3 +1,14 @@
+## Пауза / session checkpoint — 2026-10-08
+
+**Стан:** Renault Docs v0.5.77 / build 93 — **PHONE PASS 6/6, CLOSED**. Користувач: «Все норм». Код стабільний, нового APK не потрібно.
+
+**Поточний наступний крок:** наступної сесії обговорити вікно/панель статусу та прогресу, попередньо переглянувши UI й запитавши уточнення. **Нічого зараз не реалізовувати.**
+
+Канонічний докладний checkpoint: `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md`.
+App runtime: `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`; main Tests #555 PASS; Debug APK #140 PASS. Issue #68 Home-panel follow-up лишається відкритою.
+
+---
+
 ## ACCEPTED CLOSEOUT — v0.5.77 / build 93
 
 Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:

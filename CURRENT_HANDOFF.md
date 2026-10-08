@@ -1,3 +1,11 @@
+## NEW CHAT RESUME — 2026-10-08 — Renault Docs checkpoint
+
+Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md` first, then `docs/assistant-kit/CURRENT_PLAN.md`.
+v0.5.77 / build 93 CLOSED / phone PASS 6/6; nothing to reinstall or rebuild.
+Next session: discuss status window/panel UX; do not modify runtime until requirements are agreed.
+
+---
+
 ## FINAL PHONE QA — v0.5.77 / build 93 — PASS 6/6 / CLOSED — 2026-10-08
 
 Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:
