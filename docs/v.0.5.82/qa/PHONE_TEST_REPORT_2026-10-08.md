@@ -11,11 +11,15 @@
 - Add expanded and portrait 📌 pinned; in landscape system status/navigation bars hide and Add collapses; on return to portrait system bars and previous pin state return.
 - No defects were reported for this tested scenario.
 
+## Extended phone acceptance — test 2 (2026-10-08)
+- User: «Все добре, пас, поїхали далі.» after verifying expanded Home Add contains `Новий том`, `Новий проєкт`, `Готові проєкти`, `Конвертер`, `Legacy` and that Add contents and `Мої Renault` list scroll independently.
+- **PASS:** visual action availability and independent scrolling. **Not tested:** actual action execution, status during active work, data changes.
+
 ## Not independently evidenced
 - Per-dialog fullscreen or transient swipe-on-demand, Settings/Viewer/ModernVolume, explicit PDF fullscreen.
-- Expandable Home Add content (Ready Projects/Google Drive, Legacy, Tools), detailed independent Add/Projects scroll and terminal status interactions.
+- Actual Ready Projects/Drive, Legacy and Tools launch results; active operation progress/terminal status interactions (UI presence and independent scrolling already PASS).
 - Cross-app system SAF picker behavior and IME; destructive/project import/export operations; volumes count after install and data-preservation checks.
 - Older v0.5.81 Viewer-specific `Розділи` modal QA remains distinct.
 
 ## Result
-**CORE PHONE PASS / EXTENDED QA OPEN**. Do not close the whole release or unrelated issue set yet. Next isolated test should inspect Home Add choices and independent scrolling without starting any import, followed by help/dialog orientation and remaining route checks.
+**CORE PHONE PASS / EXTENDED QA OPEN**. Do not close the whole release or unrelated issue set yet. Next isolated test: Home Help `?` dialog across portrait→landscape→portrait, system bars and no automatic actions. Then Viewer/Settings route checks and active status scenarios.
