@@ -69,3 +69,12 @@ Status: core Home Add + orientation phone **PASS** (2026-10-08), extended QA **O
 ## Pending unrelated
 
 - v0.5.81 separate Viewer/dialog phone checks remain open; #79 Home `Новий том` picker routing (next separate change if still relevant), #81 original file preservation, #82/#85 safe intake candidate QA, #83 historical picker trail uncertainty, other unclosed older gates. Do not infer all issues closed from merged UI code.
+
+## Update 2026-10-09 — VIDEO Test 8 PASS; user paused further manual QA
+
+- User uploaded ~32-second screen recording `607185.mp4`: on Home `Додати` expanded then collapsed, `Мої Renault` heading + Megane II 10, Laguna II 10, Kangoo II 1 all accessible; in Megane II `Додати` collapses/expands and existing volume tiles stay accessible. **PHONE VIDEO PASS for Test 8**. Suspected overlap is not reproduced as blocking.
+- Test 7 operation status **N/A** (no current status).
+- User requests no further manual QA for now; status **QA PAUSED, NOT CLOSED**.
+- Functional gap #79 confirmed in current code: Home New Volume → ProjectChooser → ProjectActivity with `openPicker=true` auto-starts ready .rdpkg picker. Next development scope is to land on the chosen Project Add choices, preserving intentional direct picker entry routes.
+- Other open lines: #40 unified background lifecycle audit, #51 full archive intake acceptance, #30 Windows-source publishing pipeline, optional #21 support and #50 Termux polish. Older #68/#23/#85/#82 open issue bookkeeping does not mean those features are absent. Details `docs/v.0.5.82/qa/REMAINING_WORK_2026-10-09.md`.
+- No app source edited or rebuilt for the Test 8 review. Preserve original ZIP/RDPKG and installed volumes.
