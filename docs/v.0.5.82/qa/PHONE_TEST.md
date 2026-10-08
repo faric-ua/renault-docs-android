@@ -25,3 +25,9 @@ User answered «Пасс» to the explicit five-step check of Home `Додати
 ## Settings orientation / choice dialog — test 4 PASS (2026-10-08)
 
 User responded «Пасс» to Settings: orientation portrait→landscape→portrait, system bars hide/restore, open a harmless selection dialog, rotate again and close without saving. Record as **PHONE PASS for Settings and selected choice dialog**; do not treat Viewer/PDF, external SAF, destructive actions or persistent operation-status UI as verified. Next: Viewer-specific `Розділи` modal, not the separate ModernVolume native section list.
+
+## Viewer test 5 — corrected route, user screenshots (2026-10-08)
+
+- Original instructions assumed Viewer `Розділи` modal was reachable via Modern → Classic. This was **incorrect**. Screenshot sequence shows Classic/Visu Schema, in-page search and PDF; the expected modal is absent by design on this route. Therefore **TEST 5 INVALID ROUTE / NOT PASS OR FAIL**, not a Viewer bug.
+- Static check: `ViewerActivity.showSectionNavigator()` is for `hybridSectionMode` with populated modern section extras, but `NativeSectionActivity.openLegacyFallback()` deliberately launches *unmodified Classic* without the hybrid extras. See `qa/BUG_REGISTER.md` QA-ROUTE-005.
+- **Replacement test 5A pending:** in the user's currently open Classic PDF, tap its square `⛶` fullscreen control, rotate to landscape and back, verify same PDF/page and hidden bars while fullscreen, turn fullscreen off and verify portrait bars return. This requires no new APK or source changes.
