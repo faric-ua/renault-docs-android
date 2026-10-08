@@ -1,0 +1,18 @@
+{
+  "versionName": "0.5.83",
+  "versionCode": 99,
+  "phase": "phone_qa_paused",
+  "source_sha": "b5f1c22d73642d7341943e4320b5fb469cbe9bec",
+  "pull_request": 89,
+  "issue": 79,
+  "pr_tests_run": 573,
+  "pr_android_check_run": 457,
+  "main_tests_run": 574,
+  "signed_android_apk_run": 146,
+  "artifact_name": "Renault-Docs-v0.5.83-Debug",
+  "artifact_id": 11582942367,
+  "artifact_digest": "sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef",
+  "artifact_expires_at": "2026-10-11T22:27:09Z",
+  "phone_qa": "PAUSED_BY_USER",
+  "next": "Do not prompt for phone QA. When user chooses, install above existing via Renault Termux 5 → 19 → 8 → 13, then verify New Volume → project choice → expanded Add without SAF auto-launch and safe back/rotation."
+}
