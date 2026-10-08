@@ -94,6 +94,12 @@ class AppSettings(
                 .apply()
         }
 
+    var homeAddPanelPinned: Boolean
+        get() = prefs.getBoolean(KEY_HOME_ADD_PANEL_PINNED, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_HOME_ADD_PANEL_PINNED, value).apply()
+        }
+
     val backupTreeUri: String?
         get() =
             prefs.getString(
@@ -150,6 +156,8 @@ class AppSettings(
 
         private const val KEY_PROJECT_ADD_PANEL_PINNED =
             "project_add_panel_pinned"
+
+        private const val KEY_HOME_ADD_PANEL_PINNED = "home_add_panel_pinned"
 
         private const val KEY_BACKUP_TREE_URI =
             "backup_tree_uri"
