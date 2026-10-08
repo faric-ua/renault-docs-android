@@ -1,6 +1,6 @@
 # Renault Docs v0.5.83 / build 99 — Home New Volume handoff
 
-Status: **CANDIDATE / CI PENDING / PHONE QA PAUSED PER USER**.
+Status: **PR #89 MERGED / MAIN TESTS PASS / STABLE-SIGNED APK READY / PHONE QA PAUSED (NOT CLOSED)**.\n\nSource SHA: `b5f1c22d73642d7341943e4320b5fb469cbe9bec`. PR Tests #573 PASS / Android PR Check #457 PASS; main Tests #574 PASS / signed Android Debug APK #146 PASS. Artifact `Renault-Docs-v0.5.83-Debug` ID `11582942367`, GitHub artifact digest `sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`, expires 2026-10-11 22:27:09 UTC. This is an **artifact digest** and must not be mislabeled as the unpacked APK checksum. Do not install/uninstall without user choice; existing data must be retained.
 
 ## Scope
 
