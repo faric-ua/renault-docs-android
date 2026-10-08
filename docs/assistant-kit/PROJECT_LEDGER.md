@@ -2495,3 +2495,26 @@ Real-phone feedback after v0.5.74:
 
 Target release: v0.5.75 / build 91.
 
+## 2026-10-08 — v0.5.75 sticky Add panel merged
+
+Implemented:
+- Add/count area remains fixed;
+- only volume cards are inside the Project ScrollView;
+- 10dp gap before the first volume card;
+- previous diagonal push-pin silhouette restored;
+- unpinned tint = light monochrome;
+- pinned tint = red;
+- Help copy no longer uses a misleading colored emoji;
+- status-card visual review remains deferred.
+
+Merged runtime:
+`b25efbee254562d7b3e9f6917772e8d2e6370eb3`.
+
+CI:
+- Tests #547 PASS;
+- Android Debug APK #138 PASS;
+- artifact `Renault-Docs-v0.5.75-Debug`, id `11520145404`;
+- digest `sha256:59888f89ef694512ffa2a4895a75cb93b21c99687ccaa24270bfa9a06f948f00`.
+
+Phone acceptance pending.
+
