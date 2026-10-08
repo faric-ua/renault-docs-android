@@ -1,3 +1,15 @@
+## ACTIVE — v0.5.75 sticky Add phone QA — 2026-10-08
+
+- runtime: `b25efbee254562d7b3e9f6917772e8d2e6370eb3`
+- v0.5.75 / build 91
+- Tests #547 PASS
+- Android Debug APK #138 PASS
+
+Current action:
+`5 → 19 → 8 → 13` → install → verify sticky Add, list scrolling, spacing, and pin colors.
+
+---
+
 ## ACTIVE — v0.5.75 sticky Add panel — 2026-10-08
 
 Implementation:
