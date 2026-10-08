@@ -30,8 +30,8 @@ object ArchiveSourceGuard {
         if (models.isEmpty()) return null
         val expected = explicitModels(project.title + " " + project.model + " " + project.id)
         if (models.size > 1 || expected.isEmpty() || expected.intersect(models).isEmpty()) {
-            return "Джерело містить назву моделі \${models.sorted().joinToString("/")}, " +
-                "але вибрано проєкт «\${project.title}». Підготовку зупинено."
+            return "Джерело містить назву моделі ${models.sorted().joinToString("/")}, " +
+                "але вибрано проєкт «${project.title}». Підготовку зупинено."
         }
         return null
     }
@@ -73,9 +73,9 @@ object ArchiveSourceGuard {
         val displayed = matches.take(8).map { match ->
             val location = if (match.projectId == activeProjectId) " (поточний)" else ""
             val strength = if (match.matchingMetadata) "збіг метаданих" else "можливий дублікат"
-            "• \${match.projectTitle}\${location}: \${match.volumeTitle} — \${strength}"
+            "• ${match.projectTitle}${location}: ${match.volumeTitle} — ${strength}"
         }
-        val extra = if (matches.size > 8) "\nЩе збігів: \${matches.size - 8}" else ""
+        val extra = if (matches.size > 8) "\nЩе збігів: ${matches.size - 8}" else ""
         return "Знайдено серед усіх зареєстрованих проєктів:\n" +
             displayed.joinToString("\n") + extra
     }
