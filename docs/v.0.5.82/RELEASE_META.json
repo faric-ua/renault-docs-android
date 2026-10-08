@@ -2,7 +2,7 @@
   "versionName": "0.5.82",
   "versionCode": 98,
   "phase": "phone_qa",
-  "phone_qa": "PENDING",
+  "phone_qa": "CORE_PASS_EXTENDED_PENDING",
   "feature": "Home pinned Add parity and immersive landscape status/navigation bars",
   "pull_request": 88,
   "branch": "feat/v0.5.82-home-add-global-landscape-bars",
@@ -15,5 +15,7 @@
   "artifact_id": 11563839781,
   "artifact_sha256": "94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be",
   "artifact_expires_at": "2026-10-11T16:39:51Z",
-  "next": "Install over via Renault Termux Menu 5 → 19 → 8 → 13; phone test portrait ↔ landscape bars, Home Add pin/expansion, tools/ready project and independent project scroll. Do not uninstall/clear or modify source archives."
+  "next": "Extended phone QA: Add content, Tools/Drive/Legacy, independent scrolling and Help/dialog/Viewer/Settings bars; no destructive action. Do not uninstall/clear data.",
+  "phone_qa_date": "2026-10-08",
+  "phone_qa_evidence": "User: Пасс. Взагалі все чудово. Home Add/pin + portrait-landscape bar restoration PASS; extended checks not individually attested."
 }
