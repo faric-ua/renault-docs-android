@@ -3,6 +3,7 @@ package com.saney.renaultdocs
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.Configuration
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -61,6 +62,9 @@ class ProjectActivity : Activity() {
     private var addPanelExpanded =
         false
     private var addPanelPinned =
+        false
+    // Ephemeral landscape UI only; never persisted as the portrait pin preference.
+    private var addPanelLandscapeExpanded =
         false
     private var pendingManualImport =
         false
@@ -2066,13 +2070,7 @@ class ProjectActivity : Activity() {
                     isFocusable =
                         true
                     setOnClickListener {
-                        if (
-                            !addPanelPinned
-                        ) {
-                            addPanelExpanded =
-                                !addPanelExpanded
-                            updateAddPanelUi()
-                        }
+                        toggleAddPanel()
                     }
                 }
 
@@ -2106,17 +2104,18 @@ class ProjectActivity : Activity() {
                     contentDescription =
                         "Закріпити панель Додати",
                 ) {
-                    addPanelPinned =
-                        !addPanelPinned
-                    settings.projectAddPanelPinned =
-                        addPanelPinned
-                    if (
-                        addPanelPinned
-                    ) {
-                        addPanelExpanded =
-                            true
+                    // Landscape does not overwrite portrait's saved pin choice.
+                    if (!isLandscapeLayout()) {
+                        addPanelPinned =
+                            !addPanelPinned
+                        settings.projectAddPanelPinned =
+                            addPanelPinned
+                        if (addPanelPinned) {
+                            addPanelExpanded =
+                                true
+                        }
+                        updateAddPanelUi()
                     }
-                    updateAddPanelUi()
                 }
 
             titleRow.addView(
@@ -2146,13 +2145,7 @@ class ProjectActivity : Activity() {
                     contentDescription =
                         "Розгорнути або згорнути панель Додати",
                 ) {
-                    if (
-                        !addPanelPinned
-                    ) {
-                        addPanelExpanded =
-                            !addPanelExpanded
-                        updateAddPanelUi()
-                    }
+                    toggleAddPanel()
                 }
 
             titleRow.addView(
@@ -2473,27 +2466,44 @@ class ProjectActivity : Activity() {
             }
         }
 
+    private fun isLandscapeLayout(): Boolean =
+        resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    private fun toggleAddPanel() {
+        if (isLandscapeLayout()) {
+            // A user can temporarily open Add in landscape without
+            // changing the portrait pin or expanded state.
+            addPanelLandscapeExpanded =
+                !addPanelLandscapeExpanded
+        } else if (!addPanelPinned) {
+            addPanelExpanded =
+                !addPanelExpanded
+        }
+        updateAddPanelUi()
+    }
+
     private fun updateAddPanelUi() {
-        if (
-            !::addPanelBody.isInitialized
-        ) {
+        if (!::addPanelBody.isInitialized) {
             return
         }
 
-        addPanelBody.visibility =
-            if (
-                addPanelExpanded
-            ) {
-                View.VISIBLE
+        val landscape = isLandscapeLayout()
+        val pinnedHere = addPanelPinned && !landscape
+        val expandedHere =
+            if (landscape) {
+                addPanelLandscapeExpanded
             } else {
-                View.GONE
+                addPanelExpanded
             }
 
-        // Preserve the exact colorful system emoji; desaturate the entire
-        // TextView layer only while the panel is not pinned.
+        addPanelBody.visibility =
+            if (expandedHere) View.VISIBLE else View.GONE
+
+        // Keep the exact same original Android emoji. The landscape pin
+        // appears unpinned, while the saved portrait preference survives.
         addPanelPinButton.setLayerType(
             View.LAYER_TYPE_HARDWARE,
-            if (addPanelPinned) {
+            if (pinnedHere) {
                 null
             } else {
                 monochromePinPaint
@@ -2501,39 +2511,31 @@ class ProjectActivity : Activity() {
         )
         addPanelPinButton.alpha =
             1f
+        addPanelPinButton.isEnabled =
+            !landscape
+        addPanelPinButton.isClickable =
+            !landscape
+        addPanelPinButton.isFocusable =
+            !landscape
         addPanelPinButton.contentDescription =
-            if (
-                addPanelPinned
-            ) {
+            if (landscape) {
+                "Закріплення тимчасово недоступне в альбомному режимі"
+            } else if (pinnedHere) {
                 "Відкріпити панель Додати"
             } else {
                 "Закріпити панель Додати"
             }
 
         addPanelToggleButton.text =
-            if (
-                addPanelExpanded
-            ) {
-                "▲"
-            } else {
-                "▼"
-            }
+            if (expandedHere) "▲" else "▼"
         addPanelToggleButton.isClickable =
-            !addPanelPinned
+            !pinnedHere
         addPanelToggleButton.isFocusable =
-            !addPanelPinned
+            !pinnedHere
         addPanelToggleButton.alpha =
-            if (
-                addPanelPinned
-            ) {
-                0.45f
-            } else {
-                1f
-            }
+            if (pinnedHere) 0.45f else 1f
         addPanelToggleButton.contentDescription =
-            if (
-                addPanelExpanded
-            ) {
+            if (expandedHere) {
                 "Згорнути панель Додати"
             } else {
                 "Розгорнути панель Додати"
@@ -4358,7 +4360,7 @@ class ProjectActivity : Activity() {
                             "Вручну — вибрати вже підготовлену папку через SAF.\n" +
                             "Створити .rdpkg з raw — підготувати пакет з оригінальної Renault-папки.\n" +
                             "Створити .rdpkg з архіву — використати ZIP, 7Z або RAR без ручної розпаковки.\n\n" +
-                            "📌 закріплює панель у розгорнутому стані. Закріплена шпилька — кольорова, відкріплена — чорно-біла. Після відкріплення панель знову можна згортати.",
+                            "📌 закріплює панель у розгорнутому стані. Закріплена шпилька — кольорова, відкріплена — чорно-біла. В альбомному режимі панель автоматично згортається, шпилька тимчасово неактивна, а томи доступні для прокручування. Панель можна розгорнути вручну. Після повернення у вертикальний режим попереднє закріплення відновлюється.",
                 )
 
             HELP_RAW ->
