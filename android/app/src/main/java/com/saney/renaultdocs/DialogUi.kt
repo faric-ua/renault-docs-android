@@ -1,6 +1,9 @@
 package com.saney.renaultdocs
 
 import android.app.AlertDialog
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.View
@@ -16,12 +19,39 @@ enum class DialogRole {
 }
 
 object DialogUi {
+    // Weak keys never extend the lifetime of a dismissed dialog.
+    private val registeredDialogs = java.util.WeakHashMap<AlertDialog, Unit>()
+
+    fun reapplyOrientation(activity: Activity) {
+        registeredDialogs.keys.toList().forEach { dialog ->
+            if (!dialog.isShowing) {
+                registeredDialogs.remove(dialog)
+            } else if (belongsTo(dialog, activity)) {
+                Ui.applyOrientationSystemBars(
+                    dialog.window, activity.resources.configuration.orientation,
+                )
+            }
+        }
+    }
+
+    private fun belongsTo(dialog: AlertDialog, activity: Activity): Boolean {
+        var current: Context? = dialog.context
+        repeat(8) {
+            if (current === activity) return true
+            current = (current as? ContextWrapper)?.baseContext
+            if (current == null) return false
+        }
+        return false
+    }
+
     fun apply(
         dialog: AlertDialog,
         role: DialogRole,
     ) {
         val context =
             dialog.context
+
+        registeredDialogs[dialog] = Unit
 
         val rounded =
             Ui.roundedBackground(
@@ -184,6 +214,10 @@ object DialogUi {
                     DialogRole.PROGRESS -> Ui.danger
                     else -> Ui.accent
                 },
+        )
+        Ui.applyOrientationSystemBars(
+            dialog.window,
+            dialog.context.resources.configuration.orientation,
         )
     }
 
