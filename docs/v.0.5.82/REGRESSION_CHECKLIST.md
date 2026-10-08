@@ -8,4 +8,5 @@
 - [x] PR Python Tests #571 PASS / Android PR Check #456 PASS, main Tests #572 PASS and signed Android Debug APK #145 PASS; artifact ID 11563839781.
 - [x] Core Home orientation + pin/restore PHONE PASS (2026-10-08, user «Пасс. Взагалі все чудово.»).
 - [x] Expanded Home Add options and independent scroll of Add vs. My Renault — PHONE PASS (2026-10-08).
-- [ ] Extended phone QA of Help/dialog orientation, Viewer/Settings, Tools/Drive/Legacy actions and operation-status behavior before full release closeout.
+- [x] Help dialog + Settings choice orientation PASS, Classic PDF fullscreen PASS, Modern native section 120 portrait/landscape active-tab focus PASS (2026-10-09).
+- [ ] Extended QA: status independence, actual Tools/Drive/Legacy routing, SAF/IME and other operation-specific paths before full release closeout.
