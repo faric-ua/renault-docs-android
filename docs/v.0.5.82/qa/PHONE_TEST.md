@@ -50,3 +50,18 @@ User provided three screenshots: portrait shows section `120 — ЭБУ СИСТ
 ## Test 7 — Home operation status (2026-10-09)
 
 User reported «Статусу немає» and submitted a Home screenshot with no operation status. Result: N/A / deferred; do not launch a new operation solely for QA. Screenshot suggests possible overlap between the lower edge of expanded `Додати` and the top of the Megane II card, but usability is not yet established. Next safe check: collapse the Add panel and verify My Renault heading and first card are fully accessible.
+
+
+## Test 8 — Home / Project Add and project-list visibility: VIDEO PASS (2026-10-09)
+
+Evidence: user-supplied `607185.mp4`, duration ~32.16 s, reviewed directly. Video shows:
+- Home `Додати` expanded with `Мої Renault` heading and project tiles beneath; collapse reveals full Megane II, Laguna II, Kangoo II cards (counts 10 / 10 / 1).
+- Home `Додати` can be expanded again; list remains reachable. The suspected first-card overlap from a still screenshot is **not reproduced as an access/blocking defect**.
+- Inside Megane II the `Додати` panel collapses to the compact header, exposing installed volume tiles, and expands again with Auto / Manual / create .rdpkg from raw / archive and source diagnostic.
+- Pin controls shown in both Home and Megane II; panel state changes do not remove the visible volume/project list. No import, deletion, conversion or file-system change shown.
+
+Verdict: **PASS** for the reported Home panel collapse / first card accessibility and for the observed project-level panel toggle. This is UI evidence only; not a lifecycle/background-operation status test. `UX-ADD-VISIBILITY` = not reproduced; no UI patch indicated.
+
+## QA pause requested — 2026-10-09
+
+User explicitly requests to **pause additional manual phone QA**, review what functionality remains, and decide the next development step. Do not run new phone QA, initiate conversions/imports or close remaining gates until user decides. Test 7 (no status) stays **N/A/deferred**. Test 8 above is complete.
