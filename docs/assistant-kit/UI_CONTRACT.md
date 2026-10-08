@@ -99,6 +99,14 @@ completed status screen
 
 Close закриває тільки modal, якщо інше явно не визначено product contract.
 
+## Modern native adaptive category view — v0.5.82 device acceptance (2026-10-09)
+
+- In **portrait**, display full Modern section navigation: `Схеми`, `Роз’єм`, `Положення на авто`, `Документація` and the active category content.
+- In **landscape**, prioritize only the currently active category content, with other tabs hidden to maximize browsing space; this is **not** a loss of data or a Classic fallback.
+- Returning portrait restores full navigation without changing the active section/category or discarding displayed list/content.
+- Choosing a different category in portrait (e.g. `Роз’єм`) should apply the same landscape focus to that category. Preserve this invariant through future UI changes.
+- Phone QA for Megane II NT8340A section 120 `Схеми`: user screenshots + explicit acceptance PASS; don't infer every category's underlying dataset actions individually tested.
+
 ## Classic vs Modern preservation — v0.5.82 phone acceptance
 
 - **Classic is the authentic Renault Visu Schema / legacy HTML and frames**, not a redesigned Android screen. Its original controls, visual arrangement, page content, link semantics, PDF/schematic handling and full-screen feature are preserved as-is; Android shell adaptation may handle system bars, safe insets, lifecycle, file permissions and crash fixes only when necessary.
