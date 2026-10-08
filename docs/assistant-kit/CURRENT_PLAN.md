@@ -1,3 +1,17 @@
+# v0.5.78 — Project volume progress inside fixed Add panel — 2026-10-08
+
+Status: **IMPLEMENTED / PR CI NEXT / PHONE QA PENDING**.
+
+- Scope only ProjectActivity (inside Megane II/volumes), not Home.
+- Keep compact operation/progress/status view inside the fixed Add card, as a *sibling* of collapsed action body. Progress/Cancel/terminal × remain visible even while collapsed in landscape.
+- Independent ▾/▴ to show status details and ⧉ to copy full status; detail state survives Activity rotation.
+- No change to original 3D 📌, portrait pin, landscape auto-collapse, scroll list or 10dp gap.
+- Home/Projects action panel to reuse accepted pattern in a later release.
+- Found Home «Новий том» auto-opens ready .rdpkg via openPicker=true without choice; logged **issue #79**, separate fix later (do not bundle).
+- Target v0.5.78 / build 94. Gate: PR CI → main signed APK → real-phone QA for status running/terminal/cancel/rotation.
+
+---
+
 ## Пауза / session checkpoint — 2026-10-08
 
 **Стан:** Renault Docs v0.5.77 / build 93 — **PHONE PASS 6/6, CLOSED**. Користувач: «Все норм». Код стабільний, нового APK не потрібно.

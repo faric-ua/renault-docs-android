@@ -49,6 +49,7 @@ class ProjectActivity : Activity() {
     private lateinit var addPanelBody: LinearLayout
     private lateinit var addPanelPinButton: TextView
     private lateinit var addPanelToggleButton: TextView
+    private var restoredStatusDetailsExpanded = false
     private val monochromePinPaint by lazy {
         Paint().apply {
             colorFilter =
@@ -146,6 +147,11 @@ class ProjectActivity : Activity() {
                     0,
                 )
                 ?: 0
+        restoredStatusDetailsExpanded =
+            savedInstanceState?.getBoolean(
+                STATE_OPERATION_STATUS_DETAILS_EXPANDED,
+                false,
+            ) ?: false
 
         activeProjectDialogKind =
             savedInstanceState
@@ -359,6 +365,14 @@ class ProjectActivity : Activity() {
         outState.putBoolean(
             STATE_ADD_PANEL_EXPANDED,
             addPanelExpanded,
+        )
+        outState.putBoolean(
+            STATE_OPERATION_STATUS_DETAILS_EXPANDED,
+            if (::operationStatus.isInitialized) {
+                operationStatus.isProjectDetailsExpanded()
+            } else {
+                false
+            },
         )
         outState.putInt(
             STATE_SCROLL_Y,
@@ -1952,24 +1966,6 @@ class ProjectActivity : Activity() {
             ),
         )
 
-        operationStatus =
-            OperationStatusView(
-                this,
-            )
-        root.addView(
-            operationStatus,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                topMargin =
-                    Ui.dp(
-                        this@ProjectActivity,
-                        8,
-                    )
-            },
-        )
-
         // Native preparation terminal state is rendered by operationStatus.
         nativeTerminalStatusText =
             Ui.textView(this, "", 14f, Ui.text)
@@ -2416,6 +2412,22 @@ class ProjectActivity : Activity() {
 
             addView(
                 addPanelBody,
+            )
+
+            // The status is inside Add but outside its collapsible actions:
+            // current progress, cancel and terminal results remain reachable.
+            operationStatus =
+                OperationStatusView(this@ProjectActivity).apply {
+                    useProjectCompactLayout(restoredStatusDetailsExpanded)
+                }
+            addView(
+                operationStatus,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    topMargin = Ui.dp(this@ProjectActivity, 8)
+                },
             )
 
             post {
@@ -4516,6 +4528,8 @@ class ProjectActivity : Activity() {
             "projectScrollY"
         private const val STATE_ADD_PANEL_EXPANDED =
             "addPanelExpanded"
+        private const val STATE_OPERATION_STATUS_DETAILS_EXPANDED =
+            "operationStatusDetailsExpanded"
         private const val STATE_ACTIVE_DIALOG_KIND =
             "activeProjectDialogKind"
         private const val STATE_ACTIVE_DIALOG_VOLUME_ID =

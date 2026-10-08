@@ -1,3 +1,9 @@
+## v0.5.78 volume progress UI — feature PR pending
+
+Status nested into fixed volume Add card but outside action body, compact by default with independent details and copy. Home not changed. Confirmed route defect issue #79: Home New volume automatically opens ready-package picker; separate follow-up. CI and phone QA pending.
+
+---
+
 ## NEW CHAT RESUME — 2026-10-08 — Renault Docs checkpoint
 
 Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md` first, then `docs/assistant-kit/CURRENT_PLAN.md`.

@@ -1,3 +1,11 @@
+## UX-ADD-006 — Home New volume bypasses source selection
+
+Status: **OPEN / ROOT CAUSE VERIFIED / issue #79 — 2026-10-08**.
+
+`MainActivity` → `ProjectChooserActivity` → `ProjectActivity.intent(openPicker=true)` → `openPackagePicker()`. Immediately opens ready .rdpkg picker; user wants explicit choice of Auto/manual/raw/archive after selecting project. Defer fix until after v0.5.78.
+
+---
+
 ## UX-ADD-004 — original 3D emoji pin fidelity
 
 2026-10-08: User provided the original large 📌 graphic and screenshot. v0.5.75 rotated a flat vector instead of restoring the original emoji. v0.5.76 changes the pin back to the system emoji and renders grayscale only while unpinned. Actual phone look still requires acceptance.
