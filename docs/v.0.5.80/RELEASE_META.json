@@ -1,0 +1,14 @@
+{
+  "versionName": "0.5.80",
+  "versionCode": 96,
+  "phase": "feature",
+  "phone_qa": "PENDING",
+  "branch": "feat/v0.5.80-safe-archive-preflight-global-catalog",
+  "issues": [
+    85,
+    82,
+    83,
+    81
+  ],
+  "next": "PR CI then signed main APK then phone regression"
+}
