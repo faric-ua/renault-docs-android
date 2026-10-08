@@ -7,7 +7,7 @@
 - [x] Home: Add + My Renault general layout accepted by user (2026-10-08). [ ] Exact counters and legacy navigation not separately demonstrated in v0.5.82.
 - [x] Add content scrolls separately from `Мої Renault` project list — PASS, user confirmed (2026-10-08). [ ] Small-screen landscape clipping not separately documented.
 - [ ] Cancel SAF new volume, no automatic import; existing prepared export progress/terminal remains accessible while Add collapsed.
-- [ ] Settings/Viewer/dialog orientation and ongoing playback/fullscreen behavior not regressed.
+- [x] Settings screen portrait→landscape→portrait system bars restore; one non-destructive choice dialog remains open during rotation and closes without changing preferences — PHONE PASS (2026-10-08, user «Пасс»). [ ] Viewer / ModernVolume / PDF fullscreen remain untested.
 - [ ] Install over existing app, do not clear data, move or delete archives.
 
 ## Acceptance evidence — 2026-10-08
@@ -21,3 +21,7 @@ User: «Все добре, пас, поїхали далі.» in response to che
 ## Home Help dialog — test 3 PASS (2026-10-08)
 
 User answered «Пасс» to the explicit five-step check of Home `Додати` → `?` Help window: remains open across rotation, app-owned system bars hidden landscape/restored portrait, no clipped controls, Close returns Home with no automatic operation. PASS applies to this specific Help window only. Next isolated test: Settings screen portrait→landscape→portrait, verify bars, then open and close a non-destructive Settings choice dialog without saving changes. Keep Viewer/PDF fullscreen, other modal dialogs, import and destructive flows pending.
+
+## Settings orientation / choice dialog — test 4 PASS (2026-10-08)
+
+User responded «Пасс» to Settings: orientation portrait→landscape→portrait, system bars hide/restore, open a harmless selection dialog, rotate again and close without saving. Record as **PHONE PASS for Settings and selected choice dialog**; do not treat Viewer/PDF, external SAF, destructive actions or persistent operation-status UI as verified. Next: Viewer-specific `Розділи` modal, not the separate ModernVolume native section list.
