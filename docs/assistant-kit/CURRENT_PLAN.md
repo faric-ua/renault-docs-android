@@ -1,3 +1,17 @@
+## URGENT: preserve original archive provenance — issue #83 — 2026-10-08
+
+**User clarified explicitly:** problematic conversion was initiated by selecting an archive within phone's **Megane II Sources folder**, which the user asserts contains only Megane archives. Yet the generated `Megane-II_X61_NT8486_...` package displays real **Kangoo II X61 PDF content** (not merely filename). Do NOT reinterpret this as simply user selecting a Kangoo ZIP in the Kangoo folder. Root cause remains UNKNOWN.
+
+**Key newly verified source-state fact:** `NativeRdpkgRunStore.begin()` persists `sourceUri`, `sourceName`, `projectId`, `destinationUri`; `complete()` preserves them. But next `clearFinished()` will clear the whole previous run. **Stop new native conversions, app-data resets, cleanup/uninstall until read-only last-run provenance is captured.**
+
+**Normal path** in `ProjectActivity.handleNativeRdpkgArchiveSourceResult()`: Android SAF `data.data` becomes source URI → saved as pendingNativeSourceUri → `NativeRdpkgPreparationService` → `ArchiveIntakeStager` deletes old private staging and copies fresh input bytes via `openInputStream(sourceUri)`. Thus ordinary reuse of a stale private source copy is NOT supported by this path, but resume/batch and SAF selection/lifecycle still need audit.
+
+**Next highest priority:** issue [#83](https://github.com/faric-ua/renault-docs-android/issues/83), read-only diagnostic exposing persisted last-run source URI/name/project/target and provider-resolvable path/size (no side effects, no action restart); compare selected Megane folder vs actual URI/file bytes. Issue #82 remains model-consistency guard, #81 source preservation. Don't claim proven cause. No runtime modifications so far.
+
+Current app v0.5.78/build 94, CI PASS, phone QA PENDING; issue #79 Home chooser also open. **Do not overwrite last-run evidence through additional phone QA imports.**
+
+---
+
 ## POSITIVE SOURCE FIND — NT8486 confirmed in user's connected Google Drive — 2026-10-08
 
 - Direct folder listing (connected **Eset** account) reveals exactly one ZIP in **My Drive → Kangoo II**: `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip`.

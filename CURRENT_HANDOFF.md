@@ -1,3 +1,9 @@
+## URGENT 2026-10-08 — wrong source provenance, not simply misnamed file
+
+User says they selected archive in **Megane II Sources** but result contains actual Kangoo II X61 wiring. Need prove exact selected source bytes/URI; issue #83. `NativeRdpkgRunStore` retains sourceUri and sourceName after COMPLETE but `clearFinished()` on a new native job can destroy evidence. **Do not ask user to run imports, uninstall, clear data or cleanup.** Normal stageSource deletes old staging and freshly copies read-only selected URI, so no proven automatic stale-copy reuse. Issue #82 model mismatch and #81 immutability are related but distinct. Detailed canonical state: `docs/assistant-kit/CURRENT_PLAN.md`. No code changes, status phone QA v0.5.78 pending.
+
+---
+
 ## DRIVE CHECK RESUME — NT8486 found — 2026-10-08
 
 Drive Eset → Kangoo II folder has the original `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` at 67,981,490 bytes. Phone search sees same-named original too; no confirmed archive disappearance. Separate issue #82 concerns source Kangoo II → target Megane II package mismatch due selected-project model in canonical filename/metadata. #81 is source-immutability safeguard only. 0.5.78 phone QA still pending, issue #79 separate. See `docs/assistant-kit/CURRENT_PLAN.md`. No files modified on Drive and no runtime patches.

@@ -1,3 +1,9 @@
+## BUG-ARCHIVE-ORIGIN / issue #83 — selected Megane source, Kangoo X61 payload — 2026-10-08
+
+User unequivocally reports source-selection folder was Megane II containing Megane ZIPs, but generated Megane-II_X61_NT8486.rdpkg carries Kangoo wiring PDF (X61). Not a mere wrong filename. Root cause unknown. `ProjectActivity` gets SAF data.data, then service stages fresh bytes; persisted last operation includes sourceUri/sourceName until next native run clears state. Preserve evidence, inspect safely and implement read-only provenance diagnostic if needed. No verified runtime fix or user error. Separate issues #82 model-check and #81 original immutability.
+
+---
+
 ## 2026-10-08 — Drive source provenance of NT8486 confirmed
 
 Eset Google Drive → My Drive/Kangoo II directly contains one `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` (67,981,490 bytes, file id `1pnTYhIUPxoHk1yq83PV4pN8HHY1M-Nbs`). Phone-wide search also finds this original ZIP. #81 no proven data loss; maintain source-read-only contract. #82 verified risk of cross-project model stamping, still awaiting runtime fix and phone QA. Do not delete original or generated files. Generic connector search missed NT8486; direct folder browse confirmed.

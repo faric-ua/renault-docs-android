@@ -1,3 +1,13 @@
+## TOP PRIORITY — issue #83 preserve last native archive source record
+
+1. No new phone native conversions or clearing cache/data: `NativeRdpkgRunStore` persists sourceUri/sourceName/projectId after completed operation; next `clearFinished()` erases record.
+2. Read-only capture of persisted origin for Megane-II_X61_NT8486 (actual Kangoo II X61 PDF content despite user selecting file in Megane Sources).
+3. Diagnose source selection URI, SAF picker, resumed/batch state and mismatched archive; no blame/guess.
+4. Issue #82 prevent packaging conflicting source model; #81 source immutable. v0.5.78 phone QA suspended for archive actions.
+5. Preserve deployed app/data; no extra builds or mutations without explicit next step.
+
+---
+
 ## CURRENT — investigate issue #81 source archive disappearance
 
 - Stop archive-related phone QA until original file location and status are understood.
