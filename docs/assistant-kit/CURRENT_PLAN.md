@@ -1,3 +1,14 @@
+## Sources / Backup correction from two phone videos — 2026-10-08
+
+- The user **manually** moves successfully processed original Windows ZIP archives from their source folder into Backup. Renault Docs should never do this automatically.
+- Video source breadcrumb: `A26 faric → Documents → Renault → Megane II`; user calls the input location Sources. Backup is `A26 faric → Documents → Renault → Megane II → Backup`. Don't assume a literal visible folder called `Sources`.
+- Previous claim of a missing file arose amid checking the wrong folder; app deletion is **not confirmed**.
+- Earlier notification concerns processed `NT8486 · 2009-08-31`; exact original ZIP whereabouts in source or Backup are still unknown.
+- Issue #81 updated to evidence-gathering. Confirm whether original NT8486 ZIP is truly missing from **both** folders; refrain from code changes/reimports/destructive actions until clarified.
+- Main v0.5.78/build 94 remains CI PASS, phone QA PENDING; issue #79 unchanged.
+
+---
+
 ## DATA SAFETY — Windows archive source reportedly missing — OPEN / issue #81 — 2026-10-08
 
 - User transferred original Windows Renault archive and used native archive → .rdpkg flow; now cannot locate original at source location. Exact file name (possibly NT84…/84-96), extension and source folder/provider still require confirmation. A screenshot is not proof of deletion by the app.

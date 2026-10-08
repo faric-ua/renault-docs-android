@@ -1,3 +1,9 @@
+## Video correction — manually managed original ZIPs (2026-10-08)
+
+Read `docs/assistant-kit/CURRENT_PLAN.md`. User normally imports from `Documents/Renault/Megane II` (Sources) then manually moves processed ZIP to `Documents/Renault/Megane II/Backup`. User had looked in the wrong folder. No proof Renault Docs deleted ZIP; issue #81 open only pending precise NT8486 presence check and read-only source contract. Do not run destructive tests or change archive code based solely on the report.
+
+---
+
 ## RESUME — issue #81 missing original Windows archive — 2026-10-08
 
 HIGH PRIORITY open investigation. User cannot find source archive after archive→.rdpkg. Code audit on v0.5.78 suggests normal input is read-only and cleanup is private-stage/output-only; confirm exact location and rule out any source/output URI alias. No direct file loss has been demonstrated. Do not claim fixed; do not modify source. See issue #81 and `docs/assistant-kit/CURRENT_PLAN.md`. v0.5.78/build 94 CI PASS, phone QA still pending; Home chooser issue #79 remains.

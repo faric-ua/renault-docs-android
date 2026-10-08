@@ -1,3 +1,9 @@
+## Issue #81 evidence correction — source and Backup shown (2026-10-08)
+
+User videos show ZIP source folder `A26 faric/Documents/Renault/Megane II` and nested `Backup`; manual move from source to Backup after import is user's own action, never a permitted app side effect. User corrected earlier mistaken folder lookup. NT8486 original location unverified, so source loss is unconfirmed. Issue #81 remains OPEN awaiting confirmation of presence in both folders. Current audit found read-only archive input and private staging cleanup only; do not overstate that as proof of zero possible file loss.
+
+---
+
 ## DATA-LOSS FINDING #81 — original Windows archive not found after import — 2026-10-08
 
 **OPEN / HIGH PRIORITY / reported by user / no root cause proven.**
