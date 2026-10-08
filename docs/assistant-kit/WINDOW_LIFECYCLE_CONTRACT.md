@@ -1,5 +1,14 @@
 # Renault Docs — Window, Dialog and Lifecycle Contract
 
+## v0.5.82 — App-owned orientation and system bars
+
+- In landscape hide Android **status and navigation system bars** across app-owned Activities and AlertDialogs. Use transient swipe-to-show behavior.
+- On returning to portrait explicitly show those bars again. Do not override an explicitly enabled PDF fullscreen state.
+- Hide `WindowInsetsCompat.Type.systemBars()` only. **Never hide/show IME** or modify Android SAF picker/system keyboard windows.
+- The existing `RenaultDocsApplication` lifecycle handler owns Activity orientation; `DialogUi` owns our AlertDialog windows, including reapply after orientation/foreground changes.
+- Viewer and ModernVolume handle `configChanges` without recreation and must explicitly reapply the same orientation rule. Other screens may recreate; restored Help/confirmation must never rerun an operation.
+- Preserve accessible scrollable body/actions after insets changes. If any device shows clipped buttons in landscape, treat it as device QA failure rather than silently altering decision callbacks.
+
 Цей контракт адаптований з real-phone проблем і виправлень YTM Importer.
 
 ## Єдиний modal engine
