@@ -1,3 +1,9 @@
+## NEW EVIDENCE — NT8486 original ZIP exists, cross-model source risk (#82) — 2026-10-08
+
+See `docs/assistant-kit/CURRENT_PLAN.md`. User's file search clearly finds KangooII X61 NT8486 ZIP (64.83 MB), Kangoo-II .rdpkg, and Megane-II X61 .rdpkg (both ~90.57 MB). ZIP actual folder unknown, so issue #81 is location/immutability check, **not proven data loss**. Cross-model issue #82 root path: package name and dataset model use selected project.model, no clear archive/selected-project mismatch gate. Ask whether import was launched from Megane II; do not auto-delete any files. No new runtime change, phone QA for 0.5.78 not yet passed.
+
+---
+
 ## Video correction — manually managed original ZIPs (2026-10-08)
 
 Read `docs/assistant-kit/CURRENT_PLAN.md`. User normally imports from `Documents/Renault/Megane II` (Sources) then manually moves processed ZIP to `Documents/Renault/Megane II/Backup`. User had looked in the wrong folder. No proof Renault Docs deleted ZIP; issue #81 open only pending precise NT8486 presence check and read-only source contract. Do not run destructive tests or change archive code based solely on the report.

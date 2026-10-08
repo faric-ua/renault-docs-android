@@ -1,3 +1,16 @@
+## NT8486 search evidence + model mismatch — 2026-10-08
+
+**Observed in user screenshot (file manager search `NT8486`):**
+- Original `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` (64.83 MB) *is present in search results*, so global disappearance from phone is **not established**. Exact folder and hashes are unknown.
+- Two `.rdpkg`s: `Kangoo-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg` and `Megane-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg`, both display ~90.57 MB. Displayed size alone does not prove identical bytes.
+- Likely cross-model labeling pathway verified in code: `ProjectActivity` passes selected `project.model`; `NativeRdpkgPreparationService.createArchiveDestination()` constructs output name from `request.model` plus raw-root identity without explicit source vehicle-model mismatch guard; `NativeRdpkgPreparationEngine` also uses requested model for dataset metadata.
+- **Issue #82 OPEN** for wrong-project source model preflight/validation. **Issue #81 OPEN** only pending actual ZIP source directory/immutability verification, not confirmed deletion. Do not delete or move originals, wrong-project packages or installed volumes.
+- Next: ask whether NT8486 conversion was launched from **Megane II**; inspect safe read-only manifests if required. Avoid file cleanup until user confirms.
+- v0.5.78/build 94: app source `948d5688646728d53b47327cb56f222d316b6ca5`; CI PASS, phone QA incomplete. Issue #79 separate.
+- Preserve user workflow: **Sources → manual user transfer to Backup**; app must not move source files.
+
+---
+
 ## Sources / Backup correction from two phone videos — 2026-10-08
 
 - The user **manually** moves successfully processed original Windows ZIP archives from their source folder into Backup. Renault Docs should never do this automatically.

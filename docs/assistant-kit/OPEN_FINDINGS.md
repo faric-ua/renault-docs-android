@@ -1,3 +1,11 @@
+## DATA INTEGRITY — Kangoo II X61 → Megane II X61 package mismatch, issue #82 — 2026-10-08
+
+User screenshot confirms `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` and both Kangoo-II and Megane-II prefixed packages. Code uses selected `project.model` to populate `RenaultVolumeIdentity.canonicalFileName(...)` and dataset metadata, with no visible strong conflicting model validation. This is a likely silent wrong-model package; internal payload and user action not yet verified. High priority issue #82 opened for fail-closed/explicit confirmation preflight, no destructive fixes.
+
+Original archive is visibly present in search; issue #81 previous suspected disappearance **not proven**. Folder still unknown. Do not delete packages or original.
+
+---
+
 ## Issue #81 evidence correction — source and Backup shown (2026-10-08)
 
 User videos show ZIP source folder `A26 faric/Documents/Renault/Megane II` and nested `Backup`; manual move from source to Backup after import is user's own action, never a permitted app side effect. User corrected earlier mistaken folder lookup. NT8486 original location unverified, so source loss is unconfirmed. Issue #81 remains OPEN awaiting confirmation of presence in both folders. Current audit found read-only archive input and private staging cleanup only; do not overstate that as proof of zero possible file loss.
