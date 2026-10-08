@@ -1,3 +1,18 @@
+## v0.5.81 / build97 — MAIN CI PASS / SIGNED APK READY / PHONE QA NEXT — 2026-10-08
+
+- [x] Audit 20 app-owned AlertDialogs and unify all via DialogUi (Viewer 2 fixed).
+- [x] Compact archive preflight, expandable full SAF/source/duplicate details, rotation state.
+- [x] PR #87 MERGED; app SHA `309f068bbf92c65ca06c0cc2e38887d6a4664837`.
+- [x] Main Tests #568 PASS; Android Debug APK #144 PASS; signed artifact 11560786817, sha256 `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`.
+- [ ] Install **over** via Renault Menu `5 → 19 → 8 → 13`; do not uninstall or clear data.
+- [ ] Phone QA compact summary/expand, landscape/portrait rotation, Cancel=no run, safe source diagnostics.
+- [ ] Visual audit Home/Settings/Help/Viewer, including keyboard under modal and long content.
+- [ ] Closeout only after user phone evidence; keep v0.5.80 pending subtests distinct.
+
+Resume: `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.81.md` and `docs/v.0.5.81/qa/PHONE_TEST.md`. No automatic file moves/deletions.
+
+---
+
 ## v0.5.80 / build96 — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
 
 Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.80.md` first. PR #86 merged. Runtime source `5a6ddc060edb4ff452eb1e3e96c1423cc042ddf9`. Main Tests #563 PASS, Android Debug APK #143 PASS; signed artifact `Renault-Docs-v0.5.80-Debug` ID `11557433214` (sha256 `0da82672e308148e5a2178f9fb147705b5ab8f2b96c39da15220e09dde6223b6`). Phone QA PENDING. Preserve source ZIP/.rdpkg and installed volumes; no migration/cleanup. Next: install via Renault Menu 5 → 19 → 8 → 13, test source guard, strong model mismatch, SAF source confirmation, global registered-project NT preview, Cancel/rotation. Issues #85/#82 candidate not closed, #83 picker history unresolved, #81 source preservation, #79 Home picker separate.
