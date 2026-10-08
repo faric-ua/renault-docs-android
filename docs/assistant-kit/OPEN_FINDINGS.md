@@ -1,3 +1,22 @@
+## UX-ADD-003 — Add must stay fixed while volume cards scroll
+
+Status: **IMPLEMENTING IN v0.5.75 — 2026-10-08**
+
+Phone screenshots from v0.5.74 show:
+- insufficient gap between Add and the first volume card;
+- user wants Add permanently reachable while browsing long volume lists;
+- preferred pin shape is the previous diagonal push-pin, not the newer vertical silhouette.
+
+Required:
+- keep Add fixed outside the volume scroll;
+- only volume cards scroll;
+- add a small gap before the first volume;
+- same diagonal pin silhouette in both states;
+- inactive = light monochrome, active = red;
+- defer status-card styling to a later pass.
+
+---
+
 ## UX-ADD-002 — transient status placement and Add header control styling
 
 Status: **IMPLEMENTED IN v0.5.74 · MAIN CI PASS · PHONE QA PENDING — 2026-10-08**
