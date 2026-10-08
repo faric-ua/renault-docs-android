@@ -66,10 +66,6 @@ def validate_manifest(path: str | Path) -> dict:
     if not isinstance(data.get("artifact_digest"), str) or not ARTIFACT_DIGEST_RE.fullmatch(data["artifact_digest"]):
         raise ValueError("Missing GitHub artifact-bundle digest")
 
-    app_gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-    if f'versionCode = {data["version_code"]}' not in app_gradle or f'versionName = "{version}"' not in app_gradle:
-        raise ValueError("Promotion version differs from Android app Gradle version")
-
     release_meta = json.loads(
         (ROOT / f"docs/v.{version}/RELEASE_META.json").read_text(encoding="utf-8")
     )
@@ -100,6 +96,14 @@ def gh_api_json(endpoint: str) -> dict:
 def verify_ci_source(data: dict, repo: str) -> None:
     command("git", "cat-file", "-e", f'{data["source_sha"]}^{{commit}}')
     command("git", "merge-base", "--is-ancestor", data["source_sha"], "HEAD")
+    built_source = command(
+        "git", "show", f'{data["source_sha"]}:android/app/build.gradle.kts'
+    ).stdout
+    if (
+        f'versionCode = {data["version_code"]}' not in built_source
+        or f'versionName = "{data["version"]}"' not in built_source
+    ):
+        raise ValueError("Pinned source commit has a different APK version")
     # The run must be the stable-signed main build, not an ephemeral PR signer.
     run = gh_api_json(f"repos/{repo}/actions/runs/{data['signed_run_id']}")
     if (
@@ -137,7 +141,8 @@ def check_downloaded_apk(folder: Path, version: str) -> tuple[Path, Path, str]:
     match = re.fullmatch(r"([0-9a-f]{64})\s+\*?" + re.escape(filename), lines[0])
     if not match:
         raise ValueError("Malformed APK checksum file")
-    digest = hashlib.file_digest(apk.open("rb"), "sha256").hexdigest()
+    with apk.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
     if digest != match.group(1):
         raise ValueError("APK checksum mismatch")
     with zipfile.ZipFile(apk) as archive:
