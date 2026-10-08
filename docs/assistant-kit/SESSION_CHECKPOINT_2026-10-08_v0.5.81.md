@@ -21,7 +21,12 @@
 4. Source confirmation persisted through portrait/landscape rotation — PASS.
 5. **Cancel/no-run after preview still not explicitly confirmed**. Continue/new conversion, user-file preservation edge cases, generated-marker ZIP guard remain pending.
 
-## New phone QA next — v0.5.81
+## Phone QA progress — v0.5.81
+
+- 2026-10-08: user replied `++` for short confirmation and explicitly `Пасс` when asked whether opened technical details survived rotation and Cancel launched no conversion. **PASS for rotation + Cancel/no-execution.** Do not automatically mark provenance text readability, preserved prior diagnostic, source reimport, or other app-owned dialogs PASS.
+- Next isolated check: Viewer `Розділи` dialog chrome + close/restore, then Home/Settings/Help and remaining release gates. Phone QA overall **IN PROGRESS, NOT CLOSED**.
+
+## Initial phone QA plan — v0.5.81
 1. Install signed debug APK over current app; do not clear storage.
 2. Megane II → create .rdpkg from raw → choose original Megane II NT8341A ZIP (read-only SAF selection) → inspect **compact duplicate summary**.
 3. Tap `Технічні деталі`, verify provider + full Document ID. Rotate twice; expanded state and same archive must survive without starting conversion. Collapse.
