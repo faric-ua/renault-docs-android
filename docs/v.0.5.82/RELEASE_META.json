@@ -1,0 +1,19 @@
+{
+  "versionName": "0.5.82",
+  "versionCode": 98,
+  "phase": "phone_qa",
+  "phone_qa": "PENDING",
+  "feature": "Home pinned Add parity and immersive landscape status/navigation bars",
+  "pull_request": 88,
+  "branch": "feat/v0.5.82-home-add-global-landscape-bars",
+  "source_sha": "f17b319c4e17d8f7005ae20221dd7bd642cb172b",
+  "pr_tests_run": 571,
+  "pr_android_check_run": 456,
+  "tests_run": 572,
+  "android_apk_run": 145,
+  "artifact_name": "Renault-Docs-v0.5.82-Debug",
+  "artifact_id": 11563839781,
+  "artifact_sha256": "94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be",
+  "artifact_expires_at": "2026-10-11T16:39:51Z",
+  "next": "Install over via Renault Termux Menu 5 → 19 → 8 → 13; phone test portrait ↔ landscape bars, Home Add pin/expansion, tools/ready project and independent project scroll. Do not uninstall/clear or modify source archives."
+}
