@@ -2483,3 +2483,15 @@ CI:
 
 Phone acceptance pending.
 
+## 2026-10-08 — v0.5.75 sticky Add panel decision
+
+Real-phone feedback after v0.5.74:
+- compact Add is accepted;
+- Add should remain fixed while volume cards scroll independently;
+- a small gap is needed between Add and first volume card;
+- restore the previous diagonal pin form;
+- use the same pin silhouette with neutral light tint when unpinned and red tint when pinned;
+- status-card appearance will be reviewed later, not in this change.
+
+Target release: v0.5.75 / build 91.
+

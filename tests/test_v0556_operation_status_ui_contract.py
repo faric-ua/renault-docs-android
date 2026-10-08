@@ -51,14 +51,13 @@ class OperationStatusUiContractTest(unittest.TestCase):
         self.assertIn("scroll.addView(\n            scrollContent", build)
         self.assertNotIn("scroll.addView(\n            libraryContainer", build)
 
-    def test_project_status_is_inside_scrollable_content(self):
+    def test_project_status_stays_fixed_above_volume_scroll(self):
         activity = self.read("ProjectActivity.kt")
         build = activity[activity.index("private fun buildContent"):activity.index("private fun buildAddPanel")]
-        self.assertIn("val scrollContent =", build)
-        self.assertIn("scrollContent.addView(\n            operationStatus", build)
-        self.assertIn("scrollContent.addView(\n            volumeContainer", build)
-        self.assertIn("projectScroll.addView(\n            scrollContent", build)
-        self.assertNotIn("root.addView(\n            operationStatus", build)
+        self.assertIn("root.addView(\n            buildAddPanel()", build)
+        self.assertIn("root.addView(\n            operationStatus", build)
+        self.assertIn("projectScroll.addView(\n            volumeContainer", build)
+        self.assertNotIn("scrollContent.addView(\n            operationStatus", build)
 
     def test_project_content_initializes_scroll_before_use(self):
         activity = self.read("ProjectActivity.kt")
@@ -66,7 +65,8 @@ class OperationStatusUiContractTest(unittest.TestCase):
         init_pos = build.index("projectScroll =")
         add_pos = build.index("projectScroll.addView(")
         self.assertLess(init_pos, add_pos)
-        self.assertIn("ScrollView(this)", build)
+        self.assertIn("ScrollView(", build)
+        self.assertIn("projectScroll.addView(", build)
 
     def test_home_project_share_uses_shared_surface(self):
         home = self.read("MainActivity.kt")

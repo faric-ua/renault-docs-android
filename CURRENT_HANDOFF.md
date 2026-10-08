@@ -1,3 +1,17 @@
+## v0.5.75 sticky Add panel — 2026-10-08
+
+Current task:
+- keep `Додати` always visible;
+- scroll only the volume cards;
+- add a small gap before first volume;
+- diagonal push-pin silhouette;
+- unpinned light monochrome / pinned red;
+- do not redesign the warm status card in this release.
+
+Target: v0.5.75 / build 91.
+
+---
+
 ## v0.5.74 Add panel refinement — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
 
 - runtime source: `8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`;

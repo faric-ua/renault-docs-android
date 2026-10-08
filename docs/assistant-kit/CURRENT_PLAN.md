@@ -1,3 +1,27 @@
+# v0.5.75 — sticky Add panel + diagonal pin — 2026-10-08
+
+Status: **IMPLEMENTATION IN PROGRESS**.
+
+Phone feedback after v0.5.74:
+- Add layout is generally accepted;
+- user wants the **Add panel fixed at the top** while volume cards alone scroll;
+- add a small visual gap before the first volume card;
+- restore the previous diagonal push-pin form;
+- inactive pin = light monochrome, pinned pin = red;
+- status-card appearance is deferred for a later visual pass.
+
+Target:
+- v0.5.75 / build 91;
+- title/count/Add remain outside the ScrollView;
+- only volume cards scroll;
+- 10dp gap before the volume list;
+- same diagonal pin vector used for both states via tint.
+
+Next:
+CI → merge → phone QA of sticky scrolling, spacing and pin states.
+
+---
+
 # v0.5.74 — Add panel status/pin/chevron refinement — 2026-10-08
 
 Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
