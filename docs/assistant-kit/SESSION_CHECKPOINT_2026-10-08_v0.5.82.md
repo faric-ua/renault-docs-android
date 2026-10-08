@@ -38,6 +38,10 @@ User replied «Все добре, пас, поїхали далі.» after verif
 
 User «Пасс» for Home `Додати` → `?` modal across portrait→landscape→portrait: modal stays open, bars hide landscape/restore portrait, Close returns Home without actions. This covers **that specific Help dialog**, not all Viewer/Settings/dialog windows. Next Settings orientation + a harmless choice dialog, then Viewer/PDF fullscreen and progress status gates.
 
+## Settings PHONE PASS — test 4, 2026-10-08
+
+User «Пасс» after Settings system bar hide/restore across rotation; a non-destructive choice dialog remained open when rotating and closed without changing preferences. **PASS for Settings**. Viewer-specific `Розділи · [том]` dialog is still NOT checked (separate from native ModernVolume search). Next test Viewer modal and return to same Viewer, then PDF fullscreen.
+
 ## Original and extended phone QA checklist
 
 1. Home portrait: only `Додати` + `Мої Renault` blocks outside Add. Confirm Megane/Laguna/Kangoo counters unchanged. Expand Add; check New Volume/Project, Ready Projects, description, Converter/Legacy.
