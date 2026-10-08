@@ -1,4 +1,4 @@
-# v0.5.83 phone checklist — PAUSED
+# v0.5.83 phone checklist — PAUSED / SIGNED APK READY
 
 When the user chooses to resume QA (not before):
 1. Home `Додати` → `Новий том` → choose Megane II. Expect expanded project `Додати` (Auto, Manual, raw, archive) and **no SAF picker yet**.
@@ -9,3 +9,4 @@ When the user chooses to resume QA (not before):
 6. Confirm project and volume counters unchanged.
 
 Never launch a conversion, archive import, cleanup or file move solely to test this release. User requested a pause on manual tests on 2026-10-09.
+\nSigned Android Debug APK #146 PASS; artifact ID 11582942367. No phone QA requested or performed for v0.5.83. No need to run the checklist until user chooses.\n
