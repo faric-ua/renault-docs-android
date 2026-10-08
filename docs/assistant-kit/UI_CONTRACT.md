@@ -1,5 +1,15 @@
 # Renault Docs — UI Contract
 
+## Home — Add panel parity (v0.5.82)
+
+- Home mirrors Project `Додати`: fixed header with original colored 📌 when portrait-pinned, grayscale/inactive pin in landscape, ▲/▼, and Help.
+- Home pin is a distinct persisted setting: do not change a per-project pinned preference.
+- Landscape starts with actions collapsed, but lets the user expand them temporarily without modifying the portrait pin or expanded state; returning portrait restores portrait state.
+- The Home Add action body has its own bounded scroll surface, while `Мої Renault` is an independent project-list scroll below it.
+- New volume, new project, Ready Projects/Drive, project-vs-volume explanation, Tools (Converter/Legacy), and any legacy library records live **inside** expanded Add.
+- Running/terminal operation status lives inside Home Add **outside** the collapsible action body, so progress/cancel/result remains accessible even with action buttons hidden.
+- Do not introduce automatic archive import or delete/move original sources during UI changes.
+
 ## Library screen
 
 Головний екран Android-застосунку — бібліотека datasets.
