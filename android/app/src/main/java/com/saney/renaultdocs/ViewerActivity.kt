@@ -2095,6 +2095,7 @@ class ViewerActivity : Activity() {
         }
 
         dialog.show()
+        DialogUi.apply(dialog, DialogRole.CHOICE)
     }
 
     private fun switchLiveSection(
@@ -2269,6 +2270,7 @@ class ViewerActivity : Activity() {
             activeDialogKind = ""
         }
         dialog.show()
+        DialogUi.apply(dialog, DialogRole.HELP)
     }
 
     private fun openHome() {

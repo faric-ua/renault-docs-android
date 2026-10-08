@@ -106,6 +106,7 @@ class ProjectActivity : Activity() {
         String? =
         null
     private var archiveSourcePreflightOpen = false
+    private var archiveSourceDetailsExpanded = false
     private var archiveChooserDialog:
         AlertDialog? =
         null
@@ -221,6 +222,8 @@ class ProjectActivity : Activity() {
                 )
         archiveSourcePreflightOpen =
             savedInstanceState?.getBoolean("archiveSourcePreflightOpen", false) ?: false
+        archiveSourceDetailsExpanded =
+            savedInstanceState?.getBoolean("archiveSourceDetailsExpanded", false) ?: false
 
         store =
             ProjectStore(
@@ -444,6 +447,7 @@ class ProjectActivity : Activity() {
             pendingNativeRequestId,
         )
         outState.putBoolean("archiveSourcePreflightOpen", archiveSourcePreflightOpen)
+        outState.putBoolean("archiveSourceDetailsExpanded", archiveSourceDetailsExpanded)
     }
 
     @Deprecated(
@@ -966,6 +970,7 @@ class ProjectActivity : Activity() {
         pendingNativeSourceName = sourceName
         pendingNativeSourceKind = NativeRdpkgSourceKind.ARCHIVE_FILE
         pendingNativeRequestId = UUID.randomUUID().toString()
+        archiveSourceDetailsExpanded = false
         showArchiveSourcePreflight()
     }
 
@@ -982,6 +987,7 @@ class ProjectActivity : Activity() {
 
     private fun clearPendingArchiveSource() {
         archiveSourcePreflightOpen = false
+        archiveSourceDetailsExpanded = false
         pendingNativeSourceUri = null
         pendingNativeSourceName = null
         pendingNativeSourceKind = NativeRdpkgSourceKind.RAW_TREE
@@ -1006,22 +1012,84 @@ class ProjectActivity : Activity() {
         val matches = ArchiveSourceGuard.catalogMatches(
             store, RenaultVolumeIdentity.parse(sourceName),
         )
-        val message = buildString {
-            appendLine("Проєкт призначення: ${project.title}")
-            appendLine("Обраний файл: ${sourceName}")
+        val previewMessage = buildString {
+            appendLine("Архів: $sourceName")
+            appendLine("Проєкт: ${project.title}")
+            appendLine()
+            if (matches.isEmpty()) {
+                appendLine("У каталозі встановлених томів збігів за NT немає.")
+            } else {
+                appendLine("Можливий дублікат — знайдено схожих томів: ${matches.size}")
+                matches.take(2).forEach { match ->
+                    val kind = if (match.matchingMetadata) {
+                        "збіг метаданих"
+                    } else {
+                        "можливий дублікат"
+                    }
+                    appendLine("• ${match.projectTitle}: ${match.volumeTitle} — $kind")
+                }
+                if (matches.size > 2) {
+                    appendLine("Ще ${matches.size - 2} — у деталях.")
+                }
+                appendLine("Вміст архівів не порівнювався.")
+            }
+            appendLine()
+            append("Продовжити вибір папки збереження?")
+        }
+        val technicalMessage = buildString {
             appendLine("Провайдер: ${source.authority ?: "невідомий"}")
-            appendLine("Фактичний Document ID: ${documentId}")
+            appendLine("Фактичний Document ID: $documentId")
             appendLine()
             appendLine(ArchiveSourceGuard.summary(matches, project.id))
             appendLine()
-            appendLine("Це пошук серед зареєстрованих томів усіх проєктів,")
-            appendLine("а не серед усіх файлів телефона; номер NT — не хеш.")
-            appendLine("Після підтвердження обери папку збереження.")
+            append(
+                "Це пошук серед зареєстрованих томів усіх проєктів, " +
+                    "а не серед усіх файлів телефона; номер NT — не хеш.",
+            )
+        }
+        val detailsText = Ui.textView(
+            this, technicalMessage, sizeSp = 13f, color = Ui.muted,
+        ).apply {
+            visibility = if (archiveSourceDetailsExpanded) View.VISIBLE else View.GONE
+            setPadding(0, Ui.dp(this@ProjectActivity, 8), 0, 0)
+        }
+        val detailsToggle = Ui.textView(
+            this,
+            if (archiveSourceDetailsExpanded) "Сховати деталі ▲" else "Технічні деталі ▼",
+            sizeSp = 14f,
+            color = Ui.accent,
+        ).apply {
+            isClickable = true
+            isFocusable = true
+            setPadding(0, Ui.dp(this@ProjectActivity, 12), 0, Ui.dp(this@ProjectActivity, 4))
+            setOnClickListener {
+                archiveSourceDetailsExpanded = !archiveSourceDetailsExpanded
+                detailsText.visibility =
+                    if (archiveSourceDetailsExpanded) View.VISIBLE else View.GONE
+                text = if (archiveSourceDetailsExpanded) "Сховати деталі ▲"
+                    else "Технічні деталі ▼"
+            }
+        }
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(Ui.textView(this@ProjectActivity, previewMessage, sizeSp = 16f))
+            addView(detailsToggle)
+            addView(detailsText)
+        }
+        val scroll = ScrollView(this).apply {
+            setPadding(
+                Ui.dp(this@ProjectActivity, 22),
+                Ui.dp(this@ProjectActivity, 8),
+                Ui.dp(this@ProjectActivity, 22),
+                Ui.dp(this@ProjectActivity, 8),
+            )
+            clipToPadding = false
+            addView(content)
         }
         archiveSourcePreflightOpen = true
         val dialog = AlertDialog.Builder(this)
             .setTitle("Підтвердь джерело архіву")
-            .setMessage(message)
+            .setView(scroll)
             .setPositiveButton("Продовжити") { _, _ ->
                 archiveSourcePreflightOpen = false
                 if (pendingNativeSourceUri == source.toString() &&
