@@ -1,3 +1,13 @@
+## CURRENT 2026-10-09 — GITHUB RELEASES PUBLISHED / TERMUX FALLBACK MERGED / NEXT #40
+
+- Renault Android application remains **v0.5.83/build99** (runtime SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`), core New Volume route PHONE PASS, extended phone QA paused.
+- PR #90 merged signed release workflow; `v0.5.83-debug` published by GitHub workflow run #37860223840 PASS: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.83-debug
+- Release assets: `Renault-Docs-v0.5.83-debug.apk` + `.apk.sha256`; exact inner APK SHA256 `8592b1d8aacdc4db8b856d899128d7a84931fad7b69276b3baea7eeadf4f3de9`. Bundle Actions checksum is different; no new APK compiled.
+- PR #91 merged: Termux menu 8 retains exact/compatible Actions artifact path; when it expires on **main**, downloads the matching vetted GitHub Release after source/version compatibility checks and double sha256 verification, opens the same original APK folder. No widget/menu ordering changes, no user file deletion.
+- Reusable contract `docs/assistant-kit/GITHUB_RELEASES_CONTRACT.md`. **NEXT actual development: #40 unified background lifecycle audit**, then #51 archive intake and #30 Windows source publisher. No fresh phone tests unless user wants them.
+
+---
+
 ## CURRENT — v0.5.83/build99 SIGNED MAIN CI PASS / CORE PHONE PASS / EXTENDED QA PAUSED — 2026-10-09
 
 READ `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md`. #79 Home `Новий том` route fixed in PR #89; choose project → Project Add expands (Auto/Manual/raw/archive) rather than immediate .rdpkg SAF picker. Intentional direct picker untouched. Main source SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`, Tests #574 PASS, Android signed Debug APK #146 PASS. Signed artifact `Renault-Docs-v0.5.83-Debug` ID 11582942367, GitHub artifact bundle digest `sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`; expires 2026-10-11. **Core New Volume route PHONE PASS (2026-10-09; user «Пасс»)**; detailed Back/rotation/per-method QA still paused. Do not ask for tests or reinstall unprompted; never uninstall/clear data or touch existing ZIP/RDPKG/volumes. Remaining functionality #40/#51/#30 and optional #21/#50. Older v0.5.82 video Test 8 PASS, status Test 7 N/A.
