@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.83",
   "versionCode": 99,
-  "phase": "phone_qa_paused",
+  "phase": "core_phone_pass_extended_qa_paused",
   "source_sha": "b5f1c22d73642d7341943e4320b5fb469cbe9bec",
   "pull_request": 89,
   "issue": 79,
@@ -13,6 +13,7 @@
   "artifact_id": 11582942367,
   "artifact_digest": "sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef",
   "artifact_expires_at": "2026-10-11T22:27:09Z",
-  "phone_qa": "PAUSED_BY_USER",
-  "next": "Do not prompt for phone QA. When user chooses, install above existing via Renault Termux 5 → 19 → 8 → 13, then verify New Volume → project choice → expanded Add without SAF auto-launch and safe back/rotation."
+  "phone_qa": "CORE_PASS_EXTENDED_PAUSED",
+  "next": "Core route accepted by user. Other detailed phone QA remains paused. No automatic import; no source file cleanup.",
+  "phone_acceptance": "2026-10-09: user replied Пасс after v0.5.83 New Volume route fix; Back/rotation/source actions not separately evidenced."
 }
