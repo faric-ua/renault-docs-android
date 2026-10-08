@@ -1,3 +1,9 @@
+## v0.5.83/build99 — CODE MERGED / SIGNED CI PASS / PHONE QA ON HOLD — 2026-10-09
+
+PR #89 merged (source SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`). #79 New Volume now opens chosen Project Add expanded without automatic SAF; Auto/Manual/raw/archive remain explicit and existing direct picker works by its own intent. PR Tests #573 PASS / Android PR Check #457 PASS, main Tests #574 PASS / Android signed APK #146 PASS. Artifact ID 11582942367; digest `sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`. No project data was modified by the navigation change. **User-requested QA pause continues**: do not request install/testing. Details `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md`.
+
+---
+
 ## v0.5.82 / build98 — CORE PHONE PASS / EXTENDED QA OPEN — 2026-10-08
 
 User acceptance: «Пасс. Взагалі все чудово.» after Home Add 📌 portrait→landscape→portrait and Android system bars hide/restore test. **Core on-device scenario PASS**, see `docs/v.0.5.82/qa/PHONE_TEST_REPORT_2026-10-08.md`. Runtime source `f17b319c4e17d8f7005ae20221dd7bd642cb172b`, signed APK #145, main Tests #572 PASS. No reinstall needed. **Next**: non-destructive extended QA of Home Add contents (New Volume/Project, Ready/Drive, Tools/Legacy), independent scrolling and status, app-owned Help/dialog orientation and Viewer/Settings. Do not claim untested steps PASS or full release CLOSED.
