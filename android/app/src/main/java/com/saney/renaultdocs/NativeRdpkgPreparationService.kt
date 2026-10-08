@@ -385,6 +385,12 @@ class NativeRdpkgPreparationService : Service() {
     private fun runArchiveInitial(
         request: StartRequest,
     ) {
+        val target = ProjectStore(this).project(request.projectId)
+        if (target == null) {
+            runStore.fail("Проєкт не знайдено: " + request.projectId)
+            finishWorker()
+            return
+        }
         var archiveSourceStage:
             ArchiveIntakeStager.StagedSource? =
             null
@@ -395,6 +401,7 @@ class NativeRdpkgPreparationService : Service() {
             false
 
         try {
+            ArchiveSourceGuard.inputError(request.sourceName, target)?.let { error(it) }
             cleanupStaleArchiveOutput()
 
             val stager =
@@ -474,6 +481,13 @@ class NativeRdpkgPreparationService : Service() {
                     sourceNameHint =
                         stagedSource.sourceName,
                 )
+            require(!inspection.preparedPackageDetected) {
+                "Це вже підготовлений Renault dataset, а не оригінальний архів."
+            }
+            ArchiveSourceGuard.rootConflict(
+                inspection.rawRoots.map { it.leafName },
+                target,
+            )?.let { error(it) }
             val installedFromHints =
                 installedVolumesForArchiveHints(
                     projectId =
@@ -503,6 +517,11 @@ class NativeRdpkgPreparationService : Service() {
 
             archiveStage =
                 staged
+
+            ArchiveSourceGuard.rootConflict(
+                staged.rawRoots.map { it.name },
+                target,
+            )?.let { error(it) }
 
             val candidates =
                 buildArchiveCandidates(
@@ -763,6 +782,7 @@ class NativeRdpkgPreparationService : Service() {
             mutableListOf<String>()
 
         try {
+            ArchiveSourceGuard.inputError(request.sourceName, project)?.let { error(it) }
             cleanupStaleArchiveOutput()
 
             val extractionRoot =
@@ -822,6 +842,10 @@ class NativeRdpkgPreparationService : Service() {
                                 )
                         return@forEachIndexed
                     }
+
+                ArchiveSourceGuard.rootConflict(
+                    listOf(rawRoot.name), project,
+                )?.let { error(it) }
 
                 val destination =
                     createArchiveDestination(
