@@ -1,3 +1,9 @@
+## v0.5.82 / build98 — CORE PHONE PASS / EXTENDED QA OPEN — 2026-10-08
+
+User acceptance: «Пасс. Взагалі все чудово.» after Home Add 📌 portrait→landscape→portrait and Android system bars hide/restore test. **Core on-device scenario PASS**, see `docs/v.0.5.82/qa/PHONE_TEST_REPORT_2026-10-08.md`. Runtime source `f17b319c4e17d8f7005ae20221dd7bd642cb172b`, signed APK #145, main Tests #572 PASS. No reinstall needed. **Next**: non-destructive extended QA of Home Add contents (New Volume/Project, Ready/Drive, Tools/Legacy), independent scrolling and status, app-owned Help/dialog orientation and Viewer/Settings. Do not claim untested steps PASS or full release CLOSED.
+
+---
+
 ## v0.5.82 / build98 — MAIN CI PASS / STABLE SIGNED APK / PHONE QA PENDING — 2026-10-08
 
 PR #88 merged. Runtime `f17b319c4e17d8f7005ae20221dd7bd642cb172b`; Tests #572 PASS, Android APK #145 PASS; signed artifact ID 11563839781, SHA256 `94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be`. Version 0.5.82/build98. Global landscape Activity+AlertDialog hide system status/nav with transient swipe, portrait restore; exclude IME/SAF, retain PDF fullscreen. Home Add ported from Project fixed pinnable/collapsible panel with separate Home pref, legacy/ready/tools/new volume/new project inside; status remains accessible independent of collapse; My Renault list scroll independently. **Next: install over via Renault menu 5 → 19 → 8 → 13 and verify portrait→landscape→portrait, pin, content/accessibility/scroll and counters. No cleanup/backup/migrations.** Canonical checkpoint `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md`, phone checklist `docs/v.0.5.82/qa/PHONE_TEST.md`. Earlier v0.5.81 Viewer modal phone QA still pending, regardless of screenshots of Modern native search.
