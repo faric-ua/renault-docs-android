@@ -42,6 +42,10 @@ User «Пасс» for Home `Додати` → `?` modal across portrait→landsc
 
 User «Пасс» after Settings system bar hide/restore across rotation; a non-destructive choice dialog remained open when rotating and closed without changing preferences. **PASS for Settings**. Viewer-specific `Розділи · [том]` dialog is still NOT checked (separate from native ModernVolume search). Next test Viewer modal and return to same Viewer, then PDF fullscreen.
 
+## Test 5 route correction — 2026-10-08
+
+User supplied four photos of Classic NT8340 / `Visu Schema`, search `120` 0/0 on start page then 1/3 on content and PDF. Our instruction to find `Розділи · …` via Modern → Classic was wrong. Code shows hybrid-only button via `ViewerActivity.hybridSectionMode`, but `NativeSectionActivity.openLegacyFallback()` deliberately opens untouched original Classic. **Test 5 INVALID ROUTE, not PASS or FAIL; no application bug confirmed.** Log: `docs/v.0.5.82/qa/BUG_REGISTER.md` QA-ROUTE-005. Next test 5A: stay on actual Classic PDF, tap `⛶` fullscreen, rotate landscape/portrait and exit fullscreen; verify same PDF/page and correct system bars without touching SAF/IME. Do not require user to locate unavailable `Розділи` button.
+
 ## Original and extended phone QA checklist
 
 1. Home portrait: only `Додати` + `Мої Renault` blocks outside Add. Confirm Megane/Laguna/Kangoo counters unchanged. Expand Add; check New Volume/Project, Ready Projects, description, Converter/Legacy.
