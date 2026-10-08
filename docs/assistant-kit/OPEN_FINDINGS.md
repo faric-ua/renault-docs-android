@@ -1,3 +1,9 @@
+## UX-ADD-004 — original 3D emoji pin fidelity
+
+2026-10-08: User provided the original large 📌 graphic and screenshot. v0.5.75 rotated a flat vector instead of restoring the original emoji. v0.5.76 changes the pin back to the system emoji and renders grayscale only while unpinned. Actual phone look still requires acceptance.
+
+---
+
 ## UX-ADD-003 — Add must stay fixed while volume cards scroll
 
 Status: **IMPLEMENTED IN v0.5.75 · MAIN CI PASS · PHONE QA PENDING — 2026-10-08**

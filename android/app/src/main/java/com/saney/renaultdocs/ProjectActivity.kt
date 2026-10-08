@@ -15,7 +15,9 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.ImageButton
+import android.graphics.Paint
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -43,8 +45,18 @@ class ProjectActivity : Activity() {
     private lateinit var nativeTerminalStatusText: TextView
     private lateinit var countText: TextView
     private lateinit var addPanelBody: LinearLayout
-    private lateinit var addPanelPinButton: ImageButton
+    private lateinit var addPanelPinButton: TextView
     private lateinit var addPanelToggleButton: TextView
+    private val monochromePinPaint by lazy {
+        Paint().apply {
+            colorFilter =
+                ColorMatrixColorFilter(
+                    ColorMatrix().apply {
+                        setSaturation(0f)
+                    },
+                )
+        }
+    }
     private var addPanelExpanded =
         false
     private var addPanelPinned =
@@ -2087,65 +2099,23 @@ class ProjectActivity : Activity() {
             )
 
             addPanelPinButton =
-                ImageButton(
-                    this@ProjectActivity,
-                ).apply {
-                    setImageResource(
-                        R.drawable.ic_push_pin,
-                    )
-                    setColorFilter(
-                        Ui.muted,
-                    )
-                    scaleType =
-                        android.widget.ImageView.ScaleType.CENTER_INSIDE
-                    background =
-                        Ui.roundedBackground(
-                            context =
-                                this@ProjectActivity,
-                            fill =
-                                Ui.surface,
-                            stroke =
-                                Ui.border,
-                            radiusDp =
-                                12,
-                        )
-                    setPadding(
-                        Ui.dp(
-                            this@ProjectActivity,
-                            8,
-                        ),
-                        Ui.dp(
-                            this@ProjectActivity,
-                            8,
-                        ),
-                        Ui.dp(
-                            this@ProjectActivity,
-                            8,
-                        ),
-                        Ui.dp(
-                            this@ProjectActivity,
-                            8,
-                        ),
-                    )
+                addPanelHeaderButton(
+                    label =
+                        "📌",
                     contentDescription =
-                        "Закріпити панель Додати"
-                    isClickable =
-                        true
-                    isFocusable =
-                        true
-                    setOnClickListener {
-                        addPanelPinned =
-                            !addPanelPinned
-                        settings.projectAddPanelPinned =
-                            addPanelPinned
-                        if (
-                            addPanelPinned
-                        ) {
-                            addPanelExpanded =
-                                true
-                        }
-                        updateAddPanelUi()
+                        "Закріпити панель Додати",
+                ) {
+                    addPanelPinned =
+                        !addPanelPinned
+                    settings.projectAddPanelPinned =
+                        addPanelPinned
+                    if (
+                        addPanelPinned
+                    ) {
+                        addPanelExpanded =
+                            true
                     }
+                    updateAddPanelUi()
                 }
 
             titleRow.addView(
@@ -2518,13 +2488,14 @@ class ProjectActivity : Activity() {
                 View.GONE
             }
 
-        addPanelPinButton.setColorFilter(
-            if (
-                addPanelPinned
-            ) {
-                Ui.danger
+        // Preserve the exact colorful system emoji; desaturate the entire
+        // TextView layer only while the panel is not pinned.
+        addPanelPinButton.setLayerType(
+            View.LAYER_TYPE_HARDWARE,
+            if (addPanelPinned) {
+                null
             } else {
-                Ui.text
+                monochromePinPaint
             },
         )
         addPanelPinButton.alpha =
@@ -4386,7 +4357,7 @@ class ProjectActivity : Activity() {
                             "Вручну — вибрати вже підготовлену папку через SAF.\n" +
                             "Створити .rdpkg з raw — підготувати пакет з оригінальної Renault-папки.\n" +
                             "Створити .rdpkg з архіву — використати ZIP, 7Z або RAR без ручної розпаковки.\n\n" +
-                            "Кнопка закріплення світла, коли панель вільна, і червона, коли панель закріплена. Після відкріплення її знову можна згортати.",
+                            "📌 закріплює панель у розгорнутому стані. Закріплена шпилька — кольорова, відкріплена — чорно-біла. Після відкріплення панель знову можна згортати.",
                 )
 
             HELP_RAW ->
