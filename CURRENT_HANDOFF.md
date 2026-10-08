@@ -1,6 +1,6 @@
 ## v0.5.76 original emoji pin — 2026-10-08
 
-Restore the *actual original* colored 📌 system emoji from v0.5.73, grayscale only when unpinned. The v0.5.75 rotated flat icon was not accepted by the user. Sticky Add layout remains unchanged; status-card design remains deferred. Target v0.5.76 / build 92. Phone QA pending.
+Restore the *actual original* colored 📌 system emoji from v0.5.73, grayscale only when unpinned. The v0.5.75 rotated flat icon was not accepted by the user. Sticky Add layout remains unchanged; status-card design remains deferred. v0.5.76 / build 92 MERGED, Tests #551 PASS, Android Debug APK #139 PASS, artifact `Renault-Docs-v0.5.76-Debug` id `11523497323`; phone QA pending via `5 → 19 → 8 → 13`.
 
 ---
 
