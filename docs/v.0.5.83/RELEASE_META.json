@@ -14,6 +14,19 @@
   "artifact_digest": "sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef",
   "artifact_expires_at": "2026-10-11T22:27:09Z",
   "phone_qa": "CORE_PASS_EXTENDED_PAUSED",
-  "next": "Core route accepted by user. Other detailed phone QA remains paused. No automatic import; no source file cleanup.",
-  "phone_acceptance": "2026-10-09: user replied Пасс after v0.5.83 New Volume route fix; Back/rotation/source actions not separately evidenced."
+  "next": "Core New Volume route PHONE PASS, expanded QA paused. Signed APK permanently linked through published GitHub prerelease. Remaining development: #40 background lifecycle audit, #51 archive intake completion, #30 Windows preparation pipeline.",
+  "phone_acceptance": "2026-10-09: user replied Пасс after v0.5.83 New Volume route fix; Back/rotation/source actions not separately evidenced.",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.83-debug",
+    "prerelease": true,
+    "published_via_run_id": 37860223840,
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.83-debug",
+    "apk_url": "https://github.com/faric-ua/renault-docs-android/releases/download/v0.5.83-debug/Renault-Docs-v0.5.83-debug.apk",
+    "apk_asset_id": 623304935,
+    "apk_sha256": "8592b1d8aacdc4db8b856d899128d7a84931fad7b69276b3baea7eeadf4f3de9",
+    "checksum_asset_id": 623304937,
+    "source_sha": "b5f1c22d73642d7341943e4320b5fb469cbe9bec",
+    "verified": "APK SHA256 verified against CI original APK checksum; stable signer verified by source run #146"
+  }
 }
