@@ -32,7 +32,7 @@ class V0575StickyAddPanelContractTests(unittest.TestCase):
 
     def test_pin_restores_original_colored_emoji_with_grayscale_unpinned(self):
         project = self.read_java("ProjectActivity.kt")
-        self.assertIn('label =\\n                        "📌"', project)
+        self.assertIn('label =\n                        "📌"', project)
         self.assertIn("monochromePinPaint", project)
         self.assertIn("View.LAYER_TYPE_HARDWARE", project)
         self.assertIn("setSaturation(0f)", project)
