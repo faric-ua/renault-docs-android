@@ -4,7 +4,7 @@
 - [x] PR #87 Python Tests #567 PASS.
 - [x] PR #87 Android PR Check #453 PASS (unit tests / build using PR signer).
 - [x] Main Python Tests #568 PASS.
-- [ ] Main signed Android Debug APK #144 CI success and digest recorded.
+- [x] Main signed Android Debug APK #144 PASS; artifact ID 11560786817, SHA256 5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79.
 
 ## On device — pending
 - [ ] Install build97 **over** existing installation with stable signer; no uninstall/clear.
