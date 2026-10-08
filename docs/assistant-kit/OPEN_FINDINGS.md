@@ -1,6 +1,6 @@
 ## UX-ADD-003 — Add must stay fixed while volume cards scroll
 
-Status: **IMPLEMENTING IN v0.5.75 — 2026-10-08**
+Status: **IMPLEMENTED IN v0.5.75 · MAIN CI PASS · PHONE QA PENDING — 2026-10-08**
 
 Phone screenshots from v0.5.74 show:
 - insufficient gap between Add and the first volume card;
@@ -14,6 +14,13 @@ Required:
 - same diagonal pin silhouette in both states;
 - inactive = light monochrome, active = red;
 - defer status-card styling to a later pass.
+
+v0.5.75 implementation evidence:
+- PR #74 merged;
+- runtime `b25efbee254562d7b3e9f6917772e8d2e6370eb3`;
+- Tests #547 PASS;
+- Android Debug APK #138 PASS;
+- phone QA pending.
 
 ---
 
