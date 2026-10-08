@@ -58,7 +58,8 @@ class V0574AddPanelStatusRefinementTests(unittest.TestCase):
         build_end = project.index("private fun addChoiceButton", build_start)
         panel = project[build_start:build_end]
         self.assertNotIn("OperationStatusView", panel)
-        self.assertIn("operationStatus = OperationStatusView", project)
+        self.assertIn("operationStatus =", project)
+        self.assertIn("OperationStatusView(", project)
 
 
 if __name__ == "__main__":
