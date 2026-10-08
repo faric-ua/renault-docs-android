@@ -37,3 +37,11 @@ User requested to stop the manual-test sequence after an earlier v0.5.82 video; 
 ## Next user choice
 
 No automatic further actions. Once user chooses, either resume targeted phone acceptance of v0.5.83 or implement another scoped remaining feature. Never perform background work, data cleanup or unrelated conversions without explicit request.
+
+## GitHub Releases handoff extension — 2026-10-09
+
+- PR #90 MERGED; publication `Publish Verified Renault APK` run 37860223840 PASS. Public developer-signed **prerelease** `v0.5.83-debug`: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.83-debug
+- Original APK source SHA: `b5f1c22d73642d7341943e4320b5fb469cbe9bec`, developer-signed Android Actions run 37853352879 (#146), verified inner APK SHA256 `8592b1d8aacdc4db8b856d899128d7a84931fad7b69276b3baea7eeadf4f3de9`, release also contains separate APK.sha256. The old Actions artifact bundle digest is **not** this inner APK digest.
+- PR #91 MERGED with Termux Menu item 8 safe fallback to this GitHub Release when Actions artifacts expire; only main, same version, reviewed promotion, matching signed source SHA and unchanged Android code; checksum before + after copy. Device test intentionally not demanded.
+- Only changed release docs/workflow/Termux shell scripts; **no new Android APK built**. Still v0.5.83/build99. No ZIP/.rdpkg/migration/file cleanup.
+- Next project work: #40 foreground service/lock/unlock/recovery architecture review; #51 archive ingestion remaining QA; #30 Windows source-to-published catalog pipeline. Optional #21 donation URL, #50 Termux UI. Do not start manual tests without user choosing.
