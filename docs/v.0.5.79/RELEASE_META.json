@@ -1,0 +1,9 @@
+{
+  "versionName": "0.5.79",
+  "versionCode": 95,
+  "phase": "feature",
+  "phone_qa": "PENDING",
+  "source_issue": 83,
+  "feature": "read-only last native source diagnostic",
+  "next": "PR CI and main signed APK then install-over and copy source report"
+}

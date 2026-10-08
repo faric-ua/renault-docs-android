@@ -2,6 +2,8 @@ package com.saney.renaultdocs
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
 import android.content.Intent
@@ -27,6 +29,8 @@ import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import androidx.core.content.FileProvider
 import java.io.File
+import java.text.DateFormat
+import java.util.Date
 import java.util.UUID
 
 class ProjectActivity : Activity() {
@@ -736,6 +740,92 @@ class ProjectActivity : Activity() {
                 operationStatus.hide()
             }
         }
+    }
+
+    /**
+     * Read persisted source provenance without starting, resuming or
+     * clearing any conversion. The last run survives normal completion.
+     */
+    private fun showLastNativeSourceDiagnostics() {
+        val last = nativeRunStore.load()
+        val source = last.sourceUri
+            ?.takeIf { it.isNotBlank() }
+            ?.let { runCatching { Uri.parse(it) }.getOrNull() }
+        val document = source?.let { uri ->
+            runCatching {
+                if (last.sourceKind == NativeRdpkgSourceKind.ARCHIVE_FILE) {
+                    DocumentFile.fromSingleUri(this, uri)
+                } else {
+                    DocumentFile.fromTreeUri(this, uri)
+                }
+            }.getOrNull()
+        }
+        val currentName = document?.let { runCatching { it.name }.getOrNull() }
+        val currentSize = document?.let {
+            runCatching { if (it.exists()) it.length() else null }.getOrNull()
+        }
+        val documentId = source?.let { uri ->
+            runCatching {
+                if (DocumentsContract.isDocumentUri(this, uri)) {
+                    DocumentsContract.getDocumentId(uri)
+                } else {
+                    null
+                }
+            }.getOrNull()
+        }
+        fun formattedTime(value: Long): String =
+            if (value <= 0L) "немає"
+            else DateFormat.getDateTimeInstance().format(Date(value))
+
+        val report = buildString {
+            appendLine("Renault Docs — останнє native .rdpkg (лише читання)")
+            appendLine("Відкритий проєкт: ${project.title} (${project.id})")
+            appendLine("Проєкт останньої операції: ${last.projectId ?: "немає"}")
+            appendLine("Фаза: ${last.phase}")
+            appendLine("Тип джерела: ${last.sourceKind}")
+            appendLine("Назва джерела під час вибору: ${last.sourceName ?: "немає"}")
+            appendLine("URI джерела: ${last.sourceUri ?: "немає"}")
+            appendLine("Провайдер: ${source?.authority ?: "немає"}")
+            appendLine("Document ID: ${documentId ?: "недоступний"}")
+            appendLine("Назва зараз: ${currentName ?: "недоступна"}")
+            appendLine("Розмір зараз: ${currentSize?.takeIf { it > 0 }?.toString() ?: "невідомий"} байт")
+            appendLine("URI призначення: ${last.destinationUri ?: "немає"}")
+            appendLine("Том результату: ${last.volumeTitle ?: "немає"}")
+            appendLine("Package ID: ${last.packageId ?: "немає"}")
+            appendLine("SHA-256 результату: ${last.sha256 ?: "немає"}")
+            appendLine("Початок: ${formattedTime(last.startedAtMs)}")
+            appendLine("Завершення: ${formattedTime(last.finishedAtMs)}")
+            appendLine("Папка, відкрита в SAF-пікері, не зберігається окремо.")
+            appendLine("Document ID іноді містить фізичний шлях джерела.")
+            appendLine("Звіт не змінює файли й не запускає підготовку.")
+        }
+        val content = ScrollView(this).apply {
+            addView(
+                Ui.textView(this@ProjectActivity, report, 13f, Ui.text).apply {
+                    setTextIsSelectable(true)
+                    setPadding(
+                        Ui.dp(this@ProjectActivity, 18),
+                        Ui.dp(this@ProjectActivity, 12),
+                        Ui.dp(this@ProjectActivity, 18),
+                        Ui.dp(this@ProjectActivity, 12),
+                    )
+                },
+            )
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Джерело останньої .rdpkg")
+            .setView(content)
+            .setPositiveButton("Копіювати звіт") { _, _ ->
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Renault Docs source", report))
+                Toast.makeText(this, "Звіт скопійовано", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Закрити", null)
+            .create()
+            .also { dialog ->
+                dialog.show()
+                DialogUi.apply(dialog, DialogRole.CHOICE)
+            }
     }
 
     private fun handleNativeRdpkgSourceResult(
@@ -2317,6 +2407,31 @@ class ProjectActivity : Activity() {
                             8,
                         )
                 },
+            )
+
+            // Read-only access to the last native source; no task or cleanup.
+            addPanelBody.addView(
+                Ui.textView(
+                    context = this@ProjectActivity,
+                    value = "Джерело останньої .rdpkg · діагностика",
+                    sizeSp = 13f,
+                    color = Ui.accent,
+                ).apply {
+                    gravity = Gravity.CENTER
+                    minHeight = Ui.dp(this@ProjectActivity, 44)
+                    background = Ui.roundedBackground(
+                        context = this@ProjectActivity,
+                        fill = Ui.surface,
+                        stroke = Ui.border,
+                        radiusDp = 12,
+                    )
+                    contentDescription = "Діагностика останнього джерела, тільки читання"
+                    setOnClickListener { showLastNativeSourceDiagnostics() }
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@ProjectActivity, 8) },
             )
 
             statusText =
