@@ -1,3 +1,6 @@
+docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md
+docs/v.0.5.82/RELEASE.md
+docs/v.0.5.82/qa/PHONE_TEST.md
 docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.81.md
 docs/v.0.5.81/DIALOG_AUDIT.md
 docs/v.0.5.81/qa/PHONE_TEST.md
