@@ -46,3 +46,7 @@ User provided three screenshots: portrait shows section `120 — ЭБУ СИСТ
 **PHONE PASS** for category-aware adaptive navigation, section/content continuity, and orientation handling. Do not construe this as evidence of independently testing every category's individual data/export actions or operation-progress persistence. No code changes required.
 
 **Next**: non-destructive Home operation status independence check only when an existing status is available; do not initiate a new conversion/import just for QA.
+
+## Test 7 — Home operation status (2026-10-09)
+
+User reported «Статусу немає» and submitted a Home screenshot with no operation status. Result: N/A / deferred; do not launch a new operation solely for QA. Screenshot suggests possible overlap between the lower edge of expanded `Додати` and the top of the Megane II card, but usability is not yet established. Next safe check: collapse the Add panel and verify My Renault heading and first card are fully accessible.
