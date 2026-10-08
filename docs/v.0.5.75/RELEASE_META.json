@@ -1,10 +1,27 @@
 {
   "versionName": "0.5.75",
   "versionCode": 91,
-  "phase": "development",
+  "phase": "merged_phone_qa_pending",
   "feature": "Sticky Add panel and restored pin silhouette",
   "branch": "feat/v0.5.75-sticky-add-panel-pin",
   "parent_issue": 68,
-  "qa_status": "PENDING",
-  "next": "ci_then_phone_qa_sticky_add_panel"
+  "qa_status": "PENDING_PHONE_QA",
+  "next": "phone_qa_sticky_add_spacing_pin",
+  "pr": 74,
+  "main_runtime_source": "b25efbee254562d7b3e9f6917772e8d2e6370eb3",
+  "ci": {
+    "tests": {
+      "run_number": 547,
+      "status": "PASS"
+    },
+    "android_debug_apk": {
+      "run_number": 138,
+      "status": "PASS"
+    }
+  },
+  "artifact": {
+    "name": "Renault-Docs-v0.5.75-Debug",
+    "id": 11520145404,
+    "digest": "sha256:59888f89ef694512ffa2a4895a75cb93b21c99687ccaa24270bfa9a06f948f00"
+  }
 }
