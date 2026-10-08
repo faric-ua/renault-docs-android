@@ -248,6 +248,16 @@ class ProjectActivity : Activity() {
             addPanelExpanded =
                 true
         }
+        // Home -> New Volume -> project chooser is an options handoff,
+        // not permission to launch an Android file picker automatically.
+        // Respect restored expansion after rotation; preserve the pin setting.
+        if (
+            savedInstanceState == null &&
+            intent.getBooleanExtra(EXTRA_SHOW_ADD_PANEL, false)
+        ) {
+            addPanelExpanded = true
+            addPanelLandscapeExpanded = true
+        }
 
         nativeRunStore =
             NativeRdpkgRunStore(
@@ -4773,6 +4783,8 @@ class ProjectActivity : Activity() {
             "projectId"
         private const val EXTRA_OPEN_PICKER =
             "openPicker"
+        private const val EXTRA_SHOW_ADD_PANEL =
+            "showAddPanel"
         private const val REQUEST_VOLUME_FOLDER =
             4301
         private const val REQUEST_RDPKG_FILE =
@@ -4847,6 +4859,7 @@ class ProjectActivity : Activity() {
             context: Context,
             projectId: String,
             openPicker: Boolean = false,
+            showAddPanel: Boolean = false,
         ): Intent =
             Intent(
                 context,
@@ -4859,6 +4872,10 @@ class ProjectActivity : Activity() {
                 putExtra(
                     EXTRA_OPEN_PICKER,
                     openPicker,
+                )
+                putExtra(
+                    EXTRA_SHOW_ADD_PANEL,
+                    showAddPanel,
                 )
             }
     }
