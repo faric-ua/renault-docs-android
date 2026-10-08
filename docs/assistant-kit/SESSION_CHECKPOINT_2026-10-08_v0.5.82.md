@@ -46,6 +46,10 @@ User «Пасс» after Settings system bar hide/restore across rotation; a non-
 
 User supplied four photos of Classic NT8340 / `Visu Schema`, search `120` 0/0 on start page then 1/3 on content and PDF. Our instruction to find `Розділи · …` via Modern → Classic was wrong. Code shows hybrid-only button via `ViewerActivity.hybridSectionMode`, but `NativeSectionActivity.openLegacyFallback()` deliberately opens untouched original Classic. **Test 5 INVALID ROUTE, not PASS or FAIL; no application bug confirmed.** Log: `docs/v.0.5.82/qa/BUG_REGISTER.md` QA-ROUTE-005. Next test 5A: stay on actual Classic PDF, tap `⛶` fullscreen, rotate landscape/portrait and exit fullscreen; verify same PDF/page and correct system bars without touching SAF/IME. Do not require user to locate unavailable `Розділи` button.
 
+## Classic Viewer PDF fullscreen — test 5A PHONE PASS (2026-10-08)
+
+User supplied three screenshots of NT8340/120 Classic original HTML/frame UI with inline PDF `SE2416-P` zoom 176%; ordinary portrait, fullscreen portrait and fullscreen landscape. User explicitly: Classic original Renault UI is working, unchanged except Android adaptation; do not refactor/merge with Modern. Record **PASS** for entering/exiting fullscreen and presenting the same PDF across orientations. Screenshots alone do not prove exact scroll position or status/nav restore after exit, so retain those as optional unresolved specifics. Prior Viewer hybrid `Розділи` test route remains invalid, not a bug. Next QA: Modern native section screen orientation, then independent operation status/cancel; do not force Classic UI changes.
+
 ## Original and extended phone QA checklist
 
 1. Home portrait: only `Додати` + `Мої Renault` blocks outside Add. Confirm Megane/Laguna/Kangoo counters unchanged. Expand Add; check New Volume/Project, Ready Projects, description, Converter/Legacy.
