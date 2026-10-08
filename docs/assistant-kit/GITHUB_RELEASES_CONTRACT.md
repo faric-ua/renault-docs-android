@@ -28,3 +28,14 @@ GitHub artifact bundle digest is **not** necessarily the inner APK checksum; pub
 ## First promotion
 
 `docs/release-promotions/v0.5.83.json` promotes exactly v0.5.83/build 99 from signed Actions run ID `37853352879` (run #146), source `b5f1c22d73642d7341943e4320b5fb469cbe9bec`, artifact ID `11582942367`. QA: core PHONE PASS, other QA paused.
+
+## Termux menu 8 compatibility fallback (2026-10-09)
+
+`reno-download-apk.sh` still prefers its exact current-code GitHub Actions run. If that artifact is expired/missing and the current branch is `main`, `reno-download-release-apk.sh` tries `vX.Y.Z-debug`:
+- requires repository `faric-ua/renault-docs-android` and the reviewed local `docs/release-promotions/vX.Y.Z.json`;
+- checks release is published prerelease, its target SHA matches the promotion's signed source SHA, and the source is an **ancestor with identical Android code** to current checkout;
+- downloads APK **and .sha256**, verifies checksum before and after copying to the existing `Documents/Renault/packages/Renault-Docs-vX.Y.Z-build` folder;
+- opens only that output folder, never deletes source files, never uninstalls or clears the app;
+- explicit Actions run-ID downloads and candidate PR branches retain original behavior, with no cross-branch Release substitution.
+
+This is a **Termux tooling-only change**, not a new installed Android version. If no compatible Release exists, the original safe no-artifact diagnostic remains. Automated shell/static contract tests cover the fallback; device execution remains intentionally on hold.
