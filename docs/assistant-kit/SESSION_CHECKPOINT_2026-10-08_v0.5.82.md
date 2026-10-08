@@ -2,7 +2,7 @@
 
 ## Verified source / build
 
-- **PR #88 MERGED / MAIN CI PASS / STABLE-SIGNED APK READY / PHONE QA PENDING (NOT CLOSED)**.
+- **PR #88 MERGED / MAIN CI PASS / STABLE-SIGNED APK READY / CORE HOME PHONE PASS / EXTENDED QA OPEN (NOT CLOSED)**.
 - PR: https://github.com/faric-ua/renault-docs-android/pull/88
 - Runtime application source/merge SHA: `f17b319c4e17d8f7005ae20221dd7bd642cb172b`.
 - PR Python Tests **#571 PASS**; Android PR Check **#456 PASS**.
@@ -26,7 +26,11 @@
 - **Do not mark Viewer `Розділи` modal PASS**: the supplied screenshots show a Modern native section search/list, not necessarily the Viewer section navigator AlertDialog; no confirmed modal QA.
 - V0.5.80 global duplicate across *different* project not independently observed; current-project NT8341A metadata match only. Matching NT/date != archive hash.
 
-## First phone QA after install
+## Core phone evidence — 2026-10-08
+
+User replied «Пасс. Взагалі все чудово.» to the Home/Add + 📌 portrait→landscape→portrait scenario, including automatic hiding/restoring of Android system bars. **Core feature PHONE PASS**. No v0.5.82 screenshots or explicit acceptance of all Help/Viewer/Settings/SAF/independent-scroll/legacy routes, so retain separate QA items. No need to reinstall for follow-ups.
+
+## Original and extended phone QA checklist
 
 1. Home portrait: only `Додати` + `Мої Renault` blocks outside Add. Confirm Megane/Laguna/Kangoo counters unchanged. Expand Add; check New Volume/Project, Ready Projects, description, Converter/Legacy.
 2. Pin Home Add portrait 📌. Rotate landscape: status and nav bars hidden, pin appears disabled/desaturated, Add actions auto-collapse. Tap ▲/▼ to temporarily expand and scroll within Add without losing My Renault list. Rotate portrait: original pin and expansion back, Android bars visible again.
@@ -34,7 +38,7 @@
 4. Optionally verify Settings/Viewer/ModernVolume landscape/portrait and PDF fullscreen; **do not manipulate system keyboard UI or SAF picker**.
 5. Status/diagnostics: operationStatus remains reachable independent of collapsed Add. Do not launch arbitrary native conversion or delete prepared packages for QA.
 
-Status is phone QA **PENDING**, not closed. No source/archive backup, rollback, cleanup or migration performed in v0.5.82.
+Status: core Home Add + orientation phone **PASS** (2026-10-08), extended QA **OPEN**, not closed. No source/archive backup, rollback, cleanup or migration performed in v0.5.82.
 
 ## Pending unrelated
 
