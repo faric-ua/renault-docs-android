@@ -30,6 +30,10 @@
 
 User replied «Пасс. Взагалі все чудово.» to the Home/Add + 📌 portrait→landscape→portrait scenario, including automatic hiding/restoring of Android system bars. **Core feature PHONE PASS**. No v0.5.82 screenshots or explicit acceptance of all Help/Viewer/Settings/SAF/independent-scroll/legacy routes, so retain separate QA items. No need to reinstall for follow-ups.
 
+## Home expanded-panel PHONE PASS — test 2, 2026-10-08
+
+User replied «Все добре, пас, поїхали далі.» after verifying New Volume/New Project/Ready Projects/Converter/Legacy options and independent scrolling of Home Add vs. `Мої Renault`. Record **PASS** for UI availability and independent scrolling only; actual actions, active-operation status, Help/Viewer/Settings remain unverified. Next: Home Help `?` dialog open in portrait, rotate landscape and back, verify system bars hide/restore and dialog stays without auto-actions, then close.
+
 ## Original and extended phone QA checklist
 
 1. Home portrait: only `Додати` + `Мої Renault` blocks outside Add. Confirm Megane/Laguna/Kangoo counters unchanged. Expand Add; check New Volume/Project, Ready Projects, description, Converter/Legacy.
