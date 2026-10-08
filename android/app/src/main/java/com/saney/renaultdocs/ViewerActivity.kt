@@ -74,6 +74,8 @@ class ViewerActivity : Activity() {
     private var companionLoaded: Boolean = false
     private var restoredCompanionWebState: Bundle? = null
     private var pdfFullscreen: Boolean = false
+
+    fun isPdfFullscreenActive(): Boolean = pdfFullscreen
     private var fullscreenControlSyncGeneration: Int = 0
     private var splitRatio: Float = 0.55f
     private var splitControlsVisible: Boolean = false
@@ -1085,6 +1087,8 @@ class ViewerActivity : Activity() {
         super.onConfigurationChanged(
             newConfig,
         )
+        if (!pdfFullscreen) Ui.applyOrientationSystemBars(this)
+        DialogUi.reapplyOrientation(this)
 
         if (
             pdfCompanionVisible &&
@@ -1122,6 +1126,8 @@ class ViewerActivity : Activity() {
         )
 
         if (hasFocus) {
+            if (!pdfFullscreen) Ui.applyOrientationSystemBars(this)
+            DialogUi.reapplyOrientation(this)
             reconcilePdfFullscreenPresentation()
         }
     }
