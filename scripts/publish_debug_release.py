@@ -47,7 +47,7 @@ def validate_manifest(path: str | Path) -> dict:
         raise ValueError("Invalid versionCode")
     if not isinstance(data.get("source_sha"), str) or not SHA_RE.fullmatch(data["source_sha"]):
         raise ValueError("Invalid source SHA")
-    for key in ("signed_run_id", "artifact_id"):
+    for key in ("signed_run_id", "signed_run_number", "artifact_id"):
         if type(data.get(key)) is not int or data[key] <= 0:
             raise ValueError(f"Invalid {key}")
     expected_name = f"Renault-Docs-v{version}-Debug"
@@ -77,7 +77,7 @@ def validate_manifest(path: str | Path) -> dict:
         ("versionName", "version"),
         ("versionCode", "version_code"),
         ("source_sha", "source_sha"),
-        ("signed_android_apk_run", "signed_run_id"),
+        ("signed_android_apk_run", "signed_run_number"),
         ("artifact_id", "artifact_id"),
         ("artifact_name", "artifact_name"),
     ):
@@ -107,6 +107,7 @@ def verify_ci_source(data: dict, repo: str) -> None:
         or run.get("event") not in ("push", "workflow_dispatch")
         or run.get("head_branch") != "main"
         or run.get("head_sha") != data["source_sha"]
+        or run.get("run_number") != data["signed_run_number"]
         or run.get("status") != "completed"
         or run.get("conclusion") != "success"
     ):
