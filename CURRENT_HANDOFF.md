@@ -1,3 +1,9 @@
+## v0.5.77 landscape Add — 2026-10-08
+
+v0.5.76 phone acceptance **7/7 PASS**. User video confirms landscape usability issue: fixed expanded Add consumes nearly full height. PR #77 merged as v0.5.77/build 93; runtime `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`; Tests #555 PASS, Android Debug APK #140 building. Landscape temporarily unpins visually and collapses Add; the persistent portrait pin is not reset and returns when rotated back. Original 3D emoji/color contract preserved. PR #78 duplicate closed. Next: install via `5 → 19 → 8 → 13`, phone QA rotation cycles and independent scrolling; status-card redesign is deferred.
+
+---
+
 ## v0.5.76 original emoji pin — 2026-10-08
 
 Restore the *actual original* colored 📌 system emoji from v0.5.73, grayscale only when unpinned. The v0.5.75 rotated flat icon was not accepted by the user. Sticky Add layout remains unchanged; status-card design remains deferred. v0.5.76 / build 92 MERGED, Tests #551 PASS, Android Debug APK #139 PASS, artifact `Renault-Docs-v0.5.76-Debug` id `11523497323`; phone QA pending via `5 → 19 → 8 → 13`.

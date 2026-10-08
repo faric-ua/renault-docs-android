@@ -1,3 +1,19 @@
+# v0.5.77 — landscape Add auto-collapse — 2026-10-08
+
+Status: **MERGED / MAIN TESTS PASS / APK BUILD RUNNING / PHONE QA NEXT**.
+
+- v0.5.76 build 92: **PHONE PASS 7/7** (original 3D emoji, grayscale unpinned, fixed Add, 10dp gap, reopening, rotation state, Help).
+- User-submitted rotation video demonstrates pinned Add fills the landscape viewport and hides the volume cards.
+- v0.5.77 build 93, PR #77 MERGED, runtime source `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`.
+- Tests #552 PASS / Android PR Check #442 PASS / main Tests #555 PASS; Android Debug APK #140 running.
+- Landscape: pin appears grayscale/inactive; Add collapses; volumes scroll. User may expand Add temporarily with the header/chevron.
+- Portrait pin/expanded preferences persist unchanged; returning to portrait restores red 📌 and expanded Add.
+- No changes to status-card visuals, original emoji or existing 10dp gap.
+- Duplicate competing PR #78 closed unmerged.
+- Next phone gate: install through Renault Menu `5 → 19 → 8 → 13`, test portrait→landscape→portrait cycles and pinned state persistence.
+
+---
+
 # v0.5.76 — restore original 3D emoji push-pin — 2026-10-08
 
 Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
