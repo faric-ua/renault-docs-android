@@ -25,7 +25,11 @@
 - Other app-owned dialogs/transient swipe, Viewer/ModernVolume and explicit PDF fullscreen (Home Help + Settings selection dialogs already PASS).
 - Actual Ready Projects/Drive, Legacy and Tools launch results; active operation progress/terminal status interactions (UI presence and independent scrolling already PASS).
 - Cross-app system SAF picker behavior and IME; destructive/project import/export operations; volumes count after install and data-preservation checks.
-- Older v0.5.81 Viewer-specific `Розділи` modal QA remains distinct.
+- Original v0.5.81 Viewer `Розділи` dialog is *hybrid-mode-only*, not accessible from ordinary Modern→Classic. Do not treat test as failed or passed; the test route was wrong.
 
 ## Result
 **CORE PHONE PASS / EXTENDED QA OPEN**. Do not close the whole release or unrelated issue set yet. Next isolated test: Viewer-specific `Розділи · ...` AlertDialog portrait→landscape→portrait, close returns same Viewer without navigation; then PDF fullscreen and active status scenarios.
+
+## Viewer attempted test 5 — route corrected (2026-10-08)
+
+Four user screenshots show NT8340 Classic `Visu Schema`, text search `120` at `0/0` in start page and `1/3` after opening the legacy document, plus inline PDF. No `Розділи · …` modal is pictured. Code audit shows this modal requires `hybridSectionMode`, whereas section `Classic` opens untouched Viewer with no hybrid extras. **INVALID QA INSTRUCTION, NO APP REGRESSION CONFIRMED**. Next test: actual PDF fullscreen control `⛶`, landscape/portrait state and same page/position on exit, without reimport or navigation to dead-end dialog.
