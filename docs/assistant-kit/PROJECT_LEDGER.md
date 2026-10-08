@@ -1,3 +1,9 @@
+## v0.5.83/build99 — #79 Home New Volume fixed in code — 2026-10-09
+
+PR #89 merged, app SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`. ProjectChooserActivity now calls ProjectActivity.intent(showAddPanel=true) instead of openPicker=true; ProjectActivity expands existing Add choices on fresh navigation, preserves saved pin and rotational expansion, and leaves explicit direct-picker route available. Python Tests #573 PR / #574 main PASS, Android PR #457 and stable-signed APK #146 PASS. Signed artifact ID 11582942367, bundle SHA256 `b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`. **Phone QA PAUSED**, issue #79 remains OPEN until phone acceptance; do not start additional QA or mutate archives. For details see `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md`.
+
+---
+
 ## v0.5.82 — CORE HOME/ORIENTATION PHONE PASS — 2026-10-08
 
 After signed build98 (APK #145) user responded «Пасс. Взагалі все чудово.» to the Home portrait→landscape→portrait test: collapsible/pinnable `Додати`, independent `Мої Renault` layout, system bars landscape hide / portrait restore, portrait 📌 state. Record **core phone PASS**; other QA (Tools/Legacy/Drive, scroll/status, Help/Dialog/Viewer/Settings/SAF/IME) still open. Source unchanged `f17b319c4e17d8f7005ae20221dd7bd642cb172b`. No automatic imports or cleanup; see `docs/v.0.5.82/qa/PHONE_TEST_REPORT_2026-10-08.md`.
