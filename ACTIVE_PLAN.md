@@ -1,3 +1,17 @@
+## v0.5.82 / build98 — MAIN CI PASS / SIGNED APK READY / PHONE QA NEXT — 2026-10-08
+
+- [x] Home Add layout, pin/expand parity, scroll split, tools/ready projects + explanatory text + legacy tiles moved.
+- [x] Global landscape Activity and app-owned AlertDialog status/navigation bar hiding; portrait restoration; IME/SAF untouched, PDF fullscreen preserved.
+- [x] PR #88 merged; runtime SHA `f17b319c4e17d8f7005ae20221dd7bd642cb172b`.
+- [x] PR Tests #571 PASS / Android PR Check #456 PASS; main Tests #572 PASS / signed APK #145 PASS. Artifact `Renault-Docs-v0.5.82-Debug` ID 11563839781, sha256 `94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be`.
+- [ ] **NEXT:** install over existing via Renault menu `5 → 19 → 8 → 13`; never uninstall/clear data or move/delete source archives.
+- [ ] Phone QA: Home portrait collapsed/expanded/pinned, landscape auto-collapse and hidden system bars, portrait restore, Help dialog, My Renault scroll, all actions/legacy preserved.
+- [ ] Only after phone evidence: mark accepted/close; do not treat v0.5.81 Viewer pending check as PASS.
+
+Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md` and `docs/v.0.5.82/qa/PHONE_TEST.md`.
+
+---
+
 ## v0.5.81 / build97 — MAIN CI PASS / SIGNED APK READY / PHONE QA NEXT — 2026-10-08
 
 - [x] Audit 20 app-owned AlertDialogs and unify all via DialogUi (Viewer 2 fixed).
