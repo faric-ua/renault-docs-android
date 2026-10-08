@@ -7,7 +7,8 @@
 - [x] Installed/tested on phone; user core acceptance «Пасс. Взагалі все чудово.» 2026-10-08. Do not uninstall/clear data or move/delete archives.
 - [x] Core phone QA: Home Add/My Renault, 📌/expand and portrait→landscape→portrait system-bar hide/restore — PASS.
 - [x] Extended Home test 2 PHONE PASS (2026-10-08): visible New Volume/New Project/Ready Projects/Converter/Legacy and independent Add vs. My Renault scroll. User: «Все добре, пас, поїхали далі.»
-- [ ] NEXT: Home `?` Help dialog portrait→landscape→portrait and system bars/restore; then Viewer/Settings, actual route execution and status; SAF/IME remains outside owned UI.
+- [x] Home `?` Help dialog (test 3): rotation persistence, system bars landscape hide/portrait restore, close returns Home with no auto-operation — PHONE PASS (2026-10-08, user «Пасс»).
+- [ ] NEXT: Settings portrait↔landscape and choice dialog (no settings change); then Viewer/ModernVolume, status and remaining route checks. SAF/IME remain Android-owned.
 - [ ] Only after phone evidence: mark accepted/close; do not treat v0.5.81 Viewer pending check as PASS.
 
 Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md` and `docs/v.0.5.82/qa/PHONE_TEST.md`.
