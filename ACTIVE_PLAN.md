@@ -4,9 +4,9 @@
 - [x] Compact archive preflight, expandable full SAF/source/duplicate details, rotation state.
 - [x] PR #87 MERGED; app SHA `309f068bbf92c65ca06c0cc2e38887d6a4664837`.
 - [x] Main Tests #568 PASS; Android Debug APK #144 PASS; signed artifact 11560786817, sha256 `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`.
-- [ ] Install **over** via Renault Menu `5 → 19 → 8 → 13`; do not uninstall or clear data.
-- [ ] Phone QA compact summary/expand, landscape/portrait rotation, Cancel=no run, safe source diagnostics.
-- [ ] Visual audit Home/Settings/Help/Viewer, including keyboard under modal and long content.
+- [x] v0.5.81 dialog test performed on phone; install-over method not independently documented. Never uninstall/clear data.
+- [x] User PHONE PASS: expanded technical details survive rotation; Cancel starts no conversion (2026-10-08). Compact dialog acknowledged; detailed source diagnostic preservation not separately checked.
+- [ ] NEXT: audit Viewer section navigator first; then Home/Settings/Help, keyboard under modal and long content. Do not use destructive actions.
 - [ ] Closeout only after user phone evidence; keep v0.5.80 pending subtests distinct.
 
 Resume: `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.81.md` and `docs/v.0.5.81/qa/PHONE_TEST.md`. No automatic file moves/deletions.
