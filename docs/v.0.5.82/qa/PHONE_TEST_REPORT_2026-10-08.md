@@ -18,11 +18,14 @@
 ## Extended phone acceptance — test 3 Home Help (2026-10-08)
 - User replied «Пасс» after checking Home `Додати` → `?` Help window across portrait→landscape→portrait. Window remains in place, system bars hide/restore, Close returns Home and does not start operations. **PASS for this specific Help modal.**
 
+## Extended phone acceptance — test 4 Settings (2026-10-08)
+- User replied «Пасс» following Settings portrait↔landscape bar hide/restore, a non-destructive choice dialog surviving rotation, and closing without saving changes. **PASS** for Settings + that selection window.
+
 ## Not independently evidenced
-- Other app-owned dialogs/transient swipe, Settings/Viewer/ModernVolume and explicit PDF fullscreen (Home Help modal itself already PASS).
+- Other app-owned dialogs/transient swipe, Viewer/ModernVolume and explicit PDF fullscreen (Home Help + Settings selection dialogs already PASS).
 - Actual Ready Projects/Drive, Legacy and Tools launch results; active operation progress/terminal status interactions (UI presence and independent scrolling already PASS).
 - Cross-app system SAF picker behavior and IME; destructive/project import/export operations; volumes count after install and data-preservation checks.
 - Older v0.5.81 Viewer-specific `Розділи` modal QA remains distinct.
 
 ## Result
-**CORE PHONE PASS / EXTENDED QA OPEN**. Do not close the whole release or unrelated issue set yet. Next isolated test: Settings portrait→landscape→portrait bars and one non-destructive choice dialog. Then Viewer/ModernVolume and active status scenarios.
+**CORE PHONE PASS / EXTENDED QA OPEN**. Do not close the whole release or unrelated issue set yet. Next isolated test: Viewer-specific `Розділи · ...` AlertDialog portrait→landscape→portrait, close returns same Viewer without navigation; then PDF fullscreen and active status scenarios.
