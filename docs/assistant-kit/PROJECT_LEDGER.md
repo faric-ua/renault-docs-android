@@ -1,3 +1,9 @@
+## v0.5.81 dialog consistency — CODE MERGED / MAIN CI PASS / PHONE QA PENDING — 2026-10-08
+
+User requested one visual standard for warning, confirmation and action windows; real-phone v0.5.80 archive preview is too verbose. Audit: 20 app-owned Android AlertDialogs in 5 owners, 18 already styled; Viewer 2 now use DialogUi. Archive preflight now compact by default, technical provider/Document ID + full registered-project NT candidates expandable in same modal; toggled state restored across rotation. Preserves existing Cancel/Continue/selected source URI and no automatic source mutations. PR #87 merged to main source `309f068bbf92c65ca06c0cc2e38887d6a4664837`; Tests #568 PASS, Android Debug APK #144 PASS; stable artifact 11560786817 sha256 `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`. Full audit/phone gates: `docs/v.0.5.81/DIALOG_AUDIT.md`, `docs/v.0.5.81/qa/PHONE_TEST.md`. **Not phone-accepted yet**. v0.5.80 own screenshot evidence: disabled prepared packages PASS, cross-model block PASS, current-project NT8341A preview match, rotation PASS; explicit Cancel/no-run and other-project match remain pending. Keyboard visible behind prior dialog is observation, not confirmed new regression. No automatic reimport, cleanup or original file relocation.
+
+---
+
 ## v0.5.77 — landscape pinned Add — PHONE PASS 6/6 / CLOSED — 2026-10-08
 
 Phone acceptance received 2026-10-08 from user: PASS 6/6, comment «Все норм». Checked:
