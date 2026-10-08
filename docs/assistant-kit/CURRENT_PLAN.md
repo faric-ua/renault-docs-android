@@ -1,3 +1,9 @@
+## v0.5.81 / build97 — MAIN CI PASS / SIGNED APK READY / PHONE QA PENDING — 2026-10-08
+
+PR #87 merged. Runtime source `309f068bbf92c65ca06c0cc2e38887d6a4664837`. Main Tests #568 PASS / Android Debug APK #144 PASS. Signed debug artifact ID 11560786817 sha256 `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`, expiry 2026-10-11 UTC. 20 app-owned AlertDialogs now share DialogUi; archive preflight short plus `Технічні деталі` with state saved on rotation. Full audit `docs/v.0.5.81/DIALOG_AUDIT.md`. **Next: install over** via Renault Menu `5 → 19 → 8 → 13` and perform v0.5.81 phone QA; no uninstall, data clearing, archive move/delete or unnecessary conversion. Previous v0.5.80 test 1 (disabled .rdpkg), test 2 (wrong Kangoo ZIP), test 4 (rotation) PASS; test 3 current Megane NT match observed, cross-project still unverified; Cancel no-run unconfirmed. Keep #85/#82 phone gate, #83 picker history uncertainty, #81 immutability and #79 Home routing separate. Canonical checkpoint `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.81.md`.
+
+---
+
 ## v0.5.80 / build96 — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
 
 Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.80.md` first. PR #86 merged. Runtime source `5a6ddc060edb4ff452eb1e3e96c1423cc042ddf9`. Main Tests #563 PASS, Android Debug APK #143 PASS; signed artifact `Renault-Docs-v0.5.80-Debug` ID `11557433214` (sha256 `0da82672e308148e5a2178f9fb147705b5ab8f2b96c39da15220e09dde6223b6`). Phone QA PENDING. Preserve source ZIP/.rdpkg and installed volumes; no migration/cleanup. Next: install via Renault Menu 5 → 19 → 8 → 13, test source guard, strong model mismatch, SAF source confirmation, global registered-project NT preview, Cancel/rotation. Issues #85/#82 candidate not closed, #83 picker history unresolved, #81 source preservation, #79 Home picker separate.
