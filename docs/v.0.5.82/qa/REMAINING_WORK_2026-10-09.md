@@ -1,3 +1,5 @@
+> Update 2026-10-09: #79 Home `Новий том` fixed in v0.5.83 and CORE PHONE PASS; not an open code gap anymore. Verified v0.5.83 debug APK now durably published to GitHub Releases; Termux signed Release fallback merged via PR #91. Next actual functional work: #40 background lifecycle, followed by #51 archive ingestion and #30 Windows publishing. The historical list below was captured before the #79 fix and is preserved for context.
+
 # Renault Docs — what's actually left (2026-10-09)
 
 **Installed code:** v0.5.82 / build 98, runtime source `f17b319c4e17d8f7005ae20221dd7bd642cb172b`, signed APK #145 CI PASS. **QA PAUSED by user request** after video Test 8 PASS. Do not delete source ZIP, prepared RDPKG or installed volumes; no new conversions just for tests.
