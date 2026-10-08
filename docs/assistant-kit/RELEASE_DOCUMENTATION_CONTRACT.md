@@ -1,5 +1,11 @@
 # Renault Docs — Release Documentation Contract
 
+## Public GitHub Release of verified signed APK
+
+Use `docs/assistant-kit/GITHUB_RELEASES_CONTRACT.md`: publish only from an explicit reviewed version promotion file `docs/release-promotions/vX.Y.Z.json` and its pinned, successful developer-signed main run. Never auto-publish on every main APK build, never substitute a PR-signed build, never overwrite an existing release. Public debug prerelease assets contain **only APK + .sha256**; installed application remains functional when the Actions artifact expires. Phone-QA acceptance is tracked independently.
+
+---
+
 Документаційний skeleton створюється **до першої feature-code зміни релізу**.
 
 ```text
