@@ -10,9 +10,9 @@
 - [ ] Install build97 **over** existing installation with stable signer; no uninstall/clear.
 - [ ] All app-owned dialogs share canonical surface/title/button hierarchy (Project, Home, Settings, Help, Viewer).
 - [ ] Destructive confirmation remains red and does not act without explicit positive tap.
-- [ ] Archive preview summary concise; expandable provider/Document ID; scrolls on small screen.
-- [ ] Expanded preview survives portrait/landscape rotation with same selection and no auto-run.
-- [ ] Cancel preview leaves previously saved diagnostics intact; no native preparation started.
+- [ ] Compact confirmation and detail expansion verbally accepted (`++`, `Пасс`); long text and small-screen scrolling not separately checked.
+- [x] Preview with technical details remains open across rotation, no auto-run — user PHONE PASS (2026-10-08).
+- [ ] Cancel preview: **no native preparation started — user PHONE PASS**; preservation of previously saved diagnostics not separately checked.
 - [ ] Viewer navigator / frame debug dialogs retain original search/copy/close semantics.
 - [ ] Original .rdpkg rejection and wrong-model archive block from v0.5.80 remain intact.
 - [ ] Inspect keyboard behavior under modal and log separately if still present.
