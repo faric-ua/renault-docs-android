@@ -1,3 +1,16 @@
+## GitHub Releases DONE / NEXT #40 background lifecycle audit — 2026-10-09
+
+- [x] PR #90 merged: explicit reviewed signed APK promotions, stable signer provenance, CI build SHA/artifact validation, APK sha256 and public prerelease.
+- [x] `v0.5.83-debug` **PUBLISHED** by GitHub Actions run #37860223840 (PASS): https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.83-debug
+- [x] Release has original APK SHA-256 `8592b1d8aacdc4db8b856d899128d7a84931fad7b69276b3baea7eeadf4f3de9` and .sha256. Original CI source `b5f1c22d73642d7341943e4320b5fb469cbe9bec`, signed run #146.
+- [x] PR #91 merged: Termux menu 8 downloads compatible signed GitHub Release when short-lived Actions artifact expired. Static/shell unit tests PASS; device run deliberately paused.
+- [ ] **NEXT functional audit: issue #40 long-running operation lifecycle**. Then finish #51 archive intake QA and #30 Windows prepared catalog pipeline as separate scopes; optional #21/#50. No phone QA/renovations without user choice.
+- [ ] Extended phone QA remains paused (core v0.5.83 route user PASS). Do not install/uninstall or touch original ZIP/RDPKG/volumes for this tooling-only work.
+
+See `docs/assistant-kit/GITHUB_RELEASES_CONTRACT.md` and `docs/v.0.5.83/RELEASE_META.json`.
+
+---
+
 ## v0.5.83 / build99 — NEW VOLUME ROUTE PHONE PASS / EXTENDED QA PAUSED — 2026-10-09
 
 - [x] Issue #79 code fix merged in PR #89, source SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`.
