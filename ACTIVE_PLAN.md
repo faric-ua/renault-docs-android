@@ -3,7 +3,8 @@
 - Restore original Android 📌 emoji glyph exactly, not rotated flat vector.
 - Pinned: normal full color. Unpinned: grayscale render of same glyph.
 - Preserve v0.5.75 sticky Add and status-card layout.
-- Tests / APK CI, then phone QA through Renault Menu `5 → 19 → 8 → 13`.
+- PR #76 MERGED; Tests #551 PASS; Android Debug APK #139 PASS; artifact id `11523497323`.
+- Next: phone QA through Renault Menu `5 → 19 → 8 → 13`. No additional runtime changes before visual acceptance.
 
 ---
 
