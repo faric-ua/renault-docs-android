@@ -1,10 +1,10 @@
 {
   "versionName": "0.5.76",
   "versionCode": 92,
-  "phase": "development",
+  "phase": "phone_qa",
   "feature": "Original emoji pin restore with grayscale inactive state",
   "branch": "feat/v0.5.76-restore-emoji-pin",
   "parent_issue": 68,
   "qa_status": "PENDING",
-  "next": "CI then real-phone pin and sticky Add QA"
+  "next": "Install via 5 → 19 → 8 → 13; visually verify original 3D emoji and pin colors"
 }
