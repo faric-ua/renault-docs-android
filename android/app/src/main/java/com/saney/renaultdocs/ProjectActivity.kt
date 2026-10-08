@@ -105,6 +105,7 @@ class ProjectActivity : Activity() {
     private var pendingNativeRequestId:
         String? =
         null
+    private var archiveSourcePreflightOpen = false
     private var archiveChooserDialog:
         AlertDialog? =
         null
@@ -218,6 +219,8 @@ class ProjectActivity : Activity() {
                 ?.getString(
                     STATE_PENDING_NATIVE_REQUEST_ID,
                 )
+        archiveSourcePreflightOpen =
+            savedInstanceState?.getBoolean("archiveSourcePreflightOpen", false) ?: false
 
         store =
             ProjectStore(
@@ -291,6 +294,13 @@ class ProjectActivity : Activity() {
         render()
         restoreProjectScroll()
         repairSavedVolumeMetadata()
+
+        if (archiveSourcePreflightOpen && !pendingNativeSourceUri.isNullOrBlank()) {
+            volumeContainer.post {
+                // Restores only the confirmation, not the conversion.
+                showArchiveSourcePreflight()
+            }
+        }
 
         if (
             savedInstanceState !=
@@ -433,6 +443,7 @@ class ProjectActivity : Activity() {
             STATE_PENDING_NATIVE_REQUEST_ID,
             pendingNativeRequestId,
         )
+        outState.putBoolean("archiveSourcePreflightOpen", archiveSourcePreflightOpen)
     }
 
     @Deprecated(
@@ -947,19 +958,85 @@ class ProjectActivity : Activity() {
                 }
                 ?: "Renault-archive"
 
-        pendingNativeSourceUri =
-            uri.toString()
-        pendingNativeSourceName =
-            sourceName
-        pendingNativeSourceKind =
-            NativeRdpkgSourceKind.ARCHIVE_FILE
-        pendingNativeRequestId =
-            UUID.randomUUID()
-                .toString()
+        ArchiveSourceGuard.inputError(sourceName, project)?.let { problem ->
+            showArchiveSourceRejected(problem)
+            return
+        }
+        pendingNativeSourceUri = uri.toString()
+        pendingNativeSourceName = sourceName
+        pendingNativeSourceKind = NativeRdpkgSourceKind.ARCHIVE_FILE
+        pendingNativeRequestId = UUID.randomUUID().toString()
+        showArchiveSourcePreflight()
+    }
 
-        openNativeRdpkgDestinationPicker(
-            sourceName,
+    private fun showArchiveSourceRejected(message: String) {
+        statusText.text = message
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Неправильне джерело")
+            .setMessage(message)
+            .setPositiveButton("Зрозуміло", null)
+            .create()
+        dialog.show()
+        DialogUi.apply(dialog, DialogRole.HELP)
+    }
+
+    private fun clearPendingArchiveSource() {
+        archiveSourcePreflightOpen = false
+        pendingNativeSourceUri = null
+        pendingNativeSourceName = null
+        pendingNativeSourceKind = NativeRdpkgSourceKind.RAW_TREE
+        pendingNativeRequestId = null
+    }
+
+    private fun showArchiveSourcePreflight() {
+        val sourceName = pendingNativeSourceName ?: return
+        val source = pendingNativeSourceUri?.let(Uri::parse) ?: return
+        ArchiveSourceGuard.inputError(sourceName, project)?.let { problem ->
+            clearPendingArchiveSource()
+            showArchiveSourceRejected(problem)
+            return
+        }
+        val documentId = runCatching {
+            if (DocumentsContract.isDocumentUri(this, source)) {
+                DocumentsContract.getDocumentId(source)
+            } else {
+                source.toString()
+            }
+        }.getOrDefault(source.toString())
+        val matches = ArchiveSourceGuard.catalogMatches(
+            store, RenaultVolumeIdentity.parse(sourceName),
         )
+        val message = buildString {
+            appendLine("Проєкт призначення: ${project.title}")
+            appendLine("Обраний файл: ${sourceName}")
+            appendLine("Провайдер: ${source.authority ?: "невідомий"}")
+            appendLine("Фактичний Document ID: ${documentId}")
+            appendLine()
+            appendLine(ArchiveSourceGuard.summary(matches, project.id))
+            appendLine()
+            appendLine("Це пошук серед зареєстрованих томів усіх проєктів,")
+            appendLine("а не серед усіх файлів телефона; номер NT — не хеш.")
+            appendLine("Після підтвердження обери папку збереження.")
+        }
+        archiveSourcePreflightOpen = true
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Підтвердь джерело архіву")
+            .setMessage(message)
+            .setPositiveButton("Продовжити") { _, _ ->
+                archiveSourcePreflightOpen = false
+                if (pendingNativeSourceUri == source.toString() &&
+                    pendingNativeSourceName == sourceName
+                ) {
+                    openNativeRdpkgDestinationPicker(sourceName)
+                }
+            }
+            .setNegativeButton("Скасувати") { _, _ ->
+                clearPendingArchiveSource()
+            }
+            .create()
+        dialog.setOnCancelListener { clearPendingArchiveSource() }
+        dialog.show()
+        DialogUi.apply(dialog, DialogRole.CONFIRM)
     }
 
     private fun handleNativeRdpkgDestinationResult(
@@ -1022,6 +1099,12 @@ class ProjectActivity : Activity() {
                 data.flags,
         )
 
+        if (sourceKind == NativeRdpkgSourceKind.ARCHIVE_FILE) {
+            ArchiveSourceGuard.inputError(sourceName, project)?.let { problem ->
+                showArchiveSourceRejected(problem)
+                return
+            }
+        }
         val parsedSourceUri =
             Uri.parse(
                 sourceUri,
@@ -1215,8 +1298,6 @@ class ProjectActivity : Activity() {
             return
         }
 
-        nativeRunStore.clearFinished()
-
         val picker =
             Intent(
                 Intent.ACTION_OPEN_DOCUMENT,
@@ -1233,7 +1314,6 @@ class ProjectActivity : Activity() {
                         "application/x-7z-compressed",
                         "application/vnd.rar",
                         "application/x-rar-compressed",
-                        "application/octet-stream",
                     ),
                 )
                 addFlags(

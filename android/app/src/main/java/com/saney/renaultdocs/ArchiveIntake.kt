@@ -57,6 +57,7 @@ object ArchiveIntake {
     data class Inspection(
         val format: Format,
         val rawRoots: List<RawRootHint>,
+        val preparedPackageDetected: Boolean = false,
     )
 
     fun detectFormat(
@@ -559,6 +560,8 @@ object ArchiveIntake {
                 format,
             rawRoots =
                 hints,
+            preparedPackageDetected =
+                preparedParents.isNotEmpty(),
         )
     }
 
