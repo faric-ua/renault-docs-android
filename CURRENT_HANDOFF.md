@@ -1,3 +1,9 @@
+## RESUME — issue #81 missing original Windows archive — 2026-10-08
+
+HIGH PRIORITY open investigation. User cannot find source archive after archive→.rdpkg. Code audit on v0.5.78 suggests normal input is read-only and cleanup is private-stage/output-only; confirm exact location and rule out any source/output URI alias. No direct file loss has been demonstrated. Do not claim fixed; do not modify source. See issue #81 and `docs/assistant-kit/CURRENT_PLAN.md`. v0.5.78/build 94 CI PASS, phone QA still pending; Home chooser issue #79 remains.
+
+---
+
 ## v0.5.78 source and signed CI — PHONE QA NEXT — 2026-10-08
 
 Read `docs/assistant-kit/CURRENT_PLAN.md` first. PR #80 merged; source `948d5688646728d53b47327cb56f222d316b6ca5`. Tests #557 PASS; Android Debug APK #141 PASS; artifact `Renault-Docs-v0.5.78-Debug` id `11548219781`. Main pending gate: phone QA status/progress in fixed Project «Додати». Separate issue #79 remains open; Home-panel refactor later.

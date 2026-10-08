@@ -1,3 +1,13 @@
+## DATA-LOSS FINDING #81 — original Windows archive not found after import — 2026-10-08
+
+**OPEN / HIGH PRIORITY / reported by user / no root cause proven.**
+Screenshot and user report: a Windows Renault archive (exact name currently uncertain) is no longer visible in original source folder after importing/converting into app.
+Code review: `ProjectActivity` selects source with read-only SAF, `ArchiveIntakeStager` copies source into app-private `noBackupFilesDir/archive-intake`, archive extraction and staging cleanup are private-scoped. `NativeRdpkgPreparationService` deletes unfinished generated output on failure/restart, using persisted `archiveCurrentOutputUri`. No deliberate delete/move of `sourceUri` observed; still inspect source/output URI collision and provider behavior.
+Required: confirm exact original source location, path, extension and upstream transfer method; search read-only in device/Windows/cloud provider; disposable archive test with before/after hashing; add strong no-source-mutation contract and fail-closed guards where appropriate. Do not assume successful import proves source preserved or lost.
+Tracked: [GitHub issue #81](https://github.com/faric-ua/renault-docs-android/issues/81). Do not modify accepted v0.5.78 runtime until root cause established.
+
+---
+
 ## UX-ADD-006 — Home New volume bypasses source selection
 
 Status: **OPEN / ROOT CAUSE VERIFIED / issue #79 — 2026-10-08**.

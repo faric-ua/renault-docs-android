@@ -1,3 +1,16 @@
+## DATA SAFETY — Windows archive source reportedly missing — OPEN / issue #81 — 2026-10-08
+
+- User transferred original Windows Renault archive and used native archive → .rdpkg flow; now cannot locate original at source location. Exact file name (possibly NT84…/84-96), extension and source folder/provider still require confirmation. A screenshot is not proof of deletion by the app.
+- Reviewed main v0.5.78 source: `ProjectActivity` opens original archive with `ACTION_OPEN_DOCUMENT` + read flags; `ArchiveIntakeStager` reads source via `openInputStream` and copies to `noBackupFilesDir/archive-intake/`; `ArchiveIntake` extracts there.
+- Cleanup normally deletes private staging and incomplete output `.rdpkg`, not original archive. Potential edge case: incomplete output cleanup uses `deleteDestination()`; audit source/output URI separation and alias/collision safety instead of assuming it can never affect source.
+- **DO NOT** re-download over missing file, run cleanup, delete source folders, or test destructively with a real original. Gather precise storage path, filename, source provider and before/after evidence. Only use disposable archive for reproduction.
+- **Priority:** issue #81 investigation before asking user to run more archive-import QA; keep v0.5.78 phone-QA status PENDING. No runtime fix claimed, no new APK yet.
+- Existing Home chooser issue #79 remains separate. Planned Home pin/collapse/status redesign remains deferred.
+
+**Поточний наступний крок:** з'ясувати точну папку первинного Windows-архіву (локальна пам'ять / SD / Drive / Windows / синхронізована), знайти файл read-only пошуком, перевірити SAF input/output semantics і потім обережно вирішити, чи потрібен патч захисту.
+
+---
+
 ## MAIN CI PASS — v0.5.78 / build 94 — 2026-10-08
 
 - PR #80 MERGED; app source `948d5688646728d53b47327cb56f222d316b6ca5`.

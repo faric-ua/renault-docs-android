@@ -1,3 +1,13 @@
+## CURRENT — investigate issue #81 source archive disappearance
+
+- Stop archive-related phone QA until original file location and status are understood.
+- Data safety audit: main v0.5.78/build 94, archive intake read-only via SAF and app-private copy. Cleanup deletes staging or generated output, not intentionally source; no complete proof of nondeletion for all providers.
+- Ask exact original filename, source provider/path and destination. Read-only search (My Files, Downloads, Trash, upstream PC/Drive) first. Test using disposable archive only.
+- Track issue #81 as OPEN; avoid speculative fixes and avoid rebuilding unrelated release.
+- v0.5.78 phone QA otherwise pending. Issue #79 and Home panel redesign remain later.
+
+---
+
 ## CURRENT — v0.5.78 / build 94 — phone QA next
 
 - PR #80 merged, main app SHA `948d5688646728d53b47327cb56f222d316b6ca5`.
