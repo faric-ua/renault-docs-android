@@ -2,7 +2,7 @@
 
 - v0.5.76 build 92: PHONE PASS 7/7.
 - PR #77 MERGED into main as `87ab5c2dc20fa14dd7e88ac8cfb81d746c262169`.
-- Main Tests #555 PASS; Android Debug APK #140 building.
+- Main Tests #555 PASS; Android Debug APK #140 PASS; artifact `Renault-Docs-v0.5.77-Debug` id `11523858486`.
 - v0.5.77/build 93: landscape Add auto-collapses and grayscale pin becomes inactive; manual expansion in landscape available; portrait pinned/expanded state is preserved.
 - After signed APK ready: Renault Menu `5 → 19 → 8 → 13`; test rotation and scroll. Do not change status card in this release.
 
