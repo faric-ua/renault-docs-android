@@ -21,8 +21,12 @@
 ## Extended phone acceptance — test 4 Settings (2026-10-08)
 - User replied «Пасс» following Settings portrait↔landscape bar hide/restore, a non-destructive choice dialog surviving rotation, and closing without saving changes. **PASS** for Settings + that selection window.
 
+## Test 6 — Native Modern section orientation (2026-10-09)
+
+Three new phone screenshots and explicit user acceptance: Megane II / NT8340A / section `120 — ЭБУ СИСТ. ВПР.`. In portrait, full category controls `Схеми`, `Роз’єм`, `Положення на авто`, `Документація` are visible. In landscape only the currently selected `Схеми` content/list occupies the view. Portrait restores additional navigation while retaining selected category and section. The user confirms this is the intended behavior. **PHONE PASS: category-aware adaptive orientation and section continuity.** Not evidence of all per-category native data actions.
+
 ## Not independently evidenced
-- Other app-owned dialogs/transient swipe, ModernVolume and precise post-fullscreen system bar restoration; original Classic Viewer PDF fullscreen in portrait and landscape now accepted.
+- Other app-owned dialogs/transient swipe and precise post-fullscreen system bar restoration; native Modern section orientation and Classic Viewer PDF fullscreen are now accepted.
 - Actual Ready Projects/Drive, Legacy and Tools launch results; active operation progress/terminal status interactions (UI presence and independent scrolling already PASS).
 - Cross-app system SAF picker behavior and IME; destructive/project import/export operations; volumes count after install and data-preservation checks.
 - Original v0.5.81 Viewer `Розділи` dialog is *hybrid-mode-only*, not accessible from ordinary Modern→Classic. Do not treat test as failed or passed; the test route was wrong.
@@ -32,8 +36,12 @@
 
 ## Viewer attempted test 5 — route corrected (2026-10-08)
 
-Four user screenshots show NT8340 Classic `Visu Schema`, text search `120` at `0/0` in start page and `1/3` after opening the legacy document, plus inline PDF. No `Розділи · …` modal is pictured. Code audit shows this modal requires `hybridSectionMode`, whereas section `Classic` opens untouched Viewer with no hybrid extras. **INVALID QA INSTRUCTION, NO APP REGRESSION CONFIRMED**. Replacement test 5A **PASS** based on user screenshots: original Classic `⛶` fullscreen in portrait and landscape displaying the same NT8340/120 PDF; do not rework native Classic. Remaining QA: ModernVolume and independent status behavior.
+Four user screenshots show NT8340 Classic `Visu Schema`, text search `120` at `0/0` in start page and `1/3` after opening the legacy document, plus inline PDF. No `Розділи · …` modal is pictured. Code audit shows this modal requires `hybridSectionMode`, whereas section `Classic` opens untouched Viewer with no hybrid extras. **INVALID QA INSTRUCTION, NO APP REGRESSION CONFIRMED**. Replacement test 5A **PASS** based on user screenshots: original Classic `⛶` fullscreen in portrait and landscape displaying the same NT8340/120 PDF; do not rework native Classic. Remaining QA: independent operation-status behavior, genuine action routing and any unrelated legacy outstanding tests.
 
 ## Test 5A — Classic PDF fullscreen accepted (2026-10-08)
 
 Three user screenshots: portrait fullscreen (app toolbar hidden), portrait ordinary mode (app toolbar present), landscape fullscreen (app toolbar hidden); all show NT8340 / code 120 / `SE2416-P` inline PDF at `176%`. User clarifies this is **original Renault Classic** preserved with only Android compatibility. **PHONE PASS for Classic fullscreen/orientation and continuity of displayed content.** Keep original frames, drawings, controls and document flow unchanged. Precise restored Android bar state outside fullscreen and exact scroll position after rotation are not separately evidenced and stay outside this PASS.
+
+## Next isolated QA (no source mutations)
+
+Observe only an already-existing terminal operation/status on Home if visible while Add is collapsed and expanded. Do not start a new import, conversion, or share just to create a status. If no status currently exists, record N/A and choose another non-destructive test.
