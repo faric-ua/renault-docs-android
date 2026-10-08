@@ -1,9 +1,14 @@
 {
   "versionName": "0.5.79",
   "versionCode": 95,
-  "phase": "feature",
+  "phase": "phone_diagnostics",
   "phone_qa": "PENDING",
   "source_issue": 83,
   "feature": "read-only last native source diagnostic",
-  "next": "PR CI and main signed APK then install-over and copy source report"
+  "next": "Phone install-over and copy last source diagnostic before any further native .rdpkg",
+  "source_sha": "b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a",
+  "tests_run": 561,
+  "debug_apk_run": 142,
+  "artifact_id": 11553367269,
+  "artifact_sha256": "a0ed0807dc2b43d2eb92c83014e426bb0a8ea7c521d1cc7f079c927ceb4da695"
 }

@@ -1,3 +1,9 @@
+## NEW RESUME — v0.5.79 provenance artifact ready — 2026-10-08
+
+PR #84 merged; app SHA `b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a`; main Tests #561 PASS and Android Debug APK #142 PASS. Signed artifact `Renault-Docs-v0.5.79-Debug`, id `11553367269`, digest sha256 `a0ed0807dc2b43d2eb92c83014e426bb0a8ea7c521d1cc7f079c927ceb4da695`. Next: install over existing, do not clear data or run native prep; Megane II → expand Add → last source diagnostic → copy report. Issue #83 root cause pending real evidence. See `docs/assistant-kit/CURRENT_PLAN.md`.
+
+---
+
 ## v0.5.79 diagnostic candidate / no new native operation — 2026-10-08
 
 User confirms last native .rdpkg was Megane-II_X61_NT8486; source URI/name likely preserved. Version 0.5.79/build95 adds Project «Додати» read-only last source diagnostic copy modal. CI and phone QA pending. Install over existing only; no uninstall, clear data, or new native jobs. Canonical plan: docs/assistant-kit/CURRENT_PLAN.md; issue #83 urgent.

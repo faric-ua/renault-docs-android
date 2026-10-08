@@ -1,6 +1,20 @@
+## CI verified — v0.5.79/build95 signed provenance diagnostic — 2026-10-08
+
+- PR #84 MERGED; app source `b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a`.
+- PR Tests #560 PASS / Android PR Check #448 PASS.
+- Main Tests #561 PASS / Android Debug APK #142 PASS.
+- Signed debug artifact `Renault-Docs-v0.5.79-Debug` ID `11553367269`, SHA256 `a0ed0807dc2b43d2eb92c83014e426bb0a8ea7c521d1cc7f079c927ceb4da695`. Artifact expected to expire 2026-10-11.
+- Phone evidence gate: **PENDING**. Do not claim source URI known yet.
+- Install **over** existing app using Renault Menu `5 → 19 → 8 → 13`, no uninstall, data clearing, or extra native .rdpkg preparation.
+- Megane II → expand Add → «Джерело останньої .rdpkg · діагностика» → «Копіювати звіт» → paste in chat.
+- Read-only diagnostic (NativeRdpkgRunStore.load & provider metadata only); issue #83 root cause UNKNOWN.
+- After report compare `sourceUri` / Document ID / sourceName with actual user-selected Megane II source folder. No destructive fixes before evidence.
+
+---
+
 # v0.5.79 / build95 — READ-ONLY last native source diagnostics — 2026-10-08
 
-**Status: FEATURE CODE PREPARED / PR CI PENDING / PHONE DIAG PENDING.**
+**Status: MERGED / MAIN CI PASS / SIGNED APK READY / PHONE SOURCE REPORT PENDING.**
 
 User confirms **NO new native .rdpkg operation since Megane-II_X61_NT8486**. Evidence in NativeRdpkgRunStore likely preserved after COMPLETE (not yet read from device). Diagnostic option in Project → expand Add → `Джерело останньої .rdpkg · діагностика` reads last persisted state via `load()`, queries only provider metadata (document name, size, Document ID), and copies source/destination/project/result/time report. **No conversion, service restart, delete, clearFinished or archive stream read.**
 

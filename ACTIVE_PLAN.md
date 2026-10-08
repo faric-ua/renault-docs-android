@@ -1,3 +1,13 @@
+## CURRENT — collect read-only last-source report v0.5.79 / build95
+
+- Main signed APK #142 PASS / Tests #561 PASS / app SHA `b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a`.
+- Diagnostic artifact ID `11553367269` (stable signer).
+- Install-over only through Renault Menu `5 → 19 → 8 → 13`, no uninstall/clear or new archive conversion.
+- Project Megane II → expand Add → diagnostic → Copy report → paste into chat.
+- Model/source provenance issue #83 unresolved. #82 model prevention, #81 immutable original, #79 Home picker separate.
+
+---
+
 ## CURRENT — v0.5.79 source provenance read-only
 
 Implement isolated diagnostic candidate, CI → signed APK → install over existing → Project Add copy report. No new native .rdpkg before evidence capture. User confirms none since NT8486; do not assert exact source yet. Issue #83 root cause unknown; #82 model mismatch followup, #81 source immutability, #79 Home chooser.
