@@ -1,11 +1,12 @@
-## v0.5.83 / build99 — NEW VOLUME ROUTE FIXED / SIGNED CI PASS / PHONE QA PAUSED — 2026-10-09
+## v0.5.83 / build99 — NEW VOLUME ROUTE PHONE PASS / EXTENDED QA PAUSED — 2026-10-09
 
 - [x] Issue #79 code fix merged in PR #89, source SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`.
 - [x] Home `Новий том` → choose project → expanded project Add options (Auto / Manual / raw / archive); does **not** auto-open .rdpkg picker. Original explicit `openPicker` preserved.
 - [x] Python PR Tests #573 PASS / Android PR Check #457 PASS; main Tests #574 PASS / signed Android Debug APK #146 PASS.
 - [x] Signed artifact `Renault-Docs-v0.5.83-Debug` ID 11582942367, artifact bundle digest `sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`; expires 2026-10-11 22:27 UTC.
-- [ ] **Phone QA is PAUSED by user request**, not failed, not closed. Do not prompt for next test unrequested.
-- [ ] Issue #79 only close after explicit user phone acceptance. No file moves/deletion or automatic import/SAF launch on navigation.
+- [x] 2026-10-09 user replied «Пасс» for v0.5.83 Home New Volume route — CORE PHONE PASS.
+- [ ] Detailed Back/rotation/per-method tests remain PAUSED by user request; do not prompt unrequested.
+- [ ] #79 core route accepted by user; decide full issue closeout after other acceptance conditions are evidenced. No file moves/deletion or automatic import/SAF launch on navigation.
 - [ ] Other open features remain #40 lifecycle, #51 intake acceptance, #30 publishing pipeline, optional #21 support and #50 Termux minimal UI.
 
 Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md` / `docs/v.0.5.83/RELEASE_META.json`. No install requested; if later asked, use Renault Termux `5 → 19 → 8 → 13` only over existing app.
