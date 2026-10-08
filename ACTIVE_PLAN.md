@@ -9,7 +9,8 @@
 - [x] Extended Home test 2 PHONE PASS (2026-10-08): visible New Volume/New Project/Ready Projects/Converter/Legacy and independent Add vs. My Renault scroll. User: «Все добре, пас, поїхали далі.»
 - [x] Home `?` Help dialog (test 3): rotation persistence, system bars landscape hide/portrait restore, close returns Home with no auto-operation — PHONE PASS (2026-10-08, user «Пасс»).
 - [x] Settings screen orientation and non-destructive choice dialog rotation + Close without changes — PHONE PASS (2026-10-08, user «Пасс»).
-- [ ] NEXT: actual Viewer `Розділи · [том]` modal (not ModernVolume native sections search), portrait→landscape→portrait, close/no navigation. Then PDF fullscreen, active status; SAF/IME remain Android-owned.
+- [!] Test 5 `Розділи · …` INVALID ROUTE: user showed Classic Visu Schema, not hybrid Viewer. `NativeSectionActivity.openLegacyFallback()` intentionally opens original Classic without hybrid extras; do not call this an app bug or force nonexistent button. Documented QA-ROUTE-005.
+- [ ] NEXT: test 5A actual Classic Viewer PDF `⛶` fullscreen + portrait/landscape restoration and same document/page; then active status, ModernVolume. SAF/IME Android-owned.
 - [ ] Only after phone evidence: mark accepted/close; do not treat v0.5.81 Viewer pending check as PASS.
 
 Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md` and `docs/v.0.5.82/qa/PHONE_TEST.md`.
