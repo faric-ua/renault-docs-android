@@ -62,9 +62,8 @@ class RenaultDocsApplication :
                 activity,
             )
 
-        Ui.applyOrientationSystemBars(
-            activity,
-        )
+        applyBarsToActivity(activity)
+        DialogUi.reapplyOrientation(activity)
     }
 
     override fun onActivityDestroyed(
