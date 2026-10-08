@@ -1,3 +1,9 @@
+## v0.5.81 / build97 — SIGNED MAIN CI PASS / PHONE QA NEXT — 2026-10-08
+
+**READ FIRST:** `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.81.md`. PR #87 merged; app SHA `309f068bbf92c65ca06c0cc2e38887d6a4664837`; Main Tests #568 PASS, Android Debug APK #144 PASS; signed artifact `Renault-Docs-v0.5.81-Debug` ID `11560786817`, digest `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`. All 20 audited app-owned AlertDialogs use DialogUi, archive preflight concise with expandable technical details and rotation-state save; **phone QA pending**. Install over existing via Renault Menu `5 → 19 → 8 → 13`, do not clear data or delete/move sources. Next: phone-check compact/expanded NT8341A preview, rotation and explicit Cancel/no-operation, then Viewer/Home/Settings visual checks. v0.5.80 protected archive picker/model-conflict/rotation accepted, cross-project match and Cancel not yet separately verified.
+
+---
+
 ## v0.5.80 / build96 — MAIN CI PASS / PHONE QA NEXT — 2026-10-08
 
 Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.80.md` first. PR #86 merged. Runtime source `5a6ddc060edb4ff452eb1e3e96c1423cc042ddf9`. Main Tests #563 PASS, Android Debug APK #143 PASS; signed artifact `Renault-Docs-v0.5.80-Debug` ID `11557433214` (sha256 `0da82672e308148e5a2178f9fb147705b5ab8f2b96c39da15220e09dde6223b6`). Phone QA PENDING. Preserve source ZIP/.rdpkg and installed volumes; no migration/cleanup. Next: install via Renault Menu 5 → 19 → 8 → 13, test source guard, strong model mismatch, SAF source confirmation, global registered-project NT preview, Cancel/rotation. Issues #85/#82 candidate not closed, #83 picker history unresolved, #81 source preservation, #79 Home picker separate.
