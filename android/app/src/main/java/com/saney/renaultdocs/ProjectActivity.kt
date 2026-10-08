@@ -821,7 +821,11 @@ class ProjectActivity : Activity() {
                 Toast.makeText(this, "Звіт скопійовано", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Закрити", null)
-            .show()
+            .create()
+            .also { dialog ->
+                dialog.show()
+                DialogUi.apply(dialog, DialogRole.CHOICE)
+            }
     }
 
     private fun handleNativeRdpkgSourceResult(
