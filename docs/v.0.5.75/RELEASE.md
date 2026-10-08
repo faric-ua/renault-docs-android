@@ -1,6 +1,6 @@
 # Renault Docs v0.5.75 — sticky Add panel and pin refinement
 
-Status: **DEVELOPMENT**
+Status: **MERGED / MAIN CI PASS / PHONE QA PENDING**
 
 ## Phone feedback from v0.5.74
 
@@ -25,3 +25,16 @@ Requested refinements:
   - unpinned = light monochrome;
   - pinned = red;
 - Help text describes the pin state without a colored emoji.
+
+
+## CI evidence
+
+- PR #74 merged.
+- Runtime source: `b25efbee254562d7b3e9f6917772e8d2e6370eb3`.
+- Tests #547: PASS.
+- Android Debug APK #138: PASS.
+- Artifact: `Renault-Docs-v0.5.75-Debug`.
+- Artifact ID: `11520145404`.
+- Digest: `sha256:59888f89ef694512ffa2a4895a75cb93b21c99687ccaa24270bfa9a06f948f00`.
+
+Phone QA remains required.

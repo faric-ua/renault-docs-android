@@ -1,6 +1,6 @@
 # v0.5.75 — sticky Add panel + diagonal pin — 2026-10-08
 
-Status: **IMPLEMENTATION IN PROGRESS**.
+Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
 
 Phone feedback after v0.5.74:
 - Add layout is generally accepted;
@@ -17,8 +17,17 @@ Target:
 - 10dp gap before the volume list;
 - same diagonal pin vector used for both states via tint.
 
+Merged / CI:
+- PR #74 — MERGED;
+- runtime source: `b25efbee254562d7b3e9f6917772e8d2e6370eb3`;
+- Tests #547 — PASS;
+- Android Debug APK #138 — PASS;
+- artifact: `Renault-Docs-v0.5.75-Debug`;
+- artifact id: `11520145404`;
+- digest: `sha256:59888f89ef694512ffa2a4895a75cb93b21c99687ccaa24270bfa9a06f948f00`.
+
 Next:
-CI → merge → phone QA of sticky scrolling, spacing and pin states.
+phone QA of sticky scrolling, spacing and pin states.
 
 ---
 
