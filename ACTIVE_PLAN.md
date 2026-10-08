@@ -1,3 +1,18 @@
+## ACTIVE — v0.5.75 sticky Add panel — 2026-10-08
+
+Implementation:
+- Add outside volume ScrollView;
+- volumes scroll independently;
+- 10dp gap before first volume;
+- diagonal pin restored;
+- inactive pin light / active pin red;
+- status-card review deferred.
+
+Next gate:
+CI → merge → phone QA.
+
+---
+
 ## ACTIVE — v0.5.74 Add panel phone QA — 2026-10-08
 
 - runtime: `8dc7a3d0c6d22c50df343a36456f6bd4716b3a5a`
