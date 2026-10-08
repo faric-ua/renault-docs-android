@@ -99,6 +99,13 @@ completed status screen
 
 Close закриває тільки modal, якщо інше явно не визначено product contract.
 
+## Classic vs Modern preservation — v0.5.82 phone acceptance
+
+- **Classic is the authentic Renault Visu Schema / legacy HTML and frames**, not a redesigned Android screen. Its original controls, visual arrangement, page content, link semantics, PDF/schematic handling and full-screen feature are preserved as-is; Android shell adaptation may handle system bars, safe insets, lifecycle, file permissions and crash fixes only when necessary.
+- **Modern is the Android-native interface** where layout, search, menus and project actions may be expanded. Do not copy Modern-specific `Розділи` dialogs into Classic simply to pass an invalid QA scenario.
+- Section-origin hybrid Viewer and untouched original Classic are distinct routes. Do not assume `Modern → Classic` opens the legacy hybrid navigator.
+- User device screenshots 2026-10-08 accepted authentic Classic NT8340/120 PDF `SE2416-P` at 176% in ordinary portrait, fullscreen portrait and fullscreen landscape.
+
 ## Viewer screen
 
 Viewer має:
