@@ -20,6 +20,10 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     private val progressView: ProgressBar
     private val closeView: TextView
     private val cancelView: TextView
+    private val detailsToggleView: TextView
+    private val copyButtonView: TextView
+    private var projectCompact = false
+    private var projectDetailsExpanded = false
 
     init {
         orientation = VERTICAL
@@ -39,6 +43,30 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             }
         }
         header.addView(titleView, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+
+        detailsToggleView = Ui.textView(context, "▾", 18f, Ui.accent).apply {
+            gravity = Gravity.CENTER
+            minWidth = Ui.dp(context, 44)
+            minHeight = Ui.dp(context, 44)
+            visibility = View.GONE
+            contentDescription = "Розгорнути деталі статусу"
+            setOnClickListener {
+                projectDetailsExpanded = !projectDetailsExpanded
+                updateProjectCompactUi()
+            }
+        }
+        header.addView(detailsToggleView, LayoutParams(Ui.dp(context, 44), Ui.dp(context, 44)))
+
+        copyButtonView = Ui.textView(context, "⧉", 20f, Ui.accent).apply {
+            gravity = Gravity.CENTER
+            minWidth = Ui.dp(context, 44)
+            minHeight = Ui.dp(context, 44)
+            visibility = View.GONE
+            contentDescription = "Копіювати повний статус"
+            setOnClickListener { copyCurrentText() }
+        }
+        header.addView(copyButtonView, LayoutParams(Ui.dp(context, 44), Ui.dp(context, 44)))
+
         cancelView = Ui.textView(context, "Скасувати", 13f, Ui.muted).apply {
             gravity = Gravity.CENTER
             visibility = View.GONE
@@ -107,6 +135,29 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         })
     }
 
+    // Opt-in for ProjectActivity; MainActivity keeps its existing status.
+    fun useProjectCompactLayout(initiallyExpanded: Boolean) {
+        projectCompact = true
+        projectDetailsExpanded = initiallyExpanded
+        updateProjectCompactUi()
+    }
+
+    fun isProjectDetailsExpanded(): Boolean =
+        projectCompact && projectDetailsExpanded
+
+    private fun updateProjectCompactUi() {
+        if (!projectCompact) return
+        subjectView.visibility = if (projectDetailsExpanded) View.VISIBLE else View.GONE
+        detailView.visibility = if (projectDetailsExpanded) View.VISIBLE else View.GONE
+        detailsToggleView.visibility = View.VISIBLE
+        detailsToggleView.text = if (projectDetailsExpanded) "▴" else "▾"
+        detailsToggleView.contentDescription =
+            if (projectDetailsExpanded) "Згорнути деталі статусу" else "Розгорнути деталі статусу"
+        copyButtonView.visibility = View.VISIBLE
+        titleView.maxLines = 1
+        titleView.ellipsize = TextUtils.TruncateAt.END
+    }
+
     fun showRunning(
         title: String,
         detail: String,
@@ -127,6 +178,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             terminal = false,
         )
         detailView.text = detail
+        updateProjectCompactUi()
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
         cancelView.setOnClickListener(if (onCancel == null) null else View.OnClickListener { onCancel() })
@@ -219,6 +271,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             terminal = true,
         )
         detailView.text = detail
+        updateProjectCompactUi()
         progressView.isIndeterminate = false
         progressView.max = PROGRESS_SCALE
         progressView.progress = PROGRESS_SCALE

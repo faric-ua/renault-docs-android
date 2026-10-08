@@ -1,3 +1,9 @@
+## ACTIVE — v0.5.78 compact inline progress for volumes
+
+Feature branch: `feat/v0.5.78-inline-volume-operation-status`, target v0.5.78/build 94. PR CI next; only after PASS main APK then phone QA. Keep accepted v0.5.77 pin/orientation unchanged. Home panel reuse and issue #79 later.
+
+---
+
 ## NEXT CHAT RESUME — 2026-10-08
 
 Full checkpoint: `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.77.md`. v0.5.77 / build 93 PHONE PASS 6/6 / CLOSED.

@@ -55,7 +55,11 @@ class OperationStatusUiContractTest(unittest.TestCase):
         activity = self.read("ProjectActivity.kt")
         build = activity[activity.index("private fun buildContent"):activity.index("private fun buildAddPanel")]
         self.assertIn("root.addView(\n            buildAddPanel()", build)
-        self.assertIn("root.addView(\n            operationStatus", build)
+        panel = activity[activity.index("private fun buildAddPanel"):activity.index("private fun addChoiceButton")]
+        self.assertIn("addView(\n                operationStatus", panel)
+        self.assertIn("useProjectCompactLayout(", panel)
+        self.assertLess(panel.index("addView(\n                addPanelBody"), panel.index("operationStatus ="))
+        self.assertNotIn("root.addView(\n            operationStatus", build)
         self.assertIn("projectScroll.addView(\n            volumeContainer", build)
         self.assertNotIn("scrollContent.addView(\n            operationStatus", build)
 

@@ -1,0 +1,12 @@
+{
+  "versionName": "0.5.78",
+  "versionCode": 94,
+  "phase": "development",
+  "qa_status": "PENDING",
+  "feature": "Project Add compact inline operation status",
+  "followups": [
+    "Home panel later",
+    "Issue #79 New volume picker"
+  ],
+  "next": "PR CI then signed APK and phone QA"
+}
