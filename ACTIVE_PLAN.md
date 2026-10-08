@@ -1,3 +1,16 @@
+## Renault Docs — QA PAUSED / remaining functionality review — 2026-10-09
+
+- [x] **Phone Test 8 VIDEO PASS** (user `607185.mp4`, ~32 s): Home Add collapse/expand, accessible `Мої Renault` (Megane II 10, Laguna II 10, Kangoo II 1); Megane II Add collapse/expand with existing volumes. Earlier suspected UI overlap **not reproduced as blocking**.
+- [~] **Test 7 status N/A**: no operation status exists. Do not initiate an operation merely for this QA.
+- [!] **User paused further manual testing**; do not propose more numbered phone QA until requested.
+- [ ] **Primary real functionality gap:** #79 Home → New Volume auto-picks .rdpkg instead of showing the Project Add choices. Current code path reverified 2026-10-09.
+- [ ] Separate longer-term work: #40 all-services background lifecycle, #51 complete archive-intake acceptance, #30 Windows source→prepared catalog publishing, optional #21 support URL and #50 Termux UI.
+- [ ] Administrative backlog: reconcile older already-implemented #68/#23/#85/#82 against device PASS; keep #81/#83 provenance questions, untouched user files.
+
+Read `docs/v.0.5.82/qa/REMAINING_WORK_2026-10-09.md`, `docs/v.0.5.82/qa/PHONE_TEST.md`. Code unchanged; **phone QA not closed, only paused**.
+
+---
+
 ## v0.5.82 / build98 — CORE PHONE PASS / EXTENDED QA NEXT — 2026-10-08
 
 - [x] Home Add layout, pin/expand parity, scroll split, tools/ready projects + explanatory text + legacy tiles moved.
