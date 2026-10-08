@@ -1,6 +1,12 @@
 # v0.5.76 — restore original 3D emoji push-pin — 2026-10-08
 
-Status: **IMPLEMENTED ON FEATURE BRANCH / CI PENDING / PHONE QA PENDING**.
+Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.
+
+- PR #76 MERGED; main runtime `9969f38cb8f12683e9140381d4b67fcea8409daf`.
+- Tests #551 PASS; Android Debug APK #139 PASS.
+- Signed debug artifact: `Renault-Docs-v0.5.76-Debug`, id `11523497323`.
+- SHA-256 `a5e1e94cd4d19f390d91ae08138b75ceac6b0c39a5af81a0a65a9da17a3473b8`.
+- Phone gate: Renault Menu `5 → 19 → 8 → 13` → verify original colored 📌 pinned / same emoji monochrome unpinned; sticky scroll, 10dp gap, reopen, rotation, Help; status-card review deferred.
 
 User's image confirms the original Android system emoji 📌 (red dimensional body, white needle), not a rotated vector. Restore the v0.5.73 emoji-based TextView. Active/pinned state retains original colored emoji; inactive uses a zero-saturation hardware layer paint on the same glyph. Preserve the v0.5.75 sticky Add panel, 10dp gap, pin persistence, and current status-card behavior.
 
