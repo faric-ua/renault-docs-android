@@ -1,3 +1,9 @@
+## CURRENT — v0.5.79 source provenance read-only
+
+Implement isolated diagnostic candidate, CI → signed APK → install over existing → Project Add copy report. No new native .rdpkg before evidence capture. User confirms none since NT8486; do not assert exact source yet. Issue #83 root cause unknown; #82 model mismatch followup, #81 source immutability, #79 Home chooser.
+
+---
+
 ## TOP PRIORITY — issue #83 preserve last native archive source record
 
 1. No new phone native conversions or clearing cache/data: `NativeRdpkgRunStore` persists sourceUri/sourceName/projectId after completed operation; next `clearFinished()` erases record.

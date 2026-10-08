@@ -1,3 +1,15 @@
+# v0.5.79 / build95 — READ-ONLY last native source diagnostics — 2026-10-08
+
+**Status: FEATURE CODE PREPARED / PR CI PENDING / PHONE DIAG PENDING.**
+
+User confirms **NO new native .rdpkg operation since Megane-II_X61_NT8486**. Evidence in NativeRdpkgRunStore likely preserved after COMPLETE (not yet read from device). Diagnostic option in Project → expand Add → `Джерело останньої .rdpkg · діагностика` reads last persisted state via `load()`, queries only provider metadata (document name, size, Document ID), and copies source/destination/project/result/time report. **No conversion, service restart, delete, clearFinished or archive stream read.**
+
+New investigation build is v0.5.79 / build95. Install it *over the existing app* using stable signer, never uninstall or clear data. After install open Megane II → expand Add → diagnostics → copy into chat. Do not run any additional .rdpkg creation until report collected. If stored source info absent, stop: do not reproduce with original archives.
+
+Issue #83 provenance origin UNKNOWN; issue #82 model conflict separate, issue #81 source immutability separate, issue #79 Home picker separate. v0.5.78 phone QA still pending. No run state touched by GitHub work.
+
+---
+
 ## URGENT: preserve original archive provenance — issue #83 — 2026-10-08
 
 **User clarified explicitly:** problematic conversion was initiated by selecting an archive within phone's **Megane II Sources folder**, which the user asserts contains only Megane archives. Yet the generated `Megane-II_X61_NT8486_...` package displays real **Kangoo II X61 PDF content** (not merely filename). Do NOT reinterpret this as simply user selecting a Kangoo ZIP in the Kangoo folder. Root cause remains UNKNOWN.

@@ -1,3 +1,9 @@
+## v0.5.79 diagnostic candidate / no new native operation — 2026-10-08
+
+User confirms last native .rdpkg was Megane-II_X61_NT8486; source URI/name likely preserved. Version 0.5.79/build95 adds Project «Додати» read-only last source diagnostic copy modal. CI and phone QA pending. Install over existing only; no uninstall, clear data, or new native jobs. Canonical plan: docs/assistant-kit/CURRENT_PLAN.md; issue #83 urgent.
+
+---
+
 ## URGENT 2026-10-08 — wrong source provenance, not simply misnamed file
 
 User says they selected archive in **Megane II Sources** but result contains actual Kangoo II X61 wiring. Need prove exact selected source bytes/URI; issue #83. `NativeRdpkgRunStore` retains sourceUri and sourceName after COMPLETE but `clearFinished()` on a new native job can destroy evidence. **Do not ask user to run imports, uninstall, clear data or cleanup.** Normal stageSource deletes old staging and freshly copies read-only selected URI, so no proven automatic stale-copy reuse. Issue #82 model mismatch and #81 immutability are related but distinct. Detailed canonical state: `docs/assistant-kit/CURRENT_PLAN.md`. No code changes, status phone QA v0.5.78 pending.
