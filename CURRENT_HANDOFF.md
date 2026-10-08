@@ -1,3 +1,9 @@
+## v0.5.82 / build98 — SIGNED MAIN CI PASS / PHONE QA NEXT — 2026-10-08
+
+READ `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.82.md` FIRST. PR #88 merged runtime SHA `f17b319c4e17d8f7005ae20221dd7bd642cb172b`. Main Tests #572 PASS, signed Android Debug APK #145 PASS, artifact `Renault-Docs-v0.5.82-Debug` ID 11563839781 SHA256 `94cadb5caf5b1af93a2a959e674819c31f0571b479c66f7b9a492af6ae6586be`. Home uses collapsible/pinnable independent Add with New Volume, New Project, Ready Projects, Tools/Legacy and help text, bounded action scroll and fixed operation status; My Renault scrolls below. Application & DialogUi hide Android system bars landscape, show portrait, never alter keyboard/SAF; PDF fullscreen preserved. **Phone QA PENDING**. Install only over existing via Renault Termux menu `5 → 19 → 8 → 13`, don't clear/migrate/remove files. First phone test: Home portrait→landscape→portrait bars, pin/restored state, preserved counters, dialogs.
+
+---
+
 ## v0.5.81 / build97 — SIGNED MAIN CI PASS / PHONE QA NEXT — 2026-10-08
 
 **READ FIRST:** `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-08_v0.5.81.md`. PR #87 merged; app SHA `309f068bbf92c65ca06c0cc2e38887d6a4664837`; Main Tests #568 PASS, Android Debug APK #144 PASS; signed artifact `Renault-Docs-v0.5.81-Debug` ID `11560786817`, digest `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`. All 20 audited app-owned AlertDialogs use DialogUi, archive preflight concise with expandable technical details and rotation-state save; **phone QA pending**. Install over existing via Renault Menu `5 → 19 → 8 → 13`, do not clear data or delete/move sources. Next: phone-check compact/expanded NT8341A preview, rotation and explicit Cancel/no-operation, then Viewer/Home/Settings visual checks. v0.5.80 protected archive picker/model-conflict/rotation accepted, cross-project match and Cancel not yet separately verified.
