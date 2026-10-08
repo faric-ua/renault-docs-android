@@ -1,3 +1,19 @@
+## PROVENANCE RESOLVED FOR CONTENT / PICKER NAVIGATION STILL OPEN — 2026-10-08
+
+**Confirmed by actual v0.5.79/build95 phone diagnostic, after no intervening native runs:**
+- Open + saved project: `Megane II / megane-ii`. Phase `COMPLETE`, source kind `ARCHIVE_FILE`.
+- **Original selected source as persisted by application:** `Kangoo-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg`, size `94965991` bytes, current name still resolves.
+- **Source URI** `content://com.android.externalstorage.documents/document/primary%3ADocuments%2FRenault%2Fpackages%2Frdpkg%2FKangoo-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg`.
+- **Document ID** `primary:Documents/Renault/packages/rdpkg/Kangoo-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg`.
+- Output target tree `primary:Documents/Renault/packages/rdpkg`; result package ID `megane-ii-nt8486-2009-08-31`; result SHA256 `4ed38ab4a3ea8dcf41c24cf86d25820d820f896652062b682eab7f1ef0de53f2`; started local `2026-10-08 15:13:32`, completed `15:15:50`.
+- **Conclusion:** wrong Kangoo content in the produced Megane RDPKG is explained by **existing Kangoo RDPKG as actual persisted input**. It was **not original Windows ZIP**. The user still specifically recalls navigating *Megane Sources*; the saved single URI **does not reveal picker navigation history** or whether app callback handled the expected selection. Do not assume user error or claim picker sequence is proved.
+- Code: `ProjectActivity.startNativeArchiveRdpkgFlow()` uses `ACTION_OPEN_DOCUMENT`, `type="*/*"`, MIME includes `application/octet-stream`; callback accepts any returned name/URI as ARCHIVE_FILE; staging copies even unrecognized extension, `ArchiveIntake.detectFormat` detects by header ZIP magic, so ZIP-compatible `.rdpkg` can be treated as archive. Converter stamps target model `project.model` without source cross-model validation.
+- **Issue #85 OPEN:** deny `.rdpkg` as archive source + show verified source/path + explicit preflight; **#82 OPEN** model consistency gate; **#83 OPEN** unknown picker navigation/selection vs persisted URI; **#81** source immutability, original Windows ZIP found separately on Drive/phone, no confirmed original deletion.
+- **Next:** request user approval for a scoped safeguard release (extension/container validation + source identity preflight/model mismatch), not another live original-archive repro. Do not delete/move generated packages or original archives. Retain v0.5.79 evidence report / don't overwrite before note reviewed.
+- v0.5.79 / build95 signed APK #142 CI PASS, diagnostic report successfully received; full previous v0.5.78 progress phone QA still separate/pending; #79 Home chooser later.
+
+---
+
 ## CI verified — v0.5.79/build95 signed provenance diagnostic — 2026-10-08
 
 - PR #84 MERGED; app source `b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a`.

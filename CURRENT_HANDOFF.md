@@ -1,3 +1,9 @@
+## v0.5.79 source report received — Kangoo RDPKG was recorded input (2026-10-08)
+
+See `docs/assistant-kit/CURRENT_PLAN.md` for exact source URI/document ID, result SHA and timestamps. Actual saved ARCHIVE_FILE source is an existing `Kangoo-II_X61_NT8486...rdpkg` in shared `Documents/Renault/packages/rdpkg`, size 94965991. This *explains* Kangoo PDF inside Megane, but **does not prove** user's SAF navigation history, which user recalls as Megane Sources. Proven invalid intake cause: broad picker MIME plus archive signature allows prepared ZIP-compatible .rdpkg. Issue #85 now tracks block+explicit preflight; #82 model check; #83 picker history; #81 original ZIP preservation (ZIP independently found). v0.5.79 diagnosed on phone, no fix yet. Do not overwrite artifacts or alter source data. Next: agree on safe fix scope.
+
+---
+
 ## NEW RESUME — v0.5.79 provenance artifact ready — 2026-10-08
 
 PR #84 merged; app SHA `b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a`; main Tests #561 PASS and Android Debug APK #142 PASS. Signed artifact `Renault-Docs-v0.5.79-Debug`, id `11553367269`, digest sha256 `a0ed0807dc2b43d2eb92c83014e426bb0a8ea7c521d1cc7f079c927ceb4da695`. Next: install over existing, do not clear data or run native prep; Megane II → expand Add → last source diagnostic → copy report. Issue #83 root cause pending real evidence. See `docs/assistant-kit/CURRENT_PLAN.md`.

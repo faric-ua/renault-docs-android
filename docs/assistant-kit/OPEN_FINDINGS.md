@@ -1,3 +1,9 @@
+## Confirmed finding — prepared Kangoo RDPKG accepted as archive for Megane — 2026-10-08
+
+v0.5.79 phone diagnostic: persisted source `Kangoo-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg`, Doc ID `primary:Documents/Renault/packages/rdpkg/Kangoo-II_X61_NT8486_Visu-v5.0_2009-08-31.rdpkg`, size `94965991`; saved target project `megane-ii`, result package `megane-ii-nt8486-2009-08-31`, COMPLETE. User recalls selecting within Megane Sources, but picker history not logged; do not attribute user mistake. Real bug: open-document picker includes octet-stream, source callback has no .rdpkg rejection, format detected by ZIP magic; output stamps chosen model. Distinguish: issue #85 input format/source preflight, #82 model mismatch, #83 unresolved picker navigation, #81 original Windows ZIP immutability; do not delete originals or generated files.
+
+---
+
 ## BUG-ARCHIVE-ORIGIN / issue #83 — selected Megane source, Kangoo X61 payload — 2026-10-08
 
 User unequivocally reports source-selection folder was Megane II containing Megane ZIPs, but generated Megane-II_X61_NT8486.rdpkg carries Kangoo wiring PDF (X61). Not a mere wrong filename. Root cause unknown. `ProjectActivity` gets SAF data.data, then service stages fresh bytes; persisted last operation includes sourceUri/sourceName until next native run clears state. Preserve evidence, inspect safely and implement read-only provenance diagnostic if needed. No verified runtime fix or user error. Separate issues #82 model-check and #81 original immutability.

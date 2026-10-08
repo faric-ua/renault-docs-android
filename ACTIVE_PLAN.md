@@ -1,3 +1,14 @@
+## CURRENT — actual source provenance captured from phone / fix scope next
+
+- v0.5.79 read-only diagnostic proves source was `Kangoo-II_X61_NT8486...rdpkg` at `Documents/Renault/packages/rdpkg/`, source kind ARCHIVE_FILE, target Megane II, output `megane-ii-nt8486-2009-08-31`.
+- Start 2026-10-08 15:13:32, finish 15:15:50, output SHA256 `4ed38ab4a3ea8dcf41c24cf86d25820d820f896652062b682eab7f1ef0de53f2`.
+- Code confirms `.rdpkg` can appear in archive picker (generic application/octet-stream) and be treated as ZIP by magic signature; selected project's model used for output.
+- No archive-source deletion evidenced. Exact picker browsing history unknown despite user asserting Megane Sources.
+- Issues: #85 block .rdpkg + selection preflight; #82 model mismatch; #83 unclear picker selection history; #81 immutable original; #79 Home chooser.
+- Next: agree scoped safe patch; do not delete files or trigger destructive reimport. Progress UI v0.5.78 phone QA separate.
+
+---
+
 ## CURRENT — collect read-only last-source report v0.5.79 / build95
 
 - Main signed APK #142 PASS / Tests #561 PASS / app SHA `b6fdfa1efc90f0c4db9be2fc30898ddb8dfac58a`.
