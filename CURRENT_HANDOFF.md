@@ -1,3 +1,9 @@
+## DRIVE CHECK RESUME — NT8486 found — 2026-10-08
+
+Drive Eset → Kangoo II folder has the original `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` at 67,981,490 bytes. Phone search sees same-named original too; no confirmed archive disappearance. Separate issue #82 concerns source Kangoo II → target Megane II package mismatch due selected-project model in canonical filename/metadata. #81 is source-immutability safeguard only. 0.5.78 phone QA still pending, issue #79 separate. See `docs/assistant-kit/CURRENT_PLAN.md`. No files modified on Drive and no runtime patches.
+
+---
+
 ## NEW EVIDENCE — NT8486 original ZIP exists, cross-model source risk (#82) — 2026-10-08
 
 See `docs/assistant-kit/CURRENT_PLAN.md`. User's file search clearly finds KangooII X61 NT8486 ZIP (64.83 MB), Kangoo-II .rdpkg, and Megane-II X61 .rdpkg (both ~90.57 MB). ZIP actual folder unknown, so issue #81 is location/immutability check, **not proven data loss**. Cross-model issue #82 root path: package name and dataset model use selected project.model, no clear archive/selected-project mismatch gate. Ask whether import was launched from Megane II; do not auto-delete any files. No new runtime change, phone QA for 0.5.78 not yet passed.

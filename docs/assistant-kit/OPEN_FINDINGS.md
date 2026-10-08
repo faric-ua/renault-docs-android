@@ -1,3 +1,9 @@
+## 2026-10-08 — Drive source provenance of NT8486 confirmed
+
+Eset Google Drive → My Drive/Kangoo II directly contains one `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` (67,981,490 bytes, file id `1pnTYhIUPxoHk1yq83PV4pN8HHY1M-Nbs`). Phone-wide search also finds this original ZIP. #81 no proven data loss; maintain source-read-only contract. #82 verified risk of cross-project model stamping, still awaiting runtime fix and phone QA. Do not delete original or generated files. Generic connector search missed NT8486; direct folder browse confirmed.
+
+---
+
 ## DATA INTEGRITY — Kangoo II X61 → Megane II X61 package mismatch, issue #82 — 2026-10-08
 
 User screenshot confirms `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip` and both Kangoo-II and Megane-II prefixed packages. Code uses selected `project.model` to populate `RenaultVolumeIdentity.canonicalFileName(...)` and dataset metadata, with no visible strong conflicting model validation. This is a likely silent wrong-model package; internal payload and user action not yet verified. High priority issue #82 opened for fail-closed/explicit confirmation preflight, no destructive fixes.

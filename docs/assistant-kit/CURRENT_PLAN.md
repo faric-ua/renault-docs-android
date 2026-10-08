@@ -1,3 +1,16 @@
+## POSITIVE SOURCE FIND — NT8486 confirmed in user's connected Google Drive — 2026-10-08
+
+- Direct folder listing (connected **Eset** account) reveals exactly one ZIP in **My Drive → Kangoo II**: `KangooII X61_NT8486_Visu v5.0_2009.08.31(RUS).zip`.
+- Source file ID `1pnTYhIUPxoHk1yq83PV4pN8HHY1M-Nbs`; folder ID `1zzBcaXIzK8BFB2KbQM7v2S7SPiche6tM`.
+- Source size `67981490` bytes (64.83 MiB), Drive created `2025-06-05T20:31:26.958Z`, modified `2025-06-05T20:27:04Z`.
+- File link: https://drive.google.com/file/d/1pnTYhIUPxoHk1yq83PV4pN8HHY1M-Nbs/view
+- Exact ZIP also appears in user's Android-wide file-manager search. **Original not proven lost**. Generic Drive search failed to index the name, but direct Kangoo II folder listing and metadata gave an unequivocal match.
+- Separate issue #82: current-project model is used for output `.rdpkg` naming and dataset metadata, explaining possible Kangoo X61 source packaged as `Megane-II_X61_NT8486...` without model conflict preflight.
+- Issue #81 remains open only for source-preservation regression safeguards / confirmation of local parent folder; no deletion incident proven. No files moved, deleted, copied or modified on Drive.
+- Issue #79 (Home «Новий том» navigation) separate; v0.5.78 / build 94 CI PASS, phone QA pending. **No runtime code changes.**
+
+---
+
 ## NT8486 search evidence + model mismatch — 2026-10-08
 
 **Observed in user screenshot (file manager search `NT8486`):**
