@@ -1,6 +1,6 @@
 # Renault Docs v0.5.81 / build 97 — unified dialog candidate
 
-Status: **CANDIDATE / NOT MERGED / DEVICE QA PENDING**.
+Status: **PR #87 MERGED / MAIN CI PASS / STABLE-SIGNED APK READY / DEVICE QA PENDING (NOT CLOSED)**.\n\nApp source SHA: `309f068bbf92c65ca06c0cc2e38887d6a4664837`. Main Python Tests #568 PASS, Android Debug APK #144 PASS, artifact `Renault-Docs-v0.5.81-Debug` ID `11560786817`, sha256 `5711b9b6181edd4edaa53a575bc23fa13186a68aea925544de71b2b78b1afe79`. Install over via Renault Menu `5 → 19 → 8 → 13`; no uninstall/clear.
 
 Scope:
 - All 20 identified app-owned Android `AlertDialog` instances use existing `DialogUi` canonical colors, rounded border, title/message and button styling. Two previously unstyled Viewer dialogs now use it.
