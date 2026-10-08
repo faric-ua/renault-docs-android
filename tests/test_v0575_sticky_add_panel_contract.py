@@ -30,21 +30,19 @@ class V0575StickyAddPanelContractTests(unittest.TestCase):
         self.assertIn("topMargin =", section)
         self.assertIn("10,", section)
 
-    def test_pin_keeps_previous_diagonal_shape_with_state_tint(self):
+    def test_pin_restores_original_colored_emoji_with_grayscale_unpinned(self):
         project = self.read_java("ProjectActivity.kt")
-        pin = (DRAWABLE / "ic_push_pin.xml").read_text(encoding="utf-8")
+        self.assertIn('label =\n                        "📌"', project)
+        self.assertIn("monochromePinPaint", project)
+        self.assertIn("View.LAYER_TYPE_HARDWARE", project)
+        self.assertIn("setSaturation(0f)", project)
+        self.assertIn("if (addPanelPinned)", project)
 
-        self.assertIn('android:rotation="-45"', pin)
-        self.assertIn("Ui.danger", project)
-        self.assertIn("Ui.text", project)
-        self.assertIn("R.drawable.ic_push_pin", project)
-
-    def test_help_explains_neutral_and_red_pin_states_without_emoji(self):
+    def test_help_explains_true_emoji_and_two_pin_states(self):
         project = self.read_java("ProjectActivity.kt")
-
-        self.assertIn("Кнопка закріплення світла", project)
-        self.assertIn("червона", project)
-        self.assertNotIn("📌 закріплює панель", project)
+        self.assertIn("📌 закріплює панель", project)
+        self.assertIn("чорно-біла", project)
+        self.assertIn("кольорова", project)
 
 
 if __name__ == "__main__":

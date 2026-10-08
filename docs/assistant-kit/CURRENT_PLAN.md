@@ -1,3 +1,12 @@
+# v0.5.76 — restore original 3D emoji push-pin — 2026-10-08
+
+Status: **IMPLEMENTED ON FEATURE BRANCH / CI PENDING / PHONE QA PENDING**.
+
+User's image confirms the original Android system emoji 📌 (red dimensional body, white needle), not a rotated vector. Restore the v0.5.73 emoji-based TextView. Active/pinned state retains original colored emoji; inactive uses a zero-saturation hardware layer paint on the same glyph. Preserve the v0.5.75 sticky Add panel, 10dp gap, pin persistence, and current status-card behavior.
+
+Phone acceptance: inspect the actual emoji, both color states, pin persistence, scrolling, Help and rotation. Do not consider the color result accepted until real-phone evidence.
+
+---
 # v0.5.75 — sticky Add panel + diagonal pin — 2026-10-08
 
 Status: **MERGED / MAIN CI PASS / PHONE QA NEXT**.

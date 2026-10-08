@@ -33,16 +33,13 @@ class V0574AddPanelStatusRefinementTests(unittest.TestCase):
         self.assertIn("View.VISIBLE", project)
         self.assertIn("isBlank()", project)
 
-    def test_pin_is_monochrome_inactive_and_red_active(self):
+    def test_pin_uses_original_emoji_and_monochrome_inactive_state(self):
         project = self.read_java("ProjectActivity.kt")
-        pin = (DRAWABLE / "ic_push_pin.xml").read_text(encoding="utf-8")
-
-        self.assertIn("ImageButton(", project)
-        self.assertIn("R.drawable.ic_push_pin", project)
-        self.assertIn("setColorFilter(", project)
-        self.assertIn("Ui.danger", project)
-        self.assertIn("Ui.muted", project)
-        self.assertIn("android:fillColor", pin)
+        self.assertIn('label =\n                        "📌"', project)
+        self.assertIn("monochromePinPaint", project)
+        self.assertIn("setLayerType(", project)
+        self.assertIn("setSaturation(0f)", project)
+        self.assertNotIn("R.drawable.ic_push_pin", project)
 
     def test_expand_chevron_is_heavier(self):
         project = self.read_java("ProjectActivity.kt")

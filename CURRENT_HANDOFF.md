@@ -1,3 +1,9 @@
+## v0.5.76 original emoji pin — 2026-10-08
+
+Restore the *actual original* colored 📌 system emoji from v0.5.73, grayscale only when unpinned. The v0.5.75 rotated flat icon was not accepted by the user. Sticky Add layout remains unchanged; status-card design remains deferred. Target v0.5.76 / build 92. Phone QA pending.
+
+---
+
 ## v0.5.75 sticky Add panel — 2026-10-08
 
 Current task:

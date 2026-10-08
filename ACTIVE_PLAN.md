@@ -1,3 +1,12 @@
+## ACTIVE — v0.5.76 original emoji pin — 2026-10-08
+
+- Restore original Android 📌 emoji glyph exactly, not rotated flat vector.
+- Pinned: normal full color. Unpinned: grayscale render of same glyph.
+- Preserve v0.5.75 sticky Add and status-card layout.
+- Tests / APK CI, then phone QA through Renault Menu `5 → 19 → 8 → 13`.
+
+---
+
 ## ACTIVE — v0.5.75 sticky Add phone QA — 2026-10-08
 
 - runtime: `b25efbee254562d7b3e9f6917772e8d2e6370eb3`
