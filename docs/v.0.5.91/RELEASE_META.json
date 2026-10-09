@@ -17,5 +17,6 @@
   "artifact_digest": "sha256:914310ea84e8a32c63ab4018b27241d55c4bc994a4acad1d2675e194800e280b",
   "apk_sha256": "1649e9da4dae3c03d2a86936568c7cf97f966389eaa6e0e61a066b10bbbf84a6",
   "signer": "Stable development signer verified in main Android Debug APK #154",
-  "next": "Publish exact trusted APK v0.5.91-debug; then phone test clipped glyphs, SHA wrapping and stale foreground notification cleanup."
+  "next": "Publish exact trusted APK v0.5.91-debug; then phone test clipped glyphs, SHA wrapping and stale foreground notification cleanup.",
+  "signed_android_apk_run": 154
 }
