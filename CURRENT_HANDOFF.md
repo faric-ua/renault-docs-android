@@ -1,3 +1,15 @@
+## NT8298A real ZIP PHONE PASS / UX #100 DEFERRED / DELETE AUDIT READ-ONLY — 2026-10-09
+
+- User supplied actual v0.5.87 archive-to-RDPKG final status and read-only native diagnostics: `COMPLETE`, project `Megane II`, `ARCHIVE_FILE`, source 72,693,952-byte NT8298A ZIP, volume `NT8298A · 2005-11-28`, **319 native sections**, package ID `megane-ii-nt8298a-2005-11-28`, resulting .rdpkg SHA256 `e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603`, duration 119 s. **Original nested ZIP regression PHONE PASS**. Previous v0.5.86 FAIL resolved for this specific case. Post-run GUI tome count and individual section openings not separately reported.
+- Source `NativeRdpkgPreparationService.processPreparedSource()` installs generated package via `RdpkgImporter.install()` and upserts project volume before setting COMPLETE. Source ZIP full SAF URI/Document ID deliberately omitted from public records.
+- User reported **jumpy/live status text** (file counters alternating with plain counts/stage, layout shifting) during successful operation. New open UX issue **#100**, **record only, user requested no changes yet**. Potential dual progress callbacks and dynamic 1/2-line height; not confirmed root cause. Do not start code/CI for this finding.
+- User asked whether deleting similar Megane II/Kangoo II volume data/files might remove one or two files. Read-only source audit `docs/v.0.5.87/qa/DELETE_BEHAVIOR_READONLY.md`: `Видалити з проєкту` removes association for one project-volume pair, **not original ZIP/exported RDPKG nor installed package**; `Видалити підготовлений .rdpkg` deletes only private prepared-share cache, possibly both canonical + legacy cache paths; `Clear storage/data` in Android is global for all app-private installed packages and project records. Newly generated package IDs and canonical filenames prefix project identity/model, but **actual Kangoo vs Megane physical files cannot be compared without read-only device inventory**. No delete action should be used for investigation.
+- Issue **#51 remains OPEN** for untested other archive formats/batch/cancellation, although its NT8298A regression is PASS. Issue #40 background runtime QA remains OPEN. No new APK, builds, source mutations, cleanup, deletion or user file modifications in this turn. Preserve Classic and installed data.
+
+Canonical: `docs/v.0.5.87/qa/PHONE_TEST.md`, `docs/v.0.5.87/qa/DELETE_BEHAVIOR_READONLY.md`, `docs/v.0.5.87/RELEASE_META.json` and #100.
+
+---
+
 ## CURRENT — v0.5.87/build103 SIGNED VERIFIED RELEASE READY; ONE REAL NT8298A PHONE TEST NEXT — 2026-10-09
 
 - PR #98 merged app source SHA `937ffa06080c3dd6a63a87d4e9c5d209ff4b8755`. Fixes wrapper/unique nested Renault INDEX→native raw-root handoff; preserves strict multi-candidate selection and v0.5.86 nested-volume isolation. Includes privacy-safe top-level file/INDEX diagnostic if scan still fails.
