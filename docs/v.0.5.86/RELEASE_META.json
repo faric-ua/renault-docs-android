@@ -1,19 +1,23 @@
 {
   "versionName": "0.5.86",
   "versionCode": 102,
-  "phase": "merged_main_signed_ci_pending",
+  "phase": "signed_ci_pass_phone_qa_pending",
   "issue": 51,
   "branch": "fix/v0.5.86-archive-nested-volume-isolation",
   "source_baseline": "v0.5.85/build101",
   "qa_status": "phone-qa-pending",
   "phone_qa": "PAUSED_BY_USER",
   "scope": "isolate nested raw candidate directories from parent .rdpkg without mutating source",
-  "next": "Wait for successful main Tests #589 and stable-signed Android Debug APK #149; then review pinned promotion to public debug prerelease. Issue #51 remains OPEN.",
+  "next": "Promote exactly this signed APK to QA-pending debug prerelease via reviewed manifest. Issue #51 remains open for real mixed-root and ZIP/7Z/RAR import acceptance.",
   "source_sha": "f145dee0c545d5ee1953a8584cebb3a60bfd5acf",
   "pull_request": 96,
   "pr_tests_run": 588,
   "pr_android_check_run": 465,
   "main_tests_run": 589,
   "signed_android_apk_run": 149,
-  "signed_run_id": 37872426595
+  "signed_run_id": 37872426595,
+  "artifact_id": 11590399784,
+  "artifact_name": "Renault-Docs-v0.5.86-Debug",
+  "artifact_digest": "sha256:20c5727c7b000f56fb7af61348eaab77254573694f204e6dd9b7a5100abd153b",
+  "artifact_expires_at": "2026-10-12T02:01:31Z"
 }
