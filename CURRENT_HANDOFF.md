@@ -1,3 +1,9 @@
+## LIVE PHONE BUG #51 — v0.5.86 ZIP fails despite nested INDEX (2026-10-09)
+
+Device diagnostic confirms `ARCHIVE_FILE` (not raw folder picker), `FAILED`, source ZIP NT8298A (~72.7 MB), no .rdpkg/package ID/SHA. Archive manager shows nested `INDEX.HTM`, `COMMUN/`, `RUS/`. ZIP-root discovery requires direct index, but native scan stage reported it absent: source-of-truth invariant mismatch, no proven stage where path was lost. Ask user to upload original ZIP for isolated analysis if acceptable; **do not guess another code fix, rebuild/retest, or mutate original archives**. #51 OPEN and live conversion FAIL. Evidence: `docs/v.0.5.86/qa/PHONE_TEST.md`.
+
+---
+
 ## PHONE TEST 1 PASS — v0.5.86/build102 installed over existing app (2026-10-09)
 
 User explicitly replied «Пасс» after Termux Renault 5 → 19 → 8 → 13 over-install, launch and car/tome preservation. **Installed v0.5.86 smoke PHONE PASS**; overrides earlier handoff lines stating v0.5.84 is the latest confirmed installed version. This does NOT confirm archive ZIP/7Z/RAR processing, parent/nested .rdpkg isolation, cancellation/background. User now expressly wants practical testing, one simple task at a time, not more releases. NEXT: Megane II or matching project → Add → Create .rdpkg from archive → choose a real matching Renault ZIP/7Z/RAR and show `Підтвердь джерело архіву` preflight screenshot. Stop before choosing output destination/conversion. #51 remains OPEN. No new PR/build until defect discovered.
