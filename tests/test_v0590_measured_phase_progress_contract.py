@@ -45,6 +45,21 @@ class MeasuredPhaseProgressContractTests(unittest.TestCase):
         self.assertIn('stage = "Пакую дані…"', engine)
         self.assertIn('itemLabel = "Файлів"', engine)
 
+    def test_rdpkg_extraction_marks_true_eof_and_preserves_summary_during_validation(self):
+        importer = self.code("RdpkgImporter.kt")
+        final = importer.index('stage = "Розпаковано .rdpkg…"')
+        require_nonempty = importer.index('"RDPKG порожній."')
+        return_extraction = importer.index('return ExtractionResult(')
+        self.assertLess(require_nonempty, final)
+        self.assertLess(final, return_extraction)
+        self.assertIn("current = fileCount", importer[final:final + 250])
+        self.assertIn("total = fileCount", importer[final:final + 250])
+        self.assertIn('stage = "Перевіряю пакет…"', importer)
+        self.assertIn('stage = "Встановлюю том…"', importer)
+        self.assertIn('itemLabel = "Розпаковано файлів"', importer)
+        self.assertIn("(archiveBytes.coerceIn(0L, totalBytes) * 10_000L /", importer)
+        self.assertNotIn("2_500L /", importer)
+        
     def test_terminal_display_is_lossless_and_semantically_colored(self):
         view = self.code("OperationStatusView.kt")
         fmt = self.code("OperationStatusDisplayFormat.kt")
