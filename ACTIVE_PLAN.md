@@ -1,3 +1,11 @@
+## PHONE ACCEPTANCE UPDATE — v0.5.84/build100 — 2026-10-09
+
+- [x] User «Пасс» confirms over-existing installation, launch and preservation of registered projects/volumes. **INSTALL/RETENTION SMOKE PHONE PASS**; no independently reported counts.
+- [ ] Issue #40 runtime background/lock/unlock/process-restart/Android dataSync 6h timeout acceptance NOT performed; remains OPEN / postponed. This smoke is not issue #40 PASS.
+- [ ] Next functional task on user choice: #51 archive import hardening; #30 Windows/catalog pipeline after. No automatic imports or cleanup.
+
+---
+
 ## v0.5.84 / build100 — #40 SOURCE HARDENED / VERIFIED RELEASE PUBLISHED / PHONE QA PAUSED — 2026-10-09
 
 - [x] PR #92 merged; original app SHA 4890963f0dc0a268f803913c0e3e7da7193ecd7a. Conversion and native redelivery preserve cancel state and reject stale work; ConversionActivity recovery timer now lifecycle-safe.
