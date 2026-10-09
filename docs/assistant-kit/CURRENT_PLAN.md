@@ -1,3 +1,9 @@
+## v0.5.84 — #40 background hardening signed release, device QA paused — 2026-10-09
+
+PR #92 merged, source 4890963f0dc0a268f803913c0e3e7da7193ecd7a; 7 services audited; Python PR #584, Android PR #463, main Tests #585, signed Android APK #147 PASS. Verified public debug prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug, inner APK SHA256 90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010. Issue #40 remains OPEN for platform 6h dataSync and real phone process-death/lock acceptance; user paused manual QA. No input/source archive changes or app install. Next #51 and #30. See docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.84.md.
+
+---
+
 ## v0.5.83/build99 — CODE MERGED / SIGNED CI PASS / PHONE QA ON HOLD — 2026-10-09
 
 PR #89 merged (source SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`). #79 New Volume now opens chosen Project Add expanded without automatic SAF; Auto/Manual/raw/archive remain explicit and existing direct picker works by its own intent. PR Tests #573 PASS / Android PR Check #457 PASS, main Tests #574 PASS / Android signed APK #146 PASS. Artifact ID 11582942367; digest `sha256:b65dd8100cb4412c7a79933ad2c12bc4456859f37ff1a4268298933f3e01d1ef`. No project data was modified by the navigation change. **User-requested QA pause continues**: do not request install/testing. Details `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.83.md`.
