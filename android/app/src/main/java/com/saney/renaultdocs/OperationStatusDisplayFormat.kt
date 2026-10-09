@@ -13,7 +13,7 @@ internal object OperationStatusDisplayFormat {
 }
 
 /** Colors are meaningful states, not fake percentages of completed work. */
-internal enum class OperationTerminalOutcome {
+enum class OperationTerminalOutcome {
     SUCCESS, FAILED, CANCELLED, NEUTRAL;
 
     companion object {
