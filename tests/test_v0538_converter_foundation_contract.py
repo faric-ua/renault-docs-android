@@ -65,7 +65,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
         )
 
         self.assertIn(
-            "state.phase ==\n                ConversionRunPhase.SCANNING",
+            "state.phase == ConversionRunPhase.SCANNING",
             activity,
         )
         self.assertIn('"Сканую…"', activity)
