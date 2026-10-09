@@ -1,10 +1,23 @@
 {
   "versionName": "0.5.90",
   "versionCode": 106,
-  "phase": "development",
+  "phase": "signed_main_verified_promotion_pending_phone_qa",
   "feature": "Measured phase progress and semantic status colors",
   "branch": "fix/v0.5.90-phase-progress-and-status-colors",
   "sourceBaseline": "v0.5.89/build105 signed debug release",
   "phoneQa": "PENDING",
-  "signed_run_id": null
+  "signed_run_id": 37978908157,
+  "source_sha": "eded18d7a9c36b32d840a9c288459491b7ff04cd",
+  "main_tests_run": 609,
+  "pr_tests_run": 37978596101,
+  "pr_android_check_run": 37978596103,
+  "signed_android_apk_run": 153,
+  "artifact_id": 11639394813,
+  "artifact_name": "Renault-Docs-v0.5.90-Debug",
+  "artifact_digest": "sha256:92a6a8a34b47a2ee06d30a66ea9d7be121b2bc3d0f71eef46cf5940ddc202194",
+  "artifact_expires_at": "2026-10-12T19:16:40Z",
+  "apk_sha256": "9e0de592051164796bd4326d6b44933bca1a07e95969bc0bbfe7dbe823051199",
+  "signer": "Stable development certificate verified by trusted main Actions job #113984122745",
+  "qa_status": "phone-qa-pending",
+  "next": "Publish verified original signed v0.5.90/build106 and have user test stage-specific progress, import EOF N/N and transition to green indeterminate validation, colors and lossless SHA in status."
 }
