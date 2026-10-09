@@ -23,7 +23,8 @@ enum class OperationTerminalOutcome {
                 FAILED
             title.contains("скасован", ignoreCase = true) ->
                 CANCELLED
-            title.contains("вже є", ignoreCase = true) ->
+            title.contains("вже є", ignoreCase = true) ||
+                title.contains("уже є", ignoreCase = true) ->
                 NEUTRAL
             else -> SUCCESS
         }
