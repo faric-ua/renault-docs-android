@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.90",
   "versionCode": 106,
-  "phase": "signed_main_verified_promotion_pending_phone_qa",
+  "phase": "signed_debug_release_published_phone_qa_pending",
   "feature": "Measured phase progress and semantic status colors",
   "branch": "fix/v0.5.90-phase-progress-and-status-colors",
   "sourceBaseline": "v0.5.89/build105 signed debug release",
@@ -19,5 +19,19 @@
   "apk_sha256": "9e0de592051164796bd4326d6b44933bca1a07e95969bc0bbfe7dbe823051199",
   "signer": "Stable development certificate verified by trusted main Actions job #113984122745",
   "qa_status": "phone-qa-pending",
-  "next": "Publish verified original signed v0.5.90/build106 and have user test stage-specific progress, import EOF N/N and transition to green indeterminate validation, colors and lossless SHA in status."
+  "next": "User to install trusted v0.5.90/build106 in place and test ZIP EOF N/N, stage transition, Runtime IR/Fast Pack count, green busy/red error and SHA visual wrapping. Do not clear data or reimport duplicates for testing.",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.90-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.90-debug",
+    "prerelease": true,
+    "source_sha": "eded18d7a9c36b32d840a9c288459491b7ff04cd",
+    "signed_run_id": 37978908157,
+    "publisher_run_id": 37979276172,
+    "apk_asset_id": 625927632,
+    "checksum_asset_id": 625927637,
+    "apk_url": "https://github.com/faric-ua/renault-docs-android/releases/download/v0.5.90-debug/Renault-Docs-v0.5.90-debug.apk",
+    "apk_sha256": "9e0de592051164796bd4326d6b44933bca1a07e95969bc0bbfe7dbe823051199",
+    "qa_status": "phone-qa-pending"
+  }
 }
