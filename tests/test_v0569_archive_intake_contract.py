@@ -183,8 +183,8 @@ class V0569ArchiveIntakeContractTests(unittest.TestCase):
 
     def test_release_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.86"', gradle)
-        self.assertIn("versionCode = 102", gradle)
+        self.assertIn('versionName = "0.5.87"', gradle)
+        self.assertIn("versionCode = 103", gradle)
 
 
 if __name__ == "__main__":

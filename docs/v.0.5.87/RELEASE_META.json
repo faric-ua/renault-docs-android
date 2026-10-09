@@ -1,0 +1,11 @@
+{
+  "versionName": "0.5.87",
+  "versionCode": 103,
+  "phase": "code_candidate_pr_ci_pending",
+  "issue": 51,
+  "branch": "fix/v0.5.87-archive-native-root-handoff",
+  "phone_qa": "PENDING",
+  "source_baseline": "v0.5.86/build102",
+  "focus": "last-mile wrapped archive root auto-resolution and privacy-safe evidence for real NT8298A ZIP failure",
+  "next": "PR CI -> merge only on PASS -> stable signer -> verified GitHub debug prerelease -> single real NT8298A phone acceptance."
+}
