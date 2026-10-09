@@ -5,3 +5,8 @@ No device test and no app installation requested automatically.
 Future safe test: create/choose controlled mixed-root archive containing a root raw volume (INDEX.HTM), a nested independent NT volume (INDEX.HTM), and a normal shared asset. Confirm chooser lists both; creating root produces only root's assets/entries and no nested independent volume; creating the nested one produces exactly its own files. Confirm package identity, duplicate prevention, source archive preservation, temporary staging cleanup, rotation/lock, and explicit cancellation behavior. Repeat with other supported formats when sample archives are available. Observe file results; do not mark PASS based on compilation alone.
 
 #40 Android background quota/timeout is still separately open. No force-stop/reboot guarantees.
+
+
+## Release readiness — 2026-10-09
+
+Stable signed debug APK #149 PASS and public verified prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.86-debug are available. **No v0.5.86 installation or on-device archive import took place.** Previous v0.5.84 was phone-accepted only for over-install/data retention; do not ascribe this result to v0.5.86. Extended phone QA remains paused, issue #51 OPEN.
