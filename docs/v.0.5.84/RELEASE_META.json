@@ -27,11 +27,13 @@
     "published_via_run_id": 37867195007,
     "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug",
     "apk_url": "https://github.com/faric-ua/renault-docs-android/releases/download/v0.5.84-debug/Renault-Docs-v0.5.84-debug.apk",
-    "apk_asset_id": 623478333,
+    "apk_asset_id": 623455456,
     "apk_sha256": "90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010",
     "checksum_file": "Renault-Docs-v0.5.84-debug.apk.sha256",
     "source_sha": "4890963f0dc0a268f803913c0e3e7da7193ecd7a",
     "qa_status": "phone-qa-pending",
-    "verified": "Original signed APK/source and checksum verified by promotion workflow. Installed phone QA paused."
+    "verified": "Original signed APK/source and checksum verified by promotion workflow. Installed phone QA paused.",
+    "checksum_asset_id": 623455474,
+    "checksum_asset_digest": "sha256:e0797392addb6c40f99d0897ca5a2099d2c29e3160c75f35cc0cd015bfb4a0cc"
   }
 }
