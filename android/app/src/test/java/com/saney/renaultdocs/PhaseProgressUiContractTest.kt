@@ -35,6 +35,29 @@ class PhaseProgressUiContractTest {
     }
 
     @Test
+    fun extractedCountSurvivesTransitionToUnmeasuredValidation() {
+        val complete = OperationProgress.measured(
+            stage = "Розпаковано .rdpkg…",
+            current = 337,
+            total = 337,
+            itemCurrent = 337,
+            itemTotal = 337,
+            itemLabel = "Файлів",
+        )
+        assertEquals(337, complete.normalizedCurrent)
+        assertTrue(complete.displayText().contains("Файлів: 337 / 337"))
+
+        val validation = OperationProgress(
+            stage = "Перевіряю пакет…",
+            itemCurrent = 337,
+            itemTotal = 337,
+            itemLabel = "Розпаковано файлів",
+        )
+        assertFalse(validation.isDeterminate)
+        assertTrue(validation.displayText().contains("Розпаковано файлів: 337 / 337"))
+    }
+
+    @Test
     fun measuredValuesStartFromZeroAndClampSafely() {
         assertEquals(0, SharedOperationProgressBar.normalized(0, 5357))
         assertEquals(1000, SharedOperationProgressBar.normalized(5357, 5357))
