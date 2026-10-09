@@ -1,11 +1,23 @@
 {
   "versionName": "0.5.85",
   "versionCode": 101,
-  "phase": "code_candidate_ci_pending",
+  "phase": "signed_ci_pass_phone_qa_pending",
   "issue": 51,
   "branch": "fix/v0.5.85-archive-root-and-entry-safety",
   "phone_qa": "PAUSED_BY_USER",
   "source_baseline": "v0.5.84/build100",
   "focus": "archive-root multi-volume chooser identity and ZIP/7Z/RAR extraction entry collision safety",
-  "next": "Run PR CI, fix any failures, signed build and publish QA-pending debug prerelease. No phone tests unless user requests."
+  "next": "Publish verified public v0.5.85-debug prerelease with phone-qa-pending. #51 remains OPEN pending representative archive and batch acceptance.",
+  "source_sha": "5b27f30ce92aed00e5b1e0e233d9a312a064bfb6",
+  "pull_request": 94,
+  "pr": 94,
+  "pr_tests_run": 586,
+  "pr_android_check_run": 464,
+  "main_tests_run": 587,
+  "signed_android_apk_run": 148,
+  "signed_run_id": 37871352918,
+  "artifact_name": "Renault-Docs-v0.5.85-Debug",
+  "artifact_id": 11590002768,
+  "artifact_digest": "sha256:c0c1d8c73c04eed467c83ad1e0c9b59e0c5b3df70437a99c4ac0abb978cbf394",
+  "artifact_expires_at": "2026-10-12T01:47:40Z"
 }
