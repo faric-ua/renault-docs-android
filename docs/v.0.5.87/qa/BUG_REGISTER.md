@@ -11,3 +11,15 @@
 ## Signed candidate #150 READY for one real ZIP test
 
 PR #98 merged source `937ffa06080c3dd6a63a87d4e9c5d209ff4b8755`; Python #591, Android #467, main #592, signed APK #150 PASS. Public debug prerelease v0.5.87-debug published by verified workflow 37938990631 PASS, unchanged signed APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`. This **does not close** `ARCH-NT8298A-REAL-001`: waiting on original ZIP device acceptance or new bounded diagnostic. No need for further engineering before user's single test, absent new evidence.
+
+## NT8298A real-device regression acceptance — PHONE PASS (2026-10-09)
+
+User reported `COMPLETE` after retrying the same original ZIP, `ARCHIVE_FILE`, 319 native sections, volume `NT8298A · 2005-11-28`, Package ID `megane-ii-nt8298a-2005-11-28`, result package SHA256 `e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603`, 119 seconds. **ARCH-NT8298A-REAL-001 is resolved/phone-confirmed for this exact real ZIP**. No independent per-page viewing or post-run project count provided. #51 remains open for other formats and batch/cancel/lock paths.
+
+## UX-PROGRESS-JUMP — recorded as issue #100 (NO CHANGE)
+
+During successful native .rdpkg creation, visible live status row shifts as stage text, processed-file counts and plain counts alternate. Potential source: dual plain and structured updates + variable TextView line wrapping. Root cause is not confirmed by video. User specifically asked to register and not fix yet. Issue: https://github.com/faric-ua/renault-docs-android/issues/100 . No code, APK, or UI change.
+
+## Read-only deletion-scope audit
+
+See `qa/DELETE_BEHAVIOR_READONLY.md`. Megane II and Kangoo II separate project prefixes for newly generated package IDs, while project remove only deletes the matching association (may invalidate project-share cache). The prepared share .rdpkg delete command may remove both canonical and legacy **private copies** for one volume; Android app clear-data affects the full app. No actual removal attempted.
