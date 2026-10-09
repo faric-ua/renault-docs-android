@@ -61,6 +61,16 @@ class ConversionActivity : Activity() {
             }
         }
 
+    // Recovery reconciliation is UI-owned, not a second worker. Cancel
+    // its delayed attempt when the Activity is no longer visible.
+    private var activityStarted = false
+    private val interruptedRunCheck =
+        Runnable {
+            if (activityStarted) {
+                reconcileInterruptedRun()
+            }
+        }
+
     override fun onCreate(
         savedInstanceState: Bundle?,
     ) {
@@ -111,24 +121,30 @@ class ConversionActivity : Activity() {
 
     override fun onStart() {
         super.onStart()
+        activityStarted = true
 
         uiHandler.removeCallbacks(
             refreshRunnable,
+        )
+        uiHandler.removeCallbacks(
+            interruptedRunCheck,
         )
         uiHandler.post(
             refreshRunnable,
         )
         uiHandler.postDelayed(
-            {
-                reconcileInterruptedRun()
-            },
+            interruptedRunCheck,
             INTERRUPTED_RUN_RECHECK_MS,
         )
     }
 
     override fun onStop() {
+        activityStarted = false
         uiHandler.removeCallbacks(
             refreshRunnable,
+        )
+        uiHandler.removeCallbacks(
+            interruptedRunCheck,
         )
 
         super.onStop()
@@ -1615,6 +1631,7 @@ class ConversionActivity : Activity() {
             runStore.load()
 
         if (
+            !activityStarted ||
             !state.isRunning ||
             ConversionService.isActive()
         ) {
@@ -1708,6 +1725,23 @@ class ConversionActivity : Activity() {
                 }
 
             runOnUiThread {
+                // A foreground service may have redelivered while filesystem
+                // validation was running. Never overwrite its fresh state
+                // (or a newer request) with a stale Activity-side result.
+                val currentState = runStore.load()
+                if (
+                    !activityStarted ||
+                    isFinishing ||
+                    isDestroyed ||
+                    ConversionService.isActive() ||
+                    !currentState.isRunning ||
+                    currentState.startedAtMs != state.startedAtMs ||
+                    currentState.sourceUri != state.sourceUri ||
+                    currentState.destinationUri != state.destinationUri ||
+                    currentState.outputFolderName != state.outputFolderName
+                ) {
+                    return@runOnUiThread
+                }
                 recovered
                     .onSuccess {
                         outputTreeUri ->
@@ -1767,7 +1801,9 @@ class ConversionActivity : Activity() {
 
         private const val REFRESH_INTERVAL_MS =
             100L
+        // Android redelivery may be delayed during process recreation;
+        // 1.5s was not enough and could cause false "interrupted" status.
         private const val INTERRUPTED_RUN_RECHECK_MS =
-            1500L
+            30_000L
     }
 }

@@ -194,7 +194,26 @@ class ConversionRunStore(
                 KEY_FINISHED_AT,
                 0L,
             )
-            .apply()
+            // Startup must be durable before foreground work begins; Android
+            // may kill and redeliver the Service with very little notice.
+            .commit()
+    }
+
+    // Used ONLY for a previously persisted, matching active request.
+    // Keep the original start time, progress, cancel intent, and plan.
+    // A second begin() would erase the user's cancellation on redelivery.
+    fun resumeAfterProcessRestart() {
+        val previous = load()
+        if (!previous.isRunning) {
+            return
+        }
+
+        prefs.edit()
+            .putString(
+                KEY_MESSAGE,
+                "Відновлюю конвертацію після перезапуску Android…",
+            )
+            .commit()
     }
 
     fun update(
