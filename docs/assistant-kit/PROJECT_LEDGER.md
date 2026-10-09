@@ -2605,3 +2605,7 @@ User chose to broaden UX #100 to all operation progress surfaces. Shared stage/c
 ## 2026-10-09 — Android last-ten completion results candidate
 
 Device finding: native .rdpkg notifications share ID 3702 and overwrite one another, so prior tomes disappear from the notification shade. User requests an expandable up-to-ten checklist of newly added tomes. Issue #102 and stacked v0.5.89 feature branch implement bounded grouped notification IDs, per-volume results, and owning-project click destinations while retaining a single foreground progress notification. Android system notification list is ephemeral, no lost prior entries recoverable. Feature NOT YET CI/phone accepted or merged; no app user data or ZIP touched. Related lower PR #101 progress UI is independently awaiting merge/phone QA.
+
+## 2026-10-09 — published v0.5.89 developer-signed prerelease, phone QA next
+
+v0.5.89/build105 combined #100 progress UI + #102 ten-result notifications from main app source `bfdc3a7e...`, verified stable-signed run 37972943494, uploaded original APK SHA256 `46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db`. Reviewed promotion #105 and publish run 37976168925 PASS; public tag `v0.5.89-debug`. No phone QA of this version yet: #100/#102 open, user must test safe install-in-place then live progress and independent completion results. Legacy NT8298A phone PASS remains specifically v0.5.87, not proof of v0.5.89. No source archives or user data were modified during engineering.

@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.89",
   "versionCode": 105,
-  "phase": "signed_main_verified_promotion_pending_phone_qa",
+  "phase": "signed_debug_release_published_phone_qa_pending",
   "feature": "Bounded per-volume Android completed notification history",
   "issue": 102,
   "branch": "feat/v0.5.89-completed-notification-history",
@@ -10,7 +10,7 @@
   "phoneQa": "PENDING",
   "testRuns": [],
   "signedApkRun": null,
-  "next": "Promote exact trusted run #152 to v0.5.89-debug, then install safely over existing app and verify progress UI and 10-result notification history.",
+  "next": "User may safely install v0.5.89-debug over existing app; phone regression QA for shared progress and notification group, then #51/#40 safety flows.",
   "phone_qa": "PENDING",
   "main_merge_sha": "bfdc3a7e74220f19dbc90eefa596c166a6432f75",
   "exact_pr_checks": "PASS",
@@ -26,5 +26,19 @@
   "artifact_expires_at": "2026-10-12T18:25:56Z",
   "apk_sha256": "46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db",
   "signer": "Stable development certificate verified by trusted main Actions log",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.89-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.89-debug",
+    "prerelease": true,
+    "source_sha": "bfdc3a7e74220f19dbc90eefa596c166a6432f75",
+    "signed_run_id": 37972943494,
+    "publisher_run_id": 37976168925,
+    "apk_asset_id": 625863885,
+    "checksum_asset_id": 625863887,
+    "apk_url": "https://github.com/faric-ua/renault-docs-android/releases/download/v0.5.89-debug/Renault-Docs-v0.5.89-debug.apk",
+    "apk_sha256": "46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db",
+    "qa_status": "phone-qa-pending"
+  }
 }

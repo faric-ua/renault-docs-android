@@ -1,3 +1,16 @@
+## CURRENT — VERIFIED v0.5.89/debug RELEASE PUBLISHED / PHONE QA NEXT — 2026-10-09
+
+- v0.5.89/build105 application code from main `bfdc3a7e74220f19dbc90eefa596c166a6432f75` contains shared progress layout PR #101 and last-ten notifications PR #103. PR Python + Android PASS; main Tests #601 PASS.
+- Trusted stable-signed main **Android Debug APK run #152 / ID 37972943494 PASS**, signer certificate, zipalign, manifest and SHA-256 verified. APK SHA-256 `46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db`. Artifact ID 11636907894, bundle digest `sha256:d802de296b5074a878e6a8ca887729e171da58cdfb1477910c925db822b4d40d`.
+- Reviewed promotion PR #105 MERGED `f49cc6a8f8ba4482798b0ecb0596514424f00531`. Verified publisher **run 37976168925 PASS**; original APK + checksum published at https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.89-debug. Public debug prerelease, no proprietary archives.
+- **User phone QA remains PENDING**. #100 and #102 reopened because automatic PR-linked closure was premature. Do not claim progress/card UX or grouped notification history phone PASS. No uninstall/clear data. Previously overwritten Android notification entries cannot be recovered.
+- Safe next step: user updates local Termux checkout to `main` and downloads *same exact signed code* through existing Renault menu. Install APK over existing app; verify file-count row stability, current progress vs terminal result, two sequential distinct completed tome notifications, grouping/individual tap; no duplicate conversions. Then tackle #51 archive variants and #40 background/lock QA without destructive tests.
+- APK promotion done; **no further feature-code work until device regression findings are reported**.
+
+Canonical: `docs/v.0.5.89/RELEASE_META.json`, `docs/v.0.5.89/qa/PHONE_TEST.md`, #100, #102.
+
+---
+
 ## CURRENT — v0.5.89/build105 MERGED TO MAIN / SIGNED MAIN AND PHONE QA PENDING — 2026-10-09
 
 - Lower progress UI PR #101 (v0.5.88/build104) passed exact-head Python Tests and Android PR Check, merged to main as `25e4c7b6a2608a788765fbd466f8ead57275ff38`.
