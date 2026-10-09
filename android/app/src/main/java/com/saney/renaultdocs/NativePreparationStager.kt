@@ -127,9 +127,23 @@ class NativePreparationStager(
             "Сканую розпакований Renault raw…",
         )
 
+        // ZIP/7Z/RAR may wrap the actual raw data in ordinary folders.
+        // Resolve only a unique nested entrypoint; never choose arbitrarily
+        // among several Renault volumes or override a batch chooser.
+        val actualRoot =
+            if (excludedNestedRawRoots.isEmpty()) {
+                ArchiveNativeRawRoot.resolve(sourceRoot)
+            } else {
+                require(ArchiveNativeRawRoot.hasDirectEntrypoint(sourceRoot)) {
+                    "Вибраний archive batch том втратив кореневий INDEX. " +
+                        "Вкладені томи не об'єднано автоматично."
+                }
+                sourceRoot.canonicalFile
+            }
+
         val scan =
             scanLocalSource(
-                sourceRoot,
+                actualRoot,
                 excludedNestedRawRoots,
             )
 
@@ -137,6 +151,7 @@ class NativePreparationStager(
             scan = scan,
             sourceName = sourceName,
             stagingToken = stagingToken,
+            sourceRoot = actualRoot,
         )
     }
 
@@ -144,6 +159,7 @@ class NativePreparationStager(
         scan: SourceScan,
         sourceName: String,
         stagingToken: String,
+        sourceRoot: File? = null,
     ): Result {
         checkCancelled()
 
@@ -177,9 +193,13 @@ class NativePreparationStager(
                 exactFiles,
             )
         ) {
-            "Вибрано батьківську або змішану папку. " +
-                "Для .rdpkg вибери raw-папку одного Renault тому, " +
-                "де INDEX.HTM / INDEX.HTML / ACCUEIL.HTM лежить у корені."
+            if (sourceRoot != null) {
+                ArchiveNativeRawRoot.describeMismatch(sourceRoot, exactFiles)
+            } else {
+                "Вибрано батьківську або змішану папку. " +
+                    "Для .rdpkg вибери raw-папку одного Renault тому, " +
+                    "де INDEX.HTM / INDEX.HTML / ACCUEIL.HTM лежить у корені."
+            }
         }
 
         val lowerMap =
