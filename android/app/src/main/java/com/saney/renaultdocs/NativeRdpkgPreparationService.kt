@@ -87,6 +87,7 @@ class NativeRdpkgPreparationService : Service() {
                                 ?: "",
                     )
 
+                    removeCompletedForegroundStatus()
                     stopSelf()
                 } else if (
                     state.phase ==
@@ -107,6 +108,7 @@ class NativeRdpkgPreparationService : Service() {
                 } else if (
                     !state.isRunning
                 ) {
+                    if (state.isTerminal) removeCompletedForegroundStatus()
                     stopSelf()
                 }
 
@@ -147,6 +149,7 @@ class NativeRdpkgPreparationService : Service() {
             flags and START_FLAG_REDELIVERY != 0 &&
             !persistedState.isRunning
         ) {
+            if (persistedState.isTerminal) removeCompletedForegroundStatus()
             startInFlight.set(false)
             workerRunning.set(false)
             stopSelf(startId)
@@ -1876,15 +1879,23 @@ class NativeRdpkgPreparationService : Service() {
             false,
         )
 
-        stopForeground(
-            STOP_FOREGROUND_DETACH,
-        )
-        // Finished results have separate history IDs, not this foreground ID.
         if (runStore.load().isTerminal) {
-            notificationManager().cancel(NOTIFICATION_ID)
+            removeCompletedForegroundStatus()
+        } else {
+            // WAITING_SELECTION retains its actionable notification until
+            // the user selects a volume or cancels.
+            stopForeground(STOP_FOREGROUND_DETACH)
         }
 
         stopSelf()
+    }
+
+    private fun removeCompletedForegroundStatus() {
+        // DETACH leaves the foreground notification in the shade and can race
+        // NotificationManager.cancel() on some Android implementations.
+        // REMOVE atomically clears the service's live-progress notification.
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        notificationManager().cancel(NOTIFICATION_ID)
     }
 
     private fun parseRequest(
@@ -1963,6 +1974,7 @@ class NativeRdpkgPreparationService : Service() {
         projectId: String,
         cancellable: Boolean,
     ) {
+        if (runStore.load().isTerminal) return
         val now =
             System.currentTimeMillis()
 
@@ -1995,6 +2007,7 @@ class NativeRdpkgPreparationService : Service() {
         projectId: String? = null,
         cancellable: Boolean,
     ) {
+        if (runStore.load().isTerminal) return
         notificationManager()
             .notify(
                 NOTIFICATION_ID,
@@ -2094,6 +2107,9 @@ class NativeRdpkgPreparationService : Service() {
             .setContentIntent(
                 contentIntent,
             )
+            // Notification accent only. Android/OEM renders the actual
+            // system progress bar and may keep its default tint.
+            .setColor(Ui.success)
             .setOnlyAlertOnce(
                 true,
             )
