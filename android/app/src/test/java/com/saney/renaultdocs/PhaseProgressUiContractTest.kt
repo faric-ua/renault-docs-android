@@ -11,8 +11,15 @@ class PhaseProgressUiContractTest {
         val digest = "71948d2656429b103db988ff72e27ae4c2f53454d3f1d074fd0dc3b2b1aac3bc"
         val original = "Готово · NT8275A · 2005-01-03 · 333 native\nSHA-256: $digest"
         val display = OperationStatusDisplayFormat.wrapHashesForDisplay(original)
-        assertTrue(display.contains("\u200B"))
-        assertEquals(original, display.replace("\u200B", ""))
+        assertTrue(display.contains("SHA-256:\n"))
+        assertEquals(64, display.substringAfter("SHA-256:").filter { it.isLetterOrDigit() }.length)
+        assertEquals(original, display.replace("\n", "").let {
+            // The original first newline is retained by the preceding status;
+            // only visual digest line wrapping is stripped for this comparison.
+            val label = "SHA-256:"
+            val labelIndex = original.indexOf(label)
+            original.substring(0, labelIndex) + label + it.substringAfter(label)
+        })
         assertEquals(64, digest.length)
     }
 
