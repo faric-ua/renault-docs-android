@@ -1,0 +1,14 @@
+{
+  "versionName": "0.5.89",
+  "versionCode": 105,
+  "phase": "development_stacked_pr_qa_pending",
+  "feature": "Bounded per-volume Android completed notification history",
+  "issue": 102,
+  "branch": "feat/v0.5.89-completed-notification-history",
+  "baseBranch": "feat/v0.5.88-unified-progress-ui",
+  "sourceBaseline": "v0.5.88/build104 draft PR #101; live phone v0.5.87",
+  "phoneQa": "PENDING",
+  "testRuns": [],
+  "signedApkRun": null,
+  "next": "PR CI on exact head, then merge lower PR #101 first, retarget #103 to main, verify signed APK, on-device notification group QA"
+}
