@@ -1,3 +1,16 @@
+## v0.5.86/build102 — #51 NESTED ARCHIVE ISOLATION CODE MERGED / VERIFIED DEBUG RELEASE PUBLISHED — 2026-10-09
+
+- [x] PR #96 merged source SHA `f145dee0c545d5ee1953a8584cebb3a60bfd5acf`. Native .rdpkg builder no longer copies separate nested Renault raw-volume candidates when parent root is selected. No source folder deletions.
+- [x] PR Python #588 PASS, Android PR Check #465 PASS, main Tests #589 PASS, stable-signed debug APK #149 PASS (run ID 37872426595).
+- [x] Reviewed PR #97 promotion: verified public `v0.5.86-debug` published (run 37872667304 PASS), exact APK SHA256 `72d78292c8197a026bddaba4ecd32ab5f433556bab7ca6622b9d246d109b5ec3`: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.86-debug
+- [ ] #51 remains OPEN: real ZIP/7Z/RAR nonduplicate import, mixed root-with-nested output and identity, cancellation and staging cleanup, lock/background QA paused by user.
+- [ ] #40 remains OPEN for real Android dataSync lifecycle/timeout evidence.
+- [ ] Next distinct development direction #30 Windows source-to-catalog publication after #51. No new phone test, APK install, reimport, source deletion or Classic UI changes without user request. Last phone-accepted installed APK v0.5.84/build100.
+
+Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.86.md`.
+
+---
+
 ## v0.5.85/build101 — issue #51 SOURCE HARDENING VERIFIED / PHONE QA PAUSED — 2026-10-09
 
 - [x] PR #94 merged, Android source SHA `5b27f30ce92aed00e5b1e0e233d9a312a064bfb6`: root-level archive chooser path, actual raw filename propagation, normalized duplicate/casefold/file-directory collision guards in ZIP/7Z/RAR.
