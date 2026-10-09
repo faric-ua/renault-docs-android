@@ -1,3 +1,11 @@
+## Measured phase status and color — v0.5.90 candidate (phone QA pending)
+
+The shared 5dp progress component now has two explicit running modes. If the current phase provides a trustworthy numerator and denominator, render a smooth measured green fill, count/total (or measured percent when only bytes known), and reset to zero at the start of that phase. If the denominator is unknown, render a **green animated indeterminate bar** and a stable "Триває обробка…" counter slot — never a static zero/fabricated percentage. Preserve stage label separately. The runtime compiler reports real compiled sections and Fast Pack reports actual source files; counting/shard creation before a total is available remains indeterminate. Do not mix text-only events into structured native run status.
+
+Terminal state: green SUCCESS, red FAILED, amber CANCELLED, neutral ALREADY_PRESENT; status is copied from its original unmodified string. A 64-character SHA-256 may be broken visually at safe boundaries but clipboard text must remain exact. Reuse same colors/rules on Home, Project, Drive/catalog and Converter. Actual Android foreground worker and file data remain unchanged. Tests and device QA pending.
+
+---
+
 ## Android notification history — v0.5.89 candidate
 
 - The current long operation keeps **one** foreground notification with fixed ID and measured live progress; do not send one Android notification per processed file.
