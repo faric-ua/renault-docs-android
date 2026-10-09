@@ -532,7 +532,13 @@ class NativeRdpkgPreparationService : Service() {
                 staged
 
             ArchiveSourceGuard.rootConflict(
-                staged.rawRoots.map { it.name },
+                staged.rawRoots.map { rawRoot ->
+                    ArchiveIntake.rawSourceName(
+                        staged.extractionRoot,
+                        rawRoot,
+                        request.sourceName,
+                    )
+                },
                 target,
             )?.let { error(it) }
 
@@ -875,7 +881,7 @@ class NativeRdpkgPreparationService : Service() {
                     }
 
                 ArchiveSourceGuard.rootConflict(
-                    listOf(rawRoot.name), project,
+                    listOf(rawSourceName), project,
                 )?.let { error(it) }
 
                 val destination =
@@ -888,6 +894,19 @@ class NativeRdpkgPreparationService : Service() {
                             request,
                         sourceName =
                             rawSourceName,
+                    )
+
+                // A parent candidate may contain other independent
+                // Renault raw roots. Never copy those nested volume bytes
+                // into the parent's .rdpkg, even when not selected.
+                val excludedNestedRawRoots =
+                    ArchiveRawVolumeIsolation.excludedDescendantRoots(
+                        extractionRoot = extractionRoot,
+                        selectedRawRoot = rawRoot,
+                        candidateRelativePaths =
+                            initialState.archiveCandidates.map {
+                                it.relativePath
+                            },
                     )
 
                 processed +=
@@ -910,6 +929,8 @@ class NativeRdpkgPreparationService : Service() {
                                 " · ",
                         archiveCandidatePath =
                             candidate.relativePath,
+                        excludedNestedRawRoots =
+                            excludedNestedRawRoots,
                     )
             }
 
@@ -1019,6 +1040,7 @@ class NativeRdpkgPreparationService : Service() {
         destination: Uri,
         progressPrefix: String,
         archiveCandidatePath: String? = null,
+        excludedNestedRawRoots: Set<File> = emptySet(),
     ): ProcessedVolume {
         archiveCandidatePath
             ?.let {
@@ -1104,6 +1126,8 @@ class NativeRdpkgPreparationService : Service() {
                             engineRequest,
                         sourceRoot =
                             sourceRoot,
+                        excludedNestedRawRoots =
+                            excludedNestedRawRoots,
                     )
                 } else {
                     engine.prepare(

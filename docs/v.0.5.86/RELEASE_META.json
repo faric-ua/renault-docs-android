@@ -1,0 +1,12 @@
+{
+  "versionName": "0.5.86",
+  "versionCode": 102,
+  "phase": "code_candidate_ci_pending",
+  "issue": 51,
+  "branch": "fix/v0.5.86-archive-nested-volume-isolation",
+  "source_baseline": "v0.5.85/build101",
+  "qa_status": "phone-qa-pending",
+  "phone_qa": "PAUSED_BY_USER",
+  "scope": "isolate nested raw candidate directories from parent .rdpkg without mutating source",
+  "next": "Run Python/Android PR CI, merge after PASS, signed main build, explicit verified debug prerelease. Device QA remains paused."
+}
