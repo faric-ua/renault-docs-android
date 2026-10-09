@@ -22,3 +22,7 @@
 - PR #93 published the pinned original developer-signed APK via verified promotion run 37867195007 PASS: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug. APK and .sha256 assets present, inner APK SHA256 90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010. This is a DEBUG PRERELEASE with phone-qa-pending label.
 - Seven-service audit matrix and remaining limitations: docs/v.0.5.84/qa/BACKGROUND_SERVICE_AUDIT.md. Issue #40 OPEN for phone and Android dataSync 6h quota/timeouts and safe partial-output replays. User paused phone QA; no app was installed or conversions started during this work.
 - Next distinct functional scope #51 archive intake or #30 Windows source-to-published catalog. Preserve original Renault ZIP/RDPKG and Classic.
+
+## Device installation smoke PHONE PASS — 2026-10-09
+
+Following a direct request to install **v0.5.84/build100** via Termux Renault 5 → 19 → 8 → 13 *over the existing app* and verify app opens and all projects/volumes remain, the user replied «Пасс». Record confirmed **installation/launch/data-retention smoke PASS** for current device. Do not imply every individual volume was audited; no counts reported. **Issue #40 detailed foreground operation lock/unlock/process-death QA remains PAUSED and issue stays OPEN.** No new tests required. Next distinct user-selected feature scope #51 archive intake (or #30 Windows packaging) when requested.
