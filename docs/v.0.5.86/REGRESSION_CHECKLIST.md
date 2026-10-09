@@ -1,8 +1,8 @@
 # v0.5.86 checks
 
-- [ ] Python source tests PASS (including historical contracts).
-- [ ] Android JUnit root/nested isolation and boundary tests PASS.
-- [ ] Android debug APK PR Check PASS.
+- [x] Python PR Tests #588 and main Tests #589 PASS.
+- [x] Android PR JUnit isolation/boundary tests PASS (#465).
+- [x] Android PR Check #465 PASS.
 - [ ] Signed main build/tests PASS, exact source SHA recorded.
 - [ ] Public developer-signed debug prerelease APK + matching inner sha256 published.
 - [ ] Original archive source unchanged, no APK installation during tooling work.
