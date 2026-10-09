@@ -92,8 +92,11 @@ object RdpkgImporter {
                     )
 
                 progressState?.invoke(
-                    OperationProgress.indeterminate(
-                        "Перевіряю…",
+                    OperationProgress(
+                        stage = "Перевіряю пакет…",
+                        itemCurrent = extraction.fileCount,
+                        itemTotal = extraction.fileCount,
+                        itemLabel = "Розпаковано файлів",
                     ),
                 )
 
@@ -110,8 +113,11 @@ object RdpkgImporter {
                 )
 
                 progressState?.invoke(
-                    OperationProgress.indeterminate(
-                        "Встановлюю…",
+                    OperationProgress(
+                        stage = "Встановлюю том…",
+                        itemCurrent = extraction.fileCount,
+                        itemTotal = extraction.fileCount,
+                        itemLabel = "Розпаковано файлів",
                     ),
                 )
 
