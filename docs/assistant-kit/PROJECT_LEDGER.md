@@ -2601,3 +2601,7 @@ Phone acceptance pending.
 ## 2026-10-09 — v0.5.88 progress UI candidate (not released)
 
 User chose to broaden UX #100 to all operation progress surfaces. Shared stage/counter/5dp bar presentation is being unified across Home, Project, Drive/catalog and converter, retaining measured file progress and lifecycle semantics. Work only on feature branch `feat/v0.5.88-unified-progress-ui`; no main merge, signed APK, device verification or data modification until CI and QA. See `docs/v.0.5.88/`, CURRENT_PLAN and issue #100.
+
+## 2026-10-09 — Android last-ten completion results candidate
+
+Device finding: native .rdpkg notifications share ID 3702 and overwrite one another, so prior tomes disappear from the notification shade. User requests an expandable up-to-ten checklist of newly added tomes. Issue #102 and stacked v0.5.89 feature branch implement bounded grouped notification IDs, per-volume results, and owning-project click destinations while retaining a single foreground progress notification. Android system notification list is ephemeral, no lost prior entries recoverable. Feature NOT YET CI/phone accepted or merged; no app user data or ZIP touched. Related lower PR #101 progress UI is independently awaiting merge/phone QA.

@@ -1,3 +1,15 @@
+## CURRENT — v0.5.89 BUILD105 NOTIFICATION HISTORY STACKED DEVELOPMENT — 2026-10-09
+
+- User screenshot proves native finished `NT8339A · 2006-04-18 · 325 native` replaced prior result in Android shade. Root cause: fixed foreground ID 3702 reused for terminal notifications; analogous import ID 3703. User wants the last ~10 added tomes visible as expandable notification list.
+- Open UX issue #102. New stacked branch `feat/v0.5.89-completed-notification-history` based on lower draft PR #101 (v0.5.88 progress UI). Result notifications now use 10 persisted rotating IDs + group summary, duplicate event guard, per-result PendingIntent; foreground progress stays fixed; batch results each notify independently; import included. No user files touched.
+- **CI, main merge, signed APK and phone QA all PENDING.** This is not installed and cannot restore earlier overwritten notifications. Historical issue #100 progress UI checks passed on exact PR #101 head but #101 not merged/phone-accepted.
+- NEXT: open stacked PR for #102, run and fix tests/Android CI, merge lower #101 only after review, then retarget this PR to main and apply verified release workflow. No phone test before signed build. Test grouped entries and real archive independence.
+- #51 and #40 remain open; NT8298A v0.5.87 prior phone PASS unchanged.
+
+Canonical: `docs/v.0.5.89/`, #102, lower PR #101.
+
+---
+
 ## CURRENT — v0.5.88/build104 UNIFIED PROGRESS CANDIDATE — 2026-10-09
 
 - **User explicitly prioritized implementing** stable shared progress for all operations after real v0.5.87 unpacking video. This supersedes the old #100 record-only decision (retained below as historical context).

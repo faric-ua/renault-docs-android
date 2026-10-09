@@ -1,3 +1,11 @@
+## CURRENT — v0.5.89 BUILD105 NOTIFICATION HISTORY STACKED CANDIDATE / PR CI PENDING — 2026-10-09
+
+User screenshot: one native completed .rdpkg message for NT8339A/325 native replaced prior Android notification because foreground/live and final both use fixed ID 3702. User wants expandable history of ~10 distinct completed tomes to assist manual archive relocation. Issue #102 created. Stacked branch `feat/v0.5.89-completed-notification-history` on top of `feat/v0.5.88-unified-progress-ui` (lower PR #101 Tests + Android PASS, not merged or phone-QA accepted). New persistent ten-result notification ID ring 48001..48010, group summary 48000, per-result owning-project PendingIntent, duplicate protection and per-volume archive batch output; also RDPKG import. Single live foreground notification remains. v0.5.89/build105 candidate is **NOT MERGED / CI OR SIGNED APK OR PHONE QA ACCEPTED**. Do not reset app data, reimport completed volumes automatically or assume old overwritten notifications can be restored.
+
+NEXT: stacked PR/CI exact head, then review/merge lower PR #101 and retarget upper, signed main build and safe phone QA. #100/#102 remain open until on-device validation.
+
+---
+
 ## CURRENT — v0.5.88 BUILD104 UNIFIED PROGRESS DEV / CI + PHONE PENDING — 2026-10-09
 
 User authorized global progress-bar unification. Real v0.5.87 video showed ZIP extraction detail alternating bare `1361/3360` and `Файлів: 2312 / 3360` while bar progressed. New scoped candidate on `feat/v0.5.88-unified-progress-ui` changes common status component (Home, Project, Drive), the converter, and deduplicates native progress emissions; one-line landscape/two fixed slots portrait; shared 5dp thin measured bar and visible counters. Removed hidden unused Home bar. Adds Kotlin regression tests and new release skeleton `docs/v.0.5.88`. User data and sources unchanged. Not yet signed, merged or phone QA accepted. PR checks are required; never claim a new phone PASS from the old video.
