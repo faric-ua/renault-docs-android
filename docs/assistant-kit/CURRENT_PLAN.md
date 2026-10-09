@@ -1,3 +1,9 @@
+## v0.5.85/build101 — #51 archive safety source merged, signed release available — 2026-10-09
+
+PR #94 merged app SHA `5b27f30ce92aed00e5b1e0e233d9a312a064bfb6`; core fixes root-level multi-volume chooser path, archive filename/NT identity propagation, ZIP/7Z/RAR member collision validation. PR Python #586, Android PR #464, main Tests #587 and signed debug APK #148 PASS. PR #95 public verified developer debug prerelease v0.5.85-debug published, original APK SHA256 `dde09bde484d0f3d7392505a999faa8f8036a2ce38778c654fcbeac676baacb6`: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.85-debug. **User paused on-device testing and has not confirmed installation.** #51 OPEN for mixed-root nested isolation, actual ZIP/7Z/RAR, cancel/lock/staging. #40 stays open for real Android background lifecycle. See `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.85.md`.
+
+---
+
 ## v0.5.84 — #40 background hardening signed release, device QA paused — 2026-10-09
 
 PR #92 merged, source 4890963f0dc0a268f803913c0e3e7da7193ecd7a; 7 services audited; Python PR #584, Android PR #463, main Tests #585, signed Android APK #147 PASS. Verified public debug prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug, inner APK SHA256 90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010. Issue #40 remains OPEN for platform 6h dataSync and real phone process-death/lock acceptance; user paused manual QA. No input/source archive changes or app install. Next #51 and #30. See docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.84.md.
