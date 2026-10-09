@@ -1,3 +1,16 @@
+## CURRENT — v0.5.89/build105 MERGED TO MAIN / SIGNED MAIN AND PHONE QA PENDING — 2026-10-09
+
+- Lower progress UI PR #101 (v0.5.88/build104) passed exact-head Python Tests and Android PR Check, merged to main as `25e4c7b6a2608a788765fbd466f8ead57275ff38`.
+- Bounded Android notification history PR #103 (v0.5.89/build105) passed exact-head Python Tests #37972543520 and Android PR Check #37972543480, was retargeted to main, merged as `bfdc3a7e74220f19dbc90eefa596c166a6432f75`.
+- User screenshot: previous native completed notification overwritten by last `NT8339A · 2006-04-18 · 325 native`; issue #102. New candidate keeps one live notification and separately groups a bounded last ten completed tomes, including multi-volume batches and regular .rdpkg import.
+- **Main stable-signed Android Debug APK run/inner APK hash NOT VERIFIED YET. Public promotion and phone acceptance PENDING.** Do not install ephemeral PR APK, make up a main Actions run ID, claim release published, or close #100/#102 until real-device QA. Past overwritten notifications are unrecoverable.
+- NEXT: verify trusted main signed Android Debug APK workflow for app commit `bfdc3a7e...` (may be an ancestor if docs-only main changes). Record run ID/artifact checksum/signature. Then reviewed promotion manifest, publisher and installer over existing app. Validate stage/count stability and Android notification grouping. No user file deletion.
+- #51 other archive formats and #40 extended background stress are independent open work.
+
+Canonical docs: `docs/v.0.5.88/`, `docs/v.0.5.89/`, issues #100/#102.
+
+---
+
 ## CURRENT — v0.5.89 BUILD105 NOTIFICATION HISTORY STACKED DEVELOPMENT — 2026-10-09
 
 - User screenshot proves native finished `NT8339A · 2006-04-18 · 325 native` replaced prior result in Android shade. Root cause: fixed foreground ID 3702 reused for terminal notifications; analogous import ID 3703. User wants the last ~10 added tomes visible as expandable notification list.
