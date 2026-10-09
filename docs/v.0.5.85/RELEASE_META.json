@@ -1,0 +1,11 @@
+{
+  "versionName": "0.5.85",
+  "versionCode": 101,
+  "phase": "code_candidate_ci_pending",
+  "issue": 51,
+  "branch": "fix/v0.5.85-archive-root-and-entry-safety",
+  "phone_qa": "PAUSED_BY_USER",
+  "source_baseline": "v0.5.84/build100",
+  "focus": "archive-root multi-volume chooser identity and ZIP/7Z/RAR extraction entry collision safety",
+  "next": "Run PR CI, fix any failures, signed build and publish QA-pending debug prerelease. No phone tests unless user requests."
+}
