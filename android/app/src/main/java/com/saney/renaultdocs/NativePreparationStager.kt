@@ -111,6 +111,7 @@ class NativePreparationStager(
     fun prepareLocal(
         sourceRoot: File,
         stagingToken: String,
+        sourceName: String = sourceRoot.name,
     ): Result {
         checkCancelled()
 
@@ -132,10 +133,8 @@ class NativePreparationStager(
 
         return stageScan(
             scan = scan,
-            sourceName =
-                sourceRoot.name,
-            stagingToken =
-                stagingToken,
+            sourceName = sourceName,
+            stagingToken = stagingToken,
         )
     }
 
