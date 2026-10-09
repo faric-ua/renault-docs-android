@@ -5,6 +5,7 @@
 - [ ] Stale redelivered completed conversion does not start a duplicate operation.
 - [ ] Native .rdpkg preparing resume preserves user cancellation.
 - [ ] Stale completed native command cannot restart work.
+- [ ] Activity interrupted reconciliation defers 30 seconds, is canceled onStop and rechecks run identity before terminal mutation.
 - [ ] Other 5 service run stores guard duplicate restarts.
 - [ ] Process shutdown cleanup and Activity state reattachment remain consistent.
 - [ ] Python static contracts PASS.
