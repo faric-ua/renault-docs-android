@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.88",
   "versionCode": 104,
-  "phase": "development_pr_qa_pending",
+  "phase": "merged_to_main_signed_main_phone_qa_pending",
   "feature": "Shared stable operation progress and counters on every app-owned progress surface",
   "branch": "feat/v0.5.88-unified-progress-ui",
   "issue": 100,
@@ -11,5 +11,7 @@
   "pr_android_check_run": null,
   "pr_tests_run": null,
   "signed_run_id": null,
-  "next": "Review PR, await Tests and Android PR Check; then obtain verified signed main APK and run phone QA before closeout."
+  "next": "Verify trusted stable-signed main APK for app SHA bfdc3a7e..., reviewed release promotion and real phone QA. Do not install PR signer.",
+  "main_merge_sha": "25e4c7b6a2608a788765fbd466f8ead57275ff38",
+  "exact_pr_checks": "PASS"
 }

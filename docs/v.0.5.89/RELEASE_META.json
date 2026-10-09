@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.89",
   "versionCode": 105,
-  "phase": "development_stacked_pr_qa_pending",
+  "phase": "merged_to_main_signed_main_phone_qa_pending",
   "feature": "Bounded per-volume Android completed notification history",
   "issue": 102,
   "branch": "feat/v0.5.89-completed-notification-history",
@@ -10,5 +10,9 @@
   "phoneQa": "PENDING",
   "testRuns": [],
   "signedApkRun": null,
-  "next": "PR CI on exact head, then merge lower PR #101 first, retarget #103 to main, verify signed APK, on-device notification group QA"
+  "next": "Verify trusted stable-signed main APK for app SHA bfdc3a7e..., reviewed release promotion and real phone QA. Do not install PR signer.",
+  "phone_qa": "PENDING",
+  "main_merge_sha": "bfdc3a7e74220f19dbc90eefa596c166a6432f75",
+  "exact_pr_checks": "PASS",
+  "signed_run_id": null
 }
