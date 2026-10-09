@@ -186,7 +186,12 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         detailView.text = parts.stage
         detailView.setTextColor(Ui.muted)
         counterView.setTextColor(Ui.success)
-        counterView.text = parts.counter.orEmpty()
+        counterView.text = parts.counter ?: if (current != null && total != null && total > 0) {
+            val percent = current.coerceIn(0, total).toLong() * 100L / total
+            "Етап: ${percent}%"
+        } else {
+            "Триває обробка…"
+        }
         updateProjectCompactUi()
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
