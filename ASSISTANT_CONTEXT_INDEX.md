@@ -1,3 +1,9 @@
+## Work in progress — v0.5.88 unified progress (2026-10-09)
+
+Feature branch: `feat/v0.5.88-unified-progress-ui`. The user approved moving #100 from record-only to implementation across all progress surfaces. Consult `docs/assistant-kit/CURRENT_PLAN.md` and `docs/v.0.5.88/`; source changes are **not yet CI/phone accepted**. Installed baseline v0.5.87 NT8298A test was successful.
+
+---
+
 # Renault Docs — Assistant Context Index
 
 Це канонічна карта контексту для нової сесії/асистента.
