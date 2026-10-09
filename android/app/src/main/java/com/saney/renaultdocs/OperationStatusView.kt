@@ -173,6 +173,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     ) {
         visibility = View.VISIBLE
         titleView.text = title
+        titleView.setTextColor(Ui.text)
         subjectView.text =
             subject
                 .trim()
@@ -183,7 +184,14 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         fullDetail = detail
         val parts = OperationStatusDetailFormatter.split(detail)
         detailView.text = parts.stage
-        counterView.text = parts.counter.orEmpty()
+        detailView.setTextColor(Ui.muted)
+        counterView.setTextColor(Ui.success)
+        counterView.text = parts.counter ?: if (current != null && total != null && total > 0) {
+            val percent = current.coerceIn(0, total).toLong() * 100L / total
+            "Етап: ${percent}%"
+        } else {
+            "Триває обробка…"
+        }
         updateProjectCompactUi()
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
@@ -196,10 +204,18 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         title: String,
         detail: String,
         subject: String = "Renault Docs",
+        outcome: OperationTerminalOutcome = OperationTerminalOutcome.fromTitle(title),
         onClose: () -> Unit,
     ) {
         visibility = View.VISIBLE
+        val statusColor = when (outcome) {
+            OperationTerminalOutcome.SUCCESS -> Ui.success
+            OperationTerminalOutcome.FAILED -> Ui.danger
+            OperationTerminalOutcome.CANCELLED -> Ui.warning
+            OperationTerminalOutcome.NEUTRAL -> Ui.muted
+        }
         titleView.text = title
+        titleView.setTextColor(statusColor)
         subjectView.text =
             subject
                 .trim()
@@ -208,10 +224,14 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                 }
         configureDetailLayout(terminal = true)
         fullDetail = detail
-        detailView.text = detail
+        detailView.text = OperationStatusDisplayFormat.wrapHashesForDisplay(detail)
+        detailView.setTextColor(statusColor)
         counterView.text = ""
         updateProjectCompactUi()
-        SharedOperationProgressBar.render(progressView, null, null, completed = true)
+        progressView.visibility = View.VISIBLE
+        SharedOperationProgressBar.render(
+            progressView, null, null, completed = true, color = statusColor,
+        )
         cancelView.visibility = View.GONE
         cancelView.setOnClickListener(null)
         closeView.visibility = View.VISIBLE
@@ -230,7 +250,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             counterView.visibility = View.GONE
             detailView.setSingleLine(false)
             detailView.minLines = 1
-            detailView.maxLines = if (landscape) 4 else 6
+            detailView.maxLines = if (landscape) 10 else 12
             detailView.ellipsize = null
             detailView.layoutParams = LayoutParams(
                 LayoutParams.MATCH_PARENT,

@@ -72,6 +72,7 @@ object NativeFastPackWriter {
                 PACKAGE_DIR,
             ),
         progress: ((String) -> Unit)? = null,
+        fileProgress: ((Int, Int) -> Unit)? = null,
     ): Result {
         val root =
             outputRoot.canonicalFile
@@ -146,6 +147,7 @@ object NativeFastPackWriter {
                 sources.size +
                 " web-файлів."
         )
+        if (sources.isNotEmpty()) fileProgress?.invoke(0, sources.size)
 
         val temp =
             File(
@@ -250,14 +252,11 @@ object NativeFastPackWriter {
                                 1
 
                         if (
-                            completed ==
-                            1 ||
-                            completed %
-                                1000 ==
-                            0 ||
-                            completed ==
-                            sources.size
+                            completed == 1 ||
+                            completed % 50 == 0 ||
+                            completed == sources.size
                         ) {
+                            fileProgress?.invoke(completed, sources.size)
                             progress?.invoke(
                                 "Fast Pack: пакую " +
                                     completed +

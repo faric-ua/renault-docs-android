@@ -336,6 +336,21 @@ class NativeRdpkgPreparationEngine(
                             sections.data,
                         progress =
                             onProgress,
+                        sectionProgress = { done, total ->
+                            onProgressState(
+                                OperationProgress.measured(
+                                    stage = "Готую дані…",
+                                    current = done,
+                                    total = total,
+                                    itemCurrent = done,
+                                    itemTotal = total,
+                                    itemLabel = "Розділів",
+                                ),
+                            )
+                        },
+                        phaseProgress = { stage ->
+                            onProgressState(OperationProgress.indeterminate(stage))
+                        },
                     )
 
             checkCancelled()
@@ -375,8 +390,19 @@ class NativeRdpkgPreparationEngine(
                             root,
                         packageRoot =
                             packageRoot,
-                        progress =
-                            onProgress,
+                        progress = onProgress,
+                        fileProgress = { done, total ->
+                            onProgressState(
+                                OperationProgress.measured(
+                                    stage = "Пакую дані…",
+                                    current = done,
+                                    total = total,
+                                    itemCurrent = done,
+                                    itemTotal = total,
+                                    itemLabel = "Файлів",
+                                ),
+                            )
+                        },
                     )
 
             checkCancelled()

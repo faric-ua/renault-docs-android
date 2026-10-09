@@ -161,7 +161,10 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         )
         self.assertIn("SharedOperationProgressBar.render(", status)
         self.assertIn("bar.isIndeterminate = false", bar)
-        self.assertNotIn("bar.isIndeterminate = true", bar)
+        # Unlike v0.5.88's frozen zero, unknown totals now show true activity.
+        self.assertIn("bar.isIndeterminate = true", bar)
+        self.assertIn("if (!completed && measured == null)", bar)
+        self.assertIn("bar.setProgress(value, true)", bar)
         self.assertIn('"Пакую том"', project_export)
         self.assertIn("(index + 1)", project_export)
         self.assertIn("volumes.size", project_export)

@@ -24,6 +24,8 @@ object Ui {
     val accent: Int = Color.parseColor("#76BDFF")
     val entityTitle: Int = Color.parseColor("#C8E5FF")
     val danger: Int = Color.parseColor("#FF7A88")
+    val success: Int = Color.parseColor("#62D296")
+    val warning: Int = Color.parseColor("#F0B968")
     val statusWarmFill: Int = Color.parseColor("#2B251F")
     val statusWarmBorder: Int = Color.parseColor("#6E5A42")
     val statusWarmText: Int = Color.parseColor("#D8B58B")

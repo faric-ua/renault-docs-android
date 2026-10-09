@@ -1,12 +1,13 @@
 package com.saney.renaultdocs
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Build
 import android.widget.ProgressBar
 
 /**
- * Single thin, measured-progress contract for operation cards and the converter.
- * Unknown totals never use the distracting bouncing horizontal animation.
+ * Shared progress contract. Known totals use measured 0..1000 progress.
+ * Unknown totals show real activity instead of a misleading, frozen zero.
  */
 object SharedOperationProgressBar {
     const val SCALE = 1_000
@@ -17,6 +18,7 @@ object SharedOperationProgressBar {
             max = SCALE
             isIndeterminate = false
             progress = 0
+            tint(this, Ui.success)
         }
 
     fun normalized(current: Int?, total: Int?): Int? {
@@ -26,19 +28,33 @@ object SharedOperationProgressBar {
             .coerceIn(0, SCALE)
     }
 
+    fun tint(bar: ProgressBar, color: Int) {
+        val colors = ColorStateList.valueOf(color)
+        bar.progressTintList = colors
+        bar.indeterminateTintList = colors
+        bar.progressBackgroundTintList = ColorStateList.valueOf(Ui.border)
+    }
+
     fun render(
         bar: ProgressBar,
         current: Int?,
         total: Int?,
         completed: Boolean = false,
+        color: Int = Ui.success,
     ) {
-        val value = if (completed) SCALE else normalized(current, total) ?: 0
+        tint(bar, color)
+        val measured = normalized(current, total)
+        if (!completed && measured == null) {
+            // The worker is alive but has not supplied a denominator yet.
+            // Do not claim 0% or show a fake file count.
+            bar.isIndeterminate = true
+            return
+        }
         bar.isIndeterminate = false
         bar.max = SCALE
+        val value = if (completed) SCALE else measured ?: 0
         if (bar.progress == value) return
-
-        // Animate measured changes only; unknown progress and terminal reset are immediate.
-        if (!completed && normalized(current, total) != null &&
+        if (!completed && value >= bar.progress &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
         ) {
             bar.setProgress(value, true)

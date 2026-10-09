@@ -92,8 +92,11 @@ object RdpkgImporter {
                     )
 
                 progressState?.invoke(
-                    OperationProgress.indeterminate(
-                        "Перевіряю…",
+                    OperationProgress(
+                        stage = "Перевіряю пакет…",
+                        itemCurrent = extraction.fileCount,
+                        itemTotal = extraction.fileCount,
+                        itemLabel = "Розпаковано файлів",
                     ),
                 )
 
@@ -110,8 +113,11 @@ object RdpkgImporter {
                 )
 
                 progressState?.invoke(
-                    OperationProgress.indeterminate(
-                        "Встановлюю…",
+                    OperationProgress(
+                        stage = "Встановлюю том…",
+                        itemCurrent = extraction.fileCount,
+                        itemTotal = extraction.fileCount,
+                        itemLabel = "Розпаковано файлів",
                     ),
                 )
 
@@ -499,6 +505,21 @@ object RdpkgImporter {
             "RDPKG порожній."
         }
 
+        // We reached ZIP EOF without error: every actual entry was extracted.
+        // ZIP central-directory bytes may not be read by ZipInputStream and
+        // throttled progress may miss the final entry, leaving the bar at <100%.
+        // Complete only this extraction phase; package validation/install follow.
+        progressState?.invoke(
+            OperationProgress.measured(
+                stage = "Розпаковано .rdpkg…",
+                current = fileCount,
+                total = fileCount,
+                itemCurrent = fileCount,
+                itemTotal = fileCount,
+                itemLabel = "Файлів",
+            ),
+        )
+
         return ExtractionResult(
             fileCount =
                 fileCount,
@@ -548,16 +569,12 @@ object RdpkgImporter {
                             "Файлів",
                     )
                 } else {
+                    // Without a known file denominator, show *real* byte
+                    // progress over the whole compressed source, not only the
+                    // 25% byte share reserved by the mixed weighting formula.
                     val byteCurrent =
-                        (
-                            archiveBytes
-                                .coerceIn(
-                                    0L,
-                                    totalBytes,
-                                ) *
-                                2_500L /
-                                totalBytes
-                        ).toInt()
+                        (archiveBytes.coerceIn(0L, totalBytes) * 10_000L /
+                            totalBytes).toInt()
 
                     OperationProgress.measured(
                         stage =

@@ -1,3 +1,9 @@
+## CURRENT — v0.5.90 BUILD106 PHASE COUNTERS AND COLORS / PR CHECKS PENDING — 2026-10-09
+
+User phone screenshots of **v0.5.89 running ZIP** (3432/5357) and **COMPLETE NT8275A** (2005-01-03, 333 native; 12→13 Megane II tomes). User reports some phases show no file counter and a stationary bar and terminal SHA line clipped. Source audit: SharedOperationProgressBar.render previously mapped unknown totals to static zero, native text callbacks overwrite typed counters, Runtime IR compiles sections and Fast Pack packs known files without presenting counters. Candidate branch `fix/v0.5.90-phase-progress-and-status-colors`: green indeterminate unknown, real per-section Runtime compilation and Fast Pack count 0/N, stage reset for writing shards, atomic typed run updates, semantic success/failure/cancelled bar/text color, SHA visual soft breaks preserving original clipboard string, converter parity. New release skeleton `docs/v.0.5.90`. **CI/PR merge/stable signer/phone QA PENDING.** Existing v0.5.89 public release https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.89-debug still latest verified stable-signed published APK. Next PR checks, then signed build and device QA; keep #100/#102 open. No data deletion or user file changes.
+
+---
+
 ## CURRENT — v0.5.89 BUILD105 VERIFIED PUBLIC DEBUG RELEASE / PHONE QA PENDING — 2026-10-09
 
 Both PR #101 (shared stable measured operation progress) and PR #103 (last ten independent Android-shade result notifications) merged into main app source `bfdc3a7e74220f19dbc90eefa596c166a6432f75`. Tests main #601 PASS; **trusted stable-signed main build #152 / ID 37972943494 PASS**, verified signer, app ID `com.saney.renaultdocs`, version 0.5.89/build105, APK SHA256 `46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db`. Reviewed promotion PR #105 merged, **publish workflow 37976168925 PASS**, GitHub prerelease: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.89-debug (APK asset 625863885, checksum asset 625863887). **PHONE QA PENDING**; issues #100 and #102 explicitly reopened following premature PR auto-close. No app data/installed tomes touched. User can update Termux `main`, download verified release/Actions original and install over existing app without uninstall or clearing storage. Next: safe on-phone progress/card stability & grouping/individual results; afterwards #51 other archive formats/batch and #40 background. Do not claim success before screenshots/user evidence; don't create new APK unless phone QA reveals a defect.
@@ -5130,3 +5136,7 @@ Exact continuation point:
 3. run a real single-volume ZIP for a volume not installed in the project;
 4. then continue multi-volume/lifecycle/background/cancel gates.
 
+
+### 2026-10-09 additional phone finding: importer changes stage while progress bar short of 100
+
+v0.5.90 PR #107 now also handles RdpkgImporter missing final extract callback after ZIP EOF (throttled updates / unread archive central directory). It sends truthful final N/N at completed extraction, and carries extracted N/N into the separate, indeterminate validation/install stages; when no file-count denominator exists but input bytes are known, uses full compressed-byte ratio. CI/phone QA for this new commit pending; no release or phone acceptance claimed.

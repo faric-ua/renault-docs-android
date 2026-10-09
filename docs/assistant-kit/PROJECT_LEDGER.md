@@ -2609,3 +2609,7 @@ Device finding: native .rdpkg notifications share ID 3702 and overwrite one anot
 ## 2026-10-09 — published v0.5.89 developer-signed prerelease, phone QA next
 
 v0.5.89/build105 combined #100 progress UI + #102 ten-result notifications from main app source `bfdc3a7e...`, verified stable-signed run 37972943494, uploaded original APK SHA256 `46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db`. Reviewed promotion #105 and publish run 37976168925 PASS; public tag `v0.5.89-debug`. No phone QA of this version yet: #100/#102 open, user must test safe install-in-place then live progress and independent completion results. Legacy NT8298A phone PASS remains specifically v0.5.87, not proof of v0.5.89. No source archives or user data were modified during engineering.
+
+## 2026-10-09 — v0.5.90 progress phase UX candidate
+
+Phone finding: v0.5.89 NT8275A real installation succeeded (Megane II 12→13 tomes, 333 native) while intermediate status sometimes showed an unmoving bar/no counters, terminal SHA off card. User requests semantic green-running/success versus red-failed, true per-step counts where measurable. Candidate phase-specific measured Runtime IR sections and Fast Pack files, indeterminate movement for unknown/scan stages, no text-only status overwrite, and lossless SHA visual wrap. Branch `fix/v0.5.90-phase-progress-and-status-colors`, source-only until PR checks/build; phone QA not accepted. Keep original docs and user files untouched.
