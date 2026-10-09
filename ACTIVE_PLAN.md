@@ -1,3 +1,15 @@
+## v0.5.84 / build100 — #40 SOURCE HARDENED / VERIFIED RELEASE PUBLISHED / PHONE QA PAUSED — 2026-10-09
+
+- [x] PR #92 merged; original app SHA 4890963f0dc0a268f803913c0e3e7da7193ecd7a. Conversion and native redelivery preserve cancel state and reject stale work; ConversionActivity recovery timer now lifecycle-safe.
+- [x] Seven services audited; Python Tests #584 PR/#585 main PASS; Android PR Check #463 PASS; signed debug APK #147 PASS.
+- [x] v0.5.84-debug VERIFIED PUBLIC DEBUG PRERELEASE: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug — source APK SHA256 90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010.
+- [ ] Issue #40 remains OPEN for real device lock/background/process-death + Android dataSync foreground 6h quota and partial-output acceptance. Manual QA paused as user requested; this version NOT confirmed installed.
+- [ ] NEXT development: #51 archive intake completion or #30 Windows source-to-catalog publishing, separate from #40. Optional #21/#50 afterward. Do not touch user ZIP/RDPKG/volumes or start phone tests unasked.
+
+Canonical docs: docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.84.md and docs/v.0.5.84/qa/BACKGROUND_SERVICE_AUDIT.md.
+
+---
+
 ## GitHub Releases DONE / NEXT #40 background lifecycle audit — 2026-10-09
 
 - [x] PR #90 merged: explicit reviewed signed APK promotions, stable signer provenance, CI build SHA/artifact validation, APK sha256 and public prerelease.
