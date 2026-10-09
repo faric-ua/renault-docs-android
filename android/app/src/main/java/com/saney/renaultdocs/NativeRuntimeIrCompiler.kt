@@ -161,13 +161,12 @@ object NativeRuntimeIrCompiler {
                                 volume,
                         ),
                     onSectionCompiled = { done, withinVolume ->
-                        val denominator =
-                            if (knownTotal > 0) knownTotal else
-                                sectionsProcessed + withinVolume
-                        sectionProgress?.invoke(
-                            sectionsProcessed + done,
-                            denominator,
-                        )
+                        if (knownTotal > 0) {
+                            sectionProgress?.invoke(
+                                sectionsProcessed + done,
+                                knownTotal,
+                            )
+                        }
                     },
                 )
 
