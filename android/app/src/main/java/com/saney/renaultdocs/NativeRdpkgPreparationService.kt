@@ -421,12 +421,9 @@ class NativeRdpkgPreparationService : Service() {
                 ArchiveIntakeStager(
                     context =
                         this,
-                    onMessage = {
-                        message ->
-                        runStore.updatePreparing(
-                            message,
-                        )
-                    },
+                    // Live status must come from the typed progress stream.
+                    // Raw text would erase the file count during extraction.
+                    onMessage = { _ -> },
                     onProgress = {
                         progress ->
                         runStore.updateProgress(
@@ -1060,15 +1057,9 @@ class NativeRdpkgPreparationService : Service() {
                 NativeRdpkgPreparationEngine(
                     context =
                         this,
-                    onProgress = {
-                        message ->
-                        val display =
-                            progressPrefix +
-                                message
-                        runStore.updatePreparing(
-                            display,
-                        )
-                    },
+                    // Text-only internal compiler callbacks must not overwrite
+                    // measured progress for the current stage.
+                    onProgress = { _ -> },
                     onProgressState = {
                         progress ->
                         val display =
@@ -1145,9 +1136,10 @@ class NativeRdpkgPreparationService : Service() {
             )
             runStore.updateProgress(
                 OperationProgress.indeterminate(
-                    progressPrefix +
-                        "Перевіряю…",
+                    "Перевіряю…",
                 ),
+                message = progressPrefix + "Перевіряю…",
+                phase = NativeRdpkgRunPhase.IMPORTING,
             )
 
             updateNotification(
@@ -1169,17 +1161,13 @@ class NativeRdpkgPreparationService : Service() {
                             this,
                         packageUri =
                             destination,
-                        progress = {
-                            message ->
-                            runStore.updateImporting(
-                                progressPrefix +
-                                    message,
-                            )
-                        },
+                        progress = { _ -> },
                         progressState = {
                             progress ->
                             runStore.updateProgress(
                                 progress,
+                                message = progressPrefix + progress.displayText(),
+                                phase = NativeRdpkgRunPhase.IMPORTING,
                             )
 
                             updateNotificationThrottled(
