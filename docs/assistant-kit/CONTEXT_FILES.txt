@@ -1,3 +1,7 @@
+docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.84.md
+docs/v.0.5.84/RELEASE_META.json
+docs/v.0.5.84/qa/BACKGROUND_SERVICE_AUDIT.md
+docs/v.0.5.84/qa/PHONE_TEST.md
 docs/assistant-kit/GITHUB_RELEASES_CONTRACT.md
 docs/release-promotions/v0.5.83.json
 .github/workflows/publish-verified-apk.yml
