@@ -140,6 +140,19 @@ class NativeRdpkgPreparationService : Service() {
         val persistedState =
             runStore.load()
 
+        // Android can redeliver ACTION_START after a run has already
+        // completed or entered WAITING_SELECTION. Do not create a second
+        // package or overwrite the user's selection/terminal result.
+        if (
+            flags and START_FLAG_REDELIVERY != 0 &&
+            !persistedState.isRunning
+        ) {
+            startInFlight.set(false)
+            workerRunning.set(false)
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
+
         val resumingAfterProcessRestart =
             persistedState.isRunning &&
                 persistedState.projectId ==
