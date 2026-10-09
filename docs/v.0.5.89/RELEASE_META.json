@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.89",
   "versionCode": 105,
-  "phase": "merged_to_main_signed_main_phone_qa_pending",
+  "phase": "signed_main_verified_promotion_pending_phone_qa",
   "feature": "Bounded per-volume Android completed notification history",
   "issue": 102,
   "branch": "feat/v0.5.89-completed-notification-history",
@@ -10,9 +10,21 @@
   "phoneQa": "PENDING",
   "testRuns": [],
   "signedApkRun": null,
-  "next": "Verify trusted stable-signed main APK for app SHA bfdc3a7e..., reviewed release promotion and real phone QA. Do not install PR signer.",
+  "next": "Promote exact trusted run #152 to v0.5.89-debug, then install safely over existing app and verify progress UI and 10-result notification history.",
   "phone_qa": "PENDING",
   "main_merge_sha": "bfdc3a7e74220f19dbc90eefa596c166a6432f75",
   "exact_pr_checks": "PASS",
-  "signed_run_id": null
+  "signed_run_id": 37972943494,
+  "source_sha": "bfdc3a7e74220f19dbc90eefa596c166a6432f75",
+  "main_tests_run": 601,
+  "pr_tests_run": 37972543520,
+  "pr_android_check_run": 37972543480,
+  "signed_android_apk_run": 152,
+  "artifact_id": 11636907894,
+  "artifact_name": "Renault-Docs-v0.5.89-Debug",
+  "artifact_digest": "sha256:d802de296b5074a878e6a8ca887729e171da58cdfb1477910c925db822b4d40d",
+  "artifact_expires_at": "2026-10-12T18:25:56Z",
+  "apk_sha256": "46a2edc531725ca142e5f2a8afd2f5ff93ddb4e3061c919ede40e769097236db",
+  "signer": "Stable development certificate verified by trusted main Actions log",
+  "qa_status": "phone-qa-pending"
 }
