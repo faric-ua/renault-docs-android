@@ -35,6 +35,19 @@ class ArchiveNativeRawRootTest {
             assertEquals(actual.canonicalFile, ArchiveNativeRawRoot.resolve(extractionRoot))
             assertEquals(actual.canonicalFile, ArchiveNativeRawRoot.resolve(actual))
 
+            // Exercise the same relative-file entrypoint contract used by
+            // NativePreparationStager.stageScan, not just directory lookup.
+            val nativePaths = ArchiveRawVolumeIsolation
+                .walkSelectedRoot(actual, emptySet())
+                .filter { it.isFile }
+                .map { file ->
+                    actual.toPath().relativize(file.toPath())
+                        .toString().replace(File.separatorChar, '/')
+                }
+                .toSet()
+            assertTrue(NativePreparationStager.hasRootEntrypoint(nativePaths))
+            assertTrue("INDEX.HTM" in nativePaths)
+
             assertTrue(File(actual, "INDEX.HTM").isFile)
             assertTrue(File(actual, "COMMUN/img.bin").isFile)
             assertTrue(File(actual, "RUS/menu.htm").isFile)
