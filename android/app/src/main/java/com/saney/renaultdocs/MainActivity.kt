@@ -22,7 +22,6 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.FileProvider
@@ -46,7 +45,6 @@ class MainActivity : Activity() {
         }
     }
     private lateinit var statusText: TextView
-    private lateinit var operationProgress: ProgressBar
     private lateinit var operationStatus: OperationStatusView
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
@@ -140,7 +138,6 @@ class MainActivity : Activity() {
                     renderLibrary()
                 },
                 onShareProgress = { current, total, message ->
-                    operationProgress.visibility = View.GONE
                     statusText.text = message
                     if (::operationStatus.isInitialized) {
                         operationStatus.showRunning(
@@ -152,8 +149,6 @@ class MainActivity : Activity() {
                     }
                 },
                 onShareFinished = { message ->
-                    operationProgress.visibility = View.GONE
-                    operationProgress.progress = 0
                     statusText.text = message
                     if (::operationStatus.isInitialized) {
                         operationStatus.showTerminal(
@@ -815,20 +810,6 @@ class MainActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                 ).apply { topMargin = Ui.dp(this@MainActivity, 8) },
             )
-            operationProgress = ProgressBar(
-                this@MainActivity, null, android.R.attr.progressBarStyleHorizontal,
-            ).apply {
-                max = 100
-                progress = 0
-                visibility = View.GONE
-            }
-            addView(
-                operationProgress,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    Ui.dp(this@MainActivity, 4),
-                ),
-            )
             post { updateHomeAddPanelUi() }
         }
 
@@ -1288,8 +1269,6 @@ class MainActivity : Activity() {
         if (
             state.isRunning
         ) {
-            operationProgress.visibility =
-                View.GONE
             statusText.text =
                 "Проєкт = модель Renault · томи додаються окремо."
 
