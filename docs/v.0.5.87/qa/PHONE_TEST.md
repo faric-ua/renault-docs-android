@@ -8,7 +8,7 @@ Success of synthetic ZIP tests and installation smoke must not be confused with 
 
 ## Signed APK readiness — 2026-10-09
 
-All code/CI delivery gates PASS: PR Python #591, Android PR #467, main Tests #592, stable signer APK #150 (run 37938581867), explicit immutable promotion #99 and verified release publisher run 37938990631. GitHub release: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.87-debug; actual APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`. **No v0.5.87 device test has yet been reported.** Await the user's one controlled real NT8298A ZIP retry after in-place installation. Existing source archives must remain unchanged.
+All code/CI delivery gates PASS: PR Python #591, Android PR #467, main Tests #592, stable signer APK #150 (run 37938581867), explicit immutable promotion #99 and verified release publisher run 37938990631. GitHub release: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.87-debug; actual APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`. **Superseded by the real NT8298A PHONE PASS recorded below.** Existing source archives must remain unchanged.
 
 
 ## NT8298A real archive end-to-end — PHONE PASS (2026-10-09)
