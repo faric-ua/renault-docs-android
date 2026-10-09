@@ -1,10 +1,10 @@
 # v0.5.85 regression
 
-- [ ] Python source contracts pass, including previous release behavior.
-- [ ] Android JVM ArchiveIntakeTest passes ZIP collision and root source naming tests.
-- [ ] Android PR Check compiles with ZIP/7Z/RAR dependencies.
-- [ ] Main tests and stable signed APK pass; source SHA verified.
-- [ ] Public verified debug prerelease contains the original signed APK + SHA256.
+- [x] Python contracts passed: PR #586, main #587.
+- [x] Android JUnit ArchiveIntakeTest passed in PR Check #464 and signed build #148.
+- [x] Android PR Check #464 compiled successfully.
+- [x] Main Tests #587 and stable-signed APK #148 PASS; source SHA pinned.
+- [x] Verified debug prerelease v0.5.85-debug published (publisher run 37871568678 PASS), APK + SHA256.
 - [ ] Root-level + nested mixed chooser device QA — DEFERRED.
 - [ ] Nonduplicate ZIP/7Z/RAR + cancel/lock/staging runtime QA — DEFERRED.
 - [ ] No source archive mutation/data loss.
