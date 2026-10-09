@@ -17,3 +17,10 @@ The actual selected extracted directory was not persisted in that diagnostic, so
 ## Safety
 
 Original ZIP/7Z/RAR, previously installed tomes and Classic are unchanged. No user data deletion, reimport or conversion is triggered during CI. Debug prerelease is not called production-stable. Issue #51 stays OPEN until the real NT8298A archive conversion succeeds or the enhanced diagnostic identifies the remaining mismatch. The single necessary user action after confirmed signed publication is updating over the current app and retrying this same ZIP once, then reporting result; no manual archive unpacking.
+
+## Verified build and public signed debug prerelease — 2026-10-09
+
+- PR #98 merged Android app source SHA `937ffa06080c3dd6a63a87d4e9c5d209ff4b8755`; Python PR Tests #591 PASS, Android PR Check #467 PASS, main Tests #592 PASS, developer-signed Android Debug APK #150 PASS, run ID `37938581867`.
+- Original signed source artifact `Renault-Docs-v0.5.87-Debug`, ID `11620685925`, Actions **bundle** digest `sha256:8e575a37416d80380e4828984f759f166067063e7ab8b0894d9fb805f8608b5e` (not APK SHA).
+- Explicit reviewed PR #99 promotion, verified publisher run `37938990631` PASS; public [v0.5.87-debug](https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.87-debug) contains unchanged stable-signed APK and `.apk.sha256`. Original **APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`**.
+- **Phone QA pending, issue #51 OPEN.** Original NT8298A ZIP itself was not uploaded to CI, so the fix has not been validated against those exact bytes. Next user action is a single in-place APK update and retry of same ZIP once, then screenshot of result. No user files touched by build/publishing.
