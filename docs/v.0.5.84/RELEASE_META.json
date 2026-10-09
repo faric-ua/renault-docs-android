@@ -1,14 +1,14 @@
 {
   "versionName": "0.5.84",
   "versionCode": 100,
-  "phase": "signed_ci_pass_phone_qa_pending",
+  "phase": "published_debug_prerelease_phone_qa_pending",
   "feature": "Issue #40: reliable long-running service process redelivery and run-state preservation",
   "branch": "fix/v0.5.84-background-recovery-contract",
   "source_baseline": "v0.5.83/build99 (main)",
   "pr": null,
   "signed_android_apk_run": 147,
   "phone_qa": "PENDING_BY_USER_PAUSE",
-  "next": "Publish reviewed v0.5.84-debug prerelease. Extended phone QA and long FGS runtime evidence remain paused, #40 open.",
+  "next": "Keep #40 open pending device lock/unlock/process restart and long dataSync quota checks. Further manual testing remains paused; #51/#30 separate future work.",
   "source_sha": "4890963f0dc0a268f803913c0e3e7da7193ecd7a",
   "pull_request": 92,
   "issue": 40,
@@ -19,5 +19,19 @@
   "artifact_name": "Renault-Docs-v0.5.84-Debug",
   "artifact_id": 11588687681,
   "artifact_digest": "sha256:c5d7bc4f711a9986f7092367f1f00b97a4defb3638bf7234901aa9995107a24c",
-  "artifact_expires_at": "2026-10-12T00:54:03Z"
+  "artifact_expires_at": "2026-10-12T00:54:03Z",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.84-debug",
+    "prerelease": true,
+    "published_via_run_id": 37867195007,
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug",
+    "apk_url": "https://github.com/faric-ua/renault-docs-android/releases/download/v0.5.84-debug/Renault-Docs-v0.5.84-debug.apk",
+    "apk_asset_id": 623478333,
+    "apk_sha256": "90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010",
+    "checksum_file": "Renault-Docs-v0.5.84-debug.apk.sha256",
+    "source_sha": "4890963f0dc0a268f803913c0e3e7da7193ecd7a",
+    "qa_status": "phone-qa-pending",
+    "verified": "Original signed APK/source and checksum verified by promotion workflow. Installed phone QA paused."
+  }
 }
