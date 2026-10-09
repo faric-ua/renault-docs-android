@@ -882,6 +882,26 @@ object ArchiveIntake {
      * its relativePath is then "", representing extractionRoot itself.
      * Nonempty candidate paths must remain strictly within staging.
      */
+    /**
+     * The staging folder is named "extracted", not the Renault volume.
+     * Do not let that private implementation name become a package ID.
+     */
+    internal fun rawSourceName(
+        extractionRoot: File,
+        rawRoot: File,
+        archiveFileName: String,
+    ): String =
+        if (rawRoot.canonicalFile == extractionRoot.canonicalFile) {
+            archiveFileName.substringBeforeLast(
+                '.',
+                archiveFileName,
+            ).trim().ifBlank {
+                "archive-root"
+            }
+        } else {
+            rawRoot.name
+        }
+
     internal fun resolveRawRoot(
         extractionRoot: File,
         relativePath: String,
