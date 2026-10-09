@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 
 /**
  * Last 10 user-visible completed results. Never use this for live progress updates.
@@ -30,6 +31,23 @@ internal object CompletedNotificationHistory {
         text: String,
     ): Boolean {
         if (eventKey.isBlank()) return false
+        return try {
+            publishSafely(context, eventKey, projectId, title, text)
+        } catch (error: Exception) {
+            // A disabled/blocked Android notification must never fail the
+            // already-installed tome or change the operation's result.
+            Log.w("RenaultDocs", "Completion notification unavailable", error)
+            false
+        }
+    }
+
+    private fun publishSafely(
+        context: Context,
+        eventKey: String,
+        projectId: String?,
+        title: String,
+        text: String,
+    ): Boolean {
 
         val app = context.applicationContext
         val prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
