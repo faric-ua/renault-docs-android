@@ -22,3 +22,15 @@ All engineering, CI, signature, release and documents are complete. Next **singl
 **Issue #51 OPEN until this exact real-phone success/diagnosis**, even though source/CI PASS. **#40** separate background lock/process restart runtime QA still OPEN. No manual phone test, installation or original archive access performed by assistant.
 
 Canonical files `docs/v.0.5.87/RELEASE_META.json`, `docs/v.0.5.87/qa/PHONE_TEST.md`, `docs/v.0.5.87/qa/BUG_REGISTER.md`. After user PASS, record only scopes actually observed.
+
+
+## Real NT8298A ZIP acceptance and new no-code findings — 2026-10-09
+
+- User completed actual original Megane II archive `Megane II B,C,S 84_NT8298A_Visu v3.0_2005.11.28.zip` (72,693,952 bytes) through app native `.rdpkg` flow. **COMPLETE**, 319 native sections, label `NT8298A · 2005-11-28`, package ID `megane-ii-nt8298a-2005-11-28`, original generated package SHA256 `e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603`, elapsed 119 seconds (16:57:20–16:59:19 phone local). **PHONE PASS for the real nested NT8298A ZIP prior FAIL**; completed code path includes app-private install and upsert into Megane II before status COMPLETE. The user did not separately show project total changing or opening all pages. The result SHA256 is not the signed APK SHA256.
+- Live status line was observed jumping as `копіюю/готую/пакую` and processed files counters alternate, sometimes only counts. **UX issue #100 filed**, record-only, **no UI code change** per explicit user request; issue #25 prior global progress work was already closed.
+- Asked about deletion across Megane II/Kangoo II and potentially same name. **Read-only audit** `docs/v.0.5.87/qa/DELETE_BEHAVIOR_READONLY.md` documents:
+  - `ProjectStore.removeVolume(projectId, volumeId)` removes one project's association, may invalidate prepared project-share cache, but does not delete installed dataset or external archive/RDPKG.
+  - `PreparedShareStore.deleteVolume()` can remove canonical + legacy **private prepared share copies** for one volume (zero to two), not source/external package, so "two files" could refer only to cache naming here, not two projects' tomes.
+  - New native package IDs include projectId, and generated canonical filenames include model, so Megane/Kangoo newly generated packages are normally distinguishable. Exact physical filenames/URIs of existing volumes remain unverified without on-device read-only inspection.
+  - Android Settings clear-data wipes **all** project metadata/app-private extracted packages, not just a selected project. Do not test by deleting/clearing data.
+- #51 remains OPEN for other archive/7Z/RAR/batch/cancel scenarios despite this ZIP PASS. #40 remains OPEN for runtime background QA. No new build, code modifications, deletion or re-import initiated this turn.
