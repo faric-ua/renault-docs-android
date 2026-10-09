@@ -2613,3 +2613,7 @@ v0.5.89/build105 combined #100 progress UI + #102 ten-result notifications from 
 ## 2026-10-09 — v0.5.90 progress phase UX candidate
 
 Phone finding: v0.5.89 NT8275A real installation succeeded (Megane II 12→13 tomes, 333 native) while intermediate status sometimes showed an unmoving bar/no counters, terminal SHA off card. User requests semantic green-running/success versus red-failed, true per-step counts where measurable. Candidate phase-specific measured Runtime IR sections and Fast Pack files, indeterminate movement for unknown/scan stages, no text-only status overwrite, and lossless SHA visual wrap. Branch `fix/v0.5.90-phase-progress-and-status-colors`, source-only until PR checks/build; phone QA not accepted. Keep original docs and user files untouched.
+
+## 2026-10-09 — v0.5.90 signed release published, phone QA pending
+
+PR #107 merged source `eded18d7a9c36b32d840a9c288459491b7ff04cd`; main Tests #609, signed Android Debug APK #153 (run `37978908157`) PASS, stable signer verified. Exact APK SHA-256 `9e0de592051164796bd4326d6b44933bca1a07e95969bc0bbfe7dbe823051199`; reviewed promotion PR #108 and publisher run `37979276172` PASS, public release `v0.5.90-debug`. Native RDPKG importer now explicitly emits 100% N/N at successful ZIP EOF and carries that factual extraction summary while separate verification/installation uses animated unknown-progress indicator; retains stage-specific progress and semantic colors. No user archives/installed volumes modified by source/publishing. **PHONE QA PENDING**; issues #100/#102 remain open.
