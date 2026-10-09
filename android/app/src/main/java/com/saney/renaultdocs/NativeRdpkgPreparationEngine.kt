@@ -348,6 +348,9 @@ class NativeRdpkgPreparationEngine(
                                 ),
                             )
                         },
+                        phaseProgress = { stage ->
+                            onProgressState(OperationProgress.indeterminate(stage))
+                        },
                     )
 
             checkCancelled()
