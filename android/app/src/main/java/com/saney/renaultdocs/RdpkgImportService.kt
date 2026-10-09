@@ -82,21 +82,44 @@ class RdpkgImportService : Service() {
                     },
                 ).getOrThrow()
                 runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
-                getSystemService(NotificationManager::class.java)
-                    .notify(NOTIFICATION_ID, notification("Пакет .rdpkg імпортовано.", false))
+                publishResult(
+                    title = "Renault Docs · том імпортовано",
+                    text = VolumeDuplicatePreflight.label(result.volume),
+                )
             } catch (error: Throwable) {
                 val message = error.message ?: "Невідома помилка імпорту."
                 runStore.fail(message)
-                getSystemService(NotificationManager::class.java)
-                    .notify(NOTIFICATION_ID, notification("Помилка імпорту: $message", false))
+                publishResult(
+                    title = "Renault Docs · помилка імпорту",
+                    text = message,
+                )
             } finally {
                 workWakeLock.release()
                 workerRunning.set(false)
                 stopForeground(STOP_FOREGROUND_DETACH)
+                getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
                 stopSelf()
             }
         }.start()
         return START_REDELIVER_INTENT
+    }
+
+    private fun publishResult(title: String, text: String) {
+        val state = runStore.load()
+        if (!state.isTerminal) return
+        CompletedNotificationHistory.publish(
+            context = this,
+            eventKey = listOf(
+                "import",
+                state.projectId.orEmpty(),
+                state.startedAtMs.toString(),
+                state.finishedAtMs.toString(),
+                state.phase.name,
+            ).joinToString(":"),
+            projectId = state.projectId,
+            title = title,
+            text = text,
+        )
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
