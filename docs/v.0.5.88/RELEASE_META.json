@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.88",
+  "versionCode": 104,
+  "phase": "development_pr_qa_pending",
+  "feature": "Shared stable operation progress and counters on every app-owned progress surface",
+  "branch": "feat/v0.5.88-unified-progress-ui",
+  "issue": 100,
+  "source_baseline": "v0.5.87/build103",
+  "phone_qa": "PENDING",
+  "tested_source_sha": null,
+  "pr_android_check_run": null,
+  "pr_tests_run": null,
+  "signed_run_id": null,
+  "next": "Review PR, await Tests and Android PR Check; then obtain verified signed main APK and run phone QA before closeout."
+}

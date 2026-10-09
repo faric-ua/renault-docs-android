@@ -1,3 +1,19 @@
+## Shared operation progress — v0.5.88 candidate (phone QA pending)
+
+Every app-owned operation/status surface uses a compact measured thin bar. `OperationStatusView` is the shared card in Home, Project and Drive/catalog; the Converter's standalone bar uses the same progress renderer and height.
+
+- Preserve stage and file counters as **separate fixed-height slots**; counters never replace the stage or cause card height to oscillate when a total is unknown.
+- Portrait: one fixed stage line plus one reserved counter line. Landscape: fixed-height horizontal stage/counter, stage ellipsized first, count kept visible.
+- Keep `Файлів: N / M` when measured; unknown total must not fake percent or keep an old 100% value. No bouncing animation.
+- All measured updates use one clamped integer scale and smooth progress updates without per-file redraw storms.
+- Native extraction/staging/packing must publish one authoritative structured event per item; callbacks must not overwrite visible counters with redundant unstructured messages.
+- Terminal result, dismissal, copy-full-status, cancel and lifecycle ownership stay unchanged; repainting UI never restarts work.
+- Converter and any future new progress widget must reuse the shared rendering contract, not invent its own scale/style.
+
+Device and CI acceptance evidence for this new candidate is pending; keep historical #25 acceptance distinct.
+
+---
+
 # Renault Docs — UI Contract
 
 ## Home — Add panel parity (v0.5.82)

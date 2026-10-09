@@ -65,12 +65,17 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
         )
 
         self.assertIn(
-            "state.phase ==\n                ConversionRunPhase.SCANNING",
+            "state.phase == ConversionRunPhase.SCANNING",
             activity,
         )
         self.assertIn('"Сканую…"', activity)
-        self.assertIn("progressBar.isIndeterminate", activity)
-        self.assertIn('"Знайдено файлів: "', activity)
+        shared = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/SharedOperationProgressBar.kt"
+        )
+        self.assertIn("state.phase == ConversionRunPhase.SCANNING", activity)
+        self.assertIn("SharedOperationProgressBar.render(progressBar, null, null)", activity)
+        self.assertIn('itemLabel = "Знайдено файлів"', activity)
+        self.assertIn("bar.isIndeterminate = false", shared)
 
     def test_saf_paths_are_user_friendly(self):
         activity = self._read(

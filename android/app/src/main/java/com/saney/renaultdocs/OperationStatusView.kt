@@ -17,6 +17,9 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     private val titleView: TextView
     private val subjectView: TextView
     private val detailView: TextView
+    private val counterView: TextView
+    private val detailRow: LinearLayout
+    private var fullDetail: String = ""
     private val progressView: ProgressBar
     private val closeView: TextView
     private val cancelView: TextView
@@ -114,23 +117,25 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             subjectView,
         )
 
+        detailRow = LinearLayout(context).apply {
+            orientation = VERTICAL
+        }
         detailView = Ui.textView(context, "", 13f, Ui.muted).apply {
             contentDescription = "Натисни, щоб скопіювати весь статус"
-            setOnClickListener {
-                copyCurrentText()
-            }
+            setOnClickListener { copyCurrentText() }
         }
-        configureDetailLayout(
-            terminal = false,
-        )
-        addView(detailView)
+        counterView = Ui.textView(context, "", 13f, Ui.muted).apply {
+            setTypeface(typeface, Typeface.BOLD)
+            contentDescription = "Натисни, щоб скопіювати весь статус"
+            setOnClickListener { copyCurrentText() }
+        }
+        detailRow.addView(detailView)
+        detailRow.addView(counterView)
+        configureDetailLayout(terminal = false)
+        addView(detailRow)
 
-        progressView = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
-            max = PROGRESS_SCALE
-            progress = 0
-            isIndeterminate = true
-        }
-        addView(progressView, LayoutParams(LayoutParams.MATCH_PARENT, Ui.dp(context, 5)).apply {
+        progressView = SharedOperationProgressBar.create(context)
+        addView(progressView, LayoutParams(LayoutParams.MATCH_PARENT, Ui.dp(context, SharedOperationProgressBar.HEIGHT_DP)).apply {
             topMargin = Ui.dp(context, 10)
         })
     }
@@ -148,7 +153,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     private fun updateProjectCompactUi() {
         if (!projectCompact) return
         subjectView.visibility = if (projectDetailsExpanded) View.VISIBLE else View.GONE
-        detailView.visibility = if (projectDetailsExpanded) View.VISIBLE else View.GONE
+        detailRow.visibility = if (projectDetailsExpanded) View.VISIBLE else View.GONE
         detailsToggleView.visibility = View.VISIBLE
         detailsToggleView.text = if (projectDetailsExpanded) "▴" else "▾"
         detailsToggleView.contentDescription =
@@ -174,83 +179,17 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                 .ifBlank {
                     "Renault Docs"
                 }
-        configureDetailLayout(
-            terminal = false,
-        )
-        detailView.text = detail
+        configureDetailLayout(terminal = false)
+        fullDetail = detail
+        val parts = OperationStatusDetailFormatter.split(detail)
+        detailView.text = parts.stage
+        counterView.text = parts.counter.orEmpty()
         updateProjectCompactUi()
         closeView.visibility = View.GONE
         cancelView.visibility = if (onCancel == null) View.GONE else View.VISIBLE
         cancelView.setOnClickListener(if (onCancel == null) null else View.OnClickListener { onCancel() })
         progressView.visibility = View.VISIBLE
-        val determinate =
-            current !=
-                null &&
-                total !=
-                    null &&
-                total >
-                    0
-
-        if (
-            determinate
-        ) {
-            progressView.isIndeterminate =
-                false
-
-            val normalized =
-                (
-                    current!!
-                        .coerceIn(
-                            0,
-                            total!!,
-                        )
-                        .toLong() *
-                        PROGRESS_SCALE /
-                        total
-                )
-                    .toInt()
-                    .coerceIn(
-                        0,
-                        PROGRESS_SCALE,
-                    )
-
-            progressView.max =
-                PROGRESS_SCALE
-
-            if (
-                android.os.Build.VERSION.SDK_INT >=
-                android.os.Build.VERSION_CODES.N
-            ) {
-                progressView.setProgress(
-                    normalized,
-                    true,
-                )
-            } else {
-                progressView.progress =
-                    normalized
-            }
-        } else {
-            val isNewRun =
-                titleView.text
-                    .toString() !=
-                    title ||
-                    closeView.visibility ==
-                        View.VISIBLE ||
-                    visibility !=
-                        View.VISIBLE
-
-            progressView.isIndeterminate =
-                false
-            progressView.max =
-                PROGRESS_SCALE
-
-            if (
-                isNewRun
-            ) {
-                progressView.progress =
-                    0
-            }
-        }
+        SharedOperationProgressBar.render(progressView, current, total)
     }
 
     fun showTerminal(
@@ -267,14 +206,12 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                 .ifBlank {
                     "Renault Docs"
                 }
-        configureDetailLayout(
-            terminal = true,
-        )
+        configureDetailLayout(terminal = true)
+        fullDetail = detail
         detailView.text = detail
+        counterView.text = ""
         updateProjectCompactUi()
-        progressView.isIndeterminate = false
-        progressView.max = PROGRESS_SCALE
-        progressView.progress = PROGRESS_SCALE
+        SharedOperationProgressBar.render(progressView, null, null, completed = true)
         cancelView.visibility = View.GONE
         cancelView.setOnClickListener(null)
         closeView.visibility = View.VISIBLE
@@ -284,42 +221,47 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         }
     }
 
-    private fun configureDetailLayout(
-        terminal: Boolean,
-    ) {
-        if (
-            terminal
-        ) {
-            detailView.maxLines =
-                if (
-                    resources.configuration.orientation ==
-                    Configuration.ORIENTATION_LANDSCAPE
-                ) {
-                    4
-                } else {
-                    6
-                }
-            detailView.ellipsize =
-                null
+    private fun configureDetailLayout(terminal: Boolean) {
+        val landscape =
+            resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        if (terminal) {
+            detailRow.orientation = VERTICAL
+            counterView.visibility = View.GONE
+            detailView.setSingleLine(false)
+            detailView.minLines = 1
+            detailView.maxLines = if (landscape) 4 else 6
+            detailView.ellipsize = null
+            detailView.layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT,
+            )
             return
         }
 
-        val landscape =
-            resources.configuration.orientation ==
-                Configuration.ORIENTATION_LANDSCAPE
+        // Reserve the count's row in portrait even before the total is known.
+        // Landscape keeps the stage and count side by side on one fixed-height row.
+        detailRow.orientation = if (landscape) HORIZONTAL else VERTICAL
+        counterView.visibility = View.VISIBLE
+        detailView.setSingleLine(true)
+        detailView.ellipsize = TextUtils.TruncateAt.MIDDLE
+        counterView.setSingleLine(true)
+        counterView.ellipsize = TextUtils.TruncateAt.END
+        counterView.gravity = Gravity.CENTER_VERTICAL
+        detailView.gravity = Gravity.CENTER_VERTICAL
 
-        if (
-            landscape
-        ) {
-            detailView.maxLines =
-                1
-            detailView.ellipsize =
-                TextUtils.TruncateAt.MIDDLE
+        val rowHeight = Ui.dp(context, 20)
+        detailView.layoutParams = if (landscape) {
+            LayoutParams(0, rowHeight, 1f)
         } else {
-            detailView.maxLines =
-                2
-            detailView.ellipsize =
-                TextUtils.TruncateAt.END
+            LayoutParams(LayoutParams.MATCH_PARENT, rowHeight)
+        }
+        counterView.layoutParams = if (landscape) {
+            LayoutParams(LayoutParams.WRAP_CONTENT, rowHeight).apply {
+                marginStart = Ui.dp(context, 8)
+            }
+        } else {
+            LayoutParams(LayoutParams.MATCH_PARENT, rowHeight)
         }
     }
 
@@ -332,9 +274,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
                 subjectView.text
                     .toString()
                     .trim(),
-                detailView.text
-                    .toString()
-                    .trim(),
+                fullDetail.trim(),
             )
                 .filter {
                     it.isNotBlank()
@@ -372,8 +312,4 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         cancelView.setOnClickListener(null)
     }
 
-    companion object {
-        private const val PROGRESS_SCALE =
-            1_000
-    }
 }

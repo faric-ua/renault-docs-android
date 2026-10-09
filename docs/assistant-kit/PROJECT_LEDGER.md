@@ -2597,3 +2597,7 @@ CI:
 
 Phone acceptance pending.
 
+
+## 2026-10-09 — v0.5.88 progress UI candidate (not released)
+
+User chose to broaden UX #100 to all operation progress surfaces. Shared stage/counter/5dp bar presentation is being unified across Home, Project, Drive/catalog and converter, retaining measured file progress and lifecycle semantics. Work only on feature branch `feat/v0.5.88-unified-progress-ui`; no main merge, signed APK, device verification or data modification until CI and QA. See `docs/v.0.5.88/`, CURRENT_PLAN and issue #100.

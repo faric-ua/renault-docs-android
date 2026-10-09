@@ -1,3 +1,11 @@
+## CURRENT — v0.5.88 BUILD104 UNIFIED PROGRESS DEV / CI + PHONE PENDING — 2026-10-09
+
+User authorized global progress-bar unification. Real v0.5.87 video showed ZIP extraction detail alternating bare `1361/3360` and `Файлів: 2312 / 3360` while bar progressed. New scoped candidate on `feat/v0.5.88-unified-progress-ui` changes common status component (Home, Project, Drive), the converter, and deduplicates native progress emissions; one-line landscape/two fixed slots portrait; shared 5dp thin measured bar and visible counters. Removed hidden unused Home bar. Adds Kotlin regression tests and new release skeleton `docs/v.0.5.88`. User data and sources unchanged. Not yet signed, merged or phone QA accepted. PR checks are required; never claim a new phone PASS from the old video.
+
+Next: review PR + verify exact Python/Android PR CI, then main build and signed APK before user phone test. #100 OPEN until new phone PASS; #51/#40 remain independent.
+
+---
+
 ## NT8298A real ZIP PHONE PASS / UX #100 DEFERRED / DELETE AUDIT READ-ONLY — 2026-10-09
 
 - User supplied actual v0.5.87 archive-to-RDPKG final status and read-only native diagnostics: `COMPLETE`, project `Megane II`, `ARCHIVE_FILE`, source 72,693,952-byte NT8298A ZIP, volume `NT8298A · 2005-11-28`, **319 native sections**, package ID `megane-ii-nt8298a-2005-11-28`, resulting .rdpkg SHA256 `e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603`, duration 119 s. **Original nested ZIP regression PHONE PASS**. Previous v0.5.86 FAIL resolved for this specific case. Post-run GUI tome count and individual section openings not separately reported.

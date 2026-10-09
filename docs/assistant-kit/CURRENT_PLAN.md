@@ -1,3 +1,16 @@
+## CURRENT — v0.5.88/build104 UNIFIED PROGRESS CANDIDATE — 2026-10-09
+
+- **User explicitly prioritized implementing** stable shared progress for all operations after real v0.5.87 unpacking video. This supersedes the old #100 record-only decision (retained below as historical context).
+- Feature branch `feat/v0.5.88-unified-progress-ui` based on v0.5.87 main; code candidate adds shared thin progress bar/normalization, fixed stage and file-counter slots in `OperationStatusView` used by Home/Project/Drive, and shared bar/compact status for Converter.
+- Removes redundant raw/structured per-file updates during ZIP unpack, native staging and final packaging; native message and measurement are persisted atomically. Discards obsolete hidden Home bar. No changes to actual archive contents, conversion outputs, package data, Classic, deletion, sharing semantics.
+- **Tests / Android CI / signed APK / device QA: PENDING.** Feature branch source changes are **not** a released or phone-tested candidate. Do not claim issue #100 closed, do not auto-merge or install on phone before exact PR checks PASS.
+- Next: open/review PR, await Python Tests and Android PR Check on exact head; fix any failures, then follow regular main/signed-build process; phone QA must verify stage/counter alignment, converter, all status menus, rotation, and preservation of user projects.
+- #51 remaining archive variants and #40 background stress remain open. v0.5.87 NT8298A prior PHONE PASS stands.
+
+Canonical: `docs/v.0.5.88/` and issue #100.
+
+---
+
 ## NT8298A real ZIP PHONE PASS / UX #100 DEFERRED / DELETE AUDIT READ-ONLY — 2026-10-09
 
 - User supplied actual v0.5.87 archive-to-RDPKG final status and read-only native diagnostics: `COMPLETE`, project `Megane II`, `ARCHIVE_FILE`, source 72,693,952-byte NT8298A ZIP, volume `NT8298A · 2005-11-28`, **319 native sections**, package ID `megane-ii-nt8298a-2005-11-28`, resulting .rdpkg SHA256 `e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603`, duration 119 s. **Original nested ZIP regression PHONE PASS**. Previous v0.5.86 FAIL resolved for this specific case. Post-run GUI tome count and individual section openings not separately reported.

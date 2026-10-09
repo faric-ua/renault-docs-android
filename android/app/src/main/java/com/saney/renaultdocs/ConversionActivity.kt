@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.app.Activity
 import android.content.Intent
+import android.text.TextUtils
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.os.Bundle
@@ -640,21 +641,9 @@ class ConversionActivity : Activity() {
             }
         )
 
-        progressBar =
-            ProgressBar(
-                this,
-                null,
-                android.R.attr.progressBarStyleHorizontal,
-            ).apply {
-                max =
-                    1000
-                progress =
-                    0
-                isIndeterminate =
-                    false
-                visibility =
-                    View.GONE
-            }
+        progressBar = SharedOperationProgressBar.create(this).apply {
+            visibility = View.GONE
+        }
 
         body.addView(
             progressBar,
@@ -662,7 +651,7 @@ class ConversionActivity : Activity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 Ui.dp(
                     this@ConversionActivity,
-                    10,
+                    SharedOperationProgressBar.HEIGHT_DP,
                 ),
             ).apply {
                 topMargin =
@@ -686,6 +675,8 @@ class ConversionActivity : Activity() {
             ).apply {
                 visibility =
                     View.GONE
+                setSingleLine(true)
+                ellipsize = TextUtils.TruncateAt.MIDDLE
                 setPadding(
                     0,
                     Ui.dp(
@@ -1120,79 +1111,50 @@ class ConversionActivity : Activity() {
                     "Готую…"
             }
 
-        if (
-            state.phase ==
-                ConversionRunPhase.SCANNING
-        ) {
-            progressBar.isIndeterminate =
-                true
-            progressText.text =
-                if (
-                    state.filesTotal >
-                    0
-                ) {
-                    "Знайдено файлів: " +
-                        state.filesTotal
+        when {
+            state.phase == ConversionRunPhase.SCANNING -> {
+                SharedOperationProgressBar.render(progressBar, null, null)
+                progressText.text = if (state.filesTotal > 0) {
+                    OperationProgress(
+                        stage = phaseLabel,
+                        itemCurrent = state.filesTotal,
+                        itemLabel = "Знайдено файлів",
+                    ).displayText()
                 } else {
                     phaseLabel
                 }
-        } else if (
-            state.filesTotal >
-                0
-        ) {
-            progressBar.isIndeterminate =
-                false
-
-            val normalized =
-                (
-                    state.filesDone
-                        .coerceIn(
-                            0,
-                            state.filesTotal,
-                        )
-                        .toLong() *
-                        progressBar.max /
-                        state.filesTotal
-                            .coerceAtLeast(
-                                1,
-                            )
-                ).toInt()
-
-            if (
-                android.os.Build.VERSION.SDK_INT >=
-                android.os.Build.VERSION_CODES.N
-            ) {
-                progressBar.setProgress(
-                    normalized,
-                    true,
-                )
-            } else {
-                progressBar.progress =
-                    normalized
             }
 
-            progressText.text =
-                phaseLabel +
-                    " · Файлів: " +
-                    state.filesDone
-                        .coerceIn(
-                            0,
-                            state.filesTotal,
-                        ) +
-                    " / " +
-                    state.filesTotal
-        } else if (running) {
-            progressBar.isIndeterminate =
-                true
-            progressText.text =
-                phaseLabel
-        } else {
-            progressBar.isIndeterminate =
-                false
-            progressBar.progress =
-                0
-            progressText.text =
-                ""
+            state.phase == ConversionRunPhase.COMPLETE -> {
+                SharedOperationProgressBar.render(progressBar, null, null, completed = true)
+                progressText.text = "Завершено"
+            }
+
+            state.filesTotal > 0 -> {
+                SharedOperationProgressBar.render(
+                    progressBar,
+                    state.filesDone,
+                    state.filesTotal,
+                )
+                progressText.text = OperationProgress.measured(
+                    stage = phaseLabel,
+                    current = state.filesDone,
+                    total = state.filesTotal,
+                    itemCurrent = state.filesDone,
+                    itemTotal = state.filesTotal,
+                    itemLabel = "Файлів",
+                ).displayText()
+            }
+
+            running -> {
+                SharedOperationProgressBar.render(progressBar, null, null)
+                progressText.text = phaseLabel
+            }
+
+            else -> {
+                SharedOperationProgressBar.render(progressBar, null, null)
+                progressText.text = ""
+            }
         }
 
         when (

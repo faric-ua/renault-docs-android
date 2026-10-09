@@ -219,20 +219,6 @@ class ArchiveIntakeStager(
                         extractionRoot,
                     onProgress = {
                         progress ->
-                        onMessage(
-                            progress.stage +
-                                " " +
-                                progress.entriesDone +
-                                (
-                                    progress.entriesTotal
-                                        ?.let {
-                                            "/" +
-                                                it
-                                        }
-                                        ?: ""
-                                ),
-                        )
-
                         val state =
                             if (
                                 progress.entriesTotal !=

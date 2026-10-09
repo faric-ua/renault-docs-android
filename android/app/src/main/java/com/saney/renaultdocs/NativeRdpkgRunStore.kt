@@ -421,8 +421,12 @@ class NativeRdpkgRunStore(
 
     fun updateProgress(
         progress: OperationProgress,
+        message: String? = null,
+        phase: NativeRdpkgRunPhase? = null,
     ) {
         prefs.edit().apply {
+            if (message != null) putString(KEY_MESSAGE, message)
+            if (phase != null) putString(KEY_PHASE, phase.name)
             putString(
                 KEY_PROGRESS_STAGE,
                 progress.compactStage(),

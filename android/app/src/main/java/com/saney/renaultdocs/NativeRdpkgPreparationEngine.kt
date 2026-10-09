@@ -111,10 +111,7 @@ class NativeRdpkgPreparationEngine(
                             context,
                         onProgress = {
                             progress ->
-                            onProgress(
-                                progress.message,
-                            )
-        
+
                             val stage =
                                 when (
                                     progress.phase
@@ -509,27 +506,8 @@ class NativeRdpkgPreparationEngine(
                             root,
                         destinationUri =
                             request.destinationUri,
-                        progress = {
-                            completed,
-                            total ->
+                        progress = { _, _ ->
                             checkCancelled()
-
-                            if (
-                                completed ==
-                                0 ||
-                                completed ==
-                                total ||
-                                completed %
-                                    500 ==
-                                0
-                            ) {
-                                onProgress(
-                                    "Пакую .rdpkg… " +
-                                        completed +
-                                        "/" +
-                                        total,
-                                )
-                            }
                         },
                         byteProgress = {
                             completedFiles,
