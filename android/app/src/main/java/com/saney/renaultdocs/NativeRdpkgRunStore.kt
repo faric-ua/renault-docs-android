@@ -414,11 +414,9 @@ class NativeRdpkgRunStore(
                 KEY_PROGRESS_TOTAL,
                 0,
             )
-            .putBoolean(
-                KEY_CANCEL_REQUESTED,
-                false,
-            )
-            .apply()
+            // Never resurrect a user-cancelled operation on Android restart.
+            // The existing worker cancellation checks consume the saved flag.
+            .commit()
     }
 
     fun updateProgress(
