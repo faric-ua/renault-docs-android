@@ -18,3 +18,7 @@ User replied «Пасс» directly to the requested 4-step live check: Renault T
 ## Next live test: archive source confirmation (PENDING)
 
 Open a project matching an existing Renault ZIP/7Z/RAR → `Додати` → `Створити .rdpkg з архіву` → choose the archive with SAF. Expect the dialog `Підтвердь джерело архіву` showing the correct archive filename/project and duplicate-warning text. **Do not press Continue/choose destination yet**. Send screenshot; no native conversion should have started. This is an input/preflight test, not a successful ZIP/7Z/RAR import claim.
+
+## Phone Test 2 — archive source preflight screenshot PASS (2026-10-09)
+
+User supplied a screenshot of the app's `Підтвердь джерело архіву` dialog in **Megane II**, showing source `Megane II B,C,S 84_NT8298A_Visu v3.0_2005.11.28.zip` and project `Megane II`, message `У каталозі встановлених томів збігів за NT немає.`, technical details collapsed and `Скасувати`/`Продовжити` buttons. **PHONE PASS for project/source identity and read-only catalog-NT preflight UI only**. The message does not mean the archive payload was inspected or that full content duplicates were excluded; no conversion or APK package result has yet been evidenced. Next safe action is to continue and select a separate output folder intentionally to perform a real archive-to-RDPKG test, then capture result. Do not delete original archive or existing volumes.
