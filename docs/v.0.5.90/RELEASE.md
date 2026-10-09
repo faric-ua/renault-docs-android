@@ -11,3 +11,5 @@ Plan:
 - Use the same thin bar contract in Project/Home/Drive/Converter; preserve data, navigation and lifecycle.
 
 No APK or device acceptance until exact CI plus signed main build and user phone QA.
+
+Import-phase follow-up: successful RDPKG extraction now explicitly emits a final measured `N/N` after verified ZIP EOF rather than leaving the last throttled/byte-weighted partial value. The separate validation and activation stages retain `Розпаковано файлів: N / N` as a factual summary while their own progress stays indeterminate. Before total file count is known, the compressed source's known byte length is used proportionally instead of mapping the whole input to only a 25% slice.
