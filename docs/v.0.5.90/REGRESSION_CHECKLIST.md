@@ -10,3 +10,7 @@
 - [ ] Converted RDPKG actual output/SHA and installed tomes unchanged by new UI.
 - [ ] Background, rotation and redelivery do not restart operations.
 - [ ] Python, Android Kotlin tests, stable signed debug main, phone QA.
+
+- [ ] RDPKG extraction emits exact N/N after confirmed ZIP EOF (no stale sub-100% last update).
+- [ ] Transition to package verification/install retains extracted N/N as a completed count, **with indeterminate phase bar**, not fake 100% whole-operation progress.
+- [ ] When archive total bytes are known but file count unknown, show true compressed-byte percentage, not capped 25%.
