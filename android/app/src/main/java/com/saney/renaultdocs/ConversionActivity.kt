@@ -1067,8 +1067,11 @@ class ConversionActivity : Activity() {
         progressBar.visibility =
             if (
                 running ||
-                state.phase ==
-                ConversionRunPhase.COMPLETE
+                state.phase in setOf(
+                    ConversionRunPhase.COMPLETE,
+                    ConversionRunPhase.FAILED,
+                    ConversionRunPhase.CANCELLED,
+                )
             ) {
                 View.VISIBLE
             } else {
@@ -1111,6 +1114,7 @@ class ConversionActivity : Activity() {
                     "Готую…"
             }
 
+        progressText.setTextColor(Ui.muted)
         when {
             state.phase == ConversionRunPhase.SCANNING -> {
                 SharedOperationProgressBar.render(progressBar, null, null)
@@ -1128,6 +1132,22 @@ class ConversionActivity : Activity() {
             state.phase == ConversionRunPhase.COMPLETE -> {
                 SharedOperationProgressBar.render(progressBar, null, null, completed = true)
                 progressText.text = "Завершено"
+            }
+
+            state.phase == ConversionRunPhase.FAILED -> {
+                SharedOperationProgressBar.render(
+                    progressBar, null, null, completed = true, color = Ui.danger,
+                )
+                progressText.setTextColor(Ui.danger)
+                progressText.text = state.message.ifBlank { "Помилка конвертації" }
+            }
+
+            state.phase == ConversionRunPhase.CANCELLED -> {
+                SharedOperationProgressBar.render(
+                    progressBar, null, null, completed = true, color = Ui.warning,
+                )
+                progressText.setTextColor(Ui.warning)
+                progressText.text = "Операцію скасовано"
             }
 
             state.filesTotal > 0 -> {
