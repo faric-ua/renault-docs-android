@@ -1,3 +1,9 @@
+## Renault Docs v0.5.86/build102 — #51 source fix published, phone QA on hold — 2026-10-09
+
+PR #96 merged source `f145dee0c545d5ee1953a8584cebb3a60bfd5acf`; selected mixed-archive raw volume excludes nested separate candidate folders in native stager, preserving source. Python #588/Android #465/main Python #589/signed APK #149 PASS. Reviewed PR #97 published QA-pending public debug prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.86-debug, original signed APK SHA256 `72d78292c8197a026bddaba4ecd32ab5f433556bab7ca6622b9d246d109b5ec3`. #51 real mixed ZIP/7Z/RAR/cancel/lock QA OPEN, user paused manual tests; #40 runtime background acceptance OPEN. No v0.5.86 device install; previous v0.5.84 install/retention PHONE PASS. Next #30 Windows source/catalog direction. Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.86.md`.
+
+---
+
 ## v0.5.85/build101 — #51 archive safety source merged, signed release available — 2026-10-09
 
 PR #94 merged app SHA `5b27f30ce92aed00e5b1e0e233d9a312a064bfb6`; core fixes root-level multi-volume chooser path, archive filename/NT identity propagation, ZIP/7Z/RAR member collision validation. PR Python #586, Android PR #464, main Tests #587 and signed debug APK #148 PASS. PR #95 public verified developer debug prerelease v0.5.85-debug published, original APK SHA256 `dde09bde484d0f3d7392505a999faa8f8036a2ce38778c654fcbeac676baacb6`: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.85-debug. **User paused on-device testing and has not confirmed installation.** #51 OPEN for mixed-root nested isolation, actual ZIP/7Z/RAR, cancel/lock/staging. #40 stays open for real Android background lifecycle. See `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.85.md`.
