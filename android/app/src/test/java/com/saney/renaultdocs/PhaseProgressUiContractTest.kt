@@ -13,13 +13,15 @@ class PhaseProgressUiContractTest {
         val display = OperationStatusDisplayFormat.wrapHashesForDisplay(original)
         assertTrue(display.contains("SHA-256:\n"))
         assertEquals(64, display.substringAfter("SHA-256:").filter { it.isLetterOrDigit() }.length)
-        assertEquals(original, display.replace("\n", "").let {
-            // The original first newline is retained by the preceding status;
-            // only visual digest line wrapping is stripped for this comparison.
-            val label = "SHA-256:"
-            val labelIndex = original.indexOf(label)
-            original.substring(0, labelIndex) + label + it.substringAfter(label)
-        })
+        assertEquals(
+            original.substringBefore("SHA-256:"),
+            display.substringBefore("SHA-256:"),
+        )
+        assertEquals(
+            digest,
+            display.substringAfter("SHA-256:").filter { it.isLetterOrDigit() },
+        )
+        assertTrue(display.count { it == '\n' } >= 3)
         assertEquals(64, digest.length)
     }
 
