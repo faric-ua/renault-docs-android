@@ -54,7 +54,9 @@ object SharedOperationProgressBar {
         bar.max = SCALE
         val value = if (completed) SCALE else measured ?: 0
         if (bar.progress == value) return
-        if (!completed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (!completed && value >= bar.progress &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+        ) {
             bar.setProgress(value, true)
         } else {
             bar.progress = value
