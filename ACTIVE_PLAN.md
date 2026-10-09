@@ -1,3 +1,16 @@
+## v0.5.85/build101 — issue #51 SOURCE HARDENING VERIFIED / PHONE QA PAUSED — 2026-10-09
+
+- [x] PR #94 merged, Android source SHA `5b27f30ce92aed00e5b1e0e233d9a312a064bfb6`: root-level archive chooser path, actual raw filename propagation, normalized duplicate/casefold/file-directory collision guards in ZIP/7Z/RAR.
+- [x] Python PR Tests #586 PASS, Android PR Check #464 PASS, main Tests #587 PASS, stable-signed APK #148 PASS.
+- [x] Public `v0.5.85-debug` verified prerelease PUBLISHED via promotion #3/run 37871568678 PASS; APK SHA256 `dde09bde484d0f3d7392505a999faa8f8036a2ce38778c654fcbeac676baacb6`. Link https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.85-debug
+- [ ] #51 remains OPEN: root+nested candidate isolation in native compiler, nonduplicate actual ZIP/7Z/RAR, secure cancel/cleanup, Android background acceptance. Phone QA PAUSED by user. No claim new version installed; prior v0.5.84 installation PASS.
+- [ ] #40 runtime long FGS process restart/timeout QA remains OPEN. Next separate functional scope #30 Windows source/catalog pipeline after #51 user choice.
+- [ ] No user source ZIP/7Z/RAR/.rdpkg/imported volumes touched or automatically re-imported.
+
+Read `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.85.md` and `docs/v.0.5.85/RELEASE_META.json`.
+
+---
+
 ## PHONE ACCEPTANCE UPDATE — v0.5.84/build100 — 2026-10-09
 
 - [x] User «Пасс» confirms over-existing installation, launch and preservation of registered projects/volumes. **INSTALL/RETENTION SMOKE PHONE PASS**; no independently reported counts.
