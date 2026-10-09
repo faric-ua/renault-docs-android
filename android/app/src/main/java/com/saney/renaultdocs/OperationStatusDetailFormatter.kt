@@ -8,7 +8,7 @@ internal object OperationStatusDetailFormatter {
     data class Parts(val stage: String, val counter: String?)
 
     private val itemCounter =
-        Regex("""^(.*?)\s+·\s+([^:\n]{1,40}):\s*(\d+)(?:\s*/\s*(\d+))?\s*$""")
+        Regex("""^(.*)\s+·\s+([^:\n]{1,40}):\s*(\d+)(?:\s*/\s*(\d+))?\s*$""")
 
     fun split(message: String): Parts {
         val text = message.trim().ifBlank { "Виконую…" }
