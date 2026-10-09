@@ -77,6 +77,7 @@ class NativeRdpkgPreparationEngine(
     fun prepareLocal(
         request: Request,
         sourceRoot: File,
+        excludedNestedRawRoots: Set<File> = emptySet(),
     ): Result {
         checkCancelled()
 
@@ -91,6 +92,8 @@ class NativeRdpkgPreparationEngine(
                         ),
                     sourceName =
                         request.sourceName,
+                    excludedNestedRawRoots =
+                        excludedNestedRawRoots,
                 )
 
         return prepareStaged(
