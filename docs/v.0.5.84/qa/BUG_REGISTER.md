@@ -9,5 +9,5 @@
 ## BG-003 — native resume clears pending cancellation (CONFIRMED IN SOURCE)
 `NativeRdpkgRunStore.resumeAfterProcessRestart` resets `KEY_CANCEL_REQUESTED=false`. Preserve cancel request; never turn a cancelled user's intent back into continued conversion.
 
-## BG-004 — Activity interrupted reconciliation may race service restart (REVIEW)
-`ConversionActivity` rechecks at 1.5 seconds, using process-local `ConversionService.isActive()` and may incorrectly fail persisted running state during delayed Android restart. Evaluate and address without sacrificing historical output recovery. Do not assume any device failure was observed; this is source-level risk.
+## BG-004 — Activity interrupted reconciliation may race service restart (MITIGATED IN CODE / PHONE PENDING)
+`ConversionActivity` rechecks at 1.5 seconds, using process-local `ConversionService.isActive()` and may incorrectly fail persisted running state during delayed Android restart. Mitigation: use one cancellable runnable attached to onStart/onStop, extend the recovery grace period to 30 seconds, and recheck visible Activity, service active state and exact persisted run identity on the UI thread before committing recovered result. Historical output recovery is retained. Source-level risk; no device failure was reproduced.
