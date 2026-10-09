@@ -1595,30 +1595,11 @@ class NativeRdpkgPreparationService : Service() {
     private fun resolveArchiveCandidateRoot(
         extractionRoot: File,
         relativePath: String,
-    ): File {
-        val target =
-            File(
-                extractionRoot,
-                relativePath,
-            )
-                .canonicalFile
-        val prefix =
-            extractionRoot
-                .canonicalFile
-                .path +
-                File.separator
-
-        require(
-            target.isDirectory &&
-                target.path.startsWith(
-                    prefix,
-                )
-        ) {
-            "Втрачено вибраний raw-том архіву."
-        }
-
-        return target
-    }
+    ): File =
+        ArchiveIntake.resolveRawRoot(
+            extractionRoot = extractionRoot,
+            relativePath = relativePath,
+        )
 
     private fun cleanupStaleArchiveOutput() {
         val state =
