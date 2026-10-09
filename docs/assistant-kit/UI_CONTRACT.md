@@ -1,3 +1,17 @@
+## Android notification history — v0.5.89 candidate
+
+- The current long operation keeps **one** foreground notification with fixed ID and measured live progress; do not send one Android notification per processed file.
+- Each completed .rdpkg creation/import (including individual tomes in a successful multi-volume archive) gets a separate swipeable Android result, grouped with other recent Renault Docs results.
+- Retain a bounded maximum of ten child notification IDs, replacing only the oldest after ten, plus one group summary. Use separate ID namespace from all foreground services.
+- Persist notification slot and operation-key deduplication without reading/altering user ZIP, exported RDPKG or project data.
+- Opening an old result must use a per-result immutable PendingIntent so subsequent operations do not redirect it to a different project.
+- Android can suppress, dismiss or regroup notifications; this is an ephemeral notification list, **not** permanent in-app History. Old overwritten notifications cannot be reconstructed.
+- No duplicate terminal notification on Android redelivery. WAITING_SELECTION remains a live/paused status, never a completed result. Notification posting errors must not change operation success/failure.
+
+CI, APK and real Android shade verification for this candidate pending.
+
+---
+
 ## Shared operation progress — v0.5.88 candidate (phone QA pending)
 
 Every app-owned operation/status surface uses a compact measured thin bar. `OperationStatusView` is the shared card in Home, Project and Drive/catalog; the Converter's standalone bar uses the same progress renderer and height.
