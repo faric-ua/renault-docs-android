@@ -8,7 +8,10 @@ internal object OperationStatusDisplayFormat {
         hash.replace(value) { match ->
             val prefix = match.groupValues[1]
             val digest = match.groupValues[2]
-            prefix + digest.chunked(12).joinToString("\u200B")
+            // Explicit lines are reliable on Android skins where U+200B
+            // soft breaks are ignored for a continuous SHA-256 digest.
+            // Full original result is copied from OperationStatusView.fullDetail.
+            prefix.trimEnd() + "\n" + digest.chunked(24).joinToString("\n")
         }
 }
 
