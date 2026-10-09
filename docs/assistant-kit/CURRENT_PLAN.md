@@ -1,3 +1,16 @@
+## CURRENT — v0.5.91/build107 VERIFIED PUBLIC DEBUG APK — PHONE QA NEXT — 2026-10-09
+
+- User v0.5.90 phone screenshots: green real native progress works and NT8299A · 2005-11-28 · 341 native installed (Megane II volumes 14→15). Follow-up defect: all short stage labels incl. "Розпаковую" visually clipped at baseline due fixed 20dp; SHA overflow; stale `Перевірка .rdpkg` Android foreground progress stays alongside `готовий`.
+- v0.5.91 PR #110 source merged main commit `ef704cf0db59a9e89dc4000cdde4cddaec9386bc`. Changes: 32dp minimum WRAP_CONTENT for stage and file count (font-scalable), SHA explicit 24-char display rows with original copy unchanged, STOP_FOREGROUND_REMOVE for terminal service notifications, stale-update guard, Android green accent where supported. Existing last-ten completion history intact.
+- Exact-head Python Tests #610 and Android PR Check #482 PASS. Main Tests #611 and trusted **stable-signed Android Debug APK #154 / run 37983197929 PASS**. Verified original APK SHA-256 `1649e9da4dae3c03d2a86936568c7cf97f966389eaa6e0e61a066b10bbbf84a6`.
+- Reviewed promotion #111; initial publisher run 37983669525 safely failed because release metadata omitted `signed_android_apk_run`. PR #112 corrected metadata, PR #113 retriggered; **publisher run 37983893306 PASS**. Public release: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.91-debug, original APK & checksum.
+- **Phone QA remains PENDING**. User should update in place, no uninstall/clear/delete, and on next planned archive check progress-stage bottom glyphs, SHA detail and clipboard, and old foreground gone while completed result remains. Android OEM may not recolor the actual system progress bar even with requested green accent.
+- #100 and #102 remain open until real phone evidence. #51 archive variants and #40 background/lock stress are independent open work. Don't make additional feature-code changes before these regressions are observed.
+
+Canonical: `docs/v.0.5.91/`.
+
+---
+
 ## CURRENT — v0.5.91 / build107 SOURCE CANDIDATE — 2026-10-09
 
 - User confirmed successful v0.5.90 Megane II NT8299A · 2005-11-28 · 341 native, 14 → 15 tomes, measured green file/section stages visible. Phone finding: stage "Розпаковую..." and similar text have **bottom glyphs clipped** by hard-coded `rowHeight=20dp` in OperationStatusView. Long terminal SHA still overflows visually; Android shade retains obsolete foreground `Renault Docs · перевірка .rdpkg` progress alongside last successful result. User requested green color in Android shade where possible.
