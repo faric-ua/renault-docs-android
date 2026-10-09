@@ -5136,3 +5136,7 @@ Exact continuation point:
 3. run a real single-volume ZIP for a volume not installed in the project;
 4. then continue multi-volume/lifecycle/background/cancel gates.
 
+
+### 2026-10-09 additional phone finding: importer changes stage while progress bar short of 100
+
+v0.5.90 PR #107 now also handles RdpkgImporter missing final extract callback after ZIP EOF (throttled updates / unread archive central directory). It sends truthful final N/N at completed extraction, and carries extracted N/N into the separate, indeterminate validation/install stages; when no file-count denominator exists but input bytes are known, uses full compressed-byte ratio. CI/phone QA for this new commit pending; no release or phone acceptance claimed.
