@@ -1,14 +1,14 @@
 # v0.5.84 background lifecycle regression
 
-- [ ] Validate 7 services manifest dataSync + stopWithTask=false + foreground execution, CPU wakelock and redelivery.
-- [ ] Conversion Service restores same plan state without resetting cancel or start time.
-- [ ] Stale redelivered completed conversion does not start a duplicate operation.
-- [ ] Native .rdpkg preparing resume preserves user cancellation.
-- [ ] Stale completed native command cannot restart work.
-- [ ] Activity interrupted reconciliation defers 30 seconds, is canceled onStop and rechecks run identity before terminal mutation.
-- [ ] Other 5 service run stores guard duplicate restarts.
+- [x] Source/static contract: 7 services manifest dataSync + stopWithTask=false + foreground execution, CPU wakelock and redelivery (Python #584 and #585 PASS).
+- [x] Source contract: conversion resumes matching plan without resetting cancel/start time.
+- [x] Source contract: redelivered terminal conversion does not start duplicate.
+- [x] Source contract: native preparation preserves cancel.
+- [x] Source contract: native completed/waiting stale command ignored.
+- [x] Source contract: Activity defers 30 seconds, cancels onStop and rechecks identity.
+- [x] Source contract: other five services guard persisted running state; actual restart idempotency still phone pending.
 - [ ] Process shutdown cleanup and Activity state reattachment remain consistent.
-- [ ] Python static contracts PASS.
-- [ ] Android JVM/unit tests and Debug APK PR Check PASS.
-- [ ] Main CI and stable-signed APK PASS.
+- [x] Python static contracts PR #584/main #585 PASS.
+- [x] Android PR Check #463 PASS (unit + compile).
+- [x] Main CI #585 and stable-signed APK #147 PASS; GitHub debug prerelease published.
 - [ ] Phone lock/unlock/background/rotation across each long operation — **DEFERRED BY USER**.
