@@ -1,0 +1,12 @@
+{
+  "versionName": "0.5.84",
+  "versionCode": 100,
+  "phase": "development",
+  "feature": "Issue #40: reliable long-running service process redelivery and run-state preservation",
+  "branch": "fix/v0.5.84-background-recovery-contract",
+  "source_baseline": "v0.5.83/build99 (main)",
+  "pr": null,
+  "signed_android_apk_run": null,
+  "phone_qa": "PAUSED_BY_USER",
+  "next": "Audit service restart/cancellation idempotence; Python+Android CI; signed build; do not initiate phone tests."
+}
