@@ -4,10 +4,10 @@
   "phase": "signed_debug_release_published_phone_qa_pending",
   "issue": 51,
   "branch": "fix/v0.5.87-archive-native-root-handoff",
-  "phone_qa": "PENDING_USER_REAL_NT8298A_ZIP",
+  "phone_qa": "REAL_NT8298A_ZIP_PREPARATION_PHONE_PASS_OTHER_ARCHIVE_QA_OPEN",
   "source_baseline": "v0.5.86/build102",
   "focus": "last-mile wrapped archive root auto-resolution and privacy-safe evidence for real NT8298A ZIP failure",
-  "next": "User action only: install v0.5.87 over existing via Renault Termux menu, retry exact original NT8298A ZIP once and send final app result. Mark device PASS only if observed; #51 stays open.",
+  "next": "Specific NT8298A nested-ZIP bug PHONE PASS. UX status text jump registered #100 (NO CODE CHANGES). #51 other archive and batch QA OPEN; #40 runtime QA OPEN. Read-only deletion audit saved; never clear app data to test.",
   "source_sha": "937ffa06080c3dd6a63a87d4e9c5d209ff4b8755",
   "pull_request": 98,
   "pr_tests_run": 591,
@@ -31,5 +31,19 @@
     "apk_sha256": "60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5",
     "checksum_asset_id": 625096793,
     "qa_status": "phone-qa-pending"
+  },
+  "nt8298a_acceptance": {
+    "date": "2026-10-09",
+    "result": "PHONE_PASS_COMPLETE",
+    "sourceKind": "ARCHIVE_FILE",
+    "sourceDisplayName": "Megane II B,C,S 84_NT8298A_Visu v3.0_2005.11.28.zip",
+    "sourceSizeBytes": 72693952,
+    "projectId": "megane-ii",
+    "volumeLabel": "NT8298A · 2005-11-28",
+    "packageId": "megane-ii-nt8298a-2005-11-28",
+    "nativeSectionCount": 319,
+    "package_sha256": "e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603",
+    "elapsedSeconds": 119,
+    "sourceEvidence": "User copied COMPLETE status and in-app read-only diagnostics after retrying original archive. Count of installed volumes after run not separately reported."
   }
 }
