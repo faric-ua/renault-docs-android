@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.90",
+  "versionCode": 106,
+  "phase": "development",
+  "feature": "Measured phase progress and semantic status colors",
+  "branch": "fix/v0.5.90-phase-progress-and-status-colors",
+  "sourceBaseline": "v0.5.89/build105 signed debug release",
+  "phoneQa": "PENDING",
+  "signed_run_id": null
+}
