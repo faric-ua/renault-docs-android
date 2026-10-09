@@ -96,7 +96,7 @@ class RdpkgImportService : Service() {
             } finally {
                 workWakeLock.release()
                 workerRunning.set(false)
-                stopForeground(STOP_FOREGROUND_DETACH)
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
                 stopSelf()
             }
@@ -147,6 +147,7 @@ class RdpkgImportService : Service() {
             .setContentTitle("Renault Docs · .rdpkg")
             .setContentText(text)
             .setContentIntent(pending)
+            .setColor(Ui.success)
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
             .apply {
