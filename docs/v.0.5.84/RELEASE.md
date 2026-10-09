@@ -11,6 +11,7 @@ Issue [#40](https://github.com/faric-ua/renault-docs-android/issues/40): all sev
 - Prevent completed/cancelled jobs from being restarted by stale framework redelivery.
 - Preserve matching active conversion state and cancellation on process restart, reject mismatched active operations.
 - Preserve pending native archive/raw cancellation when Android restarts worker.
+- Mitigate false interrupted-run state on ConversionActivity: delay reconciliation until service restart had time to run; cancel reconciliation when UI is backgrounded and protect late callbacks with run identity checks.
 - Verify all seven existing services keep FGS/wakelock/redelivery and that Activity screens do not require always-on display.
 - Do not change Classic, imported volume data, source archives, or SAF permissions.
 
