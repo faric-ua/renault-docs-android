@@ -1451,11 +1451,14 @@ class NativeRdpkgPreparationService : Service() {
                             '/',
                         )
 
+                // A Renault volume may be the archive root itself
+                // (relativePath == ""). Validate it with the same
+                // containment contract as an actual chooser resume.
                 require(
-                    relativePath.isNotBlank() &&
-                        !relativePath.startsWith(
-                            "../",
-                        )
+                    ArchiveIntake.resolveRawRoot(
+                        extractionRoot,
+                        relativePath,
+                    ).canonicalFile == rawRoot.canonicalFile
                 ) {
                     "Некоректний raw-root path в archive staging."
                 }
