@@ -1,3 +1,9 @@
+## v0.5.87/build103 — verified native ZIP root recovery; final phone action required — 2026-10-09
+
+PR #98 merged app source `937ffa06080c3dd6a63a87d4e9c5d209ff4b8755`; Python #591, Android #467, main Python #592, stable-signed APK #150 PASS. PR #99 public verified prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.87-debug, original signed APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`. User previously confirmed v0.5.86 installation but original NT8298A ZIP failed: ARCHIVE_FILE, FAILED, no output, nested folder screenshot includes INDEX/COMMUN/RUS. Last-mile native now automatically resolves only one safe nested root; refuses multiple. Original ZIP still needs single phone retry. Next user action: over-install v0.5.87 via Termux 5→19→8→13 and retry same ZIP once, report result, no deletions. Do not claim #51 closed. See `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.87.md`.
+
+---
+
 ## Renault Docs v0.5.86/build102 — #51 source fix published, phone QA on hold — 2026-10-09
 
 PR #96 merged source `f145dee0c545d5ee1953a8584cebb3a60bfd5acf`; selected mixed-archive raw volume excludes nested separate candidate folders in native stager, preserving source. Python #588/Android #465/main Python #589/signed APK #149 PASS. Reviewed PR #97 published QA-pending public debug prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.86-debug, original signed APK SHA256 `72d78292c8197a026bddaba4ecd32ab5f433556bab7ca6622b9d246d109b5ec3`. #51 real mixed ZIP/7Z/RAR/cancel/lock QA OPEN, user paused manual tests; #40 runtime background acceptance OPEN. No v0.5.86 device install; previous v0.5.84 install/retention PHONE PASS. Next #30 Windows source/catalog direction. Resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.86.md`.
