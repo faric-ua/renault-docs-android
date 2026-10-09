@@ -20,6 +20,29 @@ class ArchiveRootAndCollisionContract(unittest.TestCase):
         self.assertIn("ArchiveIntake.resolveRawRoot(\n                        extractionRoot,\n                        relativePath,", service)
         self.assertNotIn("relativePath.isNotBlank() &&", service)
 
+    def test_archive_root_identity_reaches_preflight_package_and_chooser(self):
+        intake = (JAVA / "ArchiveIntake.kt").read_text(encoding="utf-8")
+        self.assertIn("internal fun rawSourceName(", intake)
+        self.assertIn("archiveFileName.substringBeforeLast(", intake)
+        stager = (JAVA / "NativePreparationStager.kt").read_text(encoding="utf-8")
+        self.assertIn("sourceName: String = sourceRoot.name,", stager)
+        engine = (JAVA / "NativeRdpkgPreparationEngine.kt").read_text(encoding="utf-8")
+        self.assertIn("request.sourceName,", engine)
+        service = (JAVA / "NativeRdpkgPreparationService.kt").read_text(encoding="utf-8")
+        for name in (
+            "val rawSourceName =",
+            "ArchiveIntake.rawSourceName(",
+            "archiveSourceName: String,",
+            "sourceName =\n                            rawSourceName,",
+            "private fun archiveCandidateLabel(\n        sourceName: String,",
+            "private fun createArchiveDestination(\n        destinationTreeUri: Uri,\n        request: StartRequest,\n        sourceName: String,",
+        "sourceName =\n                        rawSourceName,",
+        ):
+            self.assertIn(name, service)
+        duplicate = (JAVA / "VolumeDuplicatePreflight.kt").read_text(encoding="utf-8")
+        self.assertIn("sourceName: String = rawRoot.name", duplicate)
+        self.assertIn("RenaultVolumeIdentity.parse(\n                sourceName,", duplicate)
+
     def test_conflicting_archive_member_names_rejected_in_all_formats(self):
         code = (JAVA / "ArchiveIntake.kt").read_text(encoding="utf-8")
         guard = code.split("internal class EntryPathGuard {", 1)[1].split("fun extract(", 1)[0]
