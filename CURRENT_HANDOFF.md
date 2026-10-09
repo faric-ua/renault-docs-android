@@ -1,3 +1,13 @@
+## CURRENT — v0.5.87/build103 SIGNED VERIFIED RELEASE READY; ONE REAL NT8298A PHONE TEST NEXT — 2026-10-09
+
+- PR #98 merged app source SHA `937ffa06080c3dd6a63a87d4e9c5d209ff4b8755`. Fixes wrapper/unique nested Renault INDEX→native raw-root handoff; preserves strict multi-candidate selection and v0.5.86 nested-volume isolation. Includes privacy-safe top-level file/INDEX diagnostic if scan still fails.
+- Python PR #591, Android PR #467, main Tests #592, stable-signed APK #150 (run 37938581867) **PASS**. PR #99 promotion publisher run 37938990631 **PASS**. Public original signed [v0.5.87-debug](https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.87-debug) APK + checksum; inner APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`.
+- User's last confirmed installed version v0.5.86/build102; real NT8298A ZIP conversion FAILED there despite nested `INDEX.HTM`, `COMMUN/`, `RUS/`. Built-in report confirmed sourceKind=ARCHIVE_FILE, phase=FAILED, no output ID/SHA, but did not retain extracted root; exact fault still not proven for original ZIP.
+- **NEXT USER ACTION (single controlled check)**: install v0.5.87 in-place via Renault Termux 5 → 19 → 8 → 13, then retry exact original NT8298A ZIP once and send final result/count. No unprompted more coding or asks for ZIP upload. #51 OPEN until real phone result; #40 separate long-running background QA remains OPEN. No original archives or registered tomes touched.
+- Canonical resume `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.87.md`.
+
+---
+
 ## LIVE PHONE BUG #51 — v0.5.86 ZIP fails despite nested INDEX (2026-10-09)
 
 Device diagnostic confirms `ARCHIVE_FILE` (not raw folder picker), `FAILED`, source ZIP NT8298A (~72.7 MB), no .rdpkg/package ID/SHA. Archive manager shows nested `INDEX.HTM`, `COMMUN/`, `RUS/`. ZIP-root discovery requires direct index, but native scan stage reported it absent: source-of-truth invariant mismatch, no proven stage where path was lost. Ask user to upload original ZIP for isolated analysis if acceptable; **do not guess another code fix, rebuild/retest, or mutate original archives**. #51 OPEN and live conversion FAIL. Evidence: `docs/v.0.5.86/qa/PHONE_TEST.md`.
