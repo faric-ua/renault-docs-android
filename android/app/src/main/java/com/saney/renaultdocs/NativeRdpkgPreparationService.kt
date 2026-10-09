@@ -544,6 +544,8 @@ class NativeRdpkgPreparationService : Service() {
                         staged.extractionRoot,
                     rawRoots =
                         staged.rawRoots,
+                    archiveSourceName =
+                        request.sourceName,
                 )
 
             if (
@@ -590,6 +592,12 @@ class NativeRdpkgPreparationService : Service() {
 
             val rawRoot =
                 staged.rawRoots.single()
+            val rawSourceName =
+                ArchiveIntake.rawSourceName(
+                    staged.extractionRoot,
+                    rawRoot,
+                    request.sourceName,
+                )
             val duplicate =
                 VolumeDuplicatePreflight
                     .check(
@@ -601,6 +609,8 @@ class NativeRdpkgPreparationService : Service() {
                             ),
                         rawRoot =
                             rawRoot,
+                        sourceName =
+                            rawSourceName,
                     )
 
             duplicate.exact
@@ -644,8 +654,8 @@ class NativeRdpkgPreparationService : Service() {
                         ),
                     request =
                         request,
-                    rawRoot =
-                        rawRoot,
+                    sourceName =
+                        rawSourceName,
                 )
 
             val processed =
@@ -657,7 +667,7 @@ class NativeRdpkgPreparationService : Service() {
                     sourceRoot =
                         rawRoot,
                     sourceName =
-                        rawRoot.name,
+                        rawSourceName,
                     destination =
                         destination,
                     progressPrefix =
@@ -832,6 +842,12 @@ class NativeRdpkgPreparationService : Service() {
                             candidate.relativePath,
                     )
 
+                val rawSourceName =
+                    ArchiveIntake.rawSourceName(
+                        extractionRoot,
+                        rawRoot,
+                        request.sourceName,
+                    )
                 val duplicate =
                     VolumeDuplicatePreflight
                         .check(
@@ -843,6 +859,8 @@ class NativeRdpkgPreparationService : Service() {
                                 ),
                             rawRoot =
                                 rawRoot,
+                            sourceName =
+                                rawSourceName,
                         )
 
                 duplicate.exact
@@ -868,8 +886,8 @@ class NativeRdpkgPreparationService : Service() {
                             ),
                         request =
                             request,
-                        rawRoot =
-                            rawRoot,
+                        sourceName =
+                            rawSourceName,
                     )
 
                 processed +=
@@ -881,7 +899,7 @@ class NativeRdpkgPreparationService : Service() {
                         sourceRoot =
                             rawRoot,
                         sourceName =
-                            rawRoot.name,
+                            rawSourceName,
                         destination =
                             destination,
                         progressPrefix =
@@ -1418,6 +1436,7 @@ class NativeRdpkgPreparationService : Service() {
         projectId: String,
         extractionRoot: File,
         rawRoots: List<File>,
+        archiveSourceName: String,
     ): List<ArchiveVolumeCandidate> {
         val existing =
             ProjectStore(
@@ -1429,6 +1448,12 @@ class NativeRdpkgPreparationService : Service() {
         return rawRoots
             .map {
                 rawRoot ->
+                val rawSourceName =
+                    ArchiveIntake.rawSourceName(
+                        extractionRoot,
+                        rawRoot,
+                        archiveSourceName,
+                    )
                 val preflight =
                     VolumeDuplicatePreflight
                         .check(
@@ -1436,6 +1461,8 @@ class NativeRdpkgPreparationService : Service() {
                                 existing,
                             rawRoot =
                                 rawRoot,
+                            sourceName =
+                                rawSourceName,
                         )
                 val relativePath =
                     extractionRoot
@@ -1451,11 +1478,14 @@ class NativeRdpkgPreparationService : Service() {
                             '/',
                         )
 
+                // A Renault volume may be the archive root itself
+                // (relativePath == ""). Validate it with the same
+                // containment contract as an actual chooser resume.
                 require(
-                    relativePath.isNotBlank() &&
-                        !relativePath.startsWith(
-                            "../",
-                        )
+                    ArchiveIntake.resolveRawRoot(
+                        extractionRoot,
+                        relativePath,
+                    ).canonicalFile == rawRoot.canonicalFile
                 ) {
                     "Некоректний raw-root path в archive staging."
                 }
@@ -1465,7 +1495,7 @@ class NativeRdpkgPreparationService : Service() {
                         relativePath,
                     label =
                         archiveCandidateLabel(
-                            rawRoot,
+                            rawSourceName,
                         ),
                     installed =
                         preflight.exact !=
@@ -1486,12 +1516,12 @@ class NativeRdpkgPreparationService : Service() {
     }
 
     private fun archiveCandidateLabel(
-        rawRoot: File,
+        sourceName: String,
     ): String {
         val identity =
             RenaultVolumeIdentity
                 .parse(
-                    rawRoot.name,
+                    sourceName,
                 )
 
         return listOfNotNull(
@@ -1502,14 +1532,14 @@ class NativeRdpkgPreparationService : Service() {
                 " · ",
             )
             .ifBlank {
-                rawRoot.name
+                sourceName
             }
     }
 
     private fun createArchiveDestination(
         destinationTreeUri: Uri,
         request: StartRequest,
-        rawRoot: File,
+        sourceName: String,
     ): Uri {
         val destinationTree =
             DocumentFile.fromTreeUri(
@@ -1535,10 +1565,10 @@ class NativeRdpkgPreparationService : Service() {
                     metadata =
                         RenaultVolumeIdentity
                             .parse(
-                                rawRoot.name,
+                                sourceName,
                             ),
                     fallbackId =
-                        rawRoot.name,
+                        sourceName,
                 )
 
         return destinationTree
@@ -1595,30 +1625,11 @@ class NativeRdpkgPreparationService : Service() {
     private fun resolveArchiveCandidateRoot(
         extractionRoot: File,
         relativePath: String,
-    ): File {
-        val target =
-            File(
-                extractionRoot,
-                relativePath,
-            )
-                .canonicalFile
-        val prefix =
-            extractionRoot
-                .canonicalFile
-                .path +
-                File.separator
-
-        require(
-            target.isDirectory &&
-                target.path.startsWith(
-                    prefix,
-                )
-        ) {
-            "Втрачено вибраний raw-том архіву."
-        }
-
-        return target
-    }
+    ): File =
+        ArchiveIntake.resolveRawRoot(
+            extractionRoot = extractionRoot,
+            relativePath = relativePath,
+        )
 
     private fun cleanupStaleArchiveOutput() {
         val state =

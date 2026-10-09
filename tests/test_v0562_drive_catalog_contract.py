@@ -12,8 +12,8 @@ class V0562DriveCatalogContractTests(unittest.TestCase):
 
     def test_release_version(self):
         gradle = self.read("android/app/build.gradle.kts")
-        self.assertIn('versionName = "0.5.84"', gradle)
-        self.assertIn("versionCode = 100", gradle)
+        self.assertIn('versionName = "0.5.85"', gradle)
+        self.assertIn("versionCode = 101", gradle)
 
     def test_catalog_manifest_endpoint_is_centralized(self):
         links = self.read(

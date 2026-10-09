@@ -338,6 +338,100 @@ class ArchiveIntakeTest {
     }
 
     @Test
+    fun multiVolumeChooserResolvesArchiveRootAndNestedRawSafely() {
+        val staging = createTempDirectory("renault-archive-root-").toFile()
+        try {
+            File(staging, "INDEX.HTM").writeText("index")
+            val nested = File(staging, "NT8341A").apply { mkdirs() }
+            File(nested, "ACCUEIL.HTM").writeText("accueil")
+
+            val roots = ArchiveIntake.findRenaultRawRoots(staging)
+            assertEquals(2, roots.size)
+            assertEquals(staging.canonicalFile, ArchiveIntake.resolveRawRoot(staging, ""))
+            assertEquals(nested.canonicalFile, ArchiveIntake.resolveRawRoot(staging, "NT8341A"))
+            assertEquals(
+                "NT8340A (2006-04-18)",
+                ArchiveIntake.rawSourceName(staging, staging, "NT8340A (2006-04-18).zip"),
+            )
+            assertEquals(
+                "NT8341A",
+                ArchiveIntake.rawSourceName(staging, nested, "ignored.zip"),
+            )
+
+            for (unsafe in listOf("../", "../outside", "/tmp", "C:\\\\Windows")) {
+                try {
+                    ArchiveIntake.resolveRawRoot(staging, unsafe)
+                    fail("Unsafe chooser root should fail: " + unsafe)
+                } catch (_: IllegalArgumentException) {
+                    // Expected: do not permit escaping the archive staging tree.
+                }
+            }
+            try {
+                ArchiveIntake.resolveRawRoot(staging, "missing")
+                fail("Missing chooser raw root must fail")
+            } catch (_: IllegalArgumentException) {
+                // Expected.
+            }
+        } finally {
+            staging.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun archivePathsRejectDuplicatePayloadsAndCaseConflicts() {
+        val paths = ArchiveIntake.EntryPathGuard()
+        paths.check("NT8340A/", true)
+        paths.check("NT8340A/", true) // Duplicate directory markers are harmless.
+        paths.check("NT8340A/INDEX.HTM", false)
+
+        for (name in listOf("NT8340A/INDEX.HTM", "NT8340A/index.htm")) {
+            try {
+                paths.check(name, false)
+                fail("Ambiguous duplicate archive entry must fail: " + name)
+            } catch (_: IllegalArgumentException) {
+                // Expected.
+            }
+        }
+        try {
+            paths.check("NT8340A/INDEX.HTM/subdir", false)
+            fail("File cannot be an ancestor of another file")
+        } catch (_: IllegalArgumentException) {
+            // Expected.
+        }
+    }
+
+    @Test
+    fun zipPreflightRejectsCaseCollisionsInsteadOfSilentlyOverwriting() {
+        val folder = createTempDirectory("archive-collision-").toFile()
+        try {
+            val archive = File(folder, "bad.zip")
+            ZipOutputStream(archive.outputStream()).use { zip ->
+                for (name in listOf("raw/INDEX.HTM", "raw/index.htm")) {
+                    zip.putNextEntry(ZipEntry(name))
+                    zip.write("data".toByteArray())
+                    zip.closeEntry()
+                }
+            }
+            try {
+                ArchiveIntake.inspectRawRoots(archive)
+                fail("Expected collision rejection during archive inspection")
+            } catch (_: IllegalArgumentException) {
+                // Must fail before extraction or duplicate fast-path.
+            }
+
+            val staging = File(folder, "staging")
+            try {
+                ArchiveIntake.extract(archive, staging)
+                fail("Expected extraction collision to reject source")
+            } catch (_: IllegalStateException) {
+                assertTrue(!staging.exists())
+            }
+        } finally {
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
     fun extractsZipAndFindsNestedRenaultRawRoot() {
         val root = createTempDirectory("archive-zip-").toFile()
         val archive = File(root, "old-renault.zip")

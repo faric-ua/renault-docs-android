@@ -89,6 +89,8 @@ class NativeRdpkgPreparationEngine(
                         stagingToken(
                             request,
                         ),
+                    sourceName =
+                        request.sourceName,
                 )
 
         return prepareStaged(
