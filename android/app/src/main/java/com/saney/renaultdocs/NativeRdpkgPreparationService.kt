@@ -532,7 +532,13 @@ class NativeRdpkgPreparationService : Service() {
                 staged
 
             ArchiveSourceGuard.rootConflict(
-                staged.rawRoots.map { it.name },
+                staged.rawRoots.map { rawRoot ->
+                    ArchiveIntake.rawSourceName(
+                        staged.extractionRoot,
+                        rawRoot,
+                        request.sourceName,
+                    )
+                },
                 target,
             )?.let { error(it) }
 
