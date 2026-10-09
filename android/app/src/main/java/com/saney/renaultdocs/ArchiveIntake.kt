@@ -220,17 +220,20 @@ object ArchiveIntake {
             mutableListOf<String>()
         val identityTextByParent =
             mutableMapOf<String, MutableList<String>>()
+        val inspectedPaths = EntryPathGuard()
         var count =
             0
 
         fun inspectEntry(
             entryName: String,
+            isDirectory: Boolean,
         ): String? {
-            count +=
-                1
-            checkEntryCount(
-                count,
-            )
+            count += 1
+            checkEntryCount(count)
+            inspectedPaths.check(entryName, isDirectory)
+            if (isDirectory) {
+                return null
+            }
 
             val segments =
                 validatedEntrySegments(
@@ -310,11 +313,14 @@ object ArchiveIntake {
                             entries.nextElement()
 
                         if (
-                            !entry.isDirectory
+                            entry.isDirectory
                         ) {
+                            inspectEntry(entry.name, true)
+                        } else {
                             val rawParent =
                                 inspectEntry(
                                     entry.name,
+                                    false,
                                 )
 
                             if (
@@ -369,19 +375,16 @@ object ArchiveIntake {
                             sevenZ.nextEntry
                                 ?: break
 
-                        if (
-                            !entry.isDirectory
-                        ) {
-                            val name =
-                                entry.name
-                                    ?: error(
-                                        "7Z містить запис без назви."
-                                    )
+                        val name =
+                            entry.name
+                                ?: error(
+                                    "7Z містить запис без назви."
+                                )
 
-                            inspectEntry(
-                                name,
-                            )
-                        }
+                        inspectEntry(
+                            name,
+                            entry.isDirectory,
+                        )
                     }
                 }
             }
@@ -400,13 +403,10 @@ object ArchiveIntake {
                     archive.fileHeaders
                         .forEach {
                             header ->
-                            if (
-                                !header.isDirectory
-                            ) {
-                                inspectEntry(
-                                    header.fileName,
-                                )
-                            }
+                            inspectEntry(
+                                header.fileName,
+                                header.isDirectory,
+                            )
                         }
                 }
         }
@@ -659,6 +659,48 @@ object ArchiveIntake {
         }
 
         return segments
+    }
+
+    /**
+     * Reject duplicate payloads, case-fold collisions, and file/directory
+     * conflicts before they can overwrite staged Renault source files.
+     */
+    internal class EntryPathGuard {
+        private val files = hashSetOf<String>()
+        private val directories = hashSetOf<String>()
+        private val spelling = hashMapOf<String, String>()
+
+        fun check(name: String, isDirectory: Boolean) {
+            val segments = validatedEntrySegments(name)
+            val path = segments.joinToString("/")
+            val key = path.lowercase(Locale.ROOT)
+
+            for (index in 1..segments.size) {
+                val prefix = segments.take(index).joinToString("/")
+                val prefixKey = prefix.lowercase(Locale.ROOT)
+                val previous = spelling.putIfAbsent(prefixKey, prefix)
+                require(previous == null || previous == prefix) {
+                    "Архів містить конфлікт регістру шляху: " + name
+                }
+                if (index < segments.size) {
+                    require(prefixKey !in files) {
+                        "Архів містить файл замість папки: " + name
+                    }
+                    directories += prefixKey
+                }
+            }
+
+            if (isDirectory) {
+                require(key !in files) {
+                    "Архів містить файл і папку з однаковою назвою: " + name
+                }
+                directories += key
+            } else {
+                require(key !in directories && files.add(key)) {
+                    "Архів містить повторний або конфліктний файл: " + name
+                }
+            }
+        }
     }
 
     fun extract(
@@ -991,6 +1033,7 @@ object ArchiveIntake {
 
             val stats =
                 Stats()
+            val entryPaths = EntryPathGuard()
 
             entries.forEachIndexed {
                 index,
@@ -1003,6 +1046,7 @@ object ArchiveIntake {
                         1,
                 )
 
+                entryPaths.check(entry.name, entry.isDirectory)
                 val target =
                     safeTarget(
                         root,
@@ -1071,6 +1115,7 @@ object ArchiveIntake {
             sevenZ ->
             val stats =
                 Stats()
+            val entryPaths = EntryPathGuard()
             var count =
                 0
 
@@ -1097,6 +1142,7 @@ object ArchiveIntake {
                             "7Z містить запис без назви."
                         )
 
+                entryPaths.check(name, entry.isDirectory)
                 val target =
                     safeTarget(
                         root,
@@ -1223,6 +1269,7 @@ object ArchiveIntake {
 
             val stats =
                 Stats()
+            val entryPaths = EntryPathGuard()
 
             headers.forEachIndexed {
                 index,
@@ -1235,6 +1282,7 @@ object ArchiveIntake {
                         1,
                 )
 
+                entryPaths.check(header.fileName, header.isDirectory)
                 val target =
                     safeTarget(
                         root,
