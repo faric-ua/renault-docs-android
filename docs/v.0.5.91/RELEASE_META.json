@@ -1,10 +1,21 @@
 {
   "versionName": "0.5.91",
   "versionCode": 107,
-  "phase": "source_candidate_ci_pending",
+  "phase": "verified_main_signed_promotion_pending",
   "branch": "fix/v0.5.91-terminal-text-notification-cleanup",
   "feature": "Accessibility-safe progress status height, explicit SHA wrapping, terminal foreground cleanup, semantic Android notification accent",
   "base": "v0.5.90/build106",
   "phone_qa": "PENDING",
-  "signed_run_id": null
+  "signed_run_id": 37983197929,
+  "source_sha": "ef704cf0db59a9e89dc4000cdde4cddaec9386bc",
+  "main_tests_run": 611,
+  "pr_tests_run": 37982936448,
+  "pr_android_check_run": 37982936458,
+  "signed_run_number": 154,
+  "artifact_id": 11642735334,
+  "artifact_name": "Renault-Docs-v0.5.91-Debug",
+  "artifact_digest": "sha256:914310ea84e8a32c63ab4018b27241d55c4bc994a4acad1d2675e194800e280b",
+  "apk_sha256": "1649e9da4dae3c03d2a86936568c7cf97f966389eaa6e0e61a066b10bbbf84a6",
+  "signer": "Stable development signer verified in main Android Debug APK #154",
+  "next": "Publish exact trusted APK v0.5.91-debug; then phone test clipped glyphs, SHA wrapping and stale foreground notification cleanup."
 }
