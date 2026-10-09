@@ -7,8 +7,8 @@
   "source_baseline": "v0.5.83/build99 (main)",
   "pr": null,
   "signed_android_apk_run": 147,
-  "phone_qa": "PENDING_BY_USER_PAUSE",
-  "next": "Keep #40 open pending device lock/unlock/process restart and long dataSync quota checks. Further manual testing remains paused; #51/#30 separate future work.",
+  "phone_qa": "INSTALL_SMOKE_PASS_BACKGROUND_LIFECYCLE_PAUSED",
+  "next": "User confirmed installed app and project-volume retention. #40 remains OPEN: background/lock/unlock/process death and Android dataSync quota untested. Next functional scope #51 archive intake on user's request.",
   "source_sha": "4890963f0dc0a268f803913c0e3e7da7193ecd7a",
   "pull_request": 92,
   "issue": 40,
@@ -35,5 +35,11 @@
     "verified": "Original signed APK/source and checksum verified by promotion workflow. Installed phone QA paused.",
     "checksum_asset_id": 623455474,
     "checksum_asset_digest": "sha256:e0797392addb6c40f99d0897ca5a2099d2c29e3160c75f35cc0cd015bfb4a0cc"
+  },
+  "install_smoke": {
+    "date": "2026-10-09",
+    "result": "PHONE_PASS_USER_CONFIRMED",
+    "scope": "Installed v0.5.84/build100 over existing app; app opened; existing projects/volumes retained",
+    "evidence": "User replied «Пасс» after the precise four-step installation and data-retention instruction."
   }
 }
