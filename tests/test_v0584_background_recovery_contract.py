@@ -88,6 +88,27 @@ class BackgroundRecoveryContractTests(unittest.TestCase):
         self.assertIn('runStore.resumeAfterProcessRestart()', startup)
         self.assertIn('startInFlight.set(false)', startup)
 
+    def test_activity_does_not_reconcile_while_hidden_or_overwrite_redelivery(self):
+        activity = source('ConversionActivity')
+        self.assertIn('private val interruptedRunCheck', activity)
+        self.assertIn('activityStarted = true', activity)
+        self.assertIn('activityStarted = false', activity)
+        self.assertGreaterEqual(
+            activity.count('uiHandler.removeCallbacks(\n            interruptedRunCheck,'),
+            2,
+        )
+        self.assertIn('INTERRUPTED_RUN_RECHECK_MS =\n            30_000L', activity)
+        reconcile = activity.split('private fun reconcileInterruptedRun()', 1)[1].split(
+            'private fun treeUriForDocument(', 1
+        )[0]
+        self.assertIn('ConversionService.isActive()', reconcile)
+        self.assertIn('!activityStarted', reconcile)
+        self.assertIn('val currentState = runStore.load()', reconcile)
+        self.assertIn('currentState.startedAtMs != state.startedAtMs', reconcile)
+        self.assertIn('currentState.sourceUri != state.sourceUri', reconcile)
+        self.assertIn('currentState.destinationUri != state.destinationUri', reconcile)
+        self.assertIn('return@runOnUiThread', reconcile)
+
     def test_remaining_five_services_guard_persisted_running_state(self):
         for name in (
             "CatalogImportService", "RdpkgImportService",
