@@ -431,9 +431,8 @@ class NativeRdpkgPreparationService : Service() {
                         progress ->
                         runStore.updateProgress(
                             progress,
-                        )
-                        runStore.updatePreparing(
-                            progress.displayText(),
+                            message = progress.displayText(),
+                            phase = NativeRdpkgRunPhase.PREPARING,
                         )
 
                         updateNotificationThrottled(
@@ -1078,9 +1077,8 @@ class NativeRdpkgPreparationService : Service() {
 
                         runStore.updateProgress(
                             progress,
-                        )
-                        runStore.updatePreparing(
-                            display,
+                            message = display,
+                            phase = NativeRdpkgRunPhase.PREPARING,
                         )
 
                         updateNotificationThrottled(
