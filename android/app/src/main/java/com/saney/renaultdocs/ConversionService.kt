@@ -114,16 +114,47 @@ class ConversionService : Service() {
                 ?.isDirectory ==
                 true
 
-        runStore.begin(
-            sourceUri =
-                sourceUri,
-            destinationUri =
-                destinationUri,
-            outputFolderName =
-                outputFolderName,
-            mergeExisting =
-                mergeExisting,
-        )
+        val persistedState =
+            runStore.load()
+
+        // START_REDELIVER_INTENT may arrive AFTER the previous run completed.
+        // It must never create a second conversion or overwrite terminal state.
+        val isFrameworkRedelivery =
+            flags and START_FLAG_REDELIVERY != 0
+        if (
+            isFrameworkRedelivery &&
+            !persistedState.isRunning
+        ) {
+            workerRunning.set(false)
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
+
+        if (persistedState.isRunning) {
+            // No request ID exists in the old conversion contract, so use
+            // the persisted immutable plan as the recovery identity.
+            if (
+                persistedState.sourceUri != sourceUri ||
+                persistedState.destinationUri != destinationUri ||
+                persistedState.outputFolderName != outputFolderName
+            ) {
+                workerRunning.set(false)
+                stopSelf(startId)
+                return START_NOT_STICKY
+            }
+            runStore.resumeAfterProcessRestart()
+        } else {
+            runStore.begin(
+                sourceUri =
+                    sourceUri,
+                destinationUri =
+                    destinationUri,
+                outputFolderName =
+                    outputFolderName,
+                mergeExisting =
+                    mergeExisting,
+            )
+        }
 
         startForeground(
             NOTIFICATION_ID,
