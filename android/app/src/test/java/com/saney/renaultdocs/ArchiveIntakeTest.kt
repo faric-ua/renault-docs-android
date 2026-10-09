@@ -349,6 +349,14 @@ class ArchiveIntakeTest {
             assertEquals(2, roots.size)
             assertEquals(staging.canonicalFile, ArchiveIntake.resolveRawRoot(staging, ""))
             assertEquals(nested.canonicalFile, ArchiveIntake.resolveRawRoot(staging, "NT8341A"))
+            assertEquals(
+                "NT8340A (2006-04-18)",
+                ArchiveIntake.rawSourceName(staging, staging, "NT8340A (2006-04-18).zip"),
+            )
+            assertEquals(
+                "NT8341A",
+                ArchiveIntake.rawSourceName(staging, nested, "ignored.zip"),
+            )
 
             for (unsafe in listOf("../", "../outside", "/tmp", "C:\\\\Windows")) {
                 try {
