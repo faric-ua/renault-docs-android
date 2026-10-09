@@ -1435,23 +1435,16 @@ class NativeRdpkgPreparationService : Service() {
                 },
         )
 
-        notifyFinal(
-            title =
-                "Renault Docs · archive batch готовий",
-            text =
-                "Створено: " +
-                    processed.size +
-                    if (
-                        skipped.isNotEmpty()
-                    ) {
-                        " · уже було: " +
-                            skipped.size
-                    } else {
-                        ""
-                    },
-            projectId =
-                request.projectId,
-        )
+        // One result per installed tome, not one result for an entire batch.
+        processed.forEach { volume ->
+            notifyFinal(
+                title = "Renault Docs · .rdpkg готовий",
+                text = volume.label + " · " +
+                    volume.prepared.sectionCount + " native",
+                projectId = request.projectId,
+                resultKey = volume.imported.packageId,
+            )
+        }
     }
 
     private fun buildArchiveCandidates(
@@ -1898,6 +1891,10 @@ class NativeRdpkgPreparationService : Service() {
         stopForeground(
             STOP_FOREGROUND_DETACH,
         )
+        // Finished results have separate history IDs, not this foreground ID.
+        if (runStore.load().isTerminal) {
+            notificationManager().cancel(NOTIFICATION_ID)
+        }
 
         stopSelf()
     }
@@ -2030,21 +2027,34 @@ class NativeRdpkgPreparationService : Service() {
         title: String,
         text: String,
         projectId: String,
+        resultKey: String? = null,
     ) {
-        notificationManager()
-            .notify(
-                NOTIFICATION_ID,
-                buildNotification(
-                    title =
-                        title,
-                    text =
-                        text,
-                    projectId =
-                        projectId,
-                    cancellable =
-                        false,
-                ),
+        val state = runStore.load()
+        if (state.isTerminal) {
+            val eventKey = listOf(
+                "native",
+                projectId,
+                state.startedAtMs.toString(),
+                state.finishedAtMs.toString(),
+                state.phase.name,
+                resultKey ?: "run",
+            ).joinToString(":")
+            CompletedNotificationHistory.publish(
+                context = this,
+                eventKey = eventKey,
+                projectId = projectId,
+                title = title,
+                text = text,
             )
+        } else {
+            // Waiting for archive selection is not an installed tome.
+            updateNotification(
+                title = title,
+                text = text,
+                projectId = projectId,
+                cancellable = false,
+            )
+        }
     }
 
     private fun buildNotification(
