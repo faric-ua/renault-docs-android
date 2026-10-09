@@ -1,3 +1,13 @@
+## v0.5.87 / build103 — #51 REAL NT8298A ZIP SAFE RECOVERY SIGNED & PUBLISHED / USER PHONE TEST NEXT — 2026-10-09
+
+- [x] PR #98 merged source `937ffa06080c3dd6a63a87d4e9c5d209ff4b8755`; safe unique nested raw root discovery and fail-closed ambiguity, plus bounded privacy-safe native scan diagnostics.
+- [x] Real-layout synthetic nested ZIP checks extracted file paths through exact native INDEX gate. Python PR #591, Android PR #467, main Tests #592, developer-signed APK #150 PASS.
+- [x] PR #99 public verified debug prerelease published `v0.5.87-debug`, publisher run 37938990631 PASS. APK SHA256 `60795a057ad77b96df0f914a8c9341222d9684fc0087e89d9389c558761286f5`: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.87-debug
+- [ ] **Only remaining current step: USER PHONE TEST**. Over-install v0.5.87/build103 with Renault Termux 5→19→8→13 (no uninstall/clear data), retry same original NT8298A ZIP **once**, report Completed/Failed and volume count. Don't say real bug fixed until observed; no blind repeated attempts.
+- [ ] Issue #51 OPEN for real ZIP acceptance and other archive cases, issue #40 OPEN for runtime background QA. No original archives or registered tomes deleted or moved. Full handoff `docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.87.md`.
+
+---
+
 ## v0.5.86/build102 — #51 NESTED ARCHIVE ISOLATION CODE MERGED / VERIFIED DEBUG RELEASE PUBLISHED — 2026-10-09
 
 - [x] PR #96 merged source SHA `f145dee0c545d5ee1953a8584cebb3a60bfd5acf`. Native .rdpkg builder no longer copies separate nested Renault raw-volume candidates when parent root is selected. No source folder deletions.
