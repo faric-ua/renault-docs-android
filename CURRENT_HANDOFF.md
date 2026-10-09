@@ -1,3 +1,9 @@
+## CURRENT — v0.5.84/build100 #40 SOURCE HARDENED / SIGNED DEBUG RELEASE PUBLISHED / PHONE QA PAUSED — 2026-10-09
+
+PR #92 merged source 4890963f0dc0a268f803913c0e3e7da7193ecd7a. Existing seven foreground dataSync services audited; conversion/native stale redelivery and cancellation preservation hardened, ConversionActivity interrupted-run false-fail race mitigated. PR Python #584 and Android PR #463 PASS; main Tests #585 PASS and stable signed Android APK #147 PASS (run ID 37866966922). Verified public DEBUG PRERELEASE v0.5.84-debug published run 37867195007 PASS: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.84-debug. APK SHA256 90f4ee81e46340d4f6fd4e9f56632598bad68d3e52a944e9490727e53a1a7010, supplied with .sha256. #40 OPEN for runtime Android 6h quota/force-stop boundary and phone QA. User paused tests, no installation or user data operations performed. NEXT distinct features #51 archive intake and #30 Windows pipeline; optional #21/#50. Canonical resume docs/assistant-kit/SESSION_CHECKPOINT_2026-10-09_v0.5.84.md.
+
+---
+
 ## CURRENT 2026-10-09 — GITHUB RELEASES PUBLISHED / TERMUX FALLBACK MERGED / NEXT #40
 
 - Renault Android application remains **v0.5.83/build99** (runtime SHA `b5f1c22d73642d7341943e4320b5fb469cbe9bec`), core New Volume route PHONE PASS, extended phone QA paused.
