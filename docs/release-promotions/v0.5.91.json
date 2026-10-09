@@ -10,5 +10,6 @@
   "artifact_digest": "sha256:914310ea84e8a32c63ab4018b27241d55c4bc994a4acad1d2675e194800e280b",
   "tag": "v0.5.91-debug",
   "prerelease": true,
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "qa_note": "Phone QA pending: Samsung stage text baseline, finished SHA display, stale foreground notification and shade accent."
 }
