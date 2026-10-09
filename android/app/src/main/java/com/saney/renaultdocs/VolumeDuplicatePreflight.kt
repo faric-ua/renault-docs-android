@@ -14,14 +14,15 @@ object VolumeDuplicatePreflight {
     fun check(
         existing: List<ProjectVolumeRecord>,
         rawRoot: File,
+        sourceName: String = rawRoot.name,
     ): Result {
         val sourceId =
             NativeVolumeCompiler.slugify(
-                rawRoot.name,
+                sourceName,
             )
         val identity =
             RenaultVolumeIdentity.parse(
-                rawRoot.name,
+                sourceName,
             )
 
         val exact =
