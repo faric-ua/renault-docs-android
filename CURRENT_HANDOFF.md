@@ -1,3 +1,9 @@
+## PHONE TEST 1 PASS — v0.5.86/build102 installed over existing app (2026-10-09)
+
+User explicitly replied «Пасс» after Termux Renault 5 → 19 → 8 → 13 over-install, launch and car/tome preservation. **Installed v0.5.86 smoke PHONE PASS**; overrides earlier handoff lines stating v0.5.84 is the latest confirmed installed version. This does NOT confirm archive ZIP/7Z/RAR processing, parent/nested .rdpkg isolation, cancellation/background. User now expressly wants practical testing, one simple task at a time, not more releases. NEXT: Megane II or matching project → Add → Create .rdpkg from archive → choose a real matching Renault ZIP/7Z/RAR and show `Підтвердь джерело архіву` preflight screenshot. Stop before choosing output destination/conversion. #51 remains OPEN. No new PR/build until defect discovered.
+
+---
+
 ## CURRENT — Renault Docs v0.5.86/build102 VERIFIED SIGNED DEBUG RELEASE / #51 NESTED ISOLATION HARDENED / PHONE QA PAUSED — 2026-10-09
 
 - PR #96 MERGED app source SHA `f145dee0c545d5ee1953a8584cebb3a60bfd5acf`. Archive mixed root/child candidate isolation: selected raw volume only scans its owned subtree; nested separately selectable raw volumes are pruned during private native staging scan without removal. Also fixed root project-model conflict source identity. Existing SAF raw and Classic unchanged.
