@@ -1,3 +1,9 @@
+## Verified release prerequisite
+
+Original stable signed debug v0.5.90/build106 is published at https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.90-debug. APK SHA256 `9e0de592051164796bd4326d6b44933bca1a07e95969bc0bbfe7dbe823051199`. Install over current Renault Docs app without uninstalling or clearing data. Status **PHONE QA PENDING**. Test the next actually planned archive, not duplicate installed tomes.
+
+---
+
 # v0.5.90 phone QA — PENDING
 
 Install trusted signer over existing app only; never uninstall/clear data.
