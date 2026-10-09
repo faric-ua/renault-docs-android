@@ -833,6 +833,40 @@ object ArchiveIntake {
             .toList()
     }
 
+    /**
+     * Resolve an extracted Renault raw root saved by the multi-volume chooser.
+     *
+     * A raw INDEX.HTM may legitimately live at the archive's top level:
+     * its relativePath is then "", representing extractionRoot itself.
+     * Nonempty candidate paths must remain strictly within staging.
+     */
+    internal fun resolveRawRoot(
+        extractionRoot: File,
+        relativePath: String,
+    ): File {
+        val root = extractionRoot.canonicalFile
+        require(root.isDirectory) {
+            "Archive staging більше не доступний."
+        }
+
+        val target =
+            if (relativePath.isEmpty()) {
+                root
+            } else {
+                safeTarget(root, relativePath)
+            }
+
+        require(
+            target.isDirectory &&
+                (target.path == root.path ||
+                    target.path.startsWith(root.path + File.separator)),
+        ) {
+            "Втрачено вибраний raw-том архіву."
+        }
+
+        return target
+    }
+
     internal fun safeTarget(
         root: File,
         entryName: String,
