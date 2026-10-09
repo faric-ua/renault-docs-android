@@ -1,3 +1,15 @@
+## CURRENT — v0.5.91 / build107 SOURCE CANDIDATE — 2026-10-09
+
+- User confirmed successful v0.5.90 Megane II NT8299A · 2005-11-28 · 341 native, 14 → 15 tomes, measured green file/section stages visible. Phone finding: stage "Розпаковую..." and similar text have **bottom glyphs clipped** by hard-coded `rowHeight=20dp` in OperationStatusView. Long terminal SHA still overflows visually; Android shade retains obsolete foreground `Renault Docs · перевірка .rdpkg` progress alongside last successful result. User requested green color in Android shade where possible.
+- Implemented isolated branch `fix/v0.5.91-terminal-text-notification-cleanup`: running stage and counter use WRAP_CONTENT plus 32dp min/padding, robust 24-char SHA visual line breaks (clipboard original unchanged), atomic native/import foreground notification removal via STOP_FOREGROUND_REMOVE and defensive cancellation, terminal update guards and green notification accent. Completed-history notifications remain independent and capped at ten; WAITING_SELECTION remains actionable. Android OEM may ignore requested notification progress color.
+- **PR and CI / trusted signed release / new phone QA pending**; no user files/data touched. Keep #100/#102 OPEN until phone evidence. Do not reset storage or reimport installed volumes.
+- Next: PR checks, reviewed merge, stable signed main APK, phone test including landscape/portrait status baselines, SHA copy, no sticky old progress, completed history unaffected. #51/#40 still separate.
+- Last verified published APK remains v0.5.90 build106 at `v0.5.90-debug` until a new trusted signed release is published.
+
+Canonical: `docs/v.0.5.91/`.
+
+---
+
 ## CURRENT — v0.5.90 BUILD106 SIGNED PUBLIC DEBUG RELEASE / PHONE QA NEXT — 2026-10-09
 
 - User device found successful Megane II NT8275A 333 native but partial/static phase bar on .rdpkg import and text overflow. Source v0.5.90 PR #107 added accurate ZIP EOF N/N, accurate compressed-byte ratio until total files known, retained extracted N/N during separate validation/install (their own green indeterminate busy), per-section Runtime IR and Fast Pack file counts, green running/success, red failure, amber cancelled, original SHA copy with visual wrap.
