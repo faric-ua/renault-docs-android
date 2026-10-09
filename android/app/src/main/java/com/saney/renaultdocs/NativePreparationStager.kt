@@ -112,6 +112,7 @@ class NativePreparationStager(
         sourceRoot: File,
         stagingToken: String,
         sourceName: String = sourceRoot.name,
+        excludedNestedRawRoots: Set<File> = emptySet(),
     ): Result {
         checkCancelled()
 
@@ -129,6 +130,7 @@ class NativePreparationStager(
         val scan =
             scanLocalSource(
                 sourceRoot,
+                excludedNestedRawRoots,
             )
 
         return stageScan(
@@ -457,14 +459,18 @@ class NativePreparationStager(
 
     private fun scanLocalSource(
         sourceRoot: File,
+        excludedNestedRawRoots: Set<File>,
     ): SourceScan {
         val files =
             mutableListOf<SourceFile>()
         val directories =
             linkedSetOf<String>()
 
-        sourceRoot
-            .walkTopDown()
+        ArchiveRawVolumeIsolation
+            .walkSelectedRoot(
+                sourceRoot,
+                excludedNestedRawRoots,
+            )
             .forEach {
                 entry ->
                 checkCancelled()
