@@ -1,3 +1,15 @@
+## CURRENT — v0.5.90 BUILD106 MEASURED PHASE PROGRESS CANDIDATE — 2026-10-09
+
+- After installing/testing v0.5.89, user sent real Megane II landscape screenshots for NT8275A · 2005-01-03 · 333 native, volume count 12 → 13. Running status shows ZIP extraction `Файлів: 3432/5357`, while other phases lose counters/freeze at zero; terminal SHA-256 runs off screen. User asks real phase-specific counts and green active/success, red errors.
+- **Implementation on `fix/v0.5.90-phase-progress-and-status-colors`, NOT MERGED/PHONE ACCEPTED.** New v0.5.90/build106 candidate uses real green indeterminate movement for unknown denominators (no fake %), real Runtime IR section progress, real Fast Pack file counts, and lossless soft-wrap terminal SHA display. Stops raw text-only callbacks overwriting structured progress; introduces error red and cancelled amber. Converter uses same state colors.
+- Preserve current native ZIP extraction progress and archive copy percentages, stable status layout and foreground/background ownership. Real counts provided when knowable. No pretending index enumeration has known total until discovered; index shard writing has explicit unmeasured busy phase. Installed archives/tomes untouched.
+- NEXT: open PR; Python Tests + Android PR Check on exact head; fix any failures; only then merge and obtain stable signed main APK. Phone QA must verify no frozen zero/no stale stage and new counters; issues #100 and #102 remain open until real v0.5.89/90 phone evidence. #51/#40 separate.
+- v0.5.89 original stable-signed public prerelease remains last **verified downloadable APK**, published from main run #152. Do not claim user installed v0.5.90.
+
+Canonical: `docs/v.0.5.90/` and `docs/assistant-kit/UI_CONTRACT.md`.
+
+---
+
 ## CURRENT — VERIFIED v0.5.89/debug RELEASE PUBLISHED / PHONE QA NEXT — 2026-10-09
 
 - v0.5.89/build105 application code from main `bfdc3a7e74220f19dbc90eefa596c166a6432f75` contains shared progress layout PR #101 and last-ten notifications PR #103. PR Python + Android PASS; main Tests #601 PASS.
