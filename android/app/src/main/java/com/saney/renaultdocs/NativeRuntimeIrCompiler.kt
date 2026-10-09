@@ -48,6 +48,7 @@ object NativeRuntimeIrCompiler {
         sectionsIndex: JSONObject? = null,
         progress: ((String) -> Unit)? = null,
         sectionProgress: ((Int, Int) -> Unit)? = null,
+        phaseProgress: ((String) -> Unit)? = null,
     ): Result {
         val root =
             outputRoot.canonicalFile
@@ -73,6 +74,9 @@ object NativeRuntimeIrCompiler {
                 sectionProgress = sectionProgress,
             )
 
+        // Section compilation reached N/N. Writing JSON shards is a
+        // separate, unmeasured phase, not extra phantom sections.
+        phaseProgress?.invoke("Зберігаю індекси…")
         val runtimeTreePath =
             File(
                 packageRoot,
