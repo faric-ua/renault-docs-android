@@ -39,10 +39,15 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         view = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/OperationStatusView.kt"
         )
-        self.assertIn("progressBarStyleHorizontal", view)
-        self.assertIn("Ui.dp(context, 5)", view)
-        self.assertIn("setProgress(", view)
-        self.assertIn("PROGRESS_SCALE", view)
+        bar = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/SharedOperationProgressBar.kt"
+        )
+        self.assertIn("SharedOperationProgressBar.create(context)", view)
+        self.assertIn("SharedOperationProgressBar.render(", view)
+        self.assertIn("progressBarStyleHorizontal", bar)
+        self.assertIn("HEIGHT_DP = 5", bar)
+        self.assertIn("bar.setProgress(value, true)", bar)
+        self.assertIn("SCALE = 1_000", bar)
 
     def test_rdpkg_import_export_and_share_persist_real_progress(self):
         importer = self._read(
@@ -151,9 +156,12 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("7_500L", model)
         self.assertIn("BYTE_WEIGHT", model)
         self.assertIn("2_500L", model)
-        self.assertIn("progressView.isIndeterminate =", status)
-        self.assertIn("false", status)
-        self.assertNotIn("progressView.isIndeterminate = !determinate", status)
+        bar = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/SharedOperationProgressBar.kt"
+        )
+        self.assertIn("SharedOperationProgressBar.render(", status)
+        self.assertIn("bar.isIndeterminate = false", bar)
+        self.assertNotIn("bar.isIndeterminate = true", bar)
         self.assertIn('"Пакую том"', project_export)
         self.assertIn("(index + 1)", project_export)
         self.assertIn("volumes.size", project_export)
@@ -303,7 +311,8 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         ):
             self.assertIn(label, converter)
 
-        self.assertIn('" · Файлів: "', converter)
+        self.assertIn('itemLabel = "Файлів"', converter)
+        self.assertIn("OperationProgress.measured(", converter)
         self.assertNotIn('" · змінено файлів: "', converter)
         self.assertNotIn('" · виправлень: "', converter)
 
