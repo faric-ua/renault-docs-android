@@ -99,6 +99,14 @@ internal object CompletedNotificationHistory {
                 .setSmallIcon(R.drawable.ic_notification_document)
                 .setContentTitle(title)
                 .setContentText(text)
+                .setColor(
+                    when (OperationTerminalOutcome.fromTitle(title)) {
+                        OperationTerminalOutcome.SUCCESS -> Ui.success
+                        OperationTerminalOutcome.FAILED -> Ui.danger
+                        OperationTerminalOutcome.CANCELLED -> Ui.warning
+                        OperationTerminalOutcome.NEUTRAL -> Ui.muted
+                    },
+                )
                 .setStyle(Notification.BigTextStyle().bigText(text))
                 .setContentIntent(pending)
                 .setGroup(GROUP_KEY)

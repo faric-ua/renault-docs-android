@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.91",
+  "versionCode": 107,
+  "phase": "source_candidate_ci_pending",
+  "branch": "fix/v0.5.91-terminal-text-notification-cleanup",
+  "feature": "Accessibility-safe progress status height, explicit SHA wrapping, terminal foreground cleanup, semantic Android notification accent",
+  "base": "v0.5.90/build106",
+  "phone_qa": "PENDING",
+  "signed_run_id": null
+}

@@ -252,6 +252,9 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             detailView.minLines = 1
             detailView.maxLines = if (landscape) 10 else 12
             detailView.ellipsize = null
+            detailView.setHorizontallyScrolling(false)
+            detailView.minHeight = Ui.dp(context, 32)
+            detailView.setPadding(0, Ui.dp(context, 4), 0, Ui.dp(context, 4))
             detailView.layoutParams = LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT,
@@ -270,18 +273,25 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         counterView.gravity = Gravity.CENTER_VERTICAL
         detailView.gravity = Gravity.CENTER_VERTICAL
 
-        val rowHeight = Ui.dp(context, 20)
+        // Fixed 20dp previously cut off glyph descenders on Samsung / large
+        // font scales. Reserve at least 32dp, but allow font metrics to grow.
+        // Same stable minimum for both cells keeps the stage and counter aligned.
+        val minRowHeight = Ui.dp(context, 32)
+        detailView.minHeight = minRowHeight
+        counterView.minHeight = minRowHeight
+        detailView.setPadding(0, Ui.dp(context, 3), 0, Ui.dp(context, 3))
+        counterView.setPadding(0, Ui.dp(context, 3), 0, Ui.dp(context, 3))
         detailView.layoutParams = if (landscape) {
-            LayoutParams(0, rowHeight, 1f)
+            LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
         } else {
-            LayoutParams(LayoutParams.MATCH_PARENT, rowHeight)
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         }
         counterView.layoutParams = if (landscape) {
-            LayoutParams(LayoutParams.WRAP_CONTENT, rowHeight).apply {
+            LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
                 marginStart = Ui.dp(context, 8)
             }
         } else {
-            LayoutParams(LayoutParams.MATCH_PARENT, rowHeight)
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         }
     }
 
