@@ -47,6 +47,7 @@ object NativeRuntimeIrCompiler {
         volumes: List<JSONObject>,
         sectionsIndex: JSONObject? = null,
         progress: ((String) -> Unit)? = null,
+        sectionProgress: ((Int, Int) -> Unit)? = null,
     ): Result {
         val root =
             outputRoot.canonicalFile
@@ -65,14 +66,11 @@ object NativeRuntimeIrCompiler {
 
         val runtimeTree =
             buildRuntimeTree(
-                outputRoot =
-                    root,
-                volumes =
-                    volumes,
-                sectionsIndex =
-                    sectionsIndex,
-                progress =
-                    progress,
+                outputRoot = root,
+                volumes = volumes,
+                sectionsIndex = sectionsIndex,
+                progress = progress,
+                sectionProgress = sectionProgress,
             )
 
         val runtimeTreePath =
@@ -138,11 +136,13 @@ object NativeRuntimeIrCompiler {
         volumes: List<JSONObject>,
         sectionsIndex: JSONObject? = null,
         progress: ((String) -> Unit)? = null,
+        sectionProgress: ((Int, Int) -> Unit)? = null,
     ): JSONObject {
-        val compiledVolumes =
-            JSONArray()
-        var totalSections =
-            0
+        val compiledVolumes = JSONArray()
+        var totalSections = 0
+        val knownTotal = sectionsIndex?.optInt("section_count", 0) ?: 0
+        var sectionsProcessed = 0
+        if (knownTotal > 0) sectionProgress?.invoke(0, knownTotal)
 
         volumes.forEachIndexed {
             volumeIndex,
@@ -160,6 +160,15 @@ object NativeRuntimeIrCompiler {
                             volume =
                                 volume,
                         ),
+                    onSectionCompiled = { done, withinVolume ->
+                        val denominator =
+                            if (knownTotal > 0) knownTotal else
+                                sectionsProcessed + withinVolume
+                        sectionProgress?.invoke(
+                            sectionsProcessed + done,
+                            denominator,
+                        )
+                    },
                 )
 
             compiledVolumes.put(
@@ -178,6 +187,7 @@ object NativeRuntimeIrCompiler {
 
             totalSections +=
                 sectionCount
+            sectionsProcessed += sectionCount
 
             progress?.invoke(
                 "Runtime IR: " +
@@ -306,6 +316,7 @@ object NativeRuntimeIrCompiler {
         outputRoot: File,
         volume: JSONObject,
         sectionsResult: JSONObject? = null,
+        onSectionCompiled: ((Int, Int) -> Unit)? = null,
     ): JSONObject {
         val resolvedSectionsResult =
             sectionsResult
@@ -377,9 +388,8 @@ object NativeRuntimeIrCompiler {
                     section,
             )
 
-            sections.put(
-                section,
-            )
+            sections.put(section)
+            onSectionCompiled?.invoke(index + 1, sectionIndex.length())
         }
 
         val modern =
