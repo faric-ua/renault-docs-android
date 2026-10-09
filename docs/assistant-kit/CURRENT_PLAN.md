@@ -1,3 +1,14 @@
+## CURRENT — v0.5.90 BUILD106 SIGNED PUBLIC DEBUG RELEASE / PHONE QA NEXT — 2026-10-09
+
+- User device found successful Megane II NT8275A 333 native but partial/static phase bar on .rdpkg import and text overflow. Source v0.5.90 PR #107 added accurate ZIP EOF N/N, accurate compressed-byte ratio until total files known, retained extracted N/N during separate validation/install (their own green indeterminate busy), per-section Runtime IR and Fast Pack file counts, green running/success, red failure, amber cancelled, original SHA copy with visual wrap.
+- **PR #107 Python Tests & Android PR Check PASS**, merged to main at `eded18d7a9c36b32d840a9c288459491b7ff04cd`; main Tests #609 PASS; trusted stable-signed main Android Debug APK **#153 / 37978908157 PASS**, signer verified, version 0.5.90/build106, APK SHA256 `9e0de592051164796bd4326d6b44933bca1a07e95969bc0bbfe7dbe823051199`.
+- Reviewed promotion PR #108 merged, publisher run **37979276172 PASS**; public debug prerelease https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.90-debug with original APK and .sha256.
+- **REAL PHONE QA PENDING**. The success of prior actual .rdpkg creation on older version is not proof v0.5.90 fixes display. Keep #100 and #102 OPEN pending device evidence.
+- NEXT: install new APK **over existing app** (no uninstall, no clearing storage). On next genuinely needed archive import observe exact stage count ZIP EOF N/N; green busy on verification with extracted N/N summary; section and Fast Pack counters, green/red semantic states and terminal SHA wrap, project data integrity. Do not rerun or duplicate an installed volume solely for QA.
+- #51 other archive format variants and #40 background lock and process QA remain independently open.
+
+---
+
 ## CURRENT — v0.5.90 BUILD106 MEASURED PHASE PROGRESS CANDIDATE — 2026-10-09
 
 - After installing/testing v0.5.89, user sent real Megane II landscape screenshots for NT8275A · 2005-01-03 · 333 native, volume count 12 → 13. Running status shows ZIP extraction `Файлів: 3432/5357`, while other phases lose counters/freeze at zero; terminal SHA-256 runs off screen. User asks real phase-specific counts and green active/success, red errors.
