@@ -900,7 +900,8 @@ object ArchiveIntake {
                 "archive-root"
             }
         } else {
-            rawRoot.name
+            NestedZipVolumeIntake.sourceNameForRawRoot(extractionRoot, rawRoot)
+                ?: rawRoot.name
         }
 
     internal fun resolveRawRoot(
