@@ -1,10 +1,22 @@
 {
   "versionName": "0.5.95",
   "versionCode": 111,
-  "phase": "source_candidate_ci_pending",
+  "phase": "stable_signed_main_verified_promotion_pending_phone_qa",
   "branch": "fix/v0.5.95-native-batch-report-detail",
   "base": "0.5.94/build110",
   "issue": 123,
   "qa_status": "phone-qa-pending",
-  "signed_run_id": null
+  "signed_run_id": 38062530766,
+  "source_sha": "2a25b1b5ae885584262e8fb8b152f72356213a3c",
+  "main_tests_run": 631,
+  "pr_tests_run": 38062358256,
+  "pr_android_check_run": 38062358280,
+  "signed_run_number": 158,
+  "signed_android_apk_run": 158,
+  "artifact_id": 11673283592,
+  "artifact_name": "Renault-Docs-v0.5.95-Debug",
+  "artifact_digest": "sha256:f2529be2b72d41e0c4c13abb0c7f660c00b2f4ef24a7cf19c05cfc8f246fd6c9",
+  "apk_sha256": "c6cfc4b30c040eb81d3efdae5b1e27ce39e9e8f12e84ea86928d96164c548f5e",
+  "signer": "Stable signer verified by trusted main Android Debug APK #158",
+  "next": "Publish original trusted APK, then first check old v0.5.94 3-tome report has legacy message without fake hashes and 20 registered tomes remain intact; no forced import."
 }
