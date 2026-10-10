@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.96",
   "versionCode": 112,
-  "phase": "stable_signed_main_verified_promotion_pending_phone_qa",
+  "phase": "verified_public_signed_debug_published_quota_emulator_qa_pending",
   "branch": "fix/v0.5.96-datasync-timeout-safe-stop",
   "issue": 40,
   "scope": "Android 15+ dataSync foreground-service timeout handling for 7 workers",
@@ -20,5 +20,18 @@
   "apk_sha256": "52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b",
   "signer": "Stable signer verified by trusted Android Debug APK run #159",
   "qa_status": "phone-qa-pending",
-  "signed_android_apk_run": 159
+  "signed_android_apk_run": 159,
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.96-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.96-debug",
+    "source_sha": "8f1d76dbb77881a59767156a0ee6996366f4dabb",
+    "signed_run_id": 38072916355,
+    "publisher_run_id": 38073408138,
+    "apk_asset_id": 628608387,
+    "checksum_asset_id": 628608388,
+    "apk_sha256": "52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b",
+    "qa_status": "phone-qa-pending"
+  },
+  "next": "Safe in-place phone update and normal lock/background regression only on next genuine operation; Android 15+ shortened dataSync quota emulator ADB test still NOT RUN. Keep #40 open."
 }

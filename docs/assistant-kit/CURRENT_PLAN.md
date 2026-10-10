@@ -1,3 +1,16 @@
+## CURRENT — v0.5.96/build112 VERIFIED PUBLIC DEBUG APK / OS FGS QUOTA EMULATOR QA PENDING — 2026-10-10
+
+- User confirmed NT8445 (2007-11-19; 333 native) created successfully after ~2min phone lock, browsing other apps including TikTok, expanded shade live progress, returning to Renault Docs. Ordinary background and lock native PHONE PASS; issue #40 remains open for actual OS quota/process restart and remaining workers.
+- Source PR #129 merged app `8f1d76dbb77881a59767156a0ee6996366f4dabb`: seven dataSync foreground workers handle API35+ `onTimeout(startId, fgsType)`, signal atomic timeout, persist run state FAILED reason, attempt graceful worker cancellation at progress/commit checkpoints, remove live progress and `stopSelf()` in guaranteed finally. Existing 6h PARTIAL_WAKE_LOCK remains bounded, never auto-replay after FGS quota, preserve finished tomes; no archive/output semantics changed.
+- PR Tests #641 PASS, Android PR Check #508 PASS, main Tests #642 PASS, trusted stable-signed Android Debug APK #159/run `38072916355` PASS (com.saney.renaultdocs, v0.5.96/build112), original APK SHA256 `52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b`; artifact 11677661306.
+- Release promotion #130 initially failed metadata mismatch, repaired via reviewed docs-only #131 (added signed_android_apk_run=159, unchanged promotion values). Publisher run **38073408138 PASS** and original stable-signed public APK with checksum at https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.96-debug (asset 628608387).
+- **Real Android 15+ shortened quota onTimeout emulator QA = NOT RUN**: no local ADB emulator present. Emulator-only safe device_config test/restore plan `docs/v.0.5.96/qa/EMULATOR_TIMEOUT_PROTOCOL.md`; do not claim OS callback PASS from static/unit tests. Native short lock/background has prior v0.5.95 PASS only; next legitimate new operation can test no regression in v0.5.96 without force stop or 6-hour wait.
+- #40 remains OPEN; #51 broader archive, #102 future notification update, #123 new per-volume batch result phone QA remain OPEN. No destructive user-data experiments. Next wait for user safe in-place APK install and QA or availability of disposable Android 15+ emulator to test real quota.
+
+Canonical `docs/v.0.5.96/`.
+
+---
+
 ## CURRENT — v0.5.96/build112 Android 15+ dataSync FGS QUOTA GUARD CANDIDATE — 2026-10-10
 
 - User authorized next stage after **real NT8445 333-native phone PASS**: locked ~2 minutes, backgrounded through other apps including TikTok, visible live shade progress, same operation completed. #40 only passes ordinary screen lock/background; OS quota/forced shutdown remained open.
