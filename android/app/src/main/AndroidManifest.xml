@@ -68,6 +68,10 @@
             android:exported="false"
             android:screenOrientation="unspecified" />
 
+        <receiver
+            android:name=".CompletedNotificationDismissReceiver"
+            android:exported="false" />
+
         <service
             android:name=".CatalogImportService"
             android:exported="false"
