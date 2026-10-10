@@ -57,7 +57,7 @@ class BatchBackgroundContractTests(unittest.TestCase):
         importer = self.code("RdpkgImporter.kt")
         self.assertIn("state.isRunning", service)
         self.assertIn("runStore.requestCancel()", service)
-        self.assertIn("isCancelled = {\n                            runStore.isCancelRequested()", service)
+        self.assertIn("isCancelled = {\n                            dataSyncTimeout.isExpired || runStore.isCancelRequested()", service)
         self.assertIn("isCancelled: () -> Boolean = { false }", importer)
         self.assertIn("if (isCancelled()) throw ConversionCancelledException()", importer)
         self.assertNotIn(
