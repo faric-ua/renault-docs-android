@@ -62,7 +62,7 @@ class BatchBackgroundContractTests(unittest.TestCase):
         self.assertIn("processed += completed", batch)
         self.assertLess(batch.index("processed += completed"), batch.index("publishCompletedBatchVolume("))
         self.assertLess(batch.index("publishCompletedBatchVolume("), batch.index("runStore.isCancelRequested()", batch.index("processed += completed")))
-        self.assertIn("completed.imported.packageId", source)
+        self.assertIn("processed.imported.packageId", source)
         self.assertIn('"native-batch"', source)
         summary = source[source.index("private fun completeArchiveBatch("):source.index("private fun buildArchiveCandidates(")]
         self.assertNotIn("processed.forEach { volume ->", summary)
