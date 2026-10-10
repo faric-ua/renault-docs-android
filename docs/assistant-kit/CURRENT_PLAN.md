@@ -1,3 +1,13 @@
+## CURRENT — v0.5.94/build110 NESTED ZIP BATCH CANDIDATE — 2026-10-10
+
+- User explicitly confirmed and screenshotted genuine nested ZIP structure: `Documents/Renault/Megane II/Megane IIx.zip` contains 3 compressed child ZIP files (NT8266, NT8228A, NT8274). Each ZIP has its own folder containing `index.html`. This is **not** 3 ordinary extracted folders. v0.5.92 outer-only ArchiveIntake failed with no raw Renault root. Filed #118, linked #51.
+- Scoped new branch `feat/v0.5.94-nested-zip-volume-batch` based on main after isolated v0.5.93 notification resilience PR #119 merged (Python/Android CI PASS). v0.5.93 source changes persist future completed result notifications but cannot resurrect preexisting entries once lost at v0.5.92 upgrade.
+- v0.5.94/build110 adds dedicated **one-level nested ZIP expansion** only if outer archive has zero direct Renault entrypoint roots; preserves normal folder intake. Copies each child ZIP into private per-volume staging with entry path guard, cumulative 8GiB expanded / 768MiB compressed / 200k entries / 20 inner ZIPs / 128MiB free-space and depth caps; checks cancellation per chunk; no third compression level, no nested 7Z/RAR yet. Uses existing multi-root chooser with separate installed/duplicate check, never auto-converts all. Kotlin synthetic triple ZIP tests and Python source contract added.
+- **PR/CI/merge/signed APK/phone QA PENDING**. Source original never touched. Next: exact-head PR Tests + Android PR Check, fix CI failures, reviewed merge and stable-signed main artifact. Phone check original nested `Megane IIx.zip` without manual unzip, confirm 3 options, don't reimport installed originals to force test.
+- #118/#51 and #40 remain open until phone evidence. Do not mix unbounded recursion or source deletion into this patch.
+
+---
+
 ## CURRENT — v0.5.93/build109 NOTIFICATION HISTORY UPGRADE RECOVERY CANDIDATE — 2026-10-10
 
 - User reported completed-result Android notifications disappeared after upgrading in-place to v0.5.92/build108. Source audit found the legacy SharedPreferences last-ten ring retained only result event keys/slots, no title/body/owning project; Android OS may remove notification UI on package update. Lost legacy entries cannot be reconstructed without guessing.
