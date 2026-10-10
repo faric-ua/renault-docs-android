@@ -903,6 +903,12 @@ class ProjectActivity : Activity() {
                 }
                 ?: "Renault"
 
+        // Fail closed on explicit cross-model raw folders before asking where to save.
+        ArchiveSourceGuard.conflictingModel(sourceName, project)?.let { problem ->
+            showArchiveSourceRejected(problem)
+            return
+        }
+
         pendingNativeSourceUri =
             uri.toString()
         pendingNativeSourceName =
