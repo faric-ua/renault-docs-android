@@ -452,6 +452,7 @@ class NativeRdpkgPreparationService : Service() {
                     onMessage = { _ -> },
                     onProgress = {
                         progress ->
+                        dataSyncTimeout.checkActive()
                         runStore.updateProgress(
                             progress,
                             message = progress.displayText(),
@@ -495,6 +496,7 @@ class NativeRdpkgPreparationService : Service() {
             archiveSourceStage =
                 stagedSource
 
+            dataSyncTimeout.checkActive()
             runStore.updatePreparing(
                 "Перевіряю склад архіву без розпакування…",
             )
@@ -594,6 +596,7 @@ class NativeRdpkgPreparationService : Service() {
                 candidates.size >
                 1
             ) {
+                dataSyncTimeout.checkActive()
                 runStore.markWaitingForArchiveSelection(
                     extractionRoot =
                         staged.extractionRoot
@@ -650,6 +653,7 @@ class NativeRdpkgPreparationService : Service() {
                                 existing,
                             )
 
+                    dataSyncTimeout.checkActive()
                     runStore.markAlreadyPresent(
                         message =
                             "Том уже є в проєкті: " +
@@ -982,6 +986,7 @@ class NativeRdpkgPreparationService : Service() {
             if (
                 processed.isEmpty()
             ) {
+                dataSyncTimeout.checkActive()
                 runStore.markAlreadyPresent(
                     message =
                         "Усі вибрані томи вже є в проєкті. Конвертацію пропущено.",
@@ -1111,6 +1116,7 @@ class NativeRdpkgPreparationService : Service() {
                             progressPrefix +
                                 progress.displayText()
 
+                        dataSyncTimeout.checkActive()
                         runStore.updateProgress(
                             progress,
                             message = display,
@@ -1175,10 +1181,12 @@ class NativeRdpkgPreparationService : Service() {
                 throw ConversionCancelledException()
             }
 
+            dataSyncTimeout.checkActive()
             runStore.updateImporting(
                 progressPrefix +
                     "Перевіряю та встановлюю створений .rdpkg…",
             )
+            dataSyncTimeout.checkActive()
             runStore.updateProgress(
                 OperationProgress.indeterminate(
                     "Перевіряю…",
@@ -1212,6 +1220,7 @@ class NativeRdpkgPreparationService : Service() {
                         },
                         progressState = {
                             progress ->
+                            dataSyncTimeout.checkActive()
                             runStore.updateProgress(
                                 progress,
                                 message = progressPrefix + progress.displayText(),
@@ -1828,6 +1837,7 @@ class NativeRdpkgPreparationService : Service() {
                     "Розпакування і конвертацію пропущено."
             }
 
+        dataSyncTimeout.checkActive()
         runStore.markAlreadyPresent(
             message =
                 message,
@@ -1875,6 +1885,7 @@ class NativeRdpkgPreparationService : Service() {
                     " томів"
             }
 
+        dataSyncTimeout.checkActive()
         runStore.markAlreadyPresent(
             message =
                 if (
