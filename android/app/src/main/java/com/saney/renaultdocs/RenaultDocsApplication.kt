@@ -62,6 +62,9 @@ class RenaultDocsApplication :
                 activity,
             )
 
+        // Re-post only recorded, undismissed completed notifications after
+        // a package update. Never restart workers, scan ZIPs or change volumes.
+        CompletedNotificationHistory.restoreAfterPackageUpdate(activity)
         applyBarsToActivity(activity)
         DialogUi.reapplyOrientation(activity)
     }
