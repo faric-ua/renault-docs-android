@@ -1,0 +1,11 @@
+{
+  "versionName": "0.5.92",
+  "versionCode": 108,
+  "phase": "development_source_candidate",
+  "branch": "feat/v0.5.92-batch-background-safety",
+  "feature": "Batch volume completion durability and cancellation through RDPKG import, with background lifecycle QA",
+  "phone_qa": "PENDING",
+  "signed_run_id": null,
+  "base": "v0.5.91/build107",
+  "next": "PR Python/Android checks, reviewed merge, stable signed main build, non-destructive phone QA of batch + lock/background"
+}
