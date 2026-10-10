@@ -64,6 +64,7 @@ class RdpkgExportService : Service() {
                     volume = volume,
                     destinationUri = Uri.parse(destinationUri),
                     progressState = { progress ->
+                        dataSyncTimeout.checkActive()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -85,11 +86,13 @@ class RdpkgExportService : Service() {
                         )
                     },
                 ).getOrThrow()
+                dataSyncTimeout.checkActive()
                 val label = listOfNotNull(volume.documentCode, volume.date).joinToString(" · ").ifBlank { volume.title }
                 val message = "Пакет .rdpkg збережено: $label · ${result.fileCount} файлів"
                 runStore.complete(result.sha256, result.fileCount, message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Експорт .rdpkg завершено.", false))
             } catch (error: Throwable) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message = error.message ?: "Невідома помилка експорту."
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка експорту: $message", false))
