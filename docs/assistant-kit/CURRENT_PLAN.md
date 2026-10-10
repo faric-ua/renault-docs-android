@@ -1,3 +1,14 @@
+## CURRENT — v0.5.95/build111 VERIFIED PUBLIC APK — BATCH REPORT PHONE QA NEXT — 2026-10-10
+
+- User accepted step #123 after v0.5.94 phone PASS of 3 inner ZIP files and 20 Megane II tomes. No source archives or installed volumes modified by engineering.
+- v0.5.95 PR #125 merged app source `2a25b1b5ae885584262e8fb8b152f72356213a3c`: bounded versioned per-tome completion records with packageId, volumeId, original SHA256, label, output URI, native sections, and skipped duplicates persisted as soon as each tome is durably registered. Terminal FAIL/CANCEL preserves successful entries. Single-package reporting preserved.
+- Read-only `ProjectActivity` displays each recorded outcome, copyable full checksums, `Томів створено: N` and skipped entries. Older v0.5.94 3-tome record lacks individual digests; safely shows legacy "Дані про всі пакети ... недоступні" instead of claiming last ID/blank SHA represents all.
+- PR Python Tests #630, Android PR Check #498 PASS; main Tests #631 PASS; stable-signed main Android Debug APK **#158 / 38062530766 PASS**, trusted signer, manifest v0.5.95/build111 and file SHA256 `c6cfc4b30c040eb81d3efdae5b1e27ce39e9e8f12e84ea86928d96164c548f5e`. Promotion PR #126 docs-only merged; publisher 38062722584 PASS, public signed APK https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.95-debug (asset 628267360 + .sha256 628267359).
+- **PHONE QA PENDING:** install above current app, don't clear; verify Megane II still contains 20 tomes and prior read-only three-volume source shows honest legacy note, not scalar last package. Do not repeat conversion merely to populate new batch entries; wait for next naturally needed multi-volume operation to see individual IDs/hashes and partial outcomes.
+- #123 OPEN until phone QA; #40 screen lock, #51 broader archives, #102 notification history after upgrade separately OPEN. Next step is safe user phone test, not more coding.
+
+---
+
 ## CURRENT — v0.5.95/build111 NATIVE BATCH REPORT PER-VOLUME FIX — 2026-10-10
 
 - User approved next stage #123 following v0.5.94 phone PASS for original nested ZIP `Megane IIx.zip` (NT8228A/NT8266/NT8274; Megane II 17→20). Do not modify 20 volumes or repeat this import for testing.
