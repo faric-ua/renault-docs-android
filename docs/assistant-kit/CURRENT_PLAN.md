@@ -1,3 +1,12 @@
+## CURRENT — v0.5.97/build113 VERIFIED MAIN SIGNED APK; VERIFIED PUBLIC RELEASE PENDING — 2026-10-11
+
+- User v0.5.96/build112 installed **PHONE INSTALL/RETENTION/OPEN DOCUMENT SMOKE PASS**. Android 15+ shortened FGS quota callback still **NOT RUN** (#40); user has no emulator/computer; do not request phone device_config or six-hour test.
+- PR #134 explicit-model RAW_TREE guard merged, original main app SHA `a52a395bd4b61a178d5b821c2afee240dd4c5f15`. ZIP/7Z/RAR guards already present since v0.5.80. Kotlin raw/unknown-model tests and Python safety contract. Exact-head Python Tests #644 PASS; Android PR Check #510 PASS; main Tests #645 PASS; stable-signed Android Debug APK **#160 / 38089732429 PASS**, stable signer/zipalign/aapt verified for `com.saney.renaultdocs` version `0.5.97/build113`. Signed APK SHA256 `d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74`; artifact ID 11682944077, name Renault-Docs-v0.5.97-Debug, artifact ZIP digest `sha256:60ab22777d1eb494d8e3118ba465d3dd85825c2a563e465b6441c90fdd733098`.
+- Separate docs-only branch `release/v0.5.97-verified-apk-promotion` records immutable manifest `docs/release-promotions/v0.5.97.json` and matching RELEASE_META. Next: PR docs-only tests, reviewed merge, verified publisher PASS; **do not say public release is published before evidence**. No new signing or APK rebuilding. After publication, single safe phone install-over and read-only smoke/picker negative test, no actual conversion/reimport.
+- #82/#85 remain OPEN for actual phone negative acceptance; #83 historic SAF navigation not inferred. #51, #102, #123 separate; #133 licensing is a future TODO only. Absolutely no user archives or installed tomes touched.
+
+---
+
 ## CURRENT — v0.5.97/build113 RAW SAF MODEL-SAFETY GUARD — 2026-10-11 (DEVELOPMENT)
 
 - User installed verified v0.5.96/build112 over prior app and confirmed installed volumes + opening documentation: **phone install/retention/smoke PASS**. No real Android 15+ OS FGS quota callback observed; #40 remains OPEN/emulator deferred (no computer available).
