@@ -222,6 +222,7 @@ class ConversionService : Service() {
                             filesDone,
                             changedFiles,
                             changesTotal ->
+                        dataSyncTimeout.checkActive()
                         val now =
                             System.currentTimeMillis()
 
@@ -273,6 +274,7 @@ class ConversionService : Service() {
                     plan,
                 )
 
+            dataSyncTimeout.checkActive()
             val registration =
                 runCatching {
                     val record =
@@ -328,6 +330,7 @@ class ConversionService : Service() {
                     }
                 }
 
+            dataSyncTimeout.checkActive()
             runStore.complete(
                 outputTreeUri =
                     result.outputTreeUri,
@@ -359,6 +362,7 @@ class ConversionService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Конвертацію скасовано. Staging видалено, source не змінено."
             )
@@ -373,6 +377,7 @@ class ConversionService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.fail(
                 error.message
                     ?: "Помилка конвертації."
