@@ -1,3 +1,9 @@
+## v0.5.97/build113 — raw-folder cross-model safety — 2026-10-11
+
+Based on v0.5.96 phone install/retention/open-document PASS, user resumed development and chose safety rather than cosmetic enhancements. Read-only audit found #85 .rdpkg original-archive rejection, archive explicit Kangoo/Megane source/model guard, SAF Document ID preflight and native extraction root guard already on main from v0.5.80; issue wording reconciled without claiming prior phone acceptance. Distinct gap: manual RAW_TREE folder path lacked the same model check. PR #134 added an early rejection in ProjectActivity and redundant check in NativeRdpkgPreparationService.runRawPreparation, preserving neutral NT/X61 inputs. Kotlin/Python tests; PR Tests #644 PASS, Android PR #510 PASS, main Tests #645 PASS, trusted signer Android APK #160 PASS. Source main SHA `a52a395bd4b61a178d5b821c2afee240dd4c5f15`, signed run `38089732429`, APK SHA256 `d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74`. GitHub release promotion awaiting verified publisher; phone v0.5.97 QA pending. User docs/ZIP/installed projects untouched. Unrelated #40/#51/#102/#123 remain open; #133 future Google account/license security backlog only.
+
+---
+
 ## NT8298A real ZIP PHONE PASS / UX #100 DEFERRED / DELETE AUDIT READ-ONLY — 2026-10-09
 
 - User supplied actual v0.5.87 archive-to-RDPKG final status and read-only native diagnostics: `COMPLETE`, project `Megane II`, `ARCHIVE_FILE`, source 72,693,952-byte NT8298A ZIP, volume `NT8298A · 2005-11-28`, **319 native sections**, package ID `megane-ii-nt8298a-2005-11-28`, resulting .rdpkg SHA256 `e7fdbea2d3363af3ea3710eda22dcee518e36d08963b3483f0610a55602f6603`, duration 119 s. **Original nested ZIP regression PHONE PASS**. Previous v0.5.86 FAIL resolved for this specific case. Post-run GUI tome count and individual section openings not separately reported.

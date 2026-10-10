@@ -1,6 +1,6 @@
 # Renault Docs v0.5.97 / build113 — RAW_TREE cross-model safety
 
-Status: SOURCE CANDIDATE / PR CI PENDING / PHONE QA PENDING.
+Status: MERGED / PR + MAIN CI PASS / STABLE SIGNED APK #160 PASS / PUBLIC PROMOTION PENDING / PHONE QA PENDING.
 
 ## Background
 v0.5.80 already rejected already-prepared .rdpkg files and obvious Kangoo/Megane/Laguna source-name conflict on original ZIP/7Z/RAR archives, including late worker validation and extracted root checks. Preflight shows the exact Android SAF selected source and NT catalog hints. The pre-existing #82/#85 issues still need truthful implementation-vs-phone-acceptance tracking.
