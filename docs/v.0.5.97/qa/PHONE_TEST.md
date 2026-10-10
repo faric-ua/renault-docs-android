@@ -1,6 +1,6 @@
 # Renault Docs v0.5.97 — safe phone QA
 
-**PENDING.** Do not mark PASS on source/CI alone. No need to modify existing tomes.
+**PARTIAL PHONE PASS — 2026-10-11**: user confirmed in-place v0.5.97 installation, retained tomes, and existing documentation opening after requested gate. Wrong-model raw selection and neutral matching source behavior remain PENDING. Do not mark full feature PASS on install smoke alone. No need to modify existing tomes.
 
 1. Install **only trusted stable-signed main v0.5.97/build113** over existing v0.5.96, no uninstall/clear.
 2. Check registered project/tomes and open one existing native section / PDF; normal mode unchanged.
@@ -11,3 +11,9 @@
 Do not use the user’s existing wrongly labelled .rdpkg as a test input to raw conversion. No force-stop, reboot, emulator device_config or repeated import just for a screenshot.
 
 Status gate: PHONE INSTALL/RETENTION separate from wrong-model block behavior. #82/#85 remain open for any missing actual phone evidence. Signed build evidence must be attached before starting.
+
+## User screenshot acceptance — 2026-10-11
+
+- **RAW_TREE explicit cross-model picker gate: PHONE PASS.** Megane II selected; existing Kangoo-named raw source selected through raw preparation. App displayed «Неправильне джерело» with «Джерело містить назву моделі kangoo, але вибрано проєкт «Megane II». Підготовку зупинено.» before any destination picker. Megane II project header shows **21 том**. No package creation observed.
+- Install-over / existing volumes / document open: previous user **PHONE PASS**.
+- Still untested: arbitrary model-neutral names, worker bypass, all possible ambiguous document metadata, #85 prepared package as original archive, and #40 OS quota callback. Do not assert these PASSED from one screenshot.
