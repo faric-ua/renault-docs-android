@@ -1,3 +1,12 @@
+## PHONE QA UPDATE — v0.5.95/build111 legacy batch report PASS — 2026-10-10
+
+- User provided complete read-only native .rdpkg diagnostic after installing v0.5.95. Existing source Megane IIx.zip (147316000 bytes) and project megane-ii, phase COMPLETE, old run 16:24:33–16:30:25 preserved.
+- UI shows «Результат: пакетна обробка», «Томів створено: 3», and truthful notice «Дані про всі пакети в цьому старому звіті недоступні. Окремі Package ID та SHA-256 не були збережені.» No last-only Package ID and no empty aggregate SHA. Legacy-report migration PHONE PASS.
+- #123 OPEN / PARTIAL QA: future legitimately necessary multi-tome creation must test real distinct per-volume IDs, SHA-256, output URI, persistence and copy; do not repeat older successful import. The pasted report alone does not show registered tome count, so previous observed 20 is not independently reconfirmed.
+- Next: #40 background screen-lock QA on legitimate work; #102 notification survival on recent upgrade requires its own evidence. No destructive testing.
+- Published stable-signed debug v0.5.95/build111 is still the current release.
+
+---
 ## CURRENT — v0.5.95/build111 VERIFIED PUBLIC APK — BATCH REPORT PHONE QA NEXT — 2026-10-10
 
 - User accepted step #123 after v0.5.94 phone PASS of 3 inner ZIP files and 20 Megane II tomes. No source archives or installed volumes modified by engineering.

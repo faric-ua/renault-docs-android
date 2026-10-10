@@ -1,3 +1,12 @@
+## PHONE QA UPDATE — v0.5.95/build111 legacy batch report PASS — 2026-10-10
+
+- User provided complete read-only native .rdpkg diagnostic after installing v0.5.95. Existing source Megane IIx.zip (147316000 bytes) and project megane-ii, phase COMPLETE, old run 16:24:33–16:30:25 preserved.
+- UI shows «Результат: пакетна обробка», «Томів створено: 3», and truthful notice «Дані про всі пакети в цьому старому звіті недоступні. Окремі Package ID та SHA-256 не були збережені.» No last-only Package ID and no empty aggregate SHA. Legacy-report migration PHONE PASS.
+- #123 OPEN / PARTIAL QA: future legitimately necessary multi-tome creation must test real distinct per-volume IDs, SHA-256, output URI, persistence and copy; do not repeat older successful import. The pasted report alone does not show registered tome count, so previous observed 20 is not independently reconfirmed.
+- Next: #40 background screen-lock QA on legitimate work; #102 notification survival on recent upgrade requires its own evidence. No destructive testing.
+- Published stable-signed debug v0.5.95/build111 is still the current release.
+
+---
 ## RESUME — v0.5.95/build111 BATCH DIAGNOSTIC VERIFIED PUBLIC RELEASE / PHONE QA PENDING — 2026-10-10
 
 Real user successful v0.5.94 `Megane IIx.zip` three-tome batch NT8228A/NT8266/NT8274 (17→20). Old read-only report last-only `Package ID`, empty aggregate SHA, ungrammatical count was issue #123. Source PR #125 merged `2a25b1b5ae885584262e8fb8b152f72356213a3c`: per-volume bounded versioned report persisted immediately after durable commit; records actual hashes, IDs, SAF outputs, skipped tomes; partial failure/cancel retained; old reports transparently marked unavailable; correct grammar; no changes to project data/conversion. PR Tests #630 / Android Check #498 PASS; main Tests #631 / stable signed Android APK #158 ID 38062530766 PASS, signer verified, APK SHA `c6cfc4b30c040eb81d3efdae5b1e27ce39e9e8f12e84ea86928d96164c548f5e`. Reviewed promotion PR #126, publish run 38062722584 PASS; https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.95-debug original APK 628267360 + checksum 628267359. **Phone QA PENDING**: install over existing app (no uninstall/clear), check 20 tomes intact, inspect **existing** v0.5.94 read-only last native report for legacy note; do NOT redo 3 tomes. Next genuine new batch can verify 3 real hashes and output URI. #123 remains OPEN, background lock #40, multi-format #51 and update-notification #102 still separate. See docs/v.0.5.95/qa/PHONE_TEST.md.
