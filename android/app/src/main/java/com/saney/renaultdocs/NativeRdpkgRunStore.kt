@@ -45,6 +45,7 @@ data class NativeRdpkgRunState(
     val volumeId: String? = null,
     val volumeTitle: String? = null,
     val sha256: String? = null,
+    val batchReport: NativeRdpkgBatchReport? = null,
     val filesTotal: Int = 0,
     val changedFiles: Int = 0,
     val changesTotal: Int = 0,
@@ -229,6 +230,9 @@ class NativeRdpkgRunStore(
                     KEY_SHA256,
                     null,
                 ),
+            batchReport = decodeBatchReport(
+                prefs.getString(KEY_BATCH_REPORT, null),
+            ),
             filesTotal =
                 prefs.getInt(
                     KEY_FILES_TOTAL,
@@ -341,6 +345,8 @@ class NativeRdpkgRunStore(
             .remove(
                 KEY_SHA256,
             )
+            // Never leak a previous batch's entries into the next operation.
+            .remove(KEY_BATCH_REPORT)
             .putInt(
                 KEY_FILES_TOTAL,
                 0,
@@ -702,6 +708,27 @@ class NativeRdpkgRunStore(
             .apply()
     }
 
+    /** Call after durable project registration, never for an uncommitted package. */
+    @Synchronized
+    fun recordBatchCompleted(volume: NativeRdpkgBatchVolumeResult) {
+        val current = decodeBatchReport(prefs.getString(KEY_BATCH_REPORT, null))
+            ?: NativeRdpkgBatchReport()
+        prefs.edit().putString(
+            KEY_BATCH_REPORT,
+            encodeBatchReport(current.afterCompleted(volume)),
+        ).commit()
+    }
+
+    @Synchronized
+    fun recordBatchSkipped(label: String) {
+        val current = decodeBatchReport(prefs.getString(KEY_BATCH_REPORT, null))
+            ?: NativeRdpkgBatchReport()
+        prefs.edit().putString(
+            KEY_BATCH_REPORT,
+            encodeBatchReport(current.afterSkipped(label)),
+        ).commit()
+    }
+
     fun complete(
         message: String,
         packageId: String,
@@ -894,6 +921,58 @@ class NativeRdpkgRunStore(
         }
     }
 
+    private fun encodeBatchReport(report: NativeRdpkgBatchReport): String =
+        JSONObject().apply {
+            put("schema_version", NativeRdpkgBatchReport.SCHEMA_VERSION)
+            put("omitted_completed", report.omittedCompleted)
+            put("omitted_skipped", report.omittedSkipped)
+            put("completed", JSONArray().apply {
+                report.completed.forEach { item ->
+                    put(JSONObject().apply {
+                        put("label", item.label)
+                        put("package_id", item.packageId)
+                        put("volume_id", item.volumeId)
+                        put("sha256", item.sha256)
+                        put("output_uri", item.outputUri ?: JSONObject.NULL)
+                        put("sections", item.sections)
+                    })
+                }
+            })
+            put("skipped", JSONArray().apply {
+                report.skipped.forEach { put(it) }
+            })
+        }.toString()
+
+    private fun decodeBatchReport(raw: String?): NativeRdpkgBatchReport? {
+        if (raw.isNullOrBlank()) return null
+        return runCatching {
+            val data = JSONObject(raw)
+            require(data.getInt("schema_version") == NativeRdpkgBatchReport.SCHEMA_VERSION)
+            val array = data.getJSONArray("completed")
+            val skipped = data.getJSONArray("skipped")
+            require(array.length() <= NativeRdpkgBatchReport.MAX_RECORDED)
+            require(skipped.length() <= NativeRdpkgBatchReport.MAX_RECORDED)
+            val completed = (0 until array.length()).map { index ->
+                val item = array.getJSONObject(index)
+                NativeRdpkgBatchVolumeResult(
+                    label = item.getString("label"),
+                    packageId = item.getString("package_id"),
+                    volumeId = item.getString("volume_id"),
+                    sha256 = item.getString("sha256"),
+                    outputUri = if (item.isNull("output_uri")) null
+                        else item.getString("output_uri"),
+                    sections = item.getInt("sections"),
+                )
+            }
+            NativeRdpkgBatchReport(
+                completed = completed,
+                skipped = (0 until skipped.length()).map { skipped.getString(it) },
+                omittedCompleted = data.optInt("omitted_completed", 0).coerceAtLeast(0),
+                omittedSkipped = data.optInt("omitted_skipped", 0).coerceAtLeast(0),
+            )
+        }.getOrNull()
+    }
+
     private fun encodeArchiveCandidates(
         candidates: List<ArchiveVolumeCandidate>,
     ): String =
@@ -1041,6 +1120,8 @@ class NativeRdpkgRunStore(
             "volume_title"
         private const val KEY_SHA256 =
             "sha256"
+        private const val KEY_BATCH_REPORT =
+            "batch_report_v1"
         private const val KEY_FILES_TOTAL =
             "files_total"
         private const val KEY_CHANGED_FILES =

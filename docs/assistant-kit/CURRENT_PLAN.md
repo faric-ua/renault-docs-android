@@ -1,3 +1,13 @@
+## CURRENT — v0.5.95/build111 NATIVE BATCH REPORT PER-VOLUME FIX — 2026-10-10
+
+- User approved next stage #123 following v0.5.94 phone PASS for original nested ZIP `Megane IIx.zip` (NT8228A/NT8266/NT8274; Megane II 17→20). Do not modify 20 volumes or repeat this import for testing.
+- Source branch `fix/v0.5.95-native-batch-report-detail` adds `NativeRdpkgBatchReport` v1: bounded ordered per-volume completed entries with exact packageId, volumeId, SHA-256, original destination URI and native sections, plus skipped duplicate labels. Each result is saved immediately after successful install/registration; preserved on subsequent FAIL/CANCEL and restart. New operation clears old batch entries; legacy scalar single-volume flows preserved.
+- Read-only `ProjectActivity.showLastNativeSourceDiagnostics` now renders distinct batch outcomes and copyable hashes, with grammatical `Томів створено: 3`. Earlier v0.5.94 three-volume state has no original per-volume metadata: displays explicit LEGACY note rather than misleading last package ID and blank aggregate SHA. Does not modify app data except its own per-run report preferences.
+- Kotlin and Python tests cover 0/1/3 entries, partial failures, duplicate skips, boundedness, older report readability, scalar output and no side effects. PR/CI/merge/signed APK/new phone QA PENDING.
+- Next: run exact-head Python + Android tests; review and merge only on PASS, stable-signed main APK then PHONE QA checking legacy last report without reimport and future genuine multi-volume operations. #40 background/#51 broader archives/#102 update notifications remain independent open.
+
+---
+
 ## PHONE QA ACCEPTED — v0.5.94/build110 nested ZIP batch — 2026-10-10
 
 - Real user's original `Documents/Renault/Megane II/Megane IIx.zip` (147,316,000 bytes; outer ZIP containing 3 compressed child ZIPs, each folder/index.html) was processed **successfully**.

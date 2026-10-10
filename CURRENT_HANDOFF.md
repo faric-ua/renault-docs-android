@@ -1,3 +1,9 @@
+## RESUME — v0.5.95/build111 batch diagnostics candidate — 2026-10-10
+
+User authorized #123 after v0.5.94 three nested ZIP batch phone PASS (Megane II 20 tomes). Source `fix/v0.5.95-native-batch-report-detail` isolates report persistence/display: store completed package ID, volume ID, actual checksum, SAF destination URI, label and section count per committed tome using versioned bounded JSON in native run prefs; skipped duplicate labels; read-only diagnostic renders per-volume entries; legacy three-tome scalar report shows transparent unavailable note. Do not fabricate old per-volume hashes, reimport successful tomes, change archive output or touch installed data. Single-package summary preserved. Kotlin/Python source tests drafted; PR/CI/signed main APK/phone QA pending. See `docs/v.0.5.95/` and #123. Future screen lock QA #40 and notification upgrade QA #102 remain separate.
+
+---
+
 ## PHONE QA ACCEPTED — v0.5.94/build110 nested ZIP batch — 2026-10-10
 
 - Real user's original `Documents/Renault/Megane II/Megane IIx.zip` (147,316,000 bytes; outer ZIP containing 3 compressed child ZIPs, each folder/index.html) was processed **successfully**.

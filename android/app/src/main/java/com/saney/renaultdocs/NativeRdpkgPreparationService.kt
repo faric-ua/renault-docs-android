@@ -873,11 +873,9 @@ class NativeRdpkgPreparationService : Service() {
                 duplicate.exact
                     ?.let {
                         existing ->
-                        skipped +=
-                            VolumeDuplicatePreflight
-                                .label(
-                                    existing,
-                                )
+                        val duplicateLabel = VolumeDuplicatePreflight.label(existing)
+                        skipped += duplicateLabel
+                        runStore.recordBatchSkipped(duplicateLabel)
                         return@forEachIndexed
                     }
 
@@ -934,6 +932,18 @@ class NativeRdpkgPreparationService : Service() {
                             excludedNestedRawRoots,
                     )
                 processed += completed
+                // Persist each committed tome BEFORE continuing this batch.
+                // A later failure/cancel must not erase successful package IDs.
+                runStore.recordBatchCompleted(
+                    NativeRdpkgBatchVolumeResult(
+                        label = completed.label,
+                        packageId = completed.imported.packageId,
+                        volumeId = completed.imported.volume.id,
+                        sha256 = completed.prepared.sha256,
+                        outputUri = completed.destination.toString(),
+                        sections = completed.prepared.sectionCount,
+                    ),
+                )
                 publishCompletedBatchVolume(
                     request = request,
                     processed = completed,
@@ -1398,30 +1408,13 @@ class NativeRdpkgPreparationService : Service() {
         runStore.complete(
             message =
                 message,
-            packageId =
-                last.imported.packageId,
-            volumeId =
-                last.imported.volume.id,
-            volumeTitle =
-                if (
-                    processed.size ==
-                    1
-                ) {
-                    last.label
-                } else {
-                    processed.size
-                        .toString() +
-                        " томів"
-                },
-            sha256 =
-                if (
-                    processed.size ==
-                    1
-                ) {
-                    last.prepared.sha256
-                } else {
-                    ""
-                },
+            // Scalar identity is meaningful only for exactly one package.
+            // A batch's separate IDs/digests are in batch_report_v1 instead.
+            packageId = if (processed.size == 1) last.imported.packageId else "",
+            volumeId = if (processed.size == 1) last.imported.volume.id else "",
+            volumeTitle = if (processed.size == 1) last.label
+                else "Томів створено: ${processed.size}",
+            sha256 = if (processed.size == 1) last.prepared.sha256 else "",
             filesTotal =
                 processed.sumOf {
                     it.prepared.sourceFiles

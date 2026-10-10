@@ -1,0 +1,10 @@
+{
+  "versionName": "0.5.95",
+  "versionCode": 111,
+  "phase": "source_candidate_ci_pending",
+  "branch": "fix/v0.5.95-native-batch-report-detail",
+  "base": "0.5.94/build110",
+  "issue": 123,
+  "qa_status": "phone-qa-pending",
+  "signed_run_id": null
+}
