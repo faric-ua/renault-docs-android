@@ -1,0 +1,12 @@
+{
+  "versionName": "0.5.96",
+  "versionCode": 112,
+  "phase": "source_candidate_ci_pending",
+  "branch": "fix/v0.5.96-datasync-timeout-safe-stop",
+  "issue": 40,
+  "scope": "Android 15+ dataSync foreground-service timeout handling for 7 workers",
+  "sourceBase": "v0.5.95/build111",
+  "phoneQa": "PENDING",
+  "emulatorTimeoutQA": "NOT_RUN",
+  "signed_run_id": null
+}
