@@ -194,7 +194,8 @@ internal object CompletedNotificationHistory {
             CompletedNotificationRecord(
                 sequence = json.getLong("sequence"),
                 eventKey = json.getString("event_key"),
-                projectId = json.optString("project_id").takeIf { it.isNotBlank() },
+                projectId = if (json.isNull("project_id")) null else
+                    json.getString("project_id").takeIf { it.isNotBlank() },
                 title = json.getString("title"),
                 text = json.getString("text"),
                 dismissed = json.optBoolean("dismissed", false),
