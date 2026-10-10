@@ -20,7 +20,7 @@ class LastSourceReadOnlyTest(unittest.TestCase):
     def test_report_contains_source_evidence(self):
         for field in ("nativeRunStore.load()", "last.sourceUri", "last.sourceName",
                       "last.sourceKind", "last.projectId", "last.destinationUri",
-                      "last.sha256", "last.startedAtMs", "last.finishedAtMs",
+                      "NativeRdpkgBatchReportFormatter.reportLines(last)", "last.startedAtMs", "last.finishedAtMs",
                       "DocumentsContract.getDocumentId", "DocumentFile.fromSingleUri",
                       "Копіювати звіт", "ClipData.newPlainText"):
             self.assertIn(field, self.dialog)
