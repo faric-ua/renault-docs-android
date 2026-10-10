@@ -47,7 +47,12 @@ data class NativeRdpkgBatchReport(
 object NativeRdpkgBatchReportFormatter {
     fun reportLines(state: NativeRdpkgRunState): String {
         val batch = state.batchReport
-        if (batch != null && state.sourceKind == NativeRdpkgSourceKind.ARCHIVE_FILE) {
+        if (
+            batch != null &&
+            state.sourceKind == NativeRdpkgSourceKind.ARCHIVE_FILE &&
+            (batch.completedCount > 1 || batch.skippedCount > 0 ||
+                state.phase != NativeRdpkgRunPhase.COMPLETE)
+        ) {
             return buildString {
                 appendLine("Результат: пакетна обробка")
                 appendLine("Томів створено: ${batch.completedCount}")
