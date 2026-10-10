@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.97",
   "versionCode": 113,
-  "phase": "source_candidate_ci_pending",
+  "phase": "verified_stable_signed_main_apk_promotion_pending",
   "branch": "fix/v0.5.97-raw-source-model-safety",
   "issues": [
     82,
@@ -12,8 +12,18 @@
   "phoneQa": "PENDING",
   "pr_tests": "PENDING",
   "pr_android_check": "PENDING",
-  "signed_apk": "PENDING",
-  "source_sha": null,
-  "apk_sha256": null,
-  "next": "Exact-head CI on PR, trusted main stable signer; safe no-conversion phone guard test. Do not clean user data."
+  "signed_apk": "PASS",
+  "source_sha": "a52a395bd4b61a178d5b821c2afee240dd4c5f15",
+  "apk_sha256": "d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74",
+  "next": "Publish verified immutable original signed APK and perform in-place phone QA. Raw mismatch picker-only negative test; no forced conversion.",
+  "pr_tests_run": 38089609663,
+  "pr_android_check_run": 38089609628,
+  "main_tests_run": 645,
+  "signed_run_id": 38089732429,
+  "signed_run_number": 160,
+  "signed_android_apk_run": 160,
+  "artifact_id": 11682944077,
+  "artifact_name": "Renault-Docs-v0.5.97-Debug",
+  "artifact_digest": "sha256:60ab22777d1eb494d8e3118ba465d3dd85825c2a563e465b6441c90fdd733098",
+  "qa_status": "phone-qa-pending"
 }
