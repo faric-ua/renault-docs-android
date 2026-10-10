@@ -1,3 +1,11 @@
+## CURRENT — v0.5.97/build113 PHONE INSTALL/RETENTION PASS; RAW MISMATCH NEGATIVE TEST NEXT — 2026-10-11
+
+- User responded **«Пасс, далі»** to the specific requested v0.5.97 installed-over v0.5.96 check (existing tomes retained and documentation opened). Mark **PHONE INSTALL / RETENTION / DOCUMENT OPEN = PASS** for v0.5.97, not blanket feature acceptance.
+- Still **PENDING**: deliberately selecting an *existing* explicitly Kangoo-named **raw folder** from Megane II → «Додати» → «Створити .rdpkg з raw», expecting model-conflict rejection **before** destination picker, without making or deleting any files. If user has no existing Kangoo raw folder accessible via SAF, skip; do not create one or force tests.
+- Signed public release remains v0.5.97/build113 (app SHA `a52a395bd4b61a178d5b821c2afee240dd4c5f15`); no new APK. #82/#85 phone negative QA still open. #40 emulator FGS QA deferred, #51/#102/#123 separate, #133 license TODO only.
+
+---
+
 ## CURRENT — v0.5.97/build113 VERIFIED PUBLIC SIGNED APK — PHONE QA NEXT — 2026-10-11
 
 - Scope: PR #134 RAW_TREE explicit Kangoo/Megane model mismatch safety, both pre-destination picker and independent native worker. No model guessing from NT/X61; other archive flow unchanged. Main app source `a52a395bd4b61a178d5b821c2afee240dd4c5f15` (v0.5.97/build113).
