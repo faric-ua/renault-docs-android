@@ -13,6 +13,7 @@ import androidx.core.content.FileProvider
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RdprojectShareService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     private lateinit var runStore:
         RdprojectShareRunStore
     private lateinit var workWakeLock:
@@ -263,6 +264,24 @@ class RdprojectShareService : Service() {
         }.start()
 
         return START_REDELIVER_INTENT
+    }
+
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+        workWakeLock.release()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+        }
     }
 
     override fun onBind(
