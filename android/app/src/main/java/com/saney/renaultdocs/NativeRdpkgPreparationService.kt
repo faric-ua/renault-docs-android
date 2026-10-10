@@ -17,6 +17,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 class NativeRdpkgPreparationService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     data class StartRequest(
         val requestId: String,
         val sourceTreeUri: String,
@@ -297,6 +298,24 @@ class NativeRdpkgPreparationService : Service() {
         }.start()
 
         return START_REDELIVER_INTENT
+    }
+
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+        releaseWakeLock()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+        }
     }
 
     override fun onBind(
