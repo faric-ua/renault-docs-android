@@ -708,6 +708,7 @@ object ArchiveIntake {
         extractionRoot: File,
         onProgress: (Progress) -> Unit = {},
         isCancelled: () -> Boolean = { false },
+        allowNoRawRoots: Boolean = false,
     ): ExtractResult {
         checkCancelled(
             isCancelled,
@@ -794,7 +795,7 @@ object ArchiveIntake {
             )
 
         require(
-            rawRoots.isNotEmpty(),
+            allowNoRawRoots || rawRoots.isNotEmpty(),
         ) {
             "В архіві не знайдено raw Renault тому з INDEX.HTM / INDEX.HTML / ACCUEIL.HTM у корені."
         }
