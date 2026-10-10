@@ -36,7 +36,7 @@ class V0597RawModelSafety(unittest.TestCase):
     def test_no_speculative_vehicle_inference(self):
         self.assertIn("if (models.isEmpty()) return null", self.guard)
         self.assertIn("fun conflictingModel(name: String, project: RenaultProject)", self.guard)
-        self.assertNotIn("X61" to Regex", self.guard)
+        self.assertNotIn('"X61" to Regex', self.guard)
         self.assertIn('return conflictingModel(name, project)', self.guard)
 
 if __name__ == "__main__":
