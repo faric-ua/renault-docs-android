@@ -33,6 +33,25 @@ class BatchBackgroundContractTests(unittest.TestCase):
                     self.assertIn("BackgroundWorkWakeLock(", source)
                 self.assertIn("stopSelf()", source)
 
+    def test_manifest_declares_non_task_bound_datasync_workers(self):
+        import xml.etree.ElementTree as ET
+        manifest = ET.parse(ROOT / "android/app/src/main/AndroidManifest.xml")
+        ns = "{http://schemas.android.com/apk/res/android}"
+        services = manifest.findall(".//service")
+        entries = {
+            svc.attrib.get(ns + "name"): svc.attrib for svc in services
+        }
+        self.assertEqual(7, len([x for x in SERVICES if "." + x.removesuffix(".kt") in entries]))
+        for name in SERVICES:
+            with self.subTest(service=name):
+                row = entries["." + name.removesuffix(".kt")]
+                self.assertEqual("dataSync", row[ns + "foregroundServiceType"])
+                self.assertEqual("false", row[ns + "stopWithTask"])
+                self.assertEqual("false", row[ns + "exported"])
+        permissions = [p.attrib.get(ns + "name") for p in manifest.findall("uses-permission")]
+        self.assertIn("android.permission.WAKE_LOCK", permissions)
+        self.assertIn("android.permission.FOREGROUND_SERVICE_DATA_SYNC", permissions)
+
     def test_cancel_applies_to_native_import_phase_too(self):
         service = self.code("NativeRdpkgPreparationService.kt")
         importer = self.code("RdpkgImporter.kt")
