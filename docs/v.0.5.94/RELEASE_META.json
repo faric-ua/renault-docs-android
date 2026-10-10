@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.94",
   "versionCode": 110,
-  "phase": "source_candidate_ci_pending",
+  "phase": "stable_signed_main_verified_promotion_pending",
   "branch": "feat/v0.5.94-nested-zip-volume-batch",
   "sourceBase": "v0.5.93/build109 candidate merged to main",
   "issues": [
@@ -9,6 +9,18 @@
     118
   ],
   "phoneQa": "PENDING",
-  "signed_run_id": null,
-  "next": "Run Python/Android PR CI; merge reviewed only on pass, get stable-signed main, test user's real 3-ZIP nested outer archive without changing it"
+  "signed_run_id": 38050282060,
+  "next": "Publish exact trusted original signed APK, then phone test real Megane IIx.zip with three child ZIP roots; only preview first, do not import installed duplicates.",
+  "source_sha": "86fd713ba03f307579f86204f5b525faf0658827",
+  "main_tests_run": 628,
+  "pr_tests_run": 38050172969,
+  "pr_android_check_run": 38050172972,
+  "signed_run_number": 157,
+  "signed_android_apk_run": 157,
+  "artifact_id": 11669491553,
+  "artifact_name": "Renault-Docs-v0.5.94-Debug",
+  "artifact_digest": "sha256:01df8f9eb89e0b86d8fb80dccdc7c31d767838b77e3bef22b73a8d239e2fd464",
+  "apk_sha256": "23cb2ffef2e178606674ec279711825e2614688d7762014d07d37c7bd1bcacd2",
+  "signer": "Stable signer verified in main Android Debug APK #157",
+  "qa_status": "phone-qa-pending"
 }
