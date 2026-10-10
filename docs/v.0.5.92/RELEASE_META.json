@@ -1,11 +1,23 @@
 {
   "versionName": "0.5.92",
   "versionCode": 108,
-  "phase": "development_source_candidate",
+  "phase": "signed_main_verified_promotion_pending_phone_qa",
   "branch": "feat/v0.5.92-batch-background-safety",
   "feature": "Batch volume completion durability and cancellation through RDPKG import, with background lifecycle QA",
   "phone_qa": "PENDING",
-  "signed_run_id": null,
+  "signed_run_id": 38011662599,
   "base": "v0.5.91/build107",
-  "next": "PR Python/Android checks, reviewed merge, stable signed main build, non-destructive phone QA of batch + lock/background"
+  "next": "Publish exact stable-signed v0.5.92/build108; safe user phone QA with NEW multi-root archive, ZIP/7Z/RAR support and screen-lock/back processing.",
+  "source_sha": "3e5d60aea828a7a586044a4ff197245a8b97e91d",
+  "main_tests_run": 615,
+  "pr_tests_run": 38011543271,
+  "pr_android_check_run": 38011543292,
+  "signed_run_number": 155,
+  "signed_android_apk_run": 155,
+  "artifact_id": 11654165842,
+  "artifact_name": "Renault-Docs-v0.5.92-Debug",
+  "artifact_digest": "sha256:229c9ffcc75eb7b0153a3c19fb4922197f6f4d2c5dee64759b5e7d72a1684a3d",
+  "apk_sha256": "1c9d71639aeeedc518eb27910b16416428a39359ebb7b8eb1af51c3696859d17",
+  "signer": "Stable development signer verified in trusted main Android Debug APK #155",
+  "qa_status": "phone-qa-pending"
 }
