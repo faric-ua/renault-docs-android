@@ -1,3 +1,9 @@
+## Renault Docs resume — 2026-10-10
+
+Latest stable-signed public debug release v0.5.92/build108: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.92-debug. app SHA `3e5d60aea828a7a586044a4ff197245a8b97e91d`, APK sha256 `1c9d71639aeeedc518eb27910b16416428a39359ebb7b8eb1af51c3696859d17`. Batch success notifications and cancel in native IMPORTING improved. **Phone QA for multiple raw roots ZIP/7Z/RAR and background lock remains pending**; issues #51/#40 open. Start `docs/assistant-kit/CURRENT_PLAN.md` and `docs/v.0.5.92/qa/PHONE_TEST.md`. Never uninstall/clear user data or duplicate imports solely to test.
+
+---
+
 ## Renault Docs current batch/background work — 2026-10-10
 
 After user-confirmed successful v0.5.91 progress and 2 retained result notifications, next stage is #51 multi-volume ZIP/7Z/RAR and #40 screen lock/background lifecycle. Branch `feat/v0.5.92-batch-background-safety` contains safer native late cancel and early per-volume batch success notifications, with tests and QA plan. No checked APK or phone acceptance yet. Start at `docs/assistant-kit/CURRENT_PLAN.md` and `docs/v.0.5.92/`. Do not delete/reimport installed tomes.
