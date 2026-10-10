@@ -42,7 +42,7 @@ internal object NestedZipVolumeIntake {
             .map { it.toString() }.toList()
         if (segments.size < 2 || segments.first() != NESTED_DIR) return null
         val folder = segments[1]
-        if (!folder.matches(Regex("""\\d{3}-.+"""))) return null
+        if (!folder.matches(Regex("""\d{3}-.+"""))) return null
         return folder.substringAfter('-', "").takeIf { it.isNotBlank() }
     }
 
