@@ -89,7 +89,7 @@ internal object NestedZipVolumeIntake {
                 "Вкладений файл не є ZIP: " + inner.name
             }
             val safeName = inner.nameWithoutExtension
-                .replace(Regex("[^\\p{L}\\p{N}._-]"), "_")
+                .replace(Regex("""[^\p{L}\p{N}._-]"""), "_")
                 .take(70)
                 .trim('.')
                 .ifBlank { "volume" }
