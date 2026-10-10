@@ -30,9 +30,9 @@ class NestedZipVolumeIntakeTest {
                         archive(
                             inner,
                             mapOf(
-                                "folder_" + code + "/index.html" to
+                                "documentation/index.html" to
                                     ("<html>" + code + "</html>").toByteArray(),
-                                "folder_" + code + "/data/page.htm" to
+                                "documentation/data/page.htm" to
                                     "payload".toByteArray(),
                             ),
                         )
@@ -60,9 +60,14 @@ class NestedZipVolumeIntakeTest {
             ) ?: error("Expected three embedded ZIPs")
 
             assertEquals(3, result.rawRoots.size)
+            // Every ZIP has exactly the SAME internal folder name. The
+            // resulting source IDs must still be distinct and retain NT codes.
+            assertEquals(setOf("documentation"), result.rawRoots.map { it.name }.toSet())
             assertEquals(
-                setOf("folder_NT8266", "folder_NT8228A", "folder_NT8274"),
-                result.rawRoots.map { it.name }.toSet(),
+                setOf("NT8266", "NT8228A", "NT8274"),
+                result.rawRoots.map {
+                    ArchiveIntake.rawSourceName(stage, it)
+                }.toSet(),
             )
             assertTrue(result.rawRoots.all { File(it, "index.html").isFile })
             assertTrue(result.rawRoots.all { it.canonicalPath.startsWith(stage.canonicalPath) })
