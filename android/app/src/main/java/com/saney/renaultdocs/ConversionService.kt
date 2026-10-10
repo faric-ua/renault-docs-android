@@ -194,9 +194,13 @@ class ConversionService : Service() {
                 runStore.fail(DataSyncTimeoutUi.MESSAGE)
             }
         } finally {
-        releaseWakeLock()
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { releaseWakeLock() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
         }
     }
 
