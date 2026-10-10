@@ -1,3 +1,9 @@
+## Latest Renault Docs v0.5.94 — 2026-10-10
+
+Stable-signed public debug v0.5.94/build110 https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.94-debug; exact main app SHA `86fd713ba03f307579f86204f5b525faf0658827`, APK SHA `23cb2ffef2e178606674ec279711825e2614688d7762014d07d37c7bd1bcacd2`. Supports one-level outer ZIP containing three child Renault ZIPs in private staging and same chooser; phone QA PENDING for original Megane IIx.zip. #118/#51/#40 open, #102 future upgrade-notification recovery open. See `docs/v.0.5.94/qa/PHONE_TEST.md` and `docs/assistant-kit/CURRENT_PLAN.md`. Never uninstall/clear/reimport installed tomes to force tests.
+
+---
+
 ## Renault Docs resume — 2026-10-10
 
 Latest stable-signed public debug release v0.5.92/build108: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.92-debug. app SHA `3e5d60aea828a7a586044a4ff197245a8b97e91d`, APK sha256 `1c9d71639aeeedc518eb27910b16416428a39359ebb7b8eb1af51c3696859d17`. Batch success notifications and cancel in native IMPORTING improved. **Phone QA for multiple raw roots ZIP/7Z/RAR and background lock remains pending**; issues #51/#40 open. Start `docs/assistant-kit/CURRENT_PLAN.md` and `docs/v.0.5.92/qa/PHONE_TEST.md`. Never uninstall/clear user data or duplicate imports solely to test.
