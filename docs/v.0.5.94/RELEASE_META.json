@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.94",
   "versionCode": 110,
-  "phase": "stable_signed_main_verified_promotion_pending",
+  "phase": "verified_signed_public_debug_published_phone_qa_pending",
   "branch": "feat/v0.5.94-nested-zip-volume-batch",
   "sourceBase": "v0.5.93/build109 candidate merged to main",
   "issues": [
@@ -10,7 +10,7 @@
   ],
   "phoneQa": "PENDING",
   "signed_run_id": 38050282060,
-  "next": "Publish exact trusted original signed APK, then phone test real Megane IIx.zip with three child ZIP roots; only preview first, do not import installed duplicates.",
+  "next": "Install signed v0.5.94/build110 in place; use original Megane IIx.zip and confirm three distinct selectable raw ZIP volumes before performing any conversion. #118 open until device evidence.",
   "source_sha": "86fd713ba03f307579f86204f5b525faf0658827",
   "main_tests_run": 628,
   "pr_tests_run": 38050172969,
@@ -22,5 +22,17 @@
   "artifact_digest": "sha256:01df8f9eb89e0b86d8fb80dccdc7c31d767838b77e3bef22b73a8d239e2fd464",
   "apk_sha256": "23cb2ffef2e178606674ec279711825e2614688d7762014d07d37c7bd1bcacd2",
   "signer": "Stable signer verified in main Android Debug APK #157",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.94-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.94-debug",
+    "signed_run_id": 38050282060,
+    "publisher_run_id": 38050499749,
+    "source_sha": "86fd713ba03f307579f86204f5b525faf0658827",
+    "apk_asset_id": 627866474,
+    "checksum_asset_id": 627866475,
+    "apk_sha256": "23cb2ffef2e178606674ec279711825e2614688d7762014d07d37c7bd1bcacd2",
+    "qa_status": "phone-qa-pending"
+  }
 }
