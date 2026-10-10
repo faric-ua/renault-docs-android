@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.97",
   "versionCode": 113,
-  "phase": "verified_stable_signed_main_apk_promotion_pending",
+  "phase": "verified_public_signed_debug_published_phone_qa_pending",
   "branch": "fix/v0.5.97-raw-source-model-safety",
   "issues": [
     82,
@@ -15,7 +15,7 @@
   "signed_apk": "PASS",
   "source_sha": "a52a395bd4b61a178d5b821c2afee240dd4c5f15",
   "apk_sha256": "d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74",
-  "next": "Publish verified immutable original signed APK and perform in-place phone QA. Raw mismatch picker-only negative test; no forced conversion.",
+  "next": "Safe in-place phone update and no-conversion raw picker negative test; keep #82/#85 open. Android quota emulator QA #40 deferred.",
   "pr_tests_run": 38089609663,
   "pr_android_check_run": 38089609628,
   "main_tests_run": 645,
@@ -25,5 +25,17 @@
   "artifact_id": 11682944077,
   "artifact_name": "Renault-Docs-v0.5.97-Debug",
   "artifact_digest": "sha256:60ab22777d1eb494d8e3118ba465d3dd85825c2a563e465b6441c90fdd733098",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.97-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.97-debug",
+    "source_sha": "a52a395bd4b61a178d5b821c2afee240dd4c5f15",
+    "signed_run_id": 38089732429,
+    "publisher_run_id": 38090006087,
+    "apk_asset_id": 629103188,
+    "checksum_asset_id": 629103189,
+    "apk_sha256": "d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74",
+    "qa_status": "phone-qa-pending"
+  }
 }

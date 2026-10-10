@@ -1,3 +1,13 @@
+## CURRENT — v0.5.97/build113 VERIFIED PUBLIC SIGNED APK — PHONE QA NEXT — 2026-10-11
+
+- Scope: PR #134 RAW_TREE explicit Kangoo/Megane model mismatch safety, both pre-destination picker and independent native worker. No model guessing from NT/X61; other archive flow unchanged. Main app source `a52a395bd4b61a178d5b821c2afee240dd4c5f15` (v0.5.97/build113).
+- Exact-head PR Python Tests #644 and Android PR Check #510 PASS; main Tests #645 PASS; trusted stable-signed APK #160/run `38089732429` PASS. Original APK SHA256 `d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74`.
+- PR #135 reviewed docs-only immutable promotion merged; verified publisher run `38090006087` PASS, original APK asset `629103188` + checksum asset `629103189` published at https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.97-debug. Release target exact signed app source; no rebuild/re-sign, no archives or user data touched.
+- **PHONE v0.5.97 = PENDING**. User's existing installed v0.5.96/build112 passed install/retention/open document smoke. Next on phone: use compatible Renault Menu install-over to v0.5.97; confirm registered tomes and one document opens. Only if safe existing wrong-model RAW folder is available, select it from Megane raw picker and observe rejection *before* destination picker, without starting conversion. Never delete/reimport old files for QA.
+- #82/#85 remain OPEN for negative phone test, #83 historical SAF path unknown. #40 emulator timeout still not run (no computer). #51 broader archive QA, #102 notification update, #123 per-volume reports only next genuine batch. #133 Google licensing/protected docs future TODO only.
+
+---
+
 ## RESUME — v0.5.97/build113 RAW_TREE mismatch safety MERGED / SIGNED MAIN PASS / PUBLISH PENDING — 2026-10-11
 
 PR #134 merged on main `a52a395bd4b61a178d5b821c2afee240dd4c5f15`. Fixed explicit Kangoo-named raw SAF folder being usable from Megane project: picker checks `ArchiveSourceGuard.conflictingModel` before destination and native `runRawPreparation` checks saved project and raw name before processing, including service redelivery. Ambiguous NT/X61 stays permitted, original ZIP/7Z/RAR flow untouched. Python Tests #644 PASS, Android PR Check #510 PASS, main Tests #645 PASS, trusted stable-signed Android APK #160 (run `38089732429`) PASS, version v0.5.97/build113, artifact ID `11682944077`, artifact digest `sha256:60ab22777d1eb494d8e3118ba465d3dd85825c2a563e465b6441c90fdd733098`, inner APK SHA256 `d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74`. Verified promotion manifest in docs-only branch pending PR/merge/publisher. **Do not claim release PUBLISHED or phone PASS yet.**
