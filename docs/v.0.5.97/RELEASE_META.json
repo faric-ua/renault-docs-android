@@ -1,0 +1,19 @@
+{
+  "versionName": "0.5.97",
+  "versionCode": 113,
+  "phase": "source_candidate_ci_pending",
+  "branch": "fix/v0.5.97-raw-source-model-safety",
+  "issues": [
+    82,
+    85
+  ],
+  "scope": "Explicit RAW_TREE source folder model conflicts blocked in picker and native worker",
+  "sourceBase": "v0.5.96/build112",
+  "phoneQa": "PENDING",
+  "pr_tests": "PENDING",
+  "pr_android_check": "PENDING",
+  "signed_apk": "PENDING",
+  "source_sha": null,
+  "apk_sha256": null,
+  "next": "Exact-head CI on PR, trusted main stable signer; safe no-conversion phone guard test. Do not clean user data."
+}

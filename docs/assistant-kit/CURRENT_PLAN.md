@@ -1,3 +1,14 @@
+## CURRENT — v0.5.97/build113 RAW SAF MODEL-SAFETY GUARD — 2026-10-11 (DEVELOPMENT)
+
+- User installed verified v0.5.96/build112 over prior app and confirmed installed volumes + opening documentation: **phone install/retention/smoke PASS**. No real Android 15+ OS FGS quota callback observed; #40 remains OPEN/emulator deferred (no computer available).
+- Access/licensing/Google Play idea is future TODO #133 only; do not implement it in this version.
+- Read-only source audit: #85 prepared .rdpkg rejection, filename model guards, extracted archive root guard and user-confirmation preflight are ALREADY on main since v0.5.80; avoid repeating. Open issues #82/#85 need their implementation status reconciled and phone acceptance separate.
+- **New scoped gap:** manually selected RAW_TREE source folder has no early `ArchiveSourceGuard.conflictingModel(sourceName, project)` in ProjectActivity nor a corresponding guard in `NativeRdpkgPreparationService.runRawPreparation`; an explicitly named Kangoo folder could otherwise be compiled under Megane II. Next fix: reject only **strong explicit** model conflict on raw source UI before destination and on worker before processing, leave opaque NT/X61/source name ambiguity allowed, retain existing ZIP/7Z/RAR behavior, no source/archive/package/volume deletion.
+- Branch `fix/v0.5.97-raw-source-model-safety`; source + Kotlin regression & Python contract + version v0.5.97/build113 + release notes; then exact-HEAD PR Python/Android CI, reviewed merge, trusted stable-signed main APK, verified release, and a **single non-destructive phone smoke/preflight gate**. Do not mark source/CI/phone PASS before evidence.
+- Remaining distinct scopes: #51 broader real ZIP/7Z/RAR cancel/partial cases; #102 grouped notifications after update; #123 per-volume results only at next genuine new batch; #30 Windows intake/catalog pipeline; #133 license/access later. No new forced import, user data clearing, deleting, moving or reimporting tomes.
+
+---
+
 ## CURRENT — v0.5.96/build112 VERIFIED PUBLIC DEBUG APK / OS FGS QUOTA EMULATOR QA PENDING — 2026-10-10
 
 - User confirmed NT8445 (2007-11-19; 333 native) created successfully after ~2min phone lock, browsing other apps including TikTok, expanded shade live progress, returning to Renault Docs. Ordinary background and lock native PHONE PASS; issue #40 remains open for actual OS quota/process restart and remaining workers.
