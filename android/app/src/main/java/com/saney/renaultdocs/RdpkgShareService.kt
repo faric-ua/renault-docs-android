@@ -68,6 +68,7 @@ class RdpkgShareService : Service() {
                     volume = volume,
                     destinationUri = uri,
                     progressState = { progress ->
+                        dataSyncTimeout.checkActive()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -89,9 +90,11 @@ class RdpkgShareService : Service() {
                         )
                     },
                 ).getOrThrow()
+                dataSyncTimeout.checkActive()
                 runStore.complete(file.absolutePath)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Том готовий для поширення.", false))
             } catch (error: Throwable) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message = error.message ?: "Невідома помилка підготовки тому."
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка підготовки: $message", false))
