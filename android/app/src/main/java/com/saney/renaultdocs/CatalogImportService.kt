@@ -77,6 +77,7 @@ class CatalogImportService : Service() {
             try {
                 importItems(state.items)
             } catch (error: Throwable) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message =
                     error.message
                         ?: "Невідома помилка імпорту з каталогу."
@@ -142,6 +143,7 @@ class CatalogImportService : Service() {
         items.forEachIndexed {
             index,
             item ->
+            dataSyncTimeout.checkActive()
             val targetProject =
                 store.project(
                     item.projectId,
@@ -192,6 +194,7 @@ class CatalogImportService : Service() {
                 ) {
                     done,
                     total ->
+                    dataSyncTimeout.checkActive()
                     val scale =
                         10_000
                     val progress =
@@ -267,6 +270,7 @@ class CatalogImportService : Service() {
                             uri,
                         progressState = {
                             progress ->
+                            dataSyncTimeout.checkActive()
                             runStore.update(
                                 phase =
                                     CatalogImportPhase.IMPORTING,
@@ -282,9 +286,11 @@ class CatalogImportService : Service() {
                                         ?: 0,
                             )
                         },
+                        isCancelled = { dataSyncTimeout.isExpired },
                     )
                     .getOrThrow()
 
+            dataSyncTimeout.checkActive()
             store.upsertVolume(
                 projectId =
                     targetProject.id,
@@ -298,6 +304,7 @@ class CatalogImportService : Service() {
             destination.delete()
         }
 
+        dataSyncTimeout.checkActive()
         runStore.complete(
             "Імпортовано: " +
                 items.size +
