@@ -3,7 +3,7 @@ package com.saney.renaultdocs
 import java.io.BufferedOutputStream
 import java.io.File
 import java.util.Locale
-import org.apache.commons.compress.archivers.zip.ZipFile
+import java.util.zip.ZipFile
 
 /**
  * Exactly one level of ZIP-in-archive intake for a batch of Renault volumes.
