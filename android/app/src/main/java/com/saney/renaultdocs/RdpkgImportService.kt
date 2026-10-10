@@ -61,6 +61,7 @@ class RdpkgImportService : Service() {
                     context = applicationContext,
                     packageUri = Uri.parse(packageUri),
                     progressState = { progress ->
+                        dataSyncTimeout.checkActive()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -81,13 +82,16 @@ class RdpkgImportService : Service() {
                             ),
                         )
                     },
+                    isCancelled = { dataSyncTimeout.isExpired },
                 ).getOrThrow()
+                dataSyncTimeout.checkActive()
                 runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
                 publishResult(
                     title = "Renault Docs · том імпортовано",
                     text = VolumeDuplicatePreflight.label(result.volume),
                 )
             } catch (error: Throwable) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message = error.message ?: "Невідома помилка імпорту."
                 runStore.fail(message)
                 publishResult(
