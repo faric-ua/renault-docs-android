@@ -1,3 +1,9 @@
+## Latest Renault Docs v0.5.97 — 2026-10-11
+
+Main app SHA `a52a395bd4b61a178d5b821c2afee240dd4c5f15`: explicit model conflicts blocked for manual RAW_TREE folders at both UI/picker and native worker boundaries; original archive guards untouched. PR #134 merged, Tests PR #644 / Android PR #510 / main Tests #645 / trusted signed APK #160 ALL PASS. Signed run `38089732429`, artifact `11682944077`, APK SHA `d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74`. Verified release promotion in separate docs-only branch PENDING until publisher evidence. Phone v0.5.96 install/retention/open document PASS; v0.5.97 device QA PENDING. Do not delete/reimport existing tomes. #40 emulator timeout test deferred; #133 license TODO later. Canonical `docs/assistant-kit/CURRENT_PLAN.md` and `docs/v.0.5.97/`.
+
+---
+
 ## Latest Renault Docs v0.5.96 — 2026-10-10
 
 Published original stable-signed debug APK v0.5.96/build112 https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.96-debug, app SHA `8f1d76dbb77881a59767156a0ee6996366f4dabb`, APK SHA `52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b`. All 7 dataSync FGS now have onTimeout guard; source/Android CI PASS but real Android emulator shortened quota callback **NOT RUN**. Previous NT8445 ordinary 2-min lock/background phone QA PASS, issue #40 remains open. Docs/v.0.5.96/qa/EMULATOR_TIMEOUT_PROTOCOL.md. Never force-stop or reimport tomes just for testing.
