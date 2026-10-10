@@ -19,5 +19,6 @@
   "artifact_digest": "sha256:c6f9bd2e310509fd975a98d9408b25236fb32b59fd21575a6248bfcae6774d33",
   "apk_sha256": "52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b",
   "signer": "Stable signer verified by trusted Android Debug APK run #159",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "signed_android_apk_run": 159
 }
