@@ -1,3 +1,9 @@
+## CURRENT — v0.5.96/build112 dataSync onTimeout candidate — 2026-10-10
+
+User confirmed native NT8445 ran and completed through ~2-min phone lock, app background and TikTok: ordinary native lock/background PHONE PASS, #40 open for Android quota. Branch `fix/v0.5.96-datasync-timeout-safe-stop` source implements Android 15+ Service.onTimeout for all 7 foreground dataSync workers, prompt stopSelf, readable run-store terminal FAILED, independent AtomicBoolean gate checked before post-timeout progress/success, per-item and importer byte cancellation. No source/installed tome deletion, no auto replay when quota exhausted, original FGS wakelock (6h) bounded. Java/Kotlin tests and Python contract added plus short ADB emulator test protocol, **not run on actual emulator yet**. PR CI/signed APK/phone QA PENDING, don't assert full quota PASS. See docs/v.0.5.96/ and #40. Keep other #51/#102/#123 separate. Do not force stop phone or demand 6h waiting.
+
+---
+
 ## PHONE QA UPDATE — v0.5.95/build111 legacy batch report PASS — 2026-10-10
 
 - User provided complete read-only native .rdpkg diagnostic after installing v0.5.95. Existing source Megane IIx.zip (147316000 bytes) and project megane-ii, phase COMPLETE, old run 16:24:33–16:30:25 preserved.

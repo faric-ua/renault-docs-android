@@ -12,6 +12,7 @@ import android.os.IBinder
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RdpkgExportService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     private lateinit var runStore: RdpkgExportRunStore
     private val workerRunning = AtomicBoolean(false)
     private lateinit var workWakeLock: BackgroundWorkWakeLock
@@ -63,6 +64,7 @@ class RdpkgExportService : Service() {
                     volume = volume,
                     destinationUri = Uri.parse(destinationUri),
                     progressState = { progress ->
+                        dataSyncTimeout.checkActive()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -84,11 +86,13 @@ class RdpkgExportService : Service() {
                         )
                     },
                 ).getOrThrow()
+                dataSyncTimeout.checkActive()
                 val label = listOfNotNull(volume.documentCode, volume.date).joinToString(" · ").ifBlank { volume.title }
                 val message = "Пакет .rdpkg збережено: $label · ${result.fileCount} файлів"
                 runStore.complete(result.sha256, result.fileCount, message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Експорт .rdpkg завершено.", false))
             } catch (error: Throwable) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message = error.message ?: "Невідома помилка експорту."
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка експорту: $message", false))
@@ -100,6 +104,28 @@ class RdpkgExportService : Service() {
             }
         }.start()
         return START_REDELIVER_INTENT
+    }
+
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { workWakeLock.release() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

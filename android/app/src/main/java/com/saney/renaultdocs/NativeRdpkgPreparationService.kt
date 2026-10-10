@@ -17,6 +17,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 class NativeRdpkgPreparationService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     data class StartRequest(
         val requestId: String,
         val sourceTreeUri: String,
@@ -299,6 +300,28 @@ class NativeRdpkgPreparationService : Service() {
         return START_REDELIVER_INTENT
     }
 
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { releaseWakeLock() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
+        }
+    }
+
     override fun onBind(
         intent: Intent?,
     ): IBinder? =
@@ -363,6 +386,7 @@ class NativeRdpkgPreparationService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Підготовку .rdpkg скасовано. Source не змінено, private staging очищено.",
             )
@@ -379,6 +403,7 @@ class NativeRdpkgPreparationService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             val message =
                 error.message
                     ?: "Невідома помилка Kotlin-native підготовки."
@@ -431,6 +456,7 @@ class NativeRdpkgPreparationService : Service() {
                     onMessage = { _ -> },
                     onProgress = {
                         progress ->
+                        dataSyncTimeout.checkActive()
                         runStore.updateProgress(
                             progress,
                             message = progress.displayText(),
@@ -449,7 +475,7 @@ class NativeRdpkgPreparationService : Service() {
                         )
                     },
                     isCancelled = {
-                        runStore.isCancelRequested()
+                        dataSyncTimeout.isExpired || runStore.isCancelRequested()
                     },
                 )
 
@@ -474,6 +500,7 @@ class NativeRdpkgPreparationService : Service() {
             archiveSourceStage =
                 stagedSource
 
+            dataSyncTimeout.checkActive()
             runStore.updatePreparing(
                 "Перевіряю склад архіву без розпакування…",
             )
@@ -573,6 +600,7 @@ class NativeRdpkgPreparationService : Service() {
                 candidates.size >
                 1
             ) {
+                dataSyncTimeout.checkActive()
                 runStore.markWaitingForArchiveSelection(
                     extractionRoot =
                         staged.extractionRoot
@@ -629,6 +657,7 @@ class NativeRdpkgPreparationService : Service() {
                                 existing,
                             )
 
+                    dataSyncTimeout.checkActive()
                     runStore.markAlreadyPresent(
                         message =
                             "Том уже є в проєкті: " +
@@ -694,6 +723,7 @@ class NativeRdpkgPreparationService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Підготовку архіву скасовано. Оригінальний архів не змінено, private staging очищено.",
             )
@@ -710,6 +740,7 @@ class NativeRdpkgPreparationService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             val message =
                 error.message
                     ?: "Невідома помилка archive intake."
@@ -836,7 +867,7 @@ class NativeRdpkgPreparationService : Service() {
                 index,
                 candidate ->
                 if (
-                    runStore.isCancelRequested()
+                    dataSyncTimeout.isExpired || runStore.isCancelRequested()
                 ) {
                     throw ConversionCancelledException()
                 }
@@ -951,7 +982,7 @@ class NativeRdpkgPreparationService : Service() {
             }
 
             if (
-                runStore.isCancelRequested()
+                dataSyncTimeout.isExpired || runStore.isCancelRequested()
             ) {
                 throw ConversionCancelledException()
             }
@@ -959,6 +990,7 @@ class NativeRdpkgPreparationService : Service() {
             if (
                 processed.isEmpty()
             ) {
+                dataSyncTimeout.checkActive()
                 runStore.markAlreadyPresent(
                     message =
                         "Усі вибрані томи вже є в проєкті. Конвертацію пропущено.",
@@ -994,6 +1026,7 @@ class NativeRdpkgPreparationService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Archive batch скасовано. Уже завершені томи залишено встановленими; незавершений пакет очищено.",
             )
@@ -1010,6 +1043,7 @@ class NativeRdpkgPreparationService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             val prefix =
                 if (
                     processed.isNotEmpty()
@@ -1086,6 +1120,7 @@ class NativeRdpkgPreparationService : Service() {
                             progressPrefix +
                                 progress.displayText()
 
+                        dataSyncTimeout.checkActive()
                         runStore.updateProgress(
                             progress,
                             message = display,
@@ -1104,7 +1139,7 @@ class NativeRdpkgPreparationService : Service() {
                         )
                     },
                     isCancelled = {
-                        runStore.isCancelRequested()
+                        dataSyncTimeout.isExpired || runStore.isCancelRequested()
                     },
                 )
 
@@ -1145,15 +1180,17 @@ class NativeRdpkgPreparationService : Service() {
                 }
 
             if (
-                runStore.isCancelRequested()
+                dataSyncTimeout.isExpired || runStore.isCancelRequested()
             ) {
                 throw ConversionCancelledException()
             }
 
+            dataSyncTimeout.checkActive()
             runStore.updateImporting(
                 progressPrefix +
                     "Перевіряю та встановлюю створений .rdpkg…",
             )
+            dataSyncTimeout.checkActive()
             runStore.updateProgress(
                 OperationProgress.indeterminate(
                     "Перевіряю…",
@@ -1183,10 +1220,11 @@ class NativeRdpkgPreparationService : Service() {
                             destination,
                         progress = { _ -> },
                         isCancelled = {
-                            runStore.isCancelRequested()
+                            dataSyncTimeout.isExpired || runStore.isCancelRequested()
                         },
                         progressState = {
                             progress ->
+                            dataSyncTimeout.checkActive()
                             runStore.updateProgress(
                                 progress,
                                 message = progressPrefix + progress.displayText(),
@@ -1324,6 +1362,7 @@ class NativeRdpkgPreparationService : Service() {
                 "\nSHA-256: " +
                 processed.prepared.sha256
 
+        dataSyncTimeout.checkActive()
         runStore.complete(
             message =
                 message,
@@ -1405,6 +1444,7 @@ class NativeRdpkgPreparationService : Service() {
                 }
             }
 
+        dataSyncTimeout.checkActive()
         runStore.complete(
             message =
                 message,
@@ -1801,6 +1841,7 @@ class NativeRdpkgPreparationService : Service() {
                     "Розпакування і конвертацію пропущено."
             }
 
+        dataSyncTimeout.checkActive()
         runStore.markAlreadyPresent(
             message =
                 message,
@@ -1848,6 +1889,7 @@ class NativeRdpkgPreparationService : Service() {
                     " томів"
             }
 
+        dataSyncTimeout.checkActive()
         runStore.markAlreadyPresent(
             message =
                 if (

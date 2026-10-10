@@ -14,6 +14,7 @@ import androidx.documentfile.provider.DocumentFile
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ConversionService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     private lateinit var runStore: ConversionRunStore
     private val workerRunning =
         AtomicBoolean(
@@ -181,6 +182,28 @@ class ConversionService : Service() {
         return START_REDELIVER_INTENT
     }
 
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { releaseWakeLock() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
+        }
+    }
+
     override fun onBind(
         intent: Intent?,
     ): IBinder? =
@@ -203,6 +226,7 @@ class ConversionService : Service() {
                             filesDone,
                             changedFiles,
                             changesTotal ->
+                        dataSyncTimeout.checkActive()
                         val now =
                             System.currentTimeMillis()
 
@@ -254,6 +278,7 @@ class ConversionService : Service() {
                     plan,
                 )
 
+            dataSyncTimeout.checkActive()
             val registration =
                 runCatching {
                     val record =
@@ -309,6 +334,7 @@ class ConversionService : Service() {
                     }
                 }
 
+            dataSyncTimeout.checkActive()
             runStore.complete(
                 outputTreeUri =
                     result.outputTreeUri,
@@ -340,6 +366,7 @@ class ConversionService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Конвертацію скасовано. Staging видалено, source не змінено."
             )
@@ -354,6 +381,7 @@ class ConversionService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.fail(
                 error.message
                     ?: "Помилка конвертації."

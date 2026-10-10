@@ -13,6 +13,7 @@ import androidx.core.content.FileProvider
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RdprojectShareService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     private lateinit var runStore:
         RdprojectShareRunStore
     private lateinit var workWakeLock:
@@ -192,6 +193,7 @@ class RdprojectShareService : Service() {
                             uri,
                         progressState = {
                             progress ->
+                            dataSyncTimeout.checkActive()
                             runStore
                                 .updateProgress(
                                     progress,
@@ -204,6 +206,7 @@ class RdprojectShareService : Service() {
                     )
                     .getOrThrow()
 
+                dataSyncTimeout.checkActive()
                 runStore.complete(
                     preparedPath =
                         file.absolutePath,
@@ -231,6 +234,7 @@ class RdprojectShareService : Service() {
                 error:
                     Throwable,
             ) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message =
                     error.message
                         ?: "Невідома помилка підготовки проєкту."
@@ -263,6 +267,28 @@ class RdprojectShareService : Service() {
         }.start()
 
         return START_REDELIVER_INTENT
+    }
+
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { workWakeLock.release() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
+        }
     }
 
     override fun onBind(

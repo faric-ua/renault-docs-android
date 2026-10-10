@@ -12,6 +12,7 @@ import android.os.IBinder
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RdpkgImportService : Service() {
+    private val dataSyncTimeout = DataSyncTimeoutGate()
     private lateinit var runStore: RdpkgImportRunStore
     private val workerRunning = AtomicBoolean(false)
     private lateinit var workWakeLock: BackgroundWorkWakeLock
@@ -60,6 +61,7 @@ class RdpkgImportService : Service() {
                     context = applicationContext,
                     packageUri = Uri.parse(packageUri),
                     progressState = { progress ->
+                        dataSyncTimeout.checkActive()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -80,13 +82,16 @@ class RdpkgImportService : Service() {
                             ),
                         )
                     },
+                    isCancelled = { dataSyncTimeout.isExpired },
                 ).getOrThrow()
+                dataSyncTimeout.checkActive()
                 runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
                 publishResult(
                     title = "Renault Docs · том імпортовано",
                     text = VolumeDuplicatePreflight.label(result.volume),
                 )
             } catch (error: Throwable) {
+                if (dataSyncTimeout.isExpired) return@Thread
                 val message = error.message ?: "Невідома помилка імпорту."
                 runStore.fail(message)
                 publishResult(
@@ -120,6 +125,28 @@ class RdpkgImportService : Service() {
             title = title,
             text = text,
         )
+    }
+
+    /**
+     * Android 15+ calls this when the app's shared dataSync FGS budget expires.
+     * Persist the interruption; stopSelf is mandatory within a few seconds.
+     * Worker callbacks observe dataSyncTimeout and cannot publish success.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        dataSyncTimeout.expire()
+        try {
+            if (runStore.load().isRunning) {
+                runStore.fail(DataSyncTimeoutUi.MESSAGE)
+            }
+        } finally {
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { workWakeLock.release() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

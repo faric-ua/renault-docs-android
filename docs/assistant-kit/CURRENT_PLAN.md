@@ -1,3 +1,13 @@
+## CURRENT — v0.5.96/build112 Android 15+ dataSync FGS QUOTA GUARD CANDIDATE — 2026-10-10
+
+- User authorized next stage after **real NT8445 333-native phone PASS**: locked ~2 minutes, backgrounded through other apps including TikTok, visible live shade progress, same operation completed. #40 only passes ordinary screen lock/background; OS quota/forced shutdown remained open.
+- Source branch `fix/v0.5.96-datasync-timeout-safe-stop` adds atomic timeout gate and API35+`onTimeout(startId,fgsType)` to all seven dataSync foreground services. On system quota expiry persist readable terminal FAILED reason if running, drop live progress FGS and `stopSelf` immediately; worker progress/terminal success guarded, importer extract checks callbacks; existing committed tomes never auto-deleted. No automatic restart after quota exhaustion.
+- Kotlin `DataSyncTimeoutGateTest` + Python source contract for seven services, version v0.5.96/build112. Short timeout ADB recipe documented **emulator-only**; no actual emulator run yet and no phone stress required.
+- **PR/CI/merge/signed APK/phone QA pending.** Next: exact-head CI then scoped merge/review, trusted main signer/release. Do not claim actual shortened emulator FGS callback tested until AVD + log evidence. Do not alter user's installed 20+ Megane II tomes or archives.
+- #40 remains OPEN for quota/emulator and remaining 6 workers; #51 broader archive format QA, #102 notification upgrade semantics, #123 new batch report hashes still independently pending.
+
+---
+
 ## PHONE QA UPDATE — v0.5.95/build111 legacy batch report PASS — 2026-10-10
 
 - User provided complete read-only native .rdpkg diagnostic after installing v0.5.95. Existing source Megane IIx.zip (147316000 bytes) and project megane-ii, phase COMPLETE, old run 16:24:33–16:30:25 preserved.
