@@ -1,0 +1,14 @@
+{
+  "versionName": "0.5.94",
+  "versionCode": 110,
+  "phase": "source_candidate_ci_pending",
+  "branch": "feat/v0.5.94-nested-zip-volume-batch",
+  "sourceBase": "v0.5.93/build109 candidate merged to main",
+  "issues": [
+    51,
+    118
+  ],
+  "phoneQa": "PENDING",
+  "signed_run_id": null,
+  "next": "Run Python/Android PR CI; merge reviewed only on pass, get stable-signed main, test user's real 3-ZIP nested outer archive without changing it"
+}
