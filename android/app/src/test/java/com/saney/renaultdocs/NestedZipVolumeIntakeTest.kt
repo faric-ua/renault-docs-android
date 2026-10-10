@@ -66,7 +66,7 @@ class NestedZipVolumeIntakeTest {
             assertEquals(
                 setOf("NT8266", "NT8228A", "NT8274"),
                 result.rawRoots.map {
-                    ArchiveIntake.rawSourceName(stage, it)
+                    ArchiveIntake.rawSourceName(stage, it, "Megane IIx.zip")
                 }.toSet(),
             )
             assertTrue(result.rawRoots.all { File(it, "index.html").isFile })
