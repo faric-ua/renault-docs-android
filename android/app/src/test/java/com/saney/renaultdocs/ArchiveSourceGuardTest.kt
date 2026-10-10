@@ -25,6 +25,15 @@ class ArchiveSourceGuardTest {
         assertNotNull(ArchiveSourceGuard.rootConflict(listOf("KangooII_X61_NT8486"), megane))
     }
 
+    @Test fun explicitRawFolderMismatchIsBlockedWithoutGuessingNtOrPlatform() {
+        assertNotNull(ArchiveSourceGuard.conflictingModel("KangooII X61_NT8486", megane))
+        assertNotNull(ArchiveSourceGuard.conflictingModel("KangooII X61_NT8486", laguna))
+        assertNull(ArchiveSourceGuard.conflictingModel("KangooII X61_NT8486", kangoo))
+        assertNull(ArchiveSourceGuard.conflictingModel("Megane-II_NT8340A", megane))
+        assertNull(ArchiveSourceGuard.conflictingModel("NT8486_X61", megane))
+        assertNotNull(ArchiveSourceGuard.rootConflict(listOf("KangooII_X61"), megane))
+    }
+
     @Test fun originalMatchingAndUnmarkedArchivesWork() {
         assertNull(ArchiveSourceGuard.inputError("Megane-II_NT8340A.zip", megane))
         assertNull(ArchiveSourceGuard.inputError("NT8340A_2006-04-18.7z", megane))
