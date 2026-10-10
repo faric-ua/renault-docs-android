@@ -1,3 +1,9 @@
+## PHONE QA — v0.5.97 RAW CROSS-MODEL NEGATIVE PASS — 2026-10-11
+
+User screenshot shows «Неправильне джерело»: source model kangoo vs current Megane II, «Підготовку зупинено.» over existing Megane II project («Томів: 21»). This confirms **UI refusal before destination chooser** for this explicit wrong-model RAW folder scenario. Previous same-device in-place update, retention and document-open smoke PASS. Do not confuse with #85 (prepared `.rdpkg` passed as original ZIP/7Z/RAR still awaiting a separate on-device negative gate) or with #83 historical picker provenance (unknown). No user files moved/deleted/reconverted. Next phone QA #85 picker-only rejection, no new APK.
+
+---
+
 ## PHONE QA UPDATE — v0.5.97/build113 INSTALL/RETENTION PASS — 2026-10-11
 
 User replied «Пасс, далі» after the explicit v0.5.97 over-install/check existing Megane tomes/open documentation gate. Accept only **installation, retained tomes and existing document opening**; no evidence yet for cross-model wrong-raw-folder rejection. Next single on-device gate: existing KangooII-named raw folder selection in Megane II → raw preparation; check «Неправильне джерело» before destination or background work; do not create/delete/reimport. If none safely available, skip rather than manufacture a test. Signed public v0.5.97 unchanged. #82/#85 pending device negative test; #40 emulator deferred; #133 future TODO.
