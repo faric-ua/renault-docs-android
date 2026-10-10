@@ -38,8 +38,10 @@ object RdpkgImporter {
         packageUri: Uri,
         progress: ((String) -> Unit)? = null,
         progressState: ((OperationProgress) -> Unit)? = null,
+        isCancelled: () -> Boolean = { false },
     ): Result<ImportResult> =
         runCatching {
+            if (isCancelled()) throw ConversionCancelledException()
             val appContext =
                 context.applicationContext
             val packagesDirectory =
@@ -89,8 +91,11 @@ object RdpkgImporter {
                             progress,
                         progressState =
                             progressState,
+                        isCancelled =
+                            isCancelled,
                     )
 
+                if (isCancelled()) throw ConversionCancelledException()
                 progressState?.invoke(
                     OperationProgress(
                         stage = "Перевіряю пакет…",
@@ -112,6 +117,7 @@ object RdpkgImporter {
                         packageMetadata,
                 )
 
+                if (isCancelled()) throw ConversionCancelledException()
                 progressState?.invoke(
                     OperationProgress(
                         stage = "Встановлюю том…",
@@ -134,6 +140,9 @@ object RdpkgImporter {
                             packageMetadata.packageId,
                     )
 
+                // Last cancellation checkpoint before atomic rename/rollback.
+                // Never interrupt the activation transaction halfway through.
+                if (isCancelled()) throw ConversionCancelledException()
                 backupDirectory
                     .deleteRecursively()
 
@@ -240,6 +249,7 @@ object RdpkgImporter {
         staging: File,
         progress: ((String) -> Unit)?,
         progressState: ((OperationProgress) -> Unit)?,
+        isCancelled: () -> Boolean,
     ): ExtractionResult {
         val input =
             context.contentResolver
@@ -289,6 +299,7 @@ object RdpkgImporter {
             while (
                 true
             ) {
+                if (isCancelled()) throw ConversionCancelledException()
                 val entry =
                     archive.nextEntry
                         ?: break
@@ -374,6 +385,7 @@ object RdpkgImporter {
                     while (
                         true
                     ) {
+                        if (isCancelled()) throw ConversionCancelledException()
                         val read =
                             archive.read(
                                 buffer,
@@ -498,6 +510,7 @@ object RdpkgImporter {
             }
         }
 
+        if (isCancelled()) throw ConversionCancelledException()
         require(
             fileCount >
                 0,
