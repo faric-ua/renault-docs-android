@@ -41,7 +41,7 @@ class BatchNativeReportContract(unittest.TestCase):
         batch=service.split("private fun completeArchiveBatch(",1)[1].split("private fun publishCompletedBatchVolume(",1)[0]
         self.assertIn('packageId = if (processed.size == 1) last.imported.packageId else ""',batch)
         self.assertIn('volumeId = if (processed.size == 1) last.imported.volume.id else ""',batch)
-        self.assertIn('"Томів створено: "',batch)
+        self.assertIn('else "Томів створено: ${processed.size}"',batch)
         self.assertNotIn('" томів"',batch)
 
     def test_ui_is_read_only_and_exposes_all_per_volume_results(self):
