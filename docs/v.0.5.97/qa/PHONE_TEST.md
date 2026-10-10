@@ -1,6 +1,6 @@
 # Renault Docs v0.5.97 — safe phone QA
 
-**PENDING.** Do not mark PASS on source/CI alone. No need to modify existing tomes.
+**PARTIAL PHONE PASS — 2026-10-11**: user confirmed in-place v0.5.97 installation, retained tomes, and existing documentation opening after requested gate. Wrong-model raw selection and neutral matching source behavior remain PENDING. Do not mark full feature PASS on install smoke alone. No need to modify existing tomes.
 
 1. Install **only trusted stable-signed main v0.5.97/build113** over existing v0.5.96, no uninstall/clear.
 2. Check registered project/tomes and open one existing native section / PDF; normal mode unchanged.
