@@ -1,0 +1,15 @@
+{
+  "versionName": "0.5.93",
+  "versionCode": 109,
+  "phase": "development_source_candidate",
+  "branch": "fix/v0.5.93-completed-notification-update-recovery",
+  "base": "v0.5.92/build108",
+  "feature": "Durable completion-notification journal across in-place APK upgrades",
+  "phone_qa": "PENDING",
+  "signed_run_id": null,
+  "issues": [
+    102,
+    118
+  ],
+  "next": "Python and Android PR checks; signed-main release candidate; phone QA on real next update; nested archives issue #118 separately awaiting exact input structure"
+}
