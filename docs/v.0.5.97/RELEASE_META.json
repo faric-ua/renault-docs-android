@@ -9,13 +9,13 @@
   ],
   "scope": "Explicit RAW_TREE source folder model conflicts blocked in picker and native worker",
   "sourceBase": "v0.5.96/build112",
-  "phoneQa": "PENDING",
+  "phoneQa": "INSTALL_RETENTION_DOCUMENT_OPEN_PASS__RAW_MODEL_NEGATIVE_PENDING",
   "pr_tests": "PENDING",
   "pr_android_check": "PENDING",
   "signed_apk": "PASS",
   "source_sha": "a52a395bd4b61a178d5b821c2afee240dd4c5f15",
   "apk_sha256": "d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74",
-  "next": "Safe in-place phone update and no-conversion raw picker negative test; keep #82/#85 open. Android quota emulator QA #40 deferred.",
+  "next": "Test only selecting an existing Kangoo-named raw folder from Megane raw chooser; require wrong-model rejection before destination, no conversion. Skip when no suitable source.",
   "pr_tests_run": 38089609663,
   "pr_android_check_run": 38089609628,
   "main_tests_run": 645,
@@ -37,5 +37,11 @@
     "checksum_asset_id": 629103189,
     "apk_sha256": "d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74",
     "qa_status": "phone-qa-pending"
+  },
+  "phoneAcceptance": {
+    "installedOverExisting": true,
+    "existingTomesRetained": true,
+    "existingDocumentationOpened": true,
+    "rawWrongModelPickerTest": "PENDING"
   }
 }
