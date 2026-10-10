@@ -356,6 +356,11 @@ class NativeRdpkgPreparationService : Service() {
         request: StartRequest,
     ) {
         try {
+            // A worker may be started/re-delivered without the original picker UI.
+            val project = ProjectStore(this).project(request.projectId)
+                ?: error("Проєкт не знайдено: ${request.projectId}")
+            ArchiveSourceGuard.conflictingModel(request.sourceName, project)?.let { error(it) }
+
             val processed =
                 processPreparedSource(
                     request =
