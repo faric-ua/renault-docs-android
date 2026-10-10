@@ -1,3 +1,13 @@
+## CURRENT — v0.5.93/build109 NOTIFICATION HISTORY UPGRADE RECOVERY CANDIDATE — 2026-10-10
+
+- User reported completed-result Android notifications disappeared after upgrading in-place to v0.5.92/build108. Source audit found the legacy SharedPreferences last-ten ring retained only result event keys/slots, no title/body/owning project; Android OS may remove notification UI on package update. Lost legacy entries cannot be reconstructed without guessing.
+- Isolated draft PR #119 `fix/v0.5.93-completed-notification-update-recovery` persists real last-ten terminal entries, owning project and user-dismissed state. Private delete-intent receiver honors manual dismissal; on Activity resume following version change, missing *undismissed* saved results are posted with same IDs without relaunching work or touching tomes. v0.5.93 first install only begins new record coverage; future updates can test restoration.
+- Python Tests PASS on latest candidate; Android PR Check PENDING; **no merge, stable-signed APK or phone QA yet**. Keep #102 open for actual future upgrade testing. Avoid reinstall/clearing data to simulate.
+- **Separate new device defect #118**: user combined three Renault source archives inside outer archive, each inner archive has folder/index.html, app did not detect three volumes. Current `ArchiveIntake.inspectRawRoots` searches only outer archive entrypoint paths, not nested compressed files. If these are instead three already-extracted plain folders, that should work, requiring exact error/entry tree to diagnose. Ask one clarification; no blind nested extraction due to zip-bomb/path/security risk. #51 multi-format batch QA remains open, as does #40 background lock.
+- Do not mix nested archive feature into this narrow notification PR. Last published stable-signed APK v0.5.92/build108 remains current until verified future promotion.
+
+---
+
 ## CURRENT — v0.5.92/build108 VERIFIED PUBLIC DEBUG RELEASE / BATCH + BACKGROUND PHONE QA NEXT — 2026-10-10
 
 - User explicitly moved to batch ZIP/7Z/RAR & background/lock after accepted v0.5.91 native phone UI checks (Megane II 17 tomes; NT8222A and NT8227A completed). Existing archive intake/chooser, seven dataSync foreground services and wakelocks kept intact.
