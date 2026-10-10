@@ -27,7 +27,24 @@ internal object NestedZipVolumeIntake {
     private const val MIN_FREE_SPACE_BYTES = 128L * 1024L * 1024L
     private const val BUFFER_SIZE = 128 * 1024
     private const val MAX_DEPTH = 16
-    private const val NESTED_DIR = "__renault_nested_zip_roots"
+    internal const val NESTED_DIR = "__renault_nested_zip_roots"
+
+    /**
+     * The archive filename is the identity of a nested source. Inner Renault
+     * HTML folders may all be named "index", "html" or "document", which must
+     * NOT collapse separate NT volumes to one package ID.
+     */
+    fun sourceNameForRawRoot(extractionRoot: File, rawRoot: File): String? {
+        val root = extractionRoot.canonicalFile
+        val child = rawRoot.canonicalFile
+        if (!child.path.startsWith(root.path + File.separator)) return null
+        val segments = root.toPath().relativize(child.toPath())
+            .map { it.toString() }.toList()
+        if (segments.size < 2 || segments.first() != NESTED_DIR) return null
+        val folder = segments[1]
+        if (!folder.matches(Regex("""\\d{3}-.+"""))) return null
+        return folder.substringAfter('-', "").takeIf { it.isNotBlank() }
+    }
 
     /**
      * Only called when outer archive has NO direct raw roots, to avoid
