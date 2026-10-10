@@ -90,9 +90,11 @@ class NativeRdpkgPreparationService : Service() {
                     removeCompletedForegroundStatus()
                     stopSelf()
                 } else if (
-                    state.phase ==
-                    NativeRdpkgRunPhase.PREPARING
+                    state.isRunning
                 ) {
+                    // Native preparation includes ZIP extraction AND the
+                    // verifying/importing phase. A late Cancel must remain
+                    // actionable until the importer starts atomic activation.
                     runStore.requestCancel()
 
                     updateNotification(
@@ -908,7 +910,7 @@ class NativeRdpkgPreparationService : Service() {
                             },
                     )
 
-                processed +=
+                val completed =
                     processPreparedSource(
                         request =
                             request,
@@ -931,6 +933,11 @@ class NativeRdpkgPreparationService : Service() {
                         excludedNestedRawRoots =
                             excludedNestedRawRoots,
                     )
+                processed += completed
+                publishCompletedBatchVolume(
+                    request = request,
+                    processed = completed,
+                )
             }
 
             if (
@@ -1165,6 +1172,9 @@ class NativeRdpkgPreparationService : Service() {
                         packageUri =
                             destination,
                         progress = { _ -> },
+                        isCancelled = {
+                            runStore.isCancelRequested()
+                        },
                         progressState = {
                             progress ->
                             runStore.updateProgress(
@@ -1426,16 +1436,28 @@ class NativeRdpkgPreparationService : Service() {
                 },
         )
 
-        // One result per installed tome, not one result for an entire batch.
-        processed.forEach { volume ->
-            notifyFinal(
-                title = "Renault Docs · .rdpkg готовий",
-                text = volume.label + " · " +
-                    volume.prepared.sectionCount + " native",
-                projectId = request.projectId,
-                resultKey = volume.imported.packageId,
-            )
-        }
+        // Results for individual volumes were published at each successful
+        // commit; avoid re-posting at the end of the batch.
+    }
+
+    private fun publishCompletedBatchVolume(
+        request: StartRequest,
+        processed: ProcessedVolume,
+    ) {
+        val state = runStore.load()
+        CompletedNotificationHistory.publish(
+            context = this,
+            eventKey = listOf(
+                "native-batch",
+                request.projectId,
+                state.startedAtMs.toString(),
+                processed.imported.packageId,
+            ).joinToString(":"),
+            projectId = request.projectId,
+            title = "Renault Docs · .rdpkg готовий",
+            text = processed.label + " · " +
+                processed.prepared.sectionCount + " native",
+        )
     }
 
     private fun buildArchiveCandidates(

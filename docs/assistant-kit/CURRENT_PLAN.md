@@ -1,3 +1,15 @@
+## CURRENT — v0.5.92/build108 ARCHIVE BATCH + BACKGROUND SAFETY CANDIDATE — 2026-10-10
+
+- User explicitly advanced Renault Docs after v0.5.91 native progress/notification phone PASS (Megane II 17 tomes, NT8222A/NT8227A passed). Requested **multi-volume archive batches, ZIP/7Z/RAR and safe background/lock processing**. Main currently v0.5.91/build107; no phone data touched.
+- Audited #51 and #40. ZIP/7Z/RAR detection, multi-root chooser, per-volume package outputs, registered-volume dedup, selected candidate persistence, private staging cleanup, seven dataSync foreground workers and CPU PARTIAL_WAKE_LOCK **already exist**. Their full batch and lock lifecycle are not yet device-accepted.
+- v0.5.92/build108 source on `feat/v0.5.92-batch-background-safety`: fixes NativeRdpkgPreparationService ACTION_CANCEL ignored during IMPORTING, adds cancellation checkpoints in RdpkgImporter ZIP extraction & validation **before** atomic activation, and publishes each batch volume's grouped result immediately after its successful durable registration (even if later volume fails/cancels). Does not remove already installed volumes or modify original archive.
+- Adds source regression coverage for all seven services and batch cancellation/state contracts, QA plan with distinct ZIP/7Z/RAR and non-destructive phone lock/background tests.
+- **Source PR/CI/merge/signed APK/phone QA PENDING.** Do not close #51/#40; no claims of Android 15/16 FGS 6h or force-stop/reboot support. Test only genuinely new user-selected sources, never delete/mutate installed data to force QA. Next: draft PR and Python/Android CI; merge only on PASS; verified stable-signed main candidate then device tests.
+
+Canonical: `docs/v.0.5.92/`, #51/#40.
+
+---
+
 ## CURRENT — v0.5.91/build107 VERIFIED PUBLIC DEBUG APK — PHONE QA NEXT — 2026-10-09
 
 - User v0.5.90 phone screenshots: green real native progress works and NT8299A · 2005-11-28 · 341 native installed (Megane II volumes 14→15). Follow-up defect: all short stage labels incl. "Розпаковую" visually clipped at baseline due fixed 20dp; SHA overflow; stale `Перевірка .rdpkg` Android foreground progress stays alongside `готовий`.
