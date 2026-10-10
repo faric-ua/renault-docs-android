@@ -1,12 +1,23 @@
 {
   "versionName": "0.5.96",
   "versionCode": 112,
-  "phase": "source_candidate_ci_pending",
+  "phase": "stable_signed_main_verified_promotion_pending_phone_qa",
   "branch": "fix/v0.5.96-datasync-timeout-safe-stop",
   "issue": 40,
   "scope": "Android 15+ dataSync foreground-service timeout handling for 7 workers",
   "sourceBase": "v0.5.95/build111",
   "phoneQa": "PENDING",
   "emulatorTimeoutQA": "NOT_RUN",
-  "signed_run_id": null
+  "signed_run_id": 38072916355,
+  "source_sha": "8f1d76dbb77881a59767156a0ee6996366f4dabb",
+  "pr_tests_run": 38072732039,
+  "pr_android_check_run": 38072732041,
+  "main_tests_run": 642,
+  "signed_run_number": 159,
+  "artifact_id": 11677661306,
+  "artifact_name": "Renault-Docs-v0.5.96-Debug",
+  "artifact_digest": "sha256:c6f9bd2e310509fd975a98d9408b25236fb32b59fd21575a6248bfcae6774d33",
+  "apk_sha256": "52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b",
+  "signer": "Stable signer verified by trusted Android Debug APK run #159",
+  "qa_status": "phone-qa-pending"
 }
