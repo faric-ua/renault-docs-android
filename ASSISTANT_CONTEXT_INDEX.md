@@ -1,3 +1,9 @@
+## Latest Renault Docs v0.5.96 — 2026-10-10
+
+Published original stable-signed debug APK v0.5.96/build112 https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.96-debug, app SHA `8f1d76dbb77881a59767156a0ee6996366f4dabb`, APK SHA `52086108bb68fd735f78e986076f789e948d9d32821b9b58063d57bbe312968b`. All 7 dataSync FGS now have onTimeout guard; source/Android CI PASS but real Android emulator shortened quota callback **NOT RUN**. Previous NT8445 ordinary 2-min lock/background phone QA PASS, issue #40 remains open. Docs/v.0.5.96/qa/EMULATOR_TIMEOUT_PROTOCOL.md. Never force-stop or reimport tomes just for testing.
+
+---
+
 ## Latest Renault Docs v0.5.95 debug release — 2026-10-10
 
 Verified signed public APK v0.5.95/build111 https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.95-debug, SHA256 `c6cfc4b30c040eb81d3efdae5b1e27ce39e9e8f12e84ea86928d96164c548f5e`, main source `2a25b1b5ae885584262e8fb8b152f72356213a3c`. Fixes #123 per-tome batch diagnostics for **future** runs, old successful 3-tome batch explicitly missing original per-tome data. Phone QA pending. Next user install in place, check same 20 tomes and legacy report note (no reimport). #40/#51/#102 still open. Start docs/assistant-kit/CURRENT_PLAN.md and docs/v.0.5.95/qa/PHONE_TEST.md.
