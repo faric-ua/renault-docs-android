@@ -9,13 +9,13 @@
   ],
   "scope": "Explicit RAW_TREE source folder model conflicts blocked in picker and native worker",
   "sourceBase": "v0.5.96/build112",
-  "phoneQa": "INSTALL_RETENTION_DOCUMENT_OPEN_PASS__RAW_MODEL_NEGATIVE_PENDING",
+  "phoneQa": "INSTALL_RETENTION_DOCUMENT_OPEN_AND_RAW_WRONG_MODEL_PICKER_PASS",
   "pr_tests": "PENDING",
   "pr_android_check": "PENDING",
   "signed_apk": "PASS",
   "source_sha": "a52a395bd4b61a178d5b821c2afee240dd4c5f15",
   "apk_sha256": "d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74",
-  "next": "Test only selecting an existing Kangoo-named raw folder from Megane raw chooser; require wrong-model rejection before destination, no conversion. Skip when no suitable source.",
+  "next": "Picker-only prepared .rdpkg into archive workflow rejection #85; no import/conversion/deletion. FGS quota emulator #40 deferred.",
   "pr_tests_run": 38089609663,
   "pr_android_check_run": 38089609628,
   "main_tests_run": 645,
@@ -42,6 +42,8 @@
     "installedOverExisting": true,
     "existingTomesRetained": true,
     "existingDocumentationOpened": true,
-    "rawWrongModelPickerTest": "PENDING"
+    "observedMeganeTomesOnScreenshot": 21,
+    "rawWrongModelPickerTest": "PASS",
+    "preparedRdpkgAsArchiveSourceTest": "PENDING"
   }
 }
