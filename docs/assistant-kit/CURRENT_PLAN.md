@@ -1,3 +1,17 @@
+## CURRENT — v0.5.92/build108 VERIFIED PUBLIC DEBUG RELEASE / BATCH + BACKGROUND PHONE QA NEXT — 2026-10-10
+
+- User explicitly moved to batch ZIP/7Z/RAR & background/lock after accepted v0.5.91 native phone UI checks (Megane II 17 tomes; NT8222A and NT8227A completed). Existing archive intake/chooser, seven dataSync foreground services and wakelocks kept intact.
+- v0.5.92 PR #115 merged app source `3e5d60aea828a7a586044a4ff197245a8b97e91d`: native ACTION_CANCEL applies in both PREPARING and IMPORTING; RdpkgImporter cooperative per-entry/per-chunk checkpoints and last check before atomic activation; every completed batch tome posts individual grouped result immediately after successful import/upsert, even if later batch volume fails/cancels. Source/archive storage semantics unchanged.
+- Python PR Tests #614 and Android PR Check #485 PASS, main Tests #615 PASS. Trusted **stable-signed main Android Debug APK #155 / run 38011662599 PASS**, verified signer/zipalign/version 0.5.92(build108). Original APK SHA256 `1c9d71639aeeedc518eb27910b16416428a39359ebb7b8eb1af51c3696859d17`; artifact 11654165842.
+- Reviewed promotion PR #116 merged; publisher run **38011878868 PASS**. Public prerelease with original signed APK and SHA at https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.92-debug (APK asset 626637422).
+- **Phone QA PENDING**: first safe archive with 2+ distinct raw roots, explicit chooser + two independent installed tomes and child notifications; background/lock return during same legitimate worker; ZIP/7Z/RAR distinct pass/fail; partial batch cancellation only when actually needed. No uninstall/clear data; no duplicate import just for QA; do not force-stop/reboot. #51 and #40 remain OPEN.
+- OS Android 15/16 dataSync FGS time quota and 6h wake lock are bounded; do not claim unlimited background operation. Known per-service interruption/idempotency remains to be validated.
+- v0.5.91 user-accepted status UI remains unchanged by this increment. No new feature changes until v0.5.92 device evidence.
+
+Canonical `docs/v.0.5.92/`.
+
+---
+
 ## CURRENT — v0.5.92/build108 ARCHIVE BATCH + BACKGROUND SAFETY CANDIDATE — 2026-10-10
 
 - User explicitly advanced Renault Docs after v0.5.91 native progress/notification phone PASS (Megane II 17 tomes, NT8222A/NT8227A passed). Requested **multi-volume archive batches, ZIP/7Z/RAR and safe background/lock processing**. Main currently v0.5.91/build107; no phone data touched.
