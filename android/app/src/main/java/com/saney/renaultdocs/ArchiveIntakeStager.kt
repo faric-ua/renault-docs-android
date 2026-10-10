@@ -211,53 +211,56 @@ class ArchiveIntakeStager(
                     "extracted",
                 )
 
-            val extracted =
-                ArchiveIntake.extract(
-                    source =
-                        staged.sourceCopy,
-                    extractionRoot =
-                        extractionRoot,
-                    onProgress = {
-                        progress ->
-                        val state =
-                            if (
-                                progress.entriesTotal !=
-                                null &&
-                                progress.entriesTotal >
-                                    0
-                            ) {
-                                OperationProgress.measured(
-                                    stage =
-                                        progress.stage,
-                                    current =
-                                        progress.entriesDone,
-                                    total =
-                                        progress.entriesTotal,
-                                    itemCurrent =
-                                        progress.entriesDone,
-                                    itemTotal =
-                                        progress.entriesTotal,
-                                    itemLabel =
-                                        "Файлів",
-                                )
-                            } else {
-                                OperationProgress(
-                                    stage =
-                                        progress.stage,
-                                    itemCurrent =
-                                        progress.entriesDone,
-                                    itemLabel =
-                                        "Файлів",
-                                )
-                            }
-
-                        onProgress(
-                            state,
+            val progressConsumer: (ArchiveIntake.Progress) -> Unit = { progress ->
+                val total = progress.entriesTotal
+                onProgress(
+                    if (total != null && total > 0) {
+                        OperationProgress.measured(
+                            stage = progress.stage,
+                            current = progress.entriesDone,
+                            total = total,
+                            itemCurrent = progress.entriesDone,
+                            itemTotal = total,
+                            itemLabel = "Файлів",
+                        )
+                    } else {
+                        OperationProgress(
+                            stage = progress.stage,
+                            itemCurrent = progress.entriesDone,
+                            itemLabel = "Файлів",
                         )
                     },
-                    isCancelled =
-                        isCancelled,
                 )
+            }
+
+            // The outer ZIP may contain only inner ZIP files, not raw HTML
+            // entrypoints. This is valid for the explicit multi-volume path.
+            val extracted = ArchiveIntake.extract(
+                source = staged.sourceCopy,
+                extractionRoot = extractionRoot,
+                onProgress = progressConsumer,
+                isCancelled = isCancelled,
+                allowNoRawRoots = true,
+            )
+            val nested = if (extracted.rawRoots.isEmpty()) {
+                onProgress(
+                    OperationProgress.indeterminate("Шукаю вкладені ZIP…"),
+                )
+                NestedZipVolumeIntake.expandOneLevel(
+                    extractionRoot = extractionRoot,
+                    outerEntries = extracted.files + extracted.directories,
+                    outerExpandedBytes = extracted.extractedBytes,
+                    isCancelled = isCancelled,
+                    onProgress = progressConsumer,
+                )
+            } else {
+                null
+            }
+            val discoveredRoots = extracted.rawRoots + nested?.rawRoots.orEmpty()
+            require(discoveredRoots.isNotEmpty()) {
+                "Не знайдено Renault-томів: потрібні папки з INDEX.HTM / " +
+                    "INDEX.HTML / ACCUEIL.HTM або ZIP-архіви з такими папками."
+            }
 
             checkCancelled()
 
@@ -271,13 +274,13 @@ class ArchiveIntakeStager(
                 format =
                     extracted.format,
                 rawRoots =
-                    extracted.rawRoots,
+                    discoveredRoots,
                 files =
-                    extracted.files,
+                    extracted.files + (nested?.files ?: 0),
                 directories =
-                    extracted.directories,
+                    extracted.directories + (nested?.directories ?: 0),
                 extractedBytes =
-                    extracted.extractedBytes,
+                    extracted.extractedBytes + (nested?.expandedBytes ?: 0L),
             )
         } catch (
             error:
