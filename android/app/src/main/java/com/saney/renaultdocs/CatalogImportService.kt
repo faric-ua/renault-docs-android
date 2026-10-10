@@ -110,9 +110,13 @@ class CatalogImportService : Service() {
                 runStore.fail(DataSyncTimeoutUi.MESSAGE)
             }
         } finally {
-        workWakeLock.release()
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
+            // Even cleanup errors must not prevent Android's mandatory stop.
+            runCatching { workWakeLock.release() }
+            try {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } finally {
+                stopSelf()
+            }
         }
     }
 
