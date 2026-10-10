@@ -382,6 +382,7 @@ class NativeRdpkgPreparationService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Підготовку .rdpkg скасовано. Source не змінено, private staging очищено.",
             )
@@ -398,6 +399,7 @@ class NativeRdpkgPreparationService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             val message =
                 error.message
                     ?: "Невідома помилка Kotlin-native підготовки."
@@ -468,7 +470,7 @@ class NativeRdpkgPreparationService : Service() {
                         )
                     },
                     isCancelled = {
-                        runStore.isCancelRequested()
+                        dataSyncTimeout.isExpired || runStore.isCancelRequested()
                     },
                 )
 
@@ -713,6 +715,7 @@ class NativeRdpkgPreparationService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Підготовку архіву скасовано. Оригінальний архів не змінено, private staging очищено.",
             )
@@ -729,6 +732,7 @@ class NativeRdpkgPreparationService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             val message =
                 error.message
                     ?: "Невідома помилка archive intake."
@@ -855,7 +859,7 @@ class NativeRdpkgPreparationService : Service() {
                 index,
                 candidate ->
                 if (
-                    runStore.isCancelRequested()
+                    dataSyncTimeout.isExpired || runStore.isCancelRequested()
                 ) {
                     throw ConversionCancelledException()
                 }
@@ -970,7 +974,7 @@ class NativeRdpkgPreparationService : Service() {
             }
 
             if (
-                runStore.isCancelRequested()
+                dataSyncTimeout.isExpired || runStore.isCancelRequested()
             ) {
                 throw ConversionCancelledException()
             }
@@ -1013,6 +1017,7 @@ class NativeRdpkgPreparationService : Service() {
             cancelled:
                 ConversionCancelledException,
         ) {
+            if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
                 "Archive batch скасовано. Уже завершені томи залишено встановленими; незавершений пакет очищено.",
             )
@@ -1029,6 +1034,7 @@ class NativeRdpkgPreparationService : Service() {
             error:
                 Throwable,
         ) {
+            if (dataSyncTimeout.isExpired) return
             val prefix =
                 if (
                     processed.isNotEmpty()
@@ -1123,7 +1129,7 @@ class NativeRdpkgPreparationService : Service() {
                         )
                     },
                     isCancelled = {
-                        runStore.isCancelRequested()
+                        dataSyncTimeout.isExpired || runStore.isCancelRequested()
                     },
                 )
 
@@ -1164,7 +1170,7 @@ class NativeRdpkgPreparationService : Service() {
                 }
 
             if (
-                runStore.isCancelRequested()
+                dataSyncTimeout.isExpired || runStore.isCancelRequested()
             ) {
                 throw ConversionCancelledException()
             }
@@ -1202,7 +1208,7 @@ class NativeRdpkgPreparationService : Service() {
                             destination,
                         progress = { _ -> },
                         isCancelled = {
-                            runStore.isCancelRequested()
+                            dataSyncTimeout.isExpired || runStore.isCancelRequested()
                         },
                         progressState = {
                             progress ->
@@ -1343,6 +1349,7 @@ class NativeRdpkgPreparationService : Service() {
                 "\nSHA-256: " +
                 processed.prepared.sha256
 
+        dataSyncTimeout.checkActive()
         runStore.complete(
             message =
                 message,
@@ -1424,6 +1431,7 @@ class NativeRdpkgPreparationService : Service() {
                 }
             }
 
+        dataSyncTimeout.checkActive()
         runStore.complete(
             message =
                 message,
