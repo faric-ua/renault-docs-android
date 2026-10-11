@@ -86,6 +86,11 @@ def _reference_counts(
             path = urllib.parse.unquote(path).replace("\\", "/")
             if not path:
                 continue
+            # Old VISU HTML forms MENU/COD + ".HTM" in JavaScript.
+            # The extension fragment is not a literal missing file.
+            if re.fullmatch(r"\\.(?:htm|html|pdf|gif|ico|js)", path, re.IGNORECASE):
+                counts["dynamic_suffix_marker"] += 1
+                continue
             if path.startswith("/"):
                 target = posixpath.normpath(path.lstrip("/"))
             else:
