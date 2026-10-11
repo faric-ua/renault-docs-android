@@ -173,6 +173,23 @@ class PreflightDrivePublishPlanTests(unittest.TestCase):
         result = verify_publish_candidate(self.packages, self.plan((p, "id-a")), {"files": []})
         self.assertEqual(["local_package_missing_or_unsafe"], result["packages"][0]["problems"])
 
+    def test_local_zip_integrity_failure_blocks_even_when_drive_metadata_matches(self):
+        p = self.make_package()
+        # Archive remains structurally readable, so legacy manifest-only
+        # checks would accept it. The new full-payload guard must refuse it.
+        with ZipFile(p, "a") as archive:
+            archive.writestr("../escape.txt", b"payload")
+        result = verify_publish_candidate(
+            self.packages,
+            self.plan((p, "id-good")),
+            {"files": [self.file("id-good", p.name, p.stat().st_size)]},
+        )
+        self.assertEqual("BLOCKED", result["packages"][0]["result"])
+        self.assertEqual(
+            ["local_package_payload_integrity_failed"],
+            result["packages"][0]["problems"],
+        )
+
     def test_cli_stdout_no_writes_and_bad_id_exit_status(self):
         p = self.make_package()
         plan_path = self.root / "publish-plan.json"
