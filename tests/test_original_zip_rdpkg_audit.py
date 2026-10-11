@@ -90,12 +90,13 @@ class OriginalZipRdpkgAuditTest(unittest.TestCase):
         self.assertEqual(before, (self.original.read_bytes(), self.package.read_bytes()))
         self.assertNotIn(str(self.root), json.dumps(outcome))
 
-    def test_no_normalization_needed_is_also_valid(self):
+    def test_preserved_but_wrong_case_static_links_require_review(self):
         self.setup_pair(normalized=False)
         result = audit_original_zip_to_rdpkg(self.original, self.package)
-        self.assertEqual("PASS", result["status"])
+        self.assertEqual("REVIEW_REQUIRED", result["status"])
         self.assertEqual(3, result["identical_files"])
         self.assertEqual(0, result["allowed_text_normalizations"])
+        self.assertIn("case_sensitive_mismatch", result["link_review_reasons"])
 
     def test_nontext_pdf_modified_is_rejected(self):
         self.setup_pair(override={self.pdf: b"%PDF-1.4 corrupted"})
