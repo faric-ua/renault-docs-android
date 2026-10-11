@@ -84,10 +84,11 @@ class ProjectFolderExportService : Service() {
         }
         val all = ProjectStore(this).volumes(project.id)
         val byId = all.associateBy { it.id }
-        val selected = state.volumeIds.map { id ->
-            byId[id] ?: error("Склад проєкту змінився, том відсутній: $id")
+        val allPlan = ProjectVolumeExportPlan.build(project, all)
+        val plan = ProjectVolumeExportPlan.select(allPlan, state.volumeIds)
+        val selected = plan.map { item ->
+            byId[item.volumeId] ?: error("Склад проєкту змінився, том відсутній: ${item.volumeId}")
         }
-        val plan = ProjectVolumeExportPlan.build(project, selected)
         require(plan.size <= 250) { "Надто багато томів для однієї операції." }
 
         val records = JSONArray()
@@ -270,12 +271,19 @@ class ProjectFolderExportService : Service() {
         private const val CHANNEL = "renault_project_folder_export"
         private const val NOTIFICATION_ID = 3712
 
-        fun start(context: Context, projectId: String, tree: Uri): Boolean {
+        fun start(
+            context: Context,
+            projectId: String,
+            tree: Uri,
+            selectedVolumeIds: List<String>,
+        ): Boolean {
             val store = ProjectStore(context)
             val project = store.project(projectId) ?: return false
             val volumes = store.volumes(projectId)
-            val plan = runCatching { ProjectVolumeExportPlan.build(project, volumes) }
-                .getOrElse { return false }
+            val plan = runCatching {
+                val allPlan = ProjectVolumeExportPlan.build(project, volumes)
+                ProjectVolumeExportPlan.select(allPlan, selectedVolumeIds)
+            }.getOrElse { return false }
             if (RdprojectShareRunStore(context).load().isRunning) return false
             val runStore = ProjectFolderExportRunStore(context)
             if (!runStore.begin(projectId, tree.toString(), plan.map { it.volumeId })) {

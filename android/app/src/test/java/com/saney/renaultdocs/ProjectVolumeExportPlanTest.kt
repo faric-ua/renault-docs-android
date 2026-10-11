@@ -57,4 +57,54 @@ class ProjectVolumeExportPlanTest {
         ProjectVolumeExportPlan.validate(listOf(item))
         assertTrue(item.fileName.endsWith(".rdpkg"))
     }
+
+    private fun twoDistinctVolumes() = listOf(
+        ProjectVolumeExportPlan.Item(
+            "megane-nt8340a", "Megane-II_NT8340A.rdpkg", "NT8340A", "2006-04-18",
+        ),
+        ProjectVolumeExportPlan.Item(
+            "megane-nt8342a", "Megane-II_NT8342A.rdpkg", "NT8342A", "2006-10-09",
+        ),
+    )
+
+    @Test
+    fun oneVolumeSelectsExactlyItsOpaqueId() {
+        val selected = ProjectVolumeExportPlan.select(twoDistinctVolumes(), listOf("megane-nt8342a"))
+        assertEquals(1, selected.size)
+        assertEquals("megane-nt8342a", selected.single().volumeId)
+        assertEquals("NT8342A", selected.single().documentCode)
+    }
+
+    @Test
+    fun allVolumesRetainTheProjectsOriginalOrder() {
+        val selected = ProjectVolumeExportPlan.select(
+            twoDistinctVolumes(), listOf("megane-nt8342a", "megane-nt8340a"),
+        )
+        assertEquals(listOf("megane-nt8340a", "megane-nt8342a"), selected.map { it.volumeId })
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun staleVolumeIdCannotExpandToFullProject() {
+        ProjectVolumeExportPlan.select(twoDistinctVolumes(), listOf("no-longer-installed"))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun emptySelectionMustNotFallbackToExportAll() {
+        ProjectVolumeExportPlan.select(twoDistinctVolumes(), emptyList())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun duplicateSelectedIdsAreRejected() {
+        ProjectVolumeExportPlan.select(
+            twoDistinctVolumes(), listOf("megane-nt8340a", "megane-nt8340a"),
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun mixedKnownAndUnknownSelectionIsRejectedRatherThanPartialExport() {
+        ProjectVolumeExportPlan.select(
+            twoDistinctVolumes(), listOf("megane-nt8340a", "unknown"),
+        )
+    }
+
 }

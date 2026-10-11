@@ -34,6 +34,25 @@ object ProjectVolumeExportPlan {
         return items
     }
 
+    /**
+     * Restrict a validated full-project plan to explicitly chosen opaque volume IDs.
+     * Preserve the project's canonical ordering, never a guessed NT/date ordering.
+     */
+    fun select(plan: List<Item>, selectedVolumeIds: List<String>): List<Item> {
+        validate(plan)
+        require(selectedVolumeIds.isNotEmpty() &&
+            selectedVolumeIds.none { it.isBlank() } &&
+            selectedVolumeIds.size == selectedVolumeIds.toSet().size
+        ) {
+            "Потрібно вибрати один або кілька унікальних томів."
+        }
+        val ids = selectedVolumeIds.toSet()
+        require(ids.all { id -> plan.any { it.volumeId == id } }) {
+            "Вибраний том більше не належить до проєкту."
+        }
+        return plan.filter { it.volumeId in ids }
+    }
+
     /** Pure deterministic preflight reused by the exporter and JVM tests. */
     fun validate(items: List<Item>) {
         require(items.isNotEmpty()) { "Список томів порожній." }
