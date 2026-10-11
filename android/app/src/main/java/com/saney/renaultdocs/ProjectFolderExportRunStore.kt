@@ -54,7 +54,7 @@ class ProjectFolderExportRunStore(context: Context) {
             return false
         }
         val array = JSONArray()
-        volumeIds.forEach(array::put)
+        volumeIds.forEach { array.put(it) }
         return prefs.edit().clear()
             .putString("phase", ProjectFolderExportPhase.EXPORTING.name)
             .putString("project", projectId)
