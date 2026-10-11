@@ -62,11 +62,17 @@ class DriveMetadataAuditTests(unittest.TestCase):
         item = volume()
         files = listing(file("different-secret-id", item["file_name"], 100))
         default = audit_drive_metadata(catalog(item), files)
-        warning = default["findings"][0]
-        self.assertEqual("referenced_file_not_in_snapshot", warning["kind"])
+        warning = next(
+            finding for finding in default["findings"]
+            if finding["kind"] == "referenced_file_not_in_snapshot"
+        )
         self.assertEqual("unverified", warning["severity"])
         complete = audit_drive_metadata(catalog(item), files, listing_complete=True)
-        self.assertEqual("error", complete["findings"][0]["severity"])
+        missing = next(
+            finding for finding in complete["findings"]
+            if finding["kind"] == "referenced_file_not_in_snapshot"
+        )
+        self.assertEqual("error", missing["severity"])
 
     def test_size_and_name_differences_are_errors(self):
         result = audit_drive_metadata(
