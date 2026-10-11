@@ -10,10 +10,15 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 from zipfile import BadZipFile, ZipFile
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from core.volumes import infer_volume_identity
 
