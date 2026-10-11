@@ -1,3 +1,11 @@
+## CURRENT — STAGE J PHONE MEGANE .RDPROJECT UPLOADED, CONTENT AUDIT PENDING CONNECTOR 256MiB LIMIT — 2026-10-11
+
+- User confirmed phone `Megane II` project share prepared **21 tomes**; actual file `Megane-II_X84-B84-C84-S84-E84-L84-K84.rdproject` visible in the user-owned Drive intake folder `Phone exports - pending verification/Megane II`, 1,262,821,306 bytes. Drive `fetch` of actual archive is **blocked by HTTP 413: 268,435,456 byte (256MiB) connector limit**. **Remote upload metadata verified; archive ZIP CRC, its 21 contained packages and PDF/Modern content NOT YET independently verified.** Do not count as PASS for 21. Existing Stage H/I 5 catalog-referenced Megane NTs remain separately accepted; not equivalent to whole 21-phone set.
+- New offline `tools/audit_rdproject.py`, synthetic `tests/test_rdproject_offline_audit.py`, `docs/architecture/RDPROJECT_OFFLINE_INTEGRITY_AUDIT.md`: verify one locally accessible full `.rdproject` source by outer manifest file set, 21 count, exact nested per-NT project/identity and inner ZIP CRC, report each nested digest; reads sequentially, one temporary nested rdpkg at a time, cleans scratch files. **PR exact-head CI/merge PENDING.** Do not ask owner to re-export or upload 21 separate volumes; check original large file when feasible via a safe local read path.
+- Current phone Renault Docs v0.5.97/build113, Android app code untouched by Stage J. #30 original→prepared pipeline and complete phone-export validation OPEN, Core Stable #147 OPEN, separate license/security #133 BLOCKED until core is finished. Original Drive source/catalog, installed tomes and exported file are unchanged. Existing bug #159 live Home status collapses on rotation stays OPEN for later; do not touch now.
+
+---
+
 ## CURRENT — QA COMPLETION LEDGER ACCEPTED STAGES A–I — 2026-10-11
 
 - **Canonical status board:** `docs/assistant-kit/VERIFICATION_LEDGER.md`. Completed checkboxes for Stage A/B/C/D/E/F/G/H/I **within each explicitly documented scope**; real-data rows for all 5 current Megane II catalog NT volumes NT8340A, NT8341A, NT8342A, NT8344, NT8393 show raw original/package equality, PDF structural read, static HTML link scan and Modern/Runtime/Fast Pack asset parity, all PASS.
