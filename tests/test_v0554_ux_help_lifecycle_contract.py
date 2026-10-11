@@ -424,14 +424,14 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertEqual(
             {
-                "HomeProjectDialogController.kt": (5, 5),
+                "HomeProjectDialogController.kt": (6, 6),
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (10, 10),
                 "SettingsActivity.kt": (3, 3),
             },
             audited,
         )
-        self.assertEqual(19, total_builders)
+        self.assertEqual(20, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(
@@ -455,7 +455,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
 
         show_actions = controller.split("fun showActions(projectId: String)", 1)[1]
-        show_actions = show_actions.split("private fun showRemoveConfirmation", 1)[0]
+        show_actions = show_actions.split("private fun showSeparateVolumePreview", 1)[0]
 
         self.assertNotIn(".setItems(", show_actions)
         self.assertIn('"Експортувати томи окремо (.rdpkg)"', show_actions)
@@ -463,6 +463,11 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Видалити проєкт"', show_actions)
         self.assertIn('"Скасувати"', show_actions)
         self.assertIn("role = DialogRole.CHOICE", show_actions)
+        # The *actions panel* must not be a list. A separate volume chooser may be.
+        chooser = controller.split("private fun showSingleVolumeChooser", 1)[1]
+        chooser = chooser.split("private fun shareProject", 1)[0]
+        self.assertIn(".setItems(labels)", chooser)
+        self.assertIn("DialogUi.apply(dialog, DialogRole.CHOICE)", chooser)
 
     def test_dialog_actions_have_visible_button_chrome(self):
         dialog_ui = self.read(
