@@ -91,6 +91,12 @@
             android:stopWithTask="false" />
 
         <service
+            android:name=".ProjectFolderExportService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <service
             android:name=".RdprojectShareService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
