@@ -1,0 +1,29 @@
+{
+  "versionName": "0.5.101",
+  "versionCode": 117,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/issue178-export-wizard",
+  "issues": [
+    178,
+    162,
+    147,
+    173
+  ],
+  "scope": "#178 step-by-step export window for separate .rdpkg volumes: volumes -> folder -> confirm, header with close, fixed footer row, readable tiles, rotation keeps step/selection/folder/scroll. Export service logic (#162) and Home status unchanged. #173 untouched.",
+  "sourceBase": "v0.5.100/build116",
+  "phoneQa": "PENDING",
+  "pr_number": 179,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 684,
+  "signed_apk": "PASS",
+  "source_sha": "5454af6c43c7dbe1d76d1c5e1bb697957bf42af6",
+  "signed_run_id": 38185604677,
+  "signed_run_number": 165,
+  "signed_android_apk_run": 165,
+  "artifact_id": 11719133992,
+  "artifact_name": "Renault-Docs-v0.5.101-Debug",
+  "artifact_digest": "sha256:b1003e8080ed821c73251b7627c9ab7adf598629c6e0eb66f81dc9ed1c0ba263",
+  "qa_status": "phone-qa-pending",
+  "next": "Install v0.5.101 over v0.5.100 (no uninstall/clear). Megane II -> ⋮ -> Експортувати томи окремо: check header/✕, tiles, buttons in a row, rotation keeps step/selection/scroll; ✕ and Назад export nothing. Folder step: pick NEW EMPTY private folder, confirm, start -> exactly N .rdpkg + JSON; Home progress as before."
+}
