@@ -1,3 +1,11 @@
+## CURRENT — #30 STAGE G PREPARED VOLUME ↔ RDPKG SHA256 PARITY (PR CANDIDATE) — 2026-10-11
+
+- Last merged Stage F: PR #151 streamed .rdpkg ZIP CRC/manifest integrity, exact PR Python #655 PASS and main #656 PASS, handoff #152 merged. Next missing bridge: no byte-level verification that every already **prepared/normalized** per-volume HTML/PDF was copied unmodified to its `.rdpkg`. Original Windows ZIP may undergo intentional HTML normalization, so never claim original↔prepared byte equivalence.
+- Candidate branch `feat/issue30-prepared-volume-package-parity`: new `tools/compare_prepared_volume_to_rdpkg.py`, `tests/test_prepared_volume_rdpkg_parity.py`, `docs/architecture/PREPARED_VOLUME_RDPKG_PARITY.md`. Requires explicit NT/volume selection; uses existing `discover_volumes` and `validate_rdpkg_payload`; hashes all selected source-volume files and same-named zip members, detects extra/missing/changed files, checks project/NT/date/entrypoint and source folder, rejects symlinks and bounds scan. No ZIP extraction, writing, Drive activity, user data access or Android/APK changes. **PR tests/merge pending**; tests use tiny synthetic prepared HTML/PDF and the real `build_rdpkg` packager, not real user's Drive source.
+- Release ordering binding: #147 fully committed/tested/signed/phone-accepted **CORE STABLE** still OPEN before entirely separate #133 auth/licensing/payments/cryptographic gating (BLOCKED). Installed phone remains v0.5.97/build113. #30 real Windows originals→normalized semantic and source parity, real Drive package corpus, legal rights and catalog publishing still OPEN. #143 two same-named prepared objects **inside each distinct NT** remain review-only, never delete or interpret NT8340A vs NT8342A as duplicates.
+
+---
+
 ## CURRENT — #30 STAGE F FULL RDPKG PAYLOAD CRC INTEGRITY VERIFIED MAIN CI PASS — 2026-10-11
 
 - User requested continued work and periodic short preview/status during lengthy tool activity, but contact only at end of a completed development unit; no automation/unattended background process implied. Core-first hard gate #147 remains OPEN and #133 Google friends/license/billing/security stays BLOCKED until independent signed, tested and owner PHONE-accepted CORE STABLE release; phone stays Renault Docs v0.5.97/build113.
