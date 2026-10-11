@@ -33,7 +33,7 @@ A real 21-volume Megane II phone-generated `.rdproject` was uploaded to a **sepa
    ├─ one Laguna II .rdpkg
    └─ … more separate tomes</escape>
 
-It is fine to organize physical packages in `prepared/Megane II/`, `prepared/Laguna II/` or a flat folder. A small catalog **does not contain** copies of the documents. An ID/metadata reference alone is not a proof of real file availability or checksum integrity.
+Physical packages can **eventually** be organized in `prepared/Megane II/`, `prepared/Laguna II/` or a flat folder, but **the current Python `build_drive_catalog.py` reads canonical packages from one flat `--packages-dir`**; support for nested source staging needs separate tooling changes. Remote folder layout is not authoritative for the Android downloader because it resolves an exact Drive file ID. A small catalog **does not contain** copies of the documents. An ID/metadata reference alone is not a proof of real file availability or checksum integrity.
 
 1. **Inspect before writing.** Show project membership (e.g. 21 Megane tomes), already present/reusable validated remote objects, missing/needs-export tomes, duplicate-basename REVIEW, blocked tomes and estimated upload space. Do not choose a "newest" NT for the user.
 2. **Per-volume packaging/export, only as needed.** A prepared managed volume currently lives expanded in private storage; use existing one-tome `RdpkgExporter` to stream that **one** volume into an independent `.rdpkg`. No temporary storage for 21 ZIPs together, no extra outer `.rdproject`. Potential future compressed/lazy-read on-device storage is a **separate** performance/migration decision.
