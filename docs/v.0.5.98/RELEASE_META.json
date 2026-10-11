@@ -1,0 +1,30 @@
+{
+  "versionName": "0.5.98",
+  "versionCode": 114,
+  "phase": "verified_main_signed_debug_phone_qa_pending",
+  "branch": "chore/v0.5.98-stage-k-phone-qa",
+  "issues": [
+    162,
+    147
+  ],
+  "scope": "Stage K per-volume SAF .rdpkg export candidate (#165 merged), no Drive catalog mutation",
+  "sourceBase": "v0.5.97/build113",
+  "phoneQa": "PENDING",
+  "pr_number": 167,
+  "pr_tests_run": 38164700329,
+  "pr_tests_number": 674,
+  "pr_android_check_run": 38164700307,
+  "pr_android_check_number": 516,
+  "main_tests_run": 675,
+  "signed_apk": "PASS",
+  "source_sha": "d92d1b41ae722581f93b1170323eee0e97c929a8",
+  "apk_sha256": "bcb88aa7a89db6cabd0933dd3a93bf26d038931b8ce5d59e9a7b4da888270f62",
+  "signed_run_id": 38164855836,
+  "signed_run_number": 162,
+  "signed_android_apk_run": 162,
+  "artifact_id": 11712105452,
+  "artifact_name": "Renault-Docs-v0.5.98-Debug",
+  "artifact_digest": "sha256:d2521560cce2c33c85100518e381b83a92cc80ea5a9512119bfd51b914257eea",
+  "qa_status": "phone-qa-pending",
+  "next": "Install signed APK over existing without clearing data, test new empty private SAF Google Drive folder one-tome first, verify readback/report/no overwrite, then lifecycle and 21-volume flow. #162 and #147 remain open; no automatic catalog publication."
+}
