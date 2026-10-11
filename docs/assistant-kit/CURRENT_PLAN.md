@@ -1,3 +1,13 @@
+## CURRENT — #30 READ-ONLY WINDOWS ARCHIVE INVENTORY FOUNDATION — 2026-10-11
+
+- v0.5.97/build113 **PHONE QA PASS on Megane II ProjectActivity orientation**: user confirmed landscape hides Android status/navigation bars and portrait restores them. Issue #23 remains OPEN for other Renault-owned screens, focus/insets/Viewer routes; one Project smoke is not universal evidence. No new APK or phone changes.
+- User requested continuing functional Renault Docs development after prior #79 Home route PASS. Next substantial #30 Windows originals → prepared catalog pipeline. Read-only repository audit: existing `tools/build_rdpkg.py` builds one prepared package per volume, `tools/build_drive_catalog.py` validates packages + Drive IDs; both are already available and **must not be duplicated or rewritten**.
+- Scoped missing foundation: provide a **read-only LOCAL source-file inventory / preflight** for user-supplied Windows Renault ZIP/7Z/RAR archives (and report .rdpkg files as prepared/not original). No extraction, conversion, installation, uploading, source rename or deletion; no new Android APK. Infer only filename-based NT/date/vehicle-code/Visu metadata using existing `core.volumes.infer_volume_identity`, label guesses unverified, compare file extension with magic header, warn about possible NT/date duplicates without treating them as byte-identical. Optional SHA256 should be explicit. Deterministic stdout JSON, never write reports unless user separately chooses a mechanism.
+- Branch `feat/issue30-readonly-windows-archive-inventory`: add standalone `tools/inventory_windows_archives.py`, synthetic read-only tests, docs usage. Exact-head Python CI PR must PASS before merge. This is local-file groundwork, **not** direct Google Drive inventory/publishing yet. The remote Drive-origin read + legal/redistribution, conversion/validation and catalog upload remain separate later #30 gates; do not automatically publish originals or leak personal SAF/Drive URI.
+- #51 other formats/cancel QA, #85 internal prepared-extension handler QA, #102/#123 natural imports QA, #40 emulator system quota and #133 license TODO remain separate. Do not remove/archive/copy phone user data.
+
+---
+
 ## PHONE QA — v0.5.97 Home «Новий том» routing PASS / #79 CLOSED — 2026-10-11
 
 - User replied «Пасс» to precise test: Home → «Новий том» → choose Megane II. The project opened with expanded «Додати» and explicit choice of Auto/Manual/raw/archive, rather than auto-launching Android .rdpkg chooser. **PHONE PASS for #79 primary route**, underlying code from v0.5.83 PR #89; issue #79 marked CLOSED (completed). No new APK, source conversion, package or deletion.
