@@ -1,6 +1,6 @@
 # #30 Stage B — read-only Google Drive catalog metadata reconciliation
 
-Status: **source candidate / exact-head CI pending**.
+Status: **MERGED / PR Tests #649 PASS / main Tests #650 PASS**. Separate Drive collision review #143 OPEN; no data cleanup authorized.
 
 ## Ground truth and scope
 
