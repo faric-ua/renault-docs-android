@@ -53,3 +53,15 @@ The detailed, separate evidence is preserved permanently:
 4. A failed or unrun scenario remains **OPEN / BLOCKED / REVIEW_REQUIRED** — never marked PASS for convenience. Only close parent issue #30 or Core Stable #147 when their remaining explicit acceptance criteria are satisfied.
 
 **No new APK or source file modification was required to create this QA ledger.**
+
+## Stage J — 21-volume phone .rdproject upload versus content verification (2026-10-11)
+
+- [x] **File received on Google Drive (metadata only):** `Megane-II_X84-B84-C84-S84-E84-L84-K84.rdproject`, in separate `Phone exports - pending verification/Megane II` staging folder, **1,262,821,306 bytes**. The Renault Docs phone UI reported `Проєкт Megane II підготовлено · 21 том`. The **21 count is phone-exporter UI evidence, not an independent file inspection**.
+- [x] **New offline validator merged, synthetic CI PASS:** `tools/audit_rdproject.py`, `tests/test_rdproject_offline_audit.py`, [PR #160](https://github.com/faric-ua/renault-docs-android/pull/160), exact-head Python Tests **#664 PASS** and main **#665 PASS**. Tests outer manifest, expected count, nested `.rdpkg` CRC/identity/counters and a read-only per-volume SHA-256 report.
+- [ ] **Actual real uploaded 21-volume archive content audit PENDING:** live Google Drive connector rejected a full raw download with **HTTP 413; 1,262,821,306 bytes > 268,435,456-byte limit**. Therefore *no* independent CRC/manifest/21 nested package integrity PASS is claimed for this real archive. Full local archive bytes are required before we can safely mark this checked.
+- [ ] **Independent real 21-volume PDF/native runtime UX QA PENDING** even after archive integrity passes; earlier Stage H/I PASS applies only to **5 distinct exact catalog-referenced Megane NTs**.
+
+**Do not request another .rdproject export, delete originals, or mark actual archive PASS from synthetic CI or uploaded file size.** Preserve its Drive object; run the read-only offline validator if an authorized complete local copy becomes available. See `docs/architecture/RDPROJECT_OFFLINE_INTEGRITY_AUDIT.md` and [#30](https://github.com/faric-ua/renault-docs-android/issues/30).
+
+---
+
