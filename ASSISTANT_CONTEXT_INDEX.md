@@ -1,3 +1,13 @@
+## CURRENT — #30 STAGE C BOUNDED GOOGLE DRIVE SOURCE INVENTORY (METADATA ONLY) — 2026-10-11
+
+- After Stage B PR #142 (Drive prepared catalog offline audit merged / PR Python Tests #649 PASS / main Tests #650 PASS), read-only connected Drive folder listings inspected only known source trees: Kangoo II / MEGANE II / laguna2; **no archive downloads, unpacking, conversion, uploads, deletion or Drive edits**.
+- Kangoo II source folder: 1 ZIP (NT8486, 67,981,490 bytes). MEGANE II → «Схеми»: 24 direct ZIP archives, with names including NT8445/NT8298A/NT8340A/NT8343. Laguna II → «Схемы»: 1 large `laguna 2 2001-2006.zip` (~537,664,080 bytes) that may contain multiple tomes; do not equate this to a one-volume .rdpkg. These are **26 source ZIP filenames**, NOT 26 validated / nonduplicated volumes.
+- Also enumerated 11 direct subfolders under model trees: 25 ZIP and 27 further nested folders. Deeper folders not scanned; shared root contains unrelated software/media/PDF items; no completeness claim or root-wide recursion. Known prepared `Renault Docs Projects` still 17 .rdpkg + catalog JSON, catalog v4 references 15 volumes including 5 Megane II. The 24 original Megane ZIP filenames should **not** be automatically uploaded as 19 missing prepared docs: installed-phone coverage (21 Megane tomes), source NT and package identity are independent, and content/rights have not been verified.
+- Separate #143 OPEN: two older larger same-name unreferenced prepared .rdpkg files (NT8340A/NT8342A); catalog points to newer smaller exact IDs. No automatic cleanup or selection by basename. #30 remains OPEN, next phase is **source metadata manifest / allowlist** with privacy-safe provenance and bounded depth; owner-approved local staging and actual package/hash validation later. Publishing requires explicit content-rights review.
+- Android code unchanged; phone remains Renault Docs **v0.5.97/build113**. #40 emulator OS quota deferred, #85 inner forbidden file handler not phone exercised, #133 licensing/protected docs future TODO only.
+
+---
+
 ## CURRENT — #30 STAGE B DRIVE CATALOG METADATA AUDIT MAIN CI PASS — 2026-10-11
 
 - PR #142 merged with new **read-only/offline** `tools/audit_drive_catalog_metadata.py` and synthetic tests, no Android source or APK changes. Commit `e6eaad6ab3a47c95615e38bfe9850d60c1dd6986`; exact PR Tests #649 PASS, main Tests #650 PASS. Compared provider-IDs + names + size in already acquired local JSON snapshots; no downloader/Drive modification/output file, no credential or Drive ID emitted in reports. Missing IDs from partial listing stay UNVERIFIED; SHA still unverified without content read.
