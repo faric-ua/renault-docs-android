@@ -10,7 +10,7 @@ SOURCE = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 # UI sources with AlertDialog.Builder in the v0.5.81 audit.
 DIALOG_COUNTS = {
     "ProjectActivity.kt": 10,
-    "HomeProjectDialogController.kt": 4,
+    "HomeProjectDialogController.kt": 5,
     "SettingsActivity.kt": 3,
     "LifecycleHelpDialogController.kt": 1,
     "ViewerActivity.kt": 2,
