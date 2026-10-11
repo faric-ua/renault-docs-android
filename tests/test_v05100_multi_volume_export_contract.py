@@ -44,7 +44,6 @@ class MultiVolumeExportContract(unittest.TestCase):
         service = self.read("ProjectFolderExportService.kt")
         plan = self.read("ProjectVolumeExportPlan.kt")
         self.assertIn("STATE_PENDING_FOLDER_EXPORT_VOLUMES", main)
-        self.assertIn("ProjectFolderExportPlan", service.replace("ProjectVolumeExportPlan", "ProjectFolderExportPlan"))
         self.assertIn("ProjectVolumeExportPlan.select(plan, volumeIds)", main)
         self.assertIn("ProjectFolderExportService.start(this, projectId, folder, volumeIds)", main)
         self.assertIn("ProjectVolumeExportPlan.select(allPlan, selectedVolumeIds)", service)
