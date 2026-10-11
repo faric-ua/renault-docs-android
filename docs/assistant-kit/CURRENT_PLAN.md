@@ -1,3 +1,12 @@
+## CURRENT — 2026-10-11 CORE RELEASE FIRST / #30 EXACT DRIVE SOURCE ALLOWLIST (CANDIDATE)
+
+- Owner issued a **hard release separation**: finish, commit/merge and fully test/accept a standalone, functional **pre-security CORE STABLE** Renault Docs release first. Only AFTER its actual signed artifact, versioned source freeze and phone acceptance may Google login, friend email grants, billing/subscription, license/server entitlement, Play Integrity, or encrypted-content access be developed in a NEW branch and NEW release. #133 is explicitly BLOCKED UNTIL CORE STABLE; no such features in core. Do not label current v0.5.97/build113 final.
+- Release gate now specified at `docs/architecture/CORE_BEFORE_ACCESS_RELEASE_GATE.md`, including known limitations/real emulator quota test truthfulness (#40), exact SHA+stable signature and non-destructive phone QA, owner approval and distinct later migration.
+- Stage #30 D in branch `feat/issue30-allowlisted-drive-source-inventory`: new read-only `tools/audit_drive_source_metadata.py` with private exact folder allowlist, input provider listing snapshots, no Google Drive connection or folder recursion, strong wrong-model warnings, unknown model warning, preserve distinct Renault NT volumes (NT8340A ≠ NT8342A). Never emit Drive file IDs/URLs, write source data or publish content. Synthetic tests and docs; PR CI pending. Existing Stage A/B tools untouched and Android APK unchanged.
+- Stage C metadata snapshot shows known original Kangoo 1 ZIP, Megane II schematics 24 ZIP, Laguna II 1 large ZIP, but deeper folders not crawled and archive content validation not done. #143 two distinct same-name prepared objects per each NT remain untouched. #30 OPEN until catalog/parity/legal publishing gates; #133 separate later. #23 other screens orientation QA open; #51, #85, #102, #123 and #40 remain separate.
+
+---
+
 ## CURRENT — #30 STAGE C BOUNDED GOOGLE DRIVE SOURCE INVENTORY (METADATA ONLY) — 2026-10-11
 
 - After Stage B PR #142 (Drive prepared catalog offline audit merged / PR Python Tests #649 PASS / main Tests #650 PASS), read-only connected Drive folder listings inspected only known source trees: Kangoo II / MEGANE II / laguna2; **no archive downloads, unpacking, conversion, uploads, deletion or Drive edits**.
