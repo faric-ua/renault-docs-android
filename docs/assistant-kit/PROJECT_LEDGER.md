@@ -1,3 +1,15 @@
+## Перехід на роботу з Claude / правила і короткий стан — 2026-10-12
+
+Власник (faric) почав працювати з Claude з телефона. Домовилися про спосіб роботи: Claude працює у своїй хмарній копії репозиторію, пише код і тести, відкриває PR, після зеленого CI мержить сам і сам публікує реліз, коли є що перевірити на телефоні; faric отримує зміни і APK через Renault Termux menu (`5 → 19 → 8 → 13`). Правила записані в `CLAUDE.md`, короткий актуальний стан — у `STATUS.md`.
+
+Що змінилося в документації: раніше після кожного кроку той самий запис дублювався в 3–4 файли (`CURRENT_PLAN`, `CURRENT_HANDOFF`, `ACTIVE_PLAN`, `ASSISTANT_CONTEXT_INDEX`), і нова сесія мала перечитувати тисячі рядків. Тепер: `STATUS.md` (короткий, переписується) + журнал тут (новіші зверху). Історію не видаляли й не переносили: власник планує зробити з неї урок з програмування, тому проблеми, невдалі спроби і рішення зберігаються повністю.
+
+Технічний урок цього кроку: щоб Claude міг пушити в `faric-ua`, недостатньо прав користувача — на акаунт потрібно встановити Claude GitHub App. Без нього клонування і читання працюють, а пуш відхиляється. У середовищі Claude немає Android SDK, тому APK, як і раніше, збирає GitHub Actions; тести (641) проходять локально через `python3 -m unittest`.
+
+Код застосунку не змінювався; телефон і дані користувача не чіпали.
+
+---
+
 ## v0.5.97/build113 — raw-folder cross-model safety — 2026-10-11
 
 Based on v0.5.96 phone install/retention/open-document PASS, user resumed development and chose safety rather than cosmetic enhancements. Read-only audit found #85 .rdpkg original-archive rejection, archive explicit Kangoo/Megane source/model guard, SAF Document ID preflight and native extraction root guard already on main from v0.5.80; issue wording reconciled without claiming prior phone acceptance. Distinct gap: manual RAW_TREE folder path lacked the same model check. PR #134 added an early rejection in ProjectActivity and redundant check in NativeRdpkgPreparationService.runRawPreparation, preserving neutral NT/X61 inputs. Kotlin/Python tests; PR Tests #644 PASS, Android PR #510 PASS, main Tests #645 PASS, trusted signer Android APK #160 PASS. Source main SHA `a52a395bd4b61a178d5b821c2afee240dd4c5f15`, signed run `38089732429`, APK SHA256 `d4a410811c95a2f4a981ec2195fa7809eb98efb15e320ffae7a00e50aaea3c74`. GitHub release promotion awaiting verified publisher; phone v0.5.97 QA pending. User docs/ZIP/installed projects untouched. Unrelated #40/#51/#102/#123 remain open; #133 future Google account/license security backlog only.
