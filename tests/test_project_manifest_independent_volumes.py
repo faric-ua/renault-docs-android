@@ -18,7 +18,7 @@ class ProjectManifestIndependentVolumesTests(unittest.TestCase):
     def test_21_megane_and_10_laguna_tomes_stay_separate_metadata_refs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            plan = {"packages": []}
+            plan = {"schema_version": 1, "catalog_version": 5, "catalog_id": "synthetic-catalog", "generated_at": "2026-10-11T17:00:00+03:00", "packages": []}
             by_name = {}
             for project_id, title, count in (
                 ("megane-ii", "Megane II", 21),
