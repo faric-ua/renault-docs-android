@@ -65,3 +65,15 @@ The detailed, separate evidence is preserved permanently:
 
 ---
 
+
+
+## Stage K — per-volume SAF export code CI versus phone acceptance (2026-10-11)
+
+- [x] **Android source feature implemented** for project-folder export: per-volume `.rdpkg` queue to user-selected SAF folder and small local export inventory, retaining whole-project `.rdproject` as a separate optional menu action. [PR #165](https://github.com/faric-ua/renault-docs-android/pull/165) merged, exact PR **Python Tests #672 PASS**, **Android PR Check #515 PASS** (Android JVM unit tests + APK compile and ephemeral signer verification), main **Python Tests #673 PASS** and main **Android Debug APK #161 PASS**. This is code test acceptance **only**.
+- [x] **Invariant tests:** `ProjectVolumeExportPlanTest.kt` checks that NT8340A ≠ NT8342A, duplicate ID/filename (case-insensitive) and path traversal are rejected. A file already in the selected folder is labelled `EXISTING_UNVERIFIED`, not silently replaced, deduplicated or treated as a verified match.
+- [ ] **Phone SAF functional acceptance pending:** the feature has not been installed or run on owner's phone. Check new signed in-place build, private empty folder (including Google Drive DocumentsProvider), .part rename + SHA readback, manifest accuracy, all installed volumes, interruption/rotation/lock/background, partial uploads, FGS timeout and repeated share operations before marking PASS.
+- [ ] **Public Drive catalog Stage 2 pending:** no `drive_file_id` derived from chosen SAF URIs and no `renault-docs-catalog.json` published; needs exact uploaded object IDs and hashes, explicit owner/publication rights authorization and atomic catalog updating.
+- [ ] **Legacy .rdproject restore/import not proven:** existing one-file offline export remains available; ability to consume that file as one import on another device needs separate implementation/acceptance. Existing 1.26 GiB Megane snapshot is not deleted or edited and its nested 21 tomes remain unverified.
+
+**Do not repeat earlier Stage H/I PASS for the five separate exact Megane catalog NTs. Do not mislabel this new source-only Android feature or 21-phone-volume archive as user-accepted.** Issue #162 stays OPEN, Core Stable #147 stays OPEN, separate access/paywall issue #133 remains blocked.
+
