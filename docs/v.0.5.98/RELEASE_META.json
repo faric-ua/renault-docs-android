@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.98",
   "versionCode": 114,
-  "phase": "verified_main_signed_debug_phone_qa_pending",
+  "phase": "verified_public_signed_debug_published_phone_qa_pending",
   "branch": "chore/v0.5.98-stage-k-phone-qa",
   "issues": [
     162,
@@ -26,5 +26,17 @@
   "artifact_name": "Renault-Docs-v0.5.98-Debug",
   "artifact_digest": "sha256:d2521560cce2c33c85100518e381b83a92cc80ea5a9512119bfd51b914257eea",
   "qa_status": "phone-qa-pending",
-  "next": "Install signed APK over existing without clearing data, test new empty private SAF Google Drive folder one-tome first, verify readback/report/no overwrite, then lifecycle and 21-volume flow. #162 and #147 remain open; no automatic catalog publication."
+  "next": "Install signed APK over existing without clearing data, test new empty private SAF Google Drive folder one-tome first, verify readback/report/no overwrite, then lifecycle and 21-volume flow. #162 and #147 remain open; no automatic catalog publication.",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.98-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.98-debug",
+    "source_sha": "d92d1b41ae722581f93b1170323eee0e97c929a8",
+    "signed_run_id": 38164855836,
+    "publisher_run_id": 38165137640,
+    "apk_asset_id": 631517800,
+    "checksum_asset_id": 631517801,
+    "apk_sha256": "bcb88aa7a89db6cabd0933dd3a93bf26d038931b8ce5d59e9a7b4da888270f62",
+    "qa_status": "phone-qa-pending"
+  }
 }
