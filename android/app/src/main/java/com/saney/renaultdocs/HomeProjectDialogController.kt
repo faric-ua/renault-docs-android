@@ -225,17 +225,17 @@ class HomeProjectDialogController(
         }.isFailure && blocked == 0 && volumes.isNotEmpty()
 
         val message = buildString {
-            append("Основний спосіб: кожен том — окремий .rdpkg у вибраній папці.\\n")
-            append("Один великий .rdproject НЕ створюється.\\n\\n")
-            append("Томів у проєкті: ${volumes.size}\\n")
-            append("Готові до окремого експорту: $supported\\n")
+            append("Основний спосіб: кожен том — окремий .rdpkg у вибраній папці.\n")
+            append("Один великий .rdproject НЕ створюється.\n\n")
+            append("Томів у проєкті: ${volumes.size}\n")
+            append("Готові до окремого експорту: $supported\n")
             if (blocked > 0) {
-                append("Потребують підготовки: $blocked\\n")
+                append("Потребують підготовки: $blocked\n")
             }
             if (duplicateNames) {
-                append("Є збіг назв файлів, експортування призупинено.\\n")
+                append("Є збіг назв файлів, експортування призупинено.\n")
             }
-            append("\\nНаявні однойменні файли НЕ перезаписуються і не вважаються перевіреними. ")
+            append("\nНаявні однойменні файли НЕ перезаписуються і не вважаються перевіреними. ")
             append("У кінці буде створено невеликий JSON-звіт. ")
             append("Це ще не публікація каталогу Google Drive.")
         }
