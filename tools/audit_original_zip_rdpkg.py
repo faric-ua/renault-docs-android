@@ -215,7 +215,16 @@ def audit_original_zip_to_rdpkg(
             ],
         }
         if check_static_links:
-            report["static_links"] = _reference_counts(package, packaged, lower_map)
+            links = _reference_counts(package, packaged, lower_map)
+            report["static_links"] = links
+            trouble = [
+                key for key in ("case_sensitive_mismatch", "potential_unresolved",
+                                "outside_selected_volume")
+                if links["counts"].get(key, 0)
+            ]
+            report["link_review_reasons"] = trouble
+            if trouble and report["status"] == "PASS":
+                report["status"] = "REVIEW_REQUIRED"
         return report
 
 
