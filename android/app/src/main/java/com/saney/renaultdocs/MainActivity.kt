@@ -154,6 +154,9 @@ class MainActivity : Activity() {
                         )
                     }
                 },
+                onSeparateVolumeExportRequested = { projectId ->
+                    openProjectFolderExportPicker(projectId)
+                },
                 onShareFinished = { message ->
                     statusText.text = message
                     if (::operationStatus.isInitialized) {
