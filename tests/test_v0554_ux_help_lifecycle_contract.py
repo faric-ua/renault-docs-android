@@ -424,14 +424,14 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertEqual(
             {
-                "HomeProjectDialogController.kt": (4, 4),
+                "HomeProjectDialogController.kt": (5, 5),
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (10, 10),
                 "SettingsActivity.kt": (3, 3),
             },
             audited,
         )
-        self.assertEqual(18, total_builders)
+        self.assertEqual(19, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(
@@ -458,7 +458,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         show_actions = show_actions.split("private fun showRemoveConfirmation", 1)[0]
 
         self.assertNotIn(".setItems(", show_actions)
-        self.assertIn('"Поділитися проєктом"', show_actions)
+        self.assertIn('"Експортувати томи окремо (.rdpkg)"', show_actions)
+        self.assertIn('"Поділитися проєктом одним файлом (.rdproject) · офлайн"', show_actions)
         self.assertIn('"Видалити проєкт"', show_actions)
         self.assertIn('"Скасувати"', show_actions)
         self.assertIn("role = DialogRole.CHOICE", show_actions)
