@@ -240,7 +240,8 @@ class HomeProjectDialogController(
         }.isFailure && blocked == 0 && volumes.isNotEmpty()
 
         val message = buildString {
-            append("Основний спосіб: кожен том — окремий .rdpkg у вибраній папці.\n")
+            append("Можна вибрати кілька томів або експортувати всі.\n")
+            append("Кожен вибраний том — окремий .rdpkg у вибраній папці.\n")
             append("Один великий .rdproject НЕ створюється.\n\n")
             append("Томів у проєкті: ${volumes.size}\n")
             append("Готові до окремого експорту: $supported\n")
@@ -624,6 +625,7 @@ class HomeProjectDialogController(
         ) {
             return
         }
+        if (activeKind == DIALOG_MULTI_VOLUME) selectedExportVolumeIds.clear()
         activeKind = ""
         activeProjectId = null
         activeParentKind = null
@@ -657,7 +659,9 @@ class HomeProjectDialogController(
             "deletePreparedProject"
         private const val DIALOG_SEPARATE_VOLUMES =
             "separateVolumesPreview"
-        private const val DIALOG_SINGLE_VOLUME =
-            "singleVolumeChooser"
+        private const val DIALOG_MULTI_VOLUME =
+            "multiVolumeChooser"
+        private const val STATE_SELECTED_EXPORT_VOLUMES =
+            "homeProjectDialogSelectedExportVolumes"
     }
 }
