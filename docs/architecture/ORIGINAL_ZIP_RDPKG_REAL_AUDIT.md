@@ -37,7 +37,7 @@ python tools/audit_original_zip_rdpkg.py \
 - Runs full Stage F prepared ZIP payload CRC, original ZIP CRC and exact file-set parity.
 - Every same-name original file must either have the **same bytes**, or, **only for .htm/.html/.js**, match the exact `core.convert_paths.patch_text()` allowed case/path normalization expected from the current fast converter. Missing/extra/changed PDF, GIF, etc. or unexplained HTML changes fail.
 - Static reference scan is **diagnostic** (not browser/JS execution); explicitly recognizes old `".HTM"` concatenation markers to avoid false missing-file reports.
-- Prints sanitized JSON to stdout, no private provider IDs, remote URL, file content or absolute file path; exits 0 on PASS, 2 on content FAIL. **No extraction, conversion, output writes, catalog edits, source Drive changes or phone actions.**
+- Prints sanitized JSON to stdout, no private provider IDs, remote URL, file content or absolute file path; exits 0 only on PASS, 2 on FAIL or REVIEW_REQUIRED. Literal unresolvable or wrong-case static HTML targets require review even if source files were byte-preserved. Generated JavaScript suffix markers (e.g. `\".HTM\"`) are classified separately and do not by themselves require review. **No extraction, conversion, output writes, catalog edits, source Drive changes or phone actions.**
 
 The five real downloaded pairs above were inspected with an independent local ZIP byte comparison, PDF parser, and static-link audit. CI synthetic tests exercise this repository tool with controlled normalized HTML+PDF/GIF source packages, cross-NT mismatches, extra/missing/modified files and no user data.
 
