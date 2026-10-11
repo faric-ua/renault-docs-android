@@ -1,3 +1,12 @@
+## CURRENT — #30 STAGE A SOURCE INVENTORY MERGED / MAIN CI PASS — 2026-10-11
+
+- Project Megane II orientation PHONE PASS: user confirmed Android status/navigation bars hide in landscape and return in portrait on installed Renault Docs v0.5.97/build113. Issue #23 remains OPEN for app-wide screens; no code change/new APK.
+- Next functional #30 foundation landed via PR #140, main commit `e515108e6ef21c43b747e191a62cd191afed21e4`: `tools/inventory_windows_archives.py` scans ONLY local owner-selected Windows ZIP/7Z/RAR and indicates prepared/corrupt entries, filename-only inferred NT/date/Visu, possible non-identical NT/date duplicates, optional SHA/recursive, deterministic JSON to stdout. No output writes, conversion, extraction, deletion or uploads. Existing `tools/build_rdpkg.py` and `tools/build_drive_catalog.py` not changed. PR Tests #646 PASS; main Tests #647 PASS. **Tooling-only; no APK rebuild or phone installation required.**
+- Read-only connected Drive **metadata** verified that known Kangoo II NT8486 original ZIP (67,981,490 bytes) is in a **separate original-source folder**, not the `Renault Docs Projects` prepared-catalog folder. No bytes downloaded, full folder listing confirmed, permission changed, Drive ID published, source data modified, or data uploaded.
+- Next #30 stage B: design remote original-source inventory / metadata mapping, no automatic Google Drive writes or public catalog upload until explicit owner confirmation of rights/destinations. Preserve original files and distinguish potential duplicates by metadata only. #30 remains OPEN. #40 emulator quota deferred, #51 more archive/cancel cases, #85 inner invalid-file guard untested on phone, #102/#123 wait for natural operations, #133 licensing/security future TODO.
+
+---
+
 ## PHONE QA — v0.5.97 Home «Новий том» routing PASS / #79 CLOSED — 2026-10-11
 
 - User replied «Пасс» to precise test: Home → «Новий том» → choose Megane II. The project opened with expanded «Додати» and explicit choice of Auto/Manual/raw/archive, rather than auto-launching Android .rdpkg chooser. **PHONE PASS for #79 primary route**, underlying code from v0.5.83 PR #89; issue #79 marked CLOSED (completed). No new APK, source conversion, package or deletion.
