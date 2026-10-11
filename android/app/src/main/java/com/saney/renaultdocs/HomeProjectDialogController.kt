@@ -16,13 +16,16 @@ class HomeProjectDialogController(
     private val onPreparedProjectDeleted: (RenaultProject, Boolean) -> Unit,
     private val onShareProgress: (Int, Int, String) -> Unit,
     private val onShareFinished: (String) -> Unit,
-    private val onSeparateVolumeExportRequested: (String, List<String>) -> Unit,
+    private val onExportFolderPickRequested: (String) -> Unit,
+    private val onSeparateVolumeExportStart: (String, String, List<String>) -> Unit,
 ) {
     private var activeKind: String = ""
     private var activeProjectId: String? = null
     private var activeParentKind: String? = null
-    // Selection is presentation state only until the user explicitly picks a SAF folder.
-    private val selectedExportVolumeIds = linkedSetOf<String>()
+    // Step-by-step export window state (#178). Presentation only: nothing is exported
+    // until "Почати експорт", and MainActivity revalidates exact IDs before the service.
+    private var exportWizardState = ProjectExportWizardState()
+    private var exportWizard: ProjectExportWizard? = null
 
     fun restore(state: Bundle?) {
         activeKind =
@@ -35,12 +38,17 @@ class HomeProjectDialogController(
         activeParentKind =
             state
                 ?.getString(STATE_PARENT_KIND)
-        selectedExportVolumeIds.clear()
-        if (activeKind == DIALOG_MULTI_VOLUME) {
-            selectedExportVolumeIds.addAll(
-                state?.getStringArrayList(STATE_SELECTED_EXPORT_VOLUMES).orEmpty(),
-            )
-        }
+        exportWizardState =
+            if (activeKind == DIALOG_EXPORT_WIZARD) {
+                ProjectExportWizardState.restore(
+                    stepName = state?.getString(STATE_EXPORT_STEP),
+                    selectedVolumeIds = state?.getStringArrayList(STATE_SELECTED_EXPORT_VOLUMES),
+                    folderUri = state?.getString(STATE_EXPORT_FOLDER),
+                    scrollY = state?.getInt(STATE_EXPORT_SCROLL_Y) ?: 0,
+                )
+            } else {
+                ProjectExportWizardState()
+            }
     }
 
     fun save(outState: Bundle) {
@@ -58,8 +66,21 @@ class HomeProjectDialogController(
         )
         outState.putStringArrayList(
             STATE_SELECTED_EXPORT_VOLUMES,
-            ArrayList(selectedExportVolumeIds),
+            ArrayList(exportWizardState.selectedVolumeIds),
         )
+        outState.putString(STATE_EXPORT_STEP, exportWizardState.step.name)
+        outState.putString(STATE_EXPORT_FOLDER, exportWizardState.folderUri)
+        outState.putInt(STATE_EXPORT_SCROLL_Y, exportWizardState.scrollY)
+    }
+
+    /**
+     * MainActivity hands back a SAF folder whose read/write grant is already persisted.
+     * null (cancelled picker) keeps the previous choice. Never starts an export.
+     */
+    fun onExportFolderPicked(folderUri: String?) {
+        if (activeKind != DIALOG_EXPORT_WIZARD) return
+        exportWizardState.onFolderPicked(folderUri)
+        exportWizard?.render()
     }
 
     fun restoreOpen() {
@@ -81,11 +102,8 @@ class HomeProjectDialogController(
             DIALOG_DELETE_PREPARED ->
                 confirmDeletePreparedProject(project)
 
-            DIALOG_SEPARATE_VOLUMES ->
-                showSeparateVolumePreview(project)
-
-            DIALOG_MULTI_VOLUME ->
-                showMultiVolumeChooser(project)
+            DIALOG_EXPORT_WIZARD ->
+                showExportWizard(project)
 
             else ->
                 clear()
@@ -169,7 +187,8 @@ class HomeProjectDialogController(
 
         addAction("Експортувати томи окремо (.rdpkg)") {
             clear(DIALOG_ACTIONS)
-            showSeparateVolumePreview(project)
+            exportWizardState = ProjectExportWizardState()
+            showExportWizard(project)
         }
 
         addAction("Поділитися проєктом одним файлом (.rdproject) · офлайн") {
@@ -227,148 +246,54 @@ class HomeProjectDialogController(
         )
     }
 
-    private fun showSeparateVolumePreview(
-        project: RenaultProject,
-    ) {
-        activeKind = DIALOG_SEPARATE_VOLUMES
-        activeProjectId = project.id
-        val volumes = store.volumes(project.id)
-        val supported = volumes.count(RdpkgExporter::canFastExport)
-        val blocked = volumes.size - supported
-        val duplicateNames = runCatching {
-            ProjectVolumeExportPlan.build(project, volumes)
-        }.isFailure && blocked == 0 && volumes.isNotEmpty()
-
-        val message = buildString {
-            append("Можна вибрати кілька томів або експортувати всі.\n")
-            append("Кожен вибраний том — окремий .rdpkg у вибраній папці.\n")
-            append("Один великий .rdproject НЕ створюється.\n\n")
-            append("Томів у проєкті: ${volumes.size}\n")
-            append("Готові до окремого експорту: $supported\n")
-            if (blocked > 0) {
-                append("Потребують підготовки: $blocked\n")
-            }
-            if (duplicateNames) {
-                append("Є збіг назв файлів, експортування призупинено.\n")
-            }
-            append("\nНаявні однойменні файли НЕ перезаписуються і не вважаються перевіреними. ")
-            append("У кінці буде створено невеликий JSON-звіт. ")
-            append("Це ще не публікація каталогу Google Drive.")
-        }
-        val canProceed = supported == volumes.size && supported > 0 && !duplicateNames
-        val dialog = AlertDialog.Builder(activity)
-            .setTitle("Експортувати окремі томи")
-            .setMessage(message)
-            .setNegativeButton("Назад") { _, _ ->
-                clear(DIALOG_SEPARATE_VOLUMES)
-                showActions(project.id)
-            }
-            .setNeutralButton("Вибрати томи") { _, _ ->
-                clear(DIALOG_SEPARATE_VOLUMES)
-                selectedExportVolumeIds.clear()
-                showMultiVolumeChooser(project)
-            }
-            .setPositiveButton("Усі томи") { _, _ ->
-                clear(DIALOG_SEPARATE_VOLUMES)
-                val plan = runCatching {
-                    ProjectVolumeExportPlan.build(project, store.volumes(project.id))
-                }.getOrElse {
-                    showMessage("Експорт томів", it.message ?: "Помилка перевірки томів.")
-                    return@setPositiveButton
-                }
-                onSeparateVolumeExportRequested(project.id, plan.map { it.volumeId })
-            }
-            .create()
-        track(dialog, DIALOG_SEPARATE_VOLUMES, project.id)
-        dialog.show()
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = canProceed
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.isEnabled = canProceed
-        DialogUi.apply(dialog, DialogRole.CONFIRM)
-    }
-
     /**
-     * Multiselect is inert until explicit confirmation: checks never start SAF
-     * or any export. Stored opaque IDs survive rotation, not list indices.
+     * Step-by-step export of separate volumes (#178): volumes → folder → confirm.
+     * Checks never start SAF or export; stored opaque IDs survive rotation, not list indices.
      */
-    private fun showMultiVolumeChooser(project: RenaultProject) {
+    private fun showExportWizard(project: RenaultProject) {
         val plan = runCatching {
             ProjectVolumeExportPlan.build(project, store.volumes(project.id))
         }.getOrElse {
-            clear(DIALOG_MULTI_VOLUME)
+            clear(DIALOG_EXPORT_WIZARD)
             showMessage("Експорт томів", it.message ?: "Помилка перевірки томів.")
             return
         }
-        val ids = plan.map { it.volumeId }.toSet()
-        if (!ids.containsAll(selectedExportVolumeIds)) {
-            clear(DIALOG_MULTI_VOLUME)
+        if (plan.isEmpty()) {
+            clear(DIALOG_EXPORT_WIZARD)
+            showMessage("Експорт томів", "У проєкті немає томів для експорту.")
+            return
+        }
+        if (!exportWizardState.isConsistentWith(plan.map { it.volumeId })) {
+            clear(DIALOG_EXPORT_WIZARD)
             showMessage("Вибір томів змінився", "Склад проєкту змінився. Вибери томи ще раз.")
             return
         }
-        activeKind = DIALOG_MULTI_VOLUME
+        activeKind = DIALOG_EXPORT_WIZARD
         activeProjectId = project.id
-        val labels = plan.map { item ->
-            val identity = listOfNotNull(
-                item.documentCode?.takeIf { it.isNotBlank() },
-                item.date?.takeIf { it.isNotBlank() },
-            ).joinToString(" · ").ifBlank { item.fileName }
-            "$identity\n${item.fileName}"
-        }.toTypedArray()
-        val checked = plan.map { it.volumeId in selectedExportVolumeIds }.toBooleanArray()
-        lateinit var dialog: AlertDialog
-        dialog = AlertDialog.Builder(activity)
-            .setTitle("Вибрано ${selectedExportVolumeIds.size} із ${plan.size} томів")
-            .setMultiChoiceItems(labels, checked) { _, index, isChecked ->
-                val id = plan[index].volumeId
-                if (isChecked) selectedExportVolumeIds.add(id)
-                else selectedExportVolumeIds.remove(id)
-                dialog.setTitle("Вибрано ${selectedExportVolumeIds.size} із ${plan.size} томів")
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled =
-                    selectedExportVolumeIds.isNotEmpty()
-                dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.text =
-                    if (selectedExportVolumeIds.size == plan.size) "Очистити" else "Вибрати всі"
-            }
-            .setNegativeButton("Назад") { _, _ ->
-                clear(DIALOG_MULTI_VOLUME)
-                showSeparateVolumePreview(project)
-            }
-            .setNeutralButton("Вибрати всі", null)
-            .setPositiveButton("Вибрати папку", null)
-            .create()
-        track(dialog, DIALOG_MULTI_VOLUME, project.id)
-        dialog.show()
-        DialogUi.apply(dialog, DialogRole.CHOICE)
-        val confirm = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-        confirm?.isEnabled = selectedExportVolumeIds.isNotEmpty()
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.apply {
-            text = if (selectedExportVolumeIds.size == plan.size) "Очистити" else "Вибрати всі"
-            setOnClickListener {
-                val selectAll = selectedExportVolumeIds.size != plan.size
-                selectedExportVolumeIds.clear()
-                if (selectAll) selectedExportVolumeIds.addAll(plan.map { it.volumeId })
-                plan.indices.forEach { index ->
-                    dialog.listView?.setItemChecked(index, selectAll)
+        val wizard = ProjectExportWizard(
+            activity = activity,
+            project = project,
+            plan = plan,
+            state = exportWizardState,
+            onClose = { clear(DIALOG_EXPORT_WIZARD) },
+            onPickFolder = { onExportFolderPickRequested(project.id) },
+            onStart = { folderUri, volumeIds ->
+                // Validate current project and its exact selected IDs again before the service.
+                val selected = runCatching {
+                    val fresh = ProjectVolumeExportPlan.build(project, store.volumes(project.id))
+                    ProjectVolumeExportPlan.select(fresh, volumeIds)
+                }.getOrElse {
+                    clear(DIALOG_EXPORT_WIZARD)
+                    showMessage("Експорт томів", it.message ?: "Некоректний вибір томів.")
+                    return@ProjectExportWizard
                 }
-                dialog.setTitle("Вибрано ${selectedExportVolumeIds.size} із ${plan.size} томів")
-                confirm?.isEnabled = selectedExportVolumeIds.isNotEmpty()
-                text = if (selectAll) "Очистити" else "Вибрати всі"
-            }
-        }
-        confirm?.setOnClickListener {
-            // Validate current project and its exact selected IDs again before SAF.
-            val selected = runCatching {
-                val fresh = ProjectVolumeExportPlan.build(project, store.volumes(project.id))
-                ProjectVolumeExportPlan.select(fresh, selectedExportVolumeIds.toList())
-            }.getOrElse {
-                dialog.dismiss()
-                clear(DIALOG_MULTI_VOLUME)
-                showMessage("Експорт томів", it.message ?: "Некоректний вибір томів.")
-                return@setOnClickListener
-            }
-            val selectedIds = selected.map { it.volumeId }
-            clear(DIALOG_MULTI_VOLUME)
-            dialog.dismiss()
-            onSeparateVolumeExportRequested(project.id, selectedIds)
-        }
+                clear(DIALOG_EXPORT_WIZARD)
+                onSeparateVolumeExportStart(project.id, folderUri, selected.map { it.volumeId })
+            },
+        )
+        exportWizard = wizard
+        val dialog = wizard.show()
+        track(dialog, DIALOG_EXPORT_WIZARD, project.id)
     }
 
     private fun shareProject(
@@ -625,7 +550,10 @@ class HomeProjectDialogController(
         ) {
             return
         }
-        if (activeKind == DIALOG_MULTI_VOLUME) selectedExportVolumeIds.clear()
+        if (activeKind == DIALOG_EXPORT_WIZARD) {
+            exportWizardState = ProjectExportWizardState()
+            exportWizard = null
+        }
         activeKind = ""
         activeProjectId = null
         activeParentKind = null
@@ -657,11 +585,15 @@ class HomeProjectDialogController(
             "removeProject"
         private const val DIALOG_DELETE_PREPARED =
             "deletePreparedProject"
-        private const val DIALOG_SEPARATE_VOLUMES =
-            "separateVolumesPreview"
-        private const val DIALOG_MULTI_VOLUME =
-            "multiVolumeChooser"
+        private const val DIALOG_EXPORT_WIZARD =
+            "separateVolumesExportWizard"
         private const val STATE_SELECTED_EXPORT_VOLUMES =
             "homeProjectDialogSelectedExportVolumes"
+        private const val STATE_EXPORT_STEP =
+            "homeProjectDialogExportStep"
+        private const val STATE_EXPORT_FOLDER =
+            "homeProjectDialogExportFolder"
+        private const val STATE_EXPORT_SCROLL_Y =
+            "homeProjectDialogExportScrollY"
     }
 }

@@ -424,14 +424,16 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertEqual(
             {
-                "HomeProjectDialogController.kt": (6, 6),
+                "HomeProjectDialogController.kt": (4, 4),
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (10, 10),
+                "ProjectExportWizard.kt": (1, 1),
                 "SettingsActivity.kt": (3, 3),
             },
             audited,
         )
-        self.assertEqual(20, total_builders)
+        # v0.5.101 (#178): two export dialogs replaced by one step-by-step window.
+        self.assertEqual(19, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(
@@ -455,7 +457,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
 
         show_actions = controller.split("fun showActions(projectId: String)", 1)[1]
-        show_actions = show_actions.split("private fun showSeparateVolumePreview", 1)[0]
+        show_actions = show_actions.split("private fun showExportWizard", 1)[0]
 
         self.assertNotIn(".setItems(", show_actions)
         self.assertIn('"Експортувати томи окремо (.rdpkg)"', show_actions)
@@ -463,11 +465,13 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Видалити проєкт"', show_actions)
         self.assertIn('"Скасувати"', show_actions)
         self.assertIn("role = DialogRole.CHOICE", show_actions)
-        # The *actions panel* must not be a list. A separate volume chooser may be.
-        chooser = controller.split("private fun showMultiVolumeChooser", 1)[1]
-        chooser = chooser.split("private fun shareProject", 1)[0]
-        self.assertIn(".setMultiChoiceItems(labels, checked)", chooser)
-        self.assertIn("DialogUi.apply(dialog, DialogRole.CHOICE)", chooser)
+        # The *actions panel* must not be a list. The separate-volume export is a
+        # step-by-step window with checkbox tiles (#178).
+        wizard = self.read(
+            "android/app/src/main/java/com/saney/renaultdocs/ProjectExportWizard.kt"
+        )
+        self.assertIn("CheckBox(activity)", wizard)
+        self.assertIn("DialogUi.apply(dialog, DialogRole.CHOICE)", wizard)
 
     def test_dialog_actions_have_visible_button_chrome(self):
         dialog_ui = self.read(
