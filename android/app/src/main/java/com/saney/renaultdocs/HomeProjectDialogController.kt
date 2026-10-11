@@ -16,6 +16,7 @@ class HomeProjectDialogController(
     private val onPreparedProjectDeleted: (RenaultProject, Boolean) -> Unit,
     private val onShareProgress: (Int, Int, String) -> Unit,
     private val onShareFinished: (String) -> Unit,
+    private val onSeparateVolumeExportRequested: (String) -> Unit,
 ) {
     private var activeKind: String = ""
     private var activeProjectId: String? = null
@@ -67,6 +68,9 @@ class HomeProjectDialogController(
 
             DIALOG_DELETE_PREPARED ->
                 confirmDeletePreparedProject(project)
+
+            DIALOG_SEPARATE_VOLUMES ->
+                showSeparateVolumePreview(project)
 
             else ->
                 clear()
@@ -148,21 +152,17 @@ class HomeProjectDialogController(
                 projectVolumes,
             )
 
-        addAction("Поділитися проєктом") {
+        addAction("Експортувати томи окремо (.rdpkg)") {
             clear(DIALOG_ACTIONS)
+            showSeparateVolumePreview(project)
+        }
 
-            if (
-                prepared !=
-                null
-            ) {
-                sharePreparedProject(
-                    project,
-                    prepared,
-                )
+        addAction("Увесь проєкт одним файлом (.rdproject) · офлайн") {
+            clear(DIALOG_ACTIONS)
+            if (prepared != null) {
+                sharePreparedProject(project, prepared)
             } else {
-                shareProject(
-                    project,
-                )
+                shareProject(project)
             }
         }
 
@@ -212,6 +212,52 @@ class HomeProjectDialogController(
         )
     }
 
+    private fun showSeparateVolumePreview(
+        project: RenaultProject,
+    ) {
+        activeKind = DIALOG_SEPARATE_VOLUMES
+        activeProjectId = project.id
+        val volumes = store.volumes(project.id)
+        val supported = volumes.count(RdpkgExporter::canFastExport)
+        val blocked = volumes.size - supported
+        val duplicateNames = runCatching {
+            ProjectVolumeExportPlan.build(project, volumes)
+        }.isFailure && blocked == 0 && volumes.isNotEmpty()
+
+        val message = buildString {
+            append("Основний спосіб: кожен том — окремий .rdpkg у вибраній папці.\\n")
+            append("Один великий .rdproject НЕ створюється.\\n\\n")
+            append("Томів у проєкті: ${volumes.size}\\n")
+            append("Готові до окремого експорту: $supported\\n")
+            if (blocked > 0) {
+                append("Потребують підготовки: $blocked\\n")
+            }
+            if (duplicateNames) {
+                append("Є збіг назв файлів, експортування призупинено.\\n")
+            }
+            append("\\nНаявні однойменні файли НЕ перезаписуються і не вважаються перевіреними. ")
+            append("У кінці буде створено невеликий JSON-звіт. ")
+            append("Це ще не публікація каталогу Google Drive.")
+        }
+        val canProceed = supported == volumes.size && supported > 0 && !duplicateNames
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle("Експортувати окремі томи")
+            .setMessage(message)
+            .setNegativeButton("Назад") { _, _ ->
+                clear(DIALOG_SEPARATE_VOLUMES)
+                showActions(project.id)
+            }
+            .setPositiveButton("Вибрати папку") { _, _ ->
+                clear(DIALOG_SEPARATE_VOLUMES)
+                onSeparateVolumeExportRequested(project.id)
+            }
+            .create()
+        track(dialog, DIALOG_SEPARATE_VOLUMES, project.id)
+        dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = canProceed
+        DialogUi.apply(dialog, DialogRole.CONFIRM)
+    }
+
     private fun shareProject(
         project: RenaultProject,
     ) {
@@ -242,6 +288,14 @@ class HomeProjectDialogController(
                 message =
                     "Спочатку потрібні .rdpkg для таких томів:\n\n" +
                         labels,
+            )
+            return
+        }
+
+        if (ProjectFolderExportRunStore(activity).load().isRunning) {
+            showMessage(
+                title = "Експорт окремих томів",
+                message = "Спочатку дочекайтеся завершення експорту томів.",
             )
             return
         }
@@ -489,5 +543,7 @@ class HomeProjectDialogController(
             "removeProject"
         private const val DIALOG_DELETE_PREPARED =
             "deletePreparedProject"
+        private const val DIALOG_SEPARATE_VOLUMES =
+            "separateVolumesPreview"
     }
 }
