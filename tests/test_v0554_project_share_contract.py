@@ -9,7 +9,7 @@ class ProjectShareContractTest(unittest.TestCase):
 
     def test_project_menu_is_modern_panel_and_has_share(self):
         src = self.read("android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt")
-        block = src.split("fun showActions(projectId: String)", 1)[1].split("private fun shareProject", 1)[0]
+        block = src.split("fun showActions(projectId: String)", 1)[1].split("private fun showSeparateVolumePreview", 1)[0]
         self.assertNotIn(".setItems(", block)
         self.assertIn("Поділитися проєктом", block)
         self.assertIn("Видалити проєкт", block)
