@@ -178,7 +178,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         )
 
         share = controller.split(
-            'addAction("Поділитися проєктом")',
+            'addAction("Поділитися проєктом одним файлом (.rdproject) · офлайн")',
             1,
         )[1].split(
             'addAction("Перепакувати .rdproject")',
