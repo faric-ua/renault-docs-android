@@ -44,6 +44,8 @@ class PreflightDrivePublishPlanTests(unittest.TestCase):
             "title": "Megane II", "model": "Megane II",
             "manufacturer": "Renault", "volumes": [volume],
         }
+        dataset_bytes = json.dumps(dataset).encode("utf-8")
+        html_bytes = b"<html></html>"
         package = {
             "schema_version": 1,
             "format": "renault-volume-package-v1",
@@ -53,14 +55,14 @@ class PreflightDrivePublishPlanTests(unittest.TestCase):
             "dataset_title": "Megane II",
             "volume": volume,
             "dataset_manifest": "renault-dataset.json",
-            "payload_file_count": 1,
-            "payload_bytes": 5,
+            "payload_file_count": 2,
+            "payload_bytes": len(dataset_bytes) + len(html_bytes),
         }
         path = self.packages / default_package_filename(dataset, volume)
         with ZipFile(path, "w") as archive:
             archive.writestr("rdpkg.json", json.dumps(package))
-            archive.writestr("renault-dataset.json", json.dumps(dataset))
-            archive.writestr(volume["entrypoint"], "<html></html>")
+            archive.writestr("renault-dataset.json", dataset_bytes)
+            archive.writestr(volume["entrypoint"], html_bytes)
         return path
 
     def plan(self, *records):
