@@ -1,3 +1,11 @@
+## PHONE QA — v0.5.97 archive picker / NT8343 duplicate preflight — 2026-10-11
+
+- Two user screenshots under Megane II: Android SAF picker at `Documents/Renault/packages/rdpkg` shows already prepared `.rdpkg` as greyed-out BIN files, **not selectable**. **PASS: SAF MIME-file filter excludes prepared packages** from original ZIP/7Z/RAR intake. **NOT TESTED: inner app `ArchiveSourceGuard.inputError` when `.rdpkg` actually returned as URI**, because no URI could be selected. #85 remains OPEN for that separate negative gate, not a bug by itself.
+- Original `Megane II B,C,S 84 Europe_NT8343_Visu v4.0_2007.05.02.zip` passed original-archive chooser and produced confirmation UI with `Можливий дублікат — знайдено схожих томів: 1`, `Megane II: NT8343 · 2007-05-02 — збіг метаданих`, and explicit `Вміст архівів не порівнювався`. **PASS: informational cross-project/catalog duplicate preview**, not byte equality and not actual duplicate skip after importing. UI exposes «Скасувати» and «Продовжити»; choose **Скасувати** to avoid unnecessary conversion. No new package/output observed.
+- Prior v0.5.97 explicit raw Kangoo→Megane mismatch UI BLOCK **PHONE PASS**; screenshot shows Megane II with 21 tomes. All existing packages/docs untouched. Next independent no-write QA: #79 Home → «Новий том» → choose project → should expand «Додати» with explicit Auto/Manual/raw/archive options, **not** silently open .rdpkg picker; navigate Back afterwards. If user prefers, can stop testing and proceed to #30 pipeline planning. Do not change code or make new APK for the two successful UI behaviors.
+
+---
+
 ## PHONE QA — v0.5.97 RAW CROSS-MODEL NEGATIVE PASS — 2026-10-11
 
 User screenshot shows «Неправильне джерело»: source model kangoo vs current Megane II, «Підготовку зупинено.» over existing Megane II project («Томів: 21»). This confirms **UI refusal before destination chooser** for this explicit wrong-model RAW folder scenario. Previous same-device in-place update, retention and document-open smoke PASS. Do not confuse with #85 (prepared `.rdpkg` passed as original ZIP/7Z/RAR still awaiting a separate on-device negative gate) or with #83 historical picker provenance (unknown). No user files moved/deleted/reconverted. Next phone QA #85 picker-only rejection, no new APK.
