@@ -44,6 +44,8 @@ class PreflightDrivePublishPlanTests(unittest.TestCase):
             "title": "Megane II", "model": "Megane II",
             "manufacturer": "Renault", "volumes": [volume],
         }
+        dataset_bytes = json.dumps(dataset).encode("utf-8")
+        html_bytes = b"<html></html>"
         package = {
             "schema_version": 1,
             "format": "renault-volume-package-v1",
@@ -53,14 +55,14 @@ class PreflightDrivePublishPlanTests(unittest.TestCase):
             "dataset_title": "Megane II",
             "volume": volume,
             "dataset_manifest": "renault-dataset.json",
-            "payload_file_count": 1,
-            "payload_bytes": 5,
+            "payload_file_count": 2,
+            "payload_bytes": len(dataset_bytes) + len(html_bytes),
         }
         path = self.packages / default_package_filename(dataset, volume)
         with ZipFile(path, "w") as archive:
             archive.writestr("rdpkg.json", json.dumps(package))
-            archive.writestr("renault-dataset.json", json.dumps(dataset))
-            archive.writestr(volume["entrypoint"], "<html></html>")
+            archive.writestr("renault-dataset.json", dataset_bytes)
+            archive.writestr(volume["entrypoint"], html_bytes)
         return path
 
     def plan(self, *records):
@@ -170,6 +172,23 @@ class PreflightDrivePublishPlanTests(unittest.TestCase):
         p.unlink()
         result = verify_publish_candidate(self.packages, self.plan((p, "id-a")), {"files": []})
         self.assertEqual(["local_package_missing_or_unsafe"], result["packages"][0]["problems"])
+
+    def test_local_zip_integrity_failure_blocks_even_when_drive_metadata_matches(self):
+        p = self.make_package()
+        # Archive remains structurally readable, so legacy manifest-only
+        # checks would accept it. The new full-payload guard must refuse it.
+        with ZipFile(p, "a") as archive:
+            archive.writestr("../escape.txt", b"payload")
+        result = verify_publish_candidate(
+            self.packages,
+            self.plan((p, "id-good")),
+            {"files": [self.file("id-good", p.name, p.stat().st_size)]},
+        )
+        self.assertEqual("BLOCKED", result["packages"][0]["result"])
+        self.assertEqual(
+            ["local_package_payload_integrity_failed"],
+            result["packages"][0]["problems"],
+        )
 
     def test_cli_stdout_no_writes_and_bad_id_exit_status(self):
         p = self.make_package()

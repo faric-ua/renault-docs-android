@@ -20,6 +20,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.build_drive_catalog import inspect_package, load_publish_plan
+from tools.validate_rdpkg_payload import PackageIntegrityError, validate_rdpkg_payload
 
 
 def _document(value: Any, label: str) -> dict[str, Any]:
@@ -102,6 +103,12 @@ def verify_publish_candidate(
             continue
         try:
             metadata = inspect_package(path)
+            # Catalog metadata alone does not establish ZIP payload integrity.
+            validate_rdpkg_payload(path)
+        except PackageIntegrityError:
+            checks.append({"file_name": name, "result": "BLOCKED",
+                           "problems": ["local_package_payload_integrity_failed"]})
+            continue
         except (ValueError, OSError, TypeError) as error:
             # Avoid absolute filesystem paths in a public report.
             checks.append({"file_name": name, "result": "BLOCKED",
