@@ -53,6 +53,9 @@ class MainActivity : Activity() {
         LifecycleHelpDialogController
     private lateinit var projectDialogs:
         HomeProjectDialogController
+    private lateinit var folderExportRunStore: ProjectFolderExportRunStore
+    private var pendingFolderExportProjectId: String? = null
+
     private lateinit var rdprojectShareRunStore:
         RdprojectShareRunStore
     private var lastRenderedRdprojectFinishedAt =
@@ -103,6 +106,9 @@ class MainActivity : Activity() {
             RdprojectShareRunStore(
                 this,
             )
+        folderExportRunStore = ProjectFolderExportRunStore(this)
+        pendingFolderExportProjectId =
+            savedInstanceState?.getString(STATE_PENDING_FOLDER_EXPORT_PROJECT)
         settings = AppSettings(this)
         homeAddPanelPinned = settings.homeAddPanelPinned
         homeAddPanelExpanded = savedInstanceState
@@ -291,6 +297,10 @@ class MainActivity : Activity() {
         projectDialogs.save(
             outState,
         )
+        outState.putString(
+            STATE_PENDING_FOLDER_EXPORT_PROJECT,
+            pendingFolderExportProjectId,
+        )
         outState.putBoolean(STATE_HOME_ADD_EXPANDED, homeAddPanelExpanded)
 
         if (
@@ -318,6 +328,43 @@ class MainActivity : Activity() {
         data: Intent?,
     ) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_FOLDER_EXPORT_DESTINATION) {
+            val projectId = pendingFolderExportProjectId
+            pendingFolderExportProjectId = null
+            if (resultCode != RESULT_OK || projectId.isNullOrBlank()) {
+                statusText.text = "Вибір папки для окремих томів скасовано."
+                return
+            }
+            val folder = data?.data
+            if (folder == null) {
+                statusText.text = "Android не повернув папку для .rdpkg."
+                return
+            }
+            val flags = data.flags and (
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            if ((flags and Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0 ||
+                (flags and Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0
+            ) {
+                statusText.text = "Для експорту потрібні права читання та запису в папку."
+                return
+            }
+            val permission = runCatching {
+                contentResolver.takePersistableUriPermission(folder, flags)
+            }
+            if (permission.isFailure) {
+                statusText.text = "Не вдалося зберегти доступ до вибраної папки."
+                return
+            }
+            if (ProjectFolderExportService.start(this, projectId, folder)) {
+                statusText.text = "Почато експорт окремих .rdpkg. Каталог не змінюється."
+            } else {
+                statusText.text = "Не вдалося запустити окремий експорт. Перевірте стан томів."
+            }
+            return
+        }
 
         if (requestCode != REQUEST_DATASET_FOLDER) {
             return
@@ -1254,12 +1301,57 @@ class MainActivity : Activity() {
             }
         }
 
+    private fun openProjectFolderExportPicker(projectId: String) {
+        if (folderExportRunStore.load().isRunning ||
+            rdprojectShareRunStore.load().isRunning
+        ) {
+            statusText.text = "Інший експорт проєкту вже виконується."
+            return
+        }
+        pendingFolderExportProjectId = projectId
+        val request = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
+        }
+        @Suppress("DEPRECATION")
+        startActivityForResult(request, REQUEST_FOLDER_EXPORT_DESTINATION)
+    }
+
     private fun refreshRdprojectShareRunState() {
         if (
             !::rdprojectShareRunStore.isInitialized ||
             !::operationStatus.isInitialized ||
             !::statusText.isInitialized
         ) {
+            return
+        }
+
+        val folderState = folderExportRunStore.load()
+        if (folderState.isRunning) {
+            operationStatus.showRunning(
+                title = "Експорт окремих томів",
+                detail = folderState.message.ifBlank { "Експортую .rdpkg…" },
+                current = (folderState.completed + folderState.skipped)
+                    .takeIf { folderState.volumeIds.isNotEmpty() },
+                total = folderState.volumeIds.size.takeIf { it > 0 },
+                subject = folderState.projectId,
+            )
+            return
+        }
+        if (folderState.isTerminal && !folderState.dismissed) {
+            operationStatus.showTerminal(
+                title = if (folderState.phase == ProjectFolderExportPhase.COMPLETE) {
+                    "Окремі томи · завершено"
+                } else {
+                    "Окремі томи · помилка"
+                },
+                detail = folderState.message,
+            ) {
+                folderExportRunStore.dismiss(folderState.finishedAt)
+                operationStatus.hide()
+            }
             return
         }
 
@@ -2079,6 +2171,9 @@ class MainActivity : Activity() {
         private const val RDPROJECT_RUN_REFRESH_MS =
             100L
         private const val REQUEST_DATASET_FOLDER = 4101
+        private const val REQUEST_FOLDER_EXPORT_DESTINATION = 4103
+        private const val STATE_PENDING_FOLDER_EXPORT_PROJECT =
+            "main_pending_project_folder_export"
         private const val REQUEST_POST_NOTIFICATIONS = 4102
         private const val HELP_LIBRARY =
             "library"
