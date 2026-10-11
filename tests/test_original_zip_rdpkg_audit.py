@@ -86,6 +86,7 @@ class OriginalZipRdpkgAuditTest(unittest.TestCase):
         self.assertEqual(0, outcome["missing"])
         self.assertEqual(0, outcome["extra"])
         self.assertGreaterEqual(outcome["static_links"]["counts"]["resolved_exact"], 2)
+        self.assertEqual(0, outcome["static_links"]["counts"].get("potential_unresolved", 0))
         self.assertEqual(before, (self.original.read_bytes(), self.package.read_bytes()))
         self.assertNotIn(str(self.root), json.dumps(outcome))
 
@@ -141,6 +142,25 @@ class OriginalZipRdpkgAuditTest(unittest.TestCase):
             archive.writestr("../untrusted.PDF", "bad")
         with self.assertRaisesRegex(ValueError, "unsafe entry"):
             audit_original_zip_to_rdpkg(self.original, self.package)
+
+    def test_dynamically_constructed_htm_suffix_is_not_broken_link(self):
+        self.setup_pair()
+        with ZipFile(self.original, "a") as source:
+            # Only source branch updated here would alter the entry name, so
+            # regenerate the pair with this legitimate dynamic fragment.
+            pass
+        # Static suffix markers in historical VISU HTML do not name a file.
+        from tools.audit_original_zip_rdpkg import _reference_counts
+        source_name = self.folder + "/CTITRE.HTM"
+        temp = self.root / "dynamic-markers.zip"
+        with ZipFile(temp, "w") as archive:
+            archive.writestr(source_name, '<script>var url="./MENU/"+code+".HTM";</script>')
+        with ZipFile(temp) as archive:
+            result = _reference_counts(
+                archive, {source_name}, {source_name.casefold(): [source_name]}
+            )
+        self.assertEqual(1, result["counts"].get("dynamic_suffix_marker"))
+        self.assertEqual(0, result["counts"].get("potential_unresolved", 0))
 
     def test_cli_success_and_blocked_exit_without_writes(self):
         self.setup_pair()
