@@ -17,3 +17,9 @@ Status gate: PHONE INSTALL/RETENTION separate from wrong-model block behavior. #
 - **RAW_TREE explicit cross-model picker gate: PHONE PASS.** Megane II selected; existing Kangoo-named raw source selected through raw preparation. App displayed «Неправильне джерело» with «Джерело містить назву моделі kangoo, але вибрано проєкт «Megane II». Підготовку зупинено.» before any destination picker. Megane II project header shows **21 том**. No package creation observed.
 - Install-over / existing volumes / document open: previous user **PHONE PASS**.
 - Still untested: arbitrary model-neutral names, worker bypass, all possible ambiguous document metadata, #85 prepared package as original archive, and #40 OS quota callback. Do not assert these PASSED from one screenshot.
+
+## Archive input selector / duplicate preflight PHONE QA — 2026-10-11
+
+- **SAF filter PASS:** already-prepared `.rdpkg` files visible grey/disabled in `Documents/Renault/packages/rdpkg` when picking original archive. They cannot be selected as source. This does **not** invoke the independent app-side bad-extension validation; keep its phone test PENDING (#85).
+- **ZIP catalog preflight PASS:** genuine `Megane II B,C,S 84 Europe_NT8343_Visu v4.0_2007.05.02.zip` is selectable, and app warns a possible already installed matching NT8343/2007-05-02 with clear `Вміст архівів не порівнювався`. Cancel, don't produce duplicate packages. No conversion, data movement or cleanup occurred in supplied evidence.
+- Next safe gate: #79 Home «Новий том» project chooser destination Add panel, no auto .rdpkg picker, no actual source chosen.
