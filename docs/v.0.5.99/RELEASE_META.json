@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.99",
   "versionCode": 115,
-  "phase": "verified_main_stable_signed_debug_awaiting_phone_qa",
+  "phase": "verified_public_stable_signed_debug_published_phone_qa_pending",
   "branch": "feat/issue162-select-one-or-all-volume",
   "issues": [
     162,
@@ -26,5 +26,17 @@
   "artifact_name": "Renault-Docs-v0.5.99-Debug",
   "artifact_digest": "sha256:95d8f3f31af171565b2efbd39e7ba922ee73ce355c9cff2889678e23fed58923",
   "qa_status": "phone-qa-pending",
-  "next": "Install signed v0.5.99 in place. Verify 21 Megane II tomes retained. Preview One volume vs All. Choose exactly one identifiable full NT, rotate chooser then return, select an empty private Google Drive SAF test folder, verify exactly one independent .rdpkg + JSON and hash, no full export/reupload. Keep #162/#147 OPEN; #133 blocked."
+  "next": "Install signed v0.5.99 in place. Verify 21 Megane II tomes retained. Preview One volume vs All. Choose exactly one identifiable full NT, rotate chooser then return, select an empty private Google Drive SAF test folder, verify exactly one independent .rdpkg + JSON and hash, no full export/reupload. Keep #162/#147 OPEN; #133 blocked.",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.99-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.99-debug",
+    "source_sha": "4a42414735694aeffadab05e8388b9dc896ed867",
+    "signed_run_id": 38166740107,
+    "publisher_run_id": 38166922971,
+    "apk_asset_id": 631572701,
+    "checksum_asset_id": 631572703,
+    "apk_sha256": "656bf95d047b070a12faad768ab98e88555791ba36d3f6da76f4932130764f19",
+    "qa_status": "phone-qa-pending"
+  }
 }
