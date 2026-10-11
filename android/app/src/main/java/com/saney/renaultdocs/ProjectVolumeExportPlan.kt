@@ -30,12 +30,26 @@ object ProjectVolumeExportPlan {
                 date = RdpkgExporter.resolvedMetadata(volume).date,
             )
         }
+        validate(items)
+        return items
+    }
+
+    /** Pure deterministic preflight reused by the exporter and JVM tests. */
+    fun validate(items: List<Item>) {
+        require(items.isNotEmpty()) { "Список томів порожній." }
+        require(items.all {
+            it.volumeId.isNotBlank() &&
+                it.fileName.endsWith(".rdpkg", ignoreCase = true) &&
+                it.fileName == java.io.File(it.fileName).name &&
+                "/" !in it.fileName && "\\\\" !in it.fileName
+        }) {
+            "Некоректні ідентифікатори або назви томів."
+        }
         require(items.map { it.volumeId }.toSet().size == items.size) {
             "У проєкті є повторювані volume ID."
         }
         require(items.map { it.fileName.lowercase(java.util.Locale.ROOT) }.toSet().size == items.size) {
             "Деякі томи мають однакові назви файлів .rdpkg. Потрібен окремий розгляд."
         }
-        return items
     }
 }
