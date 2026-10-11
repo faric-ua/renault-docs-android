@@ -55,6 +55,7 @@ class MainActivity : Activity() {
         HomeProjectDialogController
     private lateinit var folderExportRunStore: ProjectFolderExportRunStore
     private var pendingFolderExportProjectId: String? = null
+    private var pendingFolderExportVolumeIds: List<String>? = null
 
     private lateinit var rdprojectShareRunStore:
         RdprojectShareRunStore
@@ -109,6 +110,8 @@ class MainActivity : Activity() {
         folderExportRunStore = ProjectFolderExportRunStore(this)
         pendingFolderExportProjectId =
             savedInstanceState?.getString(STATE_PENDING_FOLDER_EXPORT_PROJECT)
+        pendingFolderExportVolumeIds = savedInstanceState
+            ?.getStringArrayList(STATE_PENDING_FOLDER_EXPORT_VOLUMES)?.toList()
         settings = AppSettings(this)
         homeAddPanelPinned = settings.homeAddPanelPinned
         homeAddPanelExpanded = savedInstanceState
@@ -154,8 +157,8 @@ class MainActivity : Activity() {
                         )
                     }
                 },
-                onSeparateVolumeExportRequested = { projectId ->
-                    openProjectFolderExportPicker(projectId)
+                onSeparateVolumeExportRequested = { projectId, volumeIds ->
+                    openProjectFolderExportPicker(projectId, volumeIds)
                 },
                 onShareFinished = { message ->
                     statusText.text = message
@@ -304,6 +307,10 @@ class MainActivity : Activity() {
             STATE_PENDING_FOLDER_EXPORT_PROJECT,
             pendingFolderExportProjectId,
         )
+        outState.putStringArrayList(
+            STATE_PENDING_FOLDER_EXPORT_VOLUMES,
+            pendingFolderExportVolumeIds?.let { ArrayList(it) },
+        )
         outState.putBoolean(STATE_HOME_ADD_EXPANDED, homeAddPanelExpanded)
 
         if (
@@ -334,8 +341,12 @@ class MainActivity : Activity() {
 
         if (requestCode == REQUEST_FOLDER_EXPORT_DESTINATION) {
             val projectId = pendingFolderExportProjectId
+            val volumeIds = pendingFolderExportVolumeIds
             pendingFolderExportProjectId = null
-            if (resultCode != RESULT_OK || projectId.isNullOrBlank()) {
+            pendingFolderExportVolumeIds = null
+            if (resultCode != RESULT_OK || projectId.isNullOrBlank() ||
+                volumeIds.isNullOrEmpty()
+            ) {
                 statusText.text = "Вибір папки для окремих томів скасовано."
                 return
             }
@@ -361,7 +372,7 @@ class MainActivity : Activity() {
                 statusText.text = "Не вдалося зберегти доступ до вибраної папки."
                 return
             }
-            if (ProjectFolderExportService.start(this, projectId, folder)) {
+            if (ProjectFolderExportService.start(this, projectId, folder, volumeIds)) {
                 statusText.text = "Почато експорт окремих .rdpkg. Каталог не змінюється."
             } else {
                 statusText.text = "Не вдалося запустити окремий експорт. Перевірте стан томів."
@@ -1304,14 +1315,27 @@ class MainActivity : Activity() {
             }
         }
 
-    private fun openProjectFolderExportPicker(projectId: String) {
+    private fun openProjectFolderExportPicker(
+        projectId: String,
+        volumeIds: List<String>,
+    ) {
         if (folderExportRunStore.load().isRunning ||
             rdprojectShareRunStore.load().isRunning
         ) {
             statusText.text = "Інший експорт проєкту вже виконується."
             return
         }
+        val project = projectStore.project(projectId)
+        val selected = runCatching {
+            val current = requireNotNull(project) { "Проєкт не знайдено." }
+            val plan = ProjectVolumeExportPlan.build(current, projectStore.volumes(projectId))
+            ProjectVolumeExportPlan.select(plan, volumeIds)
+        }.getOrElse {
+            statusText.text = it.message ?: "Некоректний вибір томів."
+            return
+        }
         pendingFolderExportProjectId = projectId
+        pendingFolderExportVolumeIds = selected.map { it.volumeId }
         val request = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
@@ -2177,6 +2201,8 @@ class MainActivity : Activity() {
         private const val REQUEST_FOLDER_EXPORT_DESTINATION = 4103
         private const val STATE_PENDING_FOLDER_EXPORT_PROJECT =
             "main_pending_project_folder_export"
+        private const val STATE_PENDING_FOLDER_EXPORT_VOLUMES =
+            "main_pending_project_folder_export_volumes"
         private const val REQUEST_POST_NOTIFICATIONS = 4102
         private const val HELP_LIBRARY =
             "library"
