@@ -1,3 +1,5 @@
+> **Нова сесія:** спершу `CLAUDE.md` (правила) і `STATUS.md` (поточний стан). Цей файл нижче — історичний архів.
+
 ## CURRENT — v0.5.100/build116 SIGNED QA PRERELEASE PUBLISHED; MULTI-SELECT PHONE QA NEXT — 2026-10-12
 
 - Owner provided v0.5.99 Megane II screenshot listing **22 tomes** (prior previously prepared .rdproject had **21**). They requested checkbox multi-selection of ANY subset instead of only one/all. No automatic export when merely checking items.
