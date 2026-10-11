@@ -157,7 +157,7 @@ class HomeProjectDialogController(
             showSeparateVolumePreview(project)
         }
 
-        addAction("Увесь проєкт одним файлом (.rdproject) · офлайн") {
+        addAction("Поділитися проєктом одним файлом (.rdproject) · офлайн") {
             clear(DIALOG_ACTIONS)
             if (prepared != null) {
                 sharePreparedProject(project, prepared)
