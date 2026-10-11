@@ -107,4 +107,33 @@ class ProjectVolumeExportPlanTest {
         )
     }
 
+    @Test
+    fun threeOutOfFourVolumesKeepOnlyTheExplicitSubsetInProjectOrder() {
+        val plan = listOf(
+            ProjectVolumeExportPlan.Item("nt1", "NT1.rdpkg", "NT1", "2004-01-01"),
+            ProjectVolumeExportPlan.Item("nt2", "NT2.rdpkg", "NT2", "2005-01-01"),
+            ProjectVolumeExportPlan.Item("nt3", "NT3.rdpkg", "NT3", "2006-01-01"),
+            ProjectVolumeExportPlan.Item("nt4", "NT4.rdpkg", "NT4", "2007-01-01"),
+        )
+        val selected = ProjectVolumeExportPlan.select(plan, listOf("nt4", "nt1", "nt3"))
+        assertEquals(listOf("nt1", "nt3", "nt4"), selected.map { it.volumeId })
+        assertEquals(3, selected.size)
+        assertTrue(selected.none { it.volumeId == "nt2" })
+    }
+
+    @Test
+    fun selectingTheEntireExplicitSetKeepsEveryVolumeOnce() {
+        val plan = twoDistinctVolumes()
+        val selected = ProjectVolumeExportPlan.select(plan, plan.map { it.volumeId })
+        assertEquals(plan, selected)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun duplicateVolumeIdsNeverTriggerAccidentalFullBatch() {
+        val plan = twoDistinctVolumes()
+        ProjectVolumeExportPlan.select(
+            plan, listOf("megane-nt8340a", "megane-nt8340a", "megane-nt8342a"),
+        )
+    }
+
 }

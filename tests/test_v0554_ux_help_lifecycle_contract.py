@@ -464,9 +464,9 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Скасувати"', show_actions)
         self.assertIn("role = DialogRole.CHOICE", show_actions)
         # The *actions panel* must not be a list. A separate volume chooser may be.
-        chooser = controller.split("private fun showSingleVolumeChooser", 1)[1]
+        chooser = controller.split("private fun showMultiVolumeChooser", 1)[1]
         chooser = chooser.split("private fun shareProject", 1)[0]
-        self.assertIn(".setItems(labels)", chooser)
+        self.assertIn(".setMultiChoiceItems(labels, checked)", chooser)
         self.assertIn("DialogUi.apply(dialog, DialogRole.CHOICE)", chooser)
 
     def test_dialog_actions_have_visible_button_chrome(self):
