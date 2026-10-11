@@ -1,3 +1,11 @@
+## CURRENT — v0.5.98 / build 114 SIGNED QA PRERELEASE PUBLISHED — 2026-10-11
+
+- Stage 1 per-volume SAF export PR #165 MERGED, docs PR #166 MERGED. Owner asked to continue. Version-only PR #167 MERGED; exact source d92d1b41ae722581f93b1170323eee0e97c929a8; Android version 0.5.98 (114). PR Tests #674 PASS, Android PR Check #516 PASS, main Tests #675 PASS and stable-signed Android Debug APK #162 PASS, run ID 38164855836, artifact ID 11712105452.
+- QA prerelease v0.5.98-debug PUBLISHED via PR #168 and Publish workflow #16 PASS: https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.98-debug . Original APK: https://github.com/faric-ua/renault-docs-android/releases/download/v0.5.98-debug/Renault-Docs-v0.5.98-debug.apk . APK SHA-256 bcb88aa7a89db6cabd0933dd3a93bf26d038931b8ce5d59e9a7b4da888270f62; release APK asset 631517800. Phone QA PENDING, not Core Stable accepted.
+- NEXT: install v0.5.98 over existing v0.5.97 (never uninstall or clear data). Confirm Megane II project, existing 21 tomes and project menu primary independent .rdpkg export. Test on NEW EMPTY PRIVATE SAF test folder, especially Google Drive provider. Verify .part rename, SHA readback, inventory JSON, no overwrite, rotation/lock/background/interruption. Do NOT export all 21 to populated Drive before controlled test. #162 and #147 remain OPEN, Stage 2 exact Drive IDs/catalog not published; #133 login/paywall BLOCKED. Original files, uploaded 1.26GiB .rdproject and installed tomes unchanged; one-file .rdproject restore on second phone not proven.
+
+---
+
 ## CURRENT — #162 MAIN PER-VOLUME SAF FOLDER EXPORT MERGED / SOURCE CI PASS — 2026-10-11
 
 - Owner clarified architecture: **keep existing one-file `.rdproject` export as secondary offline/USB transfer**, but new default for distribution is **separate individually downloadable `.rdpkg` packages** with lightweight metadata-only project catalog. Do not remove old .rdproject file/producer. **Important:** Android .rdproject **re-import/restore was NOT established** by export code audit; verify/implement separately before promising one-file import on a second phone. Existing 1.26GiB user Google Drive export remains untouched/unverified due connector limit.
