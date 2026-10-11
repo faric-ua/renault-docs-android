@@ -344,7 +344,7 @@ class MainActivity : Activity() {
                 statusText.text = "Android не повернув папку для .rdpkg."
                 return
             }
-            val flags = data.flags and (
+            val flags = (data?.flags ?: 0) and (
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
