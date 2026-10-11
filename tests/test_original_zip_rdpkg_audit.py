@@ -144,11 +144,6 @@ class OriginalZipRdpkgAuditTest(unittest.TestCase):
             audit_original_zip_to_rdpkg(self.original, self.package)
 
     def test_dynamically_constructed_htm_suffix_is_not_broken_link(self):
-        self.setup_pair()
-        with ZipFile(self.original, "a") as source:
-            # Only source branch updated here would alter the entry name, so
-            # regenerate the pair with this legitimate dynamic fragment.
-            pass
         # Static suffix markers in historical VISU HTML do not name a file.
         from tools.audit_original_zip_rdpkg import _reference_counts
         source_name = self.folder + "/CTITRE.HTM"
