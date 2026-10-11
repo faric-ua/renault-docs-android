@@ -1,3 +1,11 @@
+## CURRENT — #30 STAGE B DRIVE CATALOG METADATA AUDIT MAIN CI PASS — 2026-10-11
+
+- PR #142 merged with new **read-only/offline** `tools/audit_drive_catalog_metadata.py` and synthetic tests, no Android source or APK changes. Commit `e6eaad6ab3a47c95615e38bfe9850d60c1dd6986`; exact PR Tests #649 PASS, main Tests #650 PASS. Compared provider-IDs + names + size in already acquired local JSON snapshots; no downloader/Drive modification/output file, no credential or Drive ID emitted in reports. Missing IDs from partial listing stay UNVERIFIED; SHA still unverified without content read.
+- Real connected Drive read-only snapshot: separate original Kangoo II, MEGANE II and laguna2 source trees (some nested, root contains unrelated files); prepared `Renault Docs Projects` folder lists **17 .rdpkg and 1 catalog JSON**; catalog version 4 has **15 volume references**. Two distinct same-name prepared files for Megane II NT8340A and NT8342A have older larger unreferenced copies; catalog uses newer smaller Drive IDs. Neither copy's payload rehashed. No delete/overwrite/move/rename/upload; independent **#143** is OPEN and blocks any filename-only 'cleanup' or publishing.
+- User's installed Renault Docs remains **v0.5.97/build113**. Stage #30 remains OPEN: next stage C is strictly folder-allowlisted metadata inventory of original Windows archives with bounded depth / completeness; no conversion or publication until source rights + owner-approved scope. #40 emulator FGS QA deferred; #85 in-app .rdpkg negative handler still not exercised by picker; #51/#102/#123 natural-operation QA; #133 Google licensing/protected docs separate future TODO.
+
+---
+
 ## CURRENT — #30 DRIVE METADATA AUDIT STAGE B — 2026-10-11 (CANDIDATE)
 
 - Source catalog: connected Drive metadata inspection confirmed prepared `Renault Docs Projects` folder holds **17 .rdpkg + 1 catalog JSON**, current catalog JSON lists **15 volumes** across 2 project models. Two **distinct older larger same-name prepared copies** of Megane II NT8340A / NT8342A are not referenced by the current catalog; catalog points to newer smaller copies. No file bytes compared or deleted; ownership/rights not inferred. Do NOT choose a winner or garbage-collect.
