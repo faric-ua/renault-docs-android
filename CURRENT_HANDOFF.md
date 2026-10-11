@@ -1,3 +1,12 @@
+## CURRENT — QA COMPLETION LEDGER ACCEPTED STAGES A–I — 2026-10-11
+
+- **Canonical status board:** `docs/assistant-kit/VERIFICATION_LEDGER.md`. Completed checkboxes for Stage A/B/C/D/E/F/G/H/I **within each explicitly documented scope**; real-data rows for all 5 current Megane II catalog NT volumes NT8340A, NT8341A, NT8342A, NT8344, NT8393 show raw original/package equality, PDF structural read, static HTML link scan and Modern/Runtime/Fast Pack asset parity, all PASS.
+- Stable evidence: Stage H PR #155 Python Tests #660 and main #661 PASS; Stage I PR #156 Python Tests #662 and main #663 PASS; Stage B/G/F etc CI already committed and retained in `tests/`. **45,312 original file matches, 9,243 PDF structural opens, 256,806 resolved static targets, 1,726 Runtime section/shard pairs, 33,801 Fast Pack byte matches** across exactly 5 matching catalog NT volumes. Ten `.HTM` dynamic suffix markers classified separately; no observed literal link failures.
+- **Do not ask owner to redo these PASS checks** solely due to moving chats or next steps. Regression CI automatically reruns affected tests when code or actual sources change; prior source-specific acceptance remains until invalidated by changed contents. Keep all distinct full NT codes separate.
+- Still OPEN: #30 full source/catalog pipeline for other NTs/Laguna/Kangoo, real Android interactive UI/visual PDF QA, licensing/rights, #147 signed/phone-accepted core stable, separately #40/#51/#85/#102/#123 disposition. #133 login/friends/Play billing/security remains BLOCKED until Core Stable released and owner accepts. No APK/source package/Drive data changes caused by this ledger.
+  
+---
+
 ## CURRENT — #30 STAGES H+I REAL 5/5 MEGANE CATALOG VOLUME AUDIT PASS / MAIN CI VERIFIED — 2026-10-11
 
 - User explicitly asked assistant to verify large volumes of Renault documentation autonomously; do not delegate manual page-by-page work to user. User prefers brief visible progress updates during complex work and final response after a finished milestone. Respect strict #147 CORE STABLE first, #133 sign-in/friend allowlist/payments/security in **separate future release only**.
