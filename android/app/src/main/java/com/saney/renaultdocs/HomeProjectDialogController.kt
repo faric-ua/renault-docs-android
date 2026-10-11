@@ -16,7 +16,7 @@ class HomeProjectDialogController(
     private val onPreparedProjectDeleted: (RenaultProject, Boolean) -> Unit,
     private val onShareProgress: (Int, Int, String) -> Unit,
     private val onShareFinished: (String) -> Unit,
-    private val onSeparateVolumeExportRequested: (String) -> Unit,
+    private val onSeparateVolumeExportRequested: (String, List<String>) -> Unit,
 ) {
     private var activeKind: String = ""
     private var activeProjectId: String? = null
@@ -71,6 +71,9 @@ class HomeProjectDialogController(
 
             DIALOG_SEPARATE_VOLUMES ->
                 showSeparateVolumePreview(project)
+
+            DIALOG_SINGLE_VOLUME ->
+                showSingleVolumeChooser(project)
 
             else ->
                 clear()
@@ -247,15 +250,60 @@ class HomeProjectDialogController(
                 clear(DIALOG_SEPARATE_VOLUMES)
                 showActions(project.id)
             }
-            .setPositiveButton("Вибрати папку") { _, _ ->
+            .setNeutralButton("Один том") { _, _ ->
                 clear(DIALOG_SEPARATE_VOLUMES)
-                onSeparateVolumeExportRequested(project.id)
+                showSingleVolumeChooser(project)
+            }
+            .setPositiveButton("Усі томи") { _, _ ->
+                clear(DIALOG_SEPARATE_VOLUMES)
+                val plan = runCatching {
+                    ProjectVolumeExportPlan.build(project, store.volumes(project.id))
+                }.getOrElse {
+                    showMessage("Експорт томів", it.message ?: "Помилка перевірки томів.")
+                    return@setPositiveButton
+                }
+                onSeparateVolumeExportRequested(project.id, plan.map { it.volumeId })
             }
             .create()
         track(dialog, DIALOG_SEPARATE_VOLUMES, project.id)
         dialog.show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = canProceed
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.isEnabled = canProceed
         DialogUi.apply(dialog, DialogRole.CONFIRM)
+    }
+
+    /** Choosing a row opens SAF for exactly one immutable volume ID, not all tomes. */
+    private fun showSingleVolumeChooser(project: RenaultProject) {
+        val plan = runCatching {
+            ProjectVolumeExportPlan.build(project, store.volumes(project.id))
+        }.getOrElse {
+            clear(DIALOG_SINGLE_VOLUME)
+            showMessage("Експорт томів", it.message ?: "Помилка перевірки томів.")
+            return
+        }
+        activeKind = DIALOG_SINGLE_VOLUME
+        activeProjectId = project.id
+        val labels = plan.map { item ->
+            val identity = listOfNotNull(
+                item.documentCode?.takeIf { it.isNotBlank() },
+                item.date?.takeIf { it.isNotBlank() },
+            ).joinToString(" · ").ifBlank { item.fileName }
+            "$identity\n${item.fileName}"
+        }.toTypedArray()
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle("Вибрати один том · ${plan.size}")
+            .setItems(labels) { _, index ->
+                clear(DIALOG_SINGLE_VOLUME)
+                onSeparateVolumeExportRequested(project.id, listOf(plan[index].volumeId))
+            }
+            .setNegativeButton("Назад") { _, _ ->
+                clear(DIALOG_SINGLE_VOLUME)
+                showSeparateVolumePreview(project)
+            }
+            .create()
+        track(dialog, DIALOG_SINGLE_VOLUME, project.id)
+        dialog.show()
+        DialogUi.apply(dialog, DialogRole.CHOICE)
     }
 
     private fun shareProject(
@@ -545,5 +593,7 @@ class HomeProjectDialogController(
             "deletePreparedProject"
         private const val DIALOG_SEPARATE_VOLUMES =
             "separateVolumesPreview"
+        private const val DIALOG_SINGLE_VOLUME =
+            "singleVolumeChooser"
     }
 }
