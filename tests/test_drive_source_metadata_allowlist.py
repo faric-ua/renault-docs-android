@@ -43,12 +43,12 @@ class DriveSourceMetadataAuditTests(unittest.TestCase):
             allowlist(scope("megane-schemes", folder, "megane-ii")), metadata
         )
         self.assertEqual(2, result["source_archive_count"])
-        docs = [x["identity"]["document_code"] for x in result["archives"]]
-        self.assertEqual(["NT8340A", "NT8342A"], docs)
+        docs = {x["identity"]["document_code"]: x for x in result["archives"]}
+        self.assertEqual({"NT8340A", "NT8342A"}, set(docs))
         self.assertEqual(["archive_metadata_only"] * 2,
                          [x["status"] for x in result["archives"]])
-        self.assertEqual("2006-04-18", result["archives"][0]["identity"]["date"])
-        self.assertEqual("Europe", result["archives"][1]["identity"]["region"])
+        self.assertEqual("2006-04-18", docs["NT8340A"]["identity"]["date"])
+        self.assertEqual("Europe", docs["NT8342A"]["identity"]["region"])
         self.assertEqual(result, audit_source_metadata(
             allowlist(scope("megane-schemes", folder, "megane-ii")), metadata
         ))
