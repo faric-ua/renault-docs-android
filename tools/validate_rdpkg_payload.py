@@ -77,6 +77,8 @@ def validate_rdpkg_payload(
 
             if RDPKG_MANIFEST not in names:
                 raise PackageIntegrityError("missing rdpkg.json")
+            if archive.getinfo(RDPKG_MANIFEST).file_size > 2 * 1024**2:
+                raise PackageIntegrityError("rdpkg.json exceeds metadata size limit")
             try:
                 package = json.loads(archive.read(RDPKG_MANIFEST).decode("utf-8"))
             except (json.JSONDecodeError, UnicodeDecodeError) as error:
@@ -98,6 +100,8 @@ def validate_rdpkg_payload(
                 raise PackageIntegrityError("dataset manifest or entrypoint not in payload")
             if entrypoint.endswith("/") or dataset_name.endswith("/"):
                 raise PackageIntegrityError("entrypoint or dataset manifest is a directory")
+            if archive.getinfo(dataset_name).file_size > 16 * 1024**2:
+                raise PackageIntegrityError("dataset manifest exceeds metadata size limit")
 
             declared_count = _positive_or_zero(package.get("payload_file_count"), "payload_file_count")
             declared_bytes = _positive_or_zero(package.get("payload_bytes"), "payload_bytes")
@@ -115,6 +119,18 @@ def validate_rdpkg_payload(
                 raise PackageIntegrityError("invalid dataset manifest JSON") from error
             if not isinstance(dataset, dict):
                 raise PackageIntegrityError("dataset manifest must be an object")
+            volumes = dataset.get("volumes")
+            if volumes is not None:
+                if not isinstance(volumes, list) or len(volumes) != 1 or not isinstance(volumes[0], dict):
+                    raise PackageIntegrityError("single-volume package requires one dataset volume")
+                single = volumes[0]
+                for identity_key in ("document_code", "id", "date"):
+                    lhs = volume.get(identity_key)
+                    rhs = single.get(identity_key)
+                    if lhs and rhs and lhs != rhs:
+                        raise PackageIntegrityError("package and dataset volume identity conflict")
+            if dataset.get("entrypoint") and dataset["entrypoint"] != entrypoint:
+                raise PackageIntegrityError("package and dataset entrypoint conflict")
             project = package.get("project_id")
             if not isinstance(project, str) or not project or dataset.get("project_id") != project:
                 raise PackageIntegrityError("project_id differs between package and dataset")
