@@ -1,3 +1,12 @@
+## CURRENT — #30 DRIVE METADATA AUDIT STAGE B — 2026-10-11 (CANDIDATE)
+
+- Source catalog: connected Drive metadata inspection confirmed prepared `Renault Docs Projects` folder holds **17 .rdpkg + 1 catalog JSON**, current catalog JSON lists **15 volumes** across 2 project models. Two **distinct older larger same-name prepared copies** of Megane II NT8340A / NT8342A are not referenced by the current catalog; catalog points to newer smaller copies. No file bytes compared or deleted; ownership/rights not inferred. Do NOT choose a winner or garbage-collect.
+- Windows source tree is separate: original Kangoo II archive folder has 1 known ZIP; Megane II and Laguna II folders contain nested subfolders, and shared Drive root has unrelated items. **Never global-crawl as if every file is a Renault source.** Only metadata listing, no original ZIP read/copy/mutation.
+- Scoped candidate branch `feat/issue30-drive-metadata-catalog-audit`: add read-only `tools/audit_drive_catalog_metadata.py` + synthetic tests/docs. Consumes *already acquired local JSON snapshots* of Drive prepared-folder metadata and `renault-docs-catalog.json`, checks immutable provider file IDs + name + size, duplicates, unreferenced packages, raw ZIP contamination; report omits IDs/URLs and writes to stdout only. No Drive OAuth integration, download, actual checksum verification or publication. Exact-head CI + merge pending; Android v0.5.97/build113 unchanged. Explicit completeness flag required before treating missing reference as proven remote missing.
+- Full issue #30 still OPEN. Next: owner-reviewed Drive-source inventory folder allowlist / pagination and controlled local staging; legal rights before any public catalog publication. #23 Project orientation narrow PHONE PASS, #40 system emulator deferred; #51/#85/#102/#123 pending separate, #133 license future TODO only.
+
+---
+
 ## CURRENT — #30 STAGE A SOURCE INVENTORY MERGED / MAIN CI PASS — 2026-10-11
 
 - Project Megane II orientation PHONE PASS: user confirmed Android status/navigation bars hide in landscape and return in portrait on installed Renault Docs v0.5.97/build113. Issue #23 remains OPEN for app-wide screens; no code change/new APK.
