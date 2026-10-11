@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.100",
   "versionCode": 116,
-  "phase": "verified_main_stable_signed_debug_awaiting_phone_qa",
+  "phase": "verified_public_stable_signed_debug_published_phone_qa_pending",
   "branch": "feat/issue162-multi-select-volume-export",
   "issues": [
     162,
@@ -27,5 +27,17 @@
   "artifact_name": "Renault-Docs-v0.5.100-Debug",
   "artifact_digest": "sha256:7cbef87bd41d22397fcc61ad99a1a96453f33455b4c2731948b1831d045f679a",
   "qa_status": "phone-qa-pending",
-  "next": "Install v0.5.100 over v0.5.99 without uninstall/clear, verify 22 tomes, multi-choice checkboxes/selected count; mark 3 non-contiguous NTs, rotate and confirm exactly 3 selected, cancel path no export; controlled export to new empty private SAF folder, exactly 3 .rdpkg and JSON expected_volumes=3. Avoid any .rdproject repack/delete. #173 historical archive retention bug is unresolved, archived 21-tome Drive object exists."
+  "next": "Install v0.5.100 over v0.5.99 without uninstall/clear, verify 22 tomes, multi-choice checkboxes/selected count; mark 3 non-contiguous NTs, rotate and confirm exactly 3 selected, cancel path no export; controlled export to new empty private SAF folder, exactly 3 .rdpkg and JSON expected_volumes=3. Avoid any .rdproject repack/delete. #173 historical archive retention bug is unresolved, archived 21-tome Drive object exists.",
+  "github_release": {
+    "status": "PUBLISHED",
+    "tag": "v0.5.100-debug",
+    "url": "https://github.com/faric-ua/renault-docs-android/releases/tag/v0.5.100-debug",
+    "source_sha": "9ca382000c4bc0c151cce24f1b1f15b51907eb1d",
+    "signed_run_id": 38178013797,
+    "publisher_run_id": 38178165105,
+    "apk_asset_id": 631901022,
+    "checksum_asset_id": 631901021,
+    "apk_sha256": "d99574294d3cd92b98c449ad161e22d5d8211aa624e2e131ca72582893ea7491",
+    "qa_status": "phone-qa-pending"
+  }
 }
