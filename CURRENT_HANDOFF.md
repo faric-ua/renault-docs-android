@@ -1,3 +1,11 @@
+## PHONE QA — v0.5.97 Home «Новий том» routing PASS / #79 CLOSED — 2026-10-11
+
+- User replied «Пасс» to precise test: Home → «Новий том» → choose Megane II. The project opened with expanded «Додати» and explicit choice of Auto/Manual/raw/archive, rather than auto-launching Android .rdpkg chooser. **PHONE PASS for #79 primary route**, underlying code from v0.5.83 PR #89; issue #79 marked CLOSED (completed). No new APK, source conversion, package or deletion.
+- Previous v0.5.97 tests still valid: in-place update/retention/open document PASS; Kangoo raw folder selected under Megane rejected before destination PASS; .rdpkg inputs unavailable in archive SAF chooser PASS at picker level; NT8343 ZIP duplicate *metadata warning* PASS, contents not compared and no conversion performed. #85 app-level prepared-extension rejection remains unexercised, so leave it OPEN.
+- Next independent safe QA: issue #23, Project activity immersive landscape → portrait system-bar restoration without picking or importing files. Scope a single Project screen first; do not infer universal app-wide PASS from one screen. #68 may be inspected only if needed; #30 Windows intake remains next substantial functionality, distinct from UI/phone gates. #40 OS dataSync quota emulator deferred (no PC); #51/#102/#123 pending natural operations; #133 license future TODO only.
+
+---
+
 ## PHONE QA — v0.5.97 archive picker / NT8343 duplicate preflight — 2026-10-11
 
 - Two user screenshots under Megane II: Android SAF picker at `Documents/Renault/packages/rdpkg` shows already prepared `.rdpkg` as greyed-out BIN files, **not selectable**. **PASS: SAF MIME-file filter excludes prepared packages** from original ZIP/7Z/RAR intake. **NOT TESTED: inner app `ArchiveSourceGuard.inputError` when `.rdpkg` actually returned as URI**, because no URI could be selected. #85 remains OPEN for that separate negative gate, not a bug by itself.
