@@ -60,9 +60,20 @@ class RdpkgShareService : Service() {
         workWakeLock.acquire()
 
         Thread {
+            var temp: java.io.File? = null
             try {
+                val existing = PreparedShareStore.existingVolumeFile(applicationContext, project, volume)
+                if (existing != null) {
+                    // One prepared file per volume: reuse it, never make a second copy.
+                    runStore.complete(existing.absolutePath)
+                    getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Том готовий для поширення.", false))
+                    return@Thread
+                }
+                PreparedShareStore.cleanupStaleIncoming(applicationContext)
                 val file = PreparedShareStore.volumeFile(applicationContext, project, volume)
-                val uri = FileProvider.getUriForFile(applicationContext, packageName + ".files", file)
+                val partial = PreparedShareStore.incomingFile(applicationContext, file)
+                temp = partial
+                val uri = FileProvider.getUriForFile(applicationContext, packageName + ".files", partial)
                 RdpkgExporter.export(
                     context = applicationContext,
                     volume = volume,
@@ -91,6 +102,9 @@ class RdpkgShareService : Service() {
                     },
                 ).getOrThrow()
                 dataSyncTimeout.checkActive()
+                // ⇧ appears only now: the complete file is moved into place in one rename.
+                PreparedShareStore.commitIncoming(partial, file)
+                temp = null
                 runStore.complete(file.absolutePath)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Том готовий для поширення.", false))
             } catch (error: Throwable) {
@@ -99,6 +113,7 @@ class RdpkgShareService : Service() {
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка підготовки: $message", false))
             } finally {
+                temp?.let { runCatching { it.delete() } }
                 workWakeLock.release()
                 workerRunning.set(false)
                 stopForeground(STOP_FOREGROUND_DETACH)

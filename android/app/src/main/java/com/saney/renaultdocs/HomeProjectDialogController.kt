@@ -134,6 +134,7 @@ class HomeProjectDialogController(
         fun addAction(
             title: String,
             danger: Boolean = false,
+            enabled: Boolean = true,
             action: () -> Unit,
         ) {
             panel.addView(
@@ -141,16 +142,25 @@ class HomeProjectDialogController(
                     context = activity,
                     value = "› " + title,
                     sizeSp = 18f,
-                    color = if (danger) Ui.danger else Ui.text,
+                    color = when {
+                        !enabled -> Ui.muted
+                        danger -> Ui.danger
+                        else -> Ui.text
+                    },
                 ).apply {
                     gravity = Gravity.CENTER_VERTICAL
-                    isClickable = true
-                    isFocusable = true
+                    isClickable = enabled
+                    isFocusable = enabled
+                    isEnabled = enabled
                     background =
                         Ui.roundedBackground(
                             context = activity,
                             fill = Ui.surfaceAlt,
-                            stroke = if (danger) Ui.danger else Ui.accent,
+                            stroke = when {
+                                !enabled -> Ui.border
+                                danger -> Ui.danger
+                                else -> Ui.accent
+                            },
                             radiusDp = 11,
                         )
                     setPadding(
@@ -201,12 +211,11 @@ class HomeProjectDialogController(
         }
 
         if (prepared != null) {
-            addAction("Перепакувати .rdproject") {
-                clear(DIALOG_ACTIONS)
-                shareProject(
-                    project,
-                )
-            }
+            // One prepared .rdproject per project: a new one only after deleting this one.
+            addAction(
+                title = "Перепакувати .rdproject · спершу видали підготовлений ⇧",
+                enabled = false,
+            ) {}
             addAction(
                 title = "Видалити підготовлений .rdproject",
                 danger = true,
@@ -523,6 +532,22 @@ class HomeProjectDialogController(
             dialog = dialog,
             role = DialogRole.DANGER,
         )
+    }
+
+    /** #181: one confirmation before stopping a long Home operation; nothing else runs. */
+    fun confirmCancelOperation(
+        title: String,
+        message: String,
+        onConfirm: () -> Unit,
+    ) {
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setMessage(message)
+            .setNegativeButton("Продовжити", null)
+            .setPositiveButton("Зупинити") { _, _ -> onConfirm() }
+            .create()
+        dialog.show()
+        DialogUi.apply(dialog, DialogRole.DANGER)
     }
 
     private fun track(

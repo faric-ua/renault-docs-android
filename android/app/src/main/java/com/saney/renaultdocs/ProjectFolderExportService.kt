@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.IBinder
+import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
@@ -25,6 +26,7 @@ class ProjectFolderExportService : Service() {
     private val active = AtomicBoolean(false)
     private lateinit var runStore: ProjectFolderExportRunStore
     private lateinit var wakeLock: BackgroundWorkWakeLock
+    @Volatile private var doneCounts: Pair<Int, Int> = 0 to 0
 
     override fun onCreate() {
         super.onCreate()
@@ -58,7 +60,14 @@ class ProjectFolderExportService : Service() {
             try {
                 export(state, project)
             } catch (error: Throwable) {
-                if (!dataSyncTimeout.isExpired) {
+                if (error is OperationCancelledException && !dataSyncTimeout.isExpired) {
+                    val (done, skip) = doneCounts
+                    runStore.cancelled(done, skip,
+                        "Скасовано. Уже експортовано: $done. Готові файли в папці не видалялись.")
+                    getSystemService(NotificationManager::class.java).notify(
+                        NOTIFICATION_ID, notification("Експорт окремих томів скасовано.", false),
+                    )
+                } else if (!dataSyncTimeout.isExpired) {
                     val message = error.message ?: "Не вдалося експортувати окремі томи."
                     runStore.fail(message)
                     getSystemService(NotificationManager::class.java).notify(
@@ -94,12 +103,14 @@ class ProjectFolderExportService : Service() {
         val records = JSONArray()
         var completed = 0
         var skipped = 0
+        doneCounts = 0 to 0
         val existingNames = tree.listFiles()
             .mapNotNull { it.name?.lowercase(java.util.Locale.ROOT) }
             .toMutableSet()
 
         plan.forEachIndexed { index, item ->
-            dataSyncTimeout.checkActive()
+            doneCounts = completed to skipped
+            checkpoint()
             val targetName = item.fileName
             val key = targetName.lowercase(java.util.Locale.ROOT)
             val record = JSONObject()
@@ -118,9 +129,29 @@ class ProjectFolderExportService : Service() {
                 return@forEachIndexed
             }
 
+            checkpoint()
+            // #182: the folder copy comes from the one prepared file inside the app (⇧).
+            // An existing prepared volume is reused; a missing one is packed once.
+            val volume = selected[index]
+            val existingPrepared = PreparedShareStore.existingVolumeFile(applicationContext, project, volume)
+            val prepared: java.io.File =
+                if (existingPrepared != null) {
+                    record.put("prepared", "REUSED")
+                    existingPrepared
+                } else {
+                    runStore.progress(completed, skipped,
+                        "Том ${index + 1}/${plan.size}: пакую ${item.documentCode ?: targetName}")
+                    notifyProgress(completed + skipped, plan.size, "Пакую том ${index + 1}/${plan.size}")
+                    val created = prepareVolume(project, volume, index, plan.size, completed, skipped, record)
+                    record.put("prepared", "CREATED")
+                    created
+                }
+            val localSha = sha256OfFile(prepared)
+
+            checkpoint()
             runStore.progress(completed, skipped,
-                "Том ${index + 1}/${plan.size}: пакую ${item.documentCode ?: targetName}")
-            notifyProgress(completed + skipped, plan.size, "Пакую том ${index + 1}/${plan.size}")
+                "Том ${index + 1}/${plan.size}: копіюю в папку ${item.documentCode ?: targetName}")
+            notifyProgress(completed + skipped, plan.size, "Копіюю том ${index + 1}/${plan.size}")
             // Unique .part: no old or user-provided canonical .rdpkg is touched.
             val partName = "$targetName.${System.currentTimeMillis()}.$index.part"
             require(partName.lowercase(java.util.Locale.ROOT) !in existingNames) {
@@ -130,20 +161,11 @@ class ProjectFolderExportService : Service() {
                 ?: error("Не вдалося створити тимчасовий .rdpkg.")
             var finalized = false
             try {
-                val write = RdpkgExporter.export(
-                    context = applicationContext,
-                    volume = selected[index],
-                    destinationUri = created.uri,
-                    progressState = { progress ->
-                        dataSyncTimeout.checkActive()
-                        runStore.progress(completed, skipped,
-                            "Том ${index + 1}/${plan.size}: ${progress.displayText()}")
-                    },
-                ).getOrThrow()
-                dataSyncTimeout.checkActive()
+                copyToUri(prepared, created.uri)
+                checkpoint()
                 val sha = sha256OfUri(created.uri)
-                require(sha.equals(write.sha256, ignoreCase = true)) {
-                    "Контрольна сума створеного тому не збігається."
+                require(sha.equals(localSha, ignoreCase = true)) {
+                    "Контрольна сума скопійованого тому не збігається."
                 }
                 require(tree.findFile(targetName) == null) {
                     "Під час експорту з'явився однойменний файл; заміну заборонено."
@@ -156,8 +178,8 @@ class ProjectFolderExportService : Service() {
                 record.put("status", "EXPORTED_SHA256_VERIFIED")
                     .put("sha256", sha)
                     .put("size_bytes", created.length())
-                    .put("file_count", write.fileCount)
                 completed++
+                doneCounts = completed to skipped
                 records.put(record)
                 runStore.progress(completed, skipped, "Готово: $targetName")
                 notifyProgress(completed + skipped, plan.size, "Том ${index + 1}/${plan.size} готовий")
@@ -201,6 +223,78 @@ class ProjectFolderExportService : Service() {
         getSystemService(NotificationManager::class.java).notify(
             NOTIFICATION_ID, notification("Окремі .rdpkg готові: $completed / ${plan.size}", false),
         )
+    }
+
+    /** Between files and inside long loops: timeout first, then the owner's «Скасувати». */
+    private fun checkpoint() {
+        dataSyncTimeout.checkActive()
+        if (runStore.isCancelRequested()) throw OperationCancelledException()
+    }
+
+    /** Packs one volume into the app's single prepared slot via a temporary file. */
+    private fun prepareVolume(
+        project: RenaultProject,
+        volume: ProjectVolumeRecord,
+        index: Int,
+        total: Int,
+        completed: Int,
+        skipped: Int,
+        record: JSONObject,
+    ): java.io.File {
+        PreparedShareStore.cleanupStaleIncoming(applicationContext)
+        val file = PreparedShareStore.volumeFile(applicationContext, project, volume)
+        val partial = PreparedShareStore.incomingFile(applicationContext, file)
+        try {
+            val uri = FileProvider.getUriForFile(applicationContext, "$packageName.files", partial)
+            val write = RdpkgExporter.export(
+                context = applicationContext,
+                volume = volume,
+                destinationUri = uri,
+                progressState = { progress ->
+                    checkpoint()
+                    runStore.progress(completed, skipped,
+                        "Том ${index + 1}/$total: ${progress.displayText()}")
+                },
+            ).getOrThrow()
+            checkpoint()
+            require(sha256OfFile(partial).equals(write.sha256, ignoreCase = true)) {
+                "Контрольна сума підготовленого тому не збігається."
+            }
+            record.put("file_count", write.fileCount)
+            PreparedShareStore.commitIncoming(partial, file)
+            return file
+        } finally {
+            if (partial.exists()) runCatching { partial.delete() }
+        }
+    }
+
+    private fun copyToUri(source: java.io.File, target: Uri) {
+        val buffer = ByteArray(1024 * 1024)
+        source.inputStream().use { input ->
+            contentResolver.openOutputStream(target, "w").use { output ->
+                requireNotNull(output) { "Немає доступу для запису в папку." }
+                while (true) {
+                    checkpoint()
+                    val size = input.read(buffer)
+                    if (size < 0) break
+                    if (size > 0) output.write(buffer, 0, size)
+                }
+            }
+        }
+    }
+
+    private fun sha256OfFile(file: java.io.File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(1024 * 1024)
+        file.inputStream().use { input ->
+            while (true) {
+                dataSyncTimeout.checkActive()
+                val size = input.read(buffer)
+                if (size < 0) break
+                if (size > 0) digest.update(buffer, 0, size)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     private fun sha256OfUri(uri: Uri): String {

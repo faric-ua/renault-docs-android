@@ -13,7 +13,9 @@ class VolumeActionsContractTest(unittest.TestCase):
         self.assertNotIn(".setItems(", block)
         for label in (
             "Експортувати .rdpkg",
-            "Поділитися томом",
+            # v0.5.102: one prepared file per volume; label says it prepares first.
+            "Підготувати і поділитися томом",
+            "Підготувати том · уже підготовлено ⇧",
             "Перемістити в інший проєкт",
             "Видалити з проєкту",
             "Скасувати",

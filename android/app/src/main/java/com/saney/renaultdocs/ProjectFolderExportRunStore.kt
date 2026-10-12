@@ -3,7 +3,7 @@ package com.saney.renaultdocs
 import android.content.Context
 import org.json.JSONArray
 
-enum class ProjectFolderExportPhase { IDLE, EXPORTING, COMPLETE, FAILED }
+enum class ProjectFolderExportPhase { IDLE, EXPORTING, COMPLETE, FAILED, CANCELLED }
 
 data class ProjectFolderExportState(
     val phase: ProjectFolderExportPhase = ProjectFolderExportPhase.IDLE,
@@ -19,7 +19,8 @@ data class ProjectFolderExportState(
     val isRunning: Boolean get() = phase == ProjectFolderExportPhase.EXPORTING
     val isTerminal: Boolean get() =
         phase == ProjectFolderExportPhase.COMPLETE ||
-            phase == ProjectFolderExportPhase.FAILED
+            phase == ProjectFolderExportPhase.FAILED ||
+            phase == ProjectFolderExportPhase.CANCELLED
     val dismissed: Boolean get() = isTerminal && finishedAt != 0L && finishedAt == dismissedAt
 }
 
@@ -88,6 +89,25 @@ class ProjectFolderExportRunStore(context: Context) {
         if (!load().isRunning) return
         prefs.edit()
             .putString("phase", ProjectFolderExportPhase.FAILED.name)
+            .putString("message", message)
+            .putLong("finished", System.currentTimeMillis())
+            .apply()
+    }
+
+    /** #181: the worker observes this between files and inside long copy loops. */
+    fun requestCancel(): Boolean {
+        if (!load().isRunning) return false
+        return prefs.edit().putBoolean("cancel_requested", true).commit()
+    }
+
+    fun isCancelRequested(): Boolean = prefs.getBoolean("cancel_requested", false)
+
+    fun cancelled(completed: Int, skipped: Int, message: String) {
+        if (!load().isRunning) return
+        prefs.edit()
+            .putString("phase", ProjectFolderExportPhase.CANCELLED.name)
+            .putInt("completed", completed)
+            .putInt("skipped", skipped)
             .putString("message", message)
             .putLong("finished", System.currentTimeMillis())
             .apply()

@@ -181,14 +181,16 @@ class V0561LiveProgressContractTests(unittest.TestCase):
             'addAction("Поділитися проєктом одним файлом (.rdproject) · офлайн")',
             1,
         )[1].split(
-            'addAction("Перепакувати .rdproject")',
+            # v0.5.102: repack is inactive while a prepared .rdproject exists.
+            'title = "Перепакувати .rdproject',
             1,
         )[0]
 
         self.assertIn("prepared !=", share)
         self.assertIn("sharePreparedProject(", share)
         self.assertIn("shareProject(", share)
-        self.assertIn('"Перепакувати .rdproject"', controller)
+        self.assertIn('"Перепакувати .rdproject · спершу видали підготовлений ⇧"', controller)
+        self.assertIn("enabled = false", controller)
 
         self.assertIn("private fun invalidatePreparedProject(", store)
         self.assertIn("invalidatePreparedProject(\n            projectId,", store)

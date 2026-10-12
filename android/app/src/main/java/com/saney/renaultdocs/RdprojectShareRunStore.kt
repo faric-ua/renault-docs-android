@@ -7,6 +7,7 @@ enum class RdprojectShareRunPhase {
     PREPARING,
     COMPLETE,
     FAILED,
+    CANCELLED,
 }
 
 data class RdprojectShareRunState(
@@ -33,6 +34,7 @@ data class RdprojectShareRunState(
                 setOf(
                     RdprojectShareRunPhase.COMPLETE,
                     RdprojectShareRunPhase.FAILED,
+                    RdprojectShareRunPhase.CANCELLED,
                 )
 
     val isChooserLaunched: Boolean
@@ -254,6 +256,22 @@ class RdprojectShareRunStore(
             .apply()
     }
 
+    /** #181: persisted so the worker sees it even after the Activity was recreated. */
+    fun requestCancel(): Boolean {
+        if (!load().isRunning) return false
+        return prefs.edit().putBoolean(KEY_CANCEL_REQUESTED, true).commit()
+    }
+
+    fun isCancelRequested(): Boolean = prefs.getBoolean(KEY_CANCEL_REQUESTED, false)
+
+    fun cancelled(message: String) {
+        prefs.edit()
+            .putString(KEY_PHASE, RdprojectShareRunPhase.CANCELLED.name)
+            .putString(KEY_MESSAGE, message)
+            .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
+            .apply()
+    }
+
     @Synchronized
     fun markChooserLaunched(
         finishedAtMs: Long,
@@ -305,6 +323,8 @@ class RdprojectShareRunStore(
         private const val PREFS =
             "renault_docs_rdproject_share_run"
 
+        private const val KEY_CANCEL_REQUESTED =
+            "cancel_requested"
         private const val KEY_PHASE =
             "phase"
         private const val KEY_PROJECT_ID =

@@ -163,7 +163,14 @@ class RdprojectShareService : Service() {
         workWakeLock.acquire()
 
         Thread {
+            var temp: java.io.File? = null
             try {
+                require(
+                    PreparedShareStore.existingProjectFile(applicationContext, project, volumes) == null,
+                ) {
+                    "Підготовлений .rdproject уже є. Поділись ним або спершу видали його."
+                }
+                PreparedShareStore.cleanupStaleIncoming(applicationContext)
                 val file =
                     PreparedShareStore
                         .projectFile(
@@ -171,6 +178,13 @@ class RdprojectShareService : Service() {
                             project,
                             volumes,
                         )
+                // Write into a temporary file first: no half .rdproject with ⇧ after a stop.
+                val partial =
+                    PreparedShareStore.incomingFile(
+                        applicationContext,
+                        file,
+                    )
+                temp = partial
 
                 val uri =
                     FileProvider
@@ -178,7 +192,7 @@ class RdprojectShareService : Service() {
                             applicationContext,
                             packageName +
                                 ".files",
-                            file,
+                            partial,
                         )
 
                 RdprojectExporter
@@ -194,6 +208,9 @@ class RdprojectShareService : Service() {
                         progressState = {
                             progress ->
                             dataSyncTimeout.checkActive()
+                            if (runStore.isCancelRequested()) {
+                                throw OperationCancelledException()
+                            }
                             runStore
                                 .updateProgress(
                                     progress,
@@ -207,6 +224,11 @@ class RdprojectShareService : Service() {
                     .getOrThrow()
 
                 dataSyncTimeout.checkActive()
+                if (runStore.isCancelRequested()) {
+                    throw OperationCancelledException()
+                }
+                PreparedShareStore.commitIncoming(partial, file)
+                temp = null
                 runStore.complete(
                     preparedPath =
                         file.absolutePath,
@@ -235,6 +257,22 @@ class RdprojectShareService : Service() {
                     Throwable,
             ) {
                 if (dataSyncTimeout.isExpired) return@Thread
+                if (error is OperationCancelledException ||
+                    error.cause is OperationCancelledException
+                ) {
+                    runStore.cancelled(
+                        "Підготовку .rdproject скасовано. Попередні файли не змінено.",
+                    )
+                    notificationManager()
+                        .notify(
+                            NOTIFICATION_ID,
+                            notification(
+                                text = "Підготовку проєкту скасовано.",
+                                ongoing = false,
+                            ),
+                        )
+                    return@Thread
+                }
                 val message =
                     error.message
                         ?: "Невідома помилка підготовки проєкту."
@@ -255,6 +293,7 @@ class RdprojectShareService : Service() {
                         ),
                     )
             } finally {
+                temp?.let { runCatching { it.delete() } }
                 workWakeLock.release()
                 workerRunning.set(
                     false,

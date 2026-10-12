@@ -3505,6 +3505,7 @@ class ProjectActivity : Activity() {
         fun addAction(
             title: String,
             danger: Boolean = false,
+            enabled: Boolean = true,
             action: () -> Unit,
         ) {
             actions.addView(
@@ -3512,16 +3513,25 @@ class ProjectActivity : Activity() {
                     context = this,
                     value = "› " + title,
                     sizeSp = 18f,
-                    color = if (danger) Ui.danger else Ui.text,
+                    color = when {
+                        !enabled -> Ui.muted
+                        danger -> Ui.danger
+                        else -> Ui.text
+                    },
                 ).apply {
                     gravity = Gravity.CENTER_VERTICAL
-                    isClickable = true
-                    isFocusable = true
+                    isClickable = enabled
+                    isFocusable = enabled
+                    isEnabled = enabled
                     background =
                         Ui.roundedBackground(
                             context = this@ProjectActivity,
                             fill = Ui.surfaceAlt,
-                            stroke = if (danger) Ui.danger else Ui.accent,
+                            stroke = when {
+                                !enabled -> Ui.border
+                                danger -> Ui.danger
+                                else -> Ui.accent
+                            },
                             radiusDp = 11,
                         )
                     setPadding(
@@ -3549,16 +3559,24 @@ class ProjectActivity : Activity() {
             clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
             startRdpkgExport(volume)
         }
-        addAction("Поділитися томом") {
-            clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
-            shareRdpkg(volume)
-        }
         val prepared =
             PreparedShareStore.existingVolumeFile(
                 this,
                 project,
                 volume,
             )
+        if (prepared == null) {
+            addAction("Підготувати і поділитися томом") {
+                clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                shareRdpkg(volume)
+            }
+        } else {
+            // One prepared .rdpkg per volume: no second copy until this one is deleted.
+            addAction(
+                title = "Підготувати том · уже підготовлено ⇧",
+                enabled = false,
+            ) {}
+        }
         if (prepared != null) {
             addAction("Поділитися підготовленим .rdpkg") {
                 clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
