@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.103",
+  "versionCode": 119,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.103-live-converter-progress",
+  "issues": [
+    147
+  ],
+  "scope": "Converter (Інструменти → Конвертація Renault): scan and validation progress reported by time (80 ms) instead of every 500/100/250 files; service persists every 100 ms. Includes all v0.5.102 changes.",
+  "sourceBase": "v0.5.102/build118",
+  "phoneQa": "PENDING",
+  "pr_number": 185,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 688,
+  "signed_apk": "PASS",
+  "source_sha": "ce7496524e74f79c0b6e9a2456d92e59bad46fc2",
+  "signed_run_id": 38191725827,
+  "signed_run_number": 167,
+  "signed_android_apk_run": 167,
+  "artifact_id": 11720859144,
+  "artifact_name": "Renault-Docs-v0.5.103-Debug",
+  "artifact_digest": "sha256:673a4eb1c10a5e366afcd7fd09d62a5c58754fe3d3dbbfb0b92aa806804ace3a",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.102. Run converter on a raw folder (e.g. Kangoo NT8486 into an empty test folder): green bar and counter move continuously during scan and 'Перевіряю…'. Continue v0.5.102 checks: status keeps expansion on rotation, ⇧ after folder export, Скасувати."
+}
