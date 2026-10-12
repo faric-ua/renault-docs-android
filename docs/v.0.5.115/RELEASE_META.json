@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.115",
+  "versionCode": 131,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.115-print",
+  "issues": [
+    147
+  ],
+  "scope": "Owner request 2026-10-12: print — Android print window (printer or Save as PDF) from the PDF viewer and from Modern tables. Includes v0.5.114.",
+  "sourceBase": "v0.5.114/build130",
+  "phoneQa": "PENDING",
+  "pr_number": 230,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 742,
+  "signed_apk": "PASS",
+  "source_sha": "1844eb60464f218b0b999126d4c6513178021d4a",
+  "signed_run_id": 38301977817,
+  "signed_run_number": 179,
+  "signed_android_apk_run": 179,
+  "artifact_id": 11771491034,
+  "artifact_name": "Renault-Docs-v0.5.115-Debug",
+  "artifact_digest": "sha256:f1d43b50999a01b0df6195436d6cdf19425ccff3e5f947804df27d3e38af6c05",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Open any scheme PDF → printer button next to «⇩ PDF» → Android print window → «Зберегти як PDF» → save. Table «Опис контактів» → «Друк»."
+}
