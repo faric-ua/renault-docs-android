@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.119",
+  "versionCode": 135,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.119-pdf-toolbar-and-frame-zoom",
+  "issues": [
+    147
+  ],
+  "scope": "Owner TODO batch 2026-10-13: PDF toolbar one medium size everywhere; PDF zoom max 500% (450/500 steps); «Схема + піни» page never zooms, pins table has its own two-finger zoom; «Документація поруч» close button styled. Includes v0.5.117–118.",
+  "sourceBase": "v0.5.118/build134",
+  "phoneQa": "PENDING",
+  "pr_number": 238,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 762,
+  "signed_apk": "PASS",
+  "source_sha": "74117eef2e878190f1a2c30a93d5452bd62b7222",
+  "signed_run_id": 38315480683,
+  "signed_run_number": 183,
+  "signed_android_apk_run": 183,
+  "artifact_id": 11775614659,
+  "artifact_name": "Renault-Docs-v0.5.119-Debug",
+  "artifact_digest": "sha256:34b3672514adcf48e39042d15eccb1616e968cfbc0631246a0ddb350197d2d68",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Separate PDF and «Схема + піни»: toolbars the same medium size; ▾ has 450% and 500%. «Схема + піни»: pinch on the table zooms only the table, the page stays; printer icon prints only the table. «Документація поруч» ✕ looks like other buttons."
+}
