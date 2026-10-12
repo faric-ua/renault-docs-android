@@ -3896,6 +3896,15 @@ class SafDatasetWebViewClient(
                 } catch (_) {}
                 return false;
               }
+              function zoomAllFrames(w) {
+                try {
+                  var frames = w.frames;
+                  for (var i = 0; i < frames.length; i++) {
+                    installFrameZoom(frames[i]);
+                    zoomAllFrames(frames[i]);
+                  }
+                } catch (_) {}
+              }
               function checkZoom() {
                 try {
                   var top = window.top;
@@ -3904,11 +3913,68 @@ class SafDatasetWebViewClient(
                     top.__renaultZoomLock = lock;
                     top.location.href =
                       '$ZOOM_SCHEME://' + (lock ? 'lock' : 'unlock');
+                    if (lock) {
+                      zoomAllFrames(top);
+                    }
                   }
+                } catch (_) {}
+              }
+              // v0.5.119 (owner): the page itself never zooms; each document
+              // zooms by itself. The PDF frame has its own zoom; other frames
+              // (the pins table) get a two-finger zoom of their own here.
+              function installFrameZoom(w) {
+                try {
+                  if (
+                    w === window.top ||
+                    w.__renaultPdfViewer ||
+                    w.__renaultFrameZoom ||
+                    !w.document ||
+                    !w.document.body ||
+                    w.document.body.tagName === 'FRAMESET'
+                  ) {
+                    return;
+                  }
+                  w.__renaultFrameZoom = true;
+                  var doc = w.document;
+                  var zoom = 1;
+                  var startDistance = 0;
+                  var startZoom = 1;
+                  function distance(t) {
+                    var dx = t[0].clientX - t[1].clientX;
+                    var dy = t[0].clientY - t[1].clientY;
+                    return Math.sqrt(dx * dx + dy * dy);
+                  }
+                  doc.addEventListener('touchstart', function (e) {
+                    if (e.touches.length === 2) {
+                      startDistance = distance(e.touches);
+                      startZoom = zoom;
+                    }
+                  }, { passive: true });
+                  doc.addEventListener('touchmove', function (e) {
+                    if (e.touches.length !== 2 || startDistance <= 0) {
+                      return;
+                    }
+                    e.preventDefault();
+                    var next = startZoom * distance(e.touches) / startDistance;
+                    next = Math.max(1, Math.min(5, next));
+                    if (Math.abs(next - zoom) < 0.01) {
+                      return;
+                    }
+                    zoom = next;
+                    doc.body.style.zoom = String(zoom);
+                  }, { passive: false });
+                  doc.addEventListener('touchend', function (e) {
+                    if (e.touches.length < 2) {
+                      startDistance = 0;
+                    }
+                  }, { passive: true });
                 } catch (_) {}
               }
               function patch(w) {
                 try {
+                  if (top.__renaultZoomLock) {
+                    installFrameZoom(w);
+                  }
                   if (!w.__renaultPrintPatched) {
                     w.__renaultPrintPatched = true;
                     w.print = function () {

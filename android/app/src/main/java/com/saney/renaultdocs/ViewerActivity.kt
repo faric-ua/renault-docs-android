@@ -3019,25 +3019,44 @@ class ViewerActivity : Activity() {
         )
 
         companionHeader.addView(
+            // v0.5.119 (owner): the close button in the app's own style
+            // (it was the grey default Android button).
             Button(this).apply {
                 text = "✕"
                 isAllCaps = false
+                textSize = 18f
                 contentDescription =
                     "Закрити документацію поруч"
                 minWidth = 0
-                minimumWidth =
-                    Ui.dp(
-                        this@ViewerActivity,
-                        44,
+                minimumWidth = 0
+                minHeight = 0
+                minimumHeight = 0
+                setPadding(0, 0, 0, 0)
+                setTextColor(Ui.text)
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@ViewerActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.border,
+                        radiusDp = 22,
                     )
-                minimumHeight =
-                    Ui.dp(
-                        this@ViewerActivity,
-                        40,
-                    )
+                stateListAnimator = null
                 setOnClickListener {
                     hidePdfCompanion()
                 }
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(this, 44),
+                Ui.dp(this, 44),
+            ).apply {
+                marginEnd =
+                    Ui.dp(
+                        this@ViewerActivity,
+                        4,
+                    )
             }
         )
 

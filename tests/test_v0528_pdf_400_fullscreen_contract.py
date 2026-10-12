@@ -14,9 +14,10 @@ class V0528Pdf400FullscreenContractTests(unittest.TestCase):
 
         self.assertIn('data-zoom="300"', pdf)
         self.assertIn('data-zoom="400"', pdf)
-        self.assertIn("Math.min(\n                          4,", pdf)
-        self.assertIn("Math.min(\n                      400,", pdf)
-        self.assertIn("coerceIn(\n            50,\n            400,", pdf)
+        # v0.5.119 (owner 2026-10-13): the top is 500% now, with 450% between.
+        self.assertIn("Math.min(\n                          5,", pdf)
+        self.assertIn("Math.min(\n                      500,", pdf)
+        self.assertIn("coerceIn(\n            50,\n            500,", pdf)
 
     def test_very_high_zoom_limits_render_width_and_uses_light_neighbors(self):
         pdf = self._read(
