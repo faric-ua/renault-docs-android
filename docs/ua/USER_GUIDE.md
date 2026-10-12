@@ -2,6 +2,8 @@
 
 _Для користувача. Версія застосунку v0.5.111, 12.10.2026. Схеми — Mermaid (GitHub показує їх як картинки)._
 
+Цей самий посібник файлами: [Word](Posibnyk-Renault-Docs.docx) · [PDF](Posibnyk-Renault-Docs.pdf). Перезібрати всі формати: `docs/ua/user-guide/build.sh`.
+
 - [Що це за застосунок](#shcho)
 - [Головний екран](#holovnyi)
 - [Як додати том](#dodaty)
