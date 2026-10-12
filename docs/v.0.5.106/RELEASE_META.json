@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.106",
+  "versionCode": 122,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.106-dialogs-survive-rotation",
+  "issues": [
+    147
+  ],
+  "scope": "Every question and message window survives screen rotation: RestorableDialogs keys on converter, Drive catalog, settings, Home and project screens (stop/cancel/clear/reset questions, source report, source-rejected and Home export messages). Includes all v0.5.105 changes.",
+  "sourceBase": "v0.5.105/build121",
+  "phoneQa": "PENDING",
+  "pr_number": 198,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 697,
+  "signed_apk": "PASS",
+  "source_sha": "fd4719324bd3bc37a416ca4d53dfb3884daa3576",
+  "signed_run_id": 38246296202,
+  "signed_run_number": 170,
+  "signed_android_apk_run": 170,
+  "artifact_id": 11745951646,
+  "artifact_name": "Renault-Docs-v0.5.106-Debug",
+  "artifact_digest": "sha256:4e43afaf663d8eaed5441967feb6fff68a2c61801c0a17a4a1ce6628380e8580",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.105. Open a stop question (converter «Скасувати конвертацію», «Підготовка тому» «Скасувати»), rotate the phone: the question stays; «Продовжити» keeps the operation running."
+}
