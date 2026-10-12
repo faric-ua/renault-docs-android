@@ -3,12 +3,14 @@ from pathlib import Path
 import re
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 MANIFEST = ROOT / "android/app/src/main/AndroidManifest.xml"
 
 SERVICES = (
-    "ConversionService",
+    # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
     "NativeRdpkgPreparationService",
     "CatalogImportService",
     "RdpkgImportService",
@@ -45,9 +47,10 @@ class BackgroundRecoveryContractTests(unittest.TestCase):
                     'BackgroundWorkWakeLock' in code
                     or 'PowerManager.PARTIAL_WAKE_LOCK' in code
                 )
-        for name in ('ConversionActivity', 'ProjectActivity', 'MainActivity'):
+        for name in ('ProjectActivity', 'MainActivity'):  # v0.5.112: ConversionActivity removed
             self.assertNotIn('FLAG_KEEP_SCREEN_ON', source(name))
 
+    @unittest.skip(RETIRED_V05112)
     def test_conversion_recovery_does_not_erase_user_cancel_progress_or_start(self):
         store = source('ConversionRunStore')
         resume = store.split('fun resumeAfterProcessRestart()', 1)[1].split('fun update(', 1)[0]
@@ -61,6 +64,7 @@ class BackgroundRecoveryContractTests(unittest.TestCase):
         begin = store.split('fun begin(', 1)[1].split('fun resumeAfterProcessRestart()', 1)[0]
         self.assertIn('.commit()', begin)
 
+    @unittest.skip(RETIRED_V05112)
     def test_conversion_rejects_stale_redelivery_and_wrong_plan(self):
         service = source('ConversionService')
         entry = service.split('override fun onStartCommand(', 1)[1].split('override fun onBind(', 1)[0]
@@ -88,6 +92,7 @@ class BackgroundRecoveryContractTests(unittest.TestCase):
         self.assertIn('runStore.resumeAfterProcessRestart()', startup)
         self.assertIn('startInFlight.set(false)', startup)
 
+    @unittest.skip(RETIRED_V05112)
     def test_activity_does_not_reconcile_while_hidden_or_overwrite_redelivery(self):
         activity = source('ConversionActivity')
         self.assertIn('private val interruptedRunCheck', activity)

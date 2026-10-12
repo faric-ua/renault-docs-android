@@ -4,11 +4,14 @@ import unittest
 # v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0537ConverterWriterContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         repo = Path(__file__).resolve().parents[1]
         return (repo / path).read_text(encoding="utf-8")
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_runs_as_foreground_data_sync_service(self):
         manifest = self._read(
             "android/app/src/main/AndroidManifest.xml"
@@ -24,6 +27,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         self.assertIn("startForeground(", service)
         self.assertIn("context.startForegroundService(", service)
 
+    @unittest.skip(RETIRED_V05112)
     def test_writer_uses_staging_and_only_renames_after_validation(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -38,6 +42,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         self.assertIn("if (!finalized)", engine)
         self.assertIn("staging.delete()", engine)
 
+    @unittest.skip(RETIRED_V05112)
     def test_source_is_read_only_and_never_deleted(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -58,6 +63,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         self.assertNotIn("source.delete()", engine)
         self.assertIn("Стара папка залишена без змін.", activity)
 
+    @unittest.skip(RETIRED_V05112)
     def test_path_normalizer_is_used_while_copying_text_files(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -70,6 +76,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         self.assertIn('"html"', engine)
         self.assertIn('"js"', engine)
 
+    @unittest.skip(RETIRED_V05112)
     def test_base_package_is_generated_and_validated(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -86,6 +93,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         self.assertIn('"modern_runtime_compiled"', package)
         self.assertIn("false", package)
 
+    @unittest.skip(RETIRED_V05112)
     def test_cancel_and_rotation_reconnect_use_persistent_run_state(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -100,6 +108,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         self.assertIn("SharedPreferences", store)
         self.assertIn("cancelRequested", store)
 
+    @unittest.skip(RETIRED_V05112)
     def test_output_can_be_registered_in_library(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"

@@ -4,11 +4,14 @@ import unittest
 # v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0541MultiVolumeMergeContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         repo = Path(__file__).resolve().parents[1]
         return (repo / path).read_text(encoding="utf-8")
 
+    @unittest.skip(RETIRED_V05112)
     def test_writer_exposes_dataset_identity_and_volume_roots(self):
         writer = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/AndroidDatasetPackageWriter.kt"
@@ -18,6 +21,7 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         self.assertIn("fun discoverVolumeRoots(", writer)
         self.assertIn('"source_folder"', writer)
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_merges_into_compatible_existing_output(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -31,6 +35,7 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         self.assertIn("combinedFilePaths", engine)
         self.assertIn("packageResult.volumeCount", engine)
 
+    @unittest.skip(RETIRED_V05112)
     def test_existing_output_must_have_same_dataset_identity(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -45,6 +50,7 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         self.assertIn("уже належить іншій готовій копії", activity)
         self.assertIn("уже належить іншій готовій копії", engine)
 
+    @unittest.skip(RETIRED_V05112)
     def test_plan_explains_merge_instead_of_rejecting_existing_output(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -63,6 +69,7 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
             activity,
         )
 
+    @unittest.skip(RETIRED_V05112)
     def test_conversion_report_is_replaced_when_dataset_is_merged(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -76,6 +83,7 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         self.assertLess(report_pos, create_pos)
 
 
+    @unittest.skip(RETIRED_V05112)
     def test_interrupted_merge_is_not_mistaken_for_completed_output(self):
         store = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionRunStore.kt"

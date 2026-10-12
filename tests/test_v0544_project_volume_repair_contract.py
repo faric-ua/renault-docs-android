@@ -35,15 +35,10 @@ class V0544ProjectVolumeRepairContractTests(unittest.TestCase):
         reader = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ModernCatalogReader.kt"
         )
-        writer = self._read(
-            "android/app/src/main/java/com/saney/renaultdocs/AndroidDatasetPackageWriter.kt"
-        )
-
         self.assertIn('"backup"', reader)
         self.assertIn("shouldIgnoreSyntheticVolume", reader)
-        self.assertIn('"backup"', writer)
-        self.assertIn('"packages"', writer)
-        self.assertIn('"_renault"', writer)
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
+        # The writer-side check (AndroidDatasetPackageWriter) went with it.
 
     def test_release_version(self):
         gradle = self._read("android/app/build.gradle.kts")

@@ -6,7 +6,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 SERVICES = (
-    "ConversionService.kt",
+    # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
     "NativeRdpkgPreparationService.kt",
     "CatalogImportService.kt",
     "RdpkgImportService.kt",
@@ -26,7 +26,7 @@ class BatchBackgroundContractTests(unittest.TestCase):
                 self.assertIn("startForeground(", source)
                 self.assertIn("START_REDELIVER_INTENT", source)
                 self.assertIn("releaseWakeLock()", source) if name in (
-                    "ConversionService.kt",
+                    # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
                     "NativeRdpkgPreparationService.kt",
                 ) else self.assertIn("workWakeLock.release()", source)
                 if name not in ("ConversionService.kt", "NativeRdpkgPreparationService.kt"):
@@ -41,7 +41,8 @@ class BatchBackgroundContractTests(unittest.TestCase):
         entries = {
             svc.attrib.get(ns + "name"): svc.attrib for svc in services
         }
-        self.assertEqual(7, len([x for x in SERVICES if "." + x.removesuffix(".kt") in entries]))
+        # 7 workers until v0.5.111; 6 since the converter was removed in v0.5.112.
+        self.assertEqual(6, len([x for x in SERVICES if "." + x.removesuffix(".kt") in entries]))
         for name in SERVICES:
             with self.subTest(service=name):
                 row = entries["." + name.removesuffix(".kt")]

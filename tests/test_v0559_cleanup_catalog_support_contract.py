@@ -48,7 +48,7 @@ class V0559CleanupCatalogSupportContractTests(unittest.TestCase):
 
     def test_other_help_surfaces_do_not_expose_lifecycle_jargon(self):
         paths = (
-            "ConversionActivity.kt",
+            # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
             "ModernVolumeActivity.kt",
             "NativeSectionActivity.kt",
             "VolumeDocumentationActivity.kt",

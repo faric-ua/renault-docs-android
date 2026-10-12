@@ -5,11 +5,14 @@ import unittest
 # v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0538ConverterFoundationContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         repo = Path(__file__).resolve().parents[1]
         return (repo / path).read_text(encoding="utf-8")
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_output_is_hidden_from_media_scanner(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -23,6 +26,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
         self.assertIn("createFile(", helper)
         self.assertIn("application/octet-stream", helper)
 
+    @unittest.skip(RETIRED_V05112)
     def test_existing_output_gets_nomedia_when_registered(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -39,6 +43,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
         self.assertIn("DatasetMediaIsolation.ensure(", block)
         self.assertIn("DatasetReader.readFolder(", block)
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_uses_direct_documents_provider_scan(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -53,6 +58,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
         self.assertIn("contentResolver", engine)
         self.assertIn(".query(", engine)
 
+    @unittest.skip(RETIRED_V05112)
     def test_documentfile_scanner_is_only_compatibility_fallback(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -64,6 +70,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
             engine,
         )
 
+    @unittest.skip(RETIRED_V05112)
     def test_scan_progress_does_not_render_as_zero_over_found_count(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -82,6 +89,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
         self.assertIn('itemLabel = "Знайдено файлів"', activity)
         self.assertIn("bar.isIndeterminate = false", shared)
 
+    @unittest.skip(RETIRED_V05112)
     def test_saf_paths_are_user_friendly(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"

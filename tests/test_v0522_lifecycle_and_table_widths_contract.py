@@ -96,15 +96,10 @@ class V0522LifecycleAndTableWidthsContractTests(unittest.TestCase):
             repo
             / "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
         ).read_text(encoding="utf-8")
-        conversion = (
-            repo
-            / "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
-        ).read_text(encoding="utf-8")
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
 
         self.assertNotIn("AlertDialog", main)
-        self.assertNotIn("AlertDialog", conversion)
         self.assertIn("ACTION_OPEN_DOCUMENT_TREE", main)
-        self.assertIn("ACTION_OPEN_DOCUMENT_TREE", conversion)
 
     def test_release_version(self):
         repo = Path(__file__).resolve().parents[1]

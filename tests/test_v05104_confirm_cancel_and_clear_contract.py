@@ -18,6 +18,8 @@ delete prepared .rdpkg/.rdproject, stop folder export, stop .rdproject.
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -40,6 +42,7 @@ class ConfirmCancelAndClearContract(unittest.TestCase):
         self.assertIn(".setPositiveButton(confirmLabel) { _, _ -> onConfirm() }", shared)
         self.assertIn("DialogUi.apply(dialog, DialogRole.DANGER)", shared)
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_cancel_asks_first(self):
         activity = read("ConversionActivity.kt")
         button = between(activity, '"Скасувати конвертацію"', "body.addView(")
@@ -52,6 +55,7 @@ class ConfirmCancelAndClearContract(unittest.TestCase):
         # A run that finished while the question was open is not "cancelled".
         self.assertIn("if (!runStore.load().isRunning)", confirm)
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_clear_asks_first(self):
         activity = read("ConversionActivity.kt")
         button = between(activity, '"Очистити вибір"', "body.addView(")

@@ -60,7 +60,8 @@ class ExportWizardContract(unittest.TestCase):
     def test_folder_pick_returns_to_window_and_never_starts_export(self):
         main = self.read("MainActivity.kt")
         result = main.split("if (requestCode == REQUEST_FOLDER_EXPORT_DESTINATION) {", 1)[1].split(
-            "if (requestCode != REQUEST_DATASET_FOLDER)", 1
+            # v0.5.112: the Legacy branch (REQUEST_DATASET_FOLDER) after it was removed.
+            "private fun repairSavedVolumeMetadata()", 1
         )[0]
         self.assertIn("takePersistableUriPermission(folder, flags)", result)
         self.assertIn("projectDialogs.onExportFolderPicked(folder.toString())", result)

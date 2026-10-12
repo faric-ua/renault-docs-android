@@ -18,6 +18,8 @@ from pathlib import Path
 import re
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -66,6 +68,7 @@ class FindingsContract(unittest.TestCase):
         self.assertNotIn('"Підготовлений .rdproject не знайдено."', read("MainActivity.kt"))
         self.assertNotIn('"Підготовлений .rdpkg не знайдено."', read("ProjectActivity.kt"))
 
+    @unittest.skip(RETIRED_V05112)
     def test_b_failure_reason_shown_once(self):
         activity = read("ConversionActivity.kt")
         bar = between(activity, "state.phase == ConversionRunPhase.FAILED -> {", "state.phase == ConversionRunPhase.CANCELLED ->")
@@ -74,6 +77,7 @@ class FindingsContract(unittest.TestCase):
         status = between(activity, "ConversionRunPhase.FAILED -> {\n                statusText", "ConversionRunPhase.CANCELLED ->")
         self.assertIn("state.message", status)
 
+    @unittest.skip(RETIRED_V05112)
     def test_b_converter_texts_are_ukrainian(self):
         for name in ("ConversionActivity.kt", "ConversionService.kt", "SafConversionEngine.kt",
                      "AndroidDatasetPackageWriter.kt"):
@@ -91,6 +95,7 @@ class FindingsContract(unittest.TestCase):
         for label in ('"Вибрати стару папку"', '"Вибрати папку призначення"', '"\\n\\nГотова копія: "'):
             self.assertIn(label, activity)
 
+    @unittest.skip(RETIRED_V05112)
     def test_c_volume_folder_chosen_itself_is_stopped_before_copying(self):
         writer = read("AndroidDatasetPackageWriter.kt")
         self.assertIn("fun isVolumeFolderItself(", writer)
@@ -103,6 +108,7 @@ class FindingsContract(unittest.TestCase):
         # The guard runs before staging is created or anything is copied.
         self.assertLess(engine.index("if (volumeRoots.isEmpty()) {"), engine.index('"Створюю тимчасову папку…"'))
 
+    @unittest.skip(RETIRED_V05112)
     def test_c_auto_add_removed_by_owner(self):
         # v0.5.107 showed the auto-add failure reason («Вибраний об'єкт не є
         # папкою»). v0.5.108: the owner decided the *_android copy is a
@@ -111,6 +117,7 @@ class FindingsContract(unittest.TestCase):
         self.assertNotIn("Автододавання в бібліотеку", service)
         self.assertNotIn("registration", service)
 
+    @unittest.skip(RETIRED_V05112)
     def test_c_kotlin_unit_tests_cover_both_choices(self):
         test = (ROOT / "android/app/src/test/java/com/saney/renaultdocs/AndroidDatasetPackageWriterTest.kt").read_text(encoding="utf-8")
         self.assertIn("fun volumeFolderChosenItselfHasNoVolumeRoots()", test)

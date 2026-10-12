@@ -8,11 +8,14 @@ now its own section in the library list, under «Мої Renault».
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 MAIN = ROOT / "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
 
 
 class OldLibrariesVisibleContract(unittest.TestCase):
+    @unittest.skip(RETIRED_V05112)
     def test_section_is_in_library_list_after_projects(self):
         main = MAIN.read_text(encoding="utf-8")
         renderer = main.split("private fun renderLibrary()", 1)[1].split("private fun buildProjectTile(", 1)[0]

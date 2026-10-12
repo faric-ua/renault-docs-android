@@ -46,7 +46,7 @@ def between(text, start, end):
 
 
 SCREENS = {
-    "ConversionActivity.kt": "confirmDialogs",
+    # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
     "DriveCatalogActivity.kt": "confirmDialogs",
     "SettingsActivity.kt": "confirmDialogs",
     "MainActivity.kt": "confirmDialogs",
@@ -117,16 +117,12 @@ class DialogsSurviveRotationContract(unittest.TestCase):
         for key in ("CONFIRM_STOP_FOLDER_EXPORT", "CONFIRM_STOP_RDPROJECT"):
             self.assertIn(f"confirmDialogs.show({key})", main)
             self.assertIn(f"{key} ->", main)
-        conversion = read("ConversionActivity.kt")
-        self.assertIn("CONFIRM_CANCEL_CONVERSION -> buildCancelConversionDialog()", conversion)
-        self.assertIn("CONFIRM_CLEAR_SELECTION -> buildClearSelectionDialog()", conversion)
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
         self.assertIn("CONFIRM_CANCEL_IMPORT) buildCancelImportDialog()", read("DriveCatalogActivity.kt"))
         self.assertIn("CONFIRM_RESET_BACKUP) buildResetBackupDialog()", read("SettingsActivity.kt"))
 
     def test_stop_questions_skip_finished_operations_after_rotation(self):
-        conversion = read("ConversionActivity.kt")
-        self.assertIn("if (!runStore.load().isRunning) return null",
-                      between(conversion, "private fun buildCancelConversionDialog()", "\n    }\n"))
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
         self.assertIn("if (!importStore.load().isRunning) return null", read("DriveCatalogActivity.kt"))
         main = between(read("MainActivity.kt"), "private fun buildConfirmDialog(key: String)", "override fun onDestroy()")
         self.assertIn("if (!folderExportRunStore.load().isRunning)", main)

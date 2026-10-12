@@ -3,6 +3,8 @@
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -48,7 +50,7 @@ class V0582HomeAndBars(unittest.TestCase):
             'buildHomeChoiceCard("Новий том", "До проєкту", true)',
             'buildHomeChoiceCard("Новий проєкт", "Створити модель", false)',
             "buildProjectCatalogCard()",
-            "buildToolsPanel()",
+            # "buildToolsPanel()" — removed in v0.5.112 (owner decision).
             "BoundedAddActionsScrollView",
             "OperationStatusView(this@MainActivity)",
         ):
@@ -68,15 +70,25 @@ class V0582HomeAndBars(unittest.TestCase):
         self.assertNotIn("buildToolsPanel()", renderer)
         # v0.5.111: «Старі бібліотеки» moved out of the collapsible Add panel
         # into the library list (phone QA: a Legacy folder could not be found).
-        self.assertIn('value = "Старі бібліотеки"', renderer)
+        # v0.5.112 (owner decision 2026-10-12): the section, «Конвертер» and
+        # «Legacy» are gone from Home; archive branch archive/legacy-converter-v0.5.111.
+        self.assertNotIn('value = "Старі бібліотеки"', renderer)
         self.assertNotIn("legacyAddContainer", main)
         for entry in ("chooseProjectForVolume()", "showCreateProjectDialog()",
-                      "DriveCatalogActivity::class.java",
-                      "ConversionActivity::class.java", "openDatasetPicker()"):
+                      "DriveCatalogActivity::class.java"):
             self.assertIn(entry, main)
+        for gone in ("ConversionActivity::class.java", "openDatasetPicker()"):
+            self.assertNotIn(gone, main)
         self.assertIn("KEY_HOME_ADD_PANEL_PINNED", source("AppSettings.kt"))
         self.assertIn("KEY_PROJECT_ADD_PANEL_PINNED", source("AppSettings.kt"))
 
+    def test_add_panel_scroll_bounds(self):
+        # Split out of test_legacy_is_not_discarded in v0.5.112.
+        bound = source("BoundedAddActionsScrollView.kt")
+        self.assertIn("View.MeasureSpec.AT_MOST", bound)
+        self.assertIn("Configuration.ORIENTATION_LANDSCAPE", bound)
+
+    @unittest.skip(RETIRED_V05112)
     def test_legacy_is_not_discarded(self):
         main = source("MainActivity.kt")
         self.assertIn("visibleLegacyRecords.forEach", main)

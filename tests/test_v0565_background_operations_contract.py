@@ -1,13 +1,15 @@
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
 
 class V0565BackgroundOperationsContractTests(unittest.TestCase):
     LONG_RUNNING_SERVICES = (
-        "ConversionService.kt",
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
         "NativeRdpkgPreparationService.kt",
         "CatalogImportService.kt",
         "RdpkgImportService.kt",
@@ -47,7 +49,7 @@ class V0565BackgroundOperationsContractTests(unittest.TestCase):
     def test_long_running_activities_do_not_force_screen_on(self):
         for name in (
             "ProjectActivity.kt",
-            "ConversionActivity.kt",
+            # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
         ):
             with self.subTest(activity=name):
                 activity = self.read_java(name)
@@ -59,7 +61,7 @@ class V0565BackgroundOperationsContractTests(unittest.TestCase):
         )
 
         for service in (
-            "ConversionService",
+            # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
             "NativeRdpkgPreparationService",
             "CatalogImportService",
             "RdpkgImportService",
@@ -72,6 +74,7 @@ class V0565BackgroundOperationsContractTests(unittest.TestCase):
                 block = manifest[start : start + 260]
                 self.assertIn('android:stopWithTask="false"', block)
 
+    @unittest.skip(RETIRED_V05112)
     def test_conversion_has_background_restart_contract(self):
         conversion = self.read_java("ConversionService.kt")
         self.assertIn("PowerManager.PARTIAL_WAKE_LOCK", conversion)
