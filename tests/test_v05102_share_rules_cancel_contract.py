@@ -76,8 +76,12 @@ class ShareRulesCancelContract(unittest.TestCase):
         self.assertIn('"Підготовка проєкту · скасовано"', main)
         home = self.read("HomeProjectDialogController.kt")
         confirm = home.split("fun confirmCancelOperation(", 1)[1].split("private fun track(", 1)[0]
-        self.assertIn('setNegativeButton("Продовжити", null)', confirm)
-        self.assertIn("DialogUi.apply(dialog, DialogRole.DANGER)", confirm)
+        # v0.5.104: the same question now lives in the shared ConfirmActions.
+        self.assertIn("ConfirmActions.confirmStop(", confirm)
+        shared = self.read("ConfirmActions.kt")
+        self.assertIn('KEEP_RUNNING_LABEL = "Продовжити"', shared)
+        self.assertIn(".setNegativeButton(keepLabel, null)", shared)
+        self.assertIn("DialogUi.apply(dialog, DialogRole.DANGER)", shared)
 
     def test_home_status_expansion_survives_rotation(self):
         main = self.read("MainActivity.kt")

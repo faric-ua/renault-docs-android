@@ -614,16 +614,7 @@ class ConversionActivity : Activity() {
                         true,
                 )
                 setOnClickListener {
-                    ConversionService
-                        .requestCancel(
-                            this@ConversionActivity,
-                        )
-
-                    statusText.setTextColor(
-                        Ui.muted,
-                    )
-                    statusText.text =
-                        "Запит на скасування надіслано…"
+                    confirmCancelConversion()
                 }
             }
 
@@ -755,17 +746,7 @@ class ConversionActivity : Activity() {
                         return@setOnClickListener
                     }
 
-                    draftStore.clear()
-                    runStore.clearFinished()
-
-                    statusText.setTextColor(
-                        Ui.muted,
-                    )
-                    statusText.text =
-                        "Вибір очищено."
-
-                    renderDraft()
-                    renderRunState()
+                    confirmClearSelection()
                 }
             }
 
@@ -1362,6 +1343,57 @@ class ConversionActivity : Activity() {
                     error.message
                         ?: "Не вдалося перевірити план."
             }
+    }
+
+    /** v0.5.104: owner asked for a confirmation before stopping the converter. */
+    private fun confirmCancelConversion() {
+        ConfirmActions.confirmStop(
+            activity = this,
+            title = "Зупинити конвертацію?",
+            message = "Недороблена тимчасова копія буде видалена. Стара Renault-папка не зміниться. Почати можна буде знову.",
+        ) {
+            if (!runStore.load().isRunning) {
+                renderRunState()
+                return@confirmStop
+            }
+            ConversionService
+                .requestCancel(
+                    this@ConversionActivity,
+                )
+
+            statusText.setTextColor(
+                Ui.muted,
+            )
+            statusText.text =
+                "Запит на скасування надіслано…"
+        }
+    }
+
+    /** v0.5.104: clearing the chosen folders and the last result asks first. */
+    private fun confirmClearSelection() {
+        ConfirmActions.confirm(
+            activity = this,
+            title = "Очистити вибір?",
+            message = "Вибрані папки і результат останньої конвертації зникнуть з цього екрана. Файли на телефоні не видаляються.",
+            confirmLabel = "Очистити",
+            keepLabel = "Залишити",
+        ) {
+            if (runStore.load().isRunning) {
+                return@confirm
+            }
+
+            draftStore.clear()
+            runStore.clearFinished()
+
+            statusText.setTextColor(
+                Ui.muted,
+            )
+            statusText.text =
+                "Вибір очищено."
+
+            renderDraft()
+            renderRunState()
+        }
     }
 
     private fun startConversion() {

@@ -540,14 +540,12 @@ class HomeProjectDialogController(
         message: String,
         onConfirm: () -> Unit,
     ) {
-        val dialog = AlertDialog.Builder(activity)
-            .setTitle(title)
-            .setMessage(message)
-            .setNegativeButton("Продовжити", null)
-            .setPositiveButton("Зупинити") { _, _ -> onConfirm() }
-            .create()
-        dialog.show()
-        DialogUi.apply(dialog, DialogRole.DANGER)
+        ConfirmActions.confirmStop(
+            activity = activity,
+            title = title,
+            message = message,
+            onConfirm = onConfirm,
+        )
     }
 
     private fun track(

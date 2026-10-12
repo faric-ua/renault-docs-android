@@ -2209,19 +2209,23 @@ class NativeRdpkgPreparationService : Service() {
                 }
 
                 if (
-                    cancellable
+                    cancellable &&
+                    projectId !=
+                        null
                 ) {
+                    // v0.5.104: a notification button cannot ask a question,
+                    // so «Скасувати» opens the project screen, which asks
+                    // «Зупинити створення тому?» before anything stops.
                     val cancelIntent =
-                        Intent(
-                            this@NativeRdpkgPreparationService,
-                            NativeRdpkgPreparationService::class.java,
-                        ).apply {
-                            action =
-                                ACTION_CANCEL
-                        }
+                        ProjectActivity.confirmCancelIntent(
+                            context =
+                                this@NativeRdpkgPreparationService,
+                            projectId =
+                                projectId,
+                        )
 
                     val cancelPending =
-                        PendingIntent.getService(
+                        PendingIntent.getActivity(
                             this@NativeRdpkgPreparationService,
                             NOTIFICATION_ID +
                                 1,

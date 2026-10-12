@@ -338,6 +338,22 @@ class ProjectActivity : Activity() {
                 openPackagePicker()
             }
         }
+
+        // Notification «Скасувати» opens this screen and asks here (v0.5.104);
+        // after rotation the question is not repeated.
+        if (
+            savedInstanceState ==
+                null &&
+            intent.getBooleanExtra(
+                EXTRA_CONFIRM_CANCEL,
+                false,
+            )
+        ) {
+            intent.removeExtra(EXTRA_CONFIRM_CANCEL)
+            volumeContainer.post {
+                confirmCancelNativePreparation()
+            }
+        }
     }
 
     override fun onStart() {
@@ -1603,11 +1619,7 @@ class ProjectActivity : Activity() {
                     onCancel =
                         if (state.phase == NativeRdpkgRunPhase.PREPARING) {
                             {
-                                NativeRdpkgPreparationService.requestCancel(this)
-                                operationStatus.showRunning(
-                                    "Створення .rdpkg",
-                                    "Скасовую після поточного безпечного кроку…",
-                                )
+                                confirmCancelNativePreparation()
                             }
                         } else {
                             null
@@ -1698,6 +1710,45 @@ class ProjectActivity : Activity() {
         showNativeTerminalStatus(
             state,
         )
+    }
+
+    /**
+     * v0.5.104: «Скасувати» on the status card and in the notification asks
+     * once before stopping volume creation. While the archive chooser is
+     * waiting, cancelling happens in that chooser (it has its own question).
+     */
+    private fun confirmCancelNativePreparation() {
+        val state =
+            nativeRunStore.load()
+
+        if (state.isWaitingForSelection) {
+            showArchiveVolumeChooser(state)
+            return
+        }
+
+        if (!state.isRunning) {
+            Toast.makeText(
+                this,
+                "Операція вже завершилась.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
+
+        ConfirmActions.confirmStop(
+            activity = this,
+            title = "Зупинити створення тому?",
+            message = "Поточний том не буде створено. Оригінальні файли не зміняться, уже додані томи лишаться.",
+        ) {
+            if (!nativeRunStore.load().isRunning) {
+                return@confirmStop
+            }
+            NativeRdpkgPreparationService.requestCancel(this)
+            operationStatus.showRunning(
+                "Створення .rdpkg",
+                "Скасовую після поточного безпечного кроку…",
+            )
+        }
     }
 
     private fun showArchiveVolumeChooser(
@@ -1848,14 +1899,8 @@ class ProjectActivity : Activity() {
                 )
                 .setNegativeButton(
                     "Скасувати",
-                ) {
-                        _,
-                        _ ->
-                    NativeRdpkgPreparationService
-                        .requestCancel(
-                            this,
-                        )
-                }
+                    null,
+                )
                 .setCancelable(
                     false,
                 )
@@ -1865,6 +1910,29 @@ class ProjectActivity : Activity() {
             dialog
 
         dialog.setOnShowListener {
+            // v0.5.104: «Скасувати» stops the archive intake, so it asks
+            // first; «Продовжити» keeps this chooser open untouched.
+            dialog.getButton(
+                AlertDialog.BUTTON_NEGATIVE,
+            ).setOnClickListener {
+                ConfirmActions.confirmStop(
+                    activity = this,
+                    title = "Скасувати вибір томів?",
+                    message = "Жоден том з цього архіву не буде створено. Оригінальний архів не зміниться, тимчасові файли буде прибрано.",
+                ) {
+                    // Cancel first (synchronous while waiting), then close:
+                    // the refresh loop must not reopen a chooser for a
+                    // selection that is already cancelled.
+                    NativeRdpkgPreparationService
+                        .requestCancel(
+                            this,
+                        )
+                    dialog.dismiss()
+                    archiveChooserDialog =
+                        null
+                }
+            }
+
             dialog.getButton(
                 AlertDialog.BUTTON_POSITIVE,
             ).setOnClickListener {
@@ -4807,6 +4875,8 @@ class ProjectActivity : Activity() {
             "openPicker"
         private const val EXTRA_SHOW_ADD_PANEL =
             "showAddPanel"
+        private const val EXTRA_CONFIRM_CANCEL =
+            "confirmCancel"
         private const val REQUEST_VOLUME_FOLDER =
             4301
         private const val REQUEST_RDPKG_FILE =
@@ -4898,6 +4968,21 @@ class ProjectActivity : Activity() {
                 putExtra(
                     EXTRA_SHOW_ADD_PANEL,
                     showAddPanel,
+                )
+            }
+
+        /** Notification «Скасувати»: open the project and ask before stopping. */
+        fun confirmCancelIntent(
+            context: Context,
+            projectId: String,
+        ): Intent =
+            intent(
+                context = context,
+                projectId = projectId,
+            ).apply {
+                putExtra(
+                    EXTRA_CONFIRM_CANCEL,
+                    true,
                 )
             }
     }
