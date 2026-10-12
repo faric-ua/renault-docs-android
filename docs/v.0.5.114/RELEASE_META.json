@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.114",
+  "versionCode": 130,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.114-criteria-pinned",
+  "issues": [
+    147
+  ],
+  "scope": "Owner request 2026-10-12: «Критерії / скорочення» pinned under the menu on every tab that has it; the table opens over the list (close with ✕ or back). Picks (green frames, pinned connector, last section) kept while the app runs. Includes v0.5.113.",
+  "sourceBase": "v0.5.113/build129",
+  "phoneQa": "PENDING",
+  "pr_number": 227,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 735,
+  "signed_apk": "PASS",
+  "source_sha": "f0335627d7022fb1de0cc75f62d17aa82286ba9a",
+  "signed_run_id": 38299486873,
+  "signed_run_number": 178,
+  "signed_android_apk_run": 178,
+  "artifact_id": 11769852976,
+  "artifact_name": "Renault-Docs-v0.5.114-Debug",
+  "artifact_digest": "sha256:5d3d019ef39cb96d10bd1dafded7d753e227c9e5162ac5b75ba3444de5e3134c",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Section 118 «Схеми»: «Критерії / скорочення» under «Документація», not in the list; tap — table over the list, ✕ closes, list at the same place. Documentation: open «Довідка», leave and reopen — still green."
+}
