@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.104",
+  "versionCode": 120,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.104-confirm-cancel",
+  "issues": [
+    147
+  ],
+  "scope": "Owner rule: every cancel / clear / reset asks first. Shared ConfirmActions dialog for converter cancel and clear, project status cancel, archive chooser cancel, notification cancel (opens project screen to ask), settings backup-folder reset. Includes all v0.5.103 changes.",
+  "sourceBase": "v0.5.103/build119",
+  "phoneQa": "PENDING",
+  "pr_number": 187,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 690,
+  "signed_apk": "PASS",
+  "source_sha": "9b643caf1281e0468227872a3adaacfd44a9a0c9",
+  "signed_run_id": 38194676094,
+  "signed_run_number": 168,
+  "signed_android_apk_run": 168,
+  "artifact_id": 11723042138,
+  "artifact_name": "Renault-Docs-v0.5.104-Debug",
+  "artifact_digest": "sha256:8d9ec7b2ddf76bcd7aa123570b628d1ab750ed7a1a14639f8c3cbef986c1d609",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.103. Converter: «Скасувати конвертацію» asks «Зупинити конвертацію?»; «Продовжити» keeps it running; bar moves continuously (v0.5.103). Then «Очистити вибір», project-screen and notification «Скасувати», Settings «Скинути вибір»."
+}
