@@ -2,6 +2,8 @@ from pathlib import Path
 import unittest
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0554UxHelpLifecycleContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -19,17 +21,16 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn('"Порожній · додай том"', main)
         self.assertNotIn('"У вибраний проєкт"', main)
         self.assertNotIn('"Порожній · додай потрібний том"', main)
-        self.assertIn('"+ стару Renault"', main)
-        self.assertIn('"+ готова"', main)
+        # v0.5.112: tool cards «+ стару Renault» / «+ готова» removed with
+        # «Конвертер» and «Legacy» (archive branch archive/legacy-converter-v0.5.111).
+        self.assertNotIn('"+ стару Renault"', main)
+        self.assertNotIn('"+ готова"', main)
         self.assertIn("buildHomeAddPanel()", main)
-        self.assertIn("buildToolsPanel()", main)
+        self.assertNotIn("buildToolsPanel()", main)
         self.assertIn('"Новий том"', main)
         self.assertIn('"Новий проєкт"', main)
-        self.assertIn("R.drawable.ic_folder", main)
-        self.assertIn(
-            "Gravity.END or Gravity.BOTTOM",
-            main,
-        )
+        # "R.drawable.ic_folder" and its "Gravity.END or Gravity.BOTTOM" placement
+        # belonged to the tool cards — removed in v0.5.112.
         self.assertIn(
             "FrameLayout.LayoutParams(",
             main,
@@ -97,9 +98,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         web_client = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/SafDatasetWebViewClient.kt"
         )
-        package_writer = self.read(
-            "android/app/src/main/java/com/saney/renaultdocs/AndroidDatasetPackageWriter.kt"
-        )
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
+        # AndroidDatasetPackageWriter (README/«Як користуватися» page) went with it.
 
         self.assertIn("fun modeButton(", ui)
 
@@ -151,15 +151,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             "applyReadmeMobileLayout(",
             web_client,
         )
-        self.assertIn(
-            '<table class="file-table">',
-            package_writer,
-        )
-        self.assertIn(
-            "<title>Як користуватися —",
-            package_writer,
-        )
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_uses_renault_docs_action_styling(self):
         converter = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -176,6 +169,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
         self.assertIn("Ui.entityTitle", converter)
 
+    @unittest.skip(RETIRED_V05112)
     def test_stale_legacy_dataset_is_validated_before_open(self):
         main = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/MainActivity.kt"
@@ -234,9 +228,10 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             "const val actionSubtitleSp: Float = 11f",
             ui,
         )
+        # 2 until v0.5.111; the tool cards (Конвертер/Legacy) were removed in v0.5.112.
         self.assertGreaterEqual(
             main.count("Ui.actionSubtitleSp"),
-            2,
+            1,
         )
         self.assertGreaterEqual(
             project.count("Ui.actionSubtitleSp"),
@@ -516,7 +511,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         paths = [
             "MainActivity.kt",
             "ProjectActivity.kt",
-            "ConversionActivity.kt",
+            # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
             "ModernVolumeActivity.kt",
             "NativeSectionActivity.kt",
             "VolumeDocumentationActivity.kt",

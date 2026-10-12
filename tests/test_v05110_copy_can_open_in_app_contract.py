@@ -13,6 +13,8 @@ Now:
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -29,6 +31,7 @@ def between(text, start, end):
 
 
 class CopyCanOpenInAppContract(unittest.TestCase):
+    @unittest.skip(RETIRED_V05112)
     def test_button_only_after_finished_conversion(self):
         activity = read("ConversionActivity.kt")
         self.assertIn('"Додати копію в застосунок"', activity)
@@ -36,6 +39,7 @@ class CopyCanOpenInAppContract(unittest.TestCase):
         self.assertIn("state.phase == ConversionRunPhase.COMPLETE", visibility)
         self.assertIn("!copyInApp", visibility)
 
+    @unittest.skip(RETIRED_V05112)
     def test_add_reads_copy_inside_destination(self):
         activity = read("ConversionActivity.kt")
         add = between(activity, "private fun addCopyToApp()", "/** v0.5.104: owner asked")
@@ -55,6 +59,7 @@ class CopyCanOpenInAppContract(unittest.TestCase):
         self.assertIn("DocumentsContract.getTreeDocumentId(uri)", helper)
         self.assertIn("SafDatasetResolver\n                    .rootDocumentIdOf(", read("SafDisplayPath.kt"))
 
+    @unittest.skip(RETIRED_V05112)
     def test_service_mentions_button(self):
         service = read("ConversionService.kt")
         self.assertIn("«Додати копію в застосунок»", service)

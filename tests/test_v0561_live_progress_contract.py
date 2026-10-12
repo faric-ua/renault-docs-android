@@ -2,6 +2,8 @@ from pathlib import Path
 import unittest
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0561LiveProgressContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         root = Path(__file__).resolve().parents[1]
@@ -302,6 +304,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         )
         self.assertIn("showVolumeActions(", project)
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_ui_uses_compact_stage_copy(self):
         converter = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"

@@ -4,7 +4,8 @@ import unittest
 
 BASE=Path(__file__).resolve().parents[1]/"android/app/src/main/java/com/saney/renaultdocs"
 SERVICES=(
-    "ConversionService.kt", "NativeRdpkgPreparationService.kt",
+    # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
+    "NativeRdpkgPreparationService.kt",
     "CatalogImportService.kt", "RdpkgImportService.kt",
     "RdpkgExportService.kt", "RdpkgShareService.kt",
     "RdprojectShareService.kt",

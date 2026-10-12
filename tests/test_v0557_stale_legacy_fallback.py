@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -8,6 +10,7 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
     def read(self, name):
         return (JAVA / name).read_text(encoding="utf-8")
 
+    @unittest.skip(RETIRED_V05112)
     def test_unavailable_migrated_legacy_record_can_open_current_project_without_deleting_data(self):
         main = self.read("MainActivity.kt")
         start = main.index("private fun openLegacyDataset")
@@ -19,6 +22,7 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
         self.assertIn("ProjectActivity.intent(", block)
         self.assertNotIn("store.remove(", block)
 
+    @unittest.skip(RETIRED_V05112)
     def test_populated_current_project_hides_matching_legacy_dataset_from_home(self):
         main = self.read("MainActivity.kt")
         self.assertIn("visibleLegacyRecords", main)
@@ -28,6 +32,7 @@ class StaleLegacyFallbackContractTest(unittest.TestCase):
         self.assertNotIn("LEGACY_COMPAT_PROJECT_IDS", main)
         self.assertNotIn("buildLegacyProjectAliasTile", main)
 
+    @unittest.skip(RETIRED_V05112)
     def test_unavailable_unmigrated_legacy_record_keeps_explicit_error(self):
         main = self.read("MainActivity.kt")
         self.assertIn("більше недоступна за збереженим шляхом", main)

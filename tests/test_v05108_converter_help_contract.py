@@ -9,6 +9,8 @@ from pathlib import Path
 import re
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVITY = ROOT / "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
 
@@ -19,10 +21,12 @@ class ConverterHelpContract(unittest.TestCase):
         block = text.split("HELP_CONVERTER ->", 1)[1].split("else ->", 1)[0]
         self.help = "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', block))
 
+    @unittest.skip(RETIRED_V05112)
     def test_explains_purpose_choice_steps_and_safety(self):
         for section in ("НАВІЩО ЦЕ", "ЩО ВИБРАТИ", "ЯК ЦЕ ПРАЦЮЄ", "БЕЗПЕКА"):
             self.assertIn(section, self.help)
 
+    @unittest.skip(RETIRED_V05112)
     def test_key_facts(self):
         for fact in (
             "Windows не розрізняє великі й малі літери",
@@ -36,10 +40,12 @@ class ConverterHelpContract(unittest.TestCase):
         ):
             self.assertIn(fact, self.help)
 
+    @unittest.skip(RETIRED_V05112)
     def test_no_english_words(self):
         words = re.findall(r"(?<![-\w./])(source|destination|output|staging|dataset|merge)(?![-.\w])", self.help, re.IGNORECASE)
         self.assertEqual([], words)
 
+    @unittest.skip(RETIRED_V05112)
     def test_version_bumped(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
         code = int(gradle.split("versionCode = ", 1)[1].splitlines()[0].strip())

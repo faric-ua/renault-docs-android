@@ -2,11 +2,14 @@ from pathlib import Path
 import unittest
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0540ConverterDraftResetContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         repo = Path(__file__).resolve().parents[1]
         return (repo / path).read_text(encoding="utf-8")
 
+    @unittest.skip(RETIRED_V05112)
     def test_new_folder_selection_clears_previous_completed_run(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -24,6 +27,7 @@ class V0540ConverterDraftResetContractTests(unittest.TestCase):
         save_pos = activity.index("draftStore.saveSource(", select_pos)
         self.assertLess(select_pos, save_pos)
 
+    @unittest.skip(RETIRED_V05112)
     def test_plan_validation_does_not_show_stale_previous_output(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"

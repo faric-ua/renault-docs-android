@@ -16,12 +16,11 @@ class V0543LibraryPolishContractTests(unittest.TestCase):
         self.assertIn('"Новий том"', main)
         self.assertIn('"Новий проєкт"', main)
         self.assertIn('"Мої Renault"', main)
-        self.assertIn('"Інструменти"', main)
-        self.assertIn('"Конвертер"', main)
-        self.assertIn('"Legacy"', main)
         self.assertIn("buildHomeAddPanel()", main)
-        self.assertIn("buildToolsPanel()", main)
-        self.assertIn("buildToolCard(", main)
+        # v0.5.112 (owner decision 2026-10-12): «Інструменти» with «Конвертер»
+        # and «Legacy» removed from Home; archive branch archive/legacy-converter-v0.5.111.
+        for gone in ('"Інструменти"', '"Конвертер"', '"Legacy"', "buildToolsPanel()", "buildToolCard("):
+            self.assertNotIn(gone, main)
         self.assertIn('"Порожній · додай том"', main)
 
     def test_project_volume_cards_do_not_repeat_document_code_and_date(self):

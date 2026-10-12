@@ -18,9 +18,15 @@ class ModernModePdfExportContractTests(unittest.TestCase):
             repo / "android/app/src/main/AndroidManifest.xml"
         ).read_text(encoding="utf-8")
 
+        # v0.5.112: «Старі бібліотеки» removed from Home (archive branch archive/legacy-converter-v0.5.111);
+        # the Modern dataset screen is still reachable from the Classic viewer.
+        viewer = (
+            repo
+            / "android/app/src/main/java/com/saney/renaultdocs/ViewerActivity.kt"
+        ).read_text(encoding="utf-8")
         self.assertIn(
-            "ModernDatasetActivity.intent",
-            main,
+            "ModernDatasetActivity",
+            viewer,
         )
         self.assertIn(
             'label =\n                    "Classic"',

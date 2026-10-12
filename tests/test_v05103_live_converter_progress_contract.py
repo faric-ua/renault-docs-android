@@ -7,11 +7,14 @@ service persists at most every 100 ms, matching the Activity refresh.
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
 
 class LiveConverterProgressContract(unittest.TestCase):
+    @unittest.skip(RETIRED_V05112)
     def test_engine_reports_by_time_not_file_count(self):
         engine = (ANDROID / "SafConversionEngine.kt").read_text(encoding="utf-8")
         self.assertIn("private fun progressDue(): Boolean", engine)
@@ -22,6 +25,7 @@ class LiveConverterProgressContract(unittest.TestCase):
         # The last validated file is always reported, so the bar reaches 100%.
         self.assertIn("progressDue() ||\n                            count ==\n                                expectedSourceFiles", engine)
 
+    @unittest.skip(RETIRED_V05112)
     def test_service_persists_progress_at_activity_refresh_rate(self):
         service = (ANDROID / "ConversionService.kt").read_text(encoding="utf-8")
         activity = (ANDROID / "ConversionActivity.kt").read_text(encoding="utf-8")

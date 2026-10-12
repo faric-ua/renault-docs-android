@@ -8,7 +8,7 @@ ICON = ROOT / "android/app/src/main/res/drawable/ic_notification_document.xml"
 
 class V0567NotificationIconContractTests(unittest.TestCase):
     SERVICES = (
-        "ConversionService.kt",
+        # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
         "NativeRdpkgPreparationService.kt",
         "CatalogImportService.kt",
         "RdpkgImportService.kt",

@@ -2,6 +2,8 @@
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -75,6 +77,7 @@ class MeasuredPhaseProgressContractTests(unittest.TestCase):
         self.assertIn("OperationTerminalOutcome.SUCCESS -> Ui.success", view)
         self.assertIn('"Триває обробка…"', view)
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_also_displays_terminal_errors_in_color(self):
         conv = self.code("ConversionActivity.kt")
         self.assertIn("state.phase == ConversionRunPhase.FAILED", conv)

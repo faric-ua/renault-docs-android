@@ -42,8 +42,14 @@ class SettingsContractTests(unittest.TestCase):
         self.assertIn("backup_tree_uri", settings)
 
         self.assertIn("SettingsActivity", main)
-        self.assertIn("DatasetOpenMode.CLASSIC", main)
-        self.assertIn("ViewerActivity", main)
+        # v0.5.112: «Старі бібліотеки» removed from Home (archive branch archive/legacy-converter-v0.5.111);
+        # the open mode now applies to project volumes only.
+        project = (
+            repo
+            / "android/app/src/main/java/com/saney/renaultdocs/ProjectActivity.kt"
+        ).read_text(encoding="utf-8")
+        self.assertIn("DatasetOpenMode.CLASSIC", project)
+        self.assertIn("ViewerActivity", project)
 
         self.assertIn("Масштаб за замовчуванням", screen)
         self.assertIn("Крок кнопок − / +", screen)

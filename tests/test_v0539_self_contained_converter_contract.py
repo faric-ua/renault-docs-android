@@ -4,11 +4,14 @@ import unittest
 # v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
 
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 class V0539SelfContainedConverterContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         repo = Path(__file__).resolve().parents[1]
         return (repo / path).read_text(encoding="utf-8")
 
+    @unittest.skip(RETIRED_V05112)
     def test_converter_keeps_cpu_awake_without_forcing_screen_on(self):
         manifest = self._read(
             "android/app/src/main/AndroidManifest.xml"
@@ -28,6 +31,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
         self.assertIn("acquireWakeLock()", service)
         self.assertIn("releaseWakeLock()", service)
 
+    @unittest.skip(RETIRED_V05112)
     def test_completed_conversion_is_auto_registered(self):
         service = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionService.kt"
@@ -45,6 +49,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
         self.assertIn("Копію для браузера створено.", service)
         self.assertIn("_renault/START.html", service)
 
+    @unittest.skip(RETIRED_V05112)
     def test_nested_android_destination_is_rejected(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
@@ -58,6 +63,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
             activity,
         )
 
+    @unittest.skip(RETIRED_V05112)
     def test_validation_has_real_progress(self):
         engine = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/SafConversionEngine.kt"
@@ -77,6 +83,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
         self.assertIn("state.filesTotal", activity)
         self.assertIn("ConversionRunPhase.VALIDATING", service)
 
+    @unittest.skip(RETIRED_V05112)
     def test_interrupted_finalized_output_is_recovered(self):
         activity = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"

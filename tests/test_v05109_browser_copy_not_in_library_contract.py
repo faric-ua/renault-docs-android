@@ -21,6 +21,8 @@ volumes in its own Modern/Classic format). So:
 from pathlib import Path
 import unittest
 
+RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
+
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
@@ -30,6 +32,7 @@ def read(name):
 
 
 class BrowserCopyNotInLibraryContract(unittest.TestCase):
+    @unittest.skip(RETIRED_V05112)
     def test_no_automatic_library_registration(self):
         # v0.5.110 (owner): adding is possible again, but only on request
         # (button on the converter screen); the service never adds by itself.
@@ -40,12 +43,14 @@ class BrowserCopyNotInLibraryContract(unittest.TestCase):
         self.assertNotIn("registerConvertedDataset", activity)
         self.assertNotIn("Додати готову папку в бібліотеку", activity)
 
+    @unittest.skip(RETIRED_V05112)
     def test_result_explains_how_to_open(self):
         service = read("ConversionService.kt")
         self.assertIn("Копію для браузера створено.", service)
         self.assertIn("_renault/START.html", service)
         self.assertIn("застосунок не потрібен", service)
 
+    @unittest.skip(RETIRED_V05112)
     def test_copy_is_addressed_inside_permitted_tree(self):
         engine = read("SafConversionEngine.kt")
         activity = read("ConversionActivity.kt")
@@ -64,6 +69,7 @@ class BrowserCopyNotInLibraryContract(unittest.TestCase):
         self.assertIn("fun readFolder(", reader)
         self.assertIn("readFolder(context, root, treeUri.toString()).getOrThrow()", reader)
 
+    @unittest.skip(RETIRED_V05112)
     def test_help_says_not_added_automatically(self):
         activity = read("ConversionActivity.kt")
         self.assertIn("Сама в застосунок вона не додається", activity)
