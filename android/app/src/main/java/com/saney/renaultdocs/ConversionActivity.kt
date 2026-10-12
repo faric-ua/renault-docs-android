@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.text.TextUtils
 import android.net.Uri
-import android.provider.DocumentsContract
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -22,7 +21,6 @@ import androidx.documentfile.provider.DocumentFile
 class ConversionActivity : Activity() {
     private lateinit var draftStore: ConversionDraftStore
     private lateinit var runStore: ConversionRunStore
-    private lateinit var datasetStore: DatasetStore
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
     private lateinit var confirmDialogs: RestorableDialogs
@@ -35,7 +33,6 @@ class ConversionActivity : Activity() {
     private lateinit var validateButton: Button
     private lateinit var startButton: Button
     private lateinit var cancelButton: Button
-    private lateinit var registerButton: Button
     private lateinit var clearButton: Button
     private lateinit var sourceButton: Button
     private lateinit var destinationButton: Button
@@ -87,10 +84,6 @@ class ConversionActivity : Activity() {
             )
         runStore =
             ConversionRunStore(
-                this,
-            )
-        datasetStore =
-            DatasetStore(
                 this,
             )
 
@@ -713,44 +706,6 @@ class ConversionActivity : Activity() {
             progressText,
         )
 
-        registerButton =
-            Button(this).apply {
-                text =
-                    "Додати готову папку в бібліотеку"
-                isAllCaps =
-                    false
-                minHeight =
-                    Ui.dp(
-                        this@ConversionActivity,
-                        48,
-                    )
-                visibility =
-                    View.GONE
-                Ui.applyActionStyle(
-                    view =
-                        this,
-                    primary =
-                        true,
-                )
-                setOnClickListener {
-                    registerConvertedDataset()
-                }
-            }
-
-        body.addView(
-            registerButton,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                topMargin =
-                    Ui.dp(
-                        this@ConversionActivity,
-                        12,
-                    )
-            }
-        )
-
         clearButton =
             Button(this).apply {
                 text =
@@ -859,7 +814,7 @@ class ConversionActivity : Activity() {
                             "Через це посилання ламаються — частина сторінок і схем не відкривається.\n\n" +
                             "Конвертер робить з такої папки копію для Android. Усередині — ті самі оригінальні сторінки, без переробки «на новий лад», лише з виправленими посиланнями. " +
                             "Копія відкривається в браузері так само, як оригінал на Windows: стартова сторінка тому (INDEX.HTM) або загальний список томів _renault/START.html. " +
-                            "Застосунок для цього не потрібен. Додатково копія сама додається в бібліотеку Renault Docs.\n\n" +
+                            "Застосунок для цього не потрібен: папку можна запакувати й передати будь-кому. У бібліотеку Renault Docs вона не додається — там томи зберігаються у своєму форматі.\n\n" +
                             "ЩО ВИБРАТИ\n" +
                             "1. Стара Renault-папка — папка, в якій лежать папки томів (у кожній є INDEX або ACCUEIL). Не сама папка тому! " +
                             "Наприклад, для Kangoo: «…(RUS)», а не внутрішня «…2009.08.31».\n" +
@@ -1062,38 +1017,8 @@ class ConversionActivity : Activity() {
         val running =
             state.isRunning
 
-        val outputRegistered =
-            state.outputTreeUri
-                ?.takeIf {
-                    it.isNotBlank()
-                }
-                ?.let {
-                    outputUri ->
-                    datasetStore
-                        .load()
-                        .any {
-                            record ->
-                            record.treeUri ==
-                                outputUri
-                        }
-                }
-                ?: false
-
         cancelButton.visibility =
             if (running) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-
-        registerButton.visibility =
-            if (
-                state.phase ==
-                ConversionRunPhase.COMPLETE &&
-                !state.outputTreeUri
-                    .isNullOrBlank() &&
-                !outputRegistered
-            ) {
                 View.VISIBLE
             } else {
                 View.GONE
@@ -1589,17 +1514,13 @@ class ConversionActivity : Activity() {
                             plan.outputFolderName
                     }
 
-                    val existingTreeUri =
-                        treeUriForDocument(
-                            existingOutput.uri,
-                        )
-
+                    // v0.5.108: read inside the permitted destination folder.
                     val existingRecord =
-                        DatasetReader.read(
+                        DatasetReader.readFolder(
                             context =
                                 this,
-                            treeUri =
-                                existingTreeUri,
+                            root =
+                                existingOutput,
                         ).getOrThrow()
 
                     val expectedDatasetId =
@@ -1621,90 +1542,6 @@ class ConversionActivity : Activity() {
 
             plan
         }
-    }
-
-    private fun registerConvertedDataset() {
-        val state =
-            runStore.load()
-
-        val outputTreeUri =
-            state.outputTreeUri
-                ?.takeIf {
-                    it.isNotBlank()
-                }
-                ?: return
-
-        statusText.setTextColor(
-            Ui.muted,
-        )
-        statusText.text =
-            "Перевіряю готову копію…"
-
-        Thread {
-            val outputUri =
-                Uri.parse(
-                    outputTreeUri,
-                )
-
-            val result =
-                runCatching {
-                    val outputRoot =
-                        DocumentFile
-                            .fromTreeUri(
-                                this,
-                                outputUri,
-                            )
-                            ?: error(
-                                "Готова копія недоступна."
-                            )
-
-                    DatasetMediaIsolation.ensure(
-                        context =
-                            this,
-                        root =
-                            outputRoot,
-                    )
-
-                    DatasetReader.read(
-                        context =
-                            this,
-                        treeUri =
-                            outputUri,
-                    ).getOrThrow()
-                }
-
-            runOnUiThread {
-                result
-                    .onSuccess {
-                        record ->
-                        datasetStore.upsert(
-                            record,
-                        )
-
-                        statusText.setTextColor(
-                            Ui.accent,
-                        )
-                        statusText.text =
-                            "Додано в бібліотеку: " +
-                                record.title +
-                                " · томів: " +
-                                record.volumeCount +
-                                "\n\nГотова копія готова до використання."
-                    }
-                    .onFailure {
-                        error ->
-                        statusText.setTextColor(
-                            Ui.danger,
-                        )
-                        statusText.text =
-                            "Готову копію створено, але перевірка бібліотеки не пройшла: " +
-                                (
-                                    error.message
-                                        ?: "невідома помилка"
-                                )
-                    }
-            }
-        }.start()
     }
 
     private fun reconcileInterruptedRun() {
@@ -1778,11 +1615,6 @@ class ConversionActivity : Activity() {
                                 "Готову копію ще не створено."
                             )
 
-                    val outputTreeUri =
-                        treeUriForDocument(
-                            output.uri,
-                        )
-
                     DatasetMediaIsolation.ensure(
                         context =
                             this,
@@ -1790,19 +1622,16 @@ class ConversionActivity : Activity() {
                             output,
                     )
 
-                    val record =
-                        DatasetReader.read(
-                            context =
-                                this,
-                            treeUri =
-                                outputTreeUri,
-                        ).getOrThrow()
+                    // v0.5.108: only check the copy (inside the permitted
+                    // destination); it is a browser folder, not a library entry.
+                    DatasetReader.readFolder(
+                        context =
+                            this,
+                        root =
+                            output,
+                    ).getOrThrow()
 
-                    datasetStore.upsert(
-                        record,
-                    )
-
-                    outputTreeUri
+                    output.uri
                 }
 
             runOnUiThread {
@@ -1831,7 +1660,7 @@ class ConversionActivity : Activity() {
                                 outputTreeUri
                                     .toString(),
                             message =
-                                "Попередній процес завершив файлову конвертацію до зупинки. Готову копію перевірено та автоматично додано в бібліотеку.",
+                                "Попередній процес завершив конвертацію до зупинки. Копію для браузера перевірено — вона готова.",
                             filesTotal =
                                 state.filesTotal,
                             changedFiles =
@@ -1849,27 +1678,6 @@ class ConversionActivity : Activity() {
                 renderRunState()
             }
         }.start()
-    }
-
-    private fun treeUriForDocument(
-        documentUri: Uri,
-    ): Uri {
-        val authority =
-            documentUri.authority
-                ?: error(
-                    "Адреса готової копії неповна (немає постачальника файлів)."
-                )
-        val documentId =
-            DocumentsContract
-                .getDocumentId(
-                    documentUri,
-                )
-
-        return DocumentsContract
-            .buildTreeDocumentUri(
-                authority,
-                documentId,
-            )
     }
 
     companion object {

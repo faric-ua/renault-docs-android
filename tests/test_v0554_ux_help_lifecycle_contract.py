@@ -169,9 +169,10 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
 
         self.assertIn("fun applyActionStyle(", ui)
+        # v0.5.108: «Додати готову папку в бібліотеку» removed (owner).
         self.assertGreaterEqual(
             converter.count("Ui.applyActionStyle("),
-            6,
+            5,
         )
         self.assertIn("Ui.entityTitle", converter)
 

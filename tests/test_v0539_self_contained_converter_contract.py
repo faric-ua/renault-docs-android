@@ -36,11 +36,14 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
         )
 
-        self.assertIn("DatasetReader.read(", service)
-        self.assertIn("DatasetStore(", service)
-        self.assertIn(".upsert(", service)
-        self.assertIn("Додано в бібліотеку автоматично.", service)
-        self.assertIn("outputRegistered", activity)
+        # v0.5.108 (owner decision): no auto-registration any more. The
+        # result explains how to open the copy in a browser instead.
+        self.assertNotIn("DatasetStore(", service)
+        self.assertNotIn(".upsert(", service)
+        self.assertNotIn("Додано в бібліотеку", service)
+        self.assertNotIn("outputRegistered", activity)
+        self.assertIn("Копію для браузера створено.", service)
+        self.assertIn("_renault/START.html", service)
 
     def test_nested_android_destination_is_rejected(self):
         activity = self._read(
@@ -84,8 +87,11 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
 
         self.assertIn("reconcileInterruptedRun()", activity)
         self.assertIn("ConversionService.isActive()", activity)
-        self.assertIn("treeUriForDocument(", activity)
-        self.assertIn("Попередній процес завершив файлову конвертацію", activity)
+        # v0.5.108: the copy is read inside the permitted destination tree
+        # (a separate sub-folder tree address has no Android permission).
+        self.assertNotIn("treeUriForDocument(", activity)
+        self.assertIn("DatasetReader.readFolder(", activity)
+        self.assertIn("Попередній процес завершив конвертацію", activity)
         self.assertIn("fun isActive()", service)
 
     def test_android_ui_never_requires_termux_post_processing(self):

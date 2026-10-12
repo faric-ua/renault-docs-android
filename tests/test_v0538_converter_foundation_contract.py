@@ -28,13 +28,16 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
         )
 
+        # v0.5.108 (owner): the *_android copy is no longer added to the
+        # library, so the manual «Додати готову папку» path is gone. The
+        # recovered copy still gets .nomedia and is checked in place.
         block = activity.split(
-            "private fun registerConvertedDataset()",
+            "val recovered =",
             1,
-        )[1]
+        )[1].split("runOnUiThread", 1)[0]
 
         self.assertIn("DatasetMediaIsolation.ensure(", block)
-        self.assertIn("DatasetReader.read(", block)
+        self.assertIn("DatasetReader.readFolder(", block)
 
     def test_converter_uses_direct_documents_provider_scan(self):
         engine = self._read(

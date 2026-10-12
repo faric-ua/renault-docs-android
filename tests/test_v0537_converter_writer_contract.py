@@ -105,8 +105,11 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ConversionActivity.kt"
         )
 
-        self.assertIn("DatasetReader.read(", activity)
-        self.assertIn("datasetStore.upsert(", activity)
+        # v0.5.108 (owner): the copy is a standalone browser folder; the
+        # converter only checks it in place and never adds it to the library.
+        self.assertIn("DatasetReader.readFolder(", activity)
+        self.assertNotIn("datasetStore.upsert(", activity)
+        self.assertNotIn("Додати готову папку в бібліотеку", activity)
         self.assertIn("outputTreeUri", activity)
 
     def test_release_version(self):
