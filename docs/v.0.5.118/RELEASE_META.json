@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.118",
+  "versionCode": 134,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.118-composite-print-zoom",
+  "issues": [
+    147
+  ],
+  "scope": "Owner 2026-10-13: no selection checkmarks (green frame stays, v0.5.117); «Схема + піни»: the original printer icon prints only its own document; whole-window zoom locked while a PDF frame is on the page. Includes v0.5.116–117.",
+  "sourceBase": "v0.5.116/build132",
+  "phoneQa": "PENDING",
+  "pr_number": 235,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 757,
+  "signed_apk": "PASS",
+  "source_sha": "b47cb880792b1b8f7e85bdad2b7a77a124e073b9",
+  "signed_run_id": 38313168957,
+  "signed_run_number": 182,
+  "signed_android_apk_run": 182,
+  "artifact_id": 11774749996,
+  "artifact_name": "Renault-Docs-v0.5.118-Debug",
+  "artifact_digest": "sha256:eec8319cbb56429fb449554578864b9888279e7a70cd3fa70943ba0b383f22ec",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. No ✓ anywhere, green frames stay. 119 → «Розʼєм» → connector → «Схема + піни»: pinch on the scheme zooms only the scheme, the pins table stays; printer icon → print preview shows only the pins table."
+}
