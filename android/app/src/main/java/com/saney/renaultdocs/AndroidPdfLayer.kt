@@ -21,9 +21,10 @@ class AndroidPdfLayer(
     private val compactMode: Boolean = false,
 ) {
     private val initialZoomPercent =
+        // v0.5.119 (owner): maximum 500% (was 400%).
         initialZoomPercent.coerceIn(
             50,
-            400,
+            500,
         )
 
     private val zoomStepPercent =
@@ -207,6 +208,9 @@ class AndroidPdfLayer(
                   flex-direction: column;
                 }
                 #toolbar {
+                  /* v0.5.119: one medium size everywhere; JS sets zoom so a
+                     PDF inside a page with frames looks the same. */
+                  zoom: var(--ui-scale, 0.85);
                   z-index: 20;
                   flex: 0 0 auto;
                   display: flex;
@@ -349,6 +353,8 @@ class AndroidPdfLayer(
                   border-radius: 10px;
                   background: #171c24;
                   box-shadow: 0 8px 24px rgba(0,0,0,.45);
+                  max-height: 70vh;
+                  overflow-y: auto;
                 }
                 #zoomMenu[hidden] {
                   display: none;
@@ -494,6 +500,8 @@ class AndroidPdfLayer(
                       <button class="zoom-option" data-zoom="200" role="menuitem">200%</button>
                       <button class="zoom-option" data-zoom="300" role="menuitem">300%</button>
                       <button class="zoom-option" data-zoom="400" role="menuitem">400%</button>
+                      <button class="zoom-option" data-zoom="450" role="menuitem">450%</button>
+                      <button class="zoom-option" data-zoom="500" role="menuitem">500%</button>
                     </div>
                   </div>
                   <button id="plus" aria-label="Збільшити масштаб">＋</button>
@@ -581,13 +589,40 @@ class AndroidPdfLayer(
                     ? Math.max(
                         0.5,
                         Math.min(
-                          4,
+                          5,
                           restoredViewerState.zoom
                         )
                       )
                     : ${initialZoomPercent} / 100;
                 const zoomStepPercent =
                   ${zoomStepPercent};
+
+                // v0.5.119 (owner): the toolbar is the same medium size in
+                // the separate PDF screen and inside «Схема + піни». A page
+                // with frames is laid out wider than the screen and shrunk,
+                // so there the toolbar is scaled back up by the same ratio.
+                (function () {
+                  let uiScale = 0.85;
+                  try {
+                    if (window.top !== window) {
+                      const pageWidth =
+                        window.top.document.documentElement.clientWidth;
+                      const screenWidth = window.screen.width;
+                      if (
+                        pageWidth > 0 &&
+                        screenWidth > 0 &&
+                        pageWidth > screenWidth * 1.1
+                      ) {
+                        uiScale =
+                          0.85 * Math.min(4, pageWidth / screenWidth);
+                      }
+                    }
+                  } catch (_) {}
+                  document.documentElement.style.setProperty(
+                    '--ui-scale',
+                    String(uiScale)
+                  );
+                })();
 
                 const pdfViewport =
                   document.getElementById(
@@ -1346,7 +1381,7 @@ class AndroidPdfLayer(
                   return Math.max(
                     50,
                     Math.min(
-                      400,
+                      500,
                       Math.round(percent)
                     )
                   );
@@ -1792,10 +1827,19 @@ class AndroidPdfLayer(
                             margin
                         );
 
+                  // v0.5.119: the toolbar is zoomed (--ui-scale); a fixed
+                  // menu inside it takes coordinates in zoomed units.
+                  const uiScale =
+                    parseFloat(
+                      getComputedStyle(
+                        document.documentElement
+                      ).getPropertyValue('--ui-scale')
+                    ) || 1;
+
                   zoomMenu.style.left =
-                    Math.round(left) + 'px';
+                    Math.round(left / uiScale) + 'px';
                   zoomMenu.style.top =
-                    Math.round(top) + 'px';
+                    Math.round(top / uiScale) + 'px';
                 }
 
                 function closeZoomMenu() {
