@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.107",
+  "versionCode": 123,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.107-findings",
+  "issues": [
+    147
+  ],
+  "scope": "Phone QA findings: owner delete of prepared ⇧ closes the old completed card (neutral card if a file vanished otherwise); converter shows the failure reason once and all its texts are Ukrainian; converter stops before copying when the chosen folder is itself a volume (Kangoo NT8486 «томів 0») and shows why auto-add failed. Includes all v0.5.106 changes.",
+  "sourceBase": "v0.5.106/build122",
+  "phoneQa": "PENDING",
+  "pr_number": 203,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 699,
+  "signed_apk": "PASS",
+  "source_sha": "9668babbeb2af7d9d092e1759c063f601e70cdc3",
+  "signed_run_id": 38251292531,
+  "signed_run_number": 171,
+  "signed_android_apk_run": 171,
+  "artifact_id": 11747014715,
+  "artifact_name": "Renault-Docs-v0.5.107-Debug",
+  "artifact_digest": "sha256:94cb4408ab801255198d3e9bcac566a61c92d81fcee4ae9592b049f53dd7207a",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.106. Converter with the inner Kangoo volume folder as source → stops at once with «сама є томом … вибери папку на рівень вище». Then the (RUS) parent folder → 1 volume, added to library."
+}
