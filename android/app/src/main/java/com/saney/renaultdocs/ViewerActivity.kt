@@ -332,6 +332,12 @@ class ViewerActivity : Activity() {
                 onSavePdf = {
                     requestPdfSave(it)
                 },
+                onPrintPdf = { path ->
+                    printPdf(
+                        datasetClient,
+                        path,
+                    )
+                },
                 onToggleFullscreen = {
                     togglePdfFullscreen()
                 },
@@ -2353,6 +2359,22 @@ class ViewerActivity : Activity() {
         )
     }
 
+    /** v0.5.115: Android print window for the PDF on screen. */
+    private fun printPdf(
+        client: SafDatasetWebViewClient,
+        relativePath: String,
+    ) {
+        PdfPrinter.print(
+            activity = this,
+            fileName = relativePath,
+        ) { output ->
+            client.writePdf(
+                relativePath,
+                output,
+            )
+        }
+    }
+
     private fun requestPdfSave(
         relativePath: String,
     ) {
@@ -2933,6 +2955,12 @@ class ViewerActivity : Activity() {
                     true,
                 onSavePdf = {
                     requestPdfSave(it)
+                },
+                onPrintPdf = { path ->
+                    printPdf(
+                        companionClient,
+                        path,
+                    )
                 },
                 onToggleFullscreen = {
                     togglePdfFullscreen()

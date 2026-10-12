@@ -3151,7 +3151,7 @@ class NativeSectionActivity : Activity() {
                 Toast
                     .makeText(
                         this,
-                        "Друк буде додано у native renderer пізніше.",
+                        "Друк: відкрий схему — у переглядачі PDF є кнопка друку.",
                         Toast.LENGTH_SHORT,
                     )
                     .show()
@@ -4102,7 +4102,15 @@ class NativeSectionActivity : Activity() {
                     ),
             )
 
-        target.addView(
+        // v0.5.115: «Друк» next to «Зберегти таблицю PDF» — the same PDF,
+        // sent to the Android print window (printer or «Зберегти як PDF»).
+        val tableActions =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+            }
+
+        tableActions.addView(
             Button(this).apply {
                 text =
                     "Зберегти таблицю PDF"
@@ -4141,6 +4149,78 @@ class NativeSectionActivity : Activity() {
                     )
                 }
             },
+            LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+                1f,
+            ).apply {
+                marginEnd =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        6,
+                    )
+            }
+        )
+
+        tableActions.addView(
+            Button(this).apply {
+                text = "Друк"
+                isAllCaps = false
+                textSize = 13f
+                gravity =
+                    Gravity.CENTER
+                minWidth = 0
+                minimumWidth = 0
+                minHeight =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        40,
+                    )
+                minimumHeight =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        40,
+                    )
+                background =
+                    Ui.roundedBackground(
+                        context =
+                            this@NativeSectionActivity,
+                        fill =
+                            Ui.surfaceAlt,
+                        stroke =
+                            Ui.accent,
+                        radiusDp = 10,
+                    )
+                setTextColor(
+                    Ui.text,
+                )
+                contentDescription =
+                    "Друк таблиці: принтер або «Зберегти як PDF»"
+                setOnClickListener {
+                    PdfPrinter.print(
+                        activity =
+                            this@NativeSectionActivity,
+                        fileName =
+                            export.suggestedFileName,
+                    ) { output ->
+                        NativeTablePdfExporter.writeTo(
+                            output,
+                            export,
+                        )
+                    }
+                }
+            },
+            LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+                1f,
+            )
+        )
+
+        target.addView(
+            tableActions,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams
                     .MATCH_PARENT,

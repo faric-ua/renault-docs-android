@@ -447,6 +447,21 @@ class AndroidPdfLayer(
                   <button id="next" aria-label="Наступна сторінка">↓</button>
                   <button id="save" aria-label="Зберегти PDF">⇩ PDF</button>
                   <button
+                    id="print"
+                    aria-label="Друк: принтер або «Зберегти як PDF»"
+                    title="Друк"
+                  >
+                    <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
+                      <path
+                        d="M5 6V2h8v4M5 13H3V7h12v6h-2M5 10h8v6H5z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <button
                     id="fullscreen"
                     aria-label="Увімкнути або вимкнути повноекранний режим"
                     aria-pressed="false"
@@ -1873,6 +1888,18 @@ class AndroidPdfLayer(
                     () => {
                       window.location.href =
                         'renaultsavepdf://save?path=' +
+                        encodeURIComponent(pdfPath);
+                    }
+                  );
+
+                // v0.5.115: Android print window (printer or «Save as PDF»).
+                document
+                  .getElementById('print')
+                  .addEventListener(
+                    'click',
+                    () => {
+                      window.location.href =
+                        'renaultprintpdf://print?path=' +
                         encodeURIComponent(pdfPath);
                     }
                   );
