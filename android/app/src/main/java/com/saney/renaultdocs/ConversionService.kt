@@ -278,28 +278,9 @@ class ConversionService : Service() {
                     plan,
                 )
 
-            dataSyncTimeout.checkActive()
-            val registration =
-                runCatching {
-                    val record =
-                        DatasetReader.read(
-                            context =
-                                this,
-                            treeUri =
-                                android.net.Uri.parse(
-                                    result.outputTreeUri,
-                                ),
-                        ).getOrThrow()
-
-                    DatasetStore(
-                        this,
-                    ).upsert(
-                        record,
-                    )
-
-                    record
-                }
-
+            // v0.5.108 (owner decision): the *_android copy is a standalone
+            // folder for any browser — to zip and give away. It is NOT added
+            // to the library; the library keeps volumes in its own format.
             val completionMessage =
                 buildString {
                     append(
@@ -321,23 +302,10 @@ class ConversionService : Service() {
                         result.volumeCount,
                     )
 
-                    if (
-                        registration.isSuccess
-                    ) {
-                        append(
-                            "\nДодано в бібліотеку автоматично."
-                        )
-                    } else {
-                        append(
-                            "\nГотова копія створена. Автододавання в бібліотеку не вдалося"
-                        )
-                        // v0.5.107: say why, instead of hiding the reason.
-                        registration.exceptionOrNull()
-                            ?.message
-                            ?.takeIf { it.isNotBlank() }
-                            ?.let { append(": ").append(it) }
-                        append(".")
-                    }
+                    append(
+                        "\nКопію для браузера створено. Відкривай у браузері _renault/START.html (список томів) " +
+                            "або INDEX.HTM потрібного тому. Цю папку можна запакувати й передати — застосунок не потрібен."
+                    )
                 }
 
             dataSyncTimeout.checkActive()
@@ -358,15 +326,8 @@ class ConversionService : Service() {
                 title =
                     "Renault Docs · готово",
                 text =
-                    if (
-                        registration.isSuccess
-                    ) {
-                        plan.outputFolderName +
-                            " готовий і доданий у бібліотеку."
-                    } else {
-                        plan.outputFolderName +
-                            " створено. Відкрий конвертер для додавання в бібліотеку."
-                    },
+                    plan.outputFolderName +
+                        " — копію для браузера створено.",
             )
         } catch (
             cancelled:

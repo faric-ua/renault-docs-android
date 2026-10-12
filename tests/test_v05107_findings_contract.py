@@ -103,10 +103,13 @@ class FindingsContract(unittest.TestCase):
         # The guard runs before staging is created or anything is copied.
         self.assertLess(engine.index("if (volumeRoots.isEmpty()) {"), engine.index('"Створюю тимчасову папку…"'))
 
-    def test_c_auto_add_failure_shows_its_reason(self):
+    def test_c_auto_add_removed_by_owner(self):
+        # v0.5.107 showed the auto-add failure reason («Вибраний об'єкт не є
+        # папкою»). v0.5.108: the owner decided the *_android copy is a
+        # browser folder and must not be added to the library at all.
         service = read("ConversionService.kt")
-        failed = between(service, "Автододавання в бібліотеку не вдалося", 'append(".")')
-        self.assertIn("registration.exceptionOrNull()", failed)
+        self.assertNotIn("Автододавання в бібліотеку", service)
+        self.assertNotIn("registration", service)
 
     def test_c_kotlin_unit_tests_cover_both_choices(self):
         test = (ROOT / "android/app/src/test/java/com/saney/renaultdocs/AndroidDatasetPackageWriterTest.kt").read_text(encoding="utf-8")

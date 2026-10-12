@@ -391,10 +391,10 @@ class SafConversionEngine(
             finalized =
                 true
 
+            // v0.5.108: an address inside the permitted destination tree
+            // (renameTo already moved staging.uri to the final name).
             val outputTreeUri =
-                treeUriForDocument(
-                    staging.uri,
-                ).toString()
+                staging.uri.toString()
 
             return SafConversionResult(
                 outputTreeUri =
@@ -471,11 +471,14 @@ class SafConversionEngine(
         val directories =
             linkedSetOf<String>()
 
+        // v0.5.108: the address may be a folder inside a permitted tree
+        // (…/tree/<destination>/document/<copy>); scan from that folder.
         val rootDocumentId =
-            DocumentsContract
-                .getTreeDocumentId(
-                    treeUri,
-                )
+            if (DocumentsContract.isDocumentUri(context, treeUri)) {
+                DocumentsContract.getDocumentId(treeUri)
+            } else {
+                DocumentsContract.getTreeDocumentId(treeUri)
+            }
 
         fun visit(
             documentId: String,
@@ -770,17 +773,18 @@ class SafConversionEngine(
         existingOutput: DocumentFile,
         sourceExactFiles: Set<String>,
     ): SafConversionResult {
+        // v0.5.108: an address inside the permitted destination tree.
         val outputTreeUri =
-            treeUriForDocument(
-                existingOutput.uri,
-            )
+            existingOutput.uri
 
+        // v0.5.108: read inside the permitted destination; the separate
+        // sub-folder tree address has no Android permission.
         val existingRecord =
-            DatasetReader.read(
+            DatasetReader.readFolder(
                 context =
                     context,
-                treeUri =
-                    outputTreeUri,
+                root =
+                    existingOutput,
             ).getOrThrow()
 
         val expectedDatasetId =
@@ -1948,28 +1952,6 @@ class SafConversionEngine(
         ) {
             throw ConversionCancelledException()
         }
-    }
-
-    private fun treeUriForDocument(
-        documentUri: Uri,
-    ): Uri {
-        val authority =
-            documentUri.authority
-                ?: error(
-                    "Адреса готової копії неповна (немає постачальника файлів)."
-                )
-
-        val documentId =
-            DocumentsContract
-                .getDocumentId(
-                    documentUri,
-                )
-
-        return DocumentsContract
-            .buildTreeDocumentUri(
-                authority,
-                documentId,
-            )
     }
 
     private fun isTreeNestedInside(

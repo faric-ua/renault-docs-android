@@ -12,6 +12,19 @@ object DatasetReader {
         val root = DocumentFile.fromTreeUri(context, treeUri)
             ?: error("Android не зміг відкрити вибрану папку")
 
+        readFolder(context, root, treeUri.toString()).getOrThrow()
+    }
+
+    /**
+     * v0.5.108: reads a copy found inside an already permitted folder
+     * (e.g. the converter's destination). A separate tree address built for
+     * a sub-folder has no Android permission and looks like «не є папкою».
+     */
+    fun readFolder(
+        context: Context,
+        root: DocumentFile,
+        treeUri: String = root.uri.toString(),
+    ): Result<DatasetRecord> = runCatching {
         require(root.isDirectory) {
             "Вибраний об'єкт не є папкою"
         }
@@ -36,7 +49,7 @@ object DatasetReader {
 
         DatasetRecord.from(
             metadata = metadata,
-            treeUri = treeUri.toString(),
+            treeUri = treeUri,
         )
     }
 
