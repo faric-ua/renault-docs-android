@@ -49,7 +49,6 @@ class V0582HomeAndBars(unittest.TestCase):
             'buildHomeChoiceCard("Новий проєкт", "Створити модель", false)',
             "buildProjectCatalogCard()",
             "buildToolsPanel()",
-            "legacyAddContainer",
             "BoundedAddActionsScrollView",
             "OperationStatusView(this@MainActivity)",
         ):
@@ -67,7 +66,10 @@ class V0582HomeAndBars(unittest.TestCase):
         self.assertIn('value = "Мої Renault"', renderer)
         self.assertIn("buildProjectTile(", renderer)
         self.assertNotIn("buildToolsPanel()", renderer)
-        self.assertIn("legacyAddContainer.addView(", renderer)
+        # v0.5.111: «Старі бібліотеки» moved out of the collapsible Add panel
+        # into the library list (phone QA: a Legacy folder could not be found).
+        self.assertIn('value = "Старі бібліотеки"', renderer)
+        self.assertNotIn("legacyAddContainer", main)
         for entry in ("chooseProjectForVolume()", "showCreateProjectDialog()",
                       "DriveCatalogActivity::class.java",
                       "ConversionActivity::class.java", "openDatasetPicker()"):
@@ -79,8 +81,9 @@ class V0582HomeAndBars(unittest.TestCase):
         main = source("MainActivity.kt")
         self.assertIn("visibleLegacyRecords.forEach", main)
         self.assertIn("buildDatasetTile(record)", main)
-        self.assertIn("legacyAddContainer.removeAllViews()", main)
-        self.assertIn("legacyAddContainer.addView(", main)
+        # v0.5.111: tiles are added to libraryContainer under «Мої Renault».
+        renderer = main.split("private fun renderLibrary()", 1)[1].split("private fun buildProjectTile(", 1)[0]
+        self.assertIn("libraryContainer.addView(\n                    buildDatasetTile(record)", renderer)
         bound = source("BoundedAddActionsScrollView.kt")
         self.assertIn("View.MeasureSpec.AT_MOST", bound)
         self.assertIn("Configuration.ORIENTATION_LANDSCAPE", bound)
