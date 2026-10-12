@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.105",
+  "versionCode": 121,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.105-status-card-cancel",
+  "issues": [
+    147
+  ],
+  "scope": "Скасувати (with confirmation) on every long-operation status card: volume prepare, volume export, volume import, native create (all phases), archive selection card, Drive catalog import. Workers stop at safe checkpoints and clean only their own unfinished output. PR check surfaces Kotlin errors as annotations. Includes all v0.5.104 changes.",
+  "sourceBase": "v0.5.104/build120",
+  "phoneQa": "PENDING",
+  "pr_number": 191,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 695,
+  "signed_apk": "PASS",
+  "source_sha": "e864b1da0c010ab8ab0c23c1d297023f2ef0bee6",
+  "signed_run_id": 38198400635,
+  "signed_run_number": 169,
+  "signed_android_apk_run": 169,
+  "artifact_id": 11724896028,
+  "artifact_name": "Renault-Docs-v0.5.105-Debug",
+  "artifact_digest": "sha256:395deb010f2df42bc6288ac10f3790ae15b5531bb9c9228512de630dcd2fed27",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.104. Project screen: «Підготувати і поділитися томом» → card «Підготовка тому» shows Скасувати → question → Продовжити keeps running → Зупинити → «Підготовка тому · скасовано», no ⇧. Then export/import cards and v0.5.104 checks."
+}
