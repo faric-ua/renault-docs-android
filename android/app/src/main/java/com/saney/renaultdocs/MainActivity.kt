@@ -30,7 +30,6 @@ import java.io.File
 
 class MainActivity : Activity() {
     private lateinit var libraryContainer: LinearLayout
-    private lateinit var legacyAddContainer: LinearLayout
     private lateinit var homeAddPanelBody: BoundedAddActionsScrollView
     private lateinit var homeAddPinButton: TextView
     private lateinit var homeAddToggleButton: TextView
@@ -882,10 +881,6 @@ class MainActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                 ).apply { topMargin = Ui.dp(this@MainActivity, 10) },
             )
-            legacyAddContainer = LinearLayout(this@MainActivity).apply {
-                orientation = LinearLayout.VERTICAL
-            }
-            actions.addView(legacyAddContainer)
             actions.addView(
                 Ui.textView(
                     this@MainActivity,
@@ -1761,29 +1756,49 @@ class MainActivity : Activity() {
                         .isEmpty()
             }
 
-        legacyAddContainer.removeAllViews()
+        // v0.5.111 (phone QA): «Старі бібліотеки» used to live inside the
+        // collapsible «Додати» panel, so a folder added with «Legacy» could
+        // not be found. Now it is its own section under «Мої Renault».
         if (
             visibleLegacyRecords.isNotEmpty()
         ) {
-            legacyAddContainer.addView(
+            libraryContainer.addView(
                 Ui.textView(
                     context = this,
                     value = "Старі бібліотеки",
-                    sizeSp = 15f,
-                    color = Ui.muted,
+                    sizeSp = 21f,
                 ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
                     setPadding(
                         0,
                         Ui.dp(this@MainActivity, 18),
                         0,
-                        Ui.dp(this@MainActivity, 8),
+                        Ui.dp(this@MainActivity, 4),
+                    )
+                }
+            )
+            libraryContainer.addView(
+                Ui.textView(
+                    context = this,
+                    value = "Копії для браузера (…_android), додані кнопкою «Legacy» або з конвертера.",
+                    sizeSp = 13f,
+                    color = Ui.muted,
+                ).apply {
+                    setPadding(
+                        0,
+                        0,
+                        0,
+                        Ui.dp(this@MainActivity, 10),
                     )
                 }
             )
 
             visibleLegacyRecords.forEach {
                 record ->
-                legacyAddContainer.addView(
+                libraryContainer.addView(
                     buildDatasetTile(record),
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
