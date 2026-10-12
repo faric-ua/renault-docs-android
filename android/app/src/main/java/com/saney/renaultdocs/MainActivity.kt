@@ -2,6 +2,7 @@ package com.saney.renaultdocs
 
 import android.Manifest
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Paint
@@ -51,6 +52,7 @@ class MainActivity : Activity() {
     private lateinit var settings: AppSettings
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
+    private lateinit var confirmDialogs: RestorableDialogs
     private lateinit var projectDialogs:
         HomeProjectDialogController
     private lateinit var folderExportRunStore: ProjectFolderExportRunStore
@@ -179,6 +181,15 @@ class MainActivity : Activity() {
         projectDialogs.restore(
             savedInstanceState,
         )
+        confirmDialogs =
+            RestorableDialogs(
+                activity = this,
+                stateKey = "homeConfirm",
+                build = ::buildConfirmDialog,
+            )
+        confirmDialogs.restore(
+            savedInstanceState,
+        )
 
         helpDialogs =
             LifecycleHelpDialogController(
@@ -210,7 +221,60 @@ class MainActivity : Activity() {
 
         helpDialogs.restoreOpen()
         projectDialogs.restoreOpen()
+        // v0.5.106: an open stop question comes back after rotation.
+        window.decorView.post {
+            confirmDialogs.restoreOpen()
+        }
         repairSavedVolumeMetadata()
+    }
+
+    /**
+     * #181 stop questions on the Home status card (v0.5.102), rebuilt after
+     * rotation (v0.5.106) only while that operation is still running.
+     */
+    private fun buildConfirmDialog(key: String): Dialog? =
+        when (key) {
+            CONFIRM_STOP_FOLDER_EXPORT ->
+                if (!folderExportRunStore.load().isRunning) {
+                    null
+                } else {
+                    ConfirmActions.confirmStop(
+                        activity = this,
+                        title = "Зупинити експорт томів?",
+                        message = "Поточний том не буде дописано. Уже готові файли в папці лишаться.",
+                    ) {
+                        if (folderExportRunStore.requestCancel()) {
+                            statusText.text = "Зупиняю експорт після поточного кроку…"
+                        }
+                    }
+                }
+
+            CONFIRM_STOP_RDPROJECT ->
+                if (!rdprojectShareRunStore.load().isRunning) {
+                    null
+                } else {
+                    ConfirmActions.confirmStop(
+                        activity = this,
+                        title = "Зупинити підготовку проєкту?",
+                        message = "Недороблений .rdproject буде видалено. Томи і попередні файли не змінюються.",
+                    ) {
+                        if (rdprojectShareRunStore.requestCancel()) {
+                            statusText.text = "Зупиняю підготовку проєкту…"
+                        }
+                    }
+                }
+
+            else -> null
+        }
+
+    override fun onDestroy() {
+        if (::confirmDialogs.isInitialized) {
+            confirmDialogs.onDestroy()
+        }
+        if (::projectDialogs.isInitialized) {
+            projectDialogs.onDestroy()
+        }
+        super.onDestroy()
     }
 
     override fun onStart() {
@@ -307,6 +371,11 @@ class MainActivity : Activity() {
         projectDialogs.save(
             outState,
         )
+        if (::confirmDialogs.isInitialized) {
+            confirmDialogs.save(
+                outState,
+            )
+        }
         outState.putString(
             STATE_PENDING_FOLDER_EXPORT_PROJECT,
             pendingFolderExportProjectId,
@@ -1389,14 +1458,7 @@ class MainActivity : Activity() {
                 total = folderState.volumeIds.size.takeIf { it > 0 },
                 subject = folderState.projectId,
                 onCancel = {
-                    projectDialogs.confirmCancelOperation(
-                        title = "Зупинити експорт томів?",
-                        message = "Поточний том не буде дописано. Уже готові файли в папці лишаться.",
-                    ) {
-                        if (folderExportRunStore.requestCancel()) {
-                            statusText.text = "Зупиняю експорт після поточного кроку…"
-                        }
-                    }
+                    confirmDialogs.show(CONFIRM_STOP_FOLDER_EXPORT)
                 },
             )
             return
@@ -1479,14 +1541,7 @@ class MainActivity : Activity() {
                 subject =
                     operationSubject,
                 onCancel = {
-                    projectDialogs.confirmCancelOperation(
-                        title = "Зупинити підготовку проєкту?",
-                        message = "Недороблений .rdproject буде видалено. Томи і попередні файли не змінюються.",
-                    ) {
-                        if (rdprojectShareRunStore.requestCancel()) {
-                            statusText.text = "Зупиняю підготовку проєкту…"
-                        }
-                    }
+                    confirmDialogs.show(CONFIRM_STOP_RDPROJECT)
                 },
             )
             return
@@ -2243,6 +2298,10 @@ class MainActivity : Activity() {
     }
 
     companion object {
+        private const val CONFIRM_STOP_FOLDER_EXPORT =
+            "stopFolderExport"
+        private const val CONFIRM_STOP_RDPROJECT =
+            "stopRdproject"
         private const val RDPROJECT_RUN_REFRESH_MS =
             100L
         private const val REQUEST_DATASET_FOLDER = 4101

@@ -26,6 +26,7 @@ class SettingsActivity : Activity() {
     private lateinit var statusText: TextView
 
     private var activeDialogKind: String = ""
+    private lateinit var confirmDialogs: RestorableDialogs
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -44,11 +45,26 @@ class SettingsActivity : Activity() {
                 )
                 .orEmpty()
 
+        confirmDialogs =
+            RestorableDialogs(
+                activity = this,
+                stateKey = "settingsConfirm",
+            ) { key ->
+                if (key == CONFIRM_RESET_BACKUP) buildResetBackupDialog() else null
+            }
+        confirmDialogs.restore(
+            savedInstanceState,
+        )
+
         setContentView(
             buildContent(),
         )
 
         renderValues()
+        // v0.5.106: an open question comes back after rotation.
+        window.decorView.post {
+            confirmDialogs.restoreOpen()
+        }
 
         when (activeDialogKind) {
             DIALOG_MODE ->
@@ -69,9 +85,45 @@ class SettingsActivity : Activity() {
             STATE_DIALOG_KIND,
             activeDialogKind,
         )
+        confirmDialogs.save(
+            outState,
+        )
         super.onSaveInstanceState(
             outState,
         )
+    }
+
+    private fun buildResetBackupDialog(): AlertDialog? =
+        ConfirmActions.confirm(
+            activity =
+                this@SettingsActivity,
+            title =
+                "Скинути папку резервних копій?",
+            message =
+                "Застосунок забуде вибрану папку. Файли в ній не видаляються; папку можна вибрати знову.",
+            confirmLabel =
+                "Скинути",
+            keepLabel =
+                "Залишити",
+        ) {
+            settings
+                .clearBackupFolder()
+
+            statusText
+                .setTextColor(
+                    Ui.muted,
+                )
+            statusText.text =
+                "Вибір папки резервних копій скинуто. Файли не видалялися."
+
+            renderValues()
+        }
+
+    override fun onDestroy() {
+        if (::confirmDialogs.isInitialized) {
+            confirmDialogs.onDestroy()
+        }
+        super.onDestroy()
     }
 
     @Deprecated(
@@ -836,31 +888,9 @@ class SettingsActivity : Activity() {
                     visibility =
                         View.GONE
                     setOnClickListener {
-                        // v0.5.104: forgetting the chosen folder asks first.
-                        ConfirmActions.confirm(
-                            activity =
-                                this@SettingsActivity,
-                            title =
-                                "Скинути папку резервних копій?",
-                            message =
-                                "Застосунок забуде вибрану папку. Файли в ній не видаляються; папку можна вибрати знову.",
-                            confirmLabel =
-                                "Скинути",
-                            keepLabel =
-                                "Залишити",
-                        ) {
-                            settings
-                                .clearBackupFolder()
-
-                            statusText
-                                .setTextColor(
-                                    Ui.muted,
-                                )
-                            statusText.text =
-                                "Вибір папки резервних копій скинуто. Файли не видалялися."
-
-                            renderValues()
-                        }
+                        // v0.5.104: forgetting the chosen folder asks first;
+                        // v0.5.106: the question survives rotation.
+                        confirmDialogs.show(CONFIRM_RESET_BACKUP)
                     }
                 }
 
@@ -1367,6 +1397,8 @@ class SettingsActivity : Activity() {
         private const val REQUEST_BACKUP_FOLDER =
             4401
 
+        private const val CONFIRM_RESET_BACKUP =
+            "resetBackupFolder"
         private const val STATE_DIALOG_KIND =
             "settingsDialogKind"
         private const val DIALOG_MODE =

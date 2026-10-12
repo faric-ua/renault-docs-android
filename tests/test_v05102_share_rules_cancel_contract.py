@@ -69,15 +69,15 @@ class ShareRulesCancelContract(unittest.TestCase):
 
     def test_home_offers_confirmed_cancel_and_shows_cancelled(self):
         main = self.read("MainActivity.kt")
-        self.assertEqual(2, main.count("projectDialogs.confirmCancelOperation("))
+        # v0.5.106: both stop questions are keyed (survive rotation).
+        self.assertIn("confirmDialogs.show(CONFIRM_STOP_FOLDER_EXPORT)", main)
+        self.assertIn("confirmDialogs.show(CONFIRM_STOP_RDPROJECT)", main)
         self.assertIn("folderExportRunStore.requestCancel()", main)
         self.assertIn("rdprojectShareRunStore.requestCancel()", main)
         self.assertIn('"Окремі томи · скасовано"', main)
         self.assertIn('"Підготовка проєкту · скасовано"', main)
-        home = self.read("HomeProjectDialogController.kt")
-        confirm = home.split("fun confirmCancelOperation(", 1)[1].split("private fun track(", 1)[0]
-        # v0.5.104: the same question now lives in the shared ConfirmActions.
-        self.assertIn("ConfirmActions.confirmStop(", confirm)
+        confirm = main.split("private fun buildConfirmDialog(key: String)", 1)[1].split("override fun onDestroy()", 1)[0]
+        self.assertEqual(2, confirm.count("ConfirmActions.confirmStop("))
         shared = self.read("ConfirmActions.kt")
         self.assertIn('KEEP_RUNNING_LABEL = "Продовжити"', shared)
         self.assertIn(".setNegativeButton(keepLabel, null)", shared)
