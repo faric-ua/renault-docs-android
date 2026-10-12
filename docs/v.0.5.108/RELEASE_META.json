@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.108",
+  "versionCode": 124,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.108-converter-help",
+  "issues": [
+    147
+  ],
+  "scope": "Detailed converter help (purpose, what to choose, steps, safety) in Ukrainian. Includes all v0.5.107 changes.",
+  "sourceBase": "v0.5.107/build123",
+  "phoneQa": "PENDING",
+  "pr_number": 206,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 701,
+  "signed_apk": "PASS",
+  "source_sha": "7ab390785d0e0c767ae0f6734bea09c65308a5ae",
+  "signed_run_id": 38268268285,
+  "signed_run_number": 172,
+  "signed_android_apk_run": 172,
+  "artifact_id": 11755966634,
+  "artifact_name": "Renault-Docs-v0.5.108-Debug",
+  "artifact_digest": "sha256:5c9dc84d8bc84ccb94c5bd4609dceeaf97c037659805de3079b7ea700f93cf97",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.107 after the running conversion finishes. Converter «?»: four sections, readable, scrolls."
+}
