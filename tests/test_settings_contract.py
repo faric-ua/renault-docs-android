@@ -60,7 +60,8 @@ class SettingsContractTests(unittest.TestCase):
             repo
             / "android/app/src/main/java/com/saney/renaultdocs/SafDisplayPath.kt"
         ).read_text(encoding="utf-8")
-        self.assertIn("getTreeDocumentId", formatter)
+        # v0.5.110: SafDisplayPath also shows a folder inside a tree (converter copy).
+        self.assertIn("rootDocumentIdOf", formatter)
         self.assertIn("Файли не видалялися", screen)
         self.assertIn("Про програму", screen)
 

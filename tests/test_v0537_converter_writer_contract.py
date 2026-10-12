@@ -108,7 +108,9 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
         # v0.5.108 (owner): the copy is a standalone browser folder; the
         # converter only checks it in place and never adds it to the library.
         self.assertIn("DatasetReader.readFolder(", activity)
-        self.assertNotIn("datasetStore.upsert(", activity)
+        # v0.5.110 (owner): adding is possible again, only via the button.
+        self.assertIn("datasetStore.upsert(record)", activity)
+        self.assertIn("private fun addCopyToApp()", activity)
         self.assertNotIn("Додати готову папку в бібліотеку", activity)
         self.assertIn("outputTreeUri", activity)
 

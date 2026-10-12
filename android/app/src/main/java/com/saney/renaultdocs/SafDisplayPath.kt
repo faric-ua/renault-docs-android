@@ -1,7 +1,6 @@
 package com.saney.renaultdocs
 
 import android.net.Uri
-import android.provider.DocumentsContract
 
 object SafDisplayPath {
     fun tree(
@@ -19,9 +18,10 @@ object SafDisplayPath {
                     uriText,
                 )
 
+            // v0.5.110: also a folder inside a tree (converter copy).
             val documentId =
-                DocumentsContract
-                    .getTreeDocumentId(
+                SafDatasetResolver
+                    .rootDocumentIdOf(
                         uri,
                     )
 

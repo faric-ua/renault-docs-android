@@ -95,7 +95,8 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
 
         self.assertIn("SafDisplayPath", activity)
         self.assertIn("SafDisplayPath.tree(", settings)
-        self.assertIn("getTreeDocumentId(", formatter)
+        # v0.5.110: SafDisplayPath also shows a folder inside a tree (converter copy).
+        self.assertIn("rootDocumentIdOf(", formatter)
         self.assertIn('"primary"', formatter)
         self.assertNotIn(
             'append(\n                uri,',

@@ -30,12 +30,13 @@ def read(name):
 
 
 class BrowserCopyNotInLibraryContract(unittest.TestCase):
-    def test_no_library_registration(self):
+    def test_no_automatic_library_registration(self):
+        # v0.5.110 (owner): adding is possible again, but only on request
+        # (button on the converter screen); the service never adds by itself.
         service = read("ConversionService.kt")
+        self.assertNotIn("DatasetStore", service)
+        self.assertNotIn(".upsert(", service)
         activity = read("ConversionActivity.kt")
-        for source in (service, activity):
-            self.assertNotIn("DatasetStore", source)
-            self.assertNotIn(".upsert(", source)
         self.assertNotIn("registerConvertedDataset", activity)
         self.assertNotIn("Додати готову папку в бібліотеку", activity)
 
@@ -63,9 +64,9 @@ class BrowserCopyNotInLibraryContract(unittest.TestCase):
         self.assertIn("fun readFolder(", reader)
         self.assertIn("readFolder(context, root, treeUri.toString()).getOrThrow()", reader)
 
-    def test_help_says_not_added_to_library(self):
+    def test_help_says_not_added_automatically(self):
         activity = read("ConversionActivity.kt")
-        self.assertIn("У бібліотеку Renault Docs вона не додається", activity)
+        self.assertIn("Сама в застосунок вона не додається", activity)
         self.assertIn("папку можна запакувати й передати", activity)
         self.assertNotIn("копія сама додається в бібліотеку", activity)
 

@@ -278,9 +278,10 @@ class ConversionService : Service() {
                     plan,
                 )
 
-            // v0.5.108 (owner decision): the *_android copy is a standalone
-            // folder for any browser — to zip and give away. It is NOT added
-            // to the library; the library keeps volumes in its own format.
+            // v0.5.109 (owner): the *_android copy is a standalone folder for
+            // any browser — to zip and give away; it is not auto-added.
+            // v0.5.110 (owner): it can be added to the app on request
+            // (button «Додати копію в застосунок» on the converter screen).
             val completionMessage =
                 buildString {
                     append(
@@ -304,7 +305,8 @@ class ConversionService : Service() {
 
                     append(
                         "\nКопію для браузера створено. Відкривай у браузері _renault/START.html (список томів) " +
-                            "або INDEX.HTM потрібного тому. Цю папку можна запакувати й передати — застосунок не потрібен."
+                            "або INDEX.HTM потрібного тому. Цю папку можна запакувати й передати — застосунок не потрібен. " +
+                            "Щоб відкривати її і в застосунку, натисни «Додати копію в застосунок»."
                     )
                 }
 
