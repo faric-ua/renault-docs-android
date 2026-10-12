@@ -65,7 +65,7 @@ class SafConversionEngine(
                 childTree = destinationUri,
             )
         ) {
-            "Destination не може бути всередині source."
+            "Папка призначення не може бути всередині старої папки."
         }
 
         val source =
@@ -74,7 +74,7 @@ class SafConversionEngine(
                 sourceUri,
             )
                 ?: error(
-                    "Source папка недоступна."
+                    "Стара папка недоступна."
                 )
         val destination =
             DocumentFile.fromTreeUri(
@@ -82,28 +82,28 @@ class SafConversionEngine(
                 destinationUri,
             )
                 ?: error(
-                    "Destination папка недоступна."
+                    "Папка призначення недоступна."
                 )
 
         require(
             source.isDirectory,
         ) {
-            "Source більше не є папкою."
+            "Стара папка більше не є папкою."
         }
         require(
             destination.isDirectory,
         ) {
-            "Destination більше не є папкою."
+            "Папка призначення більше не є папкою."
         }
         require(
             destination.canWrite(),
         ) {
-            "Немає права запису в destination."
+            "Немає права запису в папку призначення."
         }
 
         progress(
             ConversionRunPhase.SCANNING,
-            "Сканую source…",
+            "Сканую стару папку…",
             0,
             0,
             0,
@@ -123,7 +123,7 @@ class SafConversionEngine(
         require(
             scan.files.isNotEmpty(),
         ) {
-            "Source папка порожня."
+            "Стара папка порожня."
         }
 
         require(
@@ -134,7 +134,7 @@ class SafConversionEngine(
                 )
             },
         ) {
-            "Ця папка вже схожа на готовий Renault dataset."
+            "Ця папка вже схожа на готову копію Renault."
         }
 
         val exactFiles =
@@ -143,6 +143,31 @@ class SafConversionEngine(
                     it.relativePath
                 }
                 .toSet()
+
+        // v0.5.107 (phone QA, Kangoo NT8486): stop before copying anything when
+        // the chosen folder has no volume sub-folders. Previously this produced
+        // «Готово · томів 0» and a copy the library could not add.
+        val volumeRoots =
+            AndroidDatasetPackageWriter
+                .discoverVolumeRoots(
+                    filePaths =
+                        exactFiles,
+                    directoryPaths =
+                        scan.directories,
+                )
+
+        if (volumeRoots.isEmpty()) {
+            error(
+                if (AndroidDatasetPackageWriter.isVolumeFolderItself(exactFiles)) {
+                    "Вибрана стара папка сама є томом: INDEX/ACCUEIL лежить прямо в ній. " +
+                        "Вибери папку на рівень вище — ту, в якій лежить папка цього тому. " +
+                        "Нічого не скопійовано, стару папку не змінено."
+                } else {
+                    "У старій папці не знайдено папок томів з INDEX/ACCUEIL. " +
+                        "Вибери папку, в якій лежать папки томів. Нічого не скопійовано, стару папку не змінено."
+                },
+            )
+        }
 
         val lowerMap =
             ConverterPathNormalizer
@@ -159,7 +184,7 @@ class SafConversionEngine(
             require(
                 existingOutput.isDirectory,
             ) {
-                "Існуючий output не є папкою: " +
+                "Наявна готова копія не є папкою: " +
                     plan.outputFolderName
             }
 
@@ -185,7 +210,7 @@ class SafConversionEngine(
                 plan.outputFolderName,
             ) == null
         ) {
-            "Output уже існує: " +
+            "Готова копія вже існує: " +
                 plan.outputFolderName
         }
 
@@ -196,14 +221,14 @@ class SafConversionEngine(
             require(
                 stale.delete(),
             ) {
-                "Не вдалося видалити стару staging-папку: " +
+                "Не вдалося видалити стару тимчасову папку: " +
                     stagingName
             }
         }
 
         progress(
             ConversionRunPhase.PREPARING,
-            "Створюю staging…",
+            "Створюю тимчасову папку…",
             scan.files.size,
             0,
             0,
@@ -215,7 +240,7 @@ class SafConversionEngine(
                 stagingName,
             )
                 ?: error(
-                    "Не вдалося створити staging-папку."
+                    "Не вдалося створити тимчасову папку."
                 )
 
         DatasetMediaIsolation.ensure(
@@ -294,7 +319,7 @@ class SafConversionEngine(
 
             progress(
                 ConversionRunPhase.PACKAGING,
-                "Створюю базовий dataset package…",
+                "Створюю базовий пакет готової копії…",
                 scan.files.size,
                 scan.files.size,
                 changedFiles,
@@ -324,7 +349,7 @@ class SafConversionEngine(
 
             progress(
                 ConversionRunPhase.VALIDATING,
-                "Перевіряю output…",
+                "Перевіряю готову копію…",
                 scan.files.size,
                 scan.files.size,
                 changedFiles,
@@ -348,7 +373,7 @@ class SafConversionEngine(
 
             progress(
                 ConversionRunPhase.FINALIZING,
-                "Фіксую готову output-папку…",
+                "Фіксую готову копію…",
                 scan.files.size,
                 scan.files.size,
                 changedFiles,
@@ -360,7 +385,7 @@ class SafConversionEngine(
                     plan.outputFolderName,
                 )
             ) {
-                "Не вдалося перейменувати staging у готовий output."
+                "Не вдалося перетворити тимчасову папку на готову копію."
             }
 
             finalized =
@@ -405,7 +430,7 @@ class SafConversionEngine(
     private fun scanSource(
         treeUri: Uri,
         root: DocumentFile,
-        label: String = "source",
+        label: String = "стара папка",
     ): SourceScan {
         return try {
             scanSourceFast(
@@ -423,7 +448,7 @@ class SafConversionEngine(
         ) {
             progress(
                 ConversionRunPhase.SCANNING,
-                "Швидкий scanner недоступний · використовую compatibility scan…",
+                "Швидке сканування недоступне · сканую повільнішим способом…",
                 0,
                 0,
                 0,
@@ -593,9 +618,9 @@ class SafConversionEngine(
                         ) {
                             progress(
                                 ConversionRunPhase.SCANNING,
-                                "Сканую " +
+                                "Сканую (" +
                                     label +
-                                    " · файлів: " +
+                                    ") · файлів: " +
                                     files.size +
                                     " · папок: " +
                                     directories.size,
@@ -608,7 +633,7 @@ class SafConversionEngine(
                     }
                 }
                 ?: error(
-                    "DocumentsProvider не повернув список файлів."
+                    "Android не повернув список файлів папки."
                 )
         }
 
@@ -621,9 +646,9 @@ class SafConversionEngine(
 
         progress(
             ConversionRunPhase.SCANNING,
-            "Сканування " +
+            "Сканування (" +
                 label +
-                " завершено · файлів: " +
+                ") завершено · файлів: " +
                 files.size +
                 " · папок: " +
                 directories.size,
@@ -709,9 +734,9 @@ class SafConversionEngine(
                             ) {
                                 progress(
                                     ConversionRunPhase.SCANNING,
-                                    "Compatibility scan " +
+                                    "Повільне сканування (" +
                                         label +
-                                        " · файлів: " +
+                                        ") · файлів: " +
                                         files.size +
                                         " · папок: " +
                                         directories.size,
@@ -768,9 +793,9 @@ class SafConversionEngine(
             existingRecord.id ==
                 expectedDatasetId
         ) {
-            "Output " +
+            "Папка " +
                 plan.outputFolderName +
-                " належить іншому dataset: " +
+                " уже належить іншій готовій копії: " +
                 existingRecord.title
         }
 
@@ -790,7 +815,7 @@ class SafConversionEngine(
 
         progress(
             ConversionRunPhase.PREPARING,
-            "Існуючий dataset знайдено · сканую його томи…",
+            "Наявну готову копію знайдено · сканую її томи…",
             scan.files.size,
             0,
             0,
@@ -804,7 +829,7 @@ class SafConversionEngine(
                 root =
                     existingOutput,
                 label =
-                    "існуючий dataset",
+                    "наявна готова копія",
             )
 
         val existingFiles =
@@ -836,7 +861,7 @@ class SafConversionEngine(
         require(
             volumeRoots.isNotEmpty(),
         ) {
-            "У source не знайдено окремих томів з INDEX/ACCUEIL для додавання."
+            "У старій папці не знайдено окремих томів з INDEX/ACCUEIL для додавання."
         }
 
         val sourceVolumeFiles =
@@ -916,7 +941,7 @@ class SafConversionEngine(
 
                 progress(
                     ConversionRunPhase.COPYING,
-                    "Том уже є · перевірю package: " +
+                    "Том уже є · перевіряю пакет: " +
                         root,
                     sourceVolumeFiles.size,
                     filesDone,
@@ -943,7 +968,7 @@ class SafConversionEngine(
                     require(
                         staleTemp.delete(),
                     ) {
-                        "Не вдалося очистити старий merge staging: " +
+                        "Не вдалося очистити стару тимчасову папку додавання: " +
                             tempName
                     }
                 }
@@ -954,7 +979,7 @@ class SafConversionEngine(
                         tempName,
                     )
                     ?: error(
-                        "Не вдалося створити merge staging для тому: " +
+                        "Не вдалося створити тимчасову папку додавання для тому: " +
                             root
                     )
 
@@ -1102,7 +1127,7 @@ class SafConversionEngine(
 
         progress(
             ConversionRunPhase.PACKAGING,
-            "Оновлюю package для всіх томів…",
+            "Оновлюю пакет для всіх томів…",
             combinedFilePaths.size,
             combinedFilePaths.size,
             changedFiles,
@@ -1415,7 +1440,7 @@ class SafConversionEngine(
                 val parent =
                     result[parentPath]
                         ?: error(
-                            "Staging parent не знайдено: " +
+                            "Не знайдено папку для тимчасових файлів: " +
                                 parentPath
                         )
 
@@ -1613,13 +1638,13 @@ class SafConversionEngine(
                 "renault-dataset.json",
             )
                 ?: error(
-                    "Validation: renault-dataset.json відсутній."
+                    "Перевірка: немає файлу renault-dataset.json."
                 )
 
         require(
             manifest.isFile,
         ) {
-            "Validation: manifest не є файлом."
+            "Перевірка: опис набору (renault-dataset.json) не є файлом."
         }
 
         require(
@@ -1629,13 +1654,13 @@ class SafConversionEngine(
             )?.isFile ==
                 true
         ) {
-            "Validation: стартовий файл відсутній: " +
+            "Перевірка: немає стартового файлу: " +
                 expectedEntrypoint
         }
 
         progress(
             ConversionRunPhase.VALIDATING,
-            "Перевіряю output…",
+            "Перевіряю готову копію…",
             expectedSourceFiles,
             0,
             changedFiles,
@@ -1658,7 +1683,7 @@ class SafConversionEngine(
             copiedSourceFiles >=
                 expectedSourceFiles
         ) {
-            "Validation: скопійовано не всі source-файли: " +
+            "Перевірка: зі старої папки скопійовано не всі файли: " +
                 copiedSourceFiles +
                 "/" +
                 expectedSourceFiles
@@ -1726,7 +1751,7 @@ class SafConversionEngine(
                         ) {
                             progress(
                                 ConversionRunPhase.VALIDATING,
-                                "Перевіряю output…",
+                                "Перевіряю готову копію…",
                                 expectedSourceFiles,
                                 count.coerceAtMost(
                                     expectedSourceFiles,
@@ -1796,7 +1821,7 @@ class SafConversionEngine(
                 "conversion-report.json",
             )
                 ?: error(
-                    "Не вдалося створити conversion-report.json."
+                    "Не вдалося створити звіт conversion-report.json."
                 )
 
         context.contentResolver
@@ -1816,7 +1841,7 @@ class SafConversionEngine(
                 )
             }
             ?: error(
-                "Не вдалося записати conversion-report.json."
+                "Не вдалося записати звіт conversion-report.json."
             )
     }
 
@@ -1931,7 +1956,7 @@ class SafConversionEngine(
         val authority =
             documentUri.authority
                 ?: error(
-                    "Output URI не має authority."
+                    "Адреса готової копії неповна (немає постачальника файлів)."
                 )
 
         val documentId =

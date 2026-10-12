@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+# v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
+
 
 class V0539SelfContainedConverterContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
@@ -49,7 +51,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
         self.assertIn('endsWith(', activity)
         self.assertIn('"_android"', activity)
         self.assertIn(
-            "Destination має бути батьківською папкою",
+            "Папка призначення має бути батьківською",
             activity,
         )
 
@@ -66,7 +68,7 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
 
         # v0.5.103: validation progress is time-based (live), not every 250 files.
         self.assertIn("progressDue()", engine)
-        self.assertIn('"Перевіряю output…"', engine)
+        self.assertIn('"Перевіряю готову копію…"', engine)
         self.assertIn('"Перевіряю…"', activity)
         self.assertIn("state.filesDone", activity)
         self.assertIn("state.filesTotal", activity)

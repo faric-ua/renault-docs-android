@@ -2,6 +2,8 @@ from pathlib import Path
 import subprocess
 import unittest
 
+# v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
+
 
 class V0538ConverterFoundationContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
@@ -55,7 +57,7 @@ class V0538ConverterFoundationContractTests(unittest.TestCase):
 
         self.assertIn("scanSourceFallback(", engine)
         self.assertIn(
-            "Швидкий scanner недоступний · використовую compatibility scan",
+            "Швидке сканування недоступне · сканую повільнішим способом",
             engine,
         )
 
