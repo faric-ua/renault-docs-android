@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.110",
+  "versionCode": 126,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.110-copy-in-app",
+  "issues": [
+    147
+  ],
+  "scope": "Optional «Додати копію в застосунок» after a finished conversion: the browser copy is found inside the permitted destination, checked and added (Home «Старі бібліотеки»); resolver understands folder-inside-tree addresses. Includes v0.5.109 (no automatic add, in-tree addressing), v0.5.108 help and v0.5.107 fixes.",
+  "sourceBase": "v0.5.109/build125",
+  "phoneQa": "PENDING",
+  "pr_number": 212,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 705,
+  "signed_apk": "PASS",
+  "source_sha": "0c651b85700e276be856f910e7e5f5377f732b1d",
+  "signed_run_id": 38275070548,
+  "signed_run_number": 174,
+  "signed_android_apk_run": 174,
+  "artifact_id": 11757734471,
+  "artifact_name": "Renault-Docs-v0.5.110-Debug",
+  "artifact_digest": "sha256:be361428f605d0a0ba473174a7e6cec7a8f5ee51c35daf5f77f22e66bb766e49",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.107. Converter: Kangoo «(RUS)» → Test2; at the end no «не є папкою», button «Додати копію в застосунок» → copy appears on Home «Старі бібліотеки» and opens."
+}
