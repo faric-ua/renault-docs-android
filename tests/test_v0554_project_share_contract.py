@@ -14,7 +14,8 @@ class ProjectShareContractTest(unittest.TestCase):
         self.assertIn("Поділитися проєктом", block)
         self.assertIn("Видалити проєкт", block)
         self.assertIn("Скасувати", block)
-        self.assertIn("stroke = if (danger) Ui.danger else Ui.accent", block)
+        self.assertIn("danger -> Ui.danger", block)
+        self.assertIn("else -> Ui.accent", block)
 
     def test_project_share_keeps_rdpkg_one_volume_contract(self):
         exporter = self.read("android/app/src/main/java/com/saney/renaultdocs/RdprojectExporter.kt")

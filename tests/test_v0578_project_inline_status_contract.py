@@ -28,7 +28,9 @@ class ProjectInlineStatusTests(unittest.TestCase):
 
     def test_home_now_uses_same_fixed_add_status_pattern_as_project(self):
         self.assertIn("operationStatus = OperationStatusView(this@MainActivity)",self.home)
-        self.assertIn("useProjectCompactLayout(false)",self.home)
+        # #159 (v0.5.102): Home keeps the expanded/collapsed choice across rotation.
+        self.assertIn("useProjectCompactLayout(restoredStatusDetailsExpanded)",self.home)
+        self.assertIn("STATE_STATUS_DETAILS_EXPANDED",self.home)
         panel=self.home[self.home.index("private fun buildHomeAddPanel"):self.home.index("private fun buildHomeChoiceCard")]
         self.assertLess(panel.index("addView(\n                homeAddPanelBody"), panel.index("operationStatus ="))
 

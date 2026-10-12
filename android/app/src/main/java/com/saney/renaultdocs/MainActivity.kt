@@ -55,6 +55,8 @@ class MainActivity : Activity() {
         HomeProjectDialogController
     private lateinit var folderExportRunStore: ProjectFolderExportRunStore
     private var pendingFolderExportProjectId: String? = null
+    // #159: the Home operation status keeps the owner's expanded/collapsed choice on rotation.
+    private var restoredStatusDetailsExpanded = false
 
     private lateinit var rdprojectShareRunStore:
         RdprojectShareRunStore
@@ -109,6 +111,8 @@ class MainActivity : Activity() {
         folderExportRunStore = ProjectFolderExportRunStore(this)
         pendingFolderExportProjectId =
             savedInstanceState?.getString(STATE_PENDING_FOLDER_EXPORT_PROJECT)
+        restoredStatusDetailsExpanded =
+            savedInstanceState?.getBoolean(STATE_STATUS_DETAILS_EXPANDED, false) ?: false
         settings = AppSettings(this)
         homeAddPanelPinned = settings.homeAddPanelPinned
         homeAddPanelExpanded = savedInstanceState
@@ -308,6 +312,10 @@ class MainActivity : Activity() {
             pendingFolderExportProjectId,
         )
         outState.putBoolean(STATE_HOME_ADD_EXPANDED, homeAddPanelExpanded)
+        outState.putBoolean(
+            STATE_STATUS_DETAILS_EXPANDED,
+            ::operationStatus.isInitialized && operationStatus.isProjectDetailsExpanded(),
+        )
 
         if (
             ::statusText.isInitialized
@@ -855,7 +863,7 @@ class MainActivity : Activity() {
             )
 
             operationStatus = OperationStatusView(this@MainActivity).apply {
-                useProjectCompactLayout(false)
+                useProjectCompactLayout(restoredStatusDetailsExpanded)
             }
             addView(
                 operationStatus,
@@ -1380,15 +1388,25 @@ class MainActivity : Activity() {
                     .takeIf { folderState.volumeIds.isNotEmpty() },
                 total = folderState.volumeIds.size.takeIf { it > 0 },
                 subject = folderState.projectId,
+                onCancel = {
+                    projectDialogs.confirmCancelOperation(
+                        title = "Зупинити експорт томів?",
+                        message = "Поточний том не буде дописано. Уже готові файли в папці лишаться.",
+                    ) {
+                        if (folderExportRunStore.requestCancel()) {
+                            statusText.text = "Зупиняю експорт після поточного кроку…"
+                        }
+                    }
+                },
             )
             return
         }
         if (folderState.isTerminal && !folderState.dismissed) {
             operationStatus.showTerminal(
-                title = if (folderState.phase == ProjectFolderExportPhase.COMPLETE) {
-                    "Окремі томи · завершено"
-                } else {
-                    "Окремі томи · помилка"
+                title = when (folderState.phase) {
+                    ProjectFolderExportPhase.COMPLETE -> "Окремі томи · завершено"
+                    ProjectFolderExportPhase.CANCELLED -> "Окремі томи · скасовано"
+                    else -> "Окремі томи · помилка"
                 },
                 detail = folderState.message,
             ) {
@@ -1460,6 +1478,16 @@ class MainActivity : Activity() {
                         },
                 subject =
                     operationSubject,
+                onCancel = {
+                    projectDialogs.confirmCancelOperation(
+                        title = "Зупинити підготовку проєкту?",
+                        message = "Недороблений .rdproject буде видалено. Томи і попередні файли не змінюються.",
+                    ) {
+                        if (rdprojectShareRunStore.requestCancel()) {
+                            statusText.text = "Зупиняю підготовку проєкту…"
+                        }
+                    }
+                },
             )
             return
         }
@@ -1542,7 +1570,11 @@ class MainActivity : Activity() {
         } else {
             operationStatus.showTerminal(
                 title =
-                    "Підготовка проєкту · помилка",
+                    if (state.phase == RdprojectShareRunPhase.CANCELLED) {
+                        "Підготовка проєкту · скасовано"
+                    } else {
+                        "Підготовка проєкту · помилка"
+                    },
                 detail =
                     state.message
                         .ifBlank {
@@ -2223,6 +2255,7 @@ class MainActivity : Activity() {
         private const val DEFAULT_HOME_STATUS =
             "Проєкт = модель Renault · томи додаються окремо."
         private const val STATE_HOME_ADD_EXPANDED = "main_home_add_expanded"
+        private const val STATE_STATUS_DETAILS_EXPANDED = "main_status_details_expanded"
         private const val STATE_STATUS_TEXT =
             "main_status_text"
         private const val STATE_STATUS_COLOR =

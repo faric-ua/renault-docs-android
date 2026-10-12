@@ -14,6 +14,8 @@ object PreparedShareStore {
     private const val ROOT = "prepared-share"
     private const val PROJECTS = "projects"
     private const val VOLUMES = "volumes"
+    private const val INCOMING = ".incoming"
+    private const val STALE_INCOMING_MS = 6L * 60L * 60L * 1000L
 
     fun projectFile(
         context: Context,
@@ -280,6 +282,43 @@ object PreparedShareStore {
             "_",
         ) +
             ".rdpkg"
+    }
+
+    /**
+     * Temporary target for a file being prepared. It lives outside projects/ and volumes/,
+     * so ⇧ never appears for a half-written file (interrupted, failed or cancelled run).
+     */
+    fun incomingFile(
+        context: Context,
+        finalFile: File,
+    ): File =
+        File(
+            directory(context, INCOMING),
+            finalFile.name + "." + System.currentTimeMillis() + ".partial",
+        )
+
+    /**
+     * Moves a fully written and verified temporary file into place.
+     * One prepared file per volume/project: an existing one is never replaced.
+     */
+    fun commitIncoming(
+        temp: File,
+        finalFile: File,
+    ) {
+        require(temp.isFile && temp.length() > 0L) { "Підготовлений файл порожній або відсутній." }
+        require(!finalFile.exists()) {
+            "Підготовлений файл уже є. Спершу видали його, щоб зробити новий."
+        }
+        finalFile.parentFile?.mkdirs()
+        require(temp.renameTo(finalFile)) { "Не вдалося зберегти підготовлений файл." }
+    }
+
+    /** Removes only abandoned temporary files (killed process), never prepared results. */
+    fun cleanupStaleIncoming(context: Context) {
+        val now = System.currentTimeMillis()
+        directory(context, INCOMING).listFiles().orEmpty()
+            .filter { it.isFile && it.name.endsWith(".partial") && now - it.lastModified() > STALE_INCOMING_MS }
+            .forEach { runCatching { it.delete() } }
     }
 
     private fun directory(
