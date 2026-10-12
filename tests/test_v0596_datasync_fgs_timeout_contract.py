@@ -39,9 +39,11 @@ class DataSyncTimeoutContractTests(unittest.TestCase):
                 ontimeout=code.index("override fun onTimeout")
                 success=code.count("dataSyncTimeout.checkActive()")
                 self.assertGreaterEqual(success, 2, file)
-        self.assertIn("isCancelled = { dataSyncTimeout.isExpired }",
+        # v0.5.105: the owner's «Скасувати» joins the timeout at the same
+        # importer checkpoints; the timeout still comes first.
+        self.assertIn("isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() }",
                       self.code("RdpkgImportService.kt"))
-        self.assertIn("isCancelled = { dataSyncTimeout.isExpired }",
+        self.assertIn("isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() }",
                       self.code("CatalogImportService.kt"))
         self.assertIn("dataSyncTimeout.isExpired || runStore.isCancelRequested()",
                       self.code("NativeRdpkgPreparationService.kt"))

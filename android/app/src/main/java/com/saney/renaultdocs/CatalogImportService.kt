@@ -17,6 +17,7 @@ class CatalogImportService : Service() {
     private lateinit var runStore: CatalogImportRunStore
     private lateinit var workWakeLock: BackgroundWorkWakeLock
     private val workerRunning = AtomicBoolean(false)
+    @Volatile private var importedCount = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -78,6 +79,25 @@ class CatalogImportService : Service() {
                 importItems(state.items)
             } catch (error: Throwable) {
                 if (dataSyncTimeout.isExpired) return@Thread
+                if (runStore.isCancelRequested() &&
+                    (error is OperationCancelledException ||
+                        error.cause is OperationCancelledException ||
+                        error is ConversionCancelledException ||
+                        error.cause is ConversionCancelledException)
+                ) {
+                    // v0.5.105: volumes already added stay; the unfinished one is not added.
+                    val done = importedCount
+                    // Remove only partial downloads in this service's private cache folder.
+                    File(cacheDir, "catalog-downloads").listFiles()?.forEach { runCatching { it.delete() } }
+                    runStore.cancelled(
+                        "Імпорт із каталогу скасовано. Уже додано: $done із ${state.items.size}. Недороблений том не додано.",
+                    )
+                    notify(
+                        "Імпорт із каталогу скасовано.",
+                        false,
+                    )
+                    return@Thread
+                }
                 val message =
                     error.message
                         ?: "Невідома помилка імпорту з каталогу."
@@ -144,10 +164,12 @@ class CatalogImportService : Service() {
                 mkdirs()
             }
 
+        importedCount = 0
         items.forEachIndexed {
             index,
             item ->
             dataSyncTimeout.checkActive()
+            if (runStore.isCancelRequested()) throw OperationCancelledException()
             val targetProject =
                 store.project(
                     item.projectId,
@@ -199,6 +221,10 @@ class CatalogImportService : Service() {
                     done,
                     total ->
                     dataSyncTimeout.checkActive()
+                    if (runStore.isCancelRequested()) {
+                        // The partial download lives only in the app cache.
+                        throw OperationCancelledException()
+                    }
                     val scale =
                         10_000
                     val progress =
@@ -290,11 +316,14 @@ class CatalogImportService : Service() {
                                         ?: 0,
                             )
                         },
-                        isCancelled = { dataSyncTimeout.isExpired },
+                        // Importer stops only at its safe checkpoints, never mid-activation.
+                        isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() },
                     )
                     .getOrThrow()
 
             dataSyncTimeout.checkActive()
+            // Once installed, the volume is always added to the project, even if
+            // «Скасувати» came during activation: no installed-but-hidden package.
             store.upsertVolume(
                 projectId =
                     targetProject.id,
@@ -306,6 +335,7 @@ class CatalogImportService : Service() {
             )
 
             destination.delete()
+            importedCount++
         }
 
         dataSyncTimeout.checkActive()

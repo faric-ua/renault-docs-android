@@ -2,7 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 
-enum class RdpkgImportRunPhase { IDLE, IMPORTING, COMPLETE, FAILED }
+enum class RdpkgImportRunPhase { IDLE, IMPORTING, COMPLETE, FAILED, CANCELLED }
 
 data class RdpkgImportRunState(
     val phase: RdpkgImportRunPhase = RdpkgImportRunPhase.IDLE,
@@ -18,7 +18,7 @@ data class RdpkgImportRunState(
     val consumedFinishedAtMs: Long = 0L,
 ) {
     val isRunning get() = phase == RdpkgImportRunPhase.IMPORTING
-    val isTerminal get() = phase == RdpkgImportRunPhase.COMPLETE || phase == RdpkgImportRunPhase.FAILED
+    val isTerminal get() = phase == RdpkgImportRunPhase.COMPLETE || phase == RdpkgImportRunPhase.FAILED || phase == RdpkgImportRunPhase.CANCELLED
     val isConsumed get() = isTerminal && finishedAtMs > 0L && consumedFinishedAtMs == finishedAtMs
 }
 
@@ -117,7 +117,25 @@ class RdpkgImportRunStore(context: Context) {
         return prefs.edit().putLong(KEY_CONSUMED_FINISHED_AT, finishedAtMs).commit()
     }
 
+    /** v0.5.105: «Скасувати» on the status card; persisted so the worker sees it after rotation. */
+    @Synchronized
+    fun requestCancel(): Boolean {
+        if (!load().isRunning) return false
+        return prefs.edit().putBoolean(KEY_CANCEL_REQUESTED, true).commit()
+    }
+
+    fun isCancelRequested(): Boolean = prefs.getBoolean(KEY_CANCEL_REQUESTED, false)
+
+    fun cancelled(message: String) {
+        prefs.edit()
+            .putString(KEY_PHASE, RdpkgImportRunPhase.CANCELLED.name)
+            .putString(KEY_MESSAGE, message)
+            .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
+            .apply()
+    }
+
     companion object {
+        private const val KEY_CANCEL_REQUESTED = "cancel_requested"
         private const val PREFS = "renault_docs_rdpkg_import_run"
         private const val KEY_PHASE = "phase"
         private const val KEY_MESSAGE = "message"

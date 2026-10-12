@@ -883,6 +883,9 @@ class DriveCatalogActivity : Activity() {
                         state.itemIndex,
                     )
 
+            val stopping =
+                importStore.isCancelRequested()
+
             operationStatus.showRunning(
                 title =
                     when (
@@ -895,7 +898,11 @@ class DriveCatalogActivity : Activity() {
                             "Імпорт із каталогу"
                     },
                 detail =
-                    state.message,
+                    if (stopping) {
+                        "Зупиняю після поточного безпечного кроку…"
+                    } else {
+                        state.message
+                    },
                 current =
                     state.progressCurrent
                         .takeIf {
@@ -911,6 +918,15 @@ class DriveCatalogActivity : Activity() {
                 subject =
                     item?.fileName
                         ?: "Renault Docs",
+                // v0.5.105: same «Скасувати» as the Home card, with a question.
+                onCancel =
+                    if (stopping) {
+                        null
+                    } else {
+                        {
+                            confirmCancelImport()
+                        }
+                    },
             )
 
             importButton.isEnabled =
@@ -926,13 +942,17 @@ class DriveCatalogActivity : Activity() {
 
         operationStatus.showTerminal(
             title =
-                if (
-                    state.phase ==
-                    CatalogImportPhase.COMPLETE
+                when (
+                    state.phase
                 ) {
-                    "Імпорт із каталогу завершено"
-                } else {
-                    "Імпорт із каталогу · помилка"
+                    CatalogImportPhase.COMPLETE ->
+                        "Імпорт із каталогу завершено"
+
+                    CatalogImportPhase.CANCELLED ->
+                        "Імпорт із каталогу · скасовано"
+
+                    else ->
+                        "Імпорт із каталогу · помилка"
                 },
             detail =
                 state.message,
@@ -952,6 +972,17 @@ class DriveCatalogActivity : Activity() {
                 }
             },
         )
+    }
+
+    /** v0.5.105: stopping a catalog download/import asks once. */
+    private fun confirmCancelImport() {
+        ConfirmActions.confirmStop(
+            activity = this,
+            title = "Зупинити імпорт із каталогу?",
+            message = "Поточний том не буде додано. Уже додані томи лишаться. Файли на Google Drive не змінюються.",
+        ) {
+            importStore.requestCancel()
+        }
     }
 
     private fun formatSize(

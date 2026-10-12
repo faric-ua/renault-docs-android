@@ -82,7 +82,9 @@ class RdpkgImportService : Service() {
                             ),
                         )
                     },
-                    isCancelled = { dataSyncTimeout.isExpired },
+                    // v0.5.105: the owner's «Скасувати» uses the importer's own safe
+                    // checkpoints; the final activation rename is never interrupted.
+                    isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() },
                 ).getOrThrow()
                 dataSyncTimeout.checkActive()
                 runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
@@ -92,6 +94,16 @@ class RdpkgImportService : Service() {
                 )
             } catch (error: Throwable) {
                 if (dataSyncTimeout.isExpired) return@Thread
+                if (runStore.isCancelRequested() &&
+                    (error is ConversionCancelledException || error.cause is ConversionCancelledException)
+                ) {
+                    runStore.cancelled("Імпорт тому скасовано. Том не додано, вихідний .rdpkg не змінено.")
+                    publishResult(
+                        title = "Renault Docs · імпорт скасовано",
+                        text = "Том не додано.",
+                    )
+                    return@Thread
+                }
                 val message = error.message ?: "Невідома помилка імпорту."
                 runStore.fail(message)
                 publishResult(
