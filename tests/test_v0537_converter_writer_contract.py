@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+# v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
+
 
 class V0537ConverterWriterContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
@@ -54,7 +56,7 @@ class V0537ConverterWriterContractTests(unittest.TestCase):
 
         self.assertNotIn("FLAG_GRANT_WRITE_URI_PERMISSION", source_picker)
         self.assertNotIn("source.delete()", engine)
-        self.assertIn("Оригінальна source-папка залишена без змін.", activity)
+        self.assertIn("Стара папка залишена без змін.", activity)
 
     def test_path_normalizer_is_used_while_copying_text_files(self):
         engine = self._read(

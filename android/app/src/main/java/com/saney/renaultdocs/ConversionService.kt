@@ -329,8 +329,14 @@ class ConversionService : Service() {
                         )
                     } else {
                         append(
-                            "\nOutput готовий. Автододавання в бібліотеку не вдалося."
+                            "\nГотова копія створена. Автододавання в бібліотеку не вдалося"
                         )
+                        // v0.5.107: say why, instead of hiding the reason.
+                        registration.exceptionOrNull()
+                            ?.message
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { append(": ").append(it) }
+                        append(".")
                     }
                 }
 
@@ -368,14 +374,14 @@ class ConversionService : Service() {
         ) {
             if (dataSyncTimeout.isExpired) return
             runStore.markCancelled(
-                "Конвертацію скасовано. Staging видалено, source не змінено."
+                "Конвертацію скасовано. Тимчасову папку видалено, стару папку не змінено."
             )
 
             notifyFinal(
                 title =
                     "Конвертацію скасовано",
                 text =
-                    "Source не змінено.",
+                    "Стару папку не змінено.",
             )
         } catch (
             error:
@@ -543,11 +549,11 @@ class ConversionService : Service() {
         val channel =
             NotificationChannel(
                 CHANNEL_ID,
-                "Renault conversion",
+                "Конвертація Renault",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description =
-                    "Прогрес довгої конвертації Renault dataset"
+                    "Прогрес довгої конвертації Renault"
             }
 
         notificationManager()

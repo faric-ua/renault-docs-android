@@ -50,7 +50,7 @@ object AndroidDatasetPackageWriter {
                 sourceFilePaths,
             )
                 ?: error(
-                    "Не знайдено INDEX/ACCUEIL у source."
+                    "Не знайдено INDEX/ACCUEIL у старій папці."
                 )
 
         val volumes =
@@ -319,6 +319,16 @@ object AndroidDatasetPackageWriter {
                     it.isNotBlank()
                 }
         }
+
+    /**
+     * v0.5.107: the chosen folder is itself one volume — INDEX/ACCUEIL lies
+     * directly in it. Volumes are always sub-folders, so such a choice would
+     * convert into a copy with 0 volumes (phone QA: Kangoo NT8486).
+     */
+    fun isVolumeFolderItself(
+        filePaths: Set<String>,
+    ): Boolean =
+        entryNames.any { it in filePaths }
 
     private fun discoverEntrypoint(
         filePaths: Set<String>,

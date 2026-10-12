@@ -282,7 +282,7 @@ class ConversionActivity : Activity() {
                 Ui.muted,
             )
             statusText.text =
-                "Source папку вибрано."
+                "Стару папку вибрано."
         } else {
             persistPermission(
                 uri =
@@ -304,7 +304,7 @@ class ConversionActivity : Activity() {
                 Ui.muted,
             )
             statusText.text =
-                "Destination папку вибрано."
+                "Папку призначення вибрано."
         }
 
         renderDraft()
@@ -474,7 +474,7 @@ class ConversionActivity : Activity() {
                 context =
                     this,
                 value =
-                    "Конвертер: source → staging/merge → нормалізація шляхів → package → validation → готовий *_android dataset. Якщо dataset цієї моделі вже існує, нові томи додаються в нього. Оригінал ніколи не видаляється.",
+                    "Конвертер: стара папка → тимчасова папка (додавання томів) → нормалізація шляхів → пакет → перевірка → готова копія *_android. Якщо готова копія цієї моделі вже існує, нові томи додаються в неї. Оригінал ніколи не видаляється.",
                 sizeSp =
                     14f,
                 color =
@@ -497,7 +497,7 @@ class ConversionActivity : Activity() {
                 title =
                     "1. Стара Renault-папка",
                 buttonText =
-                    "Вибрати source",
+                    "Вибрати стару папку",
                 onClick = {
                     openTreePicker(
                         requestCode =
@@ -522,7 +522,7 @@ class ConversionActivity : Activity() {
                 title =
                     "2. Батьківська папка призначення",
                 buttonText =
-                    "Вибрати destination",
+                    "Вибрати папку призначення",
                 onClick = {
                     openTreePicker(
                         requestCode =
@@ -799,7 +799,7 @@ class ConversionActivity : Activity() {
                 context =
                     this,
                 value =
-                    "Вибери source і destination.",
+                    "Вибери стару папку і папку призначення.",
                 sizeSp =
                     14f,
                 color =
@@ -1150,7 +1150,9 @@ class ConversionActivity : Activity() {
                     progressBar, null, null, completed = true, color = Ui.danger,
                 )
                 progressText.setTextColor(Ui.danger)
-                progressText.text = state.message.ifBlank { "Помилка конвертації" }
+                // v0.5.107: the full reason is shown once, in the status text
+                // below; the bar line only says that the run failed.
+                progressText.text = "Помилка конвертації"
             }
 
             state.phase == ConversionRunPhase.CANCELLED -> {
@@ -1200,9 +1202,9 @@ class ConversionActivity : Activity() {
                 )
                 statusText.text =
                     state.message +
-                        "\n\nOutput: " +
+                        "\n\nГотова копія: " +
                         state.outputFolderName +
-                        "\nОригінальна source-папка залишена без змін."
+                        "\nСтара папка залишена без змін."
             }
 
             ConversionRunPhase.FAILED -> {
@@ -1355,13 +1357,13 @@ class ConversionActivity : Activity() {
                     if (
                         existingOutput != null
                     ) {
-                        "План готовий. Існуючий dataset буде доповнено новими томами:\n" +
+                        "План готовий. Наявну готову копію буде доповнено новими томами:\n" +
                             plan.outputFolderName +
-                            "\n\nSource не змінюється. Наявні томи не видаляються."
+                            "\n\nСтара папка не змінюється. Наявні томи не видаляються."
                     } else {
-                        "План готовий. Output буде створено як:\n" +
+                        "План готовий. Готову копію буде створено як:\n" +
                             plan.outputFolderName +
-                            "\n\nSource не змінюється. Робота піде через staging."
+                            "\n\nСтара папка не змінюється. Робота піде через тимчасову папку."
                     }
             }
             .onFailure {
@@ -1461,7 +1463,7 @@ class ConversionActivity : Activity() {
                     Ui.muted,
                 )
                 statusText.text =
-                    "Запускаю foreground-конвертацію…"
+                    "Запускаю конвертацію…"
 
                 renderRunState()
             }
@@ -1501,7 +1503,7 @@ class ConversionActivity : Activity() {
                         ),
                     )
                     ?: error(
-                        "Source папка більше недоступна."
+                        "Стара папка більше недоступна."
                     )
 
             val destination =
@@ -1513,25 +1515,25 @@ class ConversionActivity : Activity() {
                         ),
                     )
                     ?: error(
-                        "Destination папка більше недоступна."
+                        "Папка призначення більше недоступна."
                     )
 
             require(
                 source.isDirectory,
             ) {
-                "Source більше не є доступною папкою."
+                "Стара папка більше не доступна як папка."
             }
 
             require(
                 destination.isDirectory,
             ) {
-                "Destination більше не є доступною папкою."
+                "Папка призначення більше не доступна як папка."
             }
 
             require(
                 destination.canWrite(),
             ) {
-                "Android не дав права запису в destination."
+                "Android не дав права запису в папку призначення."
             }
 
             require(
@@ -1547,7 +1549,7 @@ class ConversionActivity : Activity() {
                                 true,
                         )
             ) {
-                "Destination має бути батьківською папкою, наприклад Documents/Renault. Не вибирай готову *_android папку."
+                "Папка призначення має бути батьківською, наприклад Documents/Renault. Не вибирай готову *_android папку."
             }
 
             destination
@@ -1559,7 +1561,7 @@ class ConversionActivity : Activity() {
                     require(
                         existingOutput.isDirectory,
                     ) {
-                        "Існуючий output не є папкою: " +
+                        "Наявна готова копія не є папкою: " +
                             plan.outputFolderName
                     }
 
@@ -1586,9 +1588,9 @@ class ConversionActivity : Activity() {
                         existingRecord.id ==
                             expectedDatasetId
                     ) {
-                        "Output " +
+                        "Папка " +
                             plan.outputFolderName +
-                            " належить іншому dataset: " +
+                            " уже належить іншій готовій копії: " +
                             existingRecord.title
                     }
                 }
@@ -1612,7 +1614,7 @@ class ConversionActivity : Activity() {
             Ui.muted,
         )
         statusText.text =
-            "Перевіряю готовий dataset…"
+            "Перевіряю готову копію…"
 
         Thread {
             val outputUri =
@@ -1629,7 +1631,7 @@ class ConversionActivity : Activity() {
                                 outputUri,
                             )
                             ?: error(
-                                "Готова output-папка недоступна."
+                                "Готова копія недоступна."
                             )
 
                     DatasetMediaIsolation.ensure(
@@ -1663,7 +1665,7 @@ class ConversionActivity : Activity() {
                                 record.title +
                                 " · томів: " +
                                 record.volumeCount +
-                                "\n\nDataset готовий до використання."
+                                "\n\nГотова копія готова до використання."
                     }
                     .onFailure {
                         error ->
@@ -1671,7 +1673,7 @@ class ConversionActivity : Activity() {
                             Ui.danger,
                         )
                         statusText.text =
-                            "Output створено, але Library validation не пройшла: " +
+                            "Готову копію створено, але перевірка бібліотеки не пройшла: " +
                                 (
                                     error.message
                                         ?: "невідома помилка"
@@ -1697,7 +1699,7 @@ class ConversionActivity : Activity() {
             state.mergeExisting
         ) {
             runStore.fail(
-                "Попереднє додавання томів було перервано. Наявний dataset не видалено. Запусти конвертацію ще раз — merge staging буде очищено, а вже додані томи буде перевірено повторно."
+                "Попереднє додавання томів було перервано. Наявну готову копію не видалено. Запусти конвертацію ще раз — тимчасову папку буде очищено, а вже додані томи буде перевірено повторно."
             )
             renderRunState()
             return
@@ -1737,7 +1739,7 @@ class ConversionActivity : Activity() {
                                 ),
                             )
                             ?: error(
-                                "Destination недоступний."
+                                "Папка призначення недоступна."
                             )
 
                     val output =
@@ -1749,7 +1751,7 @@ class ConversionActivity : Activity() {
                                 it.isDirectory
                             }
                             ?: error(
-                                "Готовий output ще не створений."
+                                "Готову копію ще не створено."
                             )
 
                     val outputTreeUri =
@@ -1805,7 +1807,7 @@ class ConversionActivity : Activity() {
                                 outputTreeUri
                                     .toString(),
                             message =
-                                "Попередній процес завершив файлову конвертацію до зупинки. Output перевірено та автоматично додано в бібліотеку.",
+                                "Попередній процес завершив файлову конвертацію до зупинки. Готову копію перевірено та автоматично додано в бібліотеку.",
                             filesTotal =
                                 state.filesTotal,
                             changedFiles =
@@ -1816,7 +1818,7 @@ class ConversionActivity : Activity() {
                     }
                     .onFailure {
                         runStore.fail(
-                            "Попередню конвертацію було перервано. Source не змінено. Запусти конвертацію ще раз — стара staging-папка буде очищена автоматично."
+                            "Попередню конвертацію було перервано. Стару папку не змінено. Запусти конвертацію ще раз — стара тимчасова папка буде очищена автоматично."
                         )
                     }
 
@@ -1831,7 +1833,7 @@ class ConversionActivity : Activity() {
         val authority =
             documentUri.authority
                 ?: error(
-                    "Output URI не має authority."
+                    "Адреса готової копії неповна (немає постачальника файлів)."
                 )
         val documentId =
             DocumentsContract

@@ -147,6 +147,19 @@ class MainActivity : Activity() {
                             "Не вдалося видалити підготовлений .rdproject: " +
                                 project.title
                         }
+                    if (deleted) {
+                        // v0.5.107: the owner deleted this file on purpose — the old
+                        // «завершено» card for it is closed, not turned into an error.
+                        val last = rdprojectShareRunStore.load()
+                        if (
+                            last.phase == RdprojectShareRunPhase.COMPLETE &&
+                            last.projectId == project.id &&
+                            rdprojectShareRunStore.dismissTerminal(last.finishedAtMs) &&
+                            ::operationStatus.isInitialized
+                        ) {
+                            operationStatus.hide()
+                        }
+                    }
                     renderLibrary()
                 },
                 onShareProgress = { current, total, message ->
@@ -1580,11 +1593,15 @@ class MainActivity : Activity() {
                     null ||
                 !file.isFile
             ) {
+                // v0.5.107: a missing file is not a failed preparation. The
+                // preparation finished; the file was removed afterwards.
                 operationStatus.showTerminal(
                     title =
-                        "Підготовка проєкту · помилка",
+                        "Підготовка проєкту · файлу вже немає",
                     detail =
-                        "Підготовлений .rdproject не знайдено.",
+                        "Підготовлений .rdproject більше не знайдено — його видалено після підготовки. Проєкт і томи не змінено. Підготувати можна знову.",
+                    outcome =
+                        OperationTerminalOutcome.NEUTRAL,
                 ) {
                     rdprojectShareRunStore
                         .dismissTerminal(

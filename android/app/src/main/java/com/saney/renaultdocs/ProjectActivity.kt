@@ -4097,9 +4097,11 @@ class ProjectActivity : Activity() {
             val path = state.preparedPath
             val file = path?.let(::File)
             if (file == null || !file.isFile) {
+                // v0.5.107: preparation finished; the file was removed afterwards.
                 operationStatus.showTerminal(
-                    "Підготовка тому · помилка",
-                    "Підготовлений .rdpkg не знайдено.",
+                    title = "Підготовка тому · файлу вже немає",
+                    detail = "Підготовлений .rdpkg більше не знайдено — його видалено після підготовки. Сам том не змінено. Підготувати можна знову.",
+                    outcome = OperationTerminalOutcome.NEUTRAL,
                 ) {
                     rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
                     operationStatus.hide()
@@ -4175,6 +4177,19 @@ class ProjectActivity : Activity() {
                             project,
                             volume,
                         )
+                    if (deleted) {
+                        // v0.5.107: the owner deleted this file on purpose — close the
+                        // old «завершена» card for it instead of turning it into an error.
+                        val last = rdpkgShareRunStore.load()
+                        if (
+                            last.phase == RdpkgShareRunPhase.COMPLETE &&
+                            last.projectId == project.id &&
+                            last.volumeId == volume.id &&
+                            rdpkgShareRunStore.dismissTerminal(last.finishedAtMs)
+                        ) {
+                            operationStatus.hide()
+                        }
+                    }
                     statusText.text =
                         if (deleted) {
                             render()

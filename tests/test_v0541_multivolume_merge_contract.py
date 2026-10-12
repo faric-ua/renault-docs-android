@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+# v0.5.107: converter wording translated to Ukrainian (owner request); checks unchanged.
+
 
 class V0541MultiVolumeMergeContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
@@ -22,10 +24,10 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         )
 
         self.assertIn("mergeIntoExistingOutput(", engine)
-        self.assertIn("Існуючий dataset знайдено", engine)
+        self.assertIn("Наявну готову копію знайдено", engine)
         self.assertIn(".renault-merge-", engine)
         self.assertIn("Том уже є", engine)
-        self.assertIn("Оновлюю package для всіх томів", engine)
+        self.assertIn("Оновлюю пакет для всіх томів", engine)
         self.assertIn("combinedFilePaths", engine)
         self.assertIn("packageResult.volumeCount", engine)
 
@@ -40,8 +42,8 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         self.assertIn("expectedDatasetId", activity)
         self.assertIn("existingRecord.id", activity)
         self.assertIn("existingRecord.id", engine)
-        self.assertIn("належить іншому dataset", activity)
-        self.assertIn("належить іншому dataset", engine)
+        self.assertIn("уже належить іншій готовій копії", activity)
+        self.assertIn("уже належить іншій готовій копії", engine)
 
     def test_plan_explains_merge_instead_of_rejecting_existing_output(self):
         activity = self._read(
@@ -49,7 +51,7 @@ class V0541MultiVolumeMergeContractTests(unittest.TestCase):
         )
 
         self.assertIn(
-            "Існуючий dataset буде доповнено новими томами",
+            "Наявну готову копію буде доповнено новими томами",
             activity,
         )
         self.assertIn(
