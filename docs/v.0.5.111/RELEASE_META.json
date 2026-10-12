@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.111",
+  "versionCode": 127,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.111-old-libraries-visible",
+  "issues": [
+    147
+  ],
+  "scope": "«Старі бібліотеки» moved out of the collapsible «Додати» panel into the Home library list under «Мої Renault». Includes all v0.5.110 changes.",
+  "sourceBase": "v0.5.110/build126",
+  "phoneQa": "PENDING",
+  "pr_number": 215,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 707,
+  "signed_apk": "PASS",
+  "source_sha": "3766797d40532995dbd41bcce290caeeb9c6eb01",
+  "signed_run_id": 38278892727,
+  "signed_run_number": 175,
+  "signed_android_apk_run": 175,
+  "artifact_id": 11760820350,
+  "artifact_name": "Renault-Docs-v0.5.111-Debug",
+  "artifact_digest": "sha256:9fc410218ae46d4d0145a3d34b21345d0fb04c2b1788845259c8ba1ec26a7bd0",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.110. Home: under «Мої Renault» a section «Старі бібліотеки» with the Kangoo (RUS) copy; tap it — it opens."
+}
