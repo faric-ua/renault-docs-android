@@ -1,0 +1,65 @@
+<title>Посібник Renault Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: one reading column like a workshop manual — sheet header, chip index, sections each with a diagram plate. */
+:root {
+  --bg: #f3f5f8;
+  --sheet: #ffffff;
+  --fg: #16202c;
+  --muted: #566476;
+  --line: #d6dde6;
+  --accent: #1f5fa8;
+  --accent-soft: #e5eef8;
+  --warn: #8a5a12;
+  --warn-soft: #fbf1df;
+  --font-display: "Unbounded", "Manrope", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Roboto Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141b; --sheet: #161d27; --fg: #e6edf5; --muted: #9aa8b8; --line: #2a3442;
+    --accent: #8cc0f5; --accent-soft: #1b2a3c; --warn: #f0c27a; --warn-soft: #2e2416;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141b; --sheet: #161d27; --fg: #e6edf5; --muted: #9aa8b8; --line: #2a3442;
+  --accent: #8cc0f5; --accent-soft: #1b2a3c; --warn: #f0c27a; --warn-soft: #2e2416;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; padding-inline: 16px; padding-block: 24px 48px; }
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-direction: column; gap: 10px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(26px, 6vw, 38px); line-height: 1.15; margin: 0; text-wrap: balance; }
+.lead { margin: 0; color: var(--muted); max-width: 62ch; }
+nav ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+nav a { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--fg); text-decoration: none; font-size: 14px; background: var(--sheet); }
+nav a:hover, nav a:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+section { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 16px; }
+h2 { font-size: 21px; font-weight: 700; line-height: 1.25; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 65ch; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 65ch; }
+b { font-weight: 700; }
+.note { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 12px 14px; font-weight: 600; }
+.diagram { background: var(--accent-soft); border-radius: 10px; padding: 12px; overflow-x: auto; min-width: 0; }
+.diagram pre { margin: 0; font-family: var(--font-mono); font-size: 13px; white-space: pre; color: var(--fg); }
+footer { color: var(--muted); font-size: 13px; text-align: center; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+<div class="wrap">
+  <header>
+    <div class="kicker">Renault Docs · {{VERSION}} · {{DATE}}</div>
+    <h1>Посібник Renault Docs</h1>
+    <p class="lead">Що вміє застосунок і через які кнопки. Кожен розділ має схему: стрілки показують, куди веде натискання.</p>
+    <nav aria-label="Зміст"><ul>
+{{TOC}}
+    </ul></nav>
+  </header>
+{{BODY}}
+  <footer>Посібник зібрано з коду застосунку {{VERSION}}. Якщо кнопка на телефоні називається інакше — правда за телефоном.</footer>
+</div>
