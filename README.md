@@ -14,7 +14,7 @@
 - `docs/ua/ANDROID_APP_RULES.md` — правила lifecycle/windows/SAF/APK;
 - `docs/ua/PHONE_WORKFLOW.md` — робота з репозиторієм на Android;
 - `docs/ua/QUICK_LAUNCH.md` — швидкий запуск документації;
-- `docs/ua/CONVERTER.md` — що робить конвертер;
+- `docs/ua/CONVERTER.md` — Python-конвертер для Termux та історія конвертера в застосунку (прибраний у v0.5.112);
 - `docs/architecture.md` — технічна архітектура;
 - `docs/initial-analysis.md` — що знайдено в Laguna II.
 
