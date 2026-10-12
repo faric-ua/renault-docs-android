@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "version": "0.5.120",
+  "version_code": 136,
+  "source_sha": "45c4706fff1c2d1aac8044a4726caedc67097144",
+  "signed_run_id": 38324758065,
+  "signed_run_number": 184,
+  "artifact_id": 11780357060,
+  "artifact_name": "Renault-Docs-v0.5.120-Debug",
+  "artifact_digest": "sha256:cd62823b2a52a75db313869d9fe6771d719de5675e54325dd68d7a557ee6087c",
+  "tag": "v0.5.120-debug",
+  "prerelease": true,
+  "qa_status": "phone-qa-pending"
+}
