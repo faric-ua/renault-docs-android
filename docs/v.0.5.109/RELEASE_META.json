@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.109",
+  "versionCode": 125,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.109-browser-copy",
+  "issues": [
+    147
+  ],
+  "scope": "Converter copy is browser-only (owner decision): no library auto-add, no manual add button; result explains how to open the copy; the copy and merge into an existing copy are addressed inside the permitted destination tree. Includes detailed converter help (v0.5.108) and all v0.5.107 changes.",
+  "sourceBase": "v0.5.108/build124",
+  "phoneQa": "PENDING",
+  "pr_number": 209,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 703,
+  "signed_apk": "PASS",
+  "source_sha": "edc8535da0b0ced46180b74fd276eba285dc5dfd",
+  "signed_run_id": 38269642451,
+  "signed_run_number": 173,
+  "signed_android_apk_run": 173,
+  "artifact_id": 11756830174,
+  "artifact_name": "Renault-Docs-v0.5.109-Debug",
+  "artifact_digest": "sha256:99e76977b54b90fbac1e131b6b999108bc7f3c29bef520dc9a884183da38cdbe",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.107. Converter «?»: detailed help. Run Kangoo «(RUS)» into Test2 again: it adds into the existing copy without «не є папкою»; result says how to open the copy in a browser; no library button."
+}
