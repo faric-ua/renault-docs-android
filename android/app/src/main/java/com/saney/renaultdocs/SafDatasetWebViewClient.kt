@@ -23,6 +23,7 @@ class SafDatasetWebViewClient(
     private val onHybridSectionReady: (Boolean) -> Unit = {},
     private val onSavePdf: (String) -> Unit = {},
     private val onPrintPdf: (String) -> Unit = {},
+    private val onPrintPage: (WebView) -> Unit = {},
     private val onToggleFullscreen: () -> Unit = {},
     private val onToggleCompanion: () -> Unit = {},
     private val pdfStateScope: String = "main",
@@ -248,6 +249,16 @@ class SafDatasetWebViewClient(
         }
 
         if (
+            isLegacyHtml(
+                relativePath,
+            )
+        ) {
+            applyPrintBridge(
+                view,
+            )
+        }
+
+        if (
             activeHybridSectionCode.isNotBlank() &&
             legacySectionRootEntrypoint
                 .isNotBlank() &&
@@ -297,11 +308,42 @@ class SafDatasetWebViewClient(
 
         if (
             url.scheme.equals(
+                PAGE_PRINT_SCHEME,
+                ignoreCase = true,
+            )
+        ) {
+            // v0.5.116: window.print() of an original Renault page.
+            if (view != null) {
+                view.post {
+                    onPrintPage(view)
+                }
+            }
+            return true
+        }
+
+        // v0.5.116: the original printer icon (Renault `imprimer`) opens the
+        // «_PRINT» / «_PRINTNB» variant of the scheme — print it instead.
+        DatasetVirtualUrl
+            .relativePath(
+                url.toString(),
+            )
+            ?.takeIf {
+                PRINT_VARIANT.containsMatchIn(it)
+            }
+            ?.let { printPath ->
+                view?.post {
+                    onPrintPdf(printPath)
+                }
+                return true
+            }
+
+        if (
+            url.scheme.equals(
                 PDF_PRINT_SCHEME,
                 ignoreCase = true,
             )
         ) {
-            // v0.5.115: «Друк» in the PDF viewer.
+            // v0.5.115: print request from the PDF viewer.
             val path =
                 url.getQueryParameter(
                     "path",
@@ -3794,6 +3836,53 @@ class SafDatasetWebViewClient(
         }
     }
 
+    /**
+     * v0.5.116: window.print() in any frame of an original Renault page asks
+     * the app to print (WebView prints nothing by itself). Frames that load
+     * later are patched on their «load».
+     */
+    private fun applyPrintBridge(
+        view: WebView?,
+    ) {
+        view ?: return
+        val script =
+            """
+            (function () {
+              function patch(w) {
+                try {
+                  if (!w.__renaultPrintPatched) {
+                    w.__renaultPrintPatched = true;
+                    w.print = function () {
+                      try {
+                        w.location.href = '$PAGE_PRINT_SCHEME://print';
+                      } catch (_) {}
+                    };
+                  }
+                  var frames =
+                    w.document.querySelectorAll('frame, iframe');
+                  for (var i = 0; i < frames.length; i++) {
+                    (function (f) {
+                      if (!f.__renaultPrintHook) {
+                        f.__renaultPrintHook = true;
+                        f.addEventListener('load', function () {
+                          try { patch(f.contentWindow); } catch (_) {}
+                        });
+                      }
+                      try { patch(f.contentWindow); } catch (_) {}
+                    })(frames[i]);
+                  }
+                } catch (_) {}
+              }
+              patch(window);
+              return true;
+            })();
+            """.trimIndent()
+        view.evaluateJavascript(
+            script,
+            null,
+        )
+    }
+
     /** v0.5.115: the PDF bytes as they are, for the print job. */
     fun writePdf(
         relativePath: String,
@@ -3813,6 +3902,19 @@ class SafDatasetWebViewClient(
             resolver.openInputStream(
                 relativePath,
             )
+                ?: relativePath
+                    .takeIf {
+                        PRINT_VARIANT.containsMatchIn(it)
+                    }
+                    ?.let {
+                        // No separate print variant in this volume: the scheme itself.
+                        resolver.openInputStream(
+                            it.replace(
+                                PRINT_VARIANT,
+                                "$2",
+                            ),
+                        )
+                    }
                 ?: error(
                     "Не вдалося відкрити PDF у dataset."
                 )
@@ -4016,6 +4118,16 @@ class SafDatasetWebViewClient(
 
         const val PDF_PRINT_SCHEME =
             "renaultprintpdf"
+
+        const val PAGE_PRINT_SCHEME =
+            "renaultprintpage"
+
+        /** «X_PRINT.PDF» / «X_PRINTNB.PDF» — print variants of scheme «X.PDF». */
+        val PRINT_VARIANT =
+            Regex(
+                "_PRINT(NB)?(\\.PDF)$",
+                RegexOption.IGNORE_CASE,
+            )
 
         const val PDF_FULLSCREEN_SCHEME =
             "renaultfullscreen"

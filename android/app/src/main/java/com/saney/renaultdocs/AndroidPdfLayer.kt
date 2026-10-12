@@ -447,21 +447,6 @@ class AndroidPdfLayer(
                   <button id="next" aria-label="Наступна сторінка">↓</button>
                   <button id="save" aria-label="Зберегти PDF">⇩ PDF</button>
                   <button
-                    id="print"
-                    aria-label="Друк: принтер або «Зберегти як PDF»"
-                    title="Друк"
-                  >
-                    <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
-                      <path
-                        d="M5 6V2h8v4M5 13H3V7h12v6h-2M5 10h8v6H5z"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.6"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </button>
-                  <button
                     id="fullscreen"
                     aria-label="Увімкнути або вимкнути повноекранний режим"
                     aria-pressed="false"
@@ -1892,17 +1877,25 @@ class AndroidPdfLayer(
                     }
                   );
 
-                // v0.5.115: Android print window (printer or «Save as PDF»).
-                document
-                  .getElementById('print')
-                  .addEventListener(
-                    'click',
-                    () => {
-                      window.location.href =
-                        'renaultprintpdf://print?path=' +
-                        encodeURIComponent(pdfPath);
-                    }
-                  );
+                // v0.5.116: the original Renault printer icon opens the
+                // «_PRINT» variant of a scheme — that means «print it».
+                if (/_PRINT(NB)?\.PDF${'$'}/i.test(pdfPath)) {
+                  const printKey =
+                    'renaultPrinted|' + pdfPath;
+                  let printed = false;
+                  try {
+                    printed =
+                      window.sessionStorage
+                        .getItem(printKey) === '1';
+                    window.sessionStorage
+                      .setItem(printKey, '1');
+                  } catch (_) {}
+                  if (!printed) {
+                    window.location.href =
+                      'renaultprintpdf://print?path=' +
+                      encodeURIComponent(pdfPath);
+                  }
+                }
 
                 document
                   .getElementById('fullscreen')
