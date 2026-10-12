@@ -1,6 +1,7 @@
 package com.saney.renaultdocs
 
 import android.app.Activity
+import android.app.Dialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +19,7 @@ private data class DriveCatalogRetainedState(
 )
 
 class DriveCatalogActivity : Activity() {
+    private lateinit var confirmDialogs: RestorableDialogs
     private lateinit var projectStore:
         ProjectStore
     private lateinit var importStore:
@@ -96,9 +98,24 @@ class DriveCatalogActivity : Activity() {
             retainedState
                 ?.catalog
 
+        confirmDialogs =
+            RestorableDialogs(
+                activity = this,
+                stateKey = "catalogConfirm",
+            ) { key ->
+                if (key == CONFIRM_CANCEL_IMPORT) buildCancelImportDialog() else null
+            }
+        confirmDialogs.restore(
+            savedInstanceState,
+        )
+
         setContentView(
             buildContent(),
         )
+        // v0.5.106: an open question comes back after rotation.
+        window.decorView.post {
+            confirmDialogs.restoreOpen()
+        }
 
         val retainedCatalog =
             catalog
@@ -129,6 +146,13 @@ class DriveCatalogActivity : Activity() {
         )
     }
 
+    override fun onDestroy() {
+        if (::confirmDialogs.isInitialized) {
+            confirmDialogs.onDestroy()
+        }
+        super.onDestroy()
+    }
+
     override fun onStop() {
         handler.removeCallbacks(
             refreshRunnable,
@@ -144,6 +168,9 @@ class DriveCatalogActivity : Activity() {
             ArrayList(
                 selectedIds,
             ),
+        )
+        confirmDialogs.save(
+            outState,
         )
         super.onSaveInstanceState(
             outState,
@@ -976,7 +1003,13 @@ class DriveCatalogActivity : Activity() {
 
     /** v0.5.105: stopping a catalog download/import asks once. */
     private fun confirmCancelImport() {
-        ConfirmActions.confirmStop(
+        confirmDialogs.show(CONFIRM_CANCEL_IMPORT)
+    }
+
+    /** v0.5.106: rebuilt after rotation while the import still runs. */
+    private fun buildCancelImportDialog(): Dialog? {
+        if (!importStore.load().isRunning) return null
+        return ConfirmActions.confirmStop(
             activity = this,
             title = "Зупинити імпорт із каталогу?",
             message = "Поточний том не буде додано. Уже додані томи лишаться. Файли на Google Drive не змінюються.",
@@ -1036,6 +1069,8 @@ class DriveCatalogActivity : Activity() {
     }
 
     companion object {
+        private const val CONFIRM_CANCEL_IMPORT =
+            "cancelCatalogImport"
         private const val REFRESH_MS =
             250L
         private const val STATE_SELECTED_IDS =

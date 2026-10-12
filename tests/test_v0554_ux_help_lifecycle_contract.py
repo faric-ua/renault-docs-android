@@ -426,9 +426,12 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
             {
                 # v0.5.104: Home's stop question moved into shared ConfirmActions.
                 "ConfirmActions.kt": (1, 1),
-                "HomeProjectDialogController.kt": (4, 4),
+                # v0.5.106: Home messages and the «Неправильне джерело» message
+                # moved into shared RestorableDialogs (they survive rotation).
+                "HomeProjectDialogController.kt": (3, 3),
+                "RestorableDialogs.kt": (1, 1),
                 "LifecycleHelpDialogController.kt": (1, 1),
-                "ProjectActivity.kt": (10, 10),
+                "ProjectActivity.kt": (9, 9),
                 "ProjectExportWizard.kt": (1, 1),
                 "SettingsActivity.kt": (3, 3),
             },
@@ -436,7 +439,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         )
         # v0.5.101 (#178): two export dialogs replaced by one step-by-step window.
         # v0.5.102 (#181): one confirmation before cancelling a long operation.
-        self.assertEqual(20, total_builders)
+        self.assertEqual(19, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(

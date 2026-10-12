@@ -26,8 +26,14 @@ class HomeProjectDialogController(
     // until "Почати експорт", and MainActivity revalidates exact IDs before the service.
     private var exportWizardState = ProjectExportWizardState()
     private var exportWizard: ProjectExportWizard? = null
+    private val infoDialogs =
+        RestorableDialogs(
+            activity = activity,
+            stateKey = "homeInfo",
+        ) { null }
 
     fun restore(state: Bundle?) {
+        infoDialogs.restore(state)
         activeKind =
             state
                 ?.getString(STATE_KIND)
@@ -52,6 +58,7 @@ class HomeProjectDialogController(
     }
 
     fun save(outState: Bundle) {
+        infoDialogs.save(outState)
         outState.putString(
             STATE_KIND,
             activeKind,
@@ -73,6 +80,10 @@ class HomeProjectDialogController(
         outState.putInt(STATE_EXPORT_SCROLL_Y, exportWizardState.scrollY)
     }
 
+    fun onDestroy() {
+        infoDialogs.onDestroy()
+    }
+
     /**
      * MainActivity hands back a SAF folder whose read/write grant is already persisted.
      * null (cancelled picker) keeps the previous choice. Never starts an export.
@@ -84,6 +95,9 @@ class HomeProjectDialogController(
     }
 
     fun restoreOpen() {
+        activity.window.decorView.post {
+            infoDialogs.restoreOpen()
+        }
         val project =
             activeProjectId
                 ?.let(store::project)
@@ -463,19 +477,15 @@ class HomeProjectDialogController(
         )
     }
 
+    /** v0.5.106: messages survive rotation (text is saved with the screen state). */
     private fun showMessage(
         title: String,
         message: String,
     ) {
-        val dialog =
-            AlertDialog.Builder(activity)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("Закрити", null)
-                .create()
-        dialog.show()
-        DialogUi.apply(
-            dialog = dialog,
+        infoDialogs.showInfo(
+            title = title,
+            message = message,
+            button = "Закрити",
             role = DialogRole.CONFIRM,
         )
     }
@@ -531,20 +541,6 @@ class HomeProjectDialogController(
         DialogUi.apply(
             dialog = dialog,
             role = DialogRole.DANGER,
-        )
-    }
-
-    /** #181: one confirmation before stopping a long Home operation; nothing else runs. */
-    fun confirmCancelOperation(
-        title: String,
-        message: String,
-        onConfirm: () -> Unit,
-    ) {
-        ConfirmActions.confirmStop(
-            activity = activity,
-            title = title,
-            message = message,
-            onConfirm = onConfirm,
         )
     }
 

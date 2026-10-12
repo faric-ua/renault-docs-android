@@ -120,12 +120,16 @@ class StatusCardCancelContract(unittest.TestCase):
                 card = project[start - 200:start + 1800]
                 self.assertIn(f"{store}.isCancelRequested()", card)
                 self.assertIn("onCancel =", card)
-                self.assertIn(f'"{question}"', card)
-                self.assertIn(f"{store}.requestCancel()", card)
+                self.assertIn("projectConfirms.show(CONFIRM_STOP_", card)
                 # While stopping, the button hides and the card says so.
                 self.assertIn("STOPPING_DETAIL", card)
-        helper = between(project, "private fun confirmStopOperation(", "private fun confirmCancelArchiveSelection()")
+                # v0.5.106: the question lives in the keyed builder.
+                builder = between(project, "private fun buildProjectConfirm(key: String)", "private fun buildStopOperationDialog(")
+                self.assertIn(f'"{question}"', builder)
+                self.assertIn(f"{store}.requestCancel()", builder)
+        helper = between(project, "private fun buildStopOperationDialog(", "private fun confirmCancelArchiveSelection()")
         self.assertIn("ConfirmActions.confirmStop(", helper)
+        self.assertIn("if (!running) return null", helper)
 
     def test_project_cards_show_cancelled_result(self):
         project = read("ProjectActivity.kt")
@@ -147,9 +151,10 @@ class StatusCardCancelContract(unittest.TestCase):
         self.assertIn("if (state.isRunning && !state.cancelRequested) {", project)
         archive = between(project, '"Архів · вибір томів"', "showArchiveVolumeChooser(")
         self.assertIn("confirmCancelArchiveSelection()", archive)
-        helper = between(project, "private fun confirmCancelArchiveSelection()", "/**")
+        helper = between(project, "private fun buildCancelArchiveSelectionDialog()", "    /**")
         self.assertIn('"Скасувати вибір томів?"', helper)
-        self.assertLess(helper.index(".requestCancel("), helper.index("?.dismiss()"))
+        after_yes = helper.split('"Скасувати вибір томів?"', 1)[1]
+        self.assertLess(after_yes.index(".requestCancel("), after_yes.index("?.dismiss()"))
 
     def test_catalog_card_offers_cancel_and_cancelled_title(self):
         drive = read("DriveCatalogActivity.kt")

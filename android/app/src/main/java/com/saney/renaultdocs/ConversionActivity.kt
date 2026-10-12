@@ -1,6 +1,7 @@
 package com.saney.renaultdocs
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.text.TextUtils
 import android.net.Uri
@@ -24,6 +25,7 @@ class ConversionActivity : Activity() {
     private lateinit var datasetStore: DatasetStore
     private lateinit var helpDialogs:
         LifecycleHelpDialogController
+    private lateinit var confirmDialogs: RestorableDialogs
 
     private lateinit var sourceValue: TextView
     private lateinit var destinationValue: TextView
@@ -100,11 +102,29 @@ class ConversionActivity : Activity() {
         helpDialogs.restore(
             savedInstanceState,
         )
+        confirmDialogs =
+            RestorableDialogs(
+                activity = this,
+                stateKey = "conversionConfirm",
+            ) { key ->
+                when (key) {
+                    CONFIRM_CANCEL_CONVERSION -> buildCancelConversionDialog()
+                    CONFIRM_CLEAR_SELECTION -> buildClearSelectionDialog()
+                    else -> null
+                }
+            }
+        confirmDialogs.restore(
+            savedInstanceState,
+        )
 
         setContentView(
             buildContent(),
         )
         helpDialogs.restoreOpen()
+        // v0.5.106: an open question comes back after rotation.
+        window.decorView.post {
+            confirmDialogs.restoreOpen()
+        }
         renderDraft()
         renderRunState()
     }
@@ -115,9 +135,19 @@ class ConversionActivity : Activity() {
         helpDialogs.save(
             outState,
         )
+        confirmDialogs.save(
+            outState,
+        )
         super.onSaveInstanceState(
             outState,
         )
+    }
+
+    override fun onDestroy() {
+        if (::confirmDialogs.isInitialized) {
+            confirmDialogs.onDestroy()
+        }
+        super.onDestroy()
     }
 
     override fun onStart() {
@@ -1347,7 +1377,13 @@ class ConversionActivity : Activity() {
 
     /** v0.5.104: owner asked for a confirmation before stopping the converter. */
     private fun confirmCancelConversion() {
-        ConfirmActions.confirmStop(
+        confirmDialogs.show(CONFIRM_CANCEL_CONVERSION)
+    }
+
+    /** v0.5.106: rebuilt after rotation from the current run state. */
+    private fun buildCancelConversionDialog(): Dialog? {
+        if (!runStore.load().isRunning) return null
+        return ConfirmActions.confirmStop(
             activity = this,
             title = "Зупинити конвертацію?",
             message = "Недороблена тимчасова копія буде видалена. Стара Renault-папка не зміниться. Почати можна буде знову.",
@@ -1371,7 +1407,12 @@ class ConversionActivity : Activity() {
 
     /** v0.5.104: clearing the chosen folders and the last result asks first. */
     private fun confirmClearSelection() {
-        ConfirmActions.confirm(
+        confirmDialogs.show(CONFIRM_CLEAR_SELECTION)
+    }
+
+    private fun buildClearSelectionDialog(): Dialog? {
+        if (runStore.load().isRunning) return null
+        return ConfirmActions.confirm(
             activity = this,
             title = "Очистити вибір?",
             message = "Вибрані папки і результат останньої конвертації зникнуть з цього екрана. Файли на телефоні не видаляються.",
@@ -1806,6 +1847,10 @@ class ConversionActivity : Activity() {
     }
 
     companion object {
+        private const val CONFIRM_CANCEL_CONVERSION =
+            "cancelConversion"
+        private const val CONFIRM_CLEAR_SELECTION =
+            "clearSelection"
         private const val HELP_CONVERTER =
             "converter"
         private const val REQUEST_SOURCE_FOLDER =

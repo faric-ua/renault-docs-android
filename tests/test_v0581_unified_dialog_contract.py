@@ -9,9 +9,11 @@ SOURCE = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
 
 # UI sources with AlertDialog.Builder in the v0.5.81 audit.
 DIALOG_COUNTS = {
-    "ProjectActivity.kt": 10,
+    # v0.5.106: «Неправильне джерело» moved into RestorableDialogs.
+    "ProjectActivity.kt": 9,
+    "RestorableDialogs.kt": 1,
     # v0.5.104: Home's stop question moved into shared ConfirmActions.
-    "HomeProjectDialogController.kt": 4,
+    "HomeProjectDialogController.kt": 3,
     "ConfirmActions.kt": 1,
     "ProjectExportWizard.kt": 1,
     "SettingsActivity.kt": 3,

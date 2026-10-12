@@ -107,6 +107,7 @@ class ProjectActivity : Activity() {
         null
     private var archiveSourcePreflightOpen = false
     private var archiveSourceDetailsExpanded = false
+    private lateinit var projectConfirms: RestorableDialogs
     private var archiveChooserDialog:
         AlertDialog? =
         null
@@ -299,6 +300,15 @@ class ProjectActivity : Activity() {
         helpDialogs.restore(
             savedInstanceState,
         )
+        projectConfirms =
+            RestorableDialogs(
+                activity = this,
+                stateKey = "projectConfirm",
+                build = ::buildProjectConfirm,
+            )
+        projectConfirms.restore(
+            savedInstanceState,
+        )
 
         setContentView(
             buildContent(),
@@ -324,6 +334,11 @@ class ProjectActivity : Activity() {
             volumeContainer.post {
                 restoreProjectDialog()
             }
+        }
+
+        // v0.5.106: an open question or message comes back after rotation.
+        volumeContainer.post {
+            projectConfirms.restoreOpen()
         }
 
         if (
@@ -376,6 +391,9 @@ class ProjectActivity : Activity() {
     }
 
     override fun onDestroy() {
+        if (::projectConfirms.isInitialized) {
+            projectConfirms.onDestroy()
+        }
         archiveChooserDialog
             ?.dismiss()
         archiveChooserDialog =
@@ -400,6 +418,12 @@ class ProjectActivity : Activity() {
         super.onSaveInstanceState(
             outState,
         )
+
+        if (::projectConfirms.isInitialized) {
+            projectConfirms.save(
+                outState,
+            )
+        }
 
         outState.putBoolean(
             STATE_PENDING_MANUAL_IMPORT,
@@ -616,10 +640,7 @@ class ProjectActivity : Activity() {
                             null
                         } else {
                             {
-                                confirmStopOperation(
-                                    title = "Зупинити імпорт тому?",
-                                    message = "Том не буде додано. Вихідний .rdpkg не зміниться. Якщо встановлення вже на останньому кроці, його буде завершено, щоб не зламати том.",
-                                ) { rdpkgImportRunStore.requestCancel() }
+                                projectConfirms.show(CONFIRM_STOP_IMPORT)
                             }
                         },
                 )
@@ -758,10 +779,7 @@ class ProjectActivity : Activity() {
                         null
                     } else {
                         {
-                            confirmStopOperation(
-                                title = "Зупинити експорт тому?",
-                                message = "Недороблений файл .rdpkg, який створює цей експорт, буде видалено. Сам том не зміниться.",
-                            ) { rdpkgExportRunStore.requestCancel() }
+                            projectConfirms.show(CONFIRM_STOP_EXPORT)
                         }
                     },
                 current =
@@ -831,6 +849,11 @@ class ProjectActivity : Activity() {
      * clearing any conversion. The last run survives normal completion.
      */
     private fun showLastNativeSourceDiagnostics() {
+        projectConfirms.show(CONFIRM_SOURCE_REPORT)
+    }
+
+    /** Read-only report; rebuilt from the saved run after rotation (v0.5.106). */
+    private fun buildLastNativeSourceDiagnostics(): AlertDialog? {
         val last = nativeRunStore.load()
         val source = last.sourceUri
             ?.takeIf { it.isNotBlank() }
@@ -894,7 +917,7 @@ class ProjectActivity : Activity() {
                 },
             )
         }
-        AlertDialog.Builder(this)
+        return AlertDialog.Builder(this)
             .setTitle("Джерело останньої .rdpkg")
             .setView(content)
             .setPositiveButton("Копіювати звіт") { _, _ ->
@@ -1049,13 +1072,13 @@ class ProjectActivity : Activity() {
 
     private fun showArchiveSourceRejected(message: String) {
         statusText.text = message
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Неправильне джерело")
-            .setMessage(message)
-            .setPositiveButton("Зрозуміло", null)
-            .create()
-        dialog.show()
-        DialogUi.apply(dialog, DialogRole.HELP)
+        // v0.5.106: the message (and its text) survives rotation.
+        projectConfirms.showInfo(
+            title = "Неправильне джерело",
+            message = message,
+            button = "Зрозуміло",
+            role = DialogRole.HELP,
+        )
     }
 
     private fun clearPendingArchiveSource() {
@@ -1761,13 +1784,55 @@ class ProjectActivity : Activity() {
         )
     }
 
+    /**
+     * v0.5.106: every question on this screen is keyed, so it comes back after
+     * rotation. Each window is rebuilt from the current operation state and
+     * is skipped when that operation already finished.
+     */
+    private fun buildProjectConfirm(key: String): AlertDialog? =
+        when (key) {
+            CONFIRM_STOP_IMPORT ->
+                buildStopOperationDialog(
+                    running = rdpkgImportRunStore.load().isRunning,
+                    title = "Зупинити імпорт тому?",
+                    message = "Том не буде додано. Вихідний .rdpkg не зміниться. Якщо встановлення вже на останньому кроці, його буде завершено, щоб не зламати том.",
+                ) { rdpkgImportRunStore.requestCancel() }
+
+            CONFIRM_STOP_EXPORT ->
+                buildStopOperationDialog(
+                    running = rdpkgExportRunStore.load().isRunning,
+                    title = "Зупинити експорт тому?",
+                    message = "Недороблений файл .rdpkg, який створює цей експорт, буде видалено. Сам том не зміниться.",
+                ) { rdpkgExportRunStore.requestCancel() }
+
+            CONFIRM_STOP_SHARE ->
+                buildStopOperationDialog(
+                    running = rdpkgShareRunStore.load().isRunning,
+                    title = "Зупинити підготовку тому?",
+                    message = "Підготовлений файл не буде створено. Сам том не зміниться.",
+                ) { rdpkgShareRunStore.requestCancel() }
+
+            CONFIRM_CANCEL_ARCHIVE ->
+                buildCancelArchiveSelectionDialog()
+
+            CONFIRM_CANCEL_NATIVE ->
+                buildCancelNativePreparationDialog()
+
+            CONFIRM_SOURCE_REPORT ->
+                buildLastNativeSourceDiagnostics()
+
+            else -> null
+        }
+
     /** v0.5.105: one question, then the store records the request for the worker. */
-    private fun confirmStopOperation(
+    private fun buildStopOperationDialog(
+        running: Boolean,
         title: String,
         message: String,
         request: () -> Boolean,
-    ) {
-        ConfirmActions.confirmStop(
+    ): AlertDialog? {
+        if (!running) return null
+        return ConfirmActions.confirmStop(
             activity = this,
             title = title,
             message = message,
@@ -1784,7 +1849,21 @@ class ProjectActivity : Activity() {
 
     /** v0.5.105: «Скасувати» on the «Архів · вибір томів» card. */
     private fun confirmCancelArchiveSelection() {
-        ConfirmActions.confirmStop(
+        projectConfirms.show(CONFIRM_CANCEL_ARCHIVE)
+    }
+
+    /**
+     * Shared by the card and the chooser's «Скасувати» (v0.5.104/105). While
+     * this question is open the chooser stays closed; «Продовжити» lets the
+     * refresh loop bring the chooser back.
+     */
+    private fun buildCancelArchiveSelectionDialog(): AlertDialog? {
+        if (!nativeRunStore.load().isWaitingForSelection) return null
+        archiveChooserDialog
+            ?.dismiss()
+        archiveChooserDialog =
+            null
+        return ConfirmActions.confirmStop(
             activity = this,
             title = "Скасувати вибір томів?",
             message = "Жоден том з цього архіву не буде створено. Оригінальний архів не зміниться, тимчасові файли буде прибрано.",
@@ -1792,6 +1871,8 @@ class ProjectActivity : Activity() {
             if (!nativeRunStore.load().isWaitingForSelection) {
                 return@confirmStop
             }
+            // Cancel first (synchronous while waiting): the refresh loop must
+            // not reopen a chooser for a selection that is already cancelled.
             NativeRdpkgPreparationService
                 .requestCancel(
                     this,
@@ -1826,7 +1907,12 @@ class ProjectActivity : Activity() {
             return
         }
 
-        ConfirmActions.confirmStop(
+        projectConfirms.show(CONFIRM_CANCEL_NATIVE)
+    }
+
+    private fun buildCancelNativePreparationDialog(): AlertDialog? {
+        if (!nativeRunStore.load().isRunning) return null
+        return ConfirmActions.confirmStop(
             activity = this,
             title = "Зупинити створення тому?",
             message = "Поточний том не буде створено. Оригінальні файли не зміняться, уже додані томи лишаться.",
@@ -1850,6 +1936,10 @@ class ProjectActivity : Activity() {
                 ?.isShowing ==
             true
         ) {
+            return
+        }
+        // v0.5.106: «Скасувати вибір томів?» is open (also after rotation).
+        if (projectConfirms.isOpen(CONFIRM_CANCEL_ARCHIVE)) {
             return
         }
 
@@ -2006,22 +2096,7 @@ class ProjectActivity : Activity() {
             dialog.getButton(
                 AlertDialog.BUTTON_NEGATIVE,
             ).setOnClickListener {
-                ConfirmActions.confirmStop(
-                    activity = this,
-                    title = "Скасувати вибір томів?",
-                    message = "Жоден том з цього архіву не буде створено. Оригінальний архів не зміниться, тимчасові файли буде прибрано.",
-                ) {
-                    // Cancel first (synchronous while waiting), then close:
-                    // the refresh loop must not reopen a chooser for a
-                    // selection that is already cancelled.
-                    NativeRdpkgPreparationService
-                        .requestCancel(
-                            this,
-                        )
-                    dialog.dismiss()
-                    archiveChooserDialog =
-                        null
-                }
+                projectConfirms.show(CONFIRM_CANCEL_ARCHIVE)
             }
 
             dialog.getButton(
@@ -3992,10 +4067,7 @@ class ProjectActivity : Activity() {
                         null
                     } else {
                         {
-                            confirmStopOperation(
-                                title = "Зупинити підготовку тому?",
-                                message = "Підготовлений файл не буде створено. Сам том не зміниться.",
-                            ) { rdpkgShareRunStore.requestCancel() }
+                            projectConfirms.show(CONFIRM_STOP_SHARE)
                         }
                     },
                 current =
@@ -5053,6 +5125,18 @@ class ProjectActivity : Activity() {
 
         private const val DEFAULT_STATUS_TEXT =
             ""
+        private const val CONFIRM_STOP_IMPORT =
+            "stopImport"
+        private const val CONFIRM_STOP_EXPORT =
+            "stopExport"
+        private const val CONFIRM_STOP_SHARE =
+            "stopShare"
+        private const val CONFIRM_CANCEL_ARCHIVE =
+            "cancelArchiveSelection"
+        private const val CONFIRM_CANCEL_NATIVE =
+            "cancelNative"
+        private const val CONFIRM_SOURCE_REPORT =
+            "sourceReport"
         private const val STOPPING_DETAIL =
             "Зупиняю після поточного безпечного кроку…"
 
