@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.116",
+  "versionCode": 132,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.116-original-print-icon",
+  "issues": [
+    147
+  ],
+  "scope": "Owner 2026-10-13: print through the original Renault printer icon (imprimer → X_PRINT.PDF / X_PRINTNB.PDF → Android print window: printer or Save as PDF); no extra buttons (v0.5.115 buttons removed); window.print() bridged. Includes v0.5.114–115.",
+  "sourceBase": "v0.5.115/build131",
+  "phoneQa": "PENDING",
+  "pr_number": 232,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 750,
+  "signed_apk": "PASS",
+  "source_sha": "3336b9af8212c08c2b0f0aaa28444321597a63dd",
+  "signed_run_id": 38311334106,
+  "signed_run_number": 180,
+  "signed_android_apk_run": 180,
+  "artifact_id": 11774328973,
+  "artifact_name": "Renault-Docs-v0.5.116-Debug",
+  "artifact_digest": "sha256:6409f768e1d38ab684a8ad6002634a16a1a58182d4a6cb2ca97691e771b237e4",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. 119 → «Розʼєм» → pick a connector → «Схема + піни» → tap the old printer icon on the page → Android print window → «Зберегти як PDF»."
+}
