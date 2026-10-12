@@ -65,6 +65,11 @@ class V0532PdfCompanionContractTests(unittest.TestCase):
         self.assertIn("companionWebView.saveState(", viewer)
         self.assertIn("restoreState(it)", viewer)
 
+    @unittest.skip(
+        "RETIRED_V05120: the lower window is now a volume navigator "
+        "(CompanionNavigatorPage) — documentation first, «←» to the volume; "
+        "see test_v05120_companion_navigator_contract.py"
+    )
     def test_companion_loads_same_volume_documentation_in_embedded_page(self):
         viewer = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/ViewerActivity.kt"

@@ -31,9 +31,11 @@ def between(text, start, end):
 class ToolbarZoomFrameContract(unittest.TestCase):
     def test_toolbar_has_one_medium_size(self):
         layer = read("AndroidPdfLayer.kt")
-        self.assertIn("zoom: var(--ui-scale, 0.85);", layer)
-        self.assertIn("let uiScale = 0.85;", layer)
-        self.assertIn("pageWidth > screenWidth * 1.1", layer)
+        # v0.5.120: still one size for all, but smaller (0.72) and the frame
+        # ratio comes from top.visualViewport.scale (screen.width was wrong
+        # in landscape). See test_v05120_companion_navigator_contract.py.
+        self.assertIn("zoom: var(--ui-scale, 0.72);", layer)
+        self.assertIn("const BASE_UI_SCALE = 0.72;", layer)
         self.assertIn("'--ui-scale'", layer)
         menu = between(layer, "function positionZoomMenu()", "zoomMenu.style.top =")
         self.assertIn("left / uiScale", menu)
@@ -68,8 +70,7 @@ class ToolbarZoomFrameContract(unittest.TestCase):
 
     def test_version_bumped(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.119"', gradle)
-        self.assertIn("versionCode = 135", gradle)
+        self.assertGreaterEqual(int(gradle.split("versionCode = ", 1)[1].splitlines()[0]), 135)
 
 
 if __name__ == "__main__":

@@ -26,6 +26,8 @@ class SafDatasetWebViewClient(
     private val onPrintPage: (WebView, String?) -> Unit = { _, _ -> },
     private val onPageZoomLock: (WebView, Boolean) -> Unit = { _, _ -> },
     private val onPageReady: (WebView) -> Unit = {},
+    // v0.5.120: pages made by the app itself (the lower-window navigator).
+    private val virtualPage: (String) -> String? = { null },
     private val onToggleFullscreen: () -> Unit = {},
     private val onToggleCompanion: () -> Unit = {},
     private val pdfStateScope: String = "main",
@@ -125,6 +127,33 @@ class SafDatasetWebViewClient(
                 title = "Renault Docs",
                 body = "Порожній шлях усередині dataset.",
             )
+        }
+
+        if (
+            relativePath.startsWith(
+                CompanionNavigatorPage.PREFIX,
+                ignoreCase = true,
+            )
+        ) {
+            virtualPage(
+                relativePath,
+            )?.let { html ->
+                return WebResourceResponse(
+                    "text/html",
+                    "UTF-8",
+                    200,
+                    "OK",
+                    mapOf(
+                        "Cache-Control" to
+                            "no-store",
+                    ),
+                    ByteArrayInputStream(
+                        html.toByteArray(
+                            Charsets.UTF_8,
+                        )
+                    ),
+                )
+            }
         }
 
         if (
@@ -1394,8 +1423,13 @@ class SafDatasetWebViewClient(
             normalized.startsWith(
                 "_renault/",
                 ignoreCase = true,
+            ) ||
+            normalized.startsWith(
+                CompanionNavigatorPage.PREFIX,
+                ignoreCase = true,
             )
         ) {
+            // v0.5.120: the app's own navigator page is not a Renault page.
             return false
         }
 
