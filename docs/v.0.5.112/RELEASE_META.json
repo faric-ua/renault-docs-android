@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.112",
+  "versionCode": 128,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/remove-legacy-converter",
+  "issues": [
+    147
+  ],
+  "scope": "Owner decision 2026-10-12: «Інструменти» (Конвертер, Legacy) and «Старі бібліотеки» removed from the app. Old Renault folder → Project «Створити .rdpkg з raw» / «… з архіву». Saved data untouched. Old code: branch archive/legacy-converter-v0.5.111.",
+  "sourceBase": "v0.5.111/build127",
+  "phoneQa": "PENDING",
+  "pr_number": 221,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 718,
+  "signed_apk": "PASS",
+  "source_sha": "31123c93a80cb00ea4540c36d0d14342774ec1c3",
+  "signed_run_id": 38285574501,
+  "signed_run_number": 176,
+  "signed_android_apk_run": 176,
+  "artifact_id": 11762978284,
+  "artifact_name": "Renault-Docs-v0.5.112-Debug",
+  "artifact_digest": "sha256:747fe6eaf4c877b0cb885617e485da0c6313bdbbdcee5d6a8d743347be7ffd50",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.110. Home: no «Інструменти», no «Старі бібліотеки»; Megane II / Laguna II / Kangoo II projects are there and open."
+}
