@@ -64,7 +64,8 @@ class ConfirmCancelAndClearContract(unittest.TestCase):
 
     def test_project_status_cancel_asks_first(self):
         project = read("ProjectActivity.kt")
-        card = between(project, "if (state.phase == NativeRdpkgRunPhase.PREPARING) {", "} else {")
+        # v0.5.105: shown for every running phase (also «Перевіряю/встановлюю»).
+        card = between(project, "if (state.isRunning && !state.cancelRequested) {", "} else {")
         self.assertIn("confirmCancelNativePreparation()", card)
         self.assertNotIn("requestCancel", card)
         confirm = between(project, "private fun confirmCancelNativePreparation()", "private fun showArchiveVolumeChooser(")
@@ -109,8 +110,9 @@ class ConfirmCancelAndClearContract(unittest.TestCase):
 
     def test_version_bumped(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.104"', gradle)
-        self.assertIn("versionCode = 120", gradle)
+        # Later releases keep counting up from v0.5.104 / build 120.
+        code = int(gradle.split("versionCode = ", 1)[1].splitlines()[0].strip())
+        self.assertGreaterEqual(code, 120)
 
 
 if __name__ == "__main__":

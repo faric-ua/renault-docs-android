@@ -2,7 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 
-enum class RdpkgExportRunPhase { IDLE, EXPORTING, COMPLETE, FAILED }
+enum class RdpkgExportRunPhase { IDLE, EXPORTING, COMPLETE, FAILED, CANCELLED }
 
 data class RdpkgExportRunState(
     val phase: RdpkgExportRunPhase = RdpkgExportRunPhase.IDLE,
@@ -20,7 +20,7 @@ data class RdpkgExportRunState(
     val dismissedFinishedAtMs: Long = 0L,
 ) {
     val isRunning get() = phase == RdpkgExportRunPhase.EXPORTING
-    val isTerminal get() = phase == RdpkgExportRunPhase.COMPLETE || phase == RdpkgExportRunPhase.FAILED
+    val isTerminal get() = phase == RdpkgExportRunPhase.COMPLETE || phase == RdpkgExportRunPhase.FAILED || phase == RdpkgExportRunPhase.CANCELLED
     val isTerminalDismissed get() = isTerminal && finishedAtMs > 0L && dismissedFinishedAtMs == finishedAtMs
 }
 
@@ -126,7 +126,25 @@ class RdpkgExportRunStore(context: Context) {
         return prefs.edit().putLong(KEY_DISMISSED_FINISHED_AT, finishedAtMs).commit()
     }
 
+    /** v0.5.105: «Скасувати» on the status card; persisted so the worker sees it after rotation. */
+    @Synchronized
+    fun requestCancel(): Boolean {
+        if (!load().isRunning) return false
+        return prefs.edit().putBoolean(KEY_CANCEL_REQUESTED, true).commit()
+    }
+
+    fun isCancelRequested(): Boolean = prefs.getBoolean(KEY_CANCEL_REQUESTED, false)
+
+    fun cancelled(message: String) {
+        prefs.edit()
+            .putString(KEY_PHASE, RdpkgExportRunPhase.CANCELLED.name)
+            .putString(KEY_MESSAGE, message)
+            .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
+            .apply()
+    }
+
     companion object {
+        private const val KEY_CANCEL_REQUESTED = "cancel_requested"
         private const val PREFS = "renault_docs_rdpkg_export_run"
         private const val KEY_PHASE = "phase"
         private const val KEY_MESSAGE = "message"

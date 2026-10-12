@@ -80,6 +80,7 @@ class RdpkgShareService : Service() {
                     destinationUri = uri,
                     progressState = { progress ->
                         dataSyncTimeout.checkActive()
+                        if (runStore.isCancelRequested()) throw OperationCancelledException()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -102,6 +103,7 @@ class RdpkgShareService : Service() {
                     },
                 ).getOrThrow()
                 dataSyncTimeout.checkActive()
+                if (runStore.isCancelRequested()) throw OperationCancelledException()
                 // ⇧ appears only now: the complete file is moved into place in one rename.
                 PreparedShareStore.commitIncoming(partial, file)
                 temp = null
@@ -109,6 +111,12 @@ class RdpkgShareService : Service() {
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Том готовий для поширення.", false))
             } catch (error: Throwable) {
                 if (dataSyncTimeout.isExpired) return@Thread
+                if (error is OperationCancelledException || error.cause is OperationCancelledException) {
+                    // v0.5.105: the unfinished file in .incoming is removed in finally; no ⇧ appears.
+                    runStore.cancelled("Підготовку тому скасовано. Підготовлений файл не створено, сам том не змінено.")
+                    getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Підготовку тому скасовано.", false))
+                    return@Thread
+                }
                 val message = error.message ?: "Невідома помилка підготовки тому."
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка підготовки: $message", false))

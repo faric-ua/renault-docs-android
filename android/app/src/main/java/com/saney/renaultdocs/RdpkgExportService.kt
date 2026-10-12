@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.os.IBinder
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -65,6 +66,7 @@ class RdpkgExportService : Service() {
                     destinationUri = Uri.parse(destinationUri),
                     progressState = { progress ->
                         dataSyncTimeout.checkActive()
+                        if (runStore.isCancelRequested()) throw OperationCancelledException()
                         val stage =
                             progress.displayText()
                         runStore.update(
@@ -87,12 +89,29 @@ class RdpkgExportService : Service() {
                     },
                 ).getOrThrow()
                 dataSyncTimeout.checkActive()
+                if (runStore.isCancelRequested()) throw OperationCancelledException()
                 val label = listOfNotNull(volume.documentCode, volume.date).joinToString(" · ").ifBlank { volume.title }
                 val message = "Пакет .rdpkg збережено: $label · ${result.fileCount} файлів"
                 runStore.complete(result.sha256, result.fileCount, message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Експорт .rdpkg завершено.", false))
             } catch (error: Throwable) {
                 if (dataSyncTimeout.isExpired) return@Thread
+                if (error is OperationCancelledException || error.cause is OperationCancelledException) {
+                    // v0.5.105: the file was created by this export a moment ago and is
+                    // unfinished; remove only it, so no broken .rdpkg is left behind.
+                    val removed = runCatching {
+                        DocumentsContract.deleteDocument(contentResolver, Uri.parse(destinationUri))
+                    }.getOrDefault(false)
+                    runStore.cancelled(
+                        if (removed) {
+                            "Експорт тому скасовано. Недороблений файл .rdpkg видалено, сам том не змінено."
+                        } else {
+                            "Експорт тому скасовано. Недороблений файл .rdpkg не вдалося видалити — видали його вручну. Сам том не змінено."
+                        },
+                    )
+                    getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Експорт .rdpkg скасовано.", false))
+                    return@Thread
+                }
                 val message = error.message ?: "Невідома помилка експорту."
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка експорту: $message", false))

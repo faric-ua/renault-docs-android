@@ -10,6 +10,7 @@ enum class CatalogImportPhase {
     IMPORTING,
     COMPLETE,
     FAILED,
+    CANCELLED,
 }
 
 data class CatalogImportItem(
@@ -44,7 +45,9 @@ data class CatalogImportRunState(
             phase ==
                 CatalogImportPhase.COMPLETE ||
                 phase ==
-                    CatalogImportPhase.FAILED
+                    CatalogImportPhase.FAILED ||
+                phase ==
+                    CatalogImportPhase.CANCELLED
 }
 
 class CatalogImportRunStore(
@@ -322,7 +325,25 @@ class CatalogImportRunStore(
             emptyList(),
         )
 
+    /** v0.5.105: «Скасувати» on the status card; persisted so the worker sees it after rotation. */
+    @Synchronized
+    fun requestCancel(): Boolean {
+        if (!load().isRunning) return false
+        return prefs.edit().putBoolean(KEY_CANCEL_REQUESTED, true).commit()
+    }
+
+    fun isCancelRequested(): Boolean = prefs.getBoolean(KEY_CANCEL_REQUESTED, false)
+
+    fun cancelled(message: String) {
+        prefs.edit()
+            .putString(KEY_PHASE, CatalogImportPhase.CANCELLED.name)
+            .putString(KEY_MESSAGE, message)
+            .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
+            .apply()
+    }
+
     companion object {
+        private const val KEY_CANCEL_REQUESTED = "cancel_requested"
         private const val PREFS =
             "renault_docs_catalog_import"
         private const val KEY_PHASE =

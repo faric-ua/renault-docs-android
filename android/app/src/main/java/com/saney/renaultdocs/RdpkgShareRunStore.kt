@@ -2,7 +2,7 @@ package com.saney.renaultdocs
 
 import android.content.Context
 
-enum class RdpkgShareRunPhase { IDLE, PREPARING, COMPLETE, FAILED }
+enum class RdpkgShareRunPhase { IDLE, PREPARING, COMPLETE, FAILED, CANCELLED }
 
 data class RdpkgShareRunState(
     val phase: RdpkgShareRunPhase = RdpkgShareRunPhase.IDLE,
@@ -19,7 +19,7 @@ data class RdpkgShareRunState(
     val dismissedFinishedAtMs: Long = 0L,
 ) {
     val isRunning get() = phase == RdpkgShareRunPhase.PREPARING
-    val isTerminal get() = phase == RdpkgShareRunPhase.COMPLETE || phase == RdpkgShareRunPhase.FAILED
+    val isTerminal get() = phase == RdpkgShareRunPhase.COMPLETE || phase == RdpkgShareRunPhase.FAILED || phase == RdpkgShareRunPhase.CANCELLED
     val isChooserLaunched get() = isTerminal && finishedAtMs > 0L && chooserLaunchedFinishedAtMs == finishedAtMs
     val isTerminalDismissed get() = isTerminal && finishedAtMs > 0L && dismissedFinishedAtMs == finishedAtMs
 }
@@ -125,7 +125,25 @@ class RdpkgShareRunStore(context: Context) {
         return prefs.edit().putLong(KEY_DISMISSED_FINISHED_AT, finishedAtMs).commit()
     }
 
+    /** v0.5.105: «Скасувати» on the status card; persisted so the worker sees it after rotation. */
+    @Synchronized
+    fun requestCancel(): Boolean {
+        if (!load().isRunning) return false
+        return prefs.edit().putBoolean(KEY_CANCEL_REQUESTED, true).commit()
+    }
+
+    fun isCancelRequested(): Boolean = prefs.getBoolean(KEY_CANCEL_REQUESTED, false)
+
+    fun cancelled(message: String) {
+        prefs.edit()
+            .putString(KEY_PHASE, RdpkgShareRunPhase.CANCELLED.name)
+            .putString(KEY_MESSAGE, message)
+            .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
+            .apply()
+    }
+
     companion object {
+        private const val KEY_CANCEL_REQUESTED = "cancel_requested"
         private const val PREFS = "renault_docs_rdpkg_share_run"
         private const val KEY_PHASE = "phase"
         private const val KEY_MESSAGE = "message"

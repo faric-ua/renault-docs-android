@@ -594,9 +594,10 @@ class ProjectActivity : Activity() {
                     }
             statusText.text = DEFAULT_STATUS_TEXT
             if (::operationStatus.isInitialized) {
+                val stopping = rdpkgImportRunStore.isCancelRequested()
                 operationStatus.showRunning(
                     title = "Імпорт тому",
-                    detail = detail,
+                    detail = if (stopping) STOPPING_DETAIL else detail,
                     current =
                         state.progressCurrent
                             .takeIf {
@@ -609,12 +610,33 @@ class ProjectActivity : Activity() {
                                 it >
                                     0
                             },
+                    // v0.5.105: same «Скасувати» as the Home card, with a question.
+                    onCancel =
+                        if (stopping) {
+                            null
+                        } else {
+                            {
+                                confirmStopOperation(
+                                    title = "Зупинити імпорт тому?",
+                                    message = "Том не буде додано. Вихідний .rdpkg не зміниться. Якщо встановлення вже на останньому кроці, його буде завершено, щоб не зламати том.",
+                                ) { rdpkgImportRunStore.requestCancel() }
+                            }
+                        },
                 )
             }
             return
         }
 
         if (!state.isTerminal || state.finishedAtMs <= 0L) return
+
+        if (state.phase == RdpkgImportRunPhase.CANCELLED) {
+            if (::operationStatus.isInitialized) {
+                operationStatus.showTerminal("Імпорт тому · скасовано", state.message) {
+                    rdpkgImportRunStore.consume(state.finishedAtMs)
+                }
+            }
+            return
+        }
 
         if (state.phase == RdpkgImportRunPhase.FAILED) {
             val detail = "Не вдалося імпортувати .rdpkg: " + state.message
@@ -719,13 +741,29 @@ class ProjectActivity : Activity() {
 
         if (state.isRunning) {
             statusText.text = DEFAULT_STATUS_TEXT
+            val stopping = rdpkgExportRunStore.isCancelRequested()
             operationStatus.showRunning(
                 title = "Експорт тому",
                 detail =
-                    state.message
-                        .ifBlank {
-                            "Експортую…"
-                        },
+                    if (stopping) {
+                        STOPPING_DETAIL
+                    } else {
+                        state.message
+                            .ifBlank {
+                                "Експортую…"
+                            }
+                    },
+                onCancel =
+                    if (stopping) {
+                        null
+                    } else {
+                        {
+                            confirmStopOperation(
+                                title = "Зупинити експорт тому?",
+                                message = "Недороблений файл .rdpkg, який створює цей експорт, буде видалено. Сам том не зміниться.",
+                            ) { rdpkgExportRunStore.requestCancel() }
+                        }
+                    },
                 current =
                     state.progressCurrent
                         .takeIf {
@@ -771,6 +809,11 @@ class ProjectActivity : Activity() {
                     }
                 }
             operationStatus.showTerminal("Експорт тому завершено", detail) {
+                rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+        } else if (state.phase == RdpkgExportRunPhase.CANCELLED) {
+            operationStatus.showTerminal("Експорт тому · скасовано", state.message) {
                 rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
                 operationStatus.hide()
             }
@@ -1551,6 +1594,10 @@ class ProjectActivity : Activity() {
                     subject =
                         state.sourceName
                             ?: "Renault архів",
+                    // v0.5.105: the card offers the same «Скасувати» as the chooser.
+                    onCancel = {
+                        confirmCancelArchiveSelection()
+                    },
                 )
             }
 
@@ -1616,8 +1663,10 @@ class ProjectActivity : Activity() {
                                 it >
                                     0
                             },
+                    // v0.5.105: also while «Перевіряю/встановлюю» — the importer stops
+                    // only at safe checkpoints before activation.
                     onCancel =
-                        if (state.phase == NativeRdpkgRunPhase.PREPARING) {
+                        if (state.isRunning && !state.cancelRequested) {
                             {
                                 confirmCancelNativePreparation()
                             }
@@ -1710,6 +1759,48 @@ class ProjectActivity : Activity() {
         showNativeTerminalStatus(
             state,
         )
+    }
+
+    /** v0.5.105: one question, then the store records the request for the worker. */
+    private fun confirmStopOperation(
+        title: String,
+        message: String,
+        request: () -> Boolean,
+    ) {
+        ConfirmActions.confirmStop(
+            activity = this,
+            title = title,
+            message = message,
+        ) {
+            if (!request()) {
+                Toast.makeText(
+                    this,
+                    "Операція вже завершилась.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+    }
+
+    /** v0.5.105: «Скасувати» on the «Архів · вибір томів» card. */
+    private fun confirmCancelArchiveSelection() {
+        ConfirmActions.confirmStop(
+            activity = this,
+            title = "Скасувати вибір томів?",
+            message = "Жоден том з цього архіву не буде створено. Оригінальний архів не зміниться, тимчасові файли буде прибрано.",
+        ) {
+            if (!nativeRunStore.load().isWaitingForSelection) {
+                return@confirmStop
+            }
+            NativeRdpkgPreparationService
+                .requestCancel(
+                    this,
+                )
+            archiveChooserDialog
+                ?.dismiss()
+            archiveChooserDialog =
+                null
+        }
     }
 
     /**
@@ -3884,13 +3975,29 @@ class ProjectActivity : Activity() {
 
         if (state.isRunning) {
             statusText.text = DEFAULT_STATUS_TEXT
+            val stopping = rdpkgShareRunStore.isCancelRequested()
             operationStatus.showRunning(
                 title = "Підготовка тому",
                 detail =
-                    state.message
-                        .ifBlank {
-                            "Готую…"
-                        },
+                    if (stopping) {
+                        STOPPING_DETAIL
+                    } else {
+                        state.message
+                            .ifBlank {
+                                "Готую…"
+                            }
+                    },
+                onCancel =
+                    if (stopping) {
+                        null
+                    } else {
+                        {
+                            confirmStopOperation(
+                                title = "Зупинити підготовку тому?",
+                                message = "Підготовлений файл не буде створено. Сам том не зміниться.",
+                            ) { rdpkgShareRunStore.requestCancel() }
+                        }
+                    },
                 current =
                     state.progressCurrent
                         .takeIf {
@@ -3936,6 +4043,11 @@ class ProjectActivity : Activity() {
             }
             if (!state.isChooserLaunched && rdpkgShareRunStore.markChooserLaunched(state.finishedAtMs)) {
                 sharePreparedRdpkg(file)
+            }
+        } else if (state.phase == RdpkgShareRunPhase.CANCELLED) {
+            operationStatus.showTerminal("Підготовка тому · скасовано", state.message) {
+                rdpkgShareRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
             }
         } else {
             val detail = "Не вдалося підготувати том: " + state.message
@@ -4941,6 +5053,8 @@ class ProjectActivity : Activity() {
 
         private const val DEFAULT_STATUS_TEXT =
             ""
+        private const val STOPPING_DETAIL =
+            "Зупиняю після поточного безпечного кроку…"
 
         private const val NATIVE_RUN_REFRESH_MS =
             100L
