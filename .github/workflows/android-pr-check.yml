@@ -55,11 +55,29 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
 
+      # Claude's environment cannot download Actions logs, so Kotlin compiler
+      # errors and failed unit tests are also surfaced as check annotations.
       - name: Run Android unit tests
-        run: gradle -p android :app:testDebugUnitTest
+        shell: bash
+        run: |
+          set -o pipefail
+          if ! gradle -p android :app:testDebugUnitTest 2>&1 | tee unit-tests.log; then
+            grep -E '^e: |FAILED|AssertionError|expected:' unit-tests.log | head -40 | while IFS= read -r line; do
+              echo "::error title=Android unit tests::${line}"
+            done
+            exit 1
+          fi
 
       - name: Compile debug APK with ephemeral PR signer
-        run: gradle -p android :app:assembleDebug
+        shell: bash
+        run: |
+          set -o pipefail
+          if ! gradle -p android :app:assembleDebug 2>&1 | tee assemble.log; then
+            grep -E '^e: |FAILED' assemble.log | head -40 | while IFS= read -r line; do
+              echo "::error title=Android build::${line}"
+            done
+            exit 1
+          fi
 
       - name: Verify APK exists
         shell: bash
