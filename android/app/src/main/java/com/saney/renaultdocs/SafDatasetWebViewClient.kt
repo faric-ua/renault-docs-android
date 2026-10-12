@@ -23,7 +23,9 @@ class SafDatasetWebViewClient(
     private val onHybridSectionReady: (Boolean) -> Unit = {},
     private val onSavePdf: (String) -> Unit = {},
     private val onPrintPdf: (String) -> Unit = {},
-    private val onPrintPage: (WebView) -> Unit = {},
+    private val onPrintPage: (WebView, String?) -> Unit = { _, _ -> },
+    private val onPageZoomLock: (WebView, Boolean) -> Unit = { _, _ -> },
+    private val onPageReady: (WebView) -> Unit = {},
     private val onToggleFullscreen: () -> Unit = {},
     private val onToggleCompanion: () -> Unit = {},
     private val pdfStateScope: String = "main",
@@ -218,6 +220,10 @@ class SafDatasetWebViewClient(
             url,
         )
 
+        if (view != null) {
+            onPageReady(view)
+        }
+
         val relativePath =
             url
                 ?.let {
@@ -308,14 +314,44 @@ class SafDatasetWebViewClient(
 
         if (
             url.scheme.equals(
+                ZOOM_SCHEME,
+                ignoreCase = true,
+            )
+        ) {
+            // v0.5.118: a page made of several documents with a PDF frame —
+            // whole-window zoom fights the PDF's own zoom, so it is locked.
+            val lock =
+                url.host.equals(
+                    "lock",
+                    ignoreCase = true,
+                )
+            if (view != null) {
+                view.post {
+                    onPageZoomLock(view, lock)
+                }
+            }
+            return true
+        }
+
+        if (
+            url.scheme.equals(
                 PAGE_PRINT_SCHEME,
                 ignoreCase = true,
             )
         ) {
             // v0.5.116: window.print() of an original Renault page.
+            // v0.5.118: «url» = the frame that asked, so only that document
+            // is printed, not the whole window.
+            val documentUrl =
+                url.getQueryParameter(
+                    "url",
+                )
+                    ?.takeIf {
+                        DatasetVirtualUrl.relativePath(it) != null
+                    }
             if (view != null) {
                 view.post {
-                    onPrintPage(view)
+                    onPrintPage(view, documentUrl)
                 }
             }
             return true
@@ -3848,13 +3884,40 @@ class SafDatasetWebViewClient(
         val script =
             """
             (function () {
+              function hasPdfFrame(w) {
+                try {
+                  var frames = w.frames;
+                  for (var i = 0; i < frames.length; i++) {
+                    try {
+                      if (frames[i].__renaultPdfViewer) return true;
+                      if (hasPdfFrame(frames[i])) return true;
+                    } catch (_) {}
+                  }
+                } catch (_) {}
+                return false;
+              }
+              function checkZoom() {
+                try {
+                  var top = window.top;
+                  var lock = hasPdfFrame(top);
+                  if (top.__renaultZoomLock !== lock) {
+                    top.__renaultZoomLock = lock;
+                    top.location.href =
+                      '$ZOOM_SCHEME://' + (lock ? 'lock' : 'unlock');
+                  }
+                } catch (_) {}
+              }
               function patch(w) {
                 try {
                   if (!w.__renaultPrintPatched) {
                     w.__renaultPrintPatched = true;
                     w.print = function () {
                       try {
-                        w.location.href = '$PAGE_PRINT_SCHEME://print';
+                        var own = '';
+                        try { own = w.location.href; } catch (_) {}
+                        w.location.href =
+                          '$PAGE_PRINT_SCHEME://print?url=' +
+                          encodeURIComponent(own);
                       } catch (_) {}
                     };
                   }
@@ -3866,6 +3929,7 @@ class SafDatasetWebViewClient(
                         f.__renaultPrintHook = true;
                         f.addEventListener('load', function () {
                           try { patch(f.contentWindow); } catch (_) {}
+                          checkZoom();
                         });
                       }
                       try { patch(f.contentWindow); } catch (_) {}
@@ -3874,6 +3938,7 @@ class SafDatasetWebViewClient(
                 } catch (_) {}
               }
               patch(window);
+              checkZoom();
               return true;
             })();
             """.trimIndent()
@@ -4121,6 +4186,9 @@ class SafDatasetWebViewClient(
 
         const val PAGE_PRINT_SCHEME =
             "renaultprintpage"
+
+        const val ZOOM_SCHEME =
+            "renaultzoom"
 
         /** «X_PRINT.PDF» / «X_PRINTNB.PDF» — print variants of scheme «X.PDF». */
         val PRINT_VARIANT =

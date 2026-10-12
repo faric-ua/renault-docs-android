@@ -1877,6 +1877,10 @@ class AndroidPdfLayer(
                     }
                   );
 
+                // v0.5.118: lets the page around this frame know a PDF
+                // viewer with its own zoom lives here.
+                window.__renaultPdfViewer = true;
+
                 // v0.5.116: the original Renault printer icon opens the
                 // «_PRINT» variant of a scheme — that means «print it».
                 if (/_PRINT(NB)?\.PDF${'$'}/i.test(pdfPath)) {

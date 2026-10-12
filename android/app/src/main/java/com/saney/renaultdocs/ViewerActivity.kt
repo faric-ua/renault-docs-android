@@ -338,10 +338,16 @@ class ViewerActivity : Activity() {
                         path,
                     )
                 },
-                onPrintPage = { page ->
-                    PdfPrinter.printPage(
-                        this,
+                onPrintPage = { page, documentUrl ->
+                    printDocument(
                         page,
+                        documentUrl,
+                    )
+                },
+                onPageZoomLock = { page, lock ->
+                    lockPageZoom(
+                        page,
+                        lock,
                     )
                 },
                 onToggleFullscreen = {
@@ -1171,6 +1177,8 @@ class ViewerActivity : Activity() {
         if (::datasetClient.isInitialized) {
             datasetClient.close()
         }
+
+        releasePrintPage()
 
         super.onDestroy()
     }
@@ -2365,6 +2373,88 @@ class ViewerActivity : Activity() {
         )
     }
 
+    // v0.5.118: a hidden page used only to print one document of a frame page.
+    private var printWebView: WebView? = null
+    private var printClient: SafDatasetWebViewClient? = null
+
+    /**
+     * v0.5.118 (owner 2026-10-13 00:44): the original printer icon prints
+     * only the document it sits on (the pins table under the scheme), as
+     * that document is — not a picture of the whole window.
+     */
+    private fun printDocument(
+        page: WebView,
+        documentUrl: String?,
+    ) {
+        if (
+            documentUrl.isNullOrBlank() ||
+            documentUrl == page.url
+        ) {
+            PdfPrinter.printPage(this, page)
+            return
+        }
+
+        releasePrintPage()
+
+        var printed = false
+        val client =
+            SafDatasetWebViewClient(
+                context = this,
+                treeUri = Uri.parse(treeUriText),
+                onPageReady = { loaded ->
+                    if (!printed) {
+                        printed = true
+                        PdfPrinter.printPage(
+                            this,
+                            loaded,
+                        )
+                    }
+                },
+            )
+        val printer =
+            WebView(this).apply {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.allowFileAccess = false
+                settings.allowContentAccess = false
+                webViewClient = client
+            }
+        printClient = client
+        printWebView = printer
+        printer.loadUrl(documentUrl)
+    }
+
+    private fun releasePrintPage() {
+        printWebView?.let {
+            it.stopLoading()
+            it.destroy()
+        }
+        printWebView = null
+        printClient?.close()
+        printClient = null
+    }
+
+    /**
+     * v0.5.118 (owner video 00:43): on «Схема + піни» the scheme frame has its
+     * own zoom; whole-window zoom on top of it moved and lost the pins table.
+     * While such a page is shown, only the frames zoom and scroll.
+     */
+    private fun lockPageZoom(
+        page: WebView,
+        lock: Boolean,
+    ) {
+        if (lock) {
+            // Back to the page's own size first (zoomOut stops working once
+            // zoom is switched off).
+            var steps = 0
+            while (steps < 30 && page.zoomOut()) {
+                steps++
+            }
+        }
+        page.settings.builtInZoomControls = !lock
+        page.settings.setSupportZoom(!lock)
+    }
+
     /** v0.5.115: Android print window for the PDF on screen. */
     private fun printPdf(
         client: SafDatasetWebViewClient,
@@ -2968,10 +3058,16 @@ class ViewerActivity : Activity() {
                         path,
                     )
                 },
-                onPrintPage = { page ->
-                    PdfPrinter.printPage(
-                        this,
+                onPrintPage = { page, documentUrl ->
+                    printDocument(
                         page,
+                        documentUrl,
+                    )
+                },
+                onPageZoomLock = { page, lock ->
+                    lockPageZoom(
+                        page,
+                        lock,
                     )
                 },
                 onToggleFullscreen = {

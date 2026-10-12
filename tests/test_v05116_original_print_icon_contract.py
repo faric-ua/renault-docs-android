@@ -58,7 +58,8 @@ class OriginalPrintIconContract(unittest.TestCase):
         block = between(route, "PRINT_VARIANT.containsMatchIn(it)", "return true")
         self.assertIn("onPrintPdf(printPath)", block)
         self.assertIn("PAGE_PRINT_SCHEME", route)
-        self.assertIn("onPrintPage(view)", route)
+        # v0.5.118: the frame URL travels with it (only that document is printed).
+        self.assertIn("onPrintPage(view, documentUrl)", route)
 
     def test_missing_print_variant_falls_back_to_the_scheme(self):
         client = read("SafDatasetWebViewClient.kt")
@@ -84,7 +85,8 @@ class OriginalPrintIconContract(unittest.TestCase):
 
     def test_viewer_wires_page_print_for_main_and_companion(self):
         viewer = read("ViewerActivity.kt")
-        self.assertEqual(viewer.count("onPrintPage = { page ->"), 2)
+        # v0.5.118: (page, documentUrl) — see test_v05118.
+        self.assertEqual(viewer.count("onPrintPage = { page, documentUrl ->"), 2)
         printer = read("PdfPrinter.kt")
         self.assertIn("webView.createPrintDocumentAdapter(name)", printer)
 
