@@ -32,8 +32,11 @@ class SafDatasetResolver(
     private val contentResolver: ContentResolver =
         context.contentResolver
 
+    // v0.5.110: a dataset may be addressed as a folder inside a permitted
+    // tree (…/tree/<parent>/document/<copy>), e.g. a converter copy inside
+    // the chosen destination. Its root is that folder, not the parent tree.
     private val rootDocumentId =
-        DocumentsContract.getTreeDocumentId(treeUri)
+        rootDocumentIdOf(treeUri)
 
     private val root = Node(
         relativePath = "",
@@ -281,6 +284,22 @@ class SafDatasetResolver(
     }
 
     companion object {
+        /** Root folder id for a tree address or for a folder inside a tree. */
+        fun rootDocumentIdOf(
+            uri: Uri,
+        ): String {
+            val segments = uri.pathSegments
+            return if (
+                segments.size >= 4 &&
+                segments[0] == "tree" &&
+                segments[2] == "document"
+            ) {
+                segments[3]
+            } else {
+                DocumentsContract.getTreeDocumentId(uri)
+            }
+        }
+
         fun normalize(
             path: String,
         ): String? {

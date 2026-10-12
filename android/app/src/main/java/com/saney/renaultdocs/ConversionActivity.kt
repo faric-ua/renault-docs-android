@@ -34,6 +34,8 @@ class ConversionActivity : Activity() {
     private lateinit var startButton: Button
     private lateinit var cancelButton: Button
     private lateinit var clearButton: Button
+    private lateinit var addToAppButton: Button
+    private lateinit var datasetStore: DatasetStore
     private lateinit var sourceButton: Button
     private lateinit var destinationButton: Button
 
@@ -84,6 +86,10 @@ class ConversionActivity : Activity() {
             )
         runStore =
             ConversionRunStore(
+                this,
+            )
+        datasetStore =
+            DatasetStore(
                 this,
             )
 
@@ -706,6 +712,46 @@ class ConversionActivity : Activity() {
             progressText,
         )
 
+        // v0.5.110 (owner): the copy is for a browser first, but it can also
+        // be opened from the app — only when the owner presses this button.
+        addToAppButton =
+            Button(this).apply {
+                text =
+                    "Додати копію в застосунок"
+                isAllCaps =
+                    false
+                minHeight =
+                    Ui.dp(
+                        this@ConversionActivity,
+                        48,
+                    )
+                visibility =
+                    View.GONE
+                Ui.applyActionStyle(
+                    view =
+                        this,
+                    primary =
+                        true,
+                )
+                setOnClickListener {
+                    addCopyToApp()
+                }
+            }
+
+        body.addView(
+            addToAppButton,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                topMargin =
+                    Ui.dp(
+                        this@ConversionActivity,
+                        12,
+                    )
+            },
+        )
+
         clearButton =
             Button(this).apply {
                 text =
@@ -814,7 +860,7 @@ class ConversionActivity : Activity() {
                             "Через це посилання ламаються — частина сторінок і схем не відкривається.\n\n" +
                             "Конвертер робить з такої папки копію для Android. Усередині — ті самі оригінальні сторінки, без переробки «на новий лад», лише з виправленими посиланнями. " +
                             "Копія відкривається в браузері так само, як оригінал на Windows: стартова сторінка тому (INDEX.HTM) або загальний список томів _renault/START.html. " +
-                            "Застосунок для цього не потрібен: папку можна запакувати й передати будь-кому. У бібліотеку Renault Docs вона не додається — там томи зберігаються у своєму форматі.\n\n" +
+                            "Застосунок для цього не потрібен: папку можна запакувати й передати будь-кому. Сама в застосунок вона не додається; якщо хочеш відкривати її і тут — після конвертації натисни «Додати копію в застосунок», і вона з'явиться на головному в розділі «Старі бібліотеки».\n\n" +
                             "ЩО ВИБРАТИ\n" +
                             "1. Стара Renault-папка — папка, в якій лежать папки томів (у кожній є INDEX або ACCUEIL). Не сама папка тому! " +
                             "Наприклад, для Kangoo: «…(RUS)», а не внутрішня «…2009.08.31».\n" +
@@ -1016,6 +1062,23 @@ class ConversionActivity : Activity() {
 
         val running =
             state.isRunning
+
+        val copyInApp =
+            state.phase == ConversionRunPhase.COMPLETE &&
+                datasetStore.load().any { record ->
+                    record.treeUri == state.outputTreeUri
+                }
+        addToAppButton.visibility =
+            if (
+                state.phase == ConversionRunPhase.COMPLETE &&
+                !state.destinationUri.isNullOrBlank() &&
+                !state.outputFolderName.isNullOrBlank() &&
+                !copyInApp
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
 
         cancelButton.visibility =
             if (running) {
@@ -1324,6 +1387,75 @@ class ConversionActivity : Activity() {
                     error.message
                         ?: "Не вдалося перевірити план."
             }
+    }
+
+    /**
+     * v0.5.110: open the finished browser copy from the app too. The copy is
+     * found inside the permitted destination (a separate sub-folder tree
+     * address has no Android permission — v0.5.109 history) and appears on
+     * Home in «Старі бібліотеки».
+     */
+    private fun addCopyToApp() {
+        val state = runStore.load()
+        val destinationUri = state.destinationUri
+        val outputFolderName = state.outputFolderName
+        if (state.phase != ConversionRunPhase.COMPLETE || destinationUri.isNullOrBlank() || outputFolderName.isNullOrBlank()) {
+            return
+        }
+        addToAppButton.isEnabled = false
+        statusText.setTextColor(Ui.muted)
+        statusText.text = "Перевіряю копію…"
+
+        Thread {
+            val added =
+                runCatching {
+                    val destination =
+                        DocumentFile.fromTreeUri(this, Uri.parse(destinationUri))
+                            ?: error("Папка призначення недоступна.")
+                    val output =
+                        destination.findFile(outputFolderName)
+                            ?.takeIf { it.isDirectory }
+                            ?: error("Готову копію не знайдено: $outputFolderName")
+                    DatasetMediaIsolation.ensure(
+                        context = this,
+                        root = output,
+                    )
+                    val record =
+                        DatasetReader.readFolder(
+                            context = this,
+                            root = output,
+                        ).getOrThrow()
+                    datasetStore.upsert(record)
+                    // Remember the in-tree address so the button hides.
+                    runStore.complete(
+                        outputTreeUri = record.treeUri,
+                        message = state.message,
+                        filesTotal = state.filesTotal,
+                        changedFiles = state.changedFiles,
+                        changesTotal = state.changesTotal,
+                    )
+                    record
+                }
+
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                addToAppButton.isEnabled = true
+                added
+                    .onSuccess { record ->
+                        statusText.setTextColor(Ui.accent)
+                        statusText.text =
+                            "Додано в застосунок: " + record.title +
+                                ". Відкривається на головному екрані в розділі «Старі бібліотеки»."
+                    }
+                    .onFailure { error ->
+                        statusText.setTextColor(Ui.danger)
+                        statusText.text =
+                            "Не вдалося додати копію в застосунок: " +
+                                (error.message ?: "невідома помилка")
+                    }
+                renderRunState()
+            }
+        }.start()
     }
 
     /** v0.5.104: owner asked for a confirmation before stopping the converter. */
