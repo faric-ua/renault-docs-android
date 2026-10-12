@@ -64,7 +64,8 @@ class V0539SelfContainedConverterContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/ConversionService.kt"
         )
 
-        self.assertIn("VALIDATION_PROGRESS_EVERY", engine)
+        # v0.5.103: validation progress is time-based (live), not every 250 files.
+        self.assertIn("progressDue()", engine)
         self.assertIn('"Перевіряю output…"', engine)
         self.assertIn('"Перевіряю…"', activity)
         self.assertIn("state.filesDone", activity)

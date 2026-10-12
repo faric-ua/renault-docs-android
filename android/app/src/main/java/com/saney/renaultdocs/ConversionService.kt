@@ -650,8 +650,9 @@ class ConversionService : Service() {
             3701
         private const val NOTIFICATION_THROTTLE_MS =
             700L
+        // Matches ConversionActivity's 100 ms refresh: live counter without per-file writes.
         private const val PROGRESS_STORE_THROTTLE_MS =
-            250L
+            100L
 
         fun start(
             context: Context,

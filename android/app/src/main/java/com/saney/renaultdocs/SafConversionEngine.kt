@@ -589,9 +589,7 @@ class SafConversionEngine(
                             )
 
                         if (
-                            files.size %
-                                FAST_SCAN_PROGRESS_EVERY ==
-                            0
+                            progressDue()
                         ) {
                             progress(
                                 ConversionRunPhase.SCANNING,
@@ -707,9 +705,7 @@ class SafConversionEngine(
                                 )
 
                             if (
-                                files.size %
-                                    FALLBACK_SCAN_PROGRESS_EVERY ==
-                                0
+                                progressDue()
                             ) {
                                 progress(
                                     ConversionRunPhase.SCANNING,
@@ -1724,9 +1720,7 @@ class SafConversionEngine(
                             1
 
                         if (
-                            count %
-                                VALIDATION_PROGRESS_EVERY ==
-                                0 ||
+                            progressDue() ||
                             count ==
                                 expectedSourceFiles
                         ) {
@@ -1908,6 +1902,20 @@ class SafConversionEngine(
         )
     }
 
+    /**
+     * Live counter: scan/validation report by time, not every N files, so the
+     * owner sees the bar move continuously (phone QA v0.5.102). The service
+     * still throttles persisted writes; this only avoids building a message per file.
+     */
+    private var lastProgressAtMs = 0L
+
+    private fun progressDue(): Boolean {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastProgressAtMs < PROGRESS_INTERVAL_MS) return false
+        lastProgressAtMs = now
+        return true
+    }
+
     private fun checkCancelled() {
         if (
             runStore
@@ -1990,11 +1998,7 @@ class SafConversionEngine(
         private const val BUFFER_SIZE =
             128 * 1024
 
-        private const val FAST_SCAN_PROGRESS_EVERY =
-            500
-        private const val FALLBACK_SCAN_PROGRESS_EVERY =
-            100
-        private const val VALIDATION_PROGRESS_EVERY =
-            250
+        private const val PROGRESS_INTERVAL_MS =
+            80L
     }
 }
