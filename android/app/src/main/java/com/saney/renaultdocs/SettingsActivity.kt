@@ -836,17 +836,31 @@ class SettingsActivity : Activity() {
                     visibility =
                         View.GONE
                     setOnClickListener {
-                        settings
-                            .clearBackupFolder()
+                        // v0.5.104: forgetting the chosen folder asks first.
+                        ConfirmActions.confirm(
+                            activity =
+                                this@SettingsActivity,
+                            title =
+                                "Скинути папку резервних копій?",
+                            message =
+                                "Застосунок забуде вибрану папку. Файли в ній не видаляються; папку можна вибрати знову.",
+                            confirmLabel =
+                                "Скинути",
+                            keepLabel =
+                                "Залишити",
+                        ) {
+                            settings
+                                .clearBackupFolder()
 
-                        statusText
-                            .setTextColor(
-                                Ui.muted,
-                            )
-                        statusText.text =
-                            "Вибір папки резервних копій скинуто. Файли не видалялися."
+                            statusText
+                                .setTextColor(
+                                    Ui.muted,
+                                )
+                            statusText.text =
+                                "Вибір папки резервних копій скинуто. Файли не видалялися."
 
-                        renderValues()
+                            renderValues()
+                        }
                     }
                 }
 

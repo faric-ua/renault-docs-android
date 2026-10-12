@@ -424,7 +424,9 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertEqual(
             {
-                "HomeProjectDialogController.kt": (5, 5),
+                # v0.5.104: Home's stop question moved into shared ConfirmActions.
+                "ConfirmActions.kt": (1, 1),
+                "HomeProjectDialogController.kt": (4, 4),
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (10, 10),
                 "ProjectExportWizard.kt": (1, 1),
