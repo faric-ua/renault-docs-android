@@ -82,8 +82,7 @@ class LegacyConverterRemovedContract(unittest.TestCase):
 
     def test_version_bumped(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.112"', gradle)
-        self.assertIn("versionCode = 128", gradle)
+        self.assertGreaterEqual(int(gradle.split("versionCode = ", 1)[1].splitlines()[0]), 128)
 
 
 if __name__ == "__main__":

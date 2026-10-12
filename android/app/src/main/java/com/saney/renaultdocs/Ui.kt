@@ -7,7 +7,9 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
+import android.widget.Button
 import android.widget.TextView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -29,6 +31,10 @@ object Ui {
     val statusWarmFill: Int = Color.parseColor("#2B251F")
     val statusWarmBorder: Int = Color.parseColor("#6E5A42")
     val statusWarmText: Int = Color.parseColor("#D8B58B")
+
+    // v0.5.113 (owner request 2026-10-12): one «selected» look everywhere a
+    // list lets you pick something — green frame, dark-green fill, ✓ on the right.
+    val selectedFill: Int = Color.parseColor("#16271E")
     const val actionSubtitleSp: Float = 11f
     const val secondaryTextSp: Float = 12f
     const val valueTextSp: Float = 13f
@@ -52,6 +58,85 @@ object Ui {
         setColor(fill)
         cornerRadius = dp(context, radiusDp).toFloat()
         setStroke(dp(context, 1), stroke)
+    }
+
+    fun selectedBackground(
+        context: Context,
+        radiusDp: Int = 10,
+    ): GradientDrawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        setColor(selectedFill)
+        cornerRadius = dp(context, radiusDp).toFloat()
+        setStroke(dp(context, 2), success)
+    }
+
+    /** Marks a list button as one choice of [scope]; see [refreshChoices]. */
+    data class ChoiceTag(
+        val scope: String,
+        val key: String,
+        val radiusDp: Int = 10,
+    )
+
+    /**
+     * Normal list button (dark fill, blue frame) or the chosen one (green
+     * frame, ✓ on the right). Text stays the same, so the layout does not jump.
+     */
+    fun styleChoice(
+        button: Button,
+        selected: Boolean,
+        radiusDp: Int = 10,
+    ) {
+        val context = button.context
+        button.background =
+            if (selected) {
+                selectedBackground(context, radiusDp)
+            } else {
+                roundedBackground(
+                    context = context,
+                    fill = surfaceAlt,
+                    stroke = accent,
+                    radiusDp = radiusDp,
+                )
+            }
+        button.setTextColor(
+            if (selected) Color.WHITE else text,
+        )
+        button.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            0,
+            0,
+            if (selected) R.drawable.ic_check_circle else 0,
+            0,
+        )
+        button.compoundDrawablePadding = dp(context, 8)
+        button.setTypeface(
+            null,
+            if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL,
+        )
+        val description =
+            button.contentDescription?.toString().orEmpty()
+                .removeSuffix(" · вибрано")
+        button.contentDescription =
+            if (selected) "$description · вибрано" else description
+    }
+
+    /** Re-styles every choice button of [scope] under [root]: only [selectedKey] is green. */
+    fun refreshChoices(
+        root: View,
+        scope: String,
+        selectedKey: String,
+    ) {
+        if (root is Button) {
+            val tag = root.tag as? ChoiceTag
+            if (tag != null && tag.scope == scope) {
+                styleChoice(root, tag.key == selectedKey, tag.radiusDp)
+            }
+            return
+        }
+        if (root is ViewGroup) {
+            for (index in 0 until root.childCount) {
+                refreshChoices(root.getChildAt(index), scope, selectedKey)
+            }
+        }
     }
 
     fun textView(

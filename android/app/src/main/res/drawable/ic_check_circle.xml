@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v0.5.113: green «selected» mark on the right of a chosen list item. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp"
+    android:height="22dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#62D296"
+        android:pathData="M12,1 A11,11 0,1 0,12,23 A11,11 0,1 0,12,1 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#0D2417"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6.5,12.5 L10.3,16.2 L17.5,8.5" />
+</vector>
