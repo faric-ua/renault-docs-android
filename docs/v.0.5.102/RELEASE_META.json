@@ -1,0 +1,31 @@
+{
+  "versionName": "0.5.102",
+  "versionCode": 118,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.102-share-rules-cancel",
+  "issues": [
+    159,
+    181,
+    182,
+    178,
+    147,
+    173
+  ],
+  "scope": "Home status keeps expanded state on rotation (#159); folder export copies from the single prepared .rdpkg so ⇧ appears (#182); one prepared file per volume/project (prepare/repack inactive while ⇧ exists); cancel with confirmation for .rdproject packaging and folder export (#181); prepared files committed from temp so no half file shows ⇧. #173 untouched.",
+  "sourceBase": "v0.5.101/build117",
+  "phoneQa": "PENDING",
+  "pr_number": 183,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 686,
+  "signed_apk": "PASS",
+  "source_sha": "c4243e099450df8f8a486b60c00f65f5c6795648",
+  "signed_run_id": 38187830004,
+  "signed_run_number": 166,
+  "signed_android_apk_run": 166,
+  "artifact_id": 11720372478,
+  "artifact_name": "Renault-Docs-v0.5.102-Debug",
+  "artifact_digest": "sha256:b5c9e8b232f38c825ebbc48874556a42e015e1213b6858c75cece0a5c4e69d1e",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over v0.5.101. Status card: expand, rotate, stays expanded. Export 1-2 volumes to a folder: ⇧ appears on them in Megane II, volume menu shows inactive 'Підготувати том · уже підготовлено ⇧'. Start an export or .rdproject and press Скасувати -> confirm -> 'скасовано', no half file. Repack inactive while .rdproject ⇧ exists."
+}
