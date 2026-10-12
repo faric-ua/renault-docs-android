@@ -26,6 +26,12 @@ def between(text, start, end):
     return rest.split(end, 1)[0]
 
 
+RETIRED_V05116 = (
+    "v0.5.116: owner 2026-10-13 00:27 — no extra print buttons; printing goes "
+    "through the original Renault printer icon (see test_v05116)"
+)
+
+
 class PrintContract(unittest.TestCase):
     def test_printer_uses_android_print_manager_with_pdf_as_is(self):
         printer = read("PdfPrinter.kt")
@@ -35,6 +41,7 @@ class PrintContract(unittest.TestCase):
             self.assertIn(marker, printer)
         self.assertIn('"Друк недоступний на цьому телефоні."', printer)
 
+    @unittest.skip(RETIRED_V05116)
     def test_pdf_viewer_has_print_button(self):
         layer = read("AndroidPdfLayer.kt")
         self.assertIn('id="print"', layer)
@@ -57,6 +64,7 @@ class PrintContract(unittest.TestCase):
         self.assertIn("companionClient,\n                        path,", viewer)
         self.assertIn("PdfPrinter.print(", between(viewer, "private fun printPdf(", "private fun requestPdfSave("))
 
+    @unittest.skip(RETIRED_V05116)
     def test_table_print_uses_the_same_pdf_as_export(self):
         exporter = read("NativeTablePdfExporter.kt")
         self.assertIn("fun writeTo(", exporter)
@@ -73,8 +81,7 @@ class PrintContract(unittest.TestCase):
 
     def test_version_bumped(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.115"', gradle)
-        self.assertIn("versionCode = 131", gradle)
+        self.assertGreaterEqual(int(gradle.split("versionCode = ", 1)[1].splitlines()[0]), 131)
 
 
 if __name__ == "__main__":

@@ -338,6 +338,12 @@ class ViewerActivity : Activity() {
                         path,
                     )
                 },
+                onPrintPage = { page ->
+                    PdfPrinter.printPage(
+                        this,
+                        page,
+                    )
+                },
                 onToggleFullscreen = {
                     togglePdfFullscreen()
                 },
@@ -2960,6 +2966,12 @@ class ViewerActivity : Activity() {
                     printPdf(
                         companionClient,
                         path,
+                    )
+                },
+                onPrintPage = { page ->
+                    PdfPrinter.printPage(
+                        this,
+                        page,
                     )
                 },
                 onToggleFullscreen = {
