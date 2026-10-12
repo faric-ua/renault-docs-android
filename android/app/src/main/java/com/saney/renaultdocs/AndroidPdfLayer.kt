@@ -210,7 +210,7 @@ class AndroidPdfLayer(
                 #toolbar {
                   /* v0.5.119: one medium size everywhere; JS sets zoom so a
                      PDF inside a page with frames looks the same. */
-                  zoom: var(--ui-scale, 0.85);
+                  zoom: var(--ui-scale, 0.72);
                   z-index: 20;
                   flex: 0 0 auto;
                   display: flex;
@@ -598,30 +598,48 @@ class AndroidPdfLayer(
                   ${zoomStepPercent};
 
                 // v0.5.119 (owner): the toolbar is the same medium size in
-                // the separate PDF screen and inside «Схема + піни». A page
-                // with frames is laid out wider than the screen and shrunk,
-                // so there the toolbar is scaled back up by the same ratio.
+                // the separate PDF screen and inside «Схема + піни».
+                // v0.5.120 (owner): it was still too big everywhere and huge
+                // in landscape «Схема + піни». Smaller base (fits one row in
+                // the half window), and the frame page shrink is read from
+                // top.visualViewport.scale — screen.width gave the portrait
+                // width in landscape, so the old ratio blew the toolbar up.
                 (function () {
-                  let uiScale = 0.85;
-                  try {
-                    if (window.top !== window) {
-                      const pageWidth =
-                        window.top.document.documentElement.clientWidth;
-                      const screenWidth = window.screen.width;
-                      if (
-                        pageWidth > 0 &&
-                        screenWidth > 0 &&
-                        pageWidth > screenWidth * 1.1
-                      ) {
-                        uiScale =
-                          0.85 * Math.min(4, pageWidth / screenWidth);
+                  const BASE_UI_SCALE = 0.72;
+                  function applyUiScale() {
+                    let uiScale = BASE_UI_SCALE;
+                    try {
+                      if (window.top !== window) {
+                        const viewport = window.top.visualViewport;
+                        const pageScale =
+                          viewport && viewport.scale > 0
+                            ? viewport.scale
+                            : 1;
+                        if (pageScale < 0.9) {
+                          uiScale =
+                            BASE_UI_SCALE *
+                            Math.min(3, 1 / pageScale);
+                        }
                       }
+                    } catch (_) {}
+                    document.documentElement.style.setProperty(
+                      '--ui-scale',
+                      String(uiScale)
+                    );
+                  }
+                  applyUiScale();
+                  try {
+                    window.addEventListener('resize', applyUiScale);
+                    if (
+                      window.top !== window &&
+                      window.top.visualViewport
+                    ) {
+                      window.top.visualViewport.addEventListener(
+                        'resize',
+                        applyUiScale
+                      );
                     }
                   } catch (_) {}
-                  document.documentElement.style.setProperty(
-                    '--ui-scale',
-                    String(uiScale)
-                  );
                 })();
 
                 const pdfViewport =

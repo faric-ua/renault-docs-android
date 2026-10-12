@@ -38,6 +38,31 @@ object RuntimeIrReader {
     private const val MAX_DOCUMENTATION_CHARS =
         12_000_000
 
+    /** v0.5.120: raw `_renault/runtime-ir-index.json` (for the lower-window navigator). */
+    fun readIndexText(
+        context: Context,
+        treeUri: Uri,
+    ): String =
+        SafDatasetResolver(
+            context = context,
+            treeUri = treeUri,
+        )
+            .openInputStream(
+                RUNTIME_INDEX,
+            )
+            ?.use {
+                readUtf8Limited(
+                    input = it,
+                    maxChars =
+                        MAX_INDEX_CHARS,
+                    label =
+                        "Runtime IR index",
+                )
+            }
+            ?: error(
+                "Runtime IR index відсутній. Запусти Renault → 9 — Оновити Fast/Modern package."
+            )
+
     fun readVolumeDocumentationForVolume(
         context: Context,
         treeUri: Uri,
@@ -392,109 +417,14 @@ object RuntimeIrReader {
                 continue
             }
 
-            val normalizedSectionEntrypoint =
-                SafDatasetResolver
-                    .normalize(
-                        sectionEntrypoint,
-                    )
-                    ?: sectionEntrypoint
-
-            val entries =
-                volume.optJSONArray(
-                    "section_entries",
-                )
-                    ?: JSONArray()
-
-            if (
-                normalizedSectionEntrypoint
-                    .isNotBlank()
-            ) {
-                for (
-                    sectionIndex in
-                    0 until entries.length()
-                ) {
-                    val item =
-                        entries.getJSONObject(
-                            sectionIndex,
-                        )
-                    val itemCode =
-                        item.optString(
-                            "code",
-                        ).trim()
-
-                    if (
-                        !itemCode.equals(
-                            sectionCode,
-                            ignoreCase = true,
-                        )
-                    ) {
-                        continue
-                    }
-
-                    val itemEntrypoint =
-                        item.optString(
-                            "entrypoint",
-                        ).trim()
-                    val normalizedItemEntrypoint =
-                        SafDatasetResolver
-                            .normalize(
-                                itemEntrypoint,
-                            )
-                            ?: itemEntrypoint
-
-                    if (
-                        !normalizedItemEntrypoint
-                            .equals(
-                                normalizedSectionEntrypoint,
-                                ignoreCase = true,
-                            )
-                    ) {
-                        continue
-                    }
-
-                    val path =
-                        item.optString(
-                            "path",
-                        ).trim()
-
-                    require(
-                        path.isNotBlank()
-                    ) {
-                        "Runtime IR entry для $sectionCode не містить path."
-                    }
-
-                    return SectionShardLookup(
-                        schemaVersion =
-                            schema,
-                        compilerPhase =
-                            compilerPhase,
-                        path =
-                            path,
-                        documentationPath =
-                            volume
-                                .optString(
-                                    "documentation_path",
-                                )
-                                .trim()
-                                .takeIf {
-                                    it.isNotBlank()
-                                },
-                    )
-                }
-            }
-
-            val sections =
-                volume.optJSONObject(
-                    "sections",
-                )
-                    ?: JSONObject()
-
             val path =
-                sections
-                    .optString(
+                sectionPathInVolume(
+                    volume = volume,
+                    sectionCode =
                         sectionCode,
-                    )
-                    .trim()
+                    sectionEntrypoint =
+                        sectionEntrypoint,
+                )
 
             require(path.isNotBlank()) {
                 "Секцію $sectionCode у Runtime IR index цього тому не знайдено."
@@ -522,6 +452,208 @@ object RuntimeIrReader {
         error(
             "Для цього тому Runtime IR v2 index не знайдено."
         )
+    }
+
+    /**
+     * v0.5.120: the lower window («навігатор тому») needs the shard of every
+     * section at once — the index is parsed one time, not once per section.
+     * Returns section code → shard path, plus the volume documentation path.
+     */
+    data class VolumeShardPaths(
+        val sections: Map<String, String>,
+        val documentationPath: String?,
+    )
+
+    fun findVolumeShardPaths(
+        indexText: String,
+        volumeEntrypoint: String,
+        sections: List<ModernSection>,
+    ): VolumeShardPaths {
+        val root =
+            JSONObject(indexText)
+
+        require(
+            root.optInt(
+                "schema_version",
+                0,
+            ) >= 2
+        ) {
+            "Для навігатора тому потрібен Runtime IR schema v2."
+        }
+
+        val normalizedWanted =
+            SafDatasetResolver
+                .normalize(
+                    volumeEntrypoint,
+                )
+                ?: volumeEntrypoint
+
+        val volumes =
+            root.optJSONArray(
+                "volumes",
+            )
+                ?: JSONArray()
+
+        for (
+            volumeIndex in
+            0 until volumes.length()
+        ) {
+            val volume =
+                volumes.getJSONObject(
+                    volumeIndex,
+                )
+
+            val classicEntrypoint =
+                volume
+                    .optString(
+                        "classic_entrypoint",
+                    )
+                    .trim()
+
+            val normalizedCurrent =
+                SafDatasetResolver
+                    .normalize(
+                        classicEntrypoint,
+                    )
+                    ?: classicEntrypoint
+
+            if (
+                !normalizedCurrent.equals(
+                    normalizedWanted,
+                    ignoreCase = true,
+                )
+            ) {
+                continue
+            }
+
+            val result =
+                linkedMapOf<String, String>()
+
+            for (section in sections) {
+                val path =
+                    sectionPathInVolume(
+                        volume = volume,
+                        sectionCode =
+                            section.code,
+                        sectionEntrypoint =
+                            section.entrypoint,
+                    )
+                if (path.isNotBlank()) {
+                    result[section.code] =
+                        path
+                }
+            }
+
+            return VolumeShardPaths(
+                sections = result,
+                documentationPath =
+                    volume
+                        .optString(
+                            "documentation_path",
+                        )
+                        .trim()
+                        .takeIf {
+                            it.isNotBlank()
+                        },
+            )
+        }
+
+        error(
+            "Для цього тому Runtime IR v2 index не знайдено."
+        )
+    }
+
+    private fun sectionPathInVolume(
+        volume: JSONObject,
+        sectionCode: String,
+        sectionEntrypoint: String,
+    ): String {
+        val normalizedSectionEntrypoint =
+            SafDatasetResolver
+                .normalize(
+                    sectionEntrypoint,
+                )
+                ?: sectionEntrypoint
+
+        val entries =
+            volume.optJSONArray(
+                "section_entries",
+            )
+                ?: JSONArray()
+
+        if (
+            normalizedSectionEntrypoint
+                .isNotBlank()
+        ) {
+            for (
+                sectionIndex in
+                0 until entries.length()
+            ) {
+                val item =
+                    entries.getJSONObject(
+                        sectionIndex,
+                    )
+                val itemCode =
+                    item.optString(
+                        "code",
+                    ).trim()
+
+                if (
+                    !itemCode.equals(
+                        sectionCode,
+                        ignoreCase = true,
+                    )
+                ) {
+                    continue
+                }
+
+                val itemEntrypoint =
+                    item.optString(
+                        "entrypoint",
+                    ).trim()
+                val normalizedItemEntrypoint =
+                    SafDatasetResolver
+                        .normalize(
+                            itemEntrypoint,
+                        )
+                        ?: itemEntrypoint
+
+                if (
+                    !normalizedItemEntrypoint
+                        .equals(
+                            normalizedSectionEntrypoint,
+                            ignoreCase = true,
+                        )
+                ) {
+                    continue
+                }
+
+                val path =
+                    item.optString(
+                        "path",
+                    ).trim()
+
+                require(
+                    path.isNotBlank()
+                ) {
+                    "Runtime IR entry для $sectionCode не містить path."
+                }
+
+                return path
+            }
+        }
+
+        val sections =
+            volume.optJSONObject(
+                "sections",
+            )
+                ?: JSONObject()
+
+        return sections
+            .optString(
+                sectionCode,
+            )
+            .trim()
     }
 
     fun parseSectionShard(

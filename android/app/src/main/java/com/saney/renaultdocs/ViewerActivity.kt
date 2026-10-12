@@ -3089,6 +3089,26 @@ class ViewerActivity : Activity() {
                         lock,
                     )
                 },
+                // v0.5.120: the lower window is a navigator of the volume.
+                virtualPage = { path ->
+                    if (
+                        CompanionNavigatorPage
+                            .isNavigatorPath(path)
+                    ) {
+                        CompanionNavigatorPage.html(
+                            CompanionNavigatorPage.read(
+                                context =
+                                    this@ViewerActivity,
+                                treeUri =
+                                    treeUri,
+                                volumeEntrypoint =
+                                    modernVolumeEntrypoint,
+                            )
+                        )
+                    } else {
+                        null
+                    }
+                },
                 onToggleFullscreen = {
                     togglePdfFullscreen()
                 },
@@ -3156,7 +3176,7 @@ class ViewerActivity : Activity() {
                                         "PDF",
                                         ignoreCase = true,
                                     ) ->
-                                        "PDF · документація"
+                                        "PDF · документ"
 
                                     else ->
                                         pageTitle
@@ -3273,54 +3293,19 @@ class ViewerActivity : Activity() {
 
         companionLoaded = true
         companionTitleView.text =
-            "Документація · завантаження…"
+            "Документація тому"
 
-        showCompanionMessage(
-            "Відкриваю документацію тому…"
+        // v0.5.120 (owner): the lower window is a navigator of the volume —
+        // «Документація тому» first, «←» to the volume (sections + search),
+        // and any document of any section opens here, under the upper one.
+        // A real URL (not loadData) keeps the «←» history free of the old
+        // «about:blank» message page.
+        companionWebView.clearHistory()
+        companionWebView.loadUrl(
+            DatasetVirtualUrl.urlFor(
+                CompanionNavigatorPage.PATH,
+            )
         )
-
-        Thread {
-            val result =
-                RuntimeIrReader
-                    .readVolumeDocumentationForVolume(
-                        context = this,
-                        treeUri =
-                            Uri.parse(
-                                treeUriText,
-                            ),
-                        volumeEntrypoint =
-                            modernVolumeEntrypoint,
-                    )
-
-            runOnUiThread {
-                result
-                    .onSuccess {
-                        companionTitleView.text =
-                            "Документація тому"
-
-                        companionWebView
-                            .loadDataWithBaseURL(
-                                "https://" +
-                                    DatasetVirtualUrl.HOST +
-                                    "/__renault_companion__/index.html",
-                                VolumeDocumentationWebPage
-                                    .html(it),
-                                "text/html",
-                                "UTF-8",
-                                null,
-                            )
-                    }
-                    .onFailure {
-                        companionLoaded = false
-                        companionTitleView.text =
-                            "Документація тому"
-                        showCompanionMessage(
-                            it.message
-                                ?: "Документацію тому не вдалося відкрити."
-                        )
-                    }
-            }
-        }.start()
     }
 
     private fun showCompanionMessage(
