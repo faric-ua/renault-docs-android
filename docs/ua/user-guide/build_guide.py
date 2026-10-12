@@ -213,7 +213,8 @@ def build_html():
 
 def build_md():
     lines = [f"# Посібник Renault Docs", "",
-             f"_Для користувача. Версія застосунку {VERSION}, {DATE}. Схеми — Mermaid (GitHub показує їх як картинки)._", ""]
+             f"_Для користувача. Версія застосунку {VERSION}, {DATE}. Схеми — Mermaid (GitHub показує їх як картинки)._", "",
+             "Цей самий посібник файлами: [Word](Posibnyk-Renault-Docs.docx) · [PDF](Posibnyk-Renault-Docs.pdf). Перезібрати всі формати: `docs/ua/user-guide/build.sh`.", ""]
     for sid, title, _ in S:
         lines.append(f"- [{title}](#{sid})")
     lines.append("")
