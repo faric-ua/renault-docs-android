@@ -43,6 +43,13 @@ STORES = {
 }
 
 
+PROGRESS_CHECK = (
+    "progressState = { progress ->\n"
+    "                        dataSyncTimeout.checkActive()\n"
+    "                        if (runStore.isCancelRequested()) throw OperationCancelledException()"
+)
+
+
 class StatusCardCancelContract(unittest.TestCase):
     def test_stores_persist_cancel_and_cancelled_is_terminal(self):
         for name, enum in STORES.items():
@@ -59,6 +66,7 @@ class StatusCardCancelContract(unittest.TestCase):
 
     def test_volume_prepare_worker_stops_and_never_commits(self):
         service = read("RdpkgShareService.kt")
+        self.assertIn(PROGRESS_CHECK, service)
         self.assertGreaterEqual(service.count("if (runStore.isCancelRequested()) throw OperationCancelledException()"), 2)
         cancel_check = service.index("if (runStore.isCancelRequested()) throw OperationCancelledException()\n                // ⇧")
         self.assertLess(cancel_check, service.index("PreparedShareStore.commitIncoming(partial, file)"))
@@ -67,6 +75,9 @@ class StatusCardCancelContract(unittest.TestCase):
 
     def test_volume_export_worker_removes_only_its_unfinished_file(self):
         service = read("RdpkgExportService.kt")
+        # The check sits inside the exporter's progress callback (a bad edit
+        # once broke this call in CI — v0.5.105 history).
+        self.assertIn(PROGRESS_CHECK, service)
         self.assertGreaterEqual(service.count("if (runStore.isCancelRequested()) throw OperationCancelledException()"), 2)
         cancelled = between(service, "if (error is OperationCancelledException", "val message =")
         self.assertIn("DocumentsContract.deleteDocument(contentResolver, Uri.parse(destinationUri))", cancelled)

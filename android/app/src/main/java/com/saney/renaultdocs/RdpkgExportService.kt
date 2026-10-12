@@ -64,7 +64,7 @@ class RdpkgExportService : Service() {
                     context = applicationContext,
                     volume = volume,
                     destinationUri = Uri.parse(destinationUri),
-            } catch (error: Throwable) {
+                    progressState = { progress ->
                         dataSyncTimeout.checkActive()
                         if (runStore.isCancelRequested()) throw OperationCancelledException()
                         val stage =
