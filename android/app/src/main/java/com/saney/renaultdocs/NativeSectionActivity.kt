@@ -69,12 +69,23 @@ class NativeSectionActivity : Activity() {
     // v0.5.113 (owner request 2026-10-12): what was picked stays visible —
     // green frame + ✓ on the chosen list item, and the chosen connector with
     // its documents pinned above the list (no scrolling down to find them).
-    private val selectedChoice = HashMap<String, String>() // scope -> action id
-    private val pinnedConnector = HashMap<String, String>() // panel id -> composite document id
-    private val pinnedConnectorLabel = HashMap<String, String>() // panel id -> its label
-    private val pinnedPart = HashMap<String, String>() // panel id -> last opened part
+    // v0.5.114: these maps come from ChoiceMemory, so they outlive the screen.
+    private var selectedChoice = HashMap<String, String>() // scope -> action id
+    private var pinnedConnector = HashMap<String, String>() // panel id -> composite document id
+    private var pinnedConnectorLabel = HashMap<String, String>() // panel id -> its label
+    private var pinnedPart = HashMap<String, String>() // panel id -> last opened part
     private var scrollToDocumentOnce: Boolean = false
     private lateinit var pinnedContainer: LinearLayout
+
+    // v0.5.114 (owner request 2026-10-12): «Критерії / скорочення» is pinned
+    // under the menu on every tab that has it; the table opens over the list,
+    // so the place in the list is not lost.
+    private var currentPanelCriteria: JSONObject? = null
+    private var criteriaOpenPanelId: String = ""
+    private lateinit var criteriaContainer: LinearLayout
+    private lateinit var criteriaOverlay: LinearLayout
+    private lateinit var criteriaOverlayBody: LinearLayout
+    private lateinit var criteriaOverlayScroll: ScrollView
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -181,12 +192,34 @@ class NativeSectionActivity : Activity() {
                 )
                 ?: 0
 
+        val memoryOwner =
+            "section|" +
+                treeUriText +
+                "|" +
+                volumeEntrypoint +
+                "|" +
+                sectionCode
+        selectedChoice =
+            ChoiceMemory.map(memoryOwner, "choice")
+        pinnedConnector =
+            ChoiceMemory.map(memoryOwner, "pinned")
+        pinnedConnectorLabel =
+            ChoiceMemory.map(memoryOwner, "pinnedLabel")
+        pinnedPart =
+            ChoiceMemory.map(memoryOwner, "pinnedPart")
+
         restoreSelectionState(
             savedInstanceState
                 ?.getString(
                     STATE_SELECTION,
                 ),
         )
+        criteriaOpenPanelId =
+            savedInstanceState
+                ?.getString(
+                    STATE_CRITERIA_OPEN,
+                )
+                .orEmpty()
 
         (
             lastNonConfigurationInstance
@@ -296,6 +329,10 @@ class NativeSectionActivity : Activity() {
         outState.putString(
             STATE_SELECTION,
             encodeSelectionState(),
+        )
+        outState.putString(
+            STATE_CRITERIA_OPEN,
+            criteriaOpenPanelId,
         )
         helpDialogs.save(
             outState,
@@ -672,6 +709,31 @@ class NativeSectionActivity : Activity() {
 
         applyLandscapeFocusChrome()
 
+        // v0.5.114: «Критерії / скорочення» right under «Документація».
+        criteriaContainer =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+                visibility =
+                    View.GONE
+            }
+
+        root.addView(
+            criteriaContainer,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams
+                    .MATCH_PARENT,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+            ).apply {
+                bottomMargin =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        6,
+                    )
+            }
+        )
+
         // v0.5.113: the chosen connector card lives here, between the fixed
         // menu and the scrolling list, so it never scrolls away.
         pinnedContainer =
@@ -731,8 +793,35 @@ class NativeSectionActivity : Activity() {
                 )
         )
 
-        root.addView(
+        // v0.5.114: the list, and over it the «Критерії / скорочення» sheet.
+        val bodyFrame =
+            android.widget.FrameLayout(this)
+
+        bodyFrame.addView(
             bodyScroll,
+            android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams
+                    .MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams
+                    .MATCH_PARENT,
+            )
+        )
+
+        criteriaOverlay =
+            buildCriteriaOverlay()
+
+        bodyFrame.addView(
+            criteriaOverlay,
+            android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams
+                    .MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams
+                    .MATCH_PARENT,
+            )
+        )
+
+        root.addView(
+            bodyFrame,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams
                     .MATCH_PARENT,
@@ -742,6 +831,422 @@ class NativeSectionActivity : Activity() {
         )
 
         return root
+    }
+
+    private fun buildCriteriaOverlay(): LinearLayout =
+        LinearLayout(this).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            visibility =
+                View.GONE
+            // Taps on the sheet never reach the list under it.
+            isClickable =
+                true
+            val radius =
+                Ui.dp(
+                    this@NativeSectionActivity,
+                    16,
+                ).toFloat()
+            background =
+                android.graphics.drawable.GradientDrawable().apply {
+                    setColor(Ui.surface)
+                    cornerRadii =
+                        floatArrayOf(
+                            radius, radius,
+                            radius, radius,
+                            0f, 0f,
+                            0f, 0f,
+                        )
+                    setStroke(
+                        Ui.dp(
+                            this@NativeSectionActivity,
+                            2,
+                        ),
+                        Ui.success,
+                    )
+                }
+            setPadding(
+                Ui.dp(this@NativeSectionActivity, 12),
+                Ui.dp(this@NativeSectionActivity, 6),
+                Ui.dp(this@NativeSectionActivity, 12),
+                0,
+            )
+
+            val header =
+                LinearLayout(
+                    this@NativeSectionActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.HORIZONTAL
+                    gravity =
+                        Gravity.CENTER_VERTICAL
+                }
+
+            header.addView(
+                Ui.textView(
+                    context =
+                        this@NativeSectionActivity,
+                    value =
+                        "Критерії / скорочення",
+                    sizeSp = 17f,
+                    color = Ui.text,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface
+                            .BOLD,
+                    )
+                },
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams
+                        .WRAP_CONTENT,
+                    1f,
+                )
+            )
+
+            header.addView(
+                Button(
+                    this@NativeSectionActivity,
+                ).apply {
+                    text = "✕"
+                    textSize = 18f
+                    isAllCaps = false
+                    minWidth = 0
+                    minimumWidth = 0
+                    minHeight = 0
+                    minimumHeight = 0
+                    setPadding(0, 0, 0, 0)
+                    setTextColor(Ui.text)
+                    background =
+                        Ui.roundedBackground(
+                            context =
+                                this@NativeSectionActivity,
+                            fill =
+                                Ui.surfaceAlt,
+                            stroke =
+                                Ui.border,
+                            radiusDp = 22,
+                        )
+                    contentDescription =
+                        "Закрити скорочення"
+                    setOnClickListener {
+                        closeCriteria()
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    Ui.dp(this@NativeSectionActivity, 44),
+                    Ui.dp(this@NativeSectionActivity, 44),
+                )
+            )
+
+            addView(header)
+
+            criteriaOverlayBody =
+                LinearLayout(
+                    this@NativeSectionActivity,
+                ).apply {
+                    orientation =
+                        LinearLayout.VERTICAL
+                    setPadding(
+                        0,
+                        Ui.dp(this@NativeSectionActivity, 6),
+                        0,
+                        Ui.dp(this@NativeSectionActivity, 24),
+                    )
+                }
+
+            criteriaOverlayScroll =
+                ScrollView(
+                    this@NativeSectionActivity,
+                ).apply {
+                    addView(
+                        criteriaOverlayBody,
+                        android.widget.FrameLayout.LayoutParams(
+                            android.widget.FrameLayout.LayoutParams
+                                .MATCH_PARENT,
+                            android.widget.FrameLayout.LayoutParams
+                                .WRAP_CONTENT,
+                        )
+                    )
+                }
+
+            addView(
+                criteriaOverlayScroll,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams
+                        .MATCH_PARENT,
+                    0,
+                    1f,
+                )
+            )
+        }
+
+    private fun activePanelId(): String =
+        if (currentViewKind == VIEW_PANEL) {
+            currentViewId
+        } else {
+            currentDocumentParentPanelId
+        }
+
+    /** Takes «Критерії / скорочення» out of the list; true = do not draw it there. */
+    private fun captureCriteria(
+        action: JSONObject?,
+        label: String,
+    ): Boolean {
+        if (
+            currentViewKind != VIEW_PANEL ||
+            action == null ||
+            !NativeRuntimePresentation.isCriteria(label)
+        ) {
+            return false
+        }
+        if (currentPanelCriteria == null) {
+            currentPanelCriteria = action
+        }
+        return true
+    }
+
+    private fun renderCriteriaButton(
+        panelId: String,
+    ) {
+        if (
+            !::criteriaContainer.isInitialized
+        ) {
+            return
+        }
+        criteriaContainer.removeAllViews()
+
+        val action =
+            currentPanelCriteria
+        if (action == null) {
+            criteriaContainer.visibility =
+                View.GONE
+            hideCriteriaOverlay()
+            return
+        }
+
+        if (
+            criteriaOpenPanelId.isNotBlank() &&
+            criteriaOpenPanelId != panelId
+        ) {
+            // Another tab: the sheet of the previous one does not follow.
+            criteriaOpenPanelId = ""
+        }
+        val open =
+            criteriaOpenPanelId == panelId
+
+        criteriaContainer.addView(
+            Button(this).apply {
+                text = "Критерії / скорочення"
+                isAllCaps = false
+                textSize = 15f
+                gravity =
+                    Gravity.START or
+                        Gravity.CENTER_VERTICAL
+                minWidth = 0
+                minimumWidth = 0
+                minHeight =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        44,
+                    )
+                minimumHeight =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        44,
+                    )
+                setPadding(
+                    Ui.dp(this@NativeSectionActivity, 12),
+                    0,
+                    Ui.dp(this@NativeSectionActivity, 12),
+                    0,
+                )
+                setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_abbreviations,
+                    0,
+                    0,
+                    0,
+                )
+                compoundDrawablePadding =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    )
+                if (open) {
+                    background =
+                        Ui.selectedBackground(
+                            this@NativeSectionActivity,
+                            12,
+                        )
+                    setTextColor(
+                        android.graphics.Color.WHITE,
+                    )
+                    setTypeface(
+                        null,
+                        android.graphics.Typeface.BOLD,
+                    )
+                } else {
+                    // Dashed frame: a tool button, not one of the list items.
+                    background =
+                        android.graphics.drawable.GradientDrawable().apply {
+                            setColor(Ui.surface)
+                            cornerRadius =
+                                Ui.dp(
+                                    this@NativeSectionActivity,
+                                    12,
+                                ).toFloat()
+                            setStroke(
+                                Ui.dp(this@NativeSectionActivity, 1),
+                                Ui.accent,
+                                Ui.dp(this@NativeSectionActivity, 6).toFloat(),
+                                Ui.dp(this@NativeSectionActivity, 4).toFloat(),
+                            )
+                        }
+                    setTextColor(Ui.text)
+                }
+                contentDescription =
+                    if (open) {
+                        "Критерії / скорочення — закрити"
+                    } else {
+                        "Критерії / скорочення — показати"
+                    }
+                setOnClickListener {
+                    if (criteriaOpenPanelId == panelId) {
+                        closeCriteria()
+                    } else {
+                        openCriteria(
+                            panelId,
+                            action,
+                        )
+                    }
+                }
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams
+                    .MATCH_PARENT,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+            )
+        )
+        criteriaContainer.visibility =
+            View.VISIBLE
+
+        if (open) {
+            showCriteriaOverlay(action)
+        } else {
+            hideCriteriaOverlay()
+        }
+    }
+
+    private fun criteriaDocument(
+        action: JSONObject,
+    ): JSONObject? =
+        action
+            .optString(
+                "document_id",
+            )
+            .takeIf {
+                it.isNotBlank()
+            }
+            ?.let {
+                findDocument(it)
+            }
+            ?.takeIf {
+                it.optString(
+                    "type",
+                ) == "structured-html"
+            }
+
+    private fun openCriteria(
+        panelId: String,
+        action: JSONObject,
+    ) {
+        if (criteriaDocument(action) == null) {
+            // Not a table (a PDF, an old link): open it the usual way.
+            scrollToDocumentOnce = true
+            handleAction(action)
+            scrollToDocumentOnce = false
+            return
+        }
+        criteriaOpenPanelId =
+            panelId
+        renderCriteriaButton(
+            panelId,
+        )
+    }
+
+    private fun showCriteriaOverlay(
+        action: JSONObject,
+    ) {
+        val document =
+            criteriaDocument(action)
+                ?: run {
+                    criteriaOpenPanelId = ""
+                    hideCriteriaOverlay()
+                    return
+                }
+        criteriaOverlayBody.removeAllViews()
+        fillStructuredDocument(
+            target =
+                criteriaOverlayBody,
+            document =
+                document,
+            showSectionHeading =
+                false,
+        )
+        criteriaOverlay.visibility =
+            View.VISIBLE
+        criteriaOverlayScroll.scrollTo(
+            0,
+            0,
+        )
+    }
+
+    private fun hideCriteriaOverlay() {
+        if (
+            !::criteriaOverlay.isInitialized
+        ) {
+            return
+        }
+        criteriaOverlay.visibility =
+            View.GONE
+        criteriaOverlayBody.removeAllViews()
+    }
+
+    private fun closeCriteria() {
+        criteriaOpenPanelId = ""
+        hideCriteriaOverlay()
+        renderCriteriaButton(
+            activePanelId(),
+        )
+    }
+
+    private fun hideCriteria() {
+        criteriaOpenPanelId = ""
+        currentPanelCriteria = null
+        if (
+            ::criteriaContainer.isInitialized
+        ) {
+            criteriaContainer.removeAllViews()
+            criteriaContainer.visibility =
+                View.GONE
+        }
+        hideCriteriaOverlay()
+    }
+
+    @Deprecated("Activity back for minSdk 26.")
+    override fun onBackPressed() {
+        // v0.5.114: «Назад» first closes the abbreviations sheet.
+        if (
+            ::criteriaOverlay.isInitialized &&
+            criteriaOverlay.visibility == View.VISIBLE
+        ) {
+            closeCriteria()
+            return
+        }
+        @Suppress("DEPRECATION")
+        super.onBackPressed()
     }
 
     private fun isLandscapeOrientation(): Boolean =
@@ -1860,6 +2365,7 @@ class NativeSectionActivity : Activity() {
                 ?: return
 
         bodyContainer.removeAllViews()
+        currentPanelCriteria = null
 
         bodyContainer.addView(
             Ui.textView(
@@ -1946,10 +2452,25 @@ class NativeSectionActivity : Activity() {
                 findAction(actionId)
                     ?: continue
 
+            if (
+                captureCriteria(
+                    action,
+                    action.optString(
+                        "label",
+                    ),
+                )
+            ) {
+                continue
+            }
+
             addActionButton(
                 action,
             )
         }
+
+        renderCriteriaButton(
+            panelId,
+        )
 
         renderPinnedConnector(
             panelId,
@@ -2109,6 +2630,15 @@ class NativeSectionActivity : Activity() {
                     )
                 )
 
+            if (
+                captureCriteria(
+                    action,
+                    label,
+                )
+            ) {
+                continue
+            }
+
             ensureTile().addView(
                 buildBodyActionButton(
                     action = action,
@@ -2260,6 +2790,17 @@ class NativeSectionActivity : Activity() {
                     )
                 )
                     ?: continue
+
+            if (
+                captureCriteria(
+                    action,
+                    action.optString(
+                        "label",
+                    ),
+                )
+            ) {
+                continue
+            }
 
             addActionButton(action)
         }
@@ -2996,6 +3537,8 @@ class NativeSectionActivity : Activity() {
     }
 
     private fun hidePinnedConnector() {
+        // v0.5.114: the pinned «Критерії / скорочення» belongs to a panel too.
+        hideCriteria()
         if (
             !::pinnedContainer.isInitialized
         ) {
@@ -3262,6 +3805,8 @@ class NativeSectionActivity : Activity() {
                     pinnedPart[panelId] == part.key,
             )
             setOnClickListener {
+                // A document from the card is shown under the list: close the sheet first.
+                criteriaOpenPanelId = ""
                 pinnedPart[panelId] =
                     part.key
                 Ui.refreshChoices(
@@ -3489,6 +4034,23 @@ class NativeSectionActivity : Activity() {
         currentDocumentParentPanelId =
             parentPanelId
 
+        fillStructuredDocument(
+            target = bodyContainer,
+            document = document,
+            showSectionHeading = !inline,
+        )
+    }
+
+    /**
+     * Heading, «Зберегти таблицю PDF» and the tables of a structured
+     * document. v0.5.114: drawn into [target], so «Критерії / скорочення»
+     * can open over the list instead of under it.
+     */
+    private fun fillStructuredDocument(
+        target: LinearLayout,
+        document: JSONObject,
+        showSectionHeading: Boolean,
+    ) {
         val headings =
             structuredHeadingTexts(
                 document,
@@ -3506,11 +4068,12 @@ class NativeSectionActivity : Activity() {
             criteria = header.first,
             metadata = header.second,
             showSectionHeading =
-                !inline,
+                showSectionHeading,
+            target = target,
         )
 
         if (tables.isEmpty()) {
-            bodyContainer.addView(
+            target.addView(
                 infoCard(
                     "Табличні дані відсутні."
                 )
@@ -3539,7 +4102,7 @@ class NativeSectionActivity : Activity() {
                     ),
             )
 
-        bodyContainer.addView(
+        target.addView(
             Button(this).apply {
                 text =
                     "Зберегти таблицю PDF"
@@ -3603,7 +4166,7 @@ class NativeSectionActivity : Activity() {
             tableIndex in
             tables.indices
         ) {
-            bodyContainer.addView(
+            target.addView(
                 buildStructuredTable(
                     table = tables[tableIndex],
                     ensurePinHeader =
@@ -3750,6 +4313,7 @@ class NativeSectionActivity : Activity() {
         criteria: String?,
         metadata: List<String>,
         showSectionHeading: Boolean = true,
+        target: LinearLayout = bodyContainer,
     ) {
         if (metadata.isNotEmpty()) {
             val metaTile =
@@ -3818,7 +4382,7 @@ class NativeSectionActivity : Activity() {
                 )
             }
 
-            bodyContainer.addView(
+            target.addView(
                 metaTile,
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams
@@ -3836,7 +4400,7 @@ class NativeSectionActivity : Activity() {
         }
 
         if (showSectionHeading) {
-            bodyContainer.addView(
+            target.addView(
                 Ui.textView(
                     context = this,
                     value =
@@ -3874,7 +4438,7 @@ class NativeSectionActivity : Activity() {
                 it.isNotBlank()
             }
             ?.let {
-                bodyContainer.addView(
+                target.addView(
                     Ui.textView(
                         context = this,
                         value = it,
@@ -4986,6 +5550,8 @@ class NativeSectionActivity : Activity() {
             "pendingTablePdf"
         private const val STATE_SELECTION =
             "nativeSelection"
+        private const val STATE_CRITERIA_OPEN =
+            "nativeCriteriaOpen"
 
         private const val VIEW_DEFAULT =
             "default"

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v0.5.114: «Критерії / скорочення» pinned button (a book). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#76BDFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,5 A2,2 0,0 1,6,3 L18,3 L18,19 L6,19 A2,2 0,0 0,4,21 Z M4,21 L4,5 M8,7 L14,7 M8,11 L14,11" />
+</vector>
