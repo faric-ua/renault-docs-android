@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -38,6 +39,9 @@ class ModernVolumeActivity : Activity() {
         "Renault volume"
     private var volumeEntrypoint: String = ""
     private var restoredQuery: String = ""
+    // v0.5.113: the section opened last keeps a green frame and ✓,
+    // so after «Назад» it is clear where you were.
+    private var lastOpenedSectionCode: String = ""
     private var restoredScrollY: Int = 0
     private var openSearchRequested: Boolean = false
 
@@ -95,6 +99,13 @@ class ModernVolumeActivity : Activity() {
             savedInstanceState
                 ?.getString(
                     STATE_QUERY,
+                )
+                .orEmpty()
+
+        lastOpenedSectionCode =
+            savedInstanceState
+                ?.getString(
+                    STATE_LAST_SECTION,
                 )
                 .orEmpty()
 
@@ -193,6 +204,11 @@ class ModernVolumeActivity : Activity() {
             } else {
                 restoredQuery
             },
+        )
+
+        outState.putString(
+            STATE_LAST_SECTION,
+            lastOpenedSectionCode,
         )
 
         outState.putInt(
@@ -796,16 +812,30 @@ class ModernVolumeActivity : Activity() {
                 true
             isFocusable =
                 true
+            val opened =
+                section.code ==
+                    lastOpenedSectionCode
             background =
-                Ui.roundedBackground(
-                    context =
+                if (opened) {
+                    Ui.selectedBackground(
                         this@ModernVolumeActivity,
-                    fill =
-                        Ui.surface,
-                    stroke =
-                        Ui.border,
-                    radiusDp = 12,
-                )
+                        12,
+                    )
+                } else {
+                    Ui.roundedBackground(
+                        context =
+                            this@ModernVolumeActivity,
+                        fill =
+                            Ui.surface,
+                        stroke =
+                            Ui.border,
+                        radiusDp = 12,
+                    )
+                }
+            if (opened) {
+                contentDescription =
+                    section.code + " " + section.title + " · відкривали останнім"
+            }
             setPadding(
                 Ui.dp(
                     this@ModernVolumeActivity,
@@ -902,17 +932,31 @@ class ModernVolumeActivity : Activity() {
             )
 
             addView(
-                Ui.textView(
-                    context =
+                if (opened) {
+                    ImageView(
                         this@ModernVolumeActivity,
-                    value =
-                        "›",
-                    sizeSp = 28f,
-                    color =
-                        Ui.muted,
-                ).apply {
-                    gravity =
-                        Gravity.CENTER
+                    ).apply {
+                        setImageResource(
+                            R.drawable.ic_check_circle,
+                        )
+                        scaleType =
+                            ImageView.ScaleType.CENTER
+                        contentDescription =
+                            "Відкривали останнім"
+                    }
+                } else {
+                    Ui.textView(
+                        context =
+                            this@ModernVolumeActivity,
+                        value =
+                            "›",
+                        sizeSp = 28f,
+                        color =
+                            Ui.muted,
+                    ).apply {
+                        gravity =
+                            Gravity.CENTER
+                    }
                 },
                 LinearLayout.LayoutParams(
                     Ui.dp(
@@ -936,6 +980,16 @@ class ModernVolumeActivity : Activity() {
     private fun openSection(
         section: ModernSection,
     ) {
+        lastOpenedSectionCode =
+            section.code
+        if (
+            ::searchInput.isInitialized
+        ) {
+            renderSections(
+                searchInput.text
+                    .toString(),
+            )
+        }
         startActivity(
             NativeSectionActivity
                 .intentForSection(
@@ -1293,6 +1347,8 @@ class ModernVolumeActivity : Activity() {
             "query"
         private const val STATE_SCROLL_Y =
             "scrollY"
+        private const val STATE_LAST_SECTION =
+            "lastOpenedSection"
         private const val HELP_VOLUME =
             "volume"
         private const val EXTRA_OPEN_SEARCH =

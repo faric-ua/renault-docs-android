@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -63,6 +65,16 @@ class NativeSectionActivity : Activity() {
     private var currentDocumentParentPanelId: String = ""
     private var restoredDocumentParentPanelId: String = ""
     private var restoredScrollY: Int = 0
+
+    // v0.5.113 (owner request 2026-10-12): what was picked stays visible —
+    // green frame + ✓ on the chosen list item, and the chosen connector with
+    // its documents pinned above the list (no scrolling down to find them).
+    private val selectedChoice = HashMap<String, String>() // scope -> action id
+    private val pinnedConnector = HashMap<String, String>() // panel id -> composite document id
+    private val pinnedConnectorLabel = HashMap<String, String>() // panel id -> its label
+    private val pinnedPart = HashMap<String, String>() // panel id -> last opened part
+    private var scrollToDocumentOnce: Boolean = false
+    private lateinit var pinnedContainer: LinearLayout
 
     override fun onCreate(
         savedInstanceState: Bundle?,
@@ -169,6 +181,13 @@ class NativeSectionActivity : Activity() {
                 )
                 ?: 0
 
+        restoreSelectionState(
+            savedInstanceState
+                ?.getString(
+                    STATE_SELECTION,
+                ),
+        )
+
         (
             lastNonConfigurationInstance
                 as? RetainedRuntimeState
@@ -273,6 +292,10 @@ class NativeSectionActivity : Activity() {
         outState.putString(
             STATE_MENU_ACTION_ID,
             currentMenuActionId,
+        )
+        outState.putString(
+            STATE_SELECTION,
+            encodeSelectionState(),
         )
         helpDialogs.save(
             outState,
@@ -649,6 +672,32 @@ class NativeSectionActivity : Activity() {
 
         applyLandscapeFocusChrome()
 
+        // v0.5.113: the chosen connector card lives here, between the fixed
+        // menu and the scrolling list, so it never scrolls away.
+        pinnedContainer =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+                visibility =
+                    View.GONE
+            }
+
+        root.addView(
+            pinnedContainer,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams
+                    .MATCH_PARENT,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+            ).apply {
+                bottomMargin =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        6,
+                    )
+            }
+        )
+
         bodyScroll =
             ScrollView(this).apply {
                 isFillViewport = true
@@ -746,12 +795,13 @@ class NativeSectionActivity : Activity() {
 
         if (isLandscapeOrientation()) {
             applyLandscapeFocusChrome()
-            if (
-                ::menuContainer.isInitialized &&
-                runtimeData != null
-            ) {
-                renderMenu()
-            }
+        }
+        // v0.5.113: re-render in portrait too, so the active tab gets the green frame.
+        if (
+            ::menuContainer.isInitialized &&
+            runtimeData != null
+        ) {
+            renderMenu()
         }
     }
 
@@ -1083,6 +1133,7 @@ class NativeSectionActivity : Activity() {
             currentViewKind =
                 VIEW_DEFAULT
             currentViewId = ""
+            hidePinnedConnector()
             bodyContainer
                 .removeAllViews()
             bodyContainer.addView(
@@ -1573,6 +1624,26 @@ class NativeSectionActivity : Activity() {
                     onClick()
                 }
             }
+            // v0.5.113: the open tab has the same green «selected» frame.
+            if (
+                enabled &&
+                label == currentMenuLabel
+            ) {
+                background =
+                    Ui.selectedBackground(
+                        this@NativeSectionActivity,
+                        12,
+                    )
+                setTextColor(
+                    android.graphics.Color.WHITE,
+                )
+                setTypeface(
+                    null,
+                    android.graphics.Typeface.BOLD,
+                )
+                contentDescription =
+                    label + " — відкрито"
+            }
         }
 
     private fun openVolumeDocumentation() {
@@ -1627,6 +1698,7 @@ class NativeSectionActivity : Activity() {
         }
 
         documentationLoading = true
+        hidePinnedConnector()
         currentViewKind =
             VIEW_DOCUMENTATION
         currentViewId = ""
@@ -1699,6 +1771,7 @@ class NativeSectionActivity : Activity() {
     private fun renderDocumentationMenu(
         items: List<JSONObject>,
     ) {
+        hidePinnedConnector()
         currentViewKind =
             VIEW_DOCUMENTATION
         currentViewId = ""
@@ -1877,6 +1950,10 @@ class NativeSectionActivity : Activity() {
                 action,
             )
         }
+
+        renderPinnedConnector(
+            panelId,
+        )
     }
 
     private fun renderControl(
@@ -2305,16 +2382,60 @@ class NativeSectionActivity : Activity() {
                 } else {
                     label + " — недоступно"
                 }
+            // v0.5.113: the picked item gets a green frame and ✓ on the right.
+            val scope =
+                currentChoiceScope()
+            val key =
+                action
+                    ?.optString(
+                        "id",
+                    )
+                    .orEmpty()
+            if (
+                enabled &&
+                key.isNotBlank()
+            ) {
+                tag =
+                    Ui.ChoiceTag(
+                        scope = scope,
+                        key = key,
+                    )
+                Ui.styleChoice(
+                    this,
+                    selected =
+                        selectedChoice[scope] == key,
+                )
+            }
             setOnClickListener {
                 if (
                     enabled &&
                     action != null
                 ) {
+                    if (key.isNotBlank()) {
+                        selectedChoice[scope] = key
+                        Ui.refreshChoices(
+                            bodyContainer,
+                            scope,
+                            key,
+                        )
+                    }
+                    scrollToDocumentOnce = true
                     handleAction(action)
+                    scrollToDocumentOnce = false
                 }
             }
         }
     }
+
+    private fun currentChoiceScope(): String =
+        when (currentViewKind) {
+            VIEW_PANEL ->
+                "panel:" + currentViewId
+            VIEW_DOCUMENTATION ->
+                "documentation"
+            else ->
+                "view:" + currentViewId
+        }
 
     private fun addUnavailableItem(
         label: String,
@@ -2554,27 +2675,60 @@ class NativeSectionActivity : Activity() {
         label: String = "Документи розʼєму",
         parentPanelId: String = "",
     ) {
-        val inline =
-            prepareDocumentBody(
-                parentPanelId =
-                    parentPanelId,
-                label =
-                    label,
+        val documentId =
+            document.optString(
+                "id",
             )
+        val validParent =
+            parentPanelId
+                .takeIf {
+                    it.isNotBlank() &&
+                        findPanel(
+                            it,
+                        ) !=
+                        null
+                }
+
+        if (validParent != null) {
+            // v0.5.113 (owner, variant A): the chosen connector and its
+            // documents are pinned above the list instead of being appended
+            // at the very bottom, where the owner had to scroll to find them.
+            if (
+                pinnedConnector[validParent] != documentId
+            ) {
+                pinnedPart.remove(validParent)
+            }
+            pinnedConnector[validParent] =
+                documentId
+            pinnedConnectorLabel[validParent] =
+                label
+            renderPanel(
+                validParent,
+            )
+            currentViewKind =
+                VIEW_DOCUMENT
+            currentViewId =
+                documentId
+            currentViewLabel =
+                label
+            currentDocumentParentPanelId =
+                validParent
+            return
+        }
+
+        hidePinnedConnector()
+        bodyContainer.removeAllViews()
 
         currentViewKind =
             VIEW_DOCUMENT
         currentViewId =
-            document.optString(
-                "id",
-            )
+            documentId
         currentViewLabel =
             label
         currentDocumentParentPanelId =
             parentPanelId
 
-        if (!inline) {
-            bodyContainer.addView(
+        bodyContainer.addView(
             Ui.textView(
                 context = this,
                 value =
@@ -2598,8 +2752,7 @@ class NativeSectionActivity : Activity() {
                     ),
                 )
             }
-            )
-        }
+        )
 
         bodyContainer.addView(
             Ui.textView(
@@ -2620,6 +2773,42 @@ class NativeSectionActivity : Activity() {
                 )
             }
         )
+
+        for (
+            part in
+            compositeParts(
+                document = document,
+                parentPanelId = parentPanelId,
+            )
+        ) {
+            addCompositePartButton(
+                label =
+                    part.label,
+            ) {
+                part.open()
+            }
+        }
+    }
+
+    private class CompositePart(
+        val key: String,
+        val label: String,
+        val shortLabel: String,
+        val open: () -> Unit,
+    )
+
+    /**
+     * The documents of one connector: «Схема + піни розʼєма» (when the
+     * drawing and the pin table are both there), «Схема розʼєму», «Опис
+     * контактів», or a plain document. Same rules as before v0.5.113; only
+     * where the buttons are shown changed.
+     */
+    private fun compositeParts(
+        document: JSONObject,
+        parentPanelId: String,
+    ): List<CompositePart> {
+        val result =
+            mutableListOf<CompositePart>()
 
         val parts =
             document.optJSONArray(
@@ -2678,16 +2867,19 @@ class NativeSectionActivity : Activity() {
             hasPins &&
             compositePath.isNotBlank()
         ) {
-            addCompositePartButton(
-                label =
-                    "Схема + піни розʼєма",
-            ) {
-                openPath(
-                    compositePath,
-                    sectionCode +
-                        " · схема + піни розʼєма",
-                )
-            }
+            result.add(
+                CompositePart(
+                    key = "both",
+                    label = "Схема + піни розʼєма",
+                    shortLabel = "Схема + піни",
+                ) {
+                    openPath(
+                        compositePath,
+                        sectionCode +
+                            " · схема + піни розʼєма",
+                    )
+                }
+            )
         }
 
         for (
@@ -2700,67 +2892,75 @@ class NativeSectionActivity : Activity() {
                 part.optString("role")
             val nested =
                 resolved.second
+            val nestedKey =
+                "part:" +
+                    nested.optString(
+                        "id",
+                    )
 
             when (
                 nested.optString(
                     "type",
                 )
             ) {
-                "pdf" ->
-                    addCompositePartButton(
-                        label =
-                            if (
-                                role.equals(
-                                    "dessin",
-                                    ignoreCase = true,
-                                )
-                            ) {
-                                "Схема розʼєму"
-                            } else {
-                                "PDF"
-                            },
-                    ) {
-                        openPath(
-                            nested.optString(
-                                "path",
-                            ),
-                            sectionCode +
-                                " · схема розʼєму",
-                        )
-                    }
+                "pdf" -> {
+                    val partLabel =
+                        if (
+                            role.equals(
+                                "dessin",
+                                ignoreCase = true,
+                            )
+                        ) {
+                            "Схема розʼєму"
+                        } else {
+                            "PDF"
+                        }
+                    result.add(
+                        CompositePart(
+                            key = nestedKey,
+                            label = partLabel,
+                            shortLabel = partLabel,
+                        ) {
+                            openPath(
+                                nested.optString(
+                                    "path",
+                                ),
+                                sectionCode +
+                                    " · схема розʼєму",
+                            )
+                        }
+                    )
+                }
 
-                "structured-html" ->
-                    addCompositePartButton(
-                        label =
-                            if (
-                                role.equals(
-                                    "alveoles",
-                                    ignoreCase = true,
-                                )
-                            ) {
-                                "Опис контактів"
-                            } else {
-                                "Опис"
-                            },
-                    ) {
-                        renderStructuredDocument(
-                            document =
-                                nested,
-                            label =
-                                if (
-                                    role.equals(
-                                        "alveoles",
-                                        ignoreCase = true,
-                                    )
-                                ) {
-                                    "Опис контактів"
-                                } else {
-                                    "Опис"
-                                },
-                            parentPanelId =
-                                currentDocumentParentPanelId,
-                        )
-                    }
+                "structured-html" -> {
+                    val partLabel =
+                        if (
+                            role.equals(
+                                "alveoles",
+                                ignoreCase = true,
+                            )
+                        ) {
+                            "Опис контактів"
+                        } else {
+                            "Опис"
+                        }
+                    result.add(
+                        CompositePart(
+                            key = nestedKey,
+                            label = partLabel,
+                            shortLabel = partLabel,
+                        ) {
+                            renderStructuredDocument(
+                                document =
+                                    nested,
+                                label =
+                                    partLabel,
+                                parentPanelId =
+                                    parentPanelId,
+                            )
+                        }
+                    )
+                }
 
                 else -> {
                     val path =
@@ -2768,23 +2968,354 @@ class NativeSectionActivity : Activity() {
                             "path",
                         )
                     if (path.isNotBlank()) {
-                        addCompositePartButton(
-                            label =
-                                role
-                                    .takeIf {
-                                        it.isNotBlank()
-                                    }
-                                    ?: "Документ",
-                        ) {
-                            openPath(
-                                path,
-                                sectionCode +
-                                    " · документ",
-                            )
-                        }
+                        val partLabel =
+                            role
+                                .takeIf {
+                                    it.isNotBlank()
+                                }
+                                ?: "Документ"
+                        result.add(
+                            CompositePart(
+                                key = nestedKey,
+                                label = partLabel,
+                                shortLabel = partLabel,
+                            ) {
+                                openPath(
+                                    path,
+                                    sectionCode +
+                                        " · документ",
+                                )
+                            }
+                        )
                     }
                 }
             }
+        }
+
+        return result
+    }
+
+    private fun hidePinnedConnector() {
+        if (
+            !::pinnedContainer.isInitialized
+        ) {
+            return
+        }
+        pinnedContainer.removeAllViews()
+        pinnedContainer.visibility =
+            View.GONE
+    }
+
+    /**
+     * v0.5.113 (owner, variant A): card above the list — ✓ «Вибрано», the
+     * connector name and its documents in one row. Shown for the panel the
+     * connector was picked in; another tab hides it, coming back shows it.
+     */
+    private fun renderPinnedConnector(
+        panelId: String,
+    ) {
+        if (
+            !::pinnedContainer.isInitialized
+        ) {
+            return
+        }
+        pinnedContainer.removeAllViews()
+
+        val document =
+            pinnedConnector[panelId]
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?.let {
+                    findDocument(it)
+                }
+        val parts =
+            document
+                ?.let {
+                    compositeParts(
+                        document = it,
+                        parentPanelId = panelId,
+                    )
+                }
+                .orEmpty()
+
+        if (
+            document == null ||
+            parts.isEmpty()
+        ) {
+            pinnedContainer.visibility =
+                View.GONE
+            return
+        }
+
+        val landscape =
+            isLandscapeOrientation()
+        val scope =
+            "pinned:" + panelId
+
+        val card =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+                background =
+                    Ui.selectedBackground(
+                        this@NativeSectionActivity,
+                        12,
+                    )
+                setPadding(
+                    Ui.dp(this@NativeSectionActivity, 12),
+                    Ui.dp(this@NativeSectionActivity, if (landscape) 6 else 10),
+                    Ui.dp(this@NativeSectionActivity, 12),
+                    Ui.dp(this@NativeSectionActivity, if (landscape) 8 else 12),
+                )
+            }
+
+        val header =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+                gravity =
+                    Gravity.CENTER_VERTICAL
+            }
+
+        header.addView(
+            ImageView(this).apply {
+                setImageResource(
+                    R.drawable.ic_check_circle,
+                )
+                contentDescription =
+                    "Вибрано"
+            },
+            LinearLayout.LayoutParams(
+                Ui.dp(this, 22),
+                Ui.dp(this, 22),
+            ).apply {
+                marginEnd =
+                    Ui.dp(
+                        this@NativeSectionActivity,
+                        10,
+                    )
+            }
+        )
+
+        val titleColumn =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+            }
+
+        if (!landscape) {
+            titleColumn.addView(
+                Ui.textView(
+                    context = this,
+                    value = "ВИБРАНО",
+                    sizeSp = 11f,
+                    color = Ui.success,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface
+                            .BOLD,
+                    )
+                    letterSpacing = 0.06f
+                }
+            )
+        }
+
+        titleColumn.addView(
+            Ui.textView(
+                context = this,
+                value =
+                    pinnedConnectorLabel[panelId]
+                        .orEmpty()
+                        .ifBlank {
+                            "Документи розʼєму"
+                        },
+                sizeSp = 15f,
+                color = Ui.text,
+            ).apply {
+                setTypeface(
+                    typeface,
+                    android.graphics.Typeface
+                        .BOLD,
+                )
+                maxLines =
+                    if (landscape) 1 else 2
+                ellipsize =
+                    TextUtils.TruncateAt.END
+            }
+        )
+
+        header.addView(
+            titleColumn,
+            LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+                1f,
+            )
+        )
+
+        card.addView(header)
+
+        parts
+            .chunked(3)
+            .forEach { rowParts ->
+                val row =
+                    LinearLayout(this).apply {
+                        orientation =
+                            LinearLayout.HORIZONTAL
+                    }
+                rowParts.forEachIndexed { index, part ->
+                    row.addView(
+                        pinnedPartButton(
+                            panelId = panelId,
+                            scope = scope,
+                            part = part,
+                        ),
+                        LinearLayout.LayoutParams(
+                            0,
+                            LinearLayout.LayoutParams
+                                .WRAP_CONTENT,
+                            1f,
+                        ).apply {
+                            if (index > 0) {
+                                marginStart =
+                                    Ui.dp(
+                                        this@NativeSectionActivity,
+                                        6,
+                                    )
+                            }
+                        }
+                    )
+                }
+                card.addView(
+                    row,
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams
+                            .MATCH_PARENT,
+                        LinearLayout.LayoutParams
+                            .WRAP_CONTENT,
+                    ).apply {
+                        topMargin =
+                            Ui.dp(
+                                this@NativeSectionActivity,
+                                8,
+                            )
+                    }
+                )
+            }
+
+        pinnedContainer.addView(
+            card,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams
+                    .MATCH_PARENT,
+                LinearLayout.LayoutParams
+                    .WRAP_CONTENT,
+            )
+        )
+        pinnedContainer.visibility =
+            View.VISIBLE
+    }
+
+    private fun pinnedPartButton(
+        panelId: String,
+        scope: String,
+        part: CompositePart,
+    ): Button =
+        Button(this).apply {
+            text = part.shortLabel
+            isAllCaps = false
+            textSize = 13f
+            maxLines = 2
+            gravity =
+                Gravity.CENTER
+            minWidth = 0
+            minimumWidth = 0
+            minHeight =
+                Ui.dp(
+                    this@NativeSectionActivity,
+                    44,
+                )
+            minimumHeight =
+                Ui.dp(
+                    this@NativeSectionActivity,
+                    44,
+                )
+            setPadding(
+                Ui.dp(this@NativeSectionActivity, 6),
+                Ui.dp(this@NativeSectionActivity, 4),
+                Ui.dp(this@NativeSectionActivity, 6),
+                Ui.dp(this@NativeSectionActivity, 4),
+            )
+            contentDescription =
+                part.label + " — відкрити"
+            tag =
+                Ui.ChoiceTag(
+                    scope = scope,
+                    key = part.key,
+                )
+            Ui.styleChoice(
+                this,
+                selected =
+                    pinnedPart[panelId] == part.key,
+            )
+            setOnClickListener {
+                pinnedPart[panelId] =
+                    part.key
+                Ui.refreshChoices(
+                    pinnedContainer,
+                    scope,
+                    part.key,
+                )
+                scrollToDocumentOnce = true
+                part.open()
+                scrollToDocumentOnce = false
+            }
+        }
+
+    private fun encodeSelectionState(): String {
+        fun toJson(
+            values: Map<String, String>,
+        ): JSONObject =
+            JSONObject().apply {
+                values.forEach { (key, value) ->
+                    put(key, value)
+                }
+            }
+        return JSONObject().apply {
+            put("choice", toJson(selectedChoice))
+            put("pinned", toJson(pinnedConnector))
+            put("pinnedLabel", toJson(pinnedConnectorLabel))
+            put("pinnedPart", toJson(pinnedPart))
+        }.toString()
+    }
+
+    private fun restoreSelectionState(
+        encoded: String?,
+    ) {
+        if (encoded.isNullOrBlank()) {
+            return
+        }
+        runCatching {
+            val json = JSONObject(encoded)
+            fun load(
+                name: String,
+                into: HashMap<String, String>,
+            ) {
+                val values =
+                    json.optJSONObject(name)
+                        ?: return
+                values.keys().forEach { key ->
+                    into[key] =
+                        values.optString(key)
+                }
+            }
+            load("choice", selectedChoice)
+            load("pinned", pinnedConnector)
+            load("pinnedLabel", pinnedConnectorLabel)
+            load("pinnedPart", pinnedPart)
         }
     }
 
@@ -2876,6 +3407,7 @@ class NativeSectionActivity : Activity() {
             validParent ==
             null
         ) {
+            hidePinnedConnector()
             bodyContainer.removeAllViews()
             return false
         }
@@ -2884,13 +3416,15 @@ class NativeSectionActivity : Activity() {
             validParent,
         )
 
-        bodyContainer.addView(
+        val documentHeading =
             Ui.textView(
                 context = this,
                 value = label,
                 sizeSp = 16f,
                 color = Ui.accent,
-            ).apply {
+            )
+        bodyContainer.addView(
+            documentHeading.apply {
                 setTypeface(
                     typeface,
                     android.graphics.Typeface
@@ -2916,6 +3450,17 @@ class NativeSectionActivity : Activity() {
                 )
             }
         )
+
+        // v0.5.113: after a tap the opened document is scrolled into view
+        // (it is added under the list), so the owner does not scroll by hand.
+        if (scrollToDocumentOnce) {
+            bodyScroll.post {
+                bodyScroll.smoothScrollTo(
+                    0,
+                    documentHeading.top,
+                )
+            }
+        }
 
         return true
     }
@@ -4439,6 +4984,8 @@ class NativeSectionActivity : Activity() {
             "nativeScrollY"
         private const val STATE_PENDING_TABLE_PDF =
             "pendingTablePdf"
+        private const val STATE_SELECTION =
+            "nativeSelection"
 
         private const val VIEW_DEFAULT =
             "default"

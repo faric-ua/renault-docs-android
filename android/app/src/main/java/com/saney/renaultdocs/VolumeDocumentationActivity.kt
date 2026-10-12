@@ -38,6 +38,9 @@ class VolumeDocumentationActivity : Activity() {
 
     private val panelStack =
         mutableListOf<String>()
+    // v0.5.113: per list, the item opened last keeps a green frame and ✓.
+    private val selectedChoice =
+        HashMap<String, String>()
     private var restoredScrollY: Int = 0
 
     override fun onCreate(
@@ -94,6 +97,20 @@ class VolumeDocumentationActivity : Activity() {
                 )
                 ?: 0
 
+        savedInstanceState
+            ?.getString(
+                STATE_SELECTION,
+            )
+            ?.let { encoded ->
+                runCatching {
+                    val json = JSONObject(encoded)
+                    json.keys().forEach { key ->
+                        selectedChoice[key] =
+                            json.optString(key)
+                    }
+                }
+            }
+
         runtimeData =
             (
                 lastNonConfigurationInstance
@@ -149,6 +166,14 @@ class VolumeDocumentationActivity : Activity() {
         outState.putStringArrayList(
             STATE_PANEL_STACK,
             ArrayList(panelStack),
+        )
+        outState.putString(
+            STATE_SELECTION,
+            JSONObject().apply {
+                selectedChoice.forEach { (key, value) ->
+                    put(key, value)
+                }
+            }.toString(),
         )
         outState.putInt(
             STATE_SCROLL_Y,
@@ -936,11 +961,43 @@ class VolumeDocumentationActivity : Activity() {
                     } else {
                         "$label — недоступно"
                     }
+                val scope =
+                    panelStack.lastOrNull()
+                        ?: "root"
+                val key =
+                    action
+                        ?.optString(
+                            "id",
+                        )
+                        .orEmpty()
+                if (
+                    enabled &&
+                    key.isNotBlank()
+                ) {
+                    tag =
+                        Ui.ChoiceTag(
+                            scope = scope,
+                            key = key,
+                        )
+                    Ui.styleChoice(
+                        this,
+                        selected =
+                            selectedChoice[scope] == key,
+                    )
+                }
                 setOnClickListener {
                     if (
                         enabled &&
                         action != null
                     ) {
+                        if (key.isNotBlank()) {
+                            selectedChoice[scope] = key
+                            Ui.refreshChoices(
+                                bodyContainer,
+                                scope,
+                                key,
+                            )
+                        }
                         handleAction(action)
                     }
                 }
@@ -1592,6 +1649,8 @@ class VolumeDocumentationActivity : Activity() {
             "documentationPanelStack"
         private const val STATE_SCROLL_Y =
             "documentationScrollY"
+        private const val STATE_SELECTION =
+            "documentationSelection"
 
         private const val EXTRA_TREE_URI =
             "treeUri"
