@@ -1170,7 +1170,7 @@ class VolumeDocumentationActivity : Activity() {
                 Toast
                     .makeText(
                         this,
-                        "Друк поки не підтримується на окремому екрані документації.",
+                        "Друк: відкрий документ — у переглядачі PDF є кнопка друку.",
                         Toast.LENGTH_SHORT,
                     )
                     .show()

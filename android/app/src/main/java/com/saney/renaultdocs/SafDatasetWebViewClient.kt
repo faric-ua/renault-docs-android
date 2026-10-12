@@ -22,6 +22,7 @@ class SafDatasetWebViewClient(
     private val legacySectionFallbackEntrypoint: String = "",
     private val onHybridSectionReady: (Boolean) -> Unit = {},
     private val onSavePdf: (String) -> Unit = {},
+    private val onPrintPdf: (String) -> Unit = {},
     private val onToggleFullscreen: () -> Unit = {},
     private val onToggleCompanion: () -> Unit = {},
     private val pdfStateScope: String = "main",
@@ -291,6 +292,36 @@ class SafDatasetWebViewClient(
             view?.post {
                 onToggleFullscreen()
             }
+            return true
+        }
+
+        if (
+            url.scheme.equals(
+                PDF_PRINT_SCHEME,
+                ignoreCase = true,
+            )
+        ) {
+            // v0.5.115: «Друк» in the PDF viewer.
+            val path =
+                url.getQueryParameter(
+                    "path",
+                )
+                    ?.takeIf {
+                        it
+                            .lowercase(
+                                Locale.ROOT,
+                            )
+                            .endsWith(".pdf")
+                    }
+
+            if (
+                !path.isNullOrBlank()
+            ) {
+                view?.post {
+                    onPrintPdf(path)
+                }
+            }
+
             return true
         }
 
@@ -3763,6 +3794,37 @@ class SafDatasetWebViewClient(
         }
     }
 
+    /** v0.5.115: the PDF bytes as they are, for the print job. */
+    fun writePdf(
+        relativePath: String,
+        output: java.io.OutputStream,
+    ) {
+        require(
+            relativePath
+                .lowercase(
+                    Locale.ROOT,
+                )
+                .endsWith(".pdf")
+        ) {
+            "Друк дозволений лише для PDF."
+        }
+
+        val input =
+            resolver.openInputStream(
+                relativePath,
+            )
+                ?: error(
+                    "Не вдалося відкрити PDF у dataset."
+                )
+
+        input.use { source ->
+            source.copyTo(
+                output,
+                DEFAULT_BUFFER_SIZE,
+            )
+        }
+    }
+
     private fun blockExternalResource(
         url: String,
     ): WebResourceResponse? {
@@ -3951,6 +4013,9 @@ class SafDatasetWebViewClient(
 
         const val PDF_SAVE_SCHEME =
             "renaultsavepdf"
+
+        const val PDF_PRINT_SCHEME =
+            "renaultprintpdf"
 
         const val PDF_FULLSCREEN_SCHEME =
             "renaultfullscreen"

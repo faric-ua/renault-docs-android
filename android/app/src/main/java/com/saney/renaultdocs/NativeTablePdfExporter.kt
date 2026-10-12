@@ -45,6 +45,23 @@ object NativeTablePdfExporter {
         uri: Uri,
         data: NativeTablePdfData,
     ) {
+        val output =
+            context
+                .contentResolver
+                .openOutputStream(uri)
+                ?: error(
+                    "Не вдалося створити PDF файл."
+                )
+        output.use {
+            writeTo(it, data)
+        }
+    }
+
+    /** v0.5.115: the same PDF straight into any stream (also a print job). */
+    fun writeTo(
+        output: java.io.OutputStream,
+        data: NativeTablePdfData,
+    ) {
         val document = PdfDocument()
 
         val widestColumnCount =
@@ -1665,16 +1682,10 @@ object NativeTablePdfExporter {
 
         finishPage()
 
-        context
-            .contentResolver
-            .openOutputStream(uri)
-            ?.use {
-                document.writeTo(it)
-            }
-            ?: error(
-                "Не вдалося створити PDF файл."
-            )
-
-        document.close()
+        try {
+            document.writeTo(output)
+        } finally {
+            document.close()
+        }
     }
 }
