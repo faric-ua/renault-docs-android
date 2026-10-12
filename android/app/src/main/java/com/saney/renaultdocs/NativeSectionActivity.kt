@@ -3550,7 +3550,7 @@ class NativeSectionActivity : Activity() {
     }
 
     /**
-     * v0.5.113 (owner, variant A): card above the list — ✓ «Вибрано», the
+     * v0.5.113 (owner, variant A): card above the list — «Вибрано», the
      * connector name and its documents in one row. Shown for the panel the
      * connector was picked in; another tab hides it, coming back shows it.
      */
@@ -3621,25 +3621,7 @@ class NativeSectionActivity : Activity() {
                     Gravity.CENTER_VERTICAL
             }
 
-        header.addView(
-            ImageView(this).apply {
-                setImageResource(
-                    R.drawable.ic_check_circle,
-                )
-                contentDescription =
-                    "Вибрано"
-            },
-            LinearLayout.LayoutParams(
-                Ui.dp(this, 22),
-                Ui.dp(this, 22),
-            ).apply {
-                marginEnd =
-                    Ui.dp(
-                        this@NativeSectionActivity,
-                        10,
-                    )
-            }
-        )
+        // v0.5.117 (owner): no ✓ icon in the card either — the green frame is enough.
 
         val titleColumn =
             LinearLayout(this).apply {

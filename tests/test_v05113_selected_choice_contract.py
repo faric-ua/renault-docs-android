@@ -34,7 +34,8 @@ class SelectedChoiceContract(unittest.TestCase):
         ui = read("Ui.kt")
         for marker in ("fun selectedBackground(", "data class ChoiceTag(",
                        "fun styleChoice(", "fun refreshChoices(",
-                       "R.drawable.ic_check_circle", "setStroke(dp(context, 2), success)"):
+                       "setStroke(dp(context, 2), success)"):
+            # "R.drawable.ic_check_circle" left Ui in v0.5.117 (owner: no ✓).
             self.assertIn(marker, ui)
         check = (RES / "drawable/ic_check_circle.xml").read_text(encoding="utf-8")
         self.assertIn("#62D296", check)
@@ -105,7 +106,8 @@ class SelectedChoiceContract(unittest.TestCase):
         volume = read("ModernVolumeActivity.kt")
         row = between(volume, "private fun sectionRow(", "private fun openSection(")
         self.assertIn("section.code ==\n                    lastOpenedSectionCode", row)
-        self.assertIn("R.drawable.ic_check_circle", row)
+        # v0.5.117: the ✓ in the row was removed; the green frame stays.
+        self.assertIn("Ui.selectedBackground(", row)
         self.assertIn("lastOpenedSectionCode =\n            section.code",
                       between(volume, "private fun openSection(", "private fun openVolumeDocumentation()"))
         documentation = read("VolumeDocumentationActivity.kt")

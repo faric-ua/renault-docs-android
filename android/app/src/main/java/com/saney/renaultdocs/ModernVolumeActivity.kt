@@ -935,32 +935,20 @@ class ModernVolumeActivity : Activity() {
                 )
             )
 
+            // v0.5.117 (owner): the last opened section keeps only the green
+            // frame; the arrow stays, no ✓ instead of it.
             addView(
-                if (opened) {
-                    ImageView(
+                Ui.textView(
+                    context =
                         this@ModernVolumeActivity,
-                    ).apply {
-                        setImageResource(
-                            R.drawable.ic_check_circle,
-                        )
-                        scaleType =
-                            ImageView.ScaleType.CENTER
-                        contentDescription =
-                            "Відкривали останнім"
-                    }
-                } else {
-                    Ui.textView(
-                        context =
-                            this@ModernVolumeActivity,
-                        value =
-                            "›",
-                        sizeSp = 28f,
-                        color =
-                            Ui.muted,
-                    ).apply {
-                        gravity =
-                            Gravity.CENTER
-                    }
+                    value =
+                        "›",
+                    sizeSp = 28f,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    gravity =
+                        Gravity.CENTER
                 },
                 LinearLayout.LayoutParams(
                     Ui.dp(
