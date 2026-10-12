@@ -86,8 +86,11 @@ class SelectedChoiceContract(unittest.TestCase):
         body = between(section, "private fun prepareDocumentBody(", "private fun renderStructuredDocument(")
         self.assertIn("if (scrollToDocumentOnce)", body)
         self.assertIn("smoothScrollTo(", body)
-        self.assertEqual(section.count("scrollToDocumentOnce = true"), 2)
-        self.assertEqual(section.count("scrollToDocumentOnce = false"), 2)
+        # 2 in v0.5.113; v0.5.114 adds the «Критерії / скорочення» fallback.
+        # Every «true» is paired with a «false» right after the action.
+        self.assertGreaterEqual(section.count("scrollToDocumentOnce = true"), 2)
+        self.assertEqual(section.count("scrollToDocumentOnce = true"),
+                         section.count("scrollToDocumentOnce = false"))
 
     def test_choice_survives_rotation(self):
         section = read("NativeSectionActivity.kt")
@@ -112,8 +115,7 @@ class SelectedChoiceContract(unittest.TestCase):
 
     def test_version_bumped(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.113"', gradle)
-        self.assertIn("versionCode = 129", gradle)
+        self.assertGreaterEqual(int(gradle.split("versionCode = ", 1)[1].splitlines()[0]), 129)
 
 
 if __name__ == "__main__":

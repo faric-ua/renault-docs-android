@@ -108,6 +108,10 @@ class ModernVolumeActivity : Activity() {
                     STATE_LAST_SECTION,
                 )
                 .orEmpty()
+                .ifBlank {
+                    // v0.5.114: remembered while the app runs.
+                    sectionMemory()["last"].orEmpty()
+                }
 
         restoredScrollY =
             savedInstanceState
@@ -977,10 +981,21 @@ class ModernVolumeActivity : Activity() {
             }
         }
 
+    private fun sectionMemory(): HashMap<String, String> =
+        ChoiceMemory.map(
+            "volume|" +
+                treeUriText +
+                "|" +
+                volumeEntrypoint,
+            "section",
+        )
+
     private fun openSection(
         section: ModernSection,
     ) {
         lastOpenedSectionCode =
+            section.code
+        sectionMemory()["last"] =
             section.code
         if (
             ::searchInput.isInitialized

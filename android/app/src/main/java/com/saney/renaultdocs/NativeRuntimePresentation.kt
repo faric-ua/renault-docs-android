@@ -29,6 +29,16 @@ object NativeRuntimePresentation {
         normalize(raw) in
             documentationMenuCodes
 
+    /** v0.5.114: «Критерії / скорочення» is pinned above the list, not in it. */
+    fun isCriteria(
+        raw: String,
+    ): Boolean =
+        normalize(raw) == "CRITERE" ||
+            raw.trim().equals(
+                "Критерії / скорочення",
+                ignoreCase = true,
+            )
+
     fun isHiddenPlaceholder(
         raw: String,
     ): Boolean =

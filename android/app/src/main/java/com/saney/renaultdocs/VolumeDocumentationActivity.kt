@@ -39,7 +39,7 @@ class VolumeDocumentationActivity : Activity() {
     private val panelStack =
         mutableListOf<String>()
     // v0.5.113: per list, the item opened last keeps a green frame and ✓.
-    private val selectedChoice =
+    private var selectedChoice =
         HashMap<String, String>()
     private var restoredScrollY: Int = 0
 
@@ -96,6 +96,16 @@ class VolumeDocumentationActivity : Activity() {
                     0,
                 )
                 ?: 0
+
+        // v0.5.114: the frame survives leaving and reopening this screen.
+        selectedChoice =
+            ChoiceMemory.map(
+                "documentation|" +
+                    treeUriText +
+                    "|" +
+                    volumeEntrypoint,
+                "choice",
+            )
 
         savedInstanceState
             ?.getString(
