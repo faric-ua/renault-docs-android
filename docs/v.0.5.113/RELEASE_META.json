@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.113",
+  "versionCode": 129,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.113-selected-connector-pinned",
+  "issues": [
+    147
+  ],
+  "scope": "Owner request 2026-10-12, mockup variant A: picked list item gets a green frame and check; active section tab framed green; chosen connector and its documents pinned above the list; inline document scrolled into view; volume sections and volume documentation mark the last opened item. Includes v0.5.112.",
+  "sourceBase": "v0.5.112/build128",
+  "phoneQa": "PENDING",
+  "pr_number": 223,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 727,
+  "signed_apk": "PASS",
+  "source_sha": "0813c9039568123ad4eccb453ed3be63dd923e87",
+  "signed_run_id": 38290988757,
+  "signed_run_number": 177,
+  "signed_android_apk_run": 177,
+  "artifact_id": 11766550044,
+  "artifact_name": "Renault-Docs-v0.5.113-Debug",
+  "artifact_digest": "sha256:8444f25a5f2d91363c6ff5a8f86141eaaaa3d249c53053e1bf29ac4fc453f9fd",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Section 103 → «Розʼєм» → tap K9K728: green frame + check on the item, card «ВИБРАНО» with three buttons above the list; «Опис контактів» scrolls to the table; rotate — card stays."
+}
