@@ -33,7 +33,7 @@ object Ui {
     val statusWarmText: Int = Color.parseColor("#D8B58B")
 
     // v0.5.113 (owner request 2026-10-12): one «selected» look everywhere a
-    // list lets you pick something — green frame, dark-green fill, ✓ on the right.
+    // list lets you pick something — green frame, dark-green fill (✓ removed in v0.5.117).
     val selectedFill: Int = Color.parseColor("#16271E")
     const val actionSubtitleSp: Float = 11f
     const val secondaryTextSp: Float = 12f
@@ -79,7 +79,7 @@ object Ui {
 
     /**
      * Normal list button (dark fill, blue frame) or the chosen one (green
-     * frame, ✓ on the right). Text stays the same, so the layout does not jump.
+     * frame). Text stays the same, so the layout does not jump.
      */
     fun styleChoice(
         button: Button,
@@ -101,13 +101,14 @@ object Ui {
         button.setTextColor(
             if (selected) Color.WHITE else text,
         )
+        // v0.5.117 (owner 2026-10-13): no ✓ — it took width from the text and
+        // the text jumped. The green frame alone marks the pick.
         button.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
             0,
-            if (selected) R.drawable.ic_check_circle else 0,
+            0,
             0,
         )
-        button.compoundDrawablePadding = dp(context, 8)
         button.setTypeface(
             null,
             if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL,
