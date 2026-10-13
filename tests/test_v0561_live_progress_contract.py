@@ -4,6 +4,13 @@ import unittest
 
 RETIRED_V05112 = "v0.5.112: «Конвертер»/«Legacy»/«Старі бібліотеки» removed by owner decision 2026-10-12; code kept in branch archive/legacy-converter-v0.5.111"
 
+
+RETIRED_V05122 = (
+    "#173 (v0.5.122): adding/removing/moving volumes no longer deletes the "
+    "prepared .rdproject; it is found by project id inside it, lookups never "
+    "rename. See test_v05122_prepared_snapshot_contract.py"
+)
+
 class V0561LiveProgressContractTests(unittest.TestCase):
     def _read(self, path: str) -> str:
         root = Path(__file__).resolve().parents[1]
@@ -171,6 +178,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
         self.assertIn("(index + 1)", project_export)
         self.assertIn("volumes.size", project_export)
 
+    @unittest.skip(RETIRED_V05122)
     def test_project_share_reuses_current_prepared_bundle(self):
         controller = self._read(
             "android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt"

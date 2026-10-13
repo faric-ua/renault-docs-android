@@ -2,6 +2,13 @@ from pathlib import Path
 import unittest
 
 
+
+RETIRED_V05122 = (
+    "#173 (v0.5.122): adding/removing/moving volumes no longer deletes the "
+    "prepared .rdproject; it is found by project id inside it, lookups never "
+    "rename. See test_v05122_prepared_snapshot_contract.py"
+)
+
 class V0560CanonicalProjectPackagesContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -39,6 +46,7 @@ class V0560CanonicalProjectPackagesContractTests(unittest.TestCase):
         self.assertIn("RdpkgExporter.resolvedMetadata(", src)
         self.assertIn("RdpkgExporter.defaultFileName(", src)
 
+    @unittest.skip(RETIRED_V05122)
     def test_prepared_project_legacy_name_is_migrated_to_canonical_name(self):
         store = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/PreparedShareStore.kt"

@@ -202,12 +202,17 @@ class HomeProjectDialogController(
             store.volumes(
                 project.id,
             )
-        val prepared =
-            PreparedShareStore.existingProjectFile(
+        // #173 (v0.5.122): the prepared file is found by the project id inside
+        // it, not by a name built from the current volumes; it may be a
+        // snapshot of an older set of volumes — the menu says so.
+        val snapshot =
+            PreparedShareStore.projectSnapshot(
                 activity,
                 project,
                 projectVolumes,
             )
+        val prepared =
+            snapshot?.file
 
         addAction("Експортувати томи окремо (.rdpkg)") {
             clear(DIALOG_ACTIONS)
@@ -215,7 +220,12 @@ class HomeProjectDialogController(
             showExportWizard(project)
         }
 
-        addAction("Поділитися проєктом одним файлом (.rdproject) · офлайн") {
+        addAction(
+            preparedShareTitle(
+                snapshot,
+                projectVolumes,
+            ),
+        ) {
             clear(DIALOG_ACTIONS)
             if (prepared != null) {
                 sharePreparedProject(project, prepared)
@@ -224,10 +234,17 @@ class HomeProjectDialogController(
             }
         }
 
-        if (prepared != null) {
+        if (snapshot != null) {
             // One prepared .rdproject per project: a new one only after deleting this one.
             addAction(
-                title = "Перепакувати .rdproject · спершу видали підготовлений ⇧",
+                title =
+                    if (snapshot.matches(projectVolumes)) {
+                        "Перепакувати .rdproject · спершу видали підготовлений ⇧"
+                    } else {
+                        "Перепакувати .rdproject на " +
+                            volumeCountLabel(projectVolumes.size) +
+                            " · спершу видали підготовлений ⇧"
+                    },
                 enabled = false,
             ) {}
             addAction(
@@ -420,14 +437,22 @@ class HomeProjectDialogController(
                 }
                 .setPositiveButton("Видалити") { _, _ ->
                     clear(DIALOG_DELETE_PREPARED)
+                    // Exactly the file the menu showed (#173: found by project id).
                     val deleted =
-                        PreparedShareStore.deleteProject(
-                            activity,
-                            project,
-                            store.volumes(
-                                project.id,
-                            ),
-                        )
+                        PreparedShareStore
+                            .projectSnapshot(
+                                activity,
+                                project,
+                                store.volumes(
+                                    project.id,
+                                ),
+                            )
+                            ?.let {
+                                PreparedShareStore.deleteProjectSnapshot(
+                                    it.file,
+                                )
+                            }
+                            ?: true
                     onPreparedProjectDeleted(
                         project,
                         deleted,
@@ -496,8 +521,24 @@ class HomeProjectDialogController(
         activeKind = DIALOG_REMOVE
         activeProjectId = project.id
 
+        val projectVolumes =
+            store.volumes(project.id)
         val volumeCount =
-            store.volumes(project.id).size
+            projectVolumes.size
+        // #173: removing a project never deletes its prepared .rdproject silently.
+        val preparedNote =
+            if (
+                PreparedShareStore.hasProjectFile(
+                    activity,
+                    project,
+                    projectVolumes,
+                )
+            ) {
+                "\n\nПідготовлений .rdproject (⇧) цього проєкту теж лишиться в застосунку. " +
+                    "Якщо він не потрібен — спершу видали його через «Видалити підготовлений .rdproject»."
+            } else {
+                ""
+            }
 
         val dialog =
             AlertDialog.Builder(activity)
@@ -509,7 +550,8 @@ class HomeProjectDialogController(
                         "\n\nПроєкт і " +
                         volumeCountLabel(volumeCount) +
                         " буде прибрано з бібліотеки Renault Docs. " +
-                        "Вихідні .rdpkg, SAF-папки та оригінальні Renault-файли на телефоні не видаляються.",
+                        "Вихідні .rdpkg, SAF-папки та оригінальні Renault-файли на телефоні не видаляються." +
+                        preparedNote,
                 )
                 .setNegativeButton(
                     "Скасувати",
@@ -576,6 +618,29 @@ class HomeProjectDialogController(
         activeKind = ""
         activeProjectId = null
         activeParentKind = null
+    }
+
+    /**
+     * #173: «Поділитися …» shares the prepared file when there is one and
+     * says how many volumes it holds if the project has changed since.
+     */
+    private fun preparedShareTitle(
+        snapshot: PreparedShareStore.ProjectSnapshot?,
+        volumes: List<ProjectVolumeRecord>,
+    ): String {
+        if (snapshot == null) {
+            return "Поділитися проєктом одним файлом (.rdproject) · офлайн"
+        }
+        if (snapshot.matches(volumes)) {
+            return "Поділитися підготовленим .rdproject ⇧ · " +
+                volumeCountLabel(volumes.size)
+        }
+        val count =
+            snapshot.volumeCount
+        return "Поділитися підготовленим .rdproject ⇧ · " +
+            (if (count != null) volumeCountLabel(count) + " · " else "") +
+            "підготовлено раніше, зараз у проєкті " +
+            volumeCountLabel(volumes.size)
     }
 
     private fun volumeCountLabel(count: Int): String {

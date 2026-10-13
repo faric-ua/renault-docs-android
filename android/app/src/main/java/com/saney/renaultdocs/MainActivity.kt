@@ -1441,12 +1441,17 @@ class MainActivity : Activity() {
                 )
         val volumeCount =
             volumes.size
-        val hasPreparedShare =
-            PreparedShareStore.hasProjectFile(
+        // #173: found by project id; may be a snapshot of older volumes.
+        val preparedSnapshot =
+            PreparedShareStore.projectSnapshot(
                 this,
                 project,
                 volumes,
             )
+        val hasPreparedShare =
+            preparedSnapshot != null
+        val preparedIsOlder =
+            preparedSnapshot?.matches(volumes) == false
 
         return LinearLayout(this).apply {
             orientation =
@@ -1589,9 +1594,14 @@ class MainActivity : Activity() {
                         context = this@MainActivity,
                         value = "⇧",
                         sizeSp = 20f,
-                        color = Ui.accent,
+                        color = if (preparedIsOlder) Ui.muted else Ui.accent,
                     ).apply {
-                        contentDescription = "Підготовлений .rdproject готовий для передачі"
+                        contentDescription =
+                            if (preparedIsOlder) {
+                                "Підготовлений .rdproject — для попереднього набору томів"
+                            } else {
+                                "Підготовлений .rdproject готовий для передачі"
+                            }
                         gravity = Gravity.CENTER
                         setPadding(
                             Ui.dp(this@MainActivity, 8),

@@ -11,7 +11,9 @@ class ProjectShareContractTest(unittest.TestCase):
         src = self.read("android/app/src/main/java/com/saney/renaultdocs/HomeProjectDialogController.kt")
         block = src.split("fun showActions(projectId: String)", 1)[1].split("private fun showExportWizard", 1)[0]
         self.assertNotIn(".setItems(", block)
-        self.assertIn("Поділитися проєктом", block)
+        # v0.5.122 (#173): the share title comes from preparedShareTitle().
+        self.assertIn("preparedShareTitle(", block)
+        self.assertIn("Поділитися проєктом", src)
         self.assertIn("Видалити проєкт", block)
         self.assertIn("Скасувати", block)
         self.assertIn("danger -> Ui.danger", block)
