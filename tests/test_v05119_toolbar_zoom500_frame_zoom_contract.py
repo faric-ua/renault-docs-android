@@ -34,8 +34,9 @@ class ToolbarZoomFrameContract(unittest.TestCase):
         # v0.5.120: still one size for all, but smaller (0.72) and the frame
         # ratio comes from top.visualViewport.scale (screen.width was wrong
         # in landscape). See test_v05120_companion_navigator_contract.py.
-        self.assertIn("zoom: var(--ui-scale, 0.72);", layer)
-        self.assertIn("const BASE_UI_SCALE = 0.72;", layer)
+        # v0.5.121: base raised to 0.84 (owner: +15–20%).
+        self.assertIn("zoom: var(--ui-scale, 0.84);", layer)
+        self.assertIn("const BASE_UI_SCALE = 0.84;", layer)
         self.assertIn("'--ui-scale'", layer)
         menu = between(layer, "function positionZoomMenu()", "zoomMenu.style.top =")
         self.assertIn("left / uiScale", menu)

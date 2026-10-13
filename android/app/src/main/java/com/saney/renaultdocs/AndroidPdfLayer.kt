@@ -210,7 +210,7 @@ class AndroidPdfLayer(
                 #toolbar {
                   /* v0.5.119: one medium size everywhere; JS sets zoom so a
                      PDF inside a page with frames looks the same. */
-                  zoom: var(--ui-scale, 0.72);
+                  zoom: var(--ui-scale, 0.84);
                   z-index: 20;
                   flex: 0 0 auto;
                   display: flex;
@@ -605,7 +605,9 @@ class AndroidPdfLayer(
                 // top.visualViewport.scale — screen.width gave the portrait
                 // width in landscape, so the old ratio blew the toolbar up.
                 (function () {
-                  const BASE_UI_SCALE = 0.72;
+                  // v0.5.121 (owner, phone QA 03:21): 0.72 was too small —
+                  // +~17% (owner asked 15–20%).
+                  const BASE_UI_SCALE = 0.84;
                   function applyUiScale() {
                     let uiScale = BASE_UI_SCALE;
                     try {
