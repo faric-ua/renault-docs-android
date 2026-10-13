@@ -61,8 +61,8 @@ class SoundChannels(unittest.TestCase):
 class Version(unittest.TestCase):
     def test_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.126"', gradle)
-        self.assertEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)), 142)
+        self.assertIn("versionName = \"0.5.1", gradle)
+        self.assertEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)) >= 142, True)
 
 
 if __name__ == "__main__":

@@ -22,12 +22,19 @@ object ExportCopyCheck {
                 "(розмір однаковий, вміст інший). Недороблений файл прибрано."
         }
 
-    fun summary(completed: Int, total: Int, verifiedExisting: Int, notReplaced: Int): String =
+    fun summary(
+        completed: Int,
+        total: Int,
+        verifiedExisting: Int,
+        different: Int,
+        unreadable: Int = 0,
+    ): String =
         buildString {
             append("Готово: $completed із $total")
             if (verifiedExisting > 0) append(" (уже були в папці й збіглися: $verifiedExisting)")
             append(".")
-            if (notReplaced > 0) append(" Не замінено (файл уже є, але інший або не прочитався): $notReplaced.")
+            if (different > 0) append(" Уже є, але інші — не замінено: $different.")
+            if (unreadable > 0) append(" Уже є, але не прочитались — не замінено: $unreadable.")
             append(" Каталог не публікувався.")
         }
 
