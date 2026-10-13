@@ -1,0 +1,27 @@
+{
+  "versionName": "0.5.122",
+  "versionCode": 138,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/173-prepared-snapshot",
+  "issues": [
+    173,
+    147
+  ],
+  "scope": "#173: adding/removing/moving a volume (or metadata repair) no longer deletes the prepared .rdproject; it is found by project.id inside rdproject.json (read-only, no rename); menu shows when it was made for an older set of volumes; only the explicit «Видалити підготовлений .rdproject» deletes exactly the shown file. Includes v0.5.121.",
+  "sourceBase": "v0.5.121/build137",
+  "phoneQa": "PENDING",
+  "pr_number": 253,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 781,
+  "signed_apk": "PASS",
+  "source_sha": "3024119a064f86bd0e0b66d90faa9c735054519e",
+  "signed_run_id": 38335638223,
+  "signed_run_number": 186,
+  "signed_android_apk_run": 186,
+  "artifact_id": 11785290482,
+  "artifact_name": "Renault-Docs-v0.5.122-Debug",
+  "artifact_digest": "sha256:f5ca4e6ab176b0da077e26698b65b8dd1881cb4f69bd61113cba3686d1438bd1",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Home → Megane II ⋮: read the share line — if a prepared file survived it shows «Поділитися підготовленим .rdproject ⇧ · 21 том · підготовлено раніше, зараз у проєкті 22 томи». Do not repack or delete during this check."
+}
