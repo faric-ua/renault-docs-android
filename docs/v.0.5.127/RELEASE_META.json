@@ -1,0 +1,27 @@
+{
+  "versionName": "0.5.127",
+  "versionCode": 143,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.127-existing-read-retry",
+  "issues": [
+    162,
+    147
+  ],
+  "scope": "Files already in the Drive folder are re-read with pauses (like new copies); the read error is kept in the export report; the summary separates different vs unreadable. Includes v0.5.126 (sound alerts) and v0.5.125.",
+  "sourceBase": "v0.5.126/build142",
+  "phoneQa": "PENDING",
+  "pr_number": 267,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 814,
+  "signed_apk": "PASS",
+  "source_sha": "208cb78d72672cbab4c01b18532a751a54fc3714",
+  "signed_run_id": 38453124563,
+  "signed_run_number": 191,
+  "signed_android_apk_run": 191,
+  "artifact_id": 11840927882,
+  "artifact_name": "Renault-Docs-v0.5.127-Debug",
+  "artifact_digest": "sha256:07f0d22bc7a9406cf82cb93605d6ebcd81578bf587f060043c26307efd487776",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Repeat export of the same 17 into «Renault Docs Projects»: expect 17 verified (all already in folder) or a reason for each unreadable one; a sound at the end."
+}
