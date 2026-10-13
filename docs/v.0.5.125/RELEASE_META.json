@@ -1,0 +1,28 @@
+{
+  "versionName": "0.5.125",
+  "versionCode": 141,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.125-drive-export-verify",
+  "issues": [
+    162,
+    261,
+    147
+  ],
+  "scope": "Export into a Google Drive folder: the copy is re-read with pauses (~1 min) before it is called broken; a same-name file already in the folder is compared by sha256 and reported (never overwritten); the JSON report is written on failure/cancel too; steps 2–3 show the real folder name (#261). Includes v0.5.124.",
+  "sourceBase": "v0.5.124/build140",
+  "phoneQa": "PENDING",
+  "pr_number": 262,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 805,
+  "signed_apk": "PASS",
+  "source_sha": "ed386393acdfc3dc7eb1c3c253feff0e7f3dc822",
+  "signed_run_id": 38442699051,
+  "signed_run_number": 189,
+  "signed_android_apk_run": 189,
+  "artifact_id": 11836876057,
+  "artifact_name": "Renault-Docs-v0.5.125-Debug",
+  "artifact_digest": "sha256:3a56674d46c24bb8d4587c96e8a5fbcc40ab751b58ee2ed5d0c9f51d13b3f676",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Megane II ⋮ → «Експортувати томи окремо» → «Вибрати лише нові для каталогу» (17) → step 2 shows the folder name → same Drive folder «Renault Docs Projects» → expect 8 «уже були, збіглися» + 9 new, report JSON in the folder."
+}
