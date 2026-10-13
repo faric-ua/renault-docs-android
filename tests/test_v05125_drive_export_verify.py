@@ -56,7 +56,7 @@ class ExistingFilesAreComparedNotTrusted(unittest.TestCase):
         self.assertIn('"EXISTING_SHA256_MISMATCH"', service)
         self.assertIn("EXISTING_UNVERIFIED", service)
         block = service.split("if (key in existingNames) {", 1)[1].split("return@forEachIndexed", 1)[0]
-        self.assertIn("readBack(file.uri)", block)
+        self.assertIn("tryVerify(file.uri, localSha, localSize)", block)
         self.assertNotIn("openOutputStream", block)
         self.assertNotIn("delete()", block)
         self.assertNotIn("renameTo", block)

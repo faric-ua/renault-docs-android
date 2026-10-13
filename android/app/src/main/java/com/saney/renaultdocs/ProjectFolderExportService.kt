@@ -104,6 +104,7 @@ class ProjectFolderExportService : Service() {
         var completed = 0
         var skipped = 0
         var verifiedExisting = 0
+        var unreadable = 0
         doneCounts = 0 to 0
         val existingNames = tree.listFiles()
             .mapNotNull { it.name?.lowercase(java.util.Locale.ROOT) }
@@ -152,7 +153,16 @@ class ProjectFolderExportService : Service() {
                         "Том ${index + 1}/${plan.size}: файл уже є, звіряю $label")
                     notifyProgress(completed + skipped, plan.size, "Звіряю том ${index + 1}/${plan.size}")
                     val existing = tree.findFile(targetName)
-                    val read = existing?.let { file -> runCatching { readBack(file.uri) }.getOrNull() }
+                    // v0.5.127: phone QA 22:06 — 6 of 10 files already on Drive were
+                    // «не прочитався» on the first try; read again with pauses like a new copy,
+                    // and keep the reason in the report.
+                    val attempt = existing?.let { file ->
+                        tryVerify(file.uri, localSha, localSize) { n, total ->
+                            runStore.progress(completed, skipped,
+                                "Том ${index + 1}/${plan.size}: чекаю, поки Диск віддасть $label ($n/$total)")
+                        }
+                    }
+                    val read = attempt?.read
                     when {
                         read != null && read.sha256.equals(localSha, ignoreCase = true) &&
                             read.size == localSize -> {
@@ -174,7 +184,10 @@ class ProjectFolderExportService : Service() {
                         }
                         else -> {
                             skipped++
+                            unreadable++
                             record.put("status", "EXISTING_UNVERIFIED")
+                                .put("reason", attempt?.error?.let { "${it.javaClass.simpleName}: ${it.message}" }
+                                    ?: "файл не знайдено в папці")
                             runStore.progress(completed, skipped,
                                 "Том ${index + 1}/${plan.size}: файл уже є, не замінюю.")
                         }
@@ -269,7 +282,7 @@ class ProjectFolderExportService : Service() {
         dataSyncTimeout.checkActive()
         writeReport(tree, project, plan.size, completed, skipped, records, "complete")
         runStore.complete(completed, skipped,
-            ExportCopyCheck.summary(completed, plan.size, verifiedExisting, skipped))
+            ExportCopyCheck.summary(completed, plan.size, verifiedExisting, skipped - unreadable, unreadable))
         getSystemService(NotificationManager::class.java).notify(
             NOTIFICATION_ID, notification("Окремі .rdpkg готові: $completed / ${plan.size}", false),
         )
@@ -319,13 +332,18 @@ class ProjectFolderExportService : Service() {
 
     private class ReadBack(val sha256: String, val size: Long)
 
-    /** Reads the written copy; retries with pauses while it differs (cloud folders). */
-    private fun verifyCopy(
+    private class VerifyAttempt(val read: ReadBack?, val error: Throwable?)
+
+    /**
+     * Reads a copy in the folder; retries with pauses while it differs or cannot be read
+     * (cloud folders may still be writing or fetching it). Never throws for a read error.
+     */
+    private fun tryVerify(
         uri: Uri,
         expectedSha: String,
         expectedSize: Long,
         onWait: (attempt: Int, total: Int) -> Unit,
-    ): ReadBack {
+    ): VerifyAttempt {
         var last: ReadBack? = null
         var lastError: Throwable? = null
         val delays = ExportCopyCheck.DELAYS_MS
@@ -346,11 +364,22 @@ class ProjectFolderExportService : Service() {
             }
             last = value
             if (value.size == expectedSize && value.sha256.equals(expectedSha, ignoreCase = true)) {
-                return value
+                return VerifyAttempt(value, null)
             }
         }
-        return last ?: throw IllegalStateException(
-            "Не вдалося прочитати створений .rdpkg для перевірки.", lastError,
+        return VerifyAttempt(last, lastError)
+    }
+
+    /** Reads the written copy; retries with pauses while it differs (cloud folders). */
+    private fun verifyCopy(
+        uri: Uri,
+        expectedSha: String,
+        expectedSize: Long,
+        onWait: (attempt: Int, total: Int) -> Unit,
+    ): ReadBack {
+        val attempt = tryVerify(uri, expectedSha, expectedSize, onWait)
+        return attempt.read ?: throw IllegalStateException(
+            "Не вдалося прочитати створений .rdpkg для перевірки.", attempt.error,
         )
     }
 

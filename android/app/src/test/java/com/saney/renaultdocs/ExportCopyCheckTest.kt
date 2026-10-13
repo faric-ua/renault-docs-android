@@ -26,7 +26,11 @@ class ExportCopyCheckTest {
             "Готово: 17 із 17 (уже були в папці й збіглися: 8). Каталог не публікувався.",
             ExportCopyCheck.summary(17, 17, 8, 0),
         )
-        assertTrue(ExportCopyCheck.summary(16, 17, 0, 1).contains("Не замінено"))
+        assertTrue(ExportCopyCheck.summary(16, 17, 0, 1).contains("Уже є, але інші — не замінено: 1."))
+        assertEquals(
+            "Готово: 11 із 17 (уже були в папці й збіглися: 4). Уже є, але не прочитались — не замінено: 6. Каталог не публікувався.",
+            ExportCopyCheck.summary(11, 17, 4, 0, 6),
+        )
     }
 
     @Test
