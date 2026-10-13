@@ -127,8 +127,9 @@ class CompanionNavigatorContract(unittest.TestCase):
 class ToolbarScaleContract(unittest.TestCase):
     def test_toolbar_smaller_and_uses_visual_viewport(self):
         layer = read("AndroidPdfLayer.kt")
-        self.assertIn("zoom: var(--ui-scale, 0.72);", layer)
-        block = between(layer, "const BASE_UI_SCALE = 0.72;", "const pdfViewport =")
+        # v0.5.121: base 0.72 → 0.84 (owner: +15–20%), see v05121 test.
+        self.assertIn("zoom: var(--ui-scale, 0.84);", layer)
+        block = between(layer, "const BASE_UI_SCALE = 0.84;", "const pdfViewport =")
         self.assertIn("window.top.visualViewport", block)
         self.assertIn("1 / pageScale", block)
         self.assertNotIn("screen.width", block)
