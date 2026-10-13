@@ -1,0 +1,27 @@
+{
+  "versionName": "0.5.124",
+  "versionCode": 140,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/export-only-new",
+  "issues": [
+    162,
+    147
+  ],
+  "scope": "Export wizard: «Вибрати лише нові для каталогу» ticks only volumes missing from the public catalog (exact file name or exact NT + date). Includes v0.5.123.",
+  "sourceBase": "v0.5.123/build139",
+  "phoneQa": "PENDING",
+  "pr_number": 259,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 794,
+  "signed_apk": "PASS",
+  "source_sha": "dab7e8a474b9531fce154725074f83c15d99374f",
+  "signed_run_id": 38432439953,
+  "signed_run_number": 188,
+  "signed_android_apk_run": 188,
+  "artifact_id": 11830758820,
+  "artifact_name": "Renault-Docs-v0.5.124-Debug",
+  "artifact_digest": "sha256:d456211811453d20c91dbe36e47cdda1a66baaae0699745e566f6ac2290fdaa2",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Megane II ⋮ → «Експортувати томи окремо» → «Вибрати лише нові для каталогу» → expect «У каталозі вже є 5 із 22. Вибрано нові: 17.» → folder «Renault Docs Projects / Megane II — нові томи 2026-10-13»."
+}
