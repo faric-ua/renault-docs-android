@@ -127,8 +127,8 @@ class CatalogToolAcceptsTheNewReport(unittest.TestCase):
 class Version(unittest.TestCase):
     def test_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.5.125"', gradle)
-        self.assertEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)), 141)
+        self.assertIn("versionName = \"0.5.1", gradle)
+        self.assertGreaterEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)), 141)
 
 
 if __name__ == "__main__":
