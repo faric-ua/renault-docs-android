@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.126",
+  "versionCode": 142,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.126-sound-alerts",
+  "issues": [
+    147
+  ],
+  "scope": "Sound in the shade when a long operation ends: «Готово (зі звуком)» and «Помилки (зі звуком)» channels for the final notification only; progress and own cancel stay silent. Includes v0.5.125.",
+  "sourceBase": "v0.5.125/build141",
+  "phoneQa": "PENDING",
+  "pr_number": 265,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 810,
+  "signed_apk": "PASS",
+  "source_sha": "3eb2e3c3e7602a50f2483aa75e6ed2bbc17e95d1",
+  "signed_run_id": 38447860063,
+  "signed_run_number": 190,
+  "signed_android_apk_run": 190,
+  "artifact_id": 11839721301,
+  "artifact_name": "Renault-Docs-v0.5.126-Debug",
+  "artifact_digest": "sha256:df140ddcd400304c13ced88da662796607f320d56a329a880fe99df5c6b0e527",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over AFTER the running folder export ends. Any finished operation → sound; an error → sound + pop-up; own cancel → silent."
+}
