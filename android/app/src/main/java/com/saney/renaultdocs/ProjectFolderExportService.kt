@@ -103,99 +103,188 @@ class ProjectFolderExportService : Service() {
         val records = JSONArray()
         var completed = 0
         var skipped = 0
+        var verifiedExisting = 0
         doneCounts = 0 to 0
         val existingNames = tree.listFiles()
             .mapNotNull { it.name?.lowercase(java.util.Locale.ROOT) }
             .toMutableSet()
 
-        plan.forEachIndexed { index, item ->
-            doneCounts = completed to skipped
-            checkpoint()
-            val targetName = item.fileName
-            val key = targetName.lowercase(java.util.Locale.ROOT)
-            val record = JSONObject()
-                .put("volume_id", item.volumeId)
-                .put("file_name", targetName)
-                .put("document_code", item.documentCode)
-                .put("date", item.date)
-            if (key in existingNames) {
-                // Same filename is NOT content equivalence. Never overwrite it.
-                skipped++
-                record.put("status", "EXISTING_UNVERIFIED")
-                runStore.progress(completed, skipped,
-                    "Том ${index + 1}/${plan.size}: файл уже є, не замінюю.")
-                records.put(record)
-                notifyProgress(completed + skipped, plan.size, "Файл уже є · потрібна звірка")
-                return@forEachIndexed
-            }
-
-            checkpoint()
-            // #182: the folder copy comes from the one prepared file inside the app (⇧).
-            // An existing prepared volume is reused; a missing one is packed once.
-            val volume = selected[index]
-            val existingPrepared = PreparedShareStore.existingVolumeFile(applicationContext, project, volume)
-            val prepared: java.io.File =
-                if (existingPrepared != null) {
-                    record.put("prepared", "REUSED")
-                    existingPrepared
-                } else {
-                    runStore.progress(completed, skipped,
-                        "Том ${index + 1}/${plan.size}: пакую ${item.documentCode ?: targetName}")
-                    notifyProgress(completed + skipped, plan.size, "Пакую том ${index + 1}/${plan.size}")
-                    val created = prepareVolume(project, volume, index, plan.size, completed, skipped, record)
-                    record.put("prepared", "CREATED")
-                    created
-                }
-            val localSha = sha256OfFile(prepared)
-
-            checkpoint()
-            runStore.progress(completed, skipped,
-                "Том ${index + 1}/${plan.size}: копіюю в папку ${item.documentCode ?: targetName}")
-            notifyProgress(completed + skipped, plan.size, "Копіюю том ${index + 1}/${plan.size}")
-            // Unique .part: no old or user-provided canonical .rdpkg is touched.
-            val partName = "$targetName.${System.currentTimeMillis()}.$index.part"
-            require(partName.lowercase(java.util.Locale.ROOT) !in existingNames) {
-                "Тимчасовий файл уже існує."
-            }
-            val created = tree.createFile("application/octet-stream", partName)
-                ?: error("Не вдалося створити тимчасовий .rdpkg.")
-            var finalized = false
-            try {
-                copyToUri(prepared, created.uri)
-                checkpoint()
-                val sha = sha256OfUri(created.uri)
-                require(sha.equals(localSha, ignoreCase = true)) {
-                    "Контрольна сума скопійованого тому не збігається."
-                }
-                require(tree.findFile(targetName) == null) {
-                    "Під час експорту з'явився однойменний файл; заміну заборонено."
-                }
-                require(created.renameTo(targetName) && created.name == targetName) {
-                    "Не вдалося завершити створення файлу з точною назвою."
-                }
-                finalized = true
-                existingNames.add(key)
-                record.put("status", "EXPORTED_SHA256_VERIFIED")
-                    .put("sha256", sha)
-                    .put("size_bytes", created.length())
-                // #162 stage 2 (v0.5.123): everything a public catalog entry
-                // needs, so the catalog is built from this report + the exact
-                // Drive file ids, without downloading the packages again.
-                putCatalogIdentity(record, volume, prepared)
-                completed++
+        var currentIndex = -1
+        try {
+            plan.forEachIndexed { index, item ->
+                currentIndex = index
                 doneCounts = completed to skipped
-                records.put(record)
-                runStore.progress(completed, skipped, "Готово: $targetName")
-                notifyProgress(completed + skipped, plan.size, "Том ${index + 1}/${plan.size} готовий")
-            } finally {
-                if (!finalized) {
-                    // Delete only the new incomplete .part created by this run.
-                    runCatching { created.delete() }
+                checkpoint()
+                val targetName = item.fileName
+                val key = targetName.lowercase(java.util.Locale.ROOT)
+                val label = item.documentCode ?: targetName
+                val record = JSONObject()
+                    .put("volume_id", item.volumeId)
+                    .put("file_name", targetName)
+                    .put("document_code", item.documentCode)
+                    .put("date", item.date)
+
+                // #182: the folder copy comes from the one prepared file inside the app (⇧).
+                // An existing prepared volume is reused; a missing one is packed once.
+                val volume = selected[index]
+                val existingPrepared = PreparedShareStore.existingVolumeFile(applicationContext, project, volume)
+                val prepared: java.io.File =
+                    if (existingPrepared != null) {
+                        record.put("prepared", "REUSED")
+                        existingPrepared
+                    } else {
+                        runStore.progress(completed, skipped,
+                            "Том ${index + 1}/${plan.size}: пакую $label")
+                        notifyProgress(completed + skipped, plan.size, "Пакую том ${index + 1}/${plan.size}")
+                        val created = prepareVolume(project, volume, index, plan.size, completed, skipped, record)
+                        record.put("prepared", "CREATED")
+                        created
+                    }
+                val localSha = sha256OfFile(prepared)
+                val localSize = prepared.length()
+
+                if (key in existingNames) {
+                    // Same filename is NOT content equivalence. Never overwrite it.
+                    // v0.5.125: compare the existing file with the prepared one; only an
+                    // identical SHA-256 makes it a verified copy (e.g. after a failed run).
+                    checkpoint()
+                    runStore.progress(completed, skipped,
+                        "Том ${index + 1}/${plan.size}: файл уже є, звіряю $label")
+                    notifyProgress(completed + skipped, plan.size, "Звіряю том ${index + 1}/${plan.size}")
+                    val existing = tree.findFile(targetName)
+                    val read = existing?.let { file -> runCatching { readBack(file.uri) }.getOrNull() }
+                    when {
+                        read != null && read.sha256.equals(localSha, ignoreCase = true) &&
+                            read.size == localSize -> {
+                            record.put("status", "EXISTING_SHA256_VERIFIED")
+                                .put("sha256", read.sha256)
+                                .put("size_bytes", read.size)
+                            putCatalogIdentity(record, volume, prepared)
+                            completed++
+                            verifiedExisting++
+                            runStore.progress(completed, skipped, "Уже був, збігся: $targetName")
+                        }
+                        read != null -> {
+                            skipped++
+                            record.put("status", "EXISTING_SHA256_MISMATCH")
+                                .put("existing_size_bytes", read.size)
+                                .put("expected_size_bytes", localSize)
+                            runStore.progress(completed, skipped,
+                                "Том ${index + 1}/${plan.size}: файл уже є і відрізняється, не замінюю.")
+                        }
+                        else -> {
+                            skipped++
+                            record.put("status", "EXISTING_UNVERIFIED")
+                            runStore.progress(completed, skipped,
+                                "Том ${index + 1}/${plan.size}: файл уже є, не замінюю.")
+                        }
+                    }
+                    doneCounts = completed to skipped
+                    records.put(record)
+                    notifyProgress(completed + skipped, plan.size, "Том ${index + 1}/${plan.size} звірено")
+                    return@forEachIndexed
+                }
+
+                checkpoint()
+                runStore.progress(completed, skipped,
+                    "Том ${index + 1}/${plan.size}: копіюю в папку $label")
+                notifyProgress(completed + skipped, plan.size, "Копіюю том ${index + 1}/${plan.size}")
+                // Unique .part: no old or user-provided canonical .rdpkg is touched.
+                val partName = "$targetName.${System.currentTimeMillis()}.$index.part"
+                require(partName.lowercase(java.util.Locale.ROOT) !in existingNames) {
+                    "Тимчасовий файл уже існує."
+                }
+                val created = tree.createFile("application/octet-stream", partName)
+                    ?: error("Не вдалося створити тимчасовий .rdpkg.")
+                var finalized = false
+                try {
+                    copyToUri(prepared, created.uri)
+                    checkpoint()
+                    // v0.5.125: a cloud provider (Google Drive) may still be finishing the
+                    // write when the stream closes. Read back again after a pause before
+                    // calling the copy broken (phone QA 13.10: 8 volumes ok, 9th failed).
+                    val read = verifyCopy(created.uri, localSha, localSize) { attempt, total ->
+                        runStore.progress(completed, skipped,
+                            "Том ${index + 1}/${plan.size}: чекаю, поки папка допише $label ($attempt/$total)")
+                    }
+                    val sha = read.sha256
+                    require(sha.equals(localSha, ignoreCase = true) && read.size == localSize) {
+                        ExportCopyCheck.mismatchMessage(localSize, read.size, ExportCopyCheck.DELAYS_MS.size)
+                    }
+                    require(tree.findFile(targetName) == null) {
+                        "Під час експорту з'явився однойменний файл; заміну заборонено."
+                    }
+                    require(created.renameTo(targetName) && created.name == targetName) {
+                        "Не вдалося завершити створення файлу з точною назвою."
+                    }
+                    finalized = true
+                    existingNames.add(key)
+                    record.put("status", "EXPORTED_SHA256_VERIFIED")
+                        .put("sha256", sha)
+                        .put("size_bytes", read.size)
+                    // #162 stage 2 (v0.5.123): everything a public catalog entry
+                    // needs, so the catalog is built from this report + the exact
+                    // Drive file ids, without downloading the packages again.
+                    putCatalogIdentity(record, volume, prepared)
+                    completed++
+                    doneCounts = completed to skipped
+                    records.put(record)
+                    runStore.progress(completed, skipped, "Готово: $targetName")
+                    notifyProgress(completed + skipped, plan.size, "Том ${index + 1}/${plan.size} готовий")
+                } finally {
+                    if (!finalized) {
+                        // Delete only the new incomplete .part created by this run.
+                        runCatching { created.delete() }
+                    }
                 }
             }
+        } catch (error: Throwable) {
+            // v0.5.125: the report is written even when a run stops, so volumes
+            // already verified on the folder are not lost for the catalog.
+            val item = plan.getOrNull(currentIndex)
+            val cancelled = error is OperationCancelledException
+            if (item != null) {
+                records.put(JSONObject()
+                    .put("volume_id", item.volumeId)
+                    .put("file_name", item.fileName)
+                    .put("document_code", item.documentCode)
+                    .put("date", item.date)
+                    .put("status", if (cancelled) "CANCELLED" else "FAILED")
+                    .put("reason", error.message ?: error.javaClass.simpleName))
+            }
+            if (!dataSyncTimeout.isExpired) {
+                runCatching {
+                    writeReport(tree, project, plan.size, completed, skipped, records,
+                        if (cancelled) "cancelled" else "failed")
+                }
+            }
+            if (cancelled || item == null) throw error
+            throw IllegalStateException(
+                "Том ${currentIndex + 1}/${plan.size} ${item.documentCode ?: item.fileName}: " +
+                    (error.message ?: "помилка") +
+                    " Готові томи лишились у папці, звіт записано.",
+                error,
+            )
         }
         dataSyncTimeout.checkActive()
-        // This is NOT the public catalog: no Google Drive file IDs are invented.
+        writeReport(tree, project, plan.size, completed, skipped, records, "complete")
+        runStore.complete(completed, skipped,
+            ExportCopyCheck.summary(completed, plan.size, verifiedExisting, skipped))
+        getSystemService(NotificationManager::class.java).notify(
+            NOTIFICATION_ID, notification("Окремі .rdpkg готові: $completed / ${plan.size}", false),
+        )
+    }
+
+    /** This is NOT the public catalog: no Google Drive file IDs are invented. */
+    private fun writeReport(
+        tree: DocumentFile,
+        project: RenaultProject,
+        expected: Int,
+        completed: Int,
+        skipped: Int,
+        records: JSONArray,
+        result: String,
+    ) {
         val manifest = JSONObject()
             .put("format", "renault-docs-folder-export-v1")
             // v0.5.123: schema 2 adds package_id / vehicle_codes / document_type /
@@ -205,7 +294,9 @@ class ProjectFolderExportService : Service() {
                 .put("id", project.id)
                 .put("title", project.title)
                 .put("model", project.model))
-            .put("expected_volumes", plan.size)
+            // v0.5.125: complete | failed | cancelled — a stopped run still reports.
+            .put("result", result)
+            .put("expected_volumes", expected)
             .put("exported_volumes", completed)
             .put("existing_unverified", skipped)
             .put("ready_for_public_catalog", false)
@@ -224,11 +315,53 @@ class ProjectFolderExportService : Service() {
         } finally {
             if (!committedReport) runCatching { report.delete() }
         }
-        runStore.complete(completed, skipped,
-            "Експортовано: $completed із ${plan.size}. Уже існували (не перевірені): $skipped. Каталог не публікувався.")
-        getSystemService(NotificationManager::class.java).notify(
-            NOTIFICATION_ID, notification("Окремі .rdpkg готові: $completed / ${plan.size}", false),
+    }
+
+    private class ReadBack(val sha256: String, val size: Long)
+
+    /** Reads the written copy; retries with pauses while it differs (cloud folders). */
+    private fun verifyCopy(
+        uri: Uri,
+        expectedSha: String,
+        expectedSize: Long,
+        onWait: (attempt: Int, total: Int) -> Unit,
+    ): ReadBack {
+        var last: ReadBack? = null
+        var lastError: Throwable? = null
+        val delays = ExportCopyCheck.DELAYS_MS
+        for ((attempt, delay) in delays.withIndex()) {
+            if (delay > 0) {
+                onWait(attempt + 1, delays.size)
+                sleepWithCheckpoints(delay)
+            }
+            checkpoint()
+            val read = runCatching { readBack(uri) }
+            read.exceptionOrNull()?.let {
+                if (it is OperationCancelledException || dataSyncTimeout.isExpired) throw it
+            }
+            val value = read.getOrNull()
+            if (value == null) {
+                lastError = read.exceptionOrNull()
+                continue
+            }
+            last = value
+            if (value.size == expectedSize && value.sha256.equals(expectedSha, ignoreCase = true)) {
+                return value
+            }
+        }
+        return last ?: throw IllegalStateException(
+            "Не вдалося прочитати створений .rdpkg для перевірки.", lastError,
         )
+    }
+
+    private fun sleepWithCheckpoints(totalMs: Long) {
+        var left = totalMs
+        while (left > 0) {
+            checkpoint()
+            val step = minOf(left, 500L)
+            Thread.sleep(step)
+            left -= step
+        }
     }
 
     /** Between files and inside long loops: timeout first, then the owner's «Скасувати». */
@@ -327,19 +460,23 @@ class ProjectFolderExportService : Service() {
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
-    private fun sha256OfUri(uri: Uri): String {
+    private fun readBack(uri: Uri): ReadBack {
         val digest = MessageDigest.getInstance("SHA-256")
         val buffer = ByteArray(1024 * 1024)
+        var total = 0L
         contentResolver.openInputStream(uri).use { input ->
             requireNotNull(input) { "Не вдалося прочитати створений .rdpkg для перевірки." }
             while (true) {
                 dataSyncTimeout.checkActive()
                 val size = input.read(buffer)
                 if (size < 0) break
-                if (size > 0) digest.update(buffer, 0, size)
+                if (size > 0) {
+                    digest.update(buffer, 0, size)
+                    total += size
+                }
             }
         }
-        return digest.digest().joinToString("") { "%02x".format(it) }
+        return ReadBack(digest.digest().joinToString("") { "%02x".format(it) }, total)
     }
 
     private fun notifyProgress(current: Int, total: Int, message: String) {

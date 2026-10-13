@@ -13,7 +13,8 @@ Output:
 Rules (owner, #162): one volume = one .rdpkg on Drive; a person downloads one or
 a few. A volume enters the catalog only when
   * the phone verified the copy (status EXPORTED_SHA256_VERIFIED, sha256 read
-    back through the Drive provider),
+    back through the Drive provider; v0.5.125: or EXISTING_SHA256_VERIFIED — the
+    file was already in the folder from an earlier run and its sha256 matched),
   * exactly ONE Drive file has that exact name and the same size,
   * its package id / file name do not clash with a different published volume.
 A same file name is never proof by itself (#143). Distinct NT codes stay
@@ -33,6 +34,8 @@ from typing import Any
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 VERIFIED = "EXPORTED_SHA256_VERIFIED"
+# v0.5.125: a file left by an earlier (stopped) run, re-read and matched by sha256.
+VERIFIED_STATUSES = (VERIFIED, "EXISTING_SHA256_VERIFIED")
 
 
 class Finding(dict):
@@ -105,7 +108,7 @@ def plan_additions(
     for volume in report.get("volumes") or []:
         name = str(volume.get("file_name") or "")
         status = str(volume.get("status") or "")
-        if status != VERIFIED:
+        if status not in VERIFIED_STATUSES:
             findings.append(_finding("BLOCKED", name, "телефон не перевірив копію (" + status + ")"))
             continue
 
@@ -122,11 +125,15 @@ def plan_additions(
             problems.append("немає sha256")
         if not isinstance(size, int) or size <= 0:
             problems.append("немає size_bytes")
-        if not code or not DATE.match(date):
-            problems.append("немає NT-коду або дати")
+        # Some genuine volumes have no date (Megane II NT8206A, NT8220A, …); the app
+        # catalog accepts date = null. A date that IS given must be well-formed.
+        if not code:
+            problems.append("немає NT-коду")
+        if date and not DATE.match(date):
+            problems.append("неправильна дата")
         if not name.endswith(".rdpkg") or "/" in name or "\\" in name:
             problems.append("неправильна назва файлу")
-        elif code and (code not in name or date not in name):
+        elif code and (code not in name or (date and date not in name)):
             problems.append("назва файлу не відповідає NT-коду/даті")
         if problems:
             findings.append(_finding("BLOCKED", name, "; ".join(problems)))
@@ -173,7 +180,7 @@ def plan_additions(
         additions.append({
             "id": package_id,
             "document_code": code,
-            "date": date,
+            "date": date or None,
             "vehicle_codes": [str(c) for c in (volume.get("vehicle_codes") or [])],
             "document_type": volume.get("document_type"),
             "document_version": volume.get("document_version"),
