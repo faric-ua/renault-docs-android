@@ -1,0 +1,27 @@
+{
+  "versionName": "0.5.123",
+  "versionCode": 139,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/162-stage2-catalog",
+  "issues": [
+    162,
+    147
+  ],
+  "scope": "#162 stage 2: per-volume export report schema 2 (package_id, vehicle codes, type/version/region) for building the public catalog; catalog download verifies size + sha256 before install; tools/catalog_from_phone_export.py. Includes v0.5.122.",
+  "sourceBase": "v0.5.122/build138",
+  "phoneQa": "PENDING",
+  "pr_number": 257,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 790,
+  "signed_apk": "PASS",
+  "source_sha": "847510d271038b39f91a6457239a925c0f35c810",
+  "signed_run_id": 38431367744,
+  "signed_run_number": 187,
+  "signed_android_apk_run": 187,
+  "artifact_id": 11831975381,
+  "artifact_name": "Renault-Docs-v0.5.123-Debug",
+  "artifact_digest": "sha256:101a53396dc3aaa7e76d69c6eb8d453a5afde307c6e0d41c51387853db9dfc64",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Megane II ⋮ → «Експортувати томи окремо» → «Вибрати томи»: all except NT8340A, NT8341A, NT8342A, NT8344, NT8393 → folder «Renault Docs Projects / Megane II — нові томи 2026-10-13» on Google Drive."
+}
