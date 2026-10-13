@@ -47,6 +47,12 @@ class ProjectExportWizardState(
         if (selectAll) selected.addAll(planVolumeIds)
     }
 
+    /** v0.5.124: tick exactly the volumes that are not in the public catalog yet. */
+    fun selectOnly(planVolumeIds: List<String>, keep: (String) -> Boolean) {
+        selected.clear()
+        selected.addAll(planVolumeIds.filter(keep))
+    }
+
     fun allSelected(planVolumeIds: List<String>): Boolean =
         planVolumeIds.isNotEmpty() && selected.containsAll(planVolumeIds) &&
             selected.size == planVolumeIds.toSet().size
