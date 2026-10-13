@@ -856,6 +856,8 @@ class DriveCatalogActivity : Activity() {
                                     volume.driveFileId,
                                 sizeBytes =
                                     volume.sizeBytes,
+                                sha256 =
+                                    volume.sha256,
                             )
                         }
                 }

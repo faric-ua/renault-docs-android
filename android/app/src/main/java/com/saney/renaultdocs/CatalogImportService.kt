@@ -217,6 +217,8 @@ class CatalogImportService : Service() {
                         destination,
                     expectedBytes =
                         item.sizeBytes,
+                    expectedSha256 =
+                        item.sha256,
                 ) {
                     done,
                     total ->
