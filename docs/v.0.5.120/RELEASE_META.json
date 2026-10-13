@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.120",
+  "versionCode": 136,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/companion-navigator-v0.5.120",
+  "issues": [
+    147
+  ],
+  "scope": "Owner request 2026-10-13 01:30/02:45: lower window «Документація поруч» becomes a volume navigator (docs → ← volume with search and sections → section tabs → any document opens below, top keeps its own; no about:blank). PDF toolbar smaller (0.72), frame ratio from top.visualViewport.scale. Includes v0.5.119.",
+  "sourceBase": "v0.5.119/build135",
+  "phoneQa": "PENDING",
+  "pr_number": 241,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 772,
+  "signed_apk": "PASS",
+  "source_sha": "45c4706fff1c2d1aac8044a4726caedc67097144",
+  "signed_run_id": 38324758065,
+  "signed_run_number": 184,
+  "signed_android_apk_run": 184,
+  "artifact_id": 11780357060,
+  "artifact_name": "Renault-Docs-v0.5.120-Debug",
+  "artifact_digest": "sha256:cd62823b2a52a75db313869d9fe6771d719de5675e54325dd68d7a557ee6087c",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Open a scheme → ◫ (Документація поруч): lower window shows «Документація тому»; ← goes to the volume (search + sections); 118 → Розʼєм → a connector → «Опис контактів» opens below while the top scheme stays; ← steps back. PDF toolbar smaller, one row."
+}
