@@ -86,7 +86,8 @@ internal object CompletedNotificationHistory {
 
         val manager = app.getSystemService(NotificationManager::class.java)
         ensureChannel(manager)
-        manager.notify(notificationId(record), buildChild(app, record))
+        // v0.5.126: a NEW result sounds (OperationAlert); a restored one stays silent.
+        manager.notify(notificationId(record), buildChild(app, record, alert = true))
         manager.notify(
             CompletedNotificationSlotPolicy.SUMMARY_ID,
             buildSummary(app, seq),
@@ -217,7 +218,11 @@ internal object CompletedNotificationHistory {
     private fun notificationId(record: CompletedNotificationRecord): Int =
         CompletedNotificationSlotPolicy.notificationId(record.sequence)
 
-    private fun buildChild(context: Context, record: CompletedNotificationRecord): Notification {
+    private fun buildChild(
+        context: Context,
+        record: CompletedNotificationRecord,
+        alert: Boolean = false,
+    ): Notification {
         val id = notificationId(record)
         val openIntent = if (!record.projectId.isNullOrBlank()) {
             ProjectActivity.intent(context, record.projectId)
@@ -255,6 +260,7 @@ internal object CompletedNotificationHistory {
             .setAutoCancel(true)
             .setOngoing(false)
             .setOnlyAlertOnce(true)
+            .let { if (alert) OperationAlert.terminal(context, it, record.title) else it }
             .build()
     }
 

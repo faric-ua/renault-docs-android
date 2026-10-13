@@ -170,6 +170,7 @@ class RdpkgExportService : Service() {
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
+            .let { OperationAlert.alertIfFinal(this, it, ongoing, text) }
             .apply {
                 if (ongoing) {
                     val resolvedTotal =

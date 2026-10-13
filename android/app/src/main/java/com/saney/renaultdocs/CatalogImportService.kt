@@ -439,6 +439,7 @@ class CatalogImportService : Service() {
             .setOngoing(
                 ongoing,
             )
+            .let { OperationAlert.alertIfFinal(this, it, ongoing, text) }
             .apply {
                 if (
                     ongoing

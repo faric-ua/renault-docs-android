@@ -499,6 +499,7 @@ class ProjectFolderExportService : Service() {
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
+            .let { OperationAlert.alertIfFinal(this, it, ongoing, message) }
             .apply {
                 if (ongoing) setProgress(total, current.coerceAtMost(total), total == 0)
             }
