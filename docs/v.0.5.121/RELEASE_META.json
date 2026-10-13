@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.121",
+  "versionCode": 137,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.121-toolbar-plus17",
+  "issues": [
+    147
+  ],
+  "scope": "Owner phone QA 2026-10-13 03:21: lower-window navigator PASS; PDF toolbar too small at 0.72 → base 0.84 (+~17%, owner asked 15–20%). Includes v0.5.120.",
+  "sourceBase": "v0.5.120/build136",
+  "phoneQa": "PENDING",
+  "pr_number": 243,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 774,
+  "signed_apk": "PASS",
+  "source_sha": "9f1a5ecd37902a3e65986f6bf291d8ef9894a138",
+  "signed_run_id": 38327081071,
+  "signed_run_number": 185,
+  "signed_android_apk_run": 185,
+  "artifact_id": 11781064370,
+  "artifact_name": "Renault-Docs-v0.5.121-Debug",
+  "artifact_digest": "sha256:25148e24afc2c36eae7bc28e4c74cd3d443a44316ef7bf2dcbfcd325c8129a7b",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Open a PDF scheme: toolbar buttons ~17% bigger than v0.5.120; also in «Схема + піни» and in the lower window."
+}
