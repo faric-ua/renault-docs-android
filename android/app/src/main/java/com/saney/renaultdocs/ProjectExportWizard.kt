@@ -288,6 +288,30 @@ class ProjectExportWizard(
         scroll.post { scroll.scrollTo(0, restoreY) }
     }
 
+    private var labelRequestedFor: String? = null
+
+    /**
+     * #261: folder name (and the app / account owning it). A cloud folder's name is
+     * asked from its app on a background thread; the step re-draws when it arrives.
+     */
+    private fun resolvedFolderLabel(): String? {
+        val uri = state.folderUri ?: return null
+        SafFolderLabel.cached(uri)?.let { return it }
+        if (labelRequestedFor != uri) {
+            labelRequestedFor = uri
+            val appContext = activity.applicationContext
+            Thread {
+                val label = SafFolderLabel.resolve(appContext, uri)
+                if (label != null) {
+                    activity.runOnUiThread {
+                        if (::dialog.isInitialized && dialog.isShowing && state.folderUri == uri) render()
+                    }
+                }
+            }.start()
+        }
+        return SafDisplayPath.tree(uri)
+    }
+
     private fun renderFolder() {
         val content = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
@@ -297,7 +321,7 @@ class ProjectExportWizard(
             Ui.textView(activity, "Куди зберегти ${volumeCountLabel(state.selectedCount)}?", 17f, Ui.text),
             matchWrap(),
         )
-        val folderLabel = SafDisplayPath.tree(state.folderUri)
+        val folderLabel = resolvedFolderLabel()
         val card = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), dp(12), dp(14), dp(12))
@@ -363,7 +387,7 @@ class ProjectExportWizard(
         content.addView(
             Ui.textView(
                 activity,
-                "Папка: " + (SafDisplayPath.tree(state.folderUri) ?: "вибрана"),
+                "Папка: " + (resolvedFolderLabel() ?: "вибрана"),
                 15f,
                 Ui.text,
             ).apply { setPadding(0, dp(12), 0, 0) },
