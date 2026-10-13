@@ -178,6 +178,10 @@ class ProjectFolderExportService : Service() {
                 record.put("status", "EXPORTED_SHA256_VERIFIED")
                     .put("sha256", sha)
                     .put("size_bytes", created.length())
+                // #162 stage 2 (v0.5.123): everything a public catalog entry
+                // needs, so the catalog is built from this report + the exact
+                // Drive file ids, without downloading the packages again.
+                putCatalogIdentity(record, volume, prepared)
                 completed++
                 doneCounts = completed to skipped
                 records.put(record)
@@ -194,7 +198,9 @@ class ProjectFolderExportService : Service() {
         // This is NOT the public catalog: no Google Drive file IDs are invented.
         val manifest = JSONObject()
             .put("format", "renault-docs-folder-export-v1")
-            .put("schema_version", 1)
+            // v0.5.123: schema 2 adds package_id / vehicle_codes / document_type /
+            // document_version / region per exported volume (#162 stage 2).
+            .put("schema_version", 2)
             .put("project", JSONObject()
                 .put("id", project.id)
                 .put("title", project.title)
@@ -281,6 +287,30 @@ class ProjectFolderExportService : Service() {
                 }
             }
         }
+    }
+
+    /** #162 stage 2: package id from the package itself + identity metadata. */
+    private fun putCatalogIdentity(
+        record: JSONObject,
+        volume: ProjectVolumeRecord,
+        prepared: java.io.File,
+    ) {
+        val packageId =
+            runCatching {
+                java.util.zip.ZipFile(prepared).use { zip ->
+                    val entry = zip.getEntry("rdpkg.json") ?: return@use null
+                    if (entry.size > 1024 * 1024) return@use null
+                    JSONObject(
+                        zip.getInputStream(entry).use { it.readBytes().toString(Charsets.UTF_8) },
+                    ).optString("package_id").trim().takeIf { it.isNotBlank() }
+                }
+            }.getOrNull()
+        val metadata = RdpkgExporter.resolvedMetadata(volume)
+        record.put("package_id", packageId ?: JSONObject.NULL)
+            .put("vehicle_codes", JSONArray(metadata.vehicleCodes))
+            .put("document_type", metadata.documentType ?: JSONObject.NULL)
+            .put("document_version", metadata.documentVersion ?: JSONObject.NULL)
+            .put("region", metadata.region ?: JSONObject.NULL)
     }
 
     private fun sha256OfFile(file: java.io.File): String {

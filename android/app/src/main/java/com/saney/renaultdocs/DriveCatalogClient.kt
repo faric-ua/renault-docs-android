@@ -38,8 +38,14 @@ object DriveCatalogClient {
         driveFileId: String,
         destination: File,
         expectedBytes: Long,
+        expectedSha256: String? = null,
         onProgress: (Long, Long) -> Unit,
     ) {
+        // #162 stage 2 (v0.5.123): the exact bytes the catalog promises.
+        val digest =
+            java.security.MessageDigest.getInstance(
+                "SHA-256",
+            )
         destination.parentFile?.mkdirs()
         val temporary =
             File(
@@ -110,6 +116,11 @@ object DriveCatalogClient {
                             0,
                             read,
                         )
+                        digest.update(
+                            buffer,
+                            0,
+                            read,
+                        )
                         done +=
                             read
                         onProgress(
@@ -128,6 +139,31 @@ object DriveCatalogClient {
                 temporary.length() > 0L
         ) {
             "Завантажений .rdpkg порожній."
+        }
+
+        val actualSha =
+            digest.digest().joinToString("") {
+                "%02x".format(it)
+            }
+        val sizeOk =
+            expectedBytes <= 0L ||
+                temporary.length() == expectedBytes
+        val shaOk =
+            expectedSha256.isNullOrBlank() ||
+                actualSha.equals(
+                    expectedSha256.trim(),
+                    ignoreCase = true,
+                )
+        if (!sizeOk || !shaOk) {
+            // Only our own temporary download in the app cache is removed.
+            temporary.delete()
+            error(
+                if (!sizeOk) {
+                    "Розмір завантаженого .rdpkg не збігається з каталогом — том не встановлено."
+                } else {
+                    "Контрольна сума .rdpkg не збігається з каталогом — том не встановлено."
+                }
+            )
         }
 
         destination.delete()

@@ -21,6 +21,8 @@ data class CatalogImportItem(
     val fileName: String,
     val driveFileId: String,
     val sizeBytes: Long,
+    // #162 stage 2 (v0.5.123): catalog sha256 — the download is checked against it.
+    val sha256: String? = null,
 )
 
 data class CatalogImportRunState(
@@ -263,6 +265,10 @@ class CatalogImportRunStore(
                         "sizeBytes",
                         item.sizeBytes,
                     )
+                    .put(
+                        "sha256",
+                        item.sha256 ?: JSONObject.NULL,
+                    )
             )
         }
 
@@ -317,6 +323,14 @@ class CatalogImportRunStore(
                                     "sizeBytes",
                                     0L,
                                 ),
+                            sha256 =
+                                item.optString(
+                                    "sha256",
+                                )
+                                    .trim()
+                                    .takeIf {
+                                        it.length == 64
+                                    },
                         ),
                     )
                 }

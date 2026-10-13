@@ -35,3 +35,16 @@ The owner verified **22 tomes** on v0.5.99 after adding a new volume to the prev
 **Separate unresolved safety issue #173:** before/after v0.5.99, the owner reported previously prepared 21-volume `.rdproject` disappeared from menu after adding a 22nd tome. Code has a likely destructive path `upsertVolume → invalidatePreparedProject → deleteProject`; do not assert device file deletion without read-only check. **Do not repack, silently delete, rename or overwrite historical .rdproject.** Verified external Drive archive copy remains. This Stage 1c only changes the independent `.rdpkg` export selection, NOT the legacy `.rdproject` lifecycle. Fix #173 separately with explicit historical snapshot retention and QA.
 
 **Phone acceptance pending:** install the exact stable-signed build over existing without clear/uninstall, check 22 tomes preserved, select any 3 non-contiguous NTs in the multi-choice list, rotate and verify the same 3 checks, cancel/back no write, then export to a NEW EMPTY PRIVATE SAF test folder. Verify 3 distinct `.rdpkg` files and one small JSON report with `expected_volumes=3`; no 19 unselected packages, no published Drive catalog. Never test in the populated Drive publication folder.
+
+
+## Stage 2 (v0.5.123, 2026-10-13) — catalog from the phone export report
+
+**Owner decision 2026-10-13 15:39 / 19:27:** publish all 22 Megane II volumes. «На Google диску кожен том окремо; людина тягне один або два, а не всі 22. Хто хоче всі офлайн — пакує і передає з телефона на телефон» (that is the optional `.rdproject`).
+
+Flow:
+1. Phone (v0.5.123+): Home → Megane II ⋮ → «Експортувати томи окремо» → «Вибрати томи» → the volumes not yet in the catalog → Drive folder `Renault Docs Projects / Megane II — нові томи 2026-10-13` (created empty by Claude, inside the public folder, so files inherit link access). The app reads every copy back through the Drive provider (SHA-256) and writes the report JSON, now **schema 2** with `package_id` (from the package's own `rdpkg.json`), `vehicle_codes`, `document_type`, `document_version`, `region`.
+2. Claude: Drive folder listing (exact ids, names, sizes) + the report → `tools/catalog_from_phone_export.py`. A volume is added only if the phone verified it, exactly one Drive file has that name and the same size, and its package id / name do not clash with a different published volume. Same name twice → `REVIEW_REQUIRED`; anything else wrong → `BLOCKED`; then no output at all. Nothing is removed from the catalog; the current catalog file is never modified — a new versioned file is written.
+3. Owner says «так» → Claude uploads the new catalog as a **new** Drive file and releases an app version pointing to it (the connector cannot replace the content of an existing Drive file; the old catalog stays as history).
+4. Download side (v0.5.123): `DriveCatalogClient.downloadPackage` now checks size and the catalog `sha256` of every downloaded `.rdpkg` before installing; on mismatch only the app's own temporary download is removed and the volume is not installed.
+
+Limits: the connector shows no Drive checksum, so the Drive side is checked by exact id + name + size; the content check is the phone's read-back SHA-256 at export time and the app's SHA-256 check at every download.
