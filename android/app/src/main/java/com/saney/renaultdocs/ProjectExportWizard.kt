@@ -36,6 +36,9 @@ class ProjectExportWizard(
         private set
 
     private val planIds = plan.map { it.volumeId }
+    // v0.5.124: volumes already in the public catalog (filled by «Лише нові для каталогу»).
+    private var publishedIds: Set<String> = emptySet()
+    private var catalogMessage: String = ""
     private lateinit var stepLabel: TextView
     private lateinit var body: FrameLayout
     private lateinit var footer: LinearLayout
@@ -148,8 +151,28 @@ class ProjectExportWizard(
 
         val next = footerButton("Далі", primary = true) { goNext() }
         val rows = mutableListOf<Pair<CheckBox, View>>()
+        val notes = mutableListOf<TextView>()
+        // v0.5.124 (owner): one tap — only the volumes not yet in «Готові проєкти».
+        val onlyNew = Ui.textView(activity, "", 15f, Ui.accent).apply {
+            gravity = Gravity.CENTER
+            isClickable = true
+            isFocusable = true
+            minHeight = dp(44)
+            setPadding(dp(12), dp(6), dp(12), dp(6))
+            background = Ui.roundedBackground(activity, Ui.surfaceAlt, Ui.accent, 10)
+        }
+        val catalogStatus = Ui.textView(activity, "", 13f, Ui.muted).apply {
+            setPadding(dp(16), dp(4), dp(16), 0)
+        }
 
         fun refresh() {
+            onlyNew.text = "Вибрати лише нові для каталогу"
+            catalogStatus.text = catalogMessage
+            catalogStatus.visibility = if (catalogMessage.isBlank()) View.GONE else View.VISIBLE
+            notes.forEachIndexed { index, note ->
+                val published = planIds[index] in publishedIds
+                note.visibility = if (published) View.VISIBLE else View.GONE
+            }
             counter.text = "Вибрано ${state.selectedCount} із ${plan.size}"
             toggleAll.text = if (state.allSelected(planIds)) "Очистити" else "Вибрати всі"
             setEnabled(next, state.canGoNext())
@@ -185,6 +208,11 @@ class ProjectExportWizard(
                 },
             )
             texts.addView(Ui.textView(activity, item.fileName, 13f, Ui.muted))
+            val note = Ui.textView(activity, "уже в каталозі «Готові проєкти»", 13f, Ui.success).apply {
+                visibility = View.GONE
+            }
+            texts.addView(note)
+            notes += note
             row.addView(box, LinearLayout.LayoutParams(dp(44), dp(44)))
             row.addView(texts, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginStart = dp(6)
@@ -200,6 +228,41 @@ class ProjectExportWizard(
             state.toggleAll(planIds)
             refresh()
         }
+        onlyNew.setOnClickListener {
+            catalogMessage = "Перевіряю каталог «Готові проєкти»…"
+            refresh()
+            Thread {
+                val result = runCatching {
+                    CatalogPublishedFilter.publishedVolumeIds(
+                        plan,
+                        CatalogPublishedFilter.catalogVolumesFor(
+                            DriveCatalogClient.loadCatalog(),
+                            project.id,
+                        ),
+                    )
+                }
+                activity.runOnUiThread {
+                    if (!::body.isInitialized || state.step != ProjectExportWizardState.Step.VOLUMES) {
+                        return@runOnUiThread
+                    }
+                    result
+                        .onSuccess { published ->
+                            publishedIds = published
+                            state.selectOnly(planIds) { it !in published }
+                            catalogMessage =
+                                "У каталозі вже є ${published.size} із ${plan.size}. " +
+                                    "Вибрано нові: ${state.selectedCount}."
+                        }
+                        .onFailure {
+                            catalogMessage =
+                                "Каталог не завантажився: " +
+                                    (it.message ?: "немає інтернету?") +
+                                    " Вибір не змінено."
+                        }
+                    refresh()
+                }
+            }.start()
+        }
 
         val scroll = ScrollView(activity).apply {
             isFillViewport = false
@@ -208,6 +271,15 @@ class ProjectExportWizard(
         }
         val column = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
         column.addView(summary, matchWrap())
+        column.addView(
+            onlyNew,
+            matchWrap().apply {
+                marginStart = dp(16)
+                marginEnd = dp(16)
+                topMargin = dp(4)
+            },
+        )
+        column.addView(catalogStatus, matchWrap())
         column.addView(scroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
         body.addView(column, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT))
         footer.addView(next, buttonParams())
