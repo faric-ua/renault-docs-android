@@ -33,53 +33,131 @@ object PreparedShareStore {
             ),
         )
 
+    /**
+     * #173 (v0.5.122): a prepared .rdproject is an unchanging snapshot of the
+     * project at the moment it was made. It is found by WHO it belongs to
+     * (project id inside its rdproject.json), not by the file name — the name
+     * is built from the current volumes and drifts when a volume is added or
+     * its metadata is repaired, which hid (and before v0.5.122 deleted) the
+     * owner's 21-volume Megane II file after the 22nd volume was added.
+     *
+     * Looking up never renames, rewrites or deletes anything.
+     */
+    data class ProjectSnapshot(
+        val file: File,
+        /** Volume ids recorded inside the snapshot; null if it could not be read. */
+        val volumeIds: Set<String>?,
+    ) {
+        val volumeCount: Int?
+            get() = volumeIds?.size
+
+        /** false = made for an older set of volumes (one was added, removed or moved since). */
+        fun matches(
+            volumes: List<ProjectVolumeRecord>,
+        ): Boolean =
+            volumeIds == null ||
+                volumeIds ==
+                volumes.map { it.id }.toSet()
+    }
+
+    private data class ManifestInfo(
+        val projectId: String?,
+        val volumeIds: Set<String>?,
+    )
+
+    private val manifestCache =
+        java.util.concurrent.ConcurrentHashMap<String, Pair<String, ManifestInfo>>()
+
+    private const val MAX_MANIFEST_BYTES =
+        4 * 1024 * 1024
+
+    fun projectSnapshots(
+        context: Context,
+        project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
+    ): List<ProjectSnapshot> =
+        projectSnapshotsIn(
+            directory(
+                context,
+                PROJECTS,
+            ),
+            project,
+            volumes,
+        )
+
+    internal fun projectSnapshotsIn(
+        projectsDirectory: File,
+        project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
+    ): List<ProjectSnapshot> {
+        val canonicalName =
+            RdprojectExporter.defaultFileName(
+                project,
+                volumes,
+            )
+        val legacyName =
+            legacyProjectFileName(
+                project,
+            )
+
+        return projectsDirectory
+            .listFiles()
+            .orEmpty()
+            .filter {
+                it.isFile &&
+                    it.name.endsWith(
+                        ".rdproject",
+                        ignoreCase = true,
+                    )
+            }
+            .mapNotNull { file ->
+                val info =
+                    manifestInfo(
+                        file,
+                    )
+                val belongs =
+                    if (info.projectId != null) {
+                        info.projectId == project.id
+                    } else {
+                        // unreadable manifest: fall back to the old name rules
+                        file.name == canonicalName ||
+                            file.name == legacyName
+                    }
+                if (belongs) {
+                    ProjectSnapshot(
+                        file = file,
+                        volumeIds = info.volumeIds,
+                    )
+                } else {
+                    null
+                }
+            }
+            .sortedByDescending {
+                it.file.lastModified()
+            }
+    }
+
+    fun projectSnapshot(
+        context: Context,
+        project: RenaultProject,
+        volumes: List<ProjectVolumeRecord>,
+    ): ProjectSnapshot? =
+        projectSnapshots(
+            context,
+            project,
+            volumes,
+        ).firstOrNull()
+
     fun existingProjectFile(
         context: Context,
         project: RenaultProject,
         volumes: List<ProjectVolumeRecord>,
-    ): File? {
-        val canonical =
-            projectFile(
-                context,
-                project,
-                volumes,
-            )
-
-        if (
-            canonical.isFile
-        ) {
-            return canonical
-        }
-
-        val legacy =
-            File(
-                directory(
-                    context,
-                    PROJECTS,
-                ),
-                legacyProjectFileName(
-                    project,
-                ),
-            )
-
-        if (
-            !legacy.isFile
-        ) {
-            return null
-        }
-
-        if (
-            legacy.absolutePath !=
-                canonical.absolutePath &&
-            legacy.renameTo(
-                canonical,
-            )
-        ) {
-            return canonical
-        }
-
-        return legacy
-    }
+    ): File? =
+        projectSnapshot(
+            context,
+            project,
+            volumes,
+        )?.file
 
     fun hasProjectFile(
         context: Context,
@@ -92,6 +170,86 @@ object PreparedShareStore {
             volumes,
         ) !=
             null
+
+    /** Read-only: the small rdproject.json inside the ZIP (central directory + one entry). */
+    private fun manifestInfo(
+        file: File,
+    ): ManifestInfo {
+        val key =
+            file.length().toString() +
+                ":" +
+                file.lastModified()
+        manifestCache[file.absolutePath]
+            ?.takeIf {
+                it.first == key
+            }
+            ?.let {
+                return it.second
+            }
+
+        val info =
+            runCatching {
+                java.util.zip.ZipFile(file).use { zip ->
+                    val entry =
+                        zip.getEntry(
+                            "rdproject.json",
+                        )
+                            ?: return@use null
+                    if (
+                        entry.size > MAX_MANIFEST_BYTES
+                    ) {
+                        return@use null
+                    }
+                    val text =
+                        zip.getInputStream(entry).use {
+                            it.readBytes().toString(Charsets.UTF_8)
+                        }
+                    parseManifest(text)
+                }
+            }.getOrNull()
+                ?: ManifestInfo(
+                    projectId = null,
+                    volumeIds = null,
+                )
+
+        manifestCache[file.absolutePath] =
+            key to info
+        return info
+    }
+
+    internal fun parseManifestForTest(
+        text: String,
+    ): Pair<String?, Set<String>?> =
+        parseManifest(text).let {
+            it.projectId to it.volumeIds
+        }
+
+    private fun parseManifest(
+        text: String,
+    ): ManifestInfo {
+        val root =
+            org.json.JSONObject(text)
+        val projectId =
+            root.optJSONObject("project")
+                ?.optString("id")
+                ?.takeIf { it.isNotBlank() }
+        val volumes =
+            root.optJSONArray("volumes")
+        val ids =
+            volumes?.let { array ->
+                (0 until array.length())
+                    .mapNotNull {
+                        array.optJSONObject(it)
+                            ?.optString("id")
+                            ?.takeIf { id -> id.isNotBlank() }
+                    }
+                    .toSet()
+            }
+        return ManifestInfo(
+            projectId = projectId,
+            volumeIds = ids,
+        )
+    }
 
     fun volumeFile(
         context: Context,
@@ -167,38 +325,20 @@ object PreparedShareStore {
         ) !=
             null
 
-    fun deleteProject(
-        context: Context,
-        project: RenaultProject,
-        volumes: List<ProjectVolumeRecord>,
+    /**
+     * Explicit user action only («Видалити підготовлений .rdproject» after a
+     * confirmation). Deletes exactly the snapshot shown to the user.
+     * #173: never called when volumes are added, removed or moved.
+     */
+    fun deleteProjectSnapshot(
+        file: File,
     ): Boolean {
-        val canonical =
-            projectFile(
-                context,
-                project,
-                volumes,
-            )
-        val legacy =
-            File(
-                directory(
-                    context,
-                    PROJECTS,
-                ),
-                legacyProjectFileName(
-                    project,
-                ),
-            )
-
-        return listOf(
-            canonical,
-            legacy,
+        manifestCache.remove(
+            file.absolutePath,
         )
-            .distinctBy {
-                it.absolutePath
-            }
-            .all(
-                ::deleteIfPresent,
-            )
+        return deleteIfPresent(
+            file,
+        )
     }
 
     fun deleteVolume(

@@ -463,7 +463,9 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
 
         self.assertNotIn(".setItems(", show_actions)
         self.assertIn('"Експортувати томи окремо (.rdpkg)"', show_actions)
-        self.assertIn('"Поділитися проєктом одним файлом (.rdproject) · офлайн"', show_actions)
+        # v0.5.122 (#173): the share title comes from preparedShareTitle().
+        self.assertIn("preparedShareTitle(", show_actions)
+        self.assertIn('"Поділитися проєктом одним файлом (.rdproject) · офлайн"', controller)
         self.assertIn('"Видалити проєкт"', show_actions)
         self.assertIn('"Скасувати"', show_actions)
         self.assertIn("role = DialogRole.CHOICE", show_actions)

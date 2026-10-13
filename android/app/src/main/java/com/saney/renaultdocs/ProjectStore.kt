@@ -167,31 +167,13 @@ class ProjectStore(
                 },
             )
 
-    private fun invalidatePreparedProject(
-        projectId: String,
-    ) {
-        val project =
-            loadProjects()
-                .firstOrNull {
-                    it.id ==
-                        projectId
-                }
-                ?: return
-        val currentVolumes =
-            volumes(
-                projectId,
-            )
-
-        if (
-            currentVolumes.isNotEmpty()
-        ) {
-            PreparedShareStore.deleteProject(
-                appContext,
-                project,
-                currentVolumes,
-            )
-        }
-    }
+    // #173 (v0.5.122): there used to be invalidatePreparedProject() here,
+    // called from upsertVolume / removeVolume / moveVolume / removeProject.
+    // It physically deleted the prepared .rdproject whenever a volume was
+    // added (or its metadata repaired) — the owner's 21-volume Megane II file
+    // vanished after the 22nd volume. A prepared .rdproject is now an
+    // unchanging snapshot: it stays until the owner deletes it explicitly,
+    // and the menu says when it was made for an older set of volumes.
 
     fun upsertVolume(
         projectId: String,
@@ -205,10 +187,6 @@ class ProjectStore(
             "Проєкт не знайдено: " +
                 projectId
         }
-
-        invalidatePreparedProject(
-            projectId,
-        )
 
         val updated =
             loadVolumes()
@@ -251,9 +229,6 @@ class ProjectStore(
     fun removeProject(
         projectId: String,
     ) {
-        invalidatePreparedProject(
-            projectId,
-        )
 
         saveProjects(
             loadProjects()
@@ -275,9 +250,6 @@ class ProjectStore(
         projectId: String,
         volumeId: String,
     ) {
-        invalidatePreparedProject(
-            projectId,
-        )
 
         saveVolumes(
             loadVolumes()
@@ -302,13 +274,6 @@ class ProjectStore(
         require(project(toProjectId) != null) {
             "Проєкт призначення не знайдено: " + toProjectId
         }
-
-        invalidatePreparedProject(
-            fromProjectId,
-        )
-        invalidatePreparedProject(
-            toProjectId,
-        )
 
         val all = loadVolumes()
         val volume =
