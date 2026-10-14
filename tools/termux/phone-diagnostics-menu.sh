@@ -1,10 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.2"
+PD_VERSION="2026-10-14.3"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
+# Пункти 21–22: реклама MIUI і службові програми, які не потрібні.
+# Вимикаються (не видаляються) і повертаються одним пунктом.
+BLOAT_PACKAGES="com.miui.msa.global com.amazon.appmanager com.ebay.carrier com.facebook.appmanager com.facebook.services com.facebook.system"
 STATE_DIR="$BASE_DIR/state"
 COUNTER_FILE="$STATE_DIR/sequence"
 TARGET_FILE="$STATE_DIR/adb-target"
@@ -174,6 +177,10 @@ PAIRING
 
 31. Пункти 19–20 — анімації швидше (0,5x) / як було (1x)
     на підключеному телефоні. Нічого не видаляється.
+
+32. Пункт 21 — вимкнути рекламу MIUI і службові програми
+    Amazon / eBay / Facebook (сам Facebook і Messenger
+    лишаються). НЕ видаляє — пункт 22 повертає все назад.
 
 ОНОВЛЕННЯ
 30. Пункт 18 — завантажити нову версію цього меню
@@ -626,6 +633,76 @@ set_animations() {
   pause_menu
 }
 
+package_label() {
+  case "$1" in
+    com.miui.msa.global) echo "Реклама MIUI" ;;
+    com.amazon.appmanager) echo "Amazon (службова)" ;;
+    com.ebay.carrier) echo "eBay (службова)" ;;
+    com.facebook.appmanager) echo "Facebook App Manager (службова)" ;;
+    com.facebook.services) echo "Facebook Services (службова)" ;;
+    com.facebook.system) echo "Facebook App Installer (службова)" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+set_bloat_enabled() {
+  local mode="$1"
+  local item="$2"
+  local title="$3"
+  clear
+  if ! require_connection; then pause_menu; return; fi
+
+  local pkg answer disabled_list ok=0 skipped=0 failed=0
+  echo "$title"
+  echo "Телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+  echo
+  for pkg in $BLOAT_PACKAGES; do
+    echo "  • $(package_label "$pkg")"
+  done
+  echo
+  if [ "$mode" = "disable" ]; then
+    echo "Програми НЕ видаляються. Повернути: пункт 22."
+  fi
+  printf "Продовжити? Напиши так / ні: "
+  read -r answer
+  case "$answer" in
+    так|Так|ТАК|y|Y|yes|д|Д) ;;
+    *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;;
+  esac
+
+  new_log "$item" "bloat-$mode" "$title"
+  for pkg in $BLOAT_PACKAGES; do
+    if ! adb -s "$ADB_TARGET" shell pm path "$pkg" >/dev/null 2>&1; then
+      echo "— $(package_label "$pkg"): немає на телефоні" | tee -a "$CURRENT_LOG"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if [ "$mode" = "disable" ]; then
+      adb -s "$ADB_TARGET" shell pm disable-user --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1
+    else
+      adb -s "$ADB_TARGET" shell pm enable --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1
+    fi
+    disabled_list="$(adb -s "$ADB_TARGET" shell pm list packages -d 2>/dev/null)"
+    if printf '%s\n' "$disabled_list" | grep -qx "package:$pkg"; then
+      if [ "$mode" = "disable" ]; then
+        echo "ГОТОВО: $(package_label "$pkg") — вимкнено" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+      else
+        echo "НЕ ВИЙШЛО: $(package_label "$pkg") — досі вимкнено" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+      fi
+    else
+      if [ "$mode" = "disable" ]; then
+        echo "НЕ ВИЙШЛО: $(package_label "$pkg") — телефон не дав вимкнути" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+      else
+        echo "ГОТОВО: $(package_label "$pkg") — увімкнено" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+      fi
+    fi
+  done
+
+  echo | tee -a "$CURRENT_LOG"
+  echo "Підсумок: готово $ok · не вийшло $failed · немає на телефоні $skipped" | tee -a "$CURRENT_LOG"
+  pause_menu
+}
+
 reset_target() {
   clear
   rm -f "$TARGET_FILE"
@@ -665,6 +742,8 @@ while true; do
   echo "18 — Оновити це меню з GitHub"
   echo "19 — Анімації швидше (0,5x)"
   echo "20 — Анімації як було (1x)"
+  echo "21 — Вимкнути рекламу MIUI і службові Amazon/eBay/Facebook"
+  echo "22 — Повернути програми з пункту 21"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -691,6 +770,8 @@ while true; do
     18) update_self ;;
     19) set_animations "0.5" "19" "Анімації швидше (0,5x)" ;;
     20) set_animations "1" "20" "Анімації як було (1x)" ;;
+    21) set_bloat_enabled "disable" "21" "Вимкнути рекламу MIUI і службові програми" ;;
+    22) set_bloat_enabled "enable" "22" "Повернути програми з пункту 21" ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac

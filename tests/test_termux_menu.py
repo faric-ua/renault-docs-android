@@ -165,12 +165,34 @@ class TermuxMenuContractTests(unittest.TestCase):
 
         self.assertIn('19) set_animations "0.5"', text)
         self.assertIn('20) set_animations "1"', text)
-        fn = text[text.index('set_animations() {'):text.index('reset_target() {')]
+        fn = text[text.index('set_animations() {'):text.index('package_label() {')]
         for key in ('window_animation_scale', 'transition_animation_scale', 'animator_duration_scale'):
             self.assertIn(key, fn)
         self.assertIn('settings get global', fn)
         self.assertIn('Налагодження USB (налаштування безпеки)', fn)
         for forbidden in ('pm disable', 'pm uninstall', 'pm clear', 'trim-caches', 'reboot'):
+            self.assertNotIn(forbidden, fn)
+
+    def test_phone_diagnostics_bloat_is_disabled_not_removed_and_reversible(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('21) set_bloat_enabled "disable"', text)
+        self.assertIn('22) set_bloat_enabled "enable"', text)
+        line = next(l for l in text.splitlines() if l.startswith('BLOAT_PACKAGES='))
+        self.assertIn('com.miui.msa.global', line)
+        # Бабусин телефон: банк, Дія, Київстар, газ, месенджери — ніколи.
+        for keep in ('ua.privatbank', 'ua.gov.diia', 'kyivstar', 'vinnytsia.gas',
+                     'com.facebook.katana', 'com.facebook.orca', 'whatsapp', 'viber', 'telegram'):
+            self.assertNotIn(keep, line)
+        fn = text[text.index('set_bloat_enabled() {'):text.index('reset_target() {')]
+        self.assertIn('pm disable-user --user 0', fn)
+        self.assertIn('pm enable --user 0', fn)
+        self.assertIn('Продовжити? Напиши так / ні', fn)
+        self.assertIn('pm list packages -d', fn)
+        for forbidden in ('pm uninstall', 'pm clear', 'trim-caches', 'rm -', 'reboot'):
             self.assertNotIn(forbidden, fn)
 
     def test_phone_diagnostics_has_dedicated_installer(self):
