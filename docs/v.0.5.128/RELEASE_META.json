@@ -1,0 +1,27 @@
+{
+  "versionName": "0.5.128",
+  "versionCode": 144,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.128-catalog-v5",
+  "issues": [
+    162,
+    147
+  ],
+  "scope": "App reads public catalog v5 (new Drive file): Megane II 22 volumes, Laguna II 10. Includes v0.5.127, v0.5.126, v0.5.125.",
+  "sourceBase": "v0.5.127/build143",
+  "phoneQa": "PENDING",
+  "pr_number": 270,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 816,
+  "signed_apk": "PASS",
+  "source_sha": "23e4a6f99270fe1d5fd7b89b537711a30a09b8f4",
+  "signed_run_id": 38495711427,
+  "signed_run_number": 192,
+  "signed_android_apk_run": 192,
+  "artifact_id": 11862764565,
+  "artifact_name": "Renault-Docs-v0.5.128-Debug",
+  "artifact_digest": "sha256:df95f1acf58a5784d3967e2a6b94e42293b47bd7d181657a5581a58fa29e712c",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. «Готові проєкти» → Megane II shows 22 volumes (all already installed on this phone); Laguna II 10."
+}
