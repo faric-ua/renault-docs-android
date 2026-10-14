@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.135",
+  "versionCode": 151,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.135-volume-storage",
+  "issues": [
+    147
+  ],
+  "scope": "TODO 1 step 1: new volumes in the phone or on the memory card (Settings «Де зберігати нові томи», import screen «Куди», «▣ на карті пам'яті», card out → «карту не вставлено», nothing deleted). TODO 5 wording. Includes v0.5.134.",
+  "sourceBase": "v0.5.134/build150",
+  "phoneQa": "PENDING",
+  "pr_number": 309,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "7a412d9c464c26593fa83c40e4fae15b0a7422e6",
+  "signed_run_id": 38652497311,
+  "signed_run_number": 203,
+  "signed_android_apk_run": 203,
+  "artifact_id": 11935721346,
+  "artifact_name": "Renault-Docs-v0.5.135-Debug",
+  "artifact_digest": "sha256:e11ee600bd212a67512f387fdb42192dd5689eb0cf5a9127ff90070c57217c1b",
+  "qa_status": "phone-qa-pending",
+  "next": "M30s: Settings → Томи → «Де зберігати нові томи» → Карта пам'яті; then import one missing volume and open it."
+}
