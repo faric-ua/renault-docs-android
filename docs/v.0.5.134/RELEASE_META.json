@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.134",
+  "versionCode": 150,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "docs/phone-qa-0.5.133-checks",
+  "issues": [
+    147
+  ],
+  "scope": ".rdproject: open from Samsung «Мої файли» (file:// and ZIP type names, name filter without a type; «Вибрати цей файл ще раз» when file:// cannot be read). One import bar (share of file, never back), install as «встановлюю N %». Unticked volume — «не вибрано». Includes v0.5.133.",
+  "sourceBase": "v0.5.133/build149",
+  "phoneQa": "PENDING",
+  "pr_number": 303,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "20a621fd13d38c9f35e38c246db8d4e33c20d01a",
+  "signed_run_id": 38630093526,
+  "signed_run_number": 201,
+  "signed_android_apk_run": 201,
+  "artifact_id": 11925927657,
+  "artifact_name": "Renault-Docs-v0.5.134-Debug",
+  "artifact_digest": "sha256:6417bad8284f9cb02f4926635387ff5a7dd44e941903abc7aeab4d5326adcf6a",
+  "qa_status": "phone-qa-pending",
+  "next": "M30s: install over. «Мої файли» → Download → Quick Share → .rdproject → «Імпорт проєкту Renault Docs» in the list."
+}
