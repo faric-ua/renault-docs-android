@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.6"
+PD_VERSION="2026-10-14.7"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -806,6 +806,38 @@ set_apps_sleep() {
   pause_menu
 }
 
+# Пункт 25 (2026-10-14, Renault Docs): «Мої файли» Samsung не показує Renault Docs
+# у «Відкрити за допомогою» для .rdproject, а ES Провідник показує. Тут видно,
+# що саме файловий менеджер надіслав Android: адресу (dat=…) і тип (typ=…).
+# Лише читає журнал і список вікон; нічого не змінює.
+open_with_intent() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  new_log "25" "open-with-intent" "Що надсилає «Відкрити за допомогою»"
+  adb -s "$ADB_TARGET" logcat -c >/dev/null 2>&1 || true
+  echo "1) На ТОМУ телефоні (до якого підключено ADB) відкрий файловий менеджер"
+  echo "   і торкнись файлу (напр. .rdproject)."
+  echo "2) Коли з'явиться «Відкрити за допомогою» — НЕ закривай його."
+  echo "3) Повернись сюди і натисни Enter."
+  read -r _
+  {
+    echo "=== Вікно зверху (dumpsys activity activities) ==="
+    adb -s "$ADB_TARGET" shell dumpsys activity activities \
+      | grep -E "Intent \{|ResolverActivity|ChooserActivity|mResumedActivity|topResumedActivity" \
+      | head -n 40 || true
+    echo
+    echo "=== Журнал запусків (logcat) ==="
+    adb -s "$ADB_TARGET" logcat -d -v time \
+      | grep -E "START u0|ResolverActivity|ChooserActivity|act=android.intent.action.(VIEW|SEND)" \
+      | tail -n 40 || true
+    echo
+    echo "Шукай рядок з act=android.intent.action.VIEW: dat=… — адреса, typ=… — тип."
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Тепер можна закрити «Відкрити за допомогою» на тому телефоні."
+  pause_menu
+}
+
 reset_target() {
   clear
   rm -f "$TARGET_FILE"
@@ -849,6 +881,7 @@ while true; do
   echo "22 — Повернути програми з пункту 21"
   echo "23 — Приспати рідко вживані застосунки"
   echo "24 — Розбудити застосунки з пункту 23"
+  echo "25 — Що надсилає «Відкрити за допомогою» → файл"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -879,6 +912,7 @@ while true; do
     22) set_bloat_enabled "enable" "22" "Повернути програми з пункту 21" ;;
     23) set_apps_sleep "sleep" "23" "Приспати рідко вживані застосунки" ;;
     24) set_apps_sleep "wake" "24" "Розбудити застосунки з пункту 23" ;;
+    25) open_with_intent ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
