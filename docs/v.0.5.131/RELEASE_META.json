@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.131",
+  "versionCode": 147,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.131-guide-back",
+  "issues": [
+    147
+  ],
+  "scope": "System «Назад» on Android 16 (targetSdk 36): guide section → list → close; same rule in criteria sheet, volume documentation panels, viewer. Settings tiles spacing; no line break after «✓» in the guide. Includes v0.5.130.",
+  "sourceBase": "v0.5.130/build146",
+  "phoneQa": "PENDING",
+  "pr_number": 281,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 834,
+  "signed_apk": "PASS",
+  "source_sha": "e1e935abe1dfa86f6712427639a6a7466d39a864",
+  "signed_run_id": 38511429036,
+  "signed_run_number": 195,
+  "signed_android_apk_run": 195,
+  "artifact_id": 11869414909,
+  "artifact_name": "Renault-Docs-v0.5.131-Debug",
+  "artifact_digest": "sha256:ee93bd0f9c5b5a7b198f6c18d25fc02b6fcf1d631554ad4e9c1a5c4b4a81f9aa",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Settings → Про програму → Інструкція → section «Готові проєкти з Google Диска» → system Back → the list of sections (not Settings)."
+}
