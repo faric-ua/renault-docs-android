@@ -423,8 +423,9 @@ class RdprojectImportActivity : Activity() {
         spaceLine?.let { line ->
             val need = loaded.needBytes(count)
             line.text =
-                "Вільно там: " + RdprojectImportSupport.formatBytes(loaded.freeBytes) +
-                    (need?.let { " · потрібно приблизно " + RdprojectImportSupport.formatBytes(it) } ?: "")
+                // Free space is already in «Куди: …» (phone QA 2026-10-15 02:47).
+                need?.let { "Потрібно приблизно " + RdprojectImportSupport.formatBytes(it) }
+                    ?: "Скільки місця потрібно — невідомо"
             line.setTextColor(if (loaded.lowSpace(count)) Ui.warning else Ui.muted)
         }
         toggleAllButton?.text =
