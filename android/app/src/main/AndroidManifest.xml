@@ -131,6 +131,11 @@
         </provider>
 
         <activity
+            android:name=".GuideActivity"
+            android:exported="false"
+            android:screenOrientation="unspecified" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:screenOrientation="unspecified" />
