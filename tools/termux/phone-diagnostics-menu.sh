@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.4"
+PD_VERSION="2026-10-14.5"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -34,6 +34,32 @@ pause_menu() {
 
 detect_phone_ip() {
   ip route get 1.1.1.1 2>/dev/null     | sed -n 's/.* src \([^ ]*\).*/\1/p'     | head -n 1
+}
+
+# Мережа вже відома (з IP цього телефона, напр. 192.168.50.) —
+# людина вводить лише останнє число. Enter без нічого = останній IP.
+# Повну адресу з крапками теж можна ввести.
+ask_target_ip() {
+  local own prefix last answer
+  own="$(detect_phone_ip)"
+  prefix="${own%.*}."
+  case "$own" in
+    *.*.*.*) ;;
+    *) prefix="192.168.50." ;;
+  esac
+  last="$(load_target)"
+  last="${last%%:*}"
+
+  if [ -n "$last" ]; then
+    echo "Enter без нічого = $last (останній)" >&2
+  fi
+  printf "IP телефону: %s" "$prefix" >&2
+  read -r answer
+  case "$answer" in
+    "") TARGET_IP="$last" ;;
+    *.*) TARGET_IP="$answer" ;;
+    *) TARGET_IP="$prefix$answer" ;;
+  esac
 }
 
 load_target() {
@@ -231,15 +257,13 @@ pair_device() {
     return
   fi
 
-  local auto_ip ip port
-  auto_ip="$(detect_phone_ip)"
+  local ip port
 
   echo "PAIRING"
-  echo "На Samsung відкрий pairing-вікно з 6-значним кодом."
+  echo "На іншому телефоні відкрий pairing-вікно з 6-значним кодом."
   echo
-  printf "IP телефону [%s]: " "${auto_ip:-192.168.x.x}"
-  read -r ip
-  ip="${ip:-$auto_ip}"
+  ask_target_ip
+  ip="$TARGET_IP"
   printf "PAIRING PORT: "
   read -r port
 
@@ -266,16 +290,15 @@ connect_device() {
     return
   fi
 
-  local auto_ip ip port target
-  auto_ip="$(detect_phone_ip)"
+  local ip port target
 
   echo "ADB CONNECT"
-  echo "На Samsung дивись рядок «IP-адреса й порт»"
+  echo "На іншому телефоні дивись рядок «IP-адреса й порт»"
   echo "на головному екрані Wi-Fi debugging."
+  echo "Початок адреси вже написано — введи лише останнє число."
   echo
-  printf "IP телефону [%s]: " "${auto_ip:-192.168.x.x}"
-  read -r ip
-  ip="${ip:-$auto_ip}"
+  ask_target_ip
+  ip="$TARGET_IP"
   printf "CONNECT PORT: "
   read -r port
 
