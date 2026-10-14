@@ -187,12 +187,34 @@ class TermuxMenuContractTests(unittest.TestCase):
         for keep in ('ua.privatbank', 'ua.gov.diia', 'kyivstar', 'vinnytsia.gas',
                      'com.facebook.katana', 'com.facebook.orca', 'whatsapp', 'viber', 'telegram'):
             self.assertNotIn(keep, line)
-        fn = text[text.index('set_bloat_enabled() {'):text.index('reset_target() {')]
+        fn = text[text.index('set_bloat_enabled() {'):text.index('set_apps_sleep() {')]
         self.assertIn('pm disable-user --user 0', fn)
         self.assertIn('pm enable --user 0', fn)
         self.assertIn('Продовжити? Напиши так / ні', fn)
         self.assertIn('pm list packages -d', fn)
         for forbidden in ('pm uninstall', 'pm clear', 'trim-caches', 'rm -', 'reboot'):
+            self.assertNotIn(forbidden, fn)
+
+    def test_phone_diagnostics_sleep_apps_is_reversible_and_spares_grandma_apps(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('23) set_apps_sleep "sleep"', text)
+        self.assertIn('24) set_apps_sleep "wake"', text)
+        line = next(l for l in text.splitlines() if l.startswith('SLEEP_PACKAGES='))
+        for keep in ('ua.privatbank', 'ua.gov.diia', 'kyivstar', 'vinnytsia.gas',
+                     'com.facebook.katana', 'com.facebook.orca', 'whatsapp', 'viber',
+                     'telegram', 'com.google.android.verifier', 'tachyon'):
+            self.assertNotIn(keep, line)
+        fn = text[text.index('set_apps_sleep() {'):text.index('reset_target() {')]
+        self.assertIn('RUN_ANY_IN_BACKGROUND ignore', fn)
+        self.assertIn('RUN_ANY_IN_BACKGROUND allow', fn)
+        self.assertIn('set-standby-bucket "$pkg" restricted', fn)
+        self.assertIn('set-standby-bucket "$pkg" active', fn)
+        self.assertIn('Продовжити? Напиши так / ні (можна y / n)', fn)
+        for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'trim-caches', 'force-stop', 'rm -', 'reboot'):
             self.assertNotIn(forbidden, fn)
 
     def test_phone_diagnostics_has_dedicated_installer(self):

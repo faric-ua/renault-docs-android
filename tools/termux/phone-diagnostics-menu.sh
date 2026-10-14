@@ -1,12 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.3"
+PD_VERSION="2026-10-14.4"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
 # Пункти 21–22: реклама MIUI і службові програми, які не потрібні.
 # Вимикаються (не видаляються) і повертаються одним пунктом.
+# Пункти 23–24: рідко вживані застосунки бабусиного Redmi (звіт 17, кошик 40).
+# Не працюють у фоні, поки їх не відкрити; відкриваються як звичайно.
+SLEEP_PACKAGES="cn.wps.xiaomi.abroad.lite com.cubleopard.pocketlifeworld com.einnovation.temu com.google.android.apps.bard com.google.android.apps.podcasts com.google.android.videos com.google.android.apps.youtube.music com.zhiliaoapp.musically com.voe.superbill"
 BLOAT_PACKAGES="com.miui.msa.global com.amazon.appmanager com.ebay.carrier com.facebook.appmanager com.facebook.services com.facebook.system"
 STATE_DIR="$BASE_DIR/state"
 COUNTER_FILE="$STATE_DIR/sequence"
@@ -181,6 +184,9 @@ PAIRING
 32. Пункт 21 — вимкнути рекламу MIUI і службові програми
     Amazon / eBay / Facebook (сам Facebook і Messenger
     лишаються). НЕ видаляє — пункт 22 повертає все назад.
+
+33. Пункт 23 — приспати рідко вживані застосунки: не
+    працюють у фоні, поки їх не відкрити. Пункт 24 — розбудити.
 
 ОНОВЛЕННЯ
 30. Пункт 18 — завантажити нову версію цього меню
@@ -641,6 +647,15 @@ package_label() {
     com.facebook.appmanager) echo "Facebook App Manager (службова)" ;;
     com.facebook.services) echo "Facebook Services (службова)" ;;
     com.facebook.system) echo "Facebook App Installer (службова)" ;;
+    cn.wps.xiaomi.abroad.lite) echo "WPS Office" ;;
+    com.cubleopard.pocketlifeworld) echo "Pocket Life World" ;;
+    com.einnovation.temu) echo "Temu" ;;
+    com.google.android.apps.bard) echo "Gemini" ;;
+    com.google.android.apps.podcasts) echo "Google Подкасти" ;;
+    com.google.android.videos) echo "Google TV" ;;
+    com.google.android.apps.youtube.music) echo "YouTube Music" ;;
+    com.zhiliaoapp.musically) echo "TikTok" ;;
+    com.voe.superbill) echo "voe.superbill" ;;
     *) echo "$1" ;;
   esac
 }
@@ -663,7 +678,7 @@ set_bloat_enabled() {
   if [ "$mode" = "disable" ]; then
     echo "Програми НЕ видаляються. Повернути: пункт 22."
   fi
-  printf "Продовжити? Напиши так / ні: "
+  printf "Продовжити? Напиши так / ні (можна y / n): "
   read -r answer
   case "$answer" in
     так|Так|ТАК|y|Y|yes|д|Д) ;;
@@ -694,6 +709,69 @@ set_bloat_enabled() {
         echo "НЕ ВИЙШЛО: $(package_label "$pkg") — телефон не дав вимкнути" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
       else
         echo "ГОТОВО: $(package_label "$pkg") — увімкнено" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+      fi
+    fi
+  done
+
+  echo | tee -a "$CURRENT_LOG"
+  echo "Підсумок: готово $ok · не вийшло $failed · немає на телефоні $skipped" | tee -a "$CURRENT_LOG"
+  pause_menu
+}
+
+set_apps_sleep() {
+  local mode="$1"
+  local item="$2"
+  local title="$3"
+  clear
+  if ! require_connection; then pause_menu; return; fi
+
+  local pkg answer op bucket ok=0 skipped=0 failed=0
+  echo "$title"
+  echo "Телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+  echo
+  for pkg in $SLEEP_PACKAGES; do
+    echo "  • $(package_label "$pkg")"
+  done
+  echo
+  if [ "$mode" = "sleep" ]; then
+    echo "Нічого не видаляється. Застосунок відкривається як звичайно,"
+    echo "лише не працює у фоні. Розбудити всі: пункт 24."
+  fi
+  printf "Продовжити? Напиши так / ні (можна y / n): "
+  read -r answer
+  case "$answer" in
+    так|Так|ТАК|y|Y|yes|д|Д) ;;
+    *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;;
+  esac
+
+  new_log "$item" "apps-$mode" "$title"
+  for pkg in $SLEEP_PACKAGES; do
+    if ! adb -s "$ADB_TARGET" shell pm path "$pkg" >/dev/null 2>&1; then
+      echo "— $(package_label "$pkg"): немає на телефоні" | tee -a "$CURRENT_LOG"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if [ "$mode" = "sleep" ]; then
+      adb -s "$ADB_TARGET" shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >> "$CURRENT_LOG" 2>&1
+      adb -s "$ADB_TARGET" shell am set-standby-bucket "$pkg" restricted >> "$CURRENT_LOG" 2>&1
+    else
+      adb -s "$ADB_TARGET" shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND allow >> "$CURRENT_LOG" 2>&1
+      adb -s "$ADB_TARGET" shell am set-standby-bucket "$pkg" active >> "$CURRENT_LOG" 2>&1
+    fi
+    op="$(adb -s "$ADB_TARGET" shell cmd appops get "$pkg" RUN_ANY_IN_BACKGROUND 2>&1)"
+    bucket="$(adb -s "$ADB_TARGET" shell am get-standby-bucket "$pkg" 2>&1)"
+    echo "  [$pkg] appops: $op · bucket: $bucket" >> "$CURRENT_LOG"
+    if [ "$mode" = "sleep" ]; then
+      if printf '%s' "$op" | grep -q "ignore"; then
+        echo "ГОТОВО: $(package_label "$pkg") — спить" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+      else
+        echo "НЕ ВИЙШЛО: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+      fi
+    else
+      if printf '%s' "$op" | grep -q "ignore"; then
+        echo "НЕ ВИЙШЛО: $(package_label "$pkg") — досі спить" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+      else
+        echo "ГОТОВО: $(package_label "$pkg") — розбуджено" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
       fi
     fi
   done
@@ -744,6 +822,8 @@ while true; do
   echo "20 — Анімації як було (1x)"
   echo "21 — Вимкнути рекламу MIUI і службові Amazon/eBay/Facebook"
   echo "22 — Повернути програми з пункту 21"
+  echo "23 — Приспати рідко вживані застосунки"
+  echo "24 — Розбудити застосунки з пункту 23"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -772,6 +852,8 @@ while true; do
     20) set_animations "1" "20" "Анімації як було (1x)" ;;
     21) set_bloat_enabled "disable" "21" "Вимкнути рекламу MIUI і службові програми" ;;
     22) set_bloat_enabled "enable" "22" "Повернути програми з пункту 21" ;;
+    23) set_apps_sleep "sleep" "23" "Приспати рідко вживані застосунки" ;;
+    24) set_apps_sleep "wake" "24" "Розбудити застосунки з пункту 23" ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
