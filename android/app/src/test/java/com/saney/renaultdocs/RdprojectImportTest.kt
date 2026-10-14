@@ -147,6 +147,16 @@ class RdprojectImportTest {
     }
 
     @Test
+    fun needFollowsTheTickedVolumes() {
+        val manifest = RdprojectManifestParser.parse(manifestJson())
+        val plan = RdprojectImportPlanner.plan(manifest, null, emptyList())
+        val all = RdprojectImportPlanner.estimatedNeedBytes(plan, 2_000_000_000L)!!
+        val one = RdprojectImportPlanner.estimatedNeedBytes(plan, 2_000_000_000L, 1)!!
+        assertTrue(one < all)
+        assertEquals(0L, RdprojectImportPlanner.estimatedNeedBytes(plan, 2_000_000_000L, 0))
+    }
+
+    @Test
     fun volumeInAnotherProjectIsNotTouched() {
         val manifest = RdprojectManifestParser.parse(manifestJson())
         val plan = RdprojectImportPlanner.plan(

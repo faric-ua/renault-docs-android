@@ -144,6 +144,7 @@ class RdprojectImportService : Service() {
         workDir.mkdirs()
         importedCount = 0
         skippedCount = 0
+        metWanted.clear()
         val manifest = RdprojectImportSupport.readManifest(applicationContext, uri)
         val wanted = state.wantedFiles.toSet().intersect(manifest.volumes.map { it.file }.toSet())
         require(wanted.isNotEmpty()) { "Файл змінився: томів, вибраних для імпорту, у ньому немає." }
@@ -282,17 +283,23 @@ class RdprojectImportService : Service() {
         return project
     }
 
+    /**
+     * v0.5.133: «Том N/M» counts wanted volumes in the order they are met in the
+     * file. The ZIP is sorted by file name, not in the project's order, so v0.5.132
+     * started at «Том 10/23» (M30s 2026-10-14 20:16) although it was the first one.
+     */
+    private val metWanted = LinkedHashSet<String>()
+
     private fun stepLabel(
         wantedOrder: List<RdprojectManifestVolume>,
         volume: RdprojectManifestVolume,
         manifest: RdprojectManifest,
     ): String {
-        val index = wantedOrder.indexOf(volume)
-        return if (index >= 0) {
-            "Том ${index + 1}/${wantedOrder.size}"
-        } else {
-            "Том ${manifest.volumes.indexOf(volume) + 1}/${manifest.volumes.size}"
+        if (!wantedOrder.contains(volume)) {
+            return "Том ${manifest.volumes.indexOf(volume) + 1}/${manifest.volumes.size}"
         }
+        metWanted.add(volume.file)
+        return "Том ${metWanted.indexOf(volume.file) + 1}/${wantedOrder.size}"
     }
 
     private fun publish(
@@ -381,6 +388,8 @@ class RdprojectImportService : Service() {
         fun start(
             context: Context,
             preview: RdprojectImportSupport.Preview,
+            // v0.5.133: only the volumes ticked on the preview screen.
+            wantedFiles: List<String> = preview.plan.toImport.map { it.volume.file },
         ): Boolean {
             val store = RdprojectImportRunStore(context)
             val target = preview.plan.targetProject
@@ -391,7 +400,7 @@ class RdprojectImportService : Service() {
                     fileSizeBytes = preview.fileSizeBytes,
                     projectId = target?.id.orEmpty(),
                     projectTitle = preview.plan.targetTitle,
-                    wantedFiles = preview.plan.toImport.map { it.volume.file },
+                    wantedFiles = wantedFiles,
                 )
             ) {
                 return false

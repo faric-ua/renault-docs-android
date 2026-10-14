@@ -113,10 +113,12 @@ object RdprojectImportPlanner {
     fun estimatedNeedBytes(
         plan: RdprojectImportPlan,
         fileSizeBytes: Long,
+        // v0.5.133: only the volumes ticked on the preview screen.
+        importCount: Int = plan.toImport.size,
     ): Long? {
         if (fileSizeBytes <= 0L || plan.volumes.isEmpty()) return null
-        if (plan.toImport.isEmpty()) return 0L
-        val share = fileSizeBytes.toDouble() * plan.toImport.size / plan.volumes.size
+        if (importCount <= 0) return 0L
+        val share = fileSizeBytes.toDouble() * importCount / plan.volumes.size
         return (share * 1.25).toLong() + RdprojectArchiveWalker.MIN_FREE_BYTES
     }
 }

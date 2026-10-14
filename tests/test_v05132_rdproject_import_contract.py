@@ -106,7 +106,20 @@ class RdprojectImportContract(unittest.TestCase):
         self.assertIn("onRetainNonConfigurationInstance", activity)
         self.assertIn("confirmDialogs.restoreOpen()", activity)
         self.assertIn("ConfirmActions.confirmStop(", activity)
-        self.assertIn('"Імпортувати $toImport', activity)
+        self.assertIn('"Імпортувати $count', activity)
+        # v0.5.133 (owner 2026-10-14 20:15): pick which volumes to import.
+        self.assertIn("CheckBox(this)", activity)
+        self.assertIn("RdprojectImportService.start(this, fresh, wanted)", activity)
+        self.assertIn("STATE_SELECTED", activity)
+
+    def test_import_copy_folder_is_shared_with_the_installer(self):
+        # v0.5.132 on M30s 2026-10-14 20:16: «Failed to find configured root …
+        # cache/rdproject-import/volume-10.rdpkg» — FileProvider did not know the folder.
+        service = source("RdprojectImportService.kt")
+        folder = re.search(r'WORK_DIR = "([^"]+)"', service).group(1)
+        self.assertIn("FileProvider.getUriForFile", service)
+        paths = (ROOT / "android/app/src/main/res/xml/file_paths.xml").read_text(encoding="utf-8")
+        self.assertIn(f'path="{folder}/"', paths)
 
 
 if __name__ == "__main__":
