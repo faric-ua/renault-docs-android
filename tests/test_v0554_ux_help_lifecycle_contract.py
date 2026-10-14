@@ -261,7 +261,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("stroke =\n                                Ui.border", settings)
         self.assertNotIn('sectionTitle(\n                "Backup"', settings)
         self.assertEqual(
-            3,
+            4,  # v0.5.135: + «Де зберігати нові томи»
             settings.count("DialogRole.CHOICE"),
         )
         self.assertGreaterEqual(
@@ -429,13 +429,14 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (9, 9),
                 "ProjectExportWizard.kt": (1, 1),
-                "SettingsActivity.kt": (3, 3),
+                "SettingsActivity.kt": (4, 4),  # v0.5.135: + «Де зберігати нові томи»
             },
             audited,
         )
         # v0.5.101 (#178): two export dialogs replaced by one step-by-step window.
         # v0.5.102 (#181): one confirmation before cancelling a long operation.
-        self.assertEqual(19, total_builders)
+        # v0.5.135 (TODO №1): + Settings «Де зберігати нові томи».
+        self.assertEqual(20, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(

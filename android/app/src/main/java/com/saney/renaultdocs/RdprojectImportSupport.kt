@@ -82,7 +82,8 @@ object RdprojectImportSupport {
 
     /** Free space where volumes are installed (the import copy lives on the same storage). */
     fun freeBytes(context: Context): Long =
-        runCatching { context.noBackupFilesDir.usableSpace }.getOrDefault(0L)
+        // TODO №1 (2026-10-15): free space where new volumes go (phone or card).
+        VolumeStorage.freeBytes(context, VolumeStorage.chosenPlace(context)) ?: 0L
 
     fun displayName(
         context: Context,
@@ -137,7 +138,7 @@ object RdprojectImportSupport {
     }
 
     const val FILE_PATH_NO_ACCESS =
-        "Android не дає прочитати цей файл напряму з «Моїх файлів». " +
+        "Android не дає прочитати цей файл напряму. " +
             "Натисни «Вибрати цей файл ще раз» і вибери його у списку — далі все як звичайно."
 
     const val NO_ACCESS =

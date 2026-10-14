@@ -44,7 +44,12 @@ class V0549RdpkgContractTests(unittest.TestCase):
         self.assertIn("buildTreeDocumentUri(", provider)
         self.assertIn("openDocument(", provider)
         self.assertIn("queryChildDocuments(", provider)
-        self.assertIn("context.noBackupFilesDir", provider)
+        # v0.5.135 (TODO №1): the folders (phone / memory card) live in VolumeStorage.
+        self.assertIn("VolumeStorage.locate(context, packageId)", provider)
+        storage = self._read(
+            "android/app/src/main/java/com/saney/renaultdocs/VolumeStorage.kt"
+        )
+        self.assertIn("context.applicationContext.noBackupFilesDir", storage)
         self.assertIn(
             'android:name=".LocalDatasetDocumentsProvider"',
             manifest,

@@ -72,7 +72,7 @@ class BatchBackgroundContractTests(unittest.TestCase):
         extract = importer[extract_start:]
         self.assertIn("if (isCancelled()) throw ConversionCancelledException()", extract)
         self.assertLess(importer.index("if (isCancelled()) throw ConversionCancelledException()\n                backupDirectory"),
-                        importer.index("finalDirectory.renameTo("))
+                        importer.index("previousDirectory.renameTo("))  # v0.5.135: phone or card
         self.assertIn("finally {\n                staging.deleteRecursively()", importer)
         self.assertIn("backupDirectory.renameTo(", importer)
 
