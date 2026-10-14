@@ -147,6 +147,14 @@ class RdprojectImportService : Service() {
         metWanted.clear()
         val manifest = RdprojectImportSupport.readManifest(applicationContext, uri)
         val wanted = state.wantedFiles.toSet().intersect(manifest.volumes.map { it.file }.toSet())
+        // v0.5.134 (M30s 2026-10-14 20:37): a volume left unticked was announced as
+        // «уже є на телефоні». Say which of the two it really is.
+        val existingNow = RdprojectImportSupport.existingVolumes(store)
+        val presentFiles =
+            manifest.volumes
+                .filter { volume -> existingNow.any { RdprojectImportPlanner.isSameVolume(volume, it) } }
+                .map { it.file }
+                .toSet()
         require(wanted.isNotEmpty()) { "Файл змінився: томів, вибраних для імпорту, у ньому немає." }
         val wantedOrder = manifest.volumes.filter { wanted.contains(it.file) }
         val fileSize = state.fileSizeBytes.takeIf { it > 0L } ?: RdprojectImportSupport.fileSize(this, uri)
@@ -169,7 +177,11 @@ class RdprojectImportService : Service() {
                         if (progress.wanted) {
                             "$position · ${volume.label} — копіюю з файлу"
                         } else {
-                            "Пропускаю ${volume.label} — уже є на телефоні"
+                            if (presentFiles.contains(volume.file)) {
+                                "Пропускаю ${volume.label} — уже є на телефоні"
+                            } else {
+                                "Пропускаю ${volume.label} — не вибрано"
+                            }
                         }
                     publish(text, progress.bytesRead, fileSize)
                 },

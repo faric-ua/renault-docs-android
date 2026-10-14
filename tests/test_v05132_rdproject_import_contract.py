@@ -112,6 +112,12 @@ class RdprojectImportContract(unittest.TestCase):
         self.assertIn("RdprojectImportService.start(this, fresh, wanted)", activity)
         self.assertIn("STATE_SELECTED", activity)
 
+    def test_unticked_volume_is_not_called_present(self):
+        # M30s 2026-10-14 20:37: «Пропускаю NT8266 — уже є на телефоні» for an unticked volume.
+        service = source("RdprojectImportService.kt")
+        self.assertIn("— не вибрано", service)
+        self.assertIn("presentFiles.contains(volume.file)", service)
+
     def test_import_copy_folder_is_shared_with_the_installer(self):
         # v0.5.132 on M30s 2026-10-14 20:16: «Failed to find configured root …
         # cache/rdproject-import/volume-10.rdpkg» — FileProvider did not know the folder.
