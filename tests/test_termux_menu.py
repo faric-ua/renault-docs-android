@@ -128,6 +128,35 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('com.google.android.providers.media.module', text)
         self.assertIn('com.samsung.android.providers.media', text)
 
+    def test_phone_diagnostics_cleanup_report_is_read_only_and_self_update_exists(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('17 — Звіт для чистки → файл (нічого не змінює)', text)
+        self.assertIn('18 — Оновити це меню з GitHub', text)
+        self.assertIn('17) cleanup_report ;;', text)
+        self.assertIn('18) update_self ;;', text)
+        self.assertRegex(text, r'PD_VERSION="\d{4}-\d{2}-\d{2}\.\d+"')
+
+        start = text.index('cleanup_report() {')
+        end = text.index('update_self() {')
+        report = text[start:end]
+        self.assertIn('am get-standby-bucket', report)
+        self.assertIn('dumpsys diskstats', report)
+        self.assertIn('Total PSS by process', report)
+        for forbidden in (
+            'settings put', 'pm disable', 'pm uninstall', 'pm clear',
+            'trim-caches', 'force-stop', 'appops set', 'rm -rf', 'reboot',
+        ):
+            self.assertNotIn(forbidden, report)
+
+        update = text[end:text.index('reset_target() {')]
+        self.assertIn('gh api "repos/$PD_REPO/contents/$PD_SOURCE_PATH"', update)
+        self.assertIn('grep -q "Phone Diagnostics Menu"', update)
+        self.assertIn('exec bash "$menu_path"', update)
+
     def test_phone_diagnostics_has_dedicated_installer(self):
         repo = Path(__file__).resolve().parents[1]
         text = (
