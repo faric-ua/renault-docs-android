@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.7"
+PD_VERSION="2026-10-15.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -213,6 +213,15 @@ PAIRING
 
 33. Пункт 23 — приспати рідко вживані застосунки: не
     працюють у фоні, поки їх не відкрити. Пункт 24 — розбудити.
+
+ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
+34. Пункт 26 — зберегти застосунок з підключеного
+    телефона: УСІ частини APK (base + split_*) у
+    Documents/PhoneDiagnostics/apk/. Нічого не змінює.
+35. Пункт 27 — поставити збережений застосунок на
+    підключений телефон (усі частини разом).
+    Один APK через Quick Share часто не працює саме
+    тому, що застосунок складається з кількох частин.
 
 ОНОВЛЕННЯ
 30. Пункт 18 — завантажити нову версію цього меню
@@ -838,6 +847,138 @@ open_with_intent() {
   pause_menu
 }
 
+# Пункти 26–27 (2026-10-15): Aolithium (виробник зник, у магазині нема) і стара
+# робоча версія JK BMS. Сучасні застосунки — це кілька файлів (base.apk +
+# split_config.*.apk); передача одного base.apk дає «не встановлюється» або
+# «не працює». Тому зберігаємо й ставимо всі частини разом.
+APK_DIR="$BASE_DIR/apk"
+
+save_app_apks() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+
+  local pattern list pkg answer n i version dir paths path saved=0
+  echo "Зберегти застосунок з телефона: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+  echo
+  printf "Що шукати в назві пакета (Enter = bms|lith): "
+  read -r pattern
+  pattern="${pattern:-bms|lith}"
+
+  list="$(adb -s "$ADB_TARGET" shell pm list packages -3 2>/dev/null | tr -d '\r' | sed 's/^package://' | grep -i -E "$pattern" | sort)"
+  if [ -z "$list" ]; then
+    echo "Нічого не знайдено за «$pattern»."
+    pause_menu
+    return
+  fi
+
+  echo
+  i=0
+  while IFS= read -r pkg; do
+    i=$((i + 1))
+    version="$(adb -s "$ADB_TARGET" shell dumpsys package "$pkg" 2>/dev/null | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
+    echo "  $i) $pkg  (версія ${version:-?})"
+  done <<EOF2
+$list
+EOF2
+  echo
+  printf "Номер застосунку (0 = скасувати): "
+  read -r n
+  case "$n" in ''|*[!0-9]*|0) echo "Скасовано."; pause_menu; return ;; esac
+  pkg="$(printf '%s\n' "$list" | sed -n "${n}p")"
+  if [ -z "$pkg" ]; then echo "Нема такого номера."; pause_menu; return; fi
+
+  version="$(adb -s "$ADB_TARGET" shell dumpsys package "$pkg" 2>/dev/null | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
+  dir="$APK_DIR/${pkg}_v${version:-unknown}"
+  mkdir -p "$dir"
+  new_log "26" "save-apk" "Зберегти застосунок $pkg"
+
+  paths="$(adb -s "$ADB_TARGET" shell pm path "$pkg" 2>/dev/null | tr -d '\r' | sed 's/^package://')"
+  {
+    echo "Пакет: $pkg"
+    echo "Версія: ${version:-?}"
+    echo "Телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+    echo "Android: $(adb -s "$ADB_TARGET" shell getprop ro.build.version.release)"
+    echo "Частини:"
+    printf '%s\n' "$paths"
+  } | tee -a "$CURRENT_LOG" > "$dir/info.txt"
+
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    if adb -s "$ADB_TARGET" pull "$path" "$dir/$(basename "$path")" >> "$CURRENT_LOG" 2>&1; then
+      saved=$((saved + 1))
+      echo "ГОТОВО: $(basename "$path")" | tee -a "$CURRENT_LOG"
+    else
+      echo "НЕ ВИЙШЛО: $(basename "$path")" | tee -a "$CURRENT_LOG"
+    fi
+  done <<EOF2
+$paths
+EOF2
+
+  echo | tee -a "$CURRENT_LOG"
+  if [ "$saved" -eq 0 ]; then
+    echo "НЕ ВИЙШЛО: телефон не віддав жодної частини APK." | tee -a "$CURRENT_LOG"
+  else
+    echo "Збережено частин: $saved → $dir" | tee -a "$CURRENT_LOG"
+  fi
+  pause_menu
+}
+
+install_saved_app() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+
+  local dirs n dir answer i
+  mkdir -p "$APK_DIR"
+  dirs="$(ls -1 "$APK_DIR" 2>/dev/null | sort)"
+  if [ -z "$dirs" ]; then
+    echo "Ще нічого не збережено. Спершу пункт 26."
+    pause_menu
+    return
+  fi
+
+  echo "Поставити збережений застосунок на: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+  echo
+  i=0
+  while IFS= read -r dir; do
+    i=$((i + 1))
+    echo "  $i) $dir  ($(ls -1 "$APK_DIR/$dir"/*.apk 2>/dev/null | wc -l) част.)"
+  done <<EOF2
+$dirs
+EOF2
+  echo
+  printf "Номер (0 = скасувати): "
+  read -r n
+  case "$n" in ''|*[!0-9]*|0) echo "Скасовано."; pause_menu; return ;; esac
+  dir="$(printf '%s\n' "$dirs" | sed -n "${n}p")"
+  if [ -z "$dir" ]; then echo "Нема такого номера."; pause_menu; return; fi
+  if ! ls "$APK_DIR/$dir"/*.apk >/dev/null 2>&1; then
+    echo "У «$dir» нема APK — збережи ще раз пунктом 26."
+    pause_menu
+    return
+  fi
+
+  echo
+  echo "Встановлюю «$dir» поверх (дані застосунку не видаляються)."
+  printf "Продовжити? Напиши так / ні (можна y / n): "
+  read -r answer
+  case "$answer" in
+    так|Так|ТАК|y|Y|yes|д|Д) ;;
+    *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;;
+  esac
+
+  new_log "27" "install-apk" "Поставити $dir"
+  if adb -s "$ADB_TARGET" install-multiple -r "$APK_DIR/$dir"/*.apk 2>&1 | tee -a "$CURRENT_LOG" | grep -q "Success"; then
+    echo "ГОТОВО: встановлено. Відкрий застосунок на тому телефоні." | tee -a "$CURRENT_LOG"
+  else
+    {
+      echo "НЕ ВИЙШЛО. Причина — у рядку вище (INSTALL_FAILED_...)."
+      echo "Часто: на телефоні вже стоїть НОВІША версія (VERSION_DOWNGRADE),"
+      echo "або Xiaomi без «Встановлення через USB» не дає ставити по adb."
+    } | tee -a "$CURRENT_LOG"
+  fi
+  pause_menu
+}
+
 reset_target() {
   clear
   rm -f "$TARGET_FILE"
@@ -882,6 +1023,8 @@ while true; do
   echo "23 — Приспати рідко вживані застосунки"
   echo "24 — Розбудити застосунки з пункту 23"
   echo "25 — Що надсилає «Відкрити за допомогою» → файл"
+  echo "26 — Зберегти застосунок (усі частини APK) з телефона"
+  echo "27 — Поставити збережений застосунок на телефон"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -913,6 +1056,8 @@ while true; do
     23) set_apps_sleep "sleep" "23" "Приспати рідко вживані застосунки" ;;
     24) set_apps_sleep "wake" "24" "Розбудити застосунки з пункту 23" ;;
     25) open_with_intent ;;
+    26) save_app_apks ;;
+    27) install_saved_app ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
