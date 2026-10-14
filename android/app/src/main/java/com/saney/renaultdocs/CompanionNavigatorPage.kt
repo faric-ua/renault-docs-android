@@ -248,6 +248,22 @@ object CompanionNavigatorPage {
       font-size: 15px;
       line-height: 1.3;
     }
+    /* v0.5.133: «›» is its own element, centred by height; text wraps beside it. */
+    .tile {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tile .chev {
+      flex: none;
+      color: var(--accent);
+      font-size: 20px;
+      line-height: 1;
+    }
+    .tile .lbl {
+      flex: 1;
+      min-width: 0;
+    }
     .tile.criteria {
       border-style: dashed;
       background: #1d2530;
@@ -487,9 +503,11 @@ object CompanionNavigatorPage {
     function tile(parent, label, selected, onClick, extraClass) {
       const button = el(
         'button',
-        'tile' + (extraClass ? ' ' + extraClass : '') + (selected ? ' sel' : ''),
-        '› ' + label
+        'tile' + (extraClass ? ' ' + extraClass : '') + (selected ? ' sel' : '')
       );
+      // v0.5.133: «›» separate; a line may end after «,» or «/», never mid-code.
+      button.appendChild(el('span', 'chev', '›'));
+      button.appendChild(el('span', 'lbl', String(label).replace(/[,\/]/g, m => m + '\u200B')));
       button.addEventListener('click', onClick);
       parent.appendChild(button);
       return button;

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- v0.5.133: colour of the «›» icon, so styleChoice can put it back. -->
+    <item name="tag_open_chevron" type="id" />
+</resources>
