@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.View
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -41,6 +42,15 @@ class RdprojectImportActivity : Activity() {
     private var pickerOpen = false
     private var shownTerminalAt = -1L
     private var renderedPhase: RdprojectImportPhase? = null
+
+    /**
+     * v0.5.133 (owner, M30s 2026-10-14 20:15): «мені з нього тільки два файли».
+     * Ticked new volumes; null = not set yet → all new volumes ticked.
+     */
+    private var selectedFiles: LinkedHashSet<String>? = null
+    private var summaryLine: TextView? = null
+    private var spaceLine: TextView? = null
+    private var toggleAllButton: TextView? = null
     private var buttonOpensProject = false
 
     private val handler = Handler(Looper.getMainLooper())
@@ -67,6 +77,9 @@ class RdprojectImportActivity : Activity() {
         uri = retained?.uri ?: savedInstanceState?.getString(STATE_URI)?.let(Uri::parse)
         preview = retained?.preview
         previewError = retained?.error
+        selectedFiles =
+            retained?.selected
+                ?: savedInstanceState?.getStringArrayList(STATE_SELECTED)?.let { LinkedHashSet(it) }
 
         if (savedInstanceState == null && retained == null) {
             handleIntent(intent)
@@ -98,6 +111,7 @@ class RdprojectImportActivity : Activity() {
             incoming != null -> {
                 if (state.isTerminal) runStore.clearTerminal()
                 uri = incoming
+                selectedFiles = null
                 preview = null
                 previewError = null
                 render()
@@ -164,6 +178,7 @@ class RdprojectImportActivity : Activity() {
         }
         runCatching { contentResolver.takePersistableUriPermission(picked, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         uri = picked
+        selectedFiles = null
         preview = null
         previewError = null
         render()
@@ -212,17 +227,19 @@ class RdprojectImportActivity : Activity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         uri?.let { outState.putString(STATE_URI, it.toString()) }
+        selectedFiles?.let { outState.putStringArrayList(STATE_SELECTED, ArrayList(it)) }
         outState.putBoolean(STATE_PICKER_OPEN, pickerOpen)
         confirmDialogs.save(outState)
         super.onSaveInstanceState(outState)
     }
 
-    override fun onRetainNonConfigurationInstance(): Any = Retained(uri, preview, previewError)
+    override fun onRetainNonConfigurationInstance(): Any = Retained(uri, preview, previewError, selectedFiles)
 
     private data class Retained(
         val uri: Uri?,
         val preview: RdprojectImportSupport.Preview?,
         val error: String?,
+        val selected: LinkedHashSet<String>?,
     )
 
     // ---------------------------------------------------------------- layout
@@ -341,6 +358,35 @@ class RdprojectImportActivity : Activity() {
         }
     }
 
+    private fun chosen(loaded: RdprojectImportSupport.Preview): List<String> {
+        val newFiles = loaded.plan.toImport.map { it.volume.file }
+        val ticks = selectedFiles ?: LinkedHashSet(newFiles).also { selectedFiles = it }
+        return newFiles.filter { ticks.contains(it) }
+    }
+
+    /** v0.5.133: summary, space and button follow the ticks without redrawing the list. */
+    private fun updateSelection(loaded: RdprojectImportSupport.Preview) {
+        val plan = loaded.plan
+        val count = chosen(loaded).size
+        summaryLine?.text =
+            "Буде додано: $count з ${plan.toImport.size} нових · Уже є на телефоні: ${plan.alreadyPresent.size}"
+        summaryLine?.setTextColor(if (count > 0) Ui.accent else Ui.muted)
+        spaceLine?.let { line ->
+            val need = loaded.needBytes(count)
+            line.text =
+                "Вільно на телефоні: " + RdprojectImportSupport.formatBytes(loaded.freeBytes) +
+                    (need?.let { " · потрібно приблизно " + RdprojectImportSupport.formatBytes(it) } ?: "")
+            line.setTextColor(if (loaded.lowSpace(count)) Ui.warning else Ui.muted)
+        }
+        toggleAllButton?.text =
+            if (count == plan.toImport.size) "Зняти всі галочки" else "Вибрати всі нові"
+        if (count > 0) {
+            showButton("Імпортувати $count ${RdprojectImportSupport.volumeNoun(count)}", primary = true)
+        } else {
+            showButton("Познач томи, які додати", primary = false)
+        }
+    }
+
     private fun renderPreview(loaded: RdprojectImportSupport.Preview) {
         val plan = loaded.plan
         val toImport = plan.toImport.size
@@ -369,21 +415,20 @@ class RdprojectImportActivity : Activity() {
                 Ui.muted,
             ),
         )
+        summaryLine = null
+        spaceLine = null
+        toggleAllButton = null
         container.addView(
             line(
                 "Буде додано: $toImport · Уже є на телефоні: ${plan.alreadyPresent.size}",
                 if (toImport > 0) Ui.accent else Ui.success,
-            ).apply { setTypeface(typeface, android.graphics.Typeface.BOLD) },
+            ).apply {
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                if (toImport > 0) summaryLine = this
+            },
         )
         if (toImport > 0) {
-            val need = loaded.needBytes
-            container.addView(
-                line(
-                    "Вільно на телефоні: " + RdprojectImportSupport.formatBytes(loaded.freeBytes) +
-                        (need?.let { " · потрібно приблизно " + RdprojectImportSupport.formatBytes(it) } ?: ""),
-                    if (loaded.lowSpace) Ui.warning else Ui.muted,
-                ),
-            )
+            container.addView(line("", Ui.muted).also { spaceLine = it })
             if (loaded.lowSpace) {
                 container.addView(
                     line(
@@ -397,10 +442,29 @@ class RdprojectImportActivity : Activity() {
             line("Наявні томи не змінюються і не замінюються.", Ui.muted),
         )
 
-        plan.volumes.forEach { item -> container.addView(volumeRow(item)) }
+        if (toImport > 0) {
+            container.addView(
+                line("Галочка — том буде додано. Зніми її з томів, які не потрібні.", Ui.muted),
+            )
+            container.addView(
+                Ui.actionButton(this, "Зняти всі галочки") {
+                    val newFiles = plan.toImport.map { it.volume.file }
+                    val ticks = selectedFiles ?: LinkedHashSet(newFiles)
+                    selectedFiles =
+                        if (newFiles.all { ticks.contains(it) }) LinkedHashSet() else LinkedHashSet(newFiles)
+                    render()
+                }.also { toggleAllButton = it },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@RdprojectImportActivity, 8) },
+            )
+        }
+
+        plan.volumes.forEach { item -> container.addView(volumeRow(item, loaded)) }
 
         if (toImport > 0) {
-            showButton("Імпортувати $toImport ${RdprojectImportSupport.volumeNoun(toImport)}", primary = true)
+            updateSelection(loaded)
         } else {
             container.addView(
                 line("Усі томи з цього файлу вже є на телефоні — додавати нічого.", Ui.success),
@@ -410,7 +474,11 @@ class RdprojectImportActivity : Activity() {
         }
     }
 
-    private fun volumeRow(item: RdprojectVolumePlan): View {
+    private fun volumeRow(
+        item: RdprojectVolumePlan,
+        loaded: RdprojectImportSupport.Preview,
+    ): View {
+        if (item.status == RdprojectVolumeStatus.NEW) return newVolumeRow(item, loaded)
         val (mark, color, note) =
             when (item.status) {
                 RdprojectVolumeStatus.NEW -> Triple("＋", Ui.accent, "буде додано")
@@ -437,6 +505,61 @@ class RdprojectImportActivity : Activity() {
                 addView(Ui.textView(this@RdprojectImportActivity, item.volume.title, Ui.secondaryTextSp, Ui.text))
             }
             addView(Ui.textView(this@RdprojectImportActivity, note, Ui.secondaryTextSp, Ui.muted))
+        }
+    }
+
+    /** v0.5.133: a new volume with a tick; tapping the row toggles it too. */
+    private fun newVolumeRow(
+        item: RdprojectVolumePlan,
+        loaded: RdprojectImportSupport.Preview,
+    ): View {
+        val file = item.volume.file
+        val ticked = chosen(loaded).contains(file)
+        val note = TextView(this)
+        fun paintNote(on: Boolean) {
+            note.text = if (on) "буде додано" else "не додавати"
+            note.setTextColor(if (on) Ui.muted else Ui.warning)
+        }
+        val check =
+            CheckBox(this).apply {
+                isChecked = ticked
+                contentDescription = item.volume.label
+                setOnCheckedChangeListener { _, on ->
+                    val ticks = selectedFiles ?: LinkedHashSet<String>().also { selectedFiles = it }
+                    if (on) ticks.add(file) else ticks.remove(file)
+                    paintNote(on)
+                    updateSelection(loaded)
+                }
+            }
+        note.textSize = Ui.secondaryTextSp
+        paintNote(ticked)
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            isBaselineAligned = false
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { check.toggle() }
+            background = Ui.roundedBackground(context = this@RdprojectImportActivity, fill = Ui.surface, stroke = Ui.border)
+            setPadding(
+                Ui.dp(this@RdprojectImportActivity, 4),
+                Ui.dp(this@RdprojectImportActivity, 6),
+                Ui.dp(this@RdprojectImportActivity, 12),
+                Ui.dp(this@RdprojectImportActivity, 6),
+            )
+            layoutParams =
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@RdprojectImportActivity, 6) }
+            addView(check)
+            val text = LinearLayout(this@RdprojectImportActivity).apply { orientation = LinearLayout.VERTICAL }
+            text.addView(Ui.textView(this@RdprojectImportActivity, item.volume.label, 15f, Ui.text))
+            if (item.volume.title.isNotBlank() && item.volume.title != item.volume.label) {
+                text.addView(Ui.textView(this@RdprojectImportActivity, item.volume.title, Ui.secondaryTextSp, Ui.text))
+            }
+            text.addView(note)
+            addView(text, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         }
     }
 
@@ -526,6 +649,7 @@ class RdprojectImportActivity : Activity() {
         if (state.isRunning) return
         val loaded = preview
         when {
+            loaded != null && loaded.plan.toImport.isNotEmpty() && chosen(loaded).isEmpty() -> Unit
             loaded != null && loaded.plan.toImport.isNotEmpty() -> startImport(loaded)
             loaded != null -> finish()
             else -> {
@@ -541,12 +665,14 @@ class RdprojectImportActivity : Activity() {
         val fresh =
             runCatching { loaded.copy(plan = RdprojectImportSupport.plan(ProjectStore(this), loaded.plan.manifest)) }
                 .getOrDefault(loaded)
-        if (fresh.plan.toImport.isEmpty()) {
+        val ticked = chosen(loaded).toSet()
+        val wanted = fresh.plan.toImport.map { it.volume.file }.filter { ticked.contains(it) }
+        if (wanted.isEmpty()) {
             preview = fresh
             render()
             return
         }
-        if (!RdprojectImportService.start(this, fresh)) {
+        if (!RdprojectImportService.start(this, fresh, wanted)) {
             statusText.setTextColor(Ui.danger)
             statusText.text = "Не вдалося запустити імпорт проєкту."
             return
@@ -597,6 +723,7 @@ class RdprojectImportActivity : Activity() {
         private const val REFRESH_MS = 300L
         private const val CONFIRM_STOP = "stopRdprojectImport"
         private const val STATE_URI = "rdprojectUri"
+        private const val STATE_SELECTED = "rdprojectSelected"
         private const val STATE_PICKER_OPEN = "rdprojectPickerOpen"
         private const val EXTRA_PICK = "pickRdproject"
 

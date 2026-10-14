@@ -20,6 +20,10 @@ object RdprojectImportSupport {
             get() = RdprojectImportPlanner.estimatedNeedBytes(plan, fileSizeBytes)
         val lowSpace: Boolean
             get() = needBytes?.let { it > freeBytes } == true
+
+        fun needBytes(count: Int): Long? = RdprojectImportPlanner.estimatedNeedBytes(plan, fileSizeBytes, count)
+
+        fun lowSpace(count: Int): Boolean = needBytes(count)?.let { it > freeBytes } == true
     }
 
     fun readManifest(

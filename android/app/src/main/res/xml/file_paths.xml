@@ -12,6 +12,11 @@
     <cache-path
         name="shared_rdproject"
         path="shared-rdproject/" />
+    <!-- v0.5.133: .rdproject import copies one volume here before installing it.
+         Missing in v0.5.132 → «Failed to find configured root» (M30s 2026-10-14 20:16). -->
+    <cache-path
+        name="rdproject_import"
+        path="rdproject-import/" />
     <files-path
         name="prepared_share"
         path="prepared-share/" />
