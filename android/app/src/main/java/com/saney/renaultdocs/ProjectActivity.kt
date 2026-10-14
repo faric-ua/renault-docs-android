@@ -3606,6 +3606,33 @@ class ProjectActivity : Activity() {
                 )
             }
 
+            // TODO №1 (2026-10-15): a volume on the memory card says so; with the
+            // card out it says «вставте карту» (not broken, nothing deleted).
+            volumePlaceNote(volume)?.let { (note, color) ->
+                textColumn.addView(
+                    Ui.textView(
+                        context =
+                            this@ProjectActivity,
+                        value =
+                            note,
+                        sizeSp =
+                            13f,
+                        color =
+                            color,
+                    ).apply {
+                        setPadding(
+                            0,
+                            Ui.dp(
+                                this@ProjectActivity,
+                                4,
+                            ),
+                            0,
+                            0,
+                        )
+                    },
+                )
+            }
+
             addView(
                 textColumn,
                 LinearLayout.LayoutParams(
@@ -4856,9 +4883,39 @@ class ProjectActivity : Activity() {
         render()
     }
 
+    /** TODO №1: «на карті пам'яті» / «карту не вставлено» under a volume; null in the phone. */
+    private fun volumePlaceNote(
+        volume: ProjectVolumeRecord,
+    ): Pair<String, Int>? {
+        val packageId =
+            LocalDatasetDocumentsProvider.packageIdFromTreeUri(
+                Uri.parse(volume.treeUri),
+            ) ?: return null
+        return when (VolumeStorage.state(this, packageId)) {
+            VolumeState.CARD -> "▣ на карті пам'яті" to Ui.muted
+            VolumeState.CARD_MISSING -> "▣ на карті пам'яті — карту не вставлено" to Ui.danger
+            else -> null
+        }
+    }
+
     private fun openVolume(
         volume: ProjectVolumeRecord,
     ) {
+        val packageId =
+            LocalDatasetDocumentsProvider.packageIdFromTreeUri(
+                Uri.parse(volume.treeUri),
+            )
+        if (
+            packageId != null &&
+            VolumeStorage.state(this, packageId) == VolumeState.CARD_MISSING
+        ) {
+            android.widget.Toast.makeText(
+                this,
+                VolumeStoragePolicy.CARD_MISSING_MESSAGE,
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
+            return
+        }
         val openIntent =
             when (
                 settings.defaultOpenMode

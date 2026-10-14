@@ -16,7 +16,7 @@ DIALOG_COUNTS = {
     "HomeProjectDialogController.kt": 3,
     "ConfirmActions.kt": 1,
     "ProjectExportWizard.kt": 1,
-    "SettingsActivity.kt": 3,
+    "SettingsActivity.kt": 4,  # v0.5.135: + «Де зберігати нові томи»
     "LifecycleHelpDialogController.kt": 1,
     "ViewerActivity.kt": 2,
 }

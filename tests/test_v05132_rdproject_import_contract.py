@@ -40,7 +40,8 @@ class RdprojectImportContract(unittest.TestCase):
         self.assertIn("refuseExistingPackage: Boolean = false", importer)
         self.assertIn("throw PackageAlreadyInstalledException(", importer)
         guard = importer.index("refuseExistingPackage &&")
-        rename = importer.index("finalDirectory.renameTo(")
+        # TODO №1 (v0.5.135): the existing copy (phone or card) is set aside first.
+        rename = importer.index("previousDirectory.renameTo(")
         self.assertLess(guard, rename)
         service = source("RdprojectImportService.kt")
         self.assertIn("refuseExistingPackage = true", service)

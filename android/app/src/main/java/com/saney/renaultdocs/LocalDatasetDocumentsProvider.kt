@@ -319,6 +319,11 @@ class LocalDatasetDocumentsProvider :
         if (
             !root.isDirectory
         ) {
+            // TODO №1 (2026-10-15): a volume put on the memory card while the card
+            // is out — say so plainly; it is not broken and nothing is deleted.
+            if (VolumeStorage.state(appContext, packageId) == VolumeState.CARD_MISSING) {
+                throw FileNotFoundException(VolumeStoragePolicy.CARD_MISSING_MESSAGE)
+            }
             throw FileNotFoundException(
                 "Renault package is not installed: " +
                     packageId,
@@ -535,6 +540,11 @@ class LocalDatasetDocumentsProvider :
                 .getOrNull()
         }
 
+        /**
+         * TODO №1 (2026-10-15): the volume may lie in the phone or on the memory card
+         * ([VolumeStorage]). Returns where it is now; when it is nowhere, the phone
+         * path (which does not exist) — callers check `isDirectory` as before.
+         */
         fun packageDirectory(
             context: android.content.Context,
             packageId: String,
@@ -543,22 +553,17 @@ class LocalDatasetDocumentsProvider :
                 packageId,
             )
 
-            return File(
-                File(
-                    context.noBackupFilesDir,
-                    PACKAGE_DIRECTORY,
-                ),
-                packageId,
-            )
+            return VolumeStorage.locate(context, packageId)
+                ?: File(
+                    VolumeStorage.phoneRoot(context),
+                    packageId,
+                )
         }
 
+        /** The phone folder of volumes (before TODO №1 the only one). */
         fun packagesDirectory(
             context: android.content.Context,
-        ): File =
-            File(
-                context.noBackupFilesDir,
-                PACKAGE_DIRECTORY,
-            )
+        ): File = VolumeStorage.phoneRoot(context)
 
         private fun documentId(
             packageId: String,

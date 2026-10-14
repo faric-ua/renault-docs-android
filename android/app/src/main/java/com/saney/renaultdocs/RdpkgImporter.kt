@@ -54,11 +54,16 @@ object RdpkgImporter {
             if (isCancelled()) throw ConversionCancelledException()
             val appContext =
                 context.applicationContext
+            // TODO №1 (2026-10-15): new volumes go where Settings → «Де зберігати нові
+            // томи» says (phone or memory card). Staging is made in the same place, so
+            // activation stays one rename on one disk.
+            val chosenPlace =
+                VolumeStorage.chosenPlace(appContext)
             val packagesDirectory =
-                LocalDatasetDocumentsProvider
-                    .packagesDirectory(
-                        appContext,
-                    )
+                (
+                    VolumeStorage.root(appContext, chosenPlace)
+                        ?: throw IllegalStateException(VolumeStoragePolicy.CARD_NOT_AVAILABLE_FOR_INSTALL)
+                )
                     .apply {
                         mkdirs()
                     }
@@ -137,22 +142,28 @@ object RdpkgImporter {
                     ),
                 )
 
+                // Where this volume is installed now (phone or card), if anywhere.
+                val previousDirectory =
+                    VolumeStorage.locate(
+                        appContext,
+                        packageMetadata.packageId,
+                    )
                 val finalDirectory =
-                    LocalDatasetDocumentsProvider
-                        .packageDirectory(
-                            appContext,
-                            packageMetadata.packageId,
-                        )
-                val backupDirectory =
                     File(
                         packagesDirectory,
+                        packageMetadata.packageId,
+                    )
+                // The old copy is set aside in its own place (rename never crosses disks).
+                val backupDirectory =
+                    File(
+                        previousDirectory?.parentFile ?: packagesDirectory,
                         ".backup-" +
                             packageMetadata.packageId,
                     )
 
                 if (
                     refuseExistingPackage &&
-                    finalDirectory.exists()
+                    previousDirectory != null
                 ) {
                     throw PackageAlreadyInstalledException(
                         packageMetadata.packageId,
@@ -165,10 +176,10 @@ object RdpkgImporter {
                     .deleteRecursively()
 
                 if (
-                    finalDirectory.exists()
+                    previousDirectory != null
                 ) {
                     require(
-                        finalDirectory.renameTo(
+                        previousDirectory.renameTo(
                             backupDirectory,
                         ),
                     ) {
@@ -190,6 +201,12 @@ object RdpkgImporter {
 
                     activated =
                         true
+
+                    VolumeStorage.rememberPlace(
+                        appContext,
+                        packageMetadata.packageId,
+                        chosenPlace,
+                    )
 
                     val treeUri =
                         LocalDatasetDocumentsProvider
@@ -250,8 +267,19 @@ object RdpkgImporter {
                         backupDirectory.exists()
                     ) {
                         backupDirectory.renameTo(
-                            finalDirectory,
+                            previousDirectory ?: finalDirectory,
                         )
+                        previousDirectory?.let { previous ->
+                            VolumeStorage.rememberPlace(
+                                appContext,
+                                packageMetadata.packageId,
+                                if (previous.parentFile == VolumeStorage.phoneRoot(appContext)) {
+                                    VolumePlace.PHONE
+                                } else {
+                                    VolumePlace.CARD
+                                },
+                            )
+                        }
                     }
 
                     throw error

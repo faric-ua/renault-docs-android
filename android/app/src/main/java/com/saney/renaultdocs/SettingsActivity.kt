@@ -19,6 +19,7 @@ class SettingsActivity : Activity() {
     private lateinit var modeValue: TextView
     private lateinit var pdfZoomValue: TextView
     private lateinit var pdfStepValue: TextView
+    private lateinit var storageValue: TextView
     private lateinit var backupValue: TextView
     private lateinit var backupWarning: TextView
     private lateinit var backupChooseButton: Button
@@ -75,7 +76,16 @@ class SettingsActivity : Activity() {
 
             DIALOG_PDF_STEP ->
                 showPdfStepChooser()
+
+            DIALOG_STORAGE ->
+                showStorageChooser()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // The card may be put in or taken out while the app is in the background.
+        if (::storageValue.isInitialized) renderValues()
     }
 
     override fun onSaveInstanceState(
@@ -366,6 +376,28 @@ class SettingsActivity : Activity() {
                 },
                 valueHolder = {
                     modeValue = it
+                },
+            )
+        )
+
+        // TODO №1 (owner 2026-10-14 20:15, plan 2026-10-15 01:55): phone or memory card.
+        body.addView(
+            sectionTitle(
+                "Томи",
+            )
+        )
+
+        body.addCard(
+            settingRow(
+                title =
+                    "Де зберігати нові томи",
+                description =
+                    "Телефон або карта пам'яті. Діє для всіх нових томів: «Готові проєкти», проєкт із файлу, .rdpkg, створення з архіву. Томи, що вже є, лишаються там, де лежать.",
+                onClick = {
+                    showStorageChooser()
+                },
+                valueHolder = {
+                    storageValue = it
                 },
             )
         )
@@ -1219,6 +1251,9 @@ class SettingsActivity : Activity() {
                     "%"
             }
 
+        storageValue.text =
+            VolumeStorage.choiceLine(this)
+
         pdfStepValue.text =
             "±" +
                 settings
@@ -1483,6 +1518,66 @@ class SettingsActivity : Activity() {
         )
     }
 
+    private fun showStorageChooser() {
+        val cardPresent =
+            VolumeStorage.cardPresent(this)
+        val places =
+            listOf(VolumePlace.PHONE, VolumePlace.CARD)
+        val labels =
+            places.map { place ->
+                VolumeStoragePolicy.choiceLine(
+                    place = place,
+                    cardPresent = cardPresent,
+                    freeBytes = VolumeStorage.freeBytes(this, place),
+                )
+            }.toTypedArray()
+        val current =
+            places.indexOf(VolumeStorage.chosenPlace(this))
+
+        activeDialogKind =
+            DIALOG_STORAGE
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle(
+                    "Де зберігати нові томи",
+                )
+                .setSingleChoiceItems(
+                    labels,
+                    current,
+                ) { dialog, which ->
+                    val place = places[which]
+                    if (place == VolumePlace.CARD && !cardPresent) {
+                        statusText.text =
+                            "Карту пам'яті не знайдено. Встав карту і спробуй ще раз."
+                        statusText.setTextColor(Ui.danger)
+                    } else {
+                        VolumeStorage.setChosenPlace(this, place)
+                        statusText.text =
+                            "Нові томи: " + VolumeStoragePolicy.placeLabel(place) + "."
+                        statusText.setTextColor(Ui.muted)
+                    }
+                    dialog.dismiss()
+                    renderValues()
+                }
+                .setNegativeButton(
+                    "Скасувати",
+                    null,
+                )
+                .create()
+
+        dialog.setOnDismissListener {
+            activeDialogKind = ""
+        }
+        dialog.show()
+        DialogUi.apply(
+            dialog =
+                dialog,
+            role =
+                DialogRole.CHOICE,
+        )
+    }
+
     private fun openBackupFolderPicker() {
         val intent =
             Intent(
@@ -1523,5 +1618,7 @@ class SettingsActivity : Activity() {
             "pdfZoom"
         private const val DIALOG_PDF_STEP =
             "pdfStep"
+        private const val DIALOG_STORAGE =
+            "volumeStorage"
     }
 }

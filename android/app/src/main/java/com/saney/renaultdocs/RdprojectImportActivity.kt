@@ -381,6 +381,38 @@ class RdprojectImportActivity : Activity() {
         return newFiles.filter { ticks.contains(it) }
     }
 
+    /**
+     * TODO №1 (owner 2026-10-14 20:15): where the volumes go — phone or memory card.
+     * The same setting as Settings → «Де зберігати нові томи».
+     */
+    private fun addPlaceRow(loaded: RdprojectImportSupport.Preview) {
+        val place = VolumeStorage.chosenPlace(this)
+        val cardPresent = VolumeStorage.cardPresent(this)
+        val missingCard = place == VolumePlace.CARD && !cardPresent
+        container.addView(
+            line(
+                "Куди: " + VolumeStorage.choiceLine(this),
+                if (missingCard) Ui.danger else Ui.text,
+            ).apply { setTypeface(typeface, android.graphics.Typeface.BOLD) },
+        )
+        val other = if (place == VolumePlace.PHONE) VolumePlace.CARD else VolumePlace.PHONE
+        if (other == VolumePlace.CARD && !cardPresent) return
+        container.addView(
+            Ui.actionButton(
+                this,
+                if (other == VolumePlace.CARD) "Зберегти на карту пам'яті" else "Зберегти в телефон",
+            ) {
+                VolumeStorage.setChosenPlace(this, other)
+                preview = loaded.copy(freeBytes = RdprojectImportSupport.freeBytes(this))
+                render()
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply { topMargin = Ui.dp(this@RdprojectImportActivity, 6) },
+        )
+    }
+
     /** v0.5.133: summary, space and button follow the ticks without redrawing the list. */
     private fun updateSelection(loaded: RdprojectImportSupport.Preview) {
         val plan = loaded.plan
@@ -391,7 +423,7 @@ class RdprojectImportActivity : Activity() {
         spaceLine?.let { line ->
             val need = loaded.needBytes(count)
             line.text =
-                "Вільно на телефоні: " + RdprojectImportSupport.formatBytes(loaded.freeBytes) +
+                "Вільно там: " + RdprojectImportSupport.formatBytes(loaded.freeBytes) +
                     (need?.let { " · потрібно приблизно " + RdprojectImportSupport.formatBytes(it) } ?: "")
             line.setTextColor(if (loaded.lowSpace(count)) Ui.warning else Ui.muted)
         }
@@ -445,6 +477,7 @@ class RdprojectImportActivity : Activity() {
             },
         )
         if (toImport > 0) {
+            addPlaceRow(loaded)
             container.addView(line("", Ui.muted).also { spaceLine = it })
             if (loaded.lowSpace) {
                 container.addView(
@@ -678,6 +711,15 @@ class RdprojectImportActivity : Activity() {
     }
 
     private fun startImport(loaded: RdprojectImportSupport.Preview) {
+        if (VolumeStorage.chosenPlace(this) == VolumePlace.CARD && !VolumeStorage.cardPresent(this)) {
+            android.widget.Toast.makeText(
+                this,
+                "Карту пам'яті не знайдено. Встав карту або натисни «Зберегти в телефон».",
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
+            render()
+            return
+        }
         // Re-check right before starting: the phone may have changed since the preview.
         val fresh =
             runCatching { loaded.copy(plan = RdprojectImportSupport.plan(ProjectStore(this), loaded.plan.manifest)) }
