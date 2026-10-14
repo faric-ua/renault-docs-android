@@ -3,6 +3,7 @@
 #   docs/ua/USER_GUIDE.md            — Markdown with Mermaid (GitHub)
 #   docs/ua/Posibnyk-Renault-Docs.docx — Word with diagram pictures
 #   docs/ua/Posibnyk-Renault-Docs.pdf  — PDF (converted from the Word file)
+#   android/app/src/main/assets/guide/index.html — the guide inside the app (v0.5.130)
 # Needs: python3, graphviz (dot), node + npm package "docx", LibreOffice (soffice).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -10,9 +11,10 @@ UA="$(cd "$HERE/.." && pwd)"
 TMP="$(mktemp -d)"
 python3 -I "$HERE/build_guide.py" "$HERE/template.html" "$TMP"
 cp "$TMP/USER_GUIDE.md" "$UA/USER_GUIDE.md"
+python3 -I "$HERE/build_app_guide.py"
 python3 -I "$HERE/export_assets.py" "$TMP"
 rm -f "$HERE"/diagrams/*.png && mkdir -p "$HERE/diagrams" && cp "$TMP"/diagrams/*.png "$HERE/diagrams/"
 (cd "$TMP" && node "$HERE/build_docx.js" guide.json Posibnyk-Renault-Docs.docx \
   && soffice --headless --convert-to pdf Posibnyk-Renault-Docs.docx >/dev/null)
 cp "$TMP/Posibnyk-Renault-Docs.docx" "$TMP/Posibnyk-Renault-Docs.pdf" "$UA/"
-echo "Готово: USER_GUIDE.md, Posibnyk-Renault-Docs.docx, Posibnyk-Renault-Docs.pdf"
+echo "Готово: USER_GUIDE.md, Posibnyk-Renault-Docs.docx, Posibnyk-Renault-Docs.pdf, assets/guide/index.html"

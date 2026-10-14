@@ -422,6 +422,11 @@ class SettingsActivity : Activity() {
             )
         )
 
+        // v0.5.130: the user guide inside the app (owner 2026-10-14).
+        body.addView(
+            guideCard(),
+        )
+
         body.addView(
             supportCard(),
         )
@@ -910,6 +915,106 @@ class SettingsActivity : Activity() {
             )
 
             addView(actions)
+        }
+
+    private fun guideCard():
+        View =
+        LinearLayout(
+            this,
+        ).apply {
+            orientation =
+                LinearLayout.VERTICAL
+            isClickable =
+                true
+            isFocusable =
+                true
+            contentDescription =
+                "Інструкція користувача"
+            background =
+                Ui.roundedBackground(
+                    context =
+                        this@SettingsActivity,
+                    fill =
+                        Ui.surface,
+                    stroke =
+                        Ui.accent,
+                )
+            setPadding(
+                Ui.dp(
+                    this@SettingsActivity,
+                    16,
+                ),
+                Ui.dp(
+                    this@SettingsActivity,
+                    14,
+                ),
+                Ui.dp(
+                    this@SettingsActivity,
+                    16,
+                ),
+                Ui.dp(
+                    this@SettingsActivity,
+                    14,
+                ),
+            )
+            addView(
+                Ui.textView(
+                    context =
+                        this@SettingsActivity,
+                    value =
+                        "📖 Інструкція користувача",
+                    sizeSp =
+                        17f,
+                    color =
+                        Ui.entityTitle,
+                ).apply {
+                    setTypeface(
+                        typeface,
+                        android.graphics.Typeface.BOLD,
+                    )
+                },
+            )
+
+            addView(
+                Ui.textView(
+                    context =
+                        this@SettingsActivity,
+                    value =
+                        "Як додати, читати і передавати томи. Працює без інтернету.",
+                    sizeSp =
+                        Ui.secondaryTextSp,
+                    color =
+                        Ui.muted,
+                ).apply {
+                    setPadding(
+                        0,
+                        Ui.dp(
+                            this@SettingsActivity,
+                            5,
+                        ),
+                        0,
+                        0,
+                    )
+                },
+            )
+
+            setOnClickListener {
+                GuideActivity.open(
+                    this@SettingsActivity,
+                )
+            }
+        }.also { card ->
+            card.layoutParams =
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin =
+                        Ui.dp(
+                            this@SettingsActivity,
+                            10,
+                        )
+                }
         }
 
     private fun supportCard():
