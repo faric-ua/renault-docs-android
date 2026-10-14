@@ -1525,7 +1525,7 @@ class SettingsActivity : Activity() {
             listOf(VolumePlace.PHONE, VolumePlace.CARD)
         val labels =
             places.map { place ->
-                VolumeStoragePolicy.choiceLine(
+                VolumeStoragePolicy.choiceItem(
                     place = place,
                     cardPresent = cardPresent,
                     freeBytes = VolumeStorage.freeBytes(this, place),
@@ -1540,7 +1540,7 @@ class SettingsActivity : Activity() {
         val dialog =
             AlertDialog.Builder(this)
                 .setTitle(
-                    "Де зберігати нові томи",
+                    "Де зберігати нові томи · вільно",
                 )
                 .setSingleChoiceItems(
                     labels,
