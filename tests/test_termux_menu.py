@@ -235,6 +235,25 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertEqual(text.count('ask_target_ip\n'), 2)
         self.assertNotIn('192.168.x.x', text)
 
+    def test_phone_diagnostics_saves_and_installs_all_apk_parts(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('26) save_app_apks ;;', text)
+        self.assertIn('27) install_saved_app ;;', text)
+        save = text[text.index('save_app_apks() {'):text.index('install_saved_app() {')]
+        self.assertIn('pm path "$pkg"', save)
+        self.assertIn('adb -s "$ADB_TARGET" pull', save)
+        for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'install', 'rm -'):
+            self.assertNotIn(forbidden, save.replace('install_saved_app', ''))
+        inst = text[text.index('install_saved_app() {'):text.index('reset_target() {')]
+        self.assertIn('install-multiple -r', inst)
+        self.assertIn('Продовжити? Напиши так / ні', inst)
+        for forbidden in ('uninstall', 'pm clear', ' -d ', 'rm -'):
+            self.assertNotIn(forbidden, inst)
+
     def test_phone_diagnostics_has_dedicated_installer(self):
         repo = Path(__file__).resolve().parents[1]
         text = (
