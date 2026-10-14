@@ -82,6 +82,24 @@
                 <data android:mimeType="application/x-zip-compressed" />
                 <data android:mimeType="application/x-rdproject" />
             </intent-filter>
+            <!-- Phone QA 2026-10-14 20:13 (M30s, «Мої файли» → Download/Quick Share):
+                 «Відкрити за допомогою» did not list Renault Docs for a .rdproject —
+                 the file manager does not send octet-stream/zip for an unknown
+                 extension. Match the file name ending instead. Android's pathPattern
+                 is not a full regex: «.*\.rdproject» stops at the first dot, so one
+                 pattern per number of dots in the path. -->
+            <intent-filter android:label="@string/rdproject_import_label">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\..*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.rdproject" />
+            </intent-filter>
             <intent-filter android:label="@string/rdproject_import_label">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
