@@ -93,13 +93,42 @@ class RdprojectImportContract(unittest.TestCase):
             self.assertIn(action, block)
         for mime in ("application/octet-stream", "application/zip"):
             self.assertIn(f'android:mimeType="{mime}"', block)
-        self.assertNotIn('android:scheme="file"', block)
         # Phone QA 2026-10-14 20:13 (M30s «Мої файли»): matched by file name too.
         self.assertIn('android:pathPattern=".*\\\\.rdproject"', block)
         self.assertIn('android:mimeType="*/*"', block)
+        # Phone QA 2026-10-14 23:01–23:04: ES Провідник lists Renault Docs, Samsung
+        # «Мої файли» offers only two ZIP readers — it sends the file as an archive,
+        # possibly as file://. Accept file:// and every common zip type name.
+        filters = re.findall(r"<intent-filter.*?</intent-filter>", block, re.S)
+        view = [f for f in filters if "action.VIEW" in f]
+        typed = [f for f in view if 'mimeType="application/zip"' in f]
+        self.assertEqual(len(typed), 1)
+        for scheme in ("content", "file"):
+            self.assertIn(f'android:scheme="{scheme}"', typed[0])
+        for mime in ("application/x-zip", "application/zip-compressed", "multipart/x-zip"):
+            self.assertIn(f'android:mimeType="{mime}"', typed[0])
+        # A filter with any mimeType never matches a request without a type —
+        # one name filter carries no mimeType at all.
+        untyped = [f for f in view if "pathPattern" in f and "mimeType" not in f]
+        self.assertEqual(len(untyped), 1)
+        self.assertIn('android:scheme="file"', untyped[0])
+        self.assertIn('android:host="*"', untyped[0])
+        self.assertNotIn("BROWSABLE", block)
+        activity = source("RdprojectImportActivity.kt")
+        self.assertIn("RdprojectImportSupport.FILE_PATH_NO_ACCESS", activity)
+        self.assertIn('"Вибрати цей файл ще раз"', activity)
+        self.assertIn("RdprojectImportProgress.describeIncoming(", activity)
         main = source("MainActivity.kt")
         self.assertIn('"Проєкт із файлу"', main)
         self.assertIn("RdprojectImportActivity.pickIntent(this@MainActivity)", main)
+
+    def test_one_bar_for_the_whole_import(self):
+        # TODO №3 (M30s 2026-10-14 20:36–20:39): the bar jumped between the share of
+        # the file and one volume's install. The bar is the share of the file only.
+        service = source("RdprojectImportService.kt")
+        self.assertIn("RdprojectImportProgress.fileBarValue(", service)
+        self.assertIn("RdprojectImportProgress.installPercent(progress)", service)
+        self.assertNotIn("current = progress.normalizedCurrent", service)
 
     def test_screen_survives_rotation_and_asks_before_stopping(self):
         activity = source("RdprojectImportActivity.kt")

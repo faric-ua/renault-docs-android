@@ -73,13 +73,22 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="unspecified">
+            <!-- Phone QA 2026-10-14 23:01–23:04: another file manager lists Renault Docs
+                 (it sends */*), but Samsung «Мої файли» offers only AndrOpen Office and
+                 Mindomo — two ZIP readers. So «Мої файли» looks inside, sees a ZIP and
+                 sends it as an archive, possibly as file:// and with a zip type name we
+                 did not list. Both schemes and all common zip type names are accepted. -->
             <intent-filter android:label="@string/rdproject_import_label">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="content" />
+                <data android:scheme="file" />
                 <data android:mimeType="application/octet-stream" />
                 <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip" />
                 <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/zip-compressed" />
+                <data android:mimeType="multipart/x-zip" />
                 <data android:mimeType="application/x-rdproject" />
             </intent-filter>
             <!-- Phone QA 2026-10-14 20:13 (M30s, «Мої файли» → Download/Quick Share):
@@ -88,12 +97,32 @@
                  extension. Match the file name ending instead. Android's pathPattern
                  is not a full regex: «.*\.rdproject» stops at the first dot, so one
                  pattern per number of dots in the path. -->
+            <!-- Phone QA 2026-10-14 23:01 (M30s, v0.5.133): still not listed. The
+                 name filter above required a MIME type (*/*) and a content:// address.
+                 A filter with a mimeType never matches a request that carries no type
+                 at all, and «Мої файли» may also send file://. So the name is matched
+                 three ways: any type, no type, and file:// as well. A file:// address
+                 that Android does not let us read is handled on the screen (pick the
+                 file again). -->
             <intent-filter android:label="@string/rdproject_import_label">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="content" />
+                <data android:scheme="file" />
                 <data android:host="*" />
                 <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\..*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.rdproject" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.rdproject" />
+            </intent-filter>
+            <intent-filter android:label="@string/rdproject_import_label">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
                 <data android:pathPattern=".*\\.rdproject" />
                 <data android:pathPattern=".*\\..*\\.rdproject" />
                 <data android:pathPattern=".*\\..*\\..*\\.rdproject" />
@@ -105,7 +134,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/octet-stream" />
                 <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip" />
                 <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/zip-compressed" />
+                <data android:mimeType="multipart/x-zip" />
                 <data android:mimeType="application/x-rdproject" />
             </intent-filter>
         </activity>

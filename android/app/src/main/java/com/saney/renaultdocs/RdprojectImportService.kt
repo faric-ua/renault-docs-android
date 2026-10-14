@@ -36,6 +36,14 @@ class RdprojectImportService : Service() {
     @Volatile private var skippedCount = 0
     private var lastNotifyAt = 0L
 
+    /**
+     * TODO №3 (M30s 2026-10-14 20:36–20:39): the «Етап» bar jumped 1 % → 44 % → 40 % →
+     * 70 % because it showed the share of the file while reading and the progress of
+     * one volume while installing it. Now the bar is always the share of the whole
+     * file already passed; the install of a volume is shown as «встановлюю N %» in text.
+     */
+    @Volatile private var fileBarCurrent = -1
+
     override fun onCreate() {
         super.onCreate()
         workWakeLock = BackgroundWorkWakeLock(this, "RdprojectImport")
@@ -144,6 +152,7 @@ class RdprojectImportService : Service() {
         workDir.mkdirs()
         importedCount = 0
         skippedCount = 0
+        fileBarCurrent = -1
         metWanted.clear()
         val manifest = RdprojectImportSupport.readManifest(applicationContext, uri)
         val wanted = state.wantedFiles.toSet().intersect(manifest.volumes.map { it.file }.toSet())
@@ -239,7 +248,7 @@ class RdprojectImportService : Service() {
             return
         }
         val text = "$position · ${volume.label} — встановлюю"
-        runStore.update(text)
+        if (fileBarCurrent >= 0) runStore.update(text, fileBarCurrent, SCALE) else runStore.update(text)
         notifyThrottled(text)
         val uri = FileProvider.getUriForFile(applicationContext, "$packageName.files", file)
         val result =
@@ -248,11 +257,13 @@ class RdprojectImportService : Service() {
                 packageUri = uri,
                 progressState = { progress ->
                     dataSyncTimeout.checkActive()
-                    runStore.update(
-                        message = text,
-                        current = progress.normalizedCurrent ?: 0,
-                        total = progress.total ?: 0,
-                    )
+                    val percent = RdprojectImportProgress.installPercent(progress)
+                    val message = if (percent != null) "$text $percent %" else text
+                    if (fileBarCurrent >= 0) {
+                        runStore.update(message = message, current = fileBarCurrent, total = SCALE)
+                    } else {
+                        runStore.update(message)
+                    }
                 },
                 // Stops only at the importer's safe checkpoints, never mid-activation.
                 isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() },
@@ -320,7 +331,8 @@ class RdprojectImportService : Service() {
         fileSize: Long,
     ) {
         if (fileSize > 0L) {
-            val current = (bytesRead.coerceIn(0L, fileSize) * SCALE / fileSize).toInt()
+            val current = RdprojectImportProgress.fileBarValue(bytesRead, fileSize, fileBarCurrent, SCALE)
+            fileBarCurrent = current
             runStore.update(text, current, SCALE)
         } else {
             runStore.update(text)
@@ -395,6 +407,7 @@ class RdprojectImportService : Service() {
         private const val NOTIFICATION_ID = 3713
         private const val WORK_DIR = "rdproject-import"
         private const val SCALE = 10_000
+
         private const val NOTIFY_EVERY_MS = 1_000L
 
         fun start(

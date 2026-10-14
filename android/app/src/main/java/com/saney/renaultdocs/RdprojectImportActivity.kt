@@ -38,6 +38,9 @@ class RdprojectImportActivity : Activity() {
     private var uri: Uri? = null
     private var preview: RdprojectImportSupport.Preview? = null
     private var previewError: String? = null
+
+    /** How another app handed the file over: shown only when it could not be read. */
+    private var incomingInfo: String? = null
     private var loading = false
     private var pickerOpen = false
     private var shownTerminalAt = -1L
@@ -110,6 +113,7 @@ class RdprojectImportActivity : Activity() {
             }
             incoming != null -> {
                 if (state.isTerminal) runStore.clearTerminal()
+                incomingInfo = RdprojectImportProgress.describeIncoming(incoming.scheme, intent?.type)
                 uri = incoming
                 selectedFiles = null
                 preview = null
@@ -177,6 +181,7 @@ class RdprojectImportActivity : Activity() {
             return
         }
         runCatching { contentResolver.takePersistableUriPermission(picked, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        incomingInfo = null
         uri = picked
         selectedFiles = null
         preview = null
@@ -201,7 +206,14 @@ class RdprojectImportActivity : Activity() {
                             when (error) {
                                 is RdprojectFormatException -> error.message
                                 is SecurityException -> RdprojectImportSupport.NO_ACCESS
-                                else -> error.message
+                                // Phone QA 2026-10-14 23:01: «Мої файли» may hand over a
+                                // raw file:// path that Android does not let us read.
+                                else ->
+                                    if (target.scheme == "file") {
+                                        RdprojectImportSupport.FILE_PATH_NO_ACCESS
+                                    } else {
+                                        error.message
+                                    }
                             } ?: "Не вдалося прочитати файл проєкту."
                     }
                 render()
@@ -343,7 +355,12 @@ class RdprojectImportActivity : Activity() {
                             "«Поділитися проєктом одним файлом (.rdproject)».",
                     ),
                 )
-                showButton("Вибрати інший файл", primary = false)
+                incomingInfo?.let { container.addView(hint(it)) }
+                if (previewError == RdprojectImportSupport.FILE_PATH_NO_ACCESS) {
+                    showButton("Вибрати цей файл ще раз", primary = true)
+                } else {
+                    showButton("Вибрати інший файл", primary = false)
+                }
             }
             loading || uri != null -> {
                 statusText.setTextColor(Ui.muted)

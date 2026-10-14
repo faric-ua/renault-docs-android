@@ -264,6 +264,32 @@ class RdprojectImportTest {
         }
     }
 
+    @Test
+    fun fileBarNeverGoesBack() {
+        // TODO №3 (M30s 2026-10-14): 1 % → 44 % → 40 % → 70 % must not happen.
+        assertEquals(4400, RdprojectImportProgress.fileBarValue(44, 100, 0, 10_000))
+        assertEquals(4400, RdprojectImportProgress.fileBarValue(40, 100, 4400, 10_000))
+        assertEquals(10_000, RdprojectImportProgress.fileBarValue(500, 100, 4400, 10_000))
+        assertEquals(4400, RdprojectImportProgress.fileBarValue(10, 0, 4400, 10_000))
+    }
+
+    @Test
+    fun installPercentIsWholeNumber() {
+        assertEquals(40, RdprojectImportProgress.installPercent(OperationProgress("x", 2, 5)))
+        assertNull(RdprojectImportProgress.installPercent(OperationProgress("x")))
+        assertNull(RdprojectImportProgress.installPercent(OperationProgress("x", 1, 0)))
+    }
+
+    @Test
+    fun incomingDescriptionHasNoPath() {
+        assertEquals("Отримано: file:// · тип: не вказано", RdprojectImportProgress.describeIncoming("file", null))
+        assertEquals(
+            "Отримано: content:// · тип: application/zip",
+            RdprojectImportProgress.describeIncoming("CONTENT", " application/zip "),
+        )
+        assertEquals("Отримано: ?:// · тип: не вказано", RdprojectImportProgress.describeIncoming(null, ""))
+    }
+
     private fun assertFormatError(block: () -> Unit) {
         try {
             block()
