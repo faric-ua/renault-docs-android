@@ -1,0 +1,27 @@
+{
+  "versionName": "0.5.129",
+  "versionCode": 145,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.129-catalog-installed-green",
+  "issues": [
+    162,
+    147
+  ],
+  "scope": "Catalog: «✓ Встановлено» on its own line in green (Ui.success), owner 2026-10-14 04:50. Includes v0.5.128 (catalog v5).",
+  "sourceBase": "v0.5.128/build144",
+  "phoneQa": "PENDING",
+  "pr_number": 272,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 820,
+  "signed_apk": "PASS",
+  "source_sha": "55c2c5dfb1169a0db757afb71ce4b1d00b9da05f",
+  "signed_run_id": 38498155713,
+  "signed_run_number": 193,
+  "signed_android_apk_run": 193,
+  "artifact_id": 11864124506,
+  "artifact_name": "Renault-Docs-v0.5.129-Debug",
+  "artifact_digest": "sha256:69980b7df4998c53cca3d979174f2f35951a7dded257f04156c48ab020c7f323",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Catalog → Megane II: «✓ Встановлено» on a separate green line; scroll to end — 22 volumes."
+}
