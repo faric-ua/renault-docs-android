@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.130",
+  "versionCode": 146,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.130-in-app-guide",
+  "issues": [
+    147
+  ],
+  "scope": "User guide inside the app: Settings → Про програму → «📖 Інструкція користувача» (offline page from assets, generated from the same source as USER_GUIDE.md). Guide content updated to v0.5.130. Includes v0.5.129.",
+  "sourceBase": "v0.5.129/build145",
+  "phoneQa": "PENDING",
+  "pr_number": 278,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 827,
+  "signed_apk": "PASS",
+  "source_sha": "bbeff34ea13c044a59df73975de31a4503bcbb99",
+  "signed_run_id": 38507430466,
+  "signed_run_number": 194,
+  "signed_android_apk_run": 194,
+  "artifact_id": 11868237461,
+  "artifact_name": "Renault-Docs-v0.5.130-Debug",
+  "artifact_digest": "sha256:12b377f63fb9fedf59757cec90e0f5b15e168805837210fab2a764899ffb1674",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Settings (key icon) → «Про програму» → «📖 Інструкція користувача» → list of 11 sections; open one, back returns."
+}
