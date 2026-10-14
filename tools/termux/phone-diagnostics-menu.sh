@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.1"
+PD_VERSION="2026-10-15.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -217,7 +217,9 @@ PAIRING
 ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
 34. Пункт 26 — зберегти застосунок з підключеного
     телефона: УСІ частини APK (base + split_*) у
-    Documents/PhoneDiagnostics/apk/. Нічого не змінює.
+    Documents/PhoneDiagnostics/apk/ + один файл .apks
+    для чужого телефона (ставиться застосунком SAI
+    з Play Маркету). Нічого не змінює.
 35. Пункт 27 — поставити збережений застосунок на
     підключений телефон (усі частини разом).
     Один APK через Quick Share часто не працює саме
@@ -917,8 +919,28 @@ EOF2
   echo | tee -a "$CURRENT_LOG"
   if [ "$saved" -eq 0 ]; then
     echo "НЕ ВИЙШЛО: телефон не віддав жодної частини APK." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+  echo "Збережено частин: $saved → $dir" | tee -a "$CURRENT_LOG"
+
+  # Один файл .apks для чужого телефона: відкривається застосунком SAI
+  # («Split APKs Installer» з Play Маркету), який ставить усі частини разом.
+  local share="$APK_DIR/${pkg}_v${version:-unknown}.apks"
+  if ! command -v zip >/dev/null 2>&1; then
+    echo "Ставлю zip (один раз)..." | tee -a "$CURRENT_LOG"
+    pkg install -y zip >> "$CURRENT_LOG" 2>&1 || true
+  fi
+  if command -v zip >/dev/null 2>&1 && (cd "$dir" && zip -q -j -X "$share.tmp" ./*.apk) && mv "$share.tmp" "$share"; then
+    {
+      echo
+      echo "Файл для іншого телефона: $share"
+      echo "Надішли його (Viber/Telegram/Quick Share). На тому телефоні:"
+      echo "Play Маркет → «SAI» (Split APKs Installer) → відкрити цей файл → Встановити."
+    } | tee -a "$CURRENT_LOG"
   else
-    echo "Збережено частин: $saved → $dir" | tee -a "$CURRENT_LOG"
+    rm -f "$share.tmp"
+    echo "Файл .apks не вийшов (нема zip). Частини лежать у папці вище." | tee -a "$CURRENT_LOG"
   fi
   pause_menu
 }
@@ -929,7 +951,7 @@ install_saved_app() {
 
   local dirs n dir answer i
   mkdir -p "$APK_DIR"
-  dirs="$(ls -1 "$APK_DIR" 2>/dev/null | sort)"
+  dirs="$(ls -1 "$APK_DIR" 2>/dev/null | grep -v '\.apks$' | sort)"
   if [ -z "$dirs" ]; then
     echo "Ще нічого не збережено. Спершу пункт 26."
     pause_menu

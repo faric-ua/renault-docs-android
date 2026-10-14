@@ -214,7 +214,7 @@ class TermuxMenuContractTests(unittest.TestCase):
                      'com.facebook.katana', 'com.facebook.orca', 'whatsapp', 'viber',
                      'telegram', 'com.google.android.verifier', 'tachyon'):
             self.assertNotIn(keep, line)
-        fn = text[text.index('set_apps_sleep() {'):text.index('reset_target() {')]
+        fn = text[text.index('set_apps_sleep() {'):text.index('open_with_intent() {')]
         self.assertIn('RUN_ANY_IN_BACKGROUND ignore', fn)
         self.assertIn('RUN_ANY_IN_BACKGROUND allow', fn)
         self.assertIn('set-standby-bucket "$pkg" restricted', fn)
@@ -246,8 +246,11 @@ class TermuxMenuContractTests(unittest.TestCase):
         save = text[text.index('save_app_apks() {'):text.index('install_saved_app() {')]
         self.assertIn('pm path "$pkg"', save)
         self.assertIn('adb -s "$ADB_TARGET" pull', save)
-        for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'install', 'rm -'):
-            self.assertNotIn(forbidden, save.replace('install_saved_app', ''))
+        self.assertIn('.apks', save)
+        self.assertIn('SAI', save)
+        for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'adb -s "$ADB_TARGET" install',
+                          'pm install', 'rm -rf'):
+            self.assertNotIn(forbidden, save)
         inst = text[text.index('install_saved_app() {'):text.index('reset_target() {')]
         self.assertIn('install-multiple -r', inst)
         self.assertIn('Продовжити? Напиши так / ні', inst)
