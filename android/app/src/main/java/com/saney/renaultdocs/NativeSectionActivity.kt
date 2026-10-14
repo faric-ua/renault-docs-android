@@ -3710,10 +3710,17 @@ class NativeSectionActivity : Activity() {
         parts
             .chunked(3)
             .forEach { rowParts ->
+                // Phone QA 2026-10-14 19:56 (M30s, Laguna II 103): when a label wraps
+                // («Схема розʼєму», «Опис контактів» on two lines, «Схема + піни» on
+                // one), the row aligned the buttons by the text baseline: the two-line
+                // buttons slid down and their bottom was cut off by the card. No
+                // baseline alignment, and every button takes the row's full height.
                 val row =
                     LinearLayout(this).apply {
                         orientation =
                             LinearLayout.HORIZONTAL
+                        isBaselineAligned =
+                            false
                     }
                 rowParts.forEachIndexed { index, part ->
                     row.addView(
@@ -3725,7 +3732,7 @@ class NativeSectionActivity : Activity() {
                         LinearLayout.LayoutParams(
                             0,
                             LinearLayout.LayoutParams
-                                .WRAP_CONTENT,
+                                .MATCH_PARENT,
                             1f,
                         ).apply {
                             if (index > 0) {
