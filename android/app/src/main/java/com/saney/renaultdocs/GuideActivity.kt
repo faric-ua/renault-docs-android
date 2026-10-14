@@ -4,12 +4,16 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 
 /**
  * v0.5.130: «Інструкція користувача» inside the app (owner 2026-10-14: «як у Track
@@ -20,11 +24,12 @@ import android.widget.FrameLayout
  * The page is served from an https asset origin by this client itself (no extra
  * library): Track Catcher found that file:// pages lost their images in WebView,
  * so both apps use the same https://appassets.androidplatform.net/assets/… path.
- * Home = list of sections; a tap opens one section; system «Назад» goes back
- * through the WebView history, then closes the screen.
+ * Home = list of sections; a tap opens one section; system «Назад» returns to
+ * the list, and from the list closes the screen (v0.5.131, see goBack()).
  */
 class GuideActivity : Activity() {
     private lateinit var web: WebView
+    private var backCallback: Any? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(
@@ -80,6 +85,19 @@ class GuideActivity : Activity() {
             frame,
         )
 
+        if (Build.VERSION.SDK_INT >= 33) {
+            val callback =
+                OnBackInvokedCallback {
+                    goBack()
+                }
+            backCallback =
+                callback
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                callback,
+            )
+        }
+
         web.loadUrl(
             savedInstanceState?.getString(
                 KEY_URL,
@@ -91,13 +109,33 @@ class GuideActivity : Activity() {
         )
     }
 
-    override fun onBackPressed() {
-        if (web.canGoBack()) {
-            web.goBack()
+    /**
+     * v0.5.131: «Назад» inside the guide (phone QA 2026-10-14 07:19: «Назад» from a
+     * section closed the guide instead of returning to the list).
+     * Why: the app targets Android 16 (targetSdk 36) — there the system «Назад»
+     * no longer calls onBackPressed(), so the old handler never ran. Now, as in
+     * Track Catcher, an OnBackInvokedCallback is registered on Android 13+, and
+     * onBackPressed() stays for older phones.
+     * Sections switch with location.replace() (no WebView history), so the rule
+     * is simple: a section is open → back to the list; the list → close.
+     */
+    private fun goBack() {
+        val section =
+            Uri.parse(
+                web.url.orEmpty(),
+            ).fragment
+        if (!section.isNullOrEmpty()) {
+            web.evaluateJavascript(
+                "location.replace('#')",
+                null,
+            )
         } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
+            finish()
         }
+    }
+
+    override fun onBackPressed() {
+        goBack()
     }
 
     override fun onSaveInstanceState(
@@ -115,6 +153,13 @@ class GuideActivity : Activity() {
     }
 
     override fun onDestroy() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            (backCallback as? OnBackInvokedCallback)?.let {
+                onBackInvokedDispatcher.unregisterOnBackInvokedCallback(
+                    it,
+                )
+            }
+        }
         web.destroy()
         super.onDestroy()
     }

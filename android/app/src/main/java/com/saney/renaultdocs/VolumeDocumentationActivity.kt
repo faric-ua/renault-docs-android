@@ -17,6 +17,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class VolumeDocumentationActivity : Activity() {
+    private var systemBackToken: Any? = null
     private lateinit var bodyContainer:
         LinearLayout
     private lateinit var bodyScroll:
@@ -47,6 +48,13 @@ class VolumeDocumentationActivity : Activity() {
         savedInstanceState: Bundle?,
     ) {
         super.onCreate(savedInstanceState)
+        // v0.5.131: same «Назад» rule on Android 16 (see SystemBack).
+        systemBackToken =
+            SystemBack.register(
+                this,
+            ) {
+                handleBack()
+            }
 
         datasetTitle =
             intent.getStringExtra(
@@ -205,15 +213,31 @@ class VolumeDocumentationActivity : Activity() {
 
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
+        if (handleBack()) {
+            return
+        }
+
+        super.onBackPressed()
+    }
+
+    /** true = «Назад» handled here; false = close the screen. */
+    private fun handleBack(): Boolean {
         if (panelStack.isNotEmpty()) {
             panelStack.removeAt(
                 panelStack.lastIndex,
             )
             renderCurrent()
-            return
+            return true
         }
+        return false
+    }
 
-        super.onBackPressed()
+    override fun onDestroy() {
+        SystemBack.unregister(
+            this,
+            systemBackToken,
+        )
+        super.onDestroy()
     }
 
     private fun buildContent(): View {

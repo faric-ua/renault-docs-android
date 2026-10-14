@@ -34,6 +34,7 @@ import android.widget.TextView
 import android.widget.Toast
 
 class ViewerActivity : Activity() {
+    private var systemBackToken: Any? = null
     private lateinit var webView: WebView
     private lateinit var titleView: TextView
     private lateinit var statusView: TextView
@@ -103,6 +104,13 @@ class ViewerActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // v0.5.131: same «Назад» rule on Android 16 (see SystemBack).
+        systemBackToken =
+            SystemBack.register(
+                this,
+            ) {
+                handleBack()
+            }
 
         pendingPdfPath =
             savedInstanceState
@@ -1088,15 +1096,22 @@ class ViewerActivity : Activity() {
     }
 
     override fun onBackPressed() {
+        if (!handleBack()) {
+            finish()
+        }
+    }
+
+    /** true = «Назад» handled here (fullscreen, second window, page history); false = close. */
+    private fun handleBack(): Boolean {
         if (pdfFullscreen) {
             pdfFullscreen = false
             applyPdfFullscreen(
                 enabled = false,
             )
-            return
+            return true
         }
 
-        navigateBack()
+        return navigateBackInside()
     }
 
     override fun onConfigurationChanged(
@@ -1151,6 +1166,10 @@ class ViewerActivity : Activity() {
     }
 
     override fun onDestroy() {
+        SystemBack.unregister(
+            this,
+            systemBackToken,
+        )
         splitControlsHandler
             .removeCallbacks(
                 hideSplitControlsRunnable,
@@ -3633,6 +3652,13 @@ class ViewerActivity : Activity() {
     }
 
     private fun navigateBack() {
+        if (!navigateBackInside()) {
+            finish()
+        }
+    }
+
+    /** One step back inside the viewer; false when there is nothing left (close). */
+    private fun navigateBackInside(): Boolean {
         if (pdfCompanionVisible) {
             if (
                 ::companionWebView.isInitialized &&
@@ -3642,7 +3668,7 @@ class ViewerActivity : Activity() {
             } else {
                 hidePdfCompanion()
             }
-            return
+            return true
         }
 
         if (
@@ -3650,10 +3676,10 @@ class ViewerActivity : Activity() {
             webView.canGoBack()
         ) {
             webView.goBack()
-            return
+            return true
         }
 
-        finish()
+        return false
     }
 
     private fun showFatalError(

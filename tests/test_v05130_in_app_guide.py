@@ -35,7 +35,7 @@ class InAppGuide(unittest.TestCase):
             self.assertIn(f'<section id="{sid}" class="page stack" hidden>', self.page)
         self.assertIn('id="katalog"', self.page)
         self.assertIn("Готові проєкти з Google Диска", self.page)
-        self.assertIn("✓ Встановлено", self.page)
+        self.assertIn("✓\u00a0Встановлено", self.page)  # v0.5.131: no break after «✓»
         self.assertIn(build_guide.VERSION, self.page)
 
     def test_offline_no_external_resources(self):
@@ -55,7 +55,8 @@ class InAppGuide(unittest.TestCase):
         self.assertIn("assets/guide/index.html", act)
         self.assertIn("allowFileAccess =\n                    false", act)
         self.assertIn('!path.startsWith(GUIDE_DIR) || path.contains("..")', act)
-        self.assertIn("web.canGoBack()", act)
+        self.assertIn("location.replace('#')", act)  # v0.5.131: section → list → close
+        self.assertIn("OnBackInvokedCallback", act)
         self.assertIn("KEY_URL", act)  # section survives rotation
         manifest = (ROOT / "android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
         self.assertRegex(manifest, r'android:name="\.GuideActivity"\s+android:exported="false"')
