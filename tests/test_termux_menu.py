@@ -183,6 +183,12 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('22) set_bloat_enabled "enable"', text)
         line = next(l for l in text.splitlines() if l.startswith('BLOAT_PACKAGES='))
         self.assertIn('com.miui.msa.global', line)
+        self.assertIn('com.mi.globalminusscreen', line)
+        self.assertIn('com.google.android.apps.magazines', line)
+        # Пошук Google, Play, YouTube, Chrome, Карти — не чіпати.
+        for keep in ('googlequicksearchbox', 'com.android.vending', 'com.google.android.youtube',
+                     'com.android.chrome', 'com.google.android.apps.maps', 'com.google.android.gms'):
+            self.assertNotIn(keep, line)
         # Бабусин телефон: банк, Дія, Київстар, газ, месенджери — ніколи.
         for keep in ('ua.privatbank', 'ua.gov.diia', 'kyivstar', 'vinnytsia.gas',
                      'com.facebook.katana', 'com.facebook.orca', 'whatsapp', 'viber', 'telegram'):
