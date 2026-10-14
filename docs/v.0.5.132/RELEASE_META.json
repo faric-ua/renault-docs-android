@@ -1,0 +1,26 @@
+{
+  "versionName": "0.5.132",
+  "versionCode": 148,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.132-rdproject-import",
+  "issues": [
+    147
+  ],
+  "scope": "Import of a whole project from one .rdproject file: open from Telegram / Drive / file manager (VIEW, SEND) or Home → «Додати» → «Проєкт із файлу»; preview marks volumes already on the phone; only missing volumes are installed (refuseExistingPackage), nothing is replaced; project created after the first installed volume. Guide section «Проєкт із файлу (.rdproject)»; guide header names the guide version. Includes v0.5.131.",
+  "sourceBase": "v0.5.131/build147",
+  "phoneQa": "PENDING",
+  "pr_number": 288,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "main_tests_run": 843,
+  "signed_apk": "PASS",
+  "source_sha": "6497ca786b307bf042d719f64d7c308602f297f7",
+  "signed_run_id": 38586333005,
+  "signed_run_number": 196,
+  "signed_android_apk_run": 196,
+  "artifact_id": 11905227197,
+  "artifact_name": "Renault-Docs-v0.5.132-Debug",
+  "artifact_digest": "sha256:c8b92924f1e6683d71a6d50a26f498ce8a98150b151bb98734b1dde976d9a522",
+  "qa_status": "phone-qa-pending",
+  "next": "Install over. Megane II ⋮ → share the prepared .rdproject (⇧) → «Імпорт проєкту Renault Docs» → expect «Буде додано: 0 · Уже є: 23» and «Закрити»."
+}
