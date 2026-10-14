@@ -740,6 +740,47 @@ class MainActivity : Activity() {
             }
         }
 
+    /**
+     * v0.5.132: Home → «Додати» → «Проєкт із файлу» — import of a whole project
+     * from one .rdproject (made by ⋮ → «Поділитися проєктом одним файлом»).
+     */
+    private fun buildProjectFromFileCard(): View =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            isClickable = true
+            isFocusable = true
+            background =
+                Ui.roundedBackground(
+                    context = this@MainActivity,
+                    fill = Ui.surface,
+                    stroke = Ui.border,
+                )
+            setPadding(
+                Ui.dp(this@MainActivity, 16),
+                Ui.dp(this@MainActivity, 13),
+                Ui.dp(this@MainActivity, 16),
+                Ui.dp(this@MainActivity, 13),
+            )
+            addView(
+                Ui.textView(this@MainActivity, "Проєкт із файлу", 18f, Ui.entityTitle).apply {
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                },
+            )
+            addView(
+                Ui.textView(
+                    this@MainActivity,
+                    "Відкрити .rdproject — додати томи, яких ще немає",
+                    Ui.secondaryTextSp,
+                    Ui.muted,
+                ).apply {
+                    setPadding(0, Ui.dp(this@MainActivity, 4), 0, 0)
+                },
+            )
+            setOnClickListener {
+                startActivity(RdprojectImportActivity.pickIntent(this@MainActivity))
+            }
+        }
+
     private fun buildHomeAddPanel(): View =
         LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -842,6 +883,13 @@ class MainActivity : Activity() {
             actions.addView(choices)
             actions.addView(
                 buildProjectCatalogCard(),
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@MainActivity, 10) },
+            )
+            actions.addView(
+                buildProjectFromFileCard(),
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
