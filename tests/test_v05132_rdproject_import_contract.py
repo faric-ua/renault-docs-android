@@ -94,6 +94,9 @@ class RdprojectImportContract(unittest.TestCase):
         for mime in ("application/octet-stream", "application/zip"):
             self.assertIn(f'android:mimeType="{mime}"', block)
         self.assertNotIn('android:scheme="file"', block)
+        # Phone QA 2026-10-14 20:13 (M30s «Мої файли»): matched by file name too.
+        self.assertIn('android:pathPattern=".*\\\\.rdproject"', block)
+        self.assertIn('android:mimeType="*/*"', block)
         main = source("MainActivity.kt")
         self.assertIn('"Проєкт із файлу"', main)
         self.assertIn("RdprojectImportActivity.pickIntent(this@MainActivity)", main)
