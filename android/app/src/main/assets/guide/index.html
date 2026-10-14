@@ -65,7 +65,7 @@ ul.points li{background:var(--surface); border:1px solid var(--border); border-r
 <li><a href="#shcho"><span class="ic" aria-hidden="true">📘</span><span><b>Що це за застосунок</b><span class="d">Проєкт, том, .rdpkg і ⇧ — що це таке</span></span><span class="chev" aria-hidden="true">›</span></a></li>
 <li><a href="#holovnyi"><span class="ic" aria-hidden="true">🏠</span><span><b>Головний екран</b><span class="d">Панель «Додати», «Мої Renault», меню ⋮</span></span><span class="chev" aria-hidden="true">›</span></a></li>
 <li><a href="#dodaty"><span class="ic" aria-hidden="true">➕</span><span><b>Як додати том</b><span class="d">З файлу, Windows-папки, архіву або каталогу</span></span><span class="chev" aria-hidden="true">›</span></a></li>
-<li><a href="#katalog"><span class="ic" aria-hidden="true">☁️</span><span><b>Готові проєкти з Google Диска</b><span class="d">Каталог: «✓ Встановлено», «Імпортувати вибране»</span></span><span class="chev" aria-hidden="true">›</span></a></li>
+<li><a href="#katalog"><span class="ic" aria-hidden="true">☁️</span><span><b>Готові проєкти з Google Диска</b><span class="d">Каталог: «✓ Встановлено», «Імпортувати вибране»</span></span><span class="chev" aria-hidden="true">›</span></a></li>
 <li><a href="#chytaty"><span class="ic" aria-hidden="true">📖</span><span><b>Як читати том</b><span class="d">Modern і Classic, пошук, розʼєми, зелена рамка</span></span><span class="chev" aria-hidden="true">›</span></a></li>
 <li><a href="#pdf"><span class="ic" aria-hidden="true">🔍</span><span><b>PDF, масштаб і друк</b><span class="d">Масштаб до 500%, повний екран, друк</span></span><span class="chev" aria-hidden="true">›</span></a></li>
 <li><a href="#poruch"><span class="ic" aria-hidden="true">◫</span><span><b>Друге вікно «Документація поруч»</b><span class="d">Два документи одночасно: зверху і знизу</span></span><span class="chev" aria-hidden="true">›</span></a></li>
@@ -105,8 +105,8 @@ ul.points li{background:var(--surface); border:1px solid var(--border); border-r
 <a class="back" href="#">← Усі розділи</a>
 <h2>Готові проєкти з Google Диска</h2>
 <p>Головне → «Готові проєкти» відкриває каталог Renault Docs з Google Диска (потрібен інтернет). Угорі видно версію каталогу, нижче — картки проєктів: роки документації і скільки томів.</p>
-<div class="diagram"><ul class="tree"><li><span class="n">Головне → «Готові проєкти»</span><ul><li><span class="n">Каталог: картки проєктів</span><ul><li><span class="n">Megane II · 2003–2007 · 22 томи</span><ul><li><span class="n">Том: код · дата, коди авто · Visu</span><ul><li><span class="via">вже є на телефоні</span><span class="n">Зелений рядок «✓ Встановлено»</span></li><li><span class="via">ще нема</span><span class="n">Розмір файлу → поставити галочку</span><ul><li><span class="n">«Імпортувати вибране»</span><ul><li><span class="n">Завантаження + перевірка SHA-256</span><ul><li><span class="n">Том зʼявляється в проєкті</span></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></div>
-<ul class="points"><li>Кожен том — окремий файл: бери лише ті, що потрібні, а не всі одразу.</li><li><b>«✓ Встановлено»</b> — зелений рядок під томом, який уже є на телефоні. Його качати не треба.</li><li>Після завантаження застосунок звіряє контрольну суму SHA-256. Пошкоджений файл не встановиться.</li><li>Томи великі — від 30 до 240 МБ. Краще качати через Wi-Fi.</li></ul>
+<div class="diagram"><ul class="tree"><li><span class="n">Головне → «Готові проєкти»</span><ul><li><span class="n">Каталог: картки проєктів</span><ul><li><span class="n">Megane II · 2003–2007 · 22 томи</span><ul><li><span class="n">Том: код · дата, коди авто · Visu</span><ul><li><span class="via">вже є на телефоні</span><span class="n">Зелений рядок «✓ Встановлено»</span></li><li><span class="via">ще нема</span><span class="n">Розмір файлу → поставити галочку</span><ul><li><span class="n">«Імпортувати вибране»</span><ul><li><span class="n">Завантаження + перевірка SHA-256</span><ul><li><span class="n">Том зʼявляється в проєкті</span></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></div>
+<ul class="points"><li>Кожен том — окремий файл: бери лише ті, що потрібні, а не всі одразу.</li><li><b>«✓ Встановлено»</b> — зелений рядок під томом, який уже є на телефоні. Його качати не треба.</li><li>Після завантаження застосунок звіряє контрольну суму SHA-256. Пошкоджений файл не встановиться.</li><li>Томи великі — від 30 до 240 МБ. Краще качати через Wi-Fi.</li></ul>
 <div class="next"><a class="back" href="#">← Усі розділи</a><a class="back" href="#chytaty">Як читати том →</a></div>
 </section>
 <section id="chytaty" class="page stack" hidden>
@@ -175,6 +175,17 @@ ul.points li{background:var(--surface); border:1px solid var(--border); border-r
     for (var i = 0; i < pages.length; i++) pages[i].hidden = pages[i] !== target;
     window.scrollTo(0, 0);
   }
+  // v0.5.131: sections switch with location.replace — no history entries, so the
+  // app's «Назад» rule is simple (section → list → close), see GuideActivity.goBack().
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (!a) return;
+    var h = a.getAttribute('href');
+    if (h && h.charAt(0) === '#') {
+      e.preventDefault();
+      location.replace(h);
+    }
+  });
   window.addEventListener('hashchange', show);
   show();
 })();

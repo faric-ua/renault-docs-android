@@ -70,8 +70,10 @@ class CriteriaPinnedContract(unittest.TestCase):
         overlay = between(section, "private fun buildCriteriaOverlay()", "private fun activePanelId()")
         self.assertIn('"Закрити скорочення"', overlay)
         self.assertIn("closeCriteria()", overlay)
-        back = between(section, "override fun onBackPressed()", "super.onBackPressed()")
+        # v0.5.131: the «Назад» rule moved into handleBack() (also used on Android 16 via SystemBack).
+        back = between(section, "private fun handleBack(): Boolean", "override fun onDestroy()")
         self.assertIn("closeCriteria()", back)
+        self.assertIn("SystemBack.register(", section)
         open_ = between(section, "private fun openCriteria(", "private fun showCriteriaOverlay(")
         self.assertIn("handleAction(action)", open_)  # not a table: the old way
 

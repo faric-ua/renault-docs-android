@@ -27,7 +27,7 @@ HOME = {
     "shcho": ("📘", "Проєкт, том, .rdpkg і ⇧ — що це таке"),
     "holovnyi": ("🏠", "Панель «Додати», «Мої Renault», меню ⋮"),
     "dodaty": ("➕", "З файлу, Windows-папки, архіву або каталогу"),
-    "katalog": ("☁️", "Каталог: «✓ Встановлено», «Імпортувати вибране»"),
+    "katalog": ("☁️", "Каталог: «✓ Встановлено», «Імпортувати вибране»"),
     "chytaty": ("📖", "Modern і Classic, пошук, розʼєми, зелена рамка"),
     "pdf": ("🔍", "Масштаб до 500%, повний екран, друк"),
     "poruch": ("◫", "Два документи одночасно: зверху і знизу"),
@@ -163,6 +163,17 @@ SCRIPT = """
     for (var i = 0; i < pages.length; i++) pages[i].hidden = pages[i] !== target;
     window.scrollTo(0, 0);
   }
+  // v0.5.131: sections switch with location.replace — no history entries, so the
+  // app's «Назад» rule is simple (section → list → close), see GuideActivity.goBack().
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (!a) return;
+    var h = a.getAttribute('href');
+    if (h && h.charAt(0) === '#') {
+      e.preventDefault();
+      location.replace(h);
+    }
+  });
   window.addEventListener('hashchange', show);
   show();
 })();

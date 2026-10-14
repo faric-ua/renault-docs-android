@@ -355,7 +355,7 @@ class SettingsActivity : Activity() {
             )
         )
 
-        body.addView(
+        body.addCard(
             settingRow(
                 title =
                     "Відкривати dataset",
@@ -376,7 +376,7 @@ class SettingsActivity : Activity() {
             )
         )
 
-        body.addView(
+        body.addCard(
             settingRow(
                 title =
                     "Масштаб за замовчуванням",
@@ -391,7 +391,7 @@ class SettingsActivity : Activity() {
             )
         )
 
-        body.addView(
+        body.addCard(
             settingRow(
                 title =
                     "Крок кнопок − / +",
@@ -412,7 +412,7 @@ class SettingsActivity : Activity() {
             )
         )
 
-        body.addView(
+        body.addCard(
             backupCard()
         )
 
@@ -423,15 +423,15 @@ class SettingsActivity : Activity() {
         )
 
         // v0.5.130: the user guide inside the app (owner 2026-10-14).
-        body.addView(
+        body.addCard(
             guideCard(),
         )
 
-        body.addView(
+        body.addCard(
             supportCard(),
         )
 
-        body.addView(
+        body.addCard(
             infoCard(
                 title =
                     "Renault Docs",
@@ -488,6 +488,29 @@ class SettingsActivity : Activity() {
         )
 
         return root
+    }
+
+    /**
+     * v0.5.131: every tile gets the same gap below it — before, tiles of one
+     * section touched each other («Підтримати» / «Renault Docs», the two PDF
+     * rows; phone QA 2026-10-14 07:22).
+     */
+    private fun LinearLayout.addCard(
+        card: View,
+    ) {
+        addView(
+            card,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                bottomMargin =
+                    Ui.dp(
+                        this@SettingsActivity,
+                        10,
+                    )
+            },
+        )
     }
 
     private fun sectionTitle(
@@ -1003,18 +1026,6 @@ class SettingsActivity : Activity() {
                     this@SettingsActivity,
                 )
             }
-        }.also { card ->
-            card.layoutParams =
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                ).apply {
-                    bottomMargin =
-                        Ui.dp(
-                            this@SettingsActivity,
-                            10,
-                        )
-                }
         }
 
     private fun supportCard():

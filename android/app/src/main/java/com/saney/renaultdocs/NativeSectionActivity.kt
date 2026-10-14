@@ -20,6 +20,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class NativeSectionActivity : Activity() {
+    private var systemBackToken: Any? = null
     private lateinit var statusText: TextView
     private lateinit var menuContainer: LinearLayout
     private lateinit var bodyContainer: LinearLayout
@@ -91,6 +92,13 @@ class NativeSectionActivity : Activity() {
         savedInstanceState: Bundle?,
     ) {
         super.onCreate(savedInstanceState)
+        // v0.5.131: same «Назад» rule on Android 16 (see SystemBack).
+        systemBackToken =
+            SystemBack.register(
+                this,
+            ) {
+                handleBack()
+            }
 
         treeUriText =
             intent.getStringExtra(
@@ -1237,16 +1245,32 @@ class NativeSectionActivity : Activity() {
 
     @Deprecated("Activity back for minSdk 26.")
     override fun onBackPressed() {
+        if (handleBack()) {
+            return
+        }
+        @Suppress("DEPRECATION")
+        super.onBackPressed()
+    }
+
+    /** true = «Назад» handled here; false = close the screen. */
+    private fun handleBack(): Boolean {
         // v0.5.114: «Назад» first closes the abbreviations sheet.
         if (
             ::criteriaOverlay.isInitialized &&
             criteriaOverlay.visibility == View.VISIBLE
         ) {
             closeCriteria()
-            return
+            return true
         }
-        @Suppress("DEPRECATION")
-        super.onBackPressed()
+        return false
+    }
+
+    override fun onDestroy() {
+        SystemBack.unregister(
+            this,
+            systemBackToken,
+        )
+        super.onDestroy()
     }
 
     private fun isLandscapeOrientation(): Boolean =

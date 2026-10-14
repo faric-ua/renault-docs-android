@@ -59,7 +59,7 @@ class SettingsContractTests(unittest.TestCase):
         self.assertIn("Змінити папку", screen)
         self.assertIn("Вибрати папку", screen)
         self.assertIn("Вибрана папка", screen)
-        self.assertIn("body.addView(\n            backupCard()", screen)
+        self.assertIn("body.addCard(\n            backupCard()", screen)
         self.assertIn("friendlyBackupPath", screen)
         self.assertIn("SafDisplayPath.tree(", screen)
         formatter = (
