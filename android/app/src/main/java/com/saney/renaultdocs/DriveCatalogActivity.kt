@@ -712,17 +712,18 @@ class DriveCatalogActivity : Activity() {
                             ::add,
                         )
 
-                    add(
-                        if (
-                            installed
-                        ) {
-                            "✓ Встановлено"
-                        } else {
+                    // v0.5.129: «✓ Встановлено» moved to its own green
+                    // line below (owner 2026-10-14 04:50); the size stays
+                    // here only for volumes that are not installed yet.
+                    if (
+                        !installed
+                    ) {
+                        add(
                             formatSize(
                                 volume.sizeBytes,
-                            )
-                        },
-                    )
+                            ),
+                        )
+                    }
                 }
                     .joinToString(
                         " · ",
@@ -756,6 +757,33 @@ class DriveCatalogActivity : Activity() {
                     )
                 },
             )
+
+            if (
+                installed
+            ) {
+                text.addView(
+                    Ui.textView(
+                        context =
+                            this@DriveCatalogActivity,
+                        value =
+                            "✓ Встановлено",
+                        sizeSp =
+                            Ui.secondaryTextSp,
+                        color =
+                            Ui.success,
+                    ).apply {
+                        setPadding(
+                            0,
+                            Ui.dp(
+                                this@DriveCatalogActivity,
+                                2,
+                            ),
+                            0,
+                            0,
+                        )
+                    },
+                )
+            }
 
             addView(
                 text,
