@@ -217,6 +217,18 @@ class TermuxMenuContractTests(unittest.TestCase):
         for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'trim-caches', 'force-stop', 'rm -', 'reboot'):
             self.assertNotIn(forbidden, fn)
 
+    def test_phone_diagnostics_ip_prompt_prefills_network(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('ask_target_ip() {', text)
+        self.assertIn('prefix="192.168.50."', text)
+        self.assertIn('TARGET_IP="$prefix$answer"', text)
+        self.assertEqual(text.count('ask_target_ip\n'), 2)
+        self.assertNotIn('192.168.x.x', text)
+
     def test_phone_diagnostics_has_dedicated_installer(self):
         repo = Path(__file__).resolve().parents[1]
         text = (
