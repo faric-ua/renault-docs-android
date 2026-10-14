@@ -40,4 +40,11 @@ class VolumeStoragePolicyTest {
         )
         assertEquals("Телефон", VolumeStoragePolicy.choiceLine(VolumePlace.PHONE, true, null))
     }
+
+    @Test
+    fun choiceItemsStayShort() {
+        assertEquals("Карта пам'яті · 333,8 ГБ", VolumeStoragePolicy.choiceItem(VolumePlace.CARD, true, 3338L * 1024 * 1024 * 1024 / 10))
+        assertEquals("Телефон · 8,2 ГБ", VolumeStoragePolicy.choiceItem(VolumePlace.PHONE, true, 82L * 1024 * 1024 * 1024 / 10))
+        assertEquals("Карта пам'яті — не вставлена", VolumeStoragePolicy.choiceItem(VolumePlace.CARD, false, null))
+    }
 }

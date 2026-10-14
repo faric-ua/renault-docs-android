@@ -166,6 +166,13 @@ object DialogUi {
                     )
                 }
 
+                // Phone QA 2026-10-15 02:47 (M30s): the restyled (bigger) text made a
+                // long item wrap to two lines after the dialog had measured its list,
+                // so the list was cut and scrolled. Measure again after restyling.
+                post {
+                    requestLayout()
+                }
+
                 setOnHierarchyChangeListener(
                     object :
                         ViewGroup.OnHierarchyChangeListener {

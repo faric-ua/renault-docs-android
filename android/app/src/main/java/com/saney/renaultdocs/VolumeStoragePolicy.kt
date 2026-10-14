@@ -68,6 +68,21 @@ object VolumeStoragePolicy {
         }
     }
 
+    /**
+     * Short item for the choice window: «Телефон · 8,2 ГБ». Phone QA 2026-10-15 02:47
+     * (M30s): «Карта пам'яті · вільно 333,8 ГБ» wrapped and the list scrolled.
+     */
+    fun choiceItem(
+        place: VolumePlace,
+        cardPresent: Boolean,
+        freeBytes: Long?,
+    ): String =
+        when {
+            place == VolumePlace.CARD && !cardPresent -> "Карта пам'яті — не вставлена"
+            freeBytes != null -> placeLabel(place) + " · " + sizeLabel(freeBytes)
+            else -> placeLabel(place)
+        }
+
     /** One line for settings and the import screen. */
     fun choiceLine(
         place: VolumePlace,
