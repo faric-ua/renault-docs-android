@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -109,6 +110,10 @@ object Ui {
             0,
             0,
         )
+        // v0.5.133: the «›» icon of an openable tile is not a ✓ — put it back.
+        (button.getTag(R.id.tag_open_chevron) as? Int)?.let {
+            applyOpenChevron(button, it)
+        }
         button.setTypeface(
             null,
             if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL,
@@ -119,6 +124,36 @@ object Ui {
         button.contentDescription =
             if (selected) "$description · вибрано" else description
     }
+
+    /**
+     * v0.5.133 (owner, phone QA 2026-10-14 20:00, M30s): «›» used to be the first
+     * character of the text. When a long label did not fit, «›» stayed alone on the
+     * first line and the codes wrapped mid-word. Now «›» is its own icon at the start
+     * of the tile, centred by the tile's height; the text wraps beside it.
+     */
+    fun applyOpenChevron(
+        view: TextView,
+        color: Int = accent,
+    ) {
+        val icon =
+            ContextCompat.getDrawable(view.context, R.drawable.ic_chevron_open)
+                ?.mutate()
+                ?: return
+        val size = dp(view.context, 18)
+        icon.setBounds(0, 0, size, size)
+        icon.setTint(color)
+        view.setTag(R.id.tag_open_chevron, color)
+        view.setCompoundDrawablesRelative(icon, null, null, null)
+        view.compoundDrawablePadding = dp(view.context, 6)
+    }
+
+    /**
+     * v0.5.133: Renault labels list codes without spaces («F9Q650,F9Q750,…»),
+     * so Android broke them mid-code («G9 / T600»). An invisible break chance
+     * after «,» and «/» lets a line end between codes instead.
+     */
+    fun breakableLabel(text: String): String =
+        text.replace(",", ",\u200B").replace("/", "/\u200B")
 
     /** Re-styles every choice button of [scope] under [root]: only [selectedKey] is green. */
     fun refreshChoices(

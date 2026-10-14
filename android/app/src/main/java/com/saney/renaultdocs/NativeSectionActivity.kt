@@ -2874,12 +2874,11 @@ class NativeSectionActivity : Activity() {
                 )
 
         return Button(this).apply {
-            text =
-                if (enabled) {
-                    "› " + label
-                } else {
-                    label
-                }
+            // v0.5.133: «›» is an icon (Ui.applyOpenChevron), not part of the text.
+            text = Ui.breakableLabel(label)
+            if (enabled) {
+                Ui.applyOpenChevron(this)
+            }
             isAllCaps = false
             textSize = 14f
             gravity =
@@ -3883,7 +3882,8 @@ class NativeSectionActivity : Activity() {
     ) {
         bodyContainer.addView(
             Button(this).apply {
-                text = "› " + label
+                text = Ui.breakableLabel(label)
+                Ui.applyOpenChevron(this)
                 isAllCaps = false
                 textSize = 14f
                 gravity =

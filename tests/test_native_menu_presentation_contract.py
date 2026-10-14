@@ -35,7 +35,10 @@ class NativeMenuPresentationContractTests(unittest.TestCase):
         self.assertIn("renderDocumentationMenu", native)
         self.assertIn("isActionResolvable", native)
         self.assertIn("— недоступно", native)
-        self.assertIn('"› " + label', native)
+        # v0.5.133 (owner 2026-10-14 20:00): «›» is an icon beside the text,
+        # not its first character (it used to sit alone on a wrapped first line).
+        self.assertIn("Ui.applyOpenChevron(this)", native)
+        self.assertNotIn('"› " + label', native)
 
         # Classic button is now pure Classic, not the old hybrid target flow.
         fallback = native.split("private fun openLegacyFallback()", 1)[1]
