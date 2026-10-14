@@ -118,12 +118,8 @@ object RdprojectImportSupport {
 
     fun formatBytes(bytes: Long): String {
         if (bytes <= 0L) return "розмір невідомий"
-        val gb = bytes / 1024.0 / 1024.0 / 1024.0
-        return if (gb >= 1.0) {
-            String.format(java.util.Locale.US, "%.1f ГБ", gb)
-        } else {
-            String.format(java.util.Locale.US, "%.0f МБ", bytes / 1024.0 / 1024.0)
-        }
+        // Phone QA 2026-10-15 02:47: «333.8 ГБ» next to «333,8 ГБ» — Ukrainian comma everywhere.
+        return VolumeStoragePolicy.sizeLabel(bytes)
     }
 
     fun volumeNoun(count: Int): String {
