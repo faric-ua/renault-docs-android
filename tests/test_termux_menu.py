@@ -375,3 +375,15 @@ class TermuxMenuContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_phone_diagnostics_open_with_intent_only_reads(self):
+        # 2026-10-14: what «Мої файли» sends for .rdproject (dat=…, typ=…).
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("25) open_with_intent ;;", text)
+        self.assertIn('echo "25 — Що надсилає «Відкрити за допомогою» → файл"', text)
+        fn = text[text.index("open_with_intent() {"):text.index("reset_target() {")]
+        self.assertIn("dumpsys activity activities", fn)
+        self.assertIn("logcat -d", fn)
+        for forbidden in ("pm ", "am force-stop", "settings put", "rm -", "reboot", "input "):
+            self.assertNotIn(forbidden, fn)
