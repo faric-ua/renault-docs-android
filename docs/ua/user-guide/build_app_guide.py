@@ -24,10 +24,11 @@ DEFAULT_OUT = ROOT / "android/app/src/main/assets/guide/index.html"
 
 # Icon + one-line description for the home list, per section id.
 HOME = {
-    "shcho": ("📘", "Проєкт, том, .rdpkg і ⇧ — що це таке"),
+    "shcho": ("📘", "Проєкт, том, .rdpkg, .rdproject і ⇧ — що це таке"),
     "holovnyi": ("🏠", "Панель «Додати», «Мої Renault», меню ⋮"),
     "dodaty": ("➕", "З файлу, Windows-папки, архіву або каталогу"),
     "katalog": ("☁️", "Каталог: «✓ Встановлено», «Імпортувати вибране»"),
+    "import": ("📦", "Відкрити .rdproject: додати томи, яких ще немає"),
     "chytaty": ("📖", "Modern і Classic, пошук, розʼєми, зелена рамка"),
     "pdf": ("🔍", "Масштаб до 500%, повний екран, друк"),
     "poruch": ("◫", "Два документи одночасно: зверху і знизу"),
@@ -226,7 +227,7 @@ def build():
 <div class="wrap">
 <main id="home" class="stack">
   <h1>Renault Docs</h1>
-  <p class="muted">Інструкція користувача · {build_guide.VERSION} · {build_guide.DATE}. Технічна документація Renault на телефоні: томи, схеми, розʼєми, PDF. Дотик по розділу — докладно, кнопка «Назад» телефона повертає.</p>
+  <p class="muted">Інструкція користувача для Renault Docs {build_guide.VERSION} · {build_guide.DATE}. Технічна документація Renault на телефоні: томи, схеми, розʼєми, PDF. Дотик по розділу — докладно, кнопка «Назад» телефона повертає.</p>
   <ul class="features">
 {chr(10).join(items)}
   </ul>

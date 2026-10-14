@@ -11,6 +11,13 @@ import java.util.UUID
 import java.util.zip.ZipInputStream
 import org.json.JSONObject
 
+/** The volume package is already installed; nothing was changed (v0.5.132). */
+class PackageAlreadyInstalledException(
+    val packageId: String,
+) : IllegalStateException(
+        "Том уже встановлено на телефоні — не замінюю: " + packageId,
+    )
+
 object RdpkgImporter {
     const val FORMAT =
         "renault-volume-package-v1"
@@ -39,6 +46,9 @@ object RdpkgImporter {
         progress: ((String) -> Unit)? = null,
         progressState: ((OperationProgress) -> Unit)? = null,
         isCancelled: () -> Boolean = { false },
+        // v0.5.132 (.rdproject import): never replace a package that is already
+        // installed — the import adds only missing volumes and overwrites nothing.
+        refuseExistingPackage: Boolean = false,
     ): Result<ImportResult> =
         runCatching {
             if (isCancelled()) throw ConversionCancelledException()
@@ -140,6 +150,14 @@ object RdpkgImporter {
                             packageMetadata.packageId,
                     )
 
+                if (
+                    refuseExistingPackage &&
+                    finalDirectory.exists()
+                ) {
+                    throw PackageAlreadyInstalledException(
+                        packageMetadata.packageId,
+                    )
+                }
                 // Last cancellation checkpoint before atomic rename/rollback.
                 // Never interrupt the activation transaction halfway through.
                 if (isCancelled()) throw ConversionCancelledException()

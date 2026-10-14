@@ -45,7 +45,13 @@ class InAppGuide(unittest.TestCase):
 
     def test_markdown_guide_is_current(self):
         md = (ROOT / "docs/ua/USER_GUIDE.md").read_text(encoding="utf-8")
-        self.assertIn("v0.5.130", md)
+        sys.path.insert(0, str(BUILDER))
+        import build_guide
+        # v0.5.132: the guide moves on with the app — the Markdown carries the
+        # same version as the source, and never older than v0.5.130.
+        self.assertIn(build_guide.VERSION, md)
+        version = tuple(int(x) for x in build_guide.VERSION.lstrip("v").split("."))
+        self.assertGreaterEqual(version, (0, 5, 130))
         self.assertIn('<a id="katalog"></a>', md)
         self.assertIn("Інструкція користувача", md)
 

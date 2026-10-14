@@ -63,6 +63,35 @@
             android:exported="false"
             android:screenOrientation="unspecified" />
 
+        <!-- v0.5.132: import a whole project from one .rdproject file.
+             Telegram, Google Drive and file managers do not know ".rdproject",
+             so they send it as a generic file (octet-stream / zip). The screen
+             reads only the beginning of the file and says plainly when it is
+             not a Renault Docs project. -->
+        <activity
+            android:name=".RdprojectImportActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="unspecified">
+            <intent-filter android:label="@string/rdproject_import_label">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/x-rdproject" />
+            </intent-filter>
+            <intent-filter android:label="@string/rdproject_import_label">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/x-rdproject" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".CompletedNotificationDismissReceiver"
             android:exported="false" />
@@ -87,6 +116,12 @@
 
         <service
             android:name=".RdprojectShareService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <service
+            android:name=".RdprojectImportService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
             android:stopWithTask="false" />
