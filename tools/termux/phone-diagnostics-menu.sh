@@ -1,6 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
+PD_VERSION="2026-10-14.1"
+PD_REPO="faric-ua/renault-docs-android"
+PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
 STATE_DIR="$BASE_DIR/state"
 COUNTER_FILE="$STATE_DIR/sequence"
@@ -165,6 +168,13 @@ PAIRING
 27. Пункт 12 — повний diagnostic bundle.
 28. Пункти 13–14 — A/B тест із тимчасовою зупинкою
     Google/Samsung MediaProvider. Дані НЕ видаляються.
+29. Пункт 17 — звіт для чистки: які застосунки
+    займають пам'ять і місце, якими давно не
+    користувались, анімації. НІЧОГО НЕ ЗМІНЮЄ.
+
+ОНОВЛЕННЯ
+30. Пункт 18 — завантажити нову версію цього меню
+    з GitHub. Логи й підключення лишаються.
 
 ЛОГИ
 Кожний тест пишеться окремо в:
@@ -465,6 +475,112 @@ open_logs() {
   pause_menu
 }
 
+cleanup_report() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  new_log "17" "cleanup-report" "Звіт для чистки (нічого не змінює)"
+
+  echo "Збираю дані для чистки. Нічого не змінюється."
+  echo "На слабкому телефоні це 1–3 хвилини — зачекай."
+  echo
+
+  {
+    echo "=== DEVICE ==="
+    echo "Виробник: $(adb -s "$ADB_TARGET" shell getprop ro.product.manufacturer)"
+    echo "Модель: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+    echo "Пристрій: $(adb -s "$ADB_TARGET" shell getprop ro.product.device)"
+    echo "Android: $(adb -s "$ADB_TARGET" shell getprop ro.build.version.release)"
+    echo "MIUI/HyperOS: $(adb -s "$ADB_TARGET" shell getprop ro.miui.ui.version.name)"
+    echo "Збірка: $(adb -s "$ADB_TARGET" shell getprop ro.build.version.incremental)"
+    echo
+    echo "=== UPTIME ==="
+    adb -s "$ADB_TARGET" shell uptime || true
+    echo
+    echo "=== STORAGE /data ==="
+    adb -s "$ADB_TARGET" shell df -h /data || true
+    echo
+    echo "=== RAM ==="
+    adb -s "$ADB_TARGET" shell free -h || true
+    echo
+    echo "=== ANIMATIONS (1 = звичайно, 0.5 = швидше) ==="
+    echo "window: $(adb -s "$ADB_TARGET" shell settings get global window_animation_scale)"
+    echo "transition: $(adb -s "$ADB_TARGET" shell settings get global transition_animation_scale)"
+    echo "animator: $(adb -s "$ADB_TARGET" shell settings get global animator_duration_scale)"
+    echo
+    echo "=== USER APPS: STANDBY BUCKET ==="
+    echo "# 5 exempted · 10 active · 20 working set · 30 frequent · 40 rare · 45 restricted · 50 never"
+    adb -s "$ADB_TARGET" shell 'for p in $(pm list packages -3 | cut -d: -f2 | sort); do echo "$(am get-standby-bucket "$p" 2>/dev/null) $p"; done' || true
+    echo
+    echo "=== DISABLED PACKAGES ==="
+    adb -s "$ADB_TARGET" shell pm list packages -d || true
+    echo
+    echo "=== BACKGROUND RESTRICTED (RUN_ANY_IN_BACKGROUND ignore) ==="
+    adb -s "$ADB_TARGET" shell cmd appops query-op RUN_ANY_IN_BACKGROUND ignore 2>&1 || true
+    echo
+    echo "=== ADS / ANALYTICS PACKAGES (installed) ==="
+    adb -s "$ADB_TARGET" shell pm list packages | grep -i -E "msa|analytics|joyose|hybrid|bugreport|mipicks|facebook" || true
+  } >> "$CURRENT_LOG" 2>&1
+  echo "1/3 — застосунки й налаштування: готово"
+
+  {
+    echo
+    echo "=== MEMINFO: TOTAL PSS BY PROCESS (top 60) ==="
+    adb -s "$ADB_TARGET" shell dumpsys meminfo > "$STATE_DIR/meminfo.tmp" 2>&1 || true
+    sed -n '/Total PSS by process/,/Total PSS by OOM/p' "$STATE_DIR/meminfo.tmp" | head -n 62
+    echo
+    echo "=== MEMINFO: SUMMARY ==="
+    grep -E "Total RAM|Free RAM|Used RAM|Lost RAM|ZRAM|Tuning" "$STATE_DIR/meminfo.tmp" || true
+    rm -f "$STATE_DIR/meminfo.tmp"
+  } >> "$CURRENT_LOG" 2>&1
+  echo "2/3 — пам'ять: готово"
+
+  {
+    echo
+    echo "=== DISKSTATS (розміри застосунків, даних і кешу) ==="
+    adb -s "$ADB_TARGET" shell dumpsys diskstats || true
+  } >> "$CURRENT_LOG" 2>&1
+  echo "3/3 — місце на диску: готово"
+
+  echo
+  echo "Звіт збережено. Надішли цей файл у чат:"
+  echo "  $CURRENT_LOG"
+  pause_menu
+}
+
+update_self() {
+  clear
+  local app_dir="$BASE_DIR/app"
+  local menu_path="$app_dir/menu.sh"
+  local tmp_path="$app_dir/menu.sh.tmp"
+
+  echo "Оновлення Phone Diagnostics"
+  echo "Зараз: версія $PD_VERSION"
+  echo
+
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "Не знайдено GitHub CLI (gh). Оновлення неможливе."
+    pause_menu
+    return
+  fi
+
+  mkdir -p "$app_dir"
+  echo "Завантажую нову версію з GitHub..."
+  if gh api "repos/$PD_REPO/contents/$PD_SOURCE_PATH" --jq .content \
+      | tr -d '\n' | base64 -d > "$tmp_path" 2>/dev/null \
+      && grep -q "Phone Diagnostics Menu" "$tmp_path"; then
+    mv "$tmp_path" "$menu_path"
+    chmod 700 "$menu_path" 2>/dev/null || true
+    echo "Готово. Нова версія: $(sed -n 's/^PD_VERSION="\(.*\)"$/\1/p' "$menu_path" | head -n 1)"
+    echo "Перезапускаю меню..."
+    sleep 2
+    exec bash "$menu_path"
+  fi
+
+  rm -f "$tmp_path"
+  echo "Не вдалося завантажити. Стара версія лишилась без змін."
+  pause_menu
+}
+
 reset_target() {
   clear
   rm -f "$TARGET_FILE"
@@ -480,6 +596,7 @@ while true; do
   echo "============================================================"
   echo "             Phone Diagnostics Menu"
   echo "============================================================"
+  echo "Версія: $PD_VERSION"
   echo "ADB target: ${target:-не заданий}"
   echo "Logs: $LOG_DIR"
   echo
@@ -499,6 +616,8 @@ while true; do
   echo "14 — A/B: force-stop Samsung MediaProvider"
   echo "15 — Відкрити папку логів у файловому менеджері"
   echo "16 — Скинути збережений ADB target"
+  echo "17 — Звіт для чистки → файл (нічого не змінює)"
+  echo "18 — Оновити це меню з GitHub"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -521,6 +640,8 @@ while true; do
     14) force_stop_samsung_media ;;
     15) open_logs ;;
     16) reset_target ;;
+    17) cleanup_report ;;
+    18) update_self ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
