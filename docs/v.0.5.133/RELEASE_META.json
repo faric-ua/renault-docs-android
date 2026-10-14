@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.133",
+  "versionCode": 149,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.133-import-batch",
+  "issues": [
+    147
+  ],
+  "scope": ".rdproject import: FileProvider path for the import copy (M30s failed on the first volume), volume counter in file order, ticks to pick volumes. TODO 1–4: «ВИБРАНО» buttons not clipped, «›» as an icon, line breaks only after , or /, open .rdproject from file managers by name. Includes v0.5.132.",
+  "sourceBase": "v0.5.132/build148",
+  "phoneQa": "PENDING",
+  "pr_number": 300,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "37e31c631df778198b416d50695363ebe7018ddb",
+  "signed_run_id": 38606204873,
+  "signed_run_number": 199,
+  "signed_android_apk_run": 199,
+  "artifact_id": 11915767268,
+  "artifact_name": "Renault-Docs-v0.5.133-Debug",
+  "artifact_digest": "sha256:d85c49434e0b047deb5abb07b11e4d27f26e1deabac7ca634f7d8957ae45d351",
+  "qa_status": "phone-qa-pending",
+  "next": "M30s: install over. Home → Додати → Проєкт із файлу → Megane II file → «Зняти всі галочки» → tick 2 volumes → «Імпортувати 2 томи»."
+}
