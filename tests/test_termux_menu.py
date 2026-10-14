@@ -152,10 +152,26 @@ class TermuxMenuContractTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, report)
 
-        update = text[end:text.index('reset_target() {')]
+        update = text[end:text.index('set_animations() {')]
         self.assertIn('gh api "repos/$PD_REPO/contents/$PD_SOURCE_PATH"', update)
         self.assertIn('grep -q "Phone Diagnostics Menu"', update)
         self.assertIn('exec bash "$menu_path"', update)
+
+    def test_phone_diagnostics_animations_are_reversible_and_verified(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('19) set_animations "0.5"', text)
+        self.assertIn('20) set_animations "1"', text)
+        fn = text[text.index('set_animations() {'):text.index('reset_target() {')]
+        for key in ('window_animation_scale', 'transition_animation_scale', 'animator_duration_scale'):
+            self.assertIn(key, fn)
+        self.assertIn('settings get global', fn)
+        self.assertIn('Налагодження USB (налаштування безпеки)', fn)
+        for forbidden in ('pm disable', 'pm uninstall', 'pm clear', 'trim-caches', 'reboot'):
+            self.assertNotIn(forbidden, fn)
 
     def test_phone_diagnostics_has_dedicated_installer(self):
         repo = Path(__file__).resolve().parents[1]

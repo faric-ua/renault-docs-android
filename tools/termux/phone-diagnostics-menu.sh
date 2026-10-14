@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.1"
+PD_VERSION="2026-10-14.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -171,6 +171,9 @@ PAIRING
 29. Пункт 17 — звіт для чистки: які застосунки
     займають пам'ять і місце, якими давно не
     користувались, анімації. НІЧОГО НЕ ЗМІНЮЄ.
+
+31. Пункти 19–20 — анімації швидше (0,5x) / як було (1x)
+    на підключеному телефоні. Нічого не видаляється.
 
 ОНОВЛЕННЯ
 30. Пункт 18 — завантажити нову версію цього меню
@@ -581,6 +584,48 @@ update_self() {
   pause_menu
 }
 
+set_animations() {
+  local scale="$1"
+  local item="$2"
+  local title="$3"
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  new_log "$item" "animations-$scale" "$title"
+
+  local key value failed=0
+  {
+    echo "Модель: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+    echo "Ставлю масштаб анімацій: $scale"
+    echo
+    for key in window_animation_scale transition_animation_scale animator_duration_scale; do
+      adb -s "$ADB_TARGET" shell settings put global "$key" "$scale" 2>&1
+      value="$(adb -s "$ADB_TARGET" shell settings get global "$key" 2>&1)"
+      echo "$key = $value"
+    done
+  } 2>&1 | tee -a "$CURRENT_LOG"
+
+  for key in window_animation_scale transition_animation_scale animator_duration_scale; do
+    value="$(adb -s "$ADB_TARGET" shell settings get global "$key" 2>/dev/null)"
+    case "$value" in
+      "$scale"|"$scale.0") ;;
+      *) failed=1 ;;
+    esac
+  done
+
+  echo
+  if [ "$failed" -eq 0 ]; then
+    echo "ГОТОВО: анімації = $scale" | tee -a "$CURRENT_LOG"
+  else
+    {
+      echo "НЕ ВИЙШЛО: телефон не дав змінити налаштування."
+      echo "На Xiaomi треба увімкнути в «Для розробників»:"
+      echo "  «Налагодження USB (налаштування безпеки)»"
+      echo "і повторити цей пункт."
+    } | tee -a "$CURRENT_LOG"
+  fi
+  pause_menu
+}
+
 reset_target() {
   clear
   rm -f "$TARGET_FILE"
@@ -618,6 +663,8 @@ while true; do
   echo "16 — Скинути збережений ADB target"
   echo "17 — Звіт для чистки → файл (нічого не змінює)"
   echo "18 — Оновити це меню з GitHub"
+  echo "19 — Анімації швидше (0,5x)"
+  echo "20 — Анімації як було (1x)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -642,6 +689,8 @@ while true; do
     16) reset_target ;;
     17) cleanup_report ;;
     18) update_self ;;
+    19) set_animations "0.5" "19" "Анімації швидше (0,5x)" ;;
+    20) set_animations "1" "20" "Анімації як було (1x)" ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
