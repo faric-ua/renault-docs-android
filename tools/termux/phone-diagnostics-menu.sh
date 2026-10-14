@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-14.5"
+PD_VERSION="2026-10-14.6"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -10,7 +10,7 @@ BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
 # Пункти 23–24: рідко вживані застосунки бабусиного Redmi (звіт 17, кошик 40).
 # Не працюють у фоні, поки їх не відкрити; відкриваються як звичайно.
 SLEEP_PACKAGES="cn.wps.xiaomi.abroad.lite com.cubleopard.pocketlifeworld com.einnovation.temu com.google.android.apps.bard com.google.android.apps.podcasts com.google.android.videos com.google.android.apps.youtube.music com.zhiliaoapp.musically com.voe.superbill"
-BLOAT_PACKAGES="com.miui.msa.global com.amazon.appmanager com.ebay.carrier com.facebook.appmanager com.facebook.services com.facebook.system"
+BLOAT_PACKAGES="com.miui.msa.global com.amazon.appmanager com.ebay.carrier com.facebook.appmanager com.facebook.services com.facebook.system com.mi.globalminusscreen com.google.android.apps.magazines"
 STATE_DIR="$BASE_DIR/state"
 COUNTER_FILE="$STATE_DIR/sequence"
 TARGET_FILE="$STATE_DIR/adb-target"
@@ -670,6 +670,8 @@ package_label() {
     com.facebook.appmanager) echo "Facebook App Manager (службова)" ;;
     com.facebook.services) echo "Facebook Services (службова)" ;;
     com.facebook.system) echo "Facebook App Installer (службова)" ;;
+    com.mi.globalminusscreen) echo "Екран зліва від головного (App Vault)" ;;
+    com.google.android.apps.magazines) echo "Google Новини" ;;
     cn.wps.xiaomi.abroad.lite) echo "WPS Office" ;;
     com.cubleopard.pocketlifeworld) echo "Pocket Life World" ;;
     com.einnovation.temu) echo "Temu" ;;
