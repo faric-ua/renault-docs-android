@@ -230,7 +230,9 @@ class TermuxMenuContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn('ask_target_ip() {', text)
-        self.assertIn('prefix="192.168.50."', text)
+        self.assertNotIn('prefix="192.168.50."', text)
+        self.assertIn('ip -4 addr show wlan0', text)
+        self.assertIn('введи ПОВНУ адресу', text)
         self.assertIn('TARGET_IP="$prefix$answer"', text)
         self.assertEqual(text.count('ask_target_ip\n'), 2)
         self.assertNotIn('192.168.x.x', text)
