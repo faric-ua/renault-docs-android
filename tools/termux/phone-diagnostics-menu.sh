@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.2"
+PD_VERSION="2026-10-15.3"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -322,13 +322,59 @@ connect_device() {
   target="$ip:$port"
   new_log "04" "adb-connect" "ADB connect"
 
-  adb connect "$target" 2>&1 | tee -a "$CURRENT_LOG"
+  local out
+  out="$(adb connect "$target" 2>&1)"
+  echo "$out" | tee -a "$CURRENT_LOG"
+
+  # Після зміни роутера / Wi-Fi старий ADB-сервер часто «застряє» на старих
+  # адресах — перезапускаємо його і пробуємо ще раз (2026-10-15).
+  if [ "$(adb -s "$target" get-state 2>/dev/null)" != "device" ]; then
+    echo | tee -a "$CURRENT_LOG"
+    echo "Не вийшло з першого разу — перезапускаю ADB і пробую ще раз..." | tee -a "$CURRENT_LOG"
+    adb disconnect >/dev/null 2>&1 || true
+    adb kill-server >/dev/null 2>&1 || true
+    adb start-server >/dev/null 2>&1 || true
+    out="$(adb connect "$target" 2>&1)"
+    echo "$out" | tee -a "$CURRENT_LOG"
+  fi
+
   if [ "$(adb -s "$target" get-state 2>/dev/null)" = "device" ]; then
     echo "$target" > "$TARGET_FILE"
-    echo "Збережено ADB target: $target" | tee -a "$CURRENT_LOG"
-  else
-    echo "Стан device не підтверджено; target не збережено." | tee -a "$CURRENT_LOG"
+    echo "ГОТОВО: підключено. Збережено ADB target: $target" | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
   fi
+
+  {
+    echo
+    echo "НЕ ПІДКЛЮЧИЛОСЬ: $target"
+    echo "Мій IP (цей телефон): $(detect_phone_ip)"
+    if command -v ping >/dev/null 2>&1; then
+      if ping -c 2 -W 2 "$ip" >/dev/null 2>&1; then
+        echo "Ping $ip: ВІДПОВІДАЄ — мережа одна, телефони бачать один одного."
+      else
+        echo "Ping $ip: НЕ відповідає (деякі телефони просто не відповідають на ping)."
+      fi
+    fi
+    echo
+    case "$out" in
+      *refused*)
+        echo "Причина: «Connection refused» — неправильний ПОРТ або на тому телефоні"
+        echo "вимкнене «Налагодження через Wi-Fi». Порт міняється щоразу, коли його"
+        echo "вмикають. Візьми свіжий порт з рядка «IP-адреса й порт»." ;;
+      *timed*|*"No route"*|*unreachable*)
+        echo "Причина: телефон НЕ досяжний — різні мережі, гостьова мережа,"
+        echo "або роутер ізолює пристрої (у роутері: «ізоляція клієнтів» /"
+        echo "«AP isolation» — вимкнути). Перевір: обидва в одній Wi-Fi?" ;;
+      *authenticate*|*unauthorized*)
+        echo "Причина: нема дозволу. Зроби пару заново — пункт 3 (код з того телефона)." ;;
+      *)
+        echo "Подивись рядок вище (що відповів adb) і надішли цей лог у чат." ;;
+    esac
+    echo
+    echo "Нова мережа: на тому телефоні Android питає «Дозволити налагодження"
+    echo "у цій мережі?» — треба натиснути «Дозволити»."
+  } | tee -a "$CURRENT_LOG"
 
   pause_menu
 }
