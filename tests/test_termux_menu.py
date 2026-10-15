@@ -232,8 +232,8 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('ask_target_ip() {', text)
         self.assertNotIn('prefix="192.168.50."', text)
         self.assertIn('ip -4 addr show wlan0', text)
-        self.assertIn('введи ПОВНУ адресу', text)
-        self.assertIn('TARGET_IP="$prefix$answer"', text)
+        self.assertIn('read -e -i "$prefill"', text)
+        self.assertIn('prefill="192.168.0."', text)
         self.assertEqual(text.count('ask_target_ip\n'), 2)
         self.assertNotIn('192.168.x.x', text)
 
