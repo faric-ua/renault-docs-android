@@ -93,6 +93,7 @@ class RdprojectImportRunStore(
             .putString(KEY_WANTED, JSONArray(wantedFiles).toString())
             .putString(KEY_MESSAGE, "Відкриваю файл проєкту…")
             .putLong(KEY_STARTED_AT, System.currentTimeMillis())
+            .putLong(KEY_BEAT_AT, System.currentTimeMillis())
             .commit()
     }
 
@@ -105,6 +106,7 @@ class RdprojectImportRunStore(
             .putString(KEY_MESSAGE, message)
             .putInt(KEY_PROGRESS_CURRENT, current)
             .putInt(KEY_PROGRESS_TOTAL, total)
+            .putLong(KEY_BEAT_AT, System.currentTimeMillis())
             .apply()
     }
 
@@ -115,6 +117,7 @@ class RdprojectImportRunStore(
         prefs.edit()
             .putInt(KEY_IMPORTED, imported)
             .putInt(KEY_SKIPPED, skipped)
+            .putLong(KEY_BEAT_AT, System.currentTimeMillis())
             .apply()
     }
 
@@ -126,6 +129,7 @@ class RdprojectImportRunStore(
         prefs.edit()
             .putString(KEY_PROJECT_ID, projectId)
             .putString(KEY_PROJECT_TITLE, projectTitle)
+            .putLong(KEY_BEAT_AT, System.currentTimeMillis())
             .apply()
     }
 
@@ -144,6 +148,28 @@ class RdprojectImportRunStore(
             .putString(KEY_MESSAGE, message)
             .putLong(KEY_FINISHED_AT, System.currentTimeMillis())
             .commit()
+    }
+
+    /**
+     * Phone QA 2026-10-15 15:00 (M30s): the screen still said «копіюю» many hours
+     * later — the phone restarts by itself at 6:00 and the import died with it, but the
+     * saved state stayed RUNNING forever. When nothing in this process is doing the
+     * import and nothing was reported for a while, the run is recorded as broken off.
+     * The volumes already added stay; opening the file again adds only what is missing.
+     */
+    @Synchronized
+    fun markInterruptedIfOrphaned(
+        workerAlive: Boolean,
+        nowMs: Long = System.currentTimeMillis(),
+    ): Boolean {
+        val state = load()
+        val lastBeat = maxOf(prefs.getLong(KEY_BEAT_AT, 0L), state.startedAtMs)
+        if (!RdprojectImportProgress.isOrphaned(state.isRunning, workerAlive, nowMs, lastBeat)) return false
+        finish(
+            RdprojectImportPhase.FAILED,
+            RdprojectImportProgress.interruptedMessage(state.importedCount),
+        )
+        return true
     }
 
     fun clearTerminal() {
@@ -181,5 +207,6 @@ class RdprojectImportRunStore(
         private const val KEY_STARTED_AT = "started_at"
         private const val KEY_FINISHED_AT = "finished_at"
         private const val KEY_CANCEL_REQUESTED = "cancel_requested"
+        private const val KEY_BEAT_AT = "beat_at"
     }
 }

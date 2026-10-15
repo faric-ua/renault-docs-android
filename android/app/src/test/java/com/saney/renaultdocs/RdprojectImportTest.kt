@@ -290,6 +290,20 @@ class RdprojectImportTest {
         assertEquals("Отримано: ?:// · тип: не вказано", RdprojectImportProgress.describeIncoming(null, ""))
     }
 
+    @Test
+    fun runLeftByAKilledProcessIsFound() {
+        // Phone QA 2026-10-15 15:00 (M30s restarts at 6:00): RUNNING for hours, no worker.
+        val now = 10L * 60 * 60 * 1000
+        assertTrue(RdprojectImportProgress.isOrphaned(true, false, now, now - 3L * 60 * 60 * 1000))
+        // A fresh start, the service not reporting yet — not orphaned.
+        assertFalse(RdprojectImportProgress.isOrphaned(true, false, now, now - 5_000))
+        // A live worker in this process is never orphaned, however quiet.
+        assertFalse(RdprojectImportProgress.isOrphaned(true, true, now, 0L))
+        assertFalse(RdprojectImportProgress.isOrphaned(false, false, now, 0L))
+        assertTrue(RdprojectImportProgress.interruptedMessage(3).contains("Уже додано томів: 3"))
+        assertFalse(RdprojectImportProgress.interruptedMessage(0).contains("Уже додано"))
+    }
+
     private fun assertFormatError(block: () -> Unit) {
         try {
             block()

@@ -101,6 +101,7 @@ class RdprojectImportActivity : Activity() {
 
     private fun handleIntent(intent: Intent?) {
         val incoming = incomingUri(intent)
+        runStore.markInterruptedIfOrphaned(RdprojectImportService.workerAlive)
         val state = runStore.load()
         when {
             incoming != null && state.isRunning -> {
@@ -334,6 +335,7 @@ class RdprojectImportActivity : Activity() {
 
     private fun render() {
         if (!::container.isInitialized) return
+        runStore.markInterruptedIfOrphaned(RdprojectImportService.workerAlive)
         val state = runStore.load()
         renderedPhase = state.phase
         buttonOpensProject = false
@@ -647,6 +649,7 @@ class RdprojectImportActivity : Activity() {
 
     private fun refreshRunState() {
         if (!::operationStatus.isInitialized) return
+        runStore.markInterruptedIfOrphaned(RdprojectImportService.workerAlive)
         val state = runStore.load()
         if (state.phase != renderedPhase) {
             // The run started or finished since the screen was drawn.
