@@ -257,6 +257,17 @@ class TermuxMenuContractTests(unittest.TestCase):
         for forbidden in ('uninstall', 'pm clear', ' -d ', 'rm -'):
             self.assertNotIn(forbidden, inst)
 
+    def test_phone_diagnostics_connect_retries_and_explains(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (
+            repo / "tools" / "termux" / "phone-diagnostics-menu.sh"
+        ).read_text(encoding="utf-8")
+        fn = text[text.index('connect_device() {'):text.index('show_connection() {')]
+        self.assertIn('adb kill-server', fn)
+        self.assertIn('*refused*)', fn)
+        self.assertIn('*timed*|*"No route"*|*unreachable*)', fn)
+        self.assertIn('Дозволити налагодження', fn)
+
     def test_phone_diagnostics_has_dedicated_installer(self):
         repo = Path(__file__).resolve().parents[1]
         text = (
