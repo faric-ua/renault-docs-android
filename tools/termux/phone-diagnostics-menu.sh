@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.7"
+PD_VERSION="2026-10-15.8"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -27,6 +27,14 @@ if ! mkdir -p "$LOG_DIR" 2>/dev/null; then
 fi
 
 pause_menu() {
+  # 2026-10-15 (faric): шлях до файлу — і зверху, і в кінці роботи,
+  # бо після довгого виводу верхній рядок уже не видно.
+  if [ -n "${CURRENT_LOG:-}" ]; then
+    echo
+    echo "Лог збережено:"
+    echo "  $CURRENT_LOG"
+    CURRENT_LOG=""
+  fi
   echo
   printf "Натисни Enter, щоб повернутися в меню..."
   read -r _
@@ -1165,7 +1173,7 @@ media_scan_report() {
       done | sort -rn | head -n 40'
   } 2>&1 | tee -a "$CURRENT_LOG"
   echo
-  echo "Готово. Надішли цей файл у чат."
+  echo "Готово. Надішли цей файл у чат (шлях — нижче)."
   pause_menu
 }
 # media_scan_report end
