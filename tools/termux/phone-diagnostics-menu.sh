@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.4"
+PD_VERSION="2026-10-15.5"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -33,7 +33,18 @@ pause_menu() {
 }
 
 detect_phone_ip() {
-  ip route get 1.1.1.1 2>/dev/null     | sed -n 's/.* src \([^ ]*\).*/\1/p'     | head -n 1
+  # 2026-10-15: на A26 `ip route get` у Termux нічого не дає — пробуємо кілька
+  # способів; якщо жоден не спрацював — порожньо (тоді питаємо повну адресу).
+  local found
+  found="$(ip route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' | head -n 1)"
+  [ -n "$found" ] || found="$(ip -4 addr show wlan0 2>/dev/null | sed -n 's/.*inet \([0-9.]*\).*/\1/p' | head -n 1)"
+  [ -n "$found" ] || found="$(ifconfig wlan0 2>/dev/null | sed -n 's/.*inet[^0-9]*\([0-9][0-9.]*\).*/\1/p' | head -n 1)"
+  if [ -z "$found" ] && command -v termux-wifi-connectioninfo >/dev/null 2>&1; then
+    found="$(timeout 5 termux-wifi-connectioninfo 2>/dev/null | sed -n 's/.*"ip": *"\([0-9.]*\)".*/\1/p' | head -n 1)"
+  fi
+  case "$found" in
+    *.*.*.*) printf '%s\n' "$found" ;;
+  esac
 }
 
 # Мережа вже відома (з IP цього телефона, напр. 192.168.50.) —
@@ -42,25 +53,42 @@ detect_phone_ip() {
 ask_target_ip() {
   local own prefix last answer
   own="$(detect_phone_ip)"
-  prefix="${own%.*}."
-  case "$own" in
-    *.*.*.*) ;;
-    *) prefix="192.168.50." ;;
-  esac
   last="$(load_target)"
   last="${last%%:*}"
+
+  # Початок адреси підставляємо ЛИШЕ коли знаємо свою мережу. Раніше тут була
+  # «запасна» 192.168.50. — після зміни роутера (мережа 192.168.0.) це давало
+  # чужу адресу і «timed out» (2026-10-15).
+  prefix=""
+  case "$own" in
+    *.*.*.*) prefix="${own%.*}." ;;
+  esac
 
   if [ -n "$last" ]; then
     echo "Enter без нічого = $last (останній)" >&2
   fi
-  printf "IP телефону: %s" "$prefix" >&2
+  if [ -n "$prefix" ]; then
+    echo "Мій IP: $own — введи лише останнє число (або повну адресу)." >&2
+    printf "IP телефону: %s" "$prefix" >&2
+  else
+    echo "Свій IP не визначився — введи ПОВНУ адресу, напр. 192.168.0.113" >&2
+    printf "IP телефону: " >&2
+  fi
   read -r answer
   case "$answer" in
     "") TARGET_IP="$last" ;;
     *.*) TARGET_IP="$answer" ;;
-    *) TARGET_IP="$prefix$answer" ;;
+    *)
+      if [ -n "$prefix" ]; then
+        TARGET_IP="$prefix$answer"
+      else
+        TARGET_IP=""
+        echo "Потрібна повна адреса з крапками." >&2
+      fi
+      ;;
   esac
 }
+
 
 load_target() {
   if [ -f "$TARGET_FILE" ]; then
@@ -306,7 +334,6 @@ connect_device() {
   echo "ADB CONNECT"
   echo "На іншому телефоні дивись рядок «IP-адреса й порт»"
   echo "на головному екрані Wi-Fi debugging."
-  echo "Початок адреси вже написано — введи лише останнє число."
   echo
   ask_target_ip
   ip="$TARGET_IP"
