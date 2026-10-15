@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.9"
+PD_VERSION="2026-10-15.10"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -295,6 +295,7 @@ prepare_tools() {
   pkg update 2>&1 | tee -a "$CURRENT_LOG"
   pkg upgrade -y 2>&1 | tee -a "$CURRENT_LOG"
   pkg reinstall -y libc++ android-tools 2>&1 | tee -a "$CURRENT_LOG"
+  pkg install -y curl 2>&1 | tee -a "$CURRENT_LOG"
   hash -r
   {
     echo
@@ -1286,6 +1287,63 @@ EOF29
 }
 # gallery_nomedia_rescan end
 
+crypto_prices() {
+  # 2026-10-15 (faric): ціни монет для сторінки-тренажера «Крипто-тренажер».
+  # Лише публічна історія цін Binance (свічки за день): без входу, без ключів,
+  # нічого не купує й не продає. Телефон підключати не треба.
+  clear
+  local dir="/storage/emulated/0/Documents/Crypto"
+  local coins="ETH BNB TRX XRP SOL LTC DOT XLM NEAR PEPE ALGO VTHO"
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "Немає curl. Спершу пункт 2 — Підготувати Termux."
+    pause_menu
+    return
+  fi
+  mkdir -p "$dir" && touch "$dir/.nomedia"
+  new_log "30" "crypto-prices" "Ціни криптовалют для тренажера"
+  local out="$dir/binance-1d-$(date '+%Y%m%d-%H%M').json"
+  local part="$out.part" first=1 c resp host ok=0 bad="" days
+  echo "Завантажую історію цін (до 1000 днів) з Binance..." | tee -a "$CURRENT_LOG"
+  printf '{' > "$part"
+  for c in $coins; do
+    resp=""
+    for host in api.binance.com data-api.binance.vision; do
+      resp="$(curl -sS -m 40 "https://$host/api/v3/klines?symbol=${c}USDT&interval=1d&limit=1000" 2>&1)"
+      case "$resp" in \[\[*) break ;; esac
+    done
+    case "$resp" in
+      \[\[*)
+        [ "$first" = 1 ] || printf ',' >> "$part"
+        printf '"%s":%s' "$c" "$resp" >> "$part"
+        first=0
+        ok=$((ok + 1))
+        days=$(( $(printf '%s' "$resp" | grep -o '\],\[' | wc -l) + 1 ))
+        echo "  $c — $days днів" | tee -a "$CURRENT_LOG"
+        ;;
+      *)
+        bad="$bad $c"
+        echo "  $c — не вийшло: $(printf '%s' "$resp" | head -c 120)" | tee -a "$CURRENT_LOG"
+        ;;
+    esac
+  done
+  printf '}' >> "$part"
+  if [ "$ok" -gt 0 ]; then
+    mv "$part" "$out"
+    {
+      echo
+      echo "ГОТОВО: $ok монет. Файл з цінами:"
+      echo "  $out"
+      [ -n "$bad" ] && echo "Не вийшло:$bad"
+      echo "У тренажері натисни «Відкрити файл з цінами» → Documents → Crypto."
+    } | tee -a "$CURRENT_LOG"
+  else
+    rm -f "$part"
+    echo "НЕ ВИЙШЛО жодної монети — перевір інтернет. Причина — у рядках вище." | tee -a "$CURRENT_LOG"
+  fi
+  pause_menu
+}
+# crypto_prices end
+
 while true; do
   clear
   target="$(load_target)"
@@ -1325,6 +1383,7 @@ while true; do
   echo "27 — Поставити збережений застосунок на телефон"
   echo "28 — Що робить сканер медіа → файл (нічого не змінює)"
   echo "29 — Галерея: прибрати папки з .nomedia (файли не чіпає)"
+  echo "30 — Ціни криптовалют для тренажера → файл (лише читає Binance)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1360,6 +1419,7 @@ while true; do
     27) install_saved_app ;;
     28) media_scan_report ;;
     29) gallery_nomedia_rescan ;;
+    30) crypto_prices ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac

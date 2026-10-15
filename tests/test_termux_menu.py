@@ -447,6 +447,18 @@ if __name__ == "__main__":
         for forbidden in ("pm clear", "--cache-only", "trim-caches", "am force-stop", "rm ", "-delete", "reboot", "settings put"):
             self.assertNotIn(forbidden, fn)
 
+    def test_phone_diagnostics_crypto_prices_only_public_history(self):
+        # 2026-10-15 (faric): ціни для «Крипто-тренажера» — лише публічні свічки,
+        # без ключів і без торгівлі.
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("30) crypto_prices ;;", text)
+        fn = text[text.index("crypto_prices() {"):text.index("# crypto_prices end")]
+        self.assertIn("/api/v3/klines?symbol=", fn)
+        self.assertIn(".nomedia", fn)
+        for forbidden in ("X-MBX-APIKEY", "/api/v3/order", "signature=", "secret", "adb "):
+            self.assertNotIn(forbidden, fn)
+
     def test_phone_diagnostics_item13_stops_installed_media_module(self):
         # 2026-10-15: на M30s пакет сканера може бути без «google».
         repo = Path(__file__).resolve().parents[1]
