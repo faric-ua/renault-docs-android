@@ -424,6 +424,15 @@ if __name__ == "__main__":
         for forbidden in ("am force-stop", "pm disable", "pm clear", "settings put", "rm ", "reboot", "input ", "-delete"):
             self.assertNotIn(forbidden, fn)
 
+    def test_phone_diagnostics_log_path_repeated_at_end(self):
+        # 2026-10-15 (faric): шлях до лога — і на початку, і в кінці роботи пункту.
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        fn = text[text.index("pause_menu() {"):text.index("detect_phone_ip() {")]
+        self.assertIn('"${CURRENT_LOG:-}"', fn)
+        self.assertIn('echo "  $CURRENT_LOG"', fn)
+        self.assertIn('CURRENT_LOG=""', fn)
+
     def test_phone_diagnostics_item13_stops_installed_media_module(self):
         # 2026-10-15: на M30s пакет сканера може бути без «google».
         repo = Path(__file__).resolve().parents[1]
