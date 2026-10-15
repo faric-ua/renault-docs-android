@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.8"
+PD_VERSION="2026-10-15.9"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1178,6 +1178,114 @@ media_scan_report() {
 }
 # media_scan_report end
 
+gallery_count_in_index() {
+  # Скільки файлів з папки $1 ще є в індексі медіа (його бачить Галерея).
+  local out
+  out="$(adb -s "$ADB_TARGET" shell "content query --uri content://media/external/file --projection _id --where \"_data LIKE '$1/%'\"" 2>&1)"
+  case "$out" in
+    *Exception*|*Error*|*rror:*) echo "?" ;;
+    *) printf '%s\n' "$out" | grep -c '^Row:' ;;
+  esac
+}
+
+gallery_nomedia_rescan() {
+  # 2026-10-15 (faric): у деяких папках лежить .nomedia, а Галерея Samsung
+  # їх досі показує — індекс медіа ще не перечитав ці папки.
+  # Не чистимо дані Галереї/Медіасховища (зник би кошик Галереї й плейлисти):
+  # лише просимо індекс перечитати саме ці папки. Файли не чіпаємо.
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  new_log "29" "gallery-nomedia" "Галерея: прибрати папки з .nomedia"
+  echo "Шукаю папки з .nomedia (телефон і карта пам'яті), до 3 хвилин..."
+  local dirs
+  dirs="$(adb -s "$ADB_TARGET" shell 'for r in /storage/emulated/0 /storage/*-*; do
+      [ -d "$r" ] || continue
+      timeout 120 find "$r" -name .nomedia -type f 2>/dev/null
+    done' | tr -d '\r' | sed 's#/\.nomedia$##' | grep -v "'" | sort -u)"
+  if [ -z "$dirs" ]; then
+    echo "Папок з .nomedia не знайдено." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+
+  local dir n total=0 shown=""
+  {
+    echo
+    echo "=== Папки з .nomedia: скільки файлів з них ще бачить Галерея ==="
+  } | tee -a "$CURRENT_LOG"
+  while IFS= read -r dir; do
+    [ -n "$dir" ] || continue
+    n="$(gallery_count_in_index "$dir")"
+    echo "$n  $dir" | tee -a "$CURRENT_LOG"
+    case "$n" in ''|*[!0-9]*) ;; *) total=$((total + n)); [ "$n" -gt 0 ] && shown="$shown$dir
+" ;; esac
+  done <<EOF29
+$dirs
+EOF29
+  echo | tee -a "$CURRENT_LOG"
+  if [ -z "$shown" ]; then
+    echo "Галерея вже не бачить жодної з цих папок. Нічого робити не треба." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+
+  echo "Галерея ще бачить $total файлів з цих папок."
+  echo "Попрошу Android перечитати ЛИШЕ ці папки. Файли не видаляються,"
+  echo "дані Галереї (кошик, альбоми) не чіпаються."
+  echo "Якщо зараз Renault імпортує томи — краще дочекатись кінця імпорту."
+  printf "Перечитати? Напиши так / ні (можна y / n): "
+  local answer
+  read -r answer
+  case "$answer" in
+    так|Так|ТАК|y|Y|yes|д|Д) ;;
+    *) echo "Скасовано. Нічого не змінено." | tee -a "$CURRENT_LOG"; pause_menu; return ;;
+  esac
+
+  {
+    echo
+    echo "=== Прошу перечитати ==="
+  } | tee -a "$CURRENT_LOG"
+  while IFS= read -r dir; do
+    [ -n "$dir" ] || continue
+    echo "→ $dir" | tee -a "$CURRENT_LOG"
+    adb -s "$ADB_TARGET" shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
+      -p com.android.providers.media.module -d "\"file://$dir\"" 2>&1 | tail -n 1 | tee -a "$CURRENT_LOG"
+  done <<EOF29
+$shown
+EOF29
+
+  echo "Чекаю, поки Android перечитає (до 3 хвилин)..." | tee -a "$CURRENT_LOG"
+  local i left
+  for i in $(seq 1 18); do
+    sleep 10
+    left=0
+    while IFS= read -r dir; do
+      [ -n "$dir" ] || continue
+      n="$(gallery_count_in_index "$dir")"
+      case "$n" in ''|*[!0-9]*) ;; *) left=$((left + n)) ;; esac
+    done <<EOF29
+$shown
+EOF29
+    echo "  через $((i * 10)) с: ще видно $left" | tee -a "$CURRENT_LOG"
+    [ "$left" -eq 0 ] && break
+  done
+
+  {
+    echo
+    echo "=== Підсумок ==="
+    echo "Було видно: $total → стало: $left"
+    if [ "$left" -eq 0 ]; then
+      echo "ГОТОВО: Галерея більше не бачить ці папки. Відкрий Галерею й перевір."
+    elif [ "$left" -lt "$total" ]; then
+      echo "Іде, але ще не все. Запусти пункт 29 ще раз за кілька хвилин."
+    else
+      echo "НЕ ЗМІНИЛОСЬ: Android не перечитав. Надішли цей файл у чат."
+    fi
+  } | tee -a "$CURRENT_LOG"
+  pause_menu
+}
+# gallery_nomedia_rescan end
+
 while true; do
   clear
   target="$(load_target)"
@@ -1216,6 +1324,7 @@ while true; do
   echo "26 — Зберегти застосунок (усі частини APK) з телефона"
   echo "27 — Поставити збережений застосунок на телефон"
   echo "28 — Що робить сканер медіа → файл (нічого не змінює)"
+  echo "29 — Галерея: прибрати папки з .nomedia (файли не чіпає)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1250,6 +1359,7 @@ while true; do
     26) save_app_apks ;;
     27) install_saved_app ;;
     28) media_scan_report ;;
+    29) gallery_nomedia_rescan ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac

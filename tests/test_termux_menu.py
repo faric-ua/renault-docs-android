@@ -433,6 +433,20 @@ if __name__ == "__main__":
         self.assertIn('echo "  $CURRENT_LOG"', fn)
         self.assertIn('CURRENT_LOG=""', fn)
 
+    def test_phone_diagnostics_gallery_rescan_never_clears_data(self):
+        # 2026-10-15 (faric): прибрати з Галереї папки з .nomedia без чистки даних
+        # Галереї/Медіасховища (там кошик Галереї й плейлисти).
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("29) gallery_nomedia_rescan ;;", text)
+        self.assertIn('echo "29 — Галерея: прибрати папки з .nomedia (файли не чіпає)"', text)
+        fn = text[text.index("gallery_count_in_index() {"):text.index("# gallery_nomedia_rescan end")]
+        self.assertIn("MEDIA_SCANNER_SCAN_FILE", fn)
+        self.assertIn("content query", fn)
+        self.assertIn("так|Так|ТАК|y|Y", fn)
+        for forbidden in ("pm clear", "--cache-only", "trim-caches", "am force-stop", "rm ", "-delete", "reboot", "settings put"):
+            self.assertNotIn(forbidden, fn)
+
     def test_phone_diagnostics_item13_stops_installed_media_module(self):
         # 2026-10-15: на M30s пакет сканера може бути без «google».
         repo = Path(__file__).resolve().parents[1]
