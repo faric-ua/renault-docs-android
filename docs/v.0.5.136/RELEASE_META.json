@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.136",
+  "versionCode": 152,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/import-orphan-after-reboot",
+  "issues": [
+    147
+  ],
+  "scope": ".rdproject import left RUNNING by a killed process (M30s daily 6:00 restart) is closed as «Імпорт обірвався»; choice dialogs re-measure after restyle; sizes with a comma. Includes v0.5.135.",
+  "sourceBase": "v0.5.135/build151",
+  "phoneQa": "PENDING",
+  "pr_number": 313,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "4c0c1ca1678633d648d47dc0e4f15acab5ad8be6",
+  "signed_run_id": 38732334332,
+  "signed_run_number": 206,
+  "signed_android_apk_run": 206,
+  "artifact_id": 11970322812,
+  "artifact_name": "Renault-Docs-v0.5.136-Debug",
+  "artifact_digest": "sha256:f2a357ec554e00b8bbe9186c8b29b847bb192620221a194cd4ef621849022c78",
+  "qa_status": "phone-qa-pending",
+  "next": "M30s: install over; open Renault Docs → the stuck import shows «Імпорт обірвався…»; open the Megane II file again → only missing volumes."
+}
