@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.3"
+PD_VERSION="2026-10-15.4"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -322,8 +322,24 @@ connect_device() {
   target="$ip:$port"
   new_log "04" "adb-connect" "ADB connect"
 
-  local out
-  out="$(adb connect "$target" 2>&1)"
+  local out tmo="" ping_ok=""
+  command -v timeout >/dev/null 2>&1 && tmo="timeout 15"
+  {
+    echo "Мій IP (цей телефон): $(detect_phone_ip)"
+    echo "Підключаюсь до: $target (чекаю до 15 с)..."
+    if command -v ping >/dev/null 2>&1; then
+      if ping -c 2 -W 2 "$ip" >/dev/null 2>&1; then
+        echo "Ping $ip: ВІДПОВІДАЄ"
+        : > "$STATE_DIR/ping_ok"
+      else
+        echo "Ping $ip: НЕ відповідає"
+      fi
+    fi
+  } | tee -a "$CURRENT_LOG"
+  [ -f "$STATE_DIR/ping_ok" ] && ping_ok=1
+  rm -f "$STATE_DIR/ping_ok"
+  out="$($tmo adb connect "$target" 2>&1)"
+  [ -n "$out" ] || out="timed out (15 с без відповіді)"
   echo "$out" | tee -a "$CURRENT_LOG"
 
   # Після зміни роутера / Wi-Fi старий ADB-сервер часто «застряє» на старих
@@ -334,7 +350,8 @@ connect_device() {
     adb disconnect >/dev/null 2>&1 || true
     adb kill-server >/dev/null 2>&1 || true
     adb start-server >/dev/null 2>&1 || true
-    out="$(adb connect "$target" 2>&1)"
+    out="$($tmo adb connect "$target" 2>&1)"
+    [ -n "$out" ] || out="timed out (15 с без відповіді)"
     echo "$out" | tee -a "$CURRENT_LOG"
   fi
 
@@ -348,14 +365,6 @@ connect_device() {
   {
     echo
     echo "НЕ ПІДКЛЮЧИЛОСЬ: $target"
-    echo "Мій IP (цей телефон): $(detect_phone_ip)"
-    if command -v ping >/dev/null 2>&1; then
-      if ping -c 2 -W 2 "$ip" >/dev/null 2>&1; then
-        echo "Ping $ip: ВІДПОВІДАЄ — мережа одна, телефони бачать один одного."
-      else
-        echo "Ping $ip: НЕ відповідає (деякі телефони просто не відповідають на ping)."
-      fi
-    fi
     echo
     case "$out" in
       *refused*)
@@ -363,9 +372,16 @@ connect_device() {
         echo "вимкнене «Налагодження через Wi-Fi». Порт міняється щоразу, коли його"
         echo "вмикають. Візьми свіжий порт з рядка «IP-адреса й порт»." ;;
       *timed*|*"No route"*|*unreachable*)
+        if [ -n "$ping_ok" ]; then
+          echo "Причина: телефон У МЕРЕЖІ (ping є), але порт $port мовчить."
+          echo "Значить, порт не той або налагодження на тому телефоні вимкнулось."
+          echo "Візьми порт з ГОЛОВНОГО екрана «Налагодження через Wi-Fi» →"
+          echo "«IP-адреса й порт» (не з віконця з кодом пари)."
+        else
         echo "Причина: телефон НЕ досяжний — різні мережі, гостьова мережа,"
         echo "або роутер ізолює пристрої (у роутері: «ізоляція клієнтів» /"
-        echo "«AP isolation» — вимкнути). Перевір: обидва в одній Wi-Fi?" ;;
+        echo "«AP isolation» — вимкнути). Перевір: обидва в одній Wi-Fi?"
+        fi ;;
       *authenticate*|*unauthorized*)
         echo "Причина: нема дозволу. Зроби пару заново — пункт 3 (код з того телефона)." ;;
       *)
