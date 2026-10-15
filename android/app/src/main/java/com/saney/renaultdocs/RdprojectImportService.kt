@@ -65,9 +65,11 @@ class RdprojectImportService : Service() {
     ): Int {
         if (intent?.action != ACTION_START) return START_NOT_STICKY
         if (!workerRunning.compareAndSet(false, true)) return START_REDELIVER_INTENT
+        workerAlive = true
         val state = runStore.load()
         if (!state.isRunning || state.wantedFiles.isEmpty()) {
             workerRunning.set(false)
+            workerAlive = false
             stopSelf()
             return START_NOT_STICKY
         }
@@ -108,6 +110,7 @@ class RdprojectImportService : Service() {
                 runCatching { workDir.deleteRecursively() }
                 workWakeLock.release()
                 workerRunning.set(false)
+                workerAlive = false
                 stopForeground(STOP_FOREGROUND_DETACH)
                 stopSelf()
             }
@@ -402,6 +405,13 @@ class RdprojectImportService : Service() {
     }
 
     companion object {
+        /**
+         * True while an import thread runs in this process. After a restart of the
+         * phone or of the app it is false again — that is how a dead run is found.
+         */
+        @Volatile
+        var workerAlive: Boolean = false
+            private set
         private const val ACTION_START = "com.saney.renaultdocs.action.RDPROJECT_IMPORT_START"
         private const val CHANNEL_ID = "renault_rdproject_import"
         private const val NOTIFICATION_ID = 3713

@@ -131,6 +131,18 @@ class RdprojectImportContract(unittest.TestCase):
         self.assertIn("RdprojectImportProgress.installPercent(progress)", service)
         self.assertNotIn("current = progress.normalizedCurrent", service)
 
+    def test_run_killed_with_the_process_is_closed_not_shown_forever(self):
+        # Phone QA 2026-10-15 15:00 (M30s): «копіюю» for hours after the daily 6:00 restart.
+        store = source("RdprojectImportRunStore.kt")
+        self.assertIn("fun markInterruptedIfOrphaned(", store)
+        self.assertIn("RdprojectImportProgress.isOrphaned(", store)
+        self.assertGreaterEqual(store.count(".putLong(KEY_BEAT_AT, System.currentTimeMillis())"), 4)
+        service = source("RdprojectImportService.kt")
+        self.assertEqual(service.count("workerAlive = false"), 2)
+        self.assertIn("workerAlive = true", service)
+        activity = source("RdprojectImportActivity.kt")
+        self.assertEqual(activity.count("runStore.markInterruptedIfOrphaned(RdprojectImportService.workerAlive)"), 3)
+
     def test_screen_survives_rotation_and_asks_before_stopping(self):
         activity = source("RdprojectImportActivity.kt")
         self.assertIn("onRetainNonConfigurationInstance", activity)

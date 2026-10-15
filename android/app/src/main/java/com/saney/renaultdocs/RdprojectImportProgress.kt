@@ -19,6 +19,27 @@ object RdprojectImportProgress {
         return maxOf(now, previous)
     }
 
+    /** No report for this long and no worker in this process — the run is gone. */
+    const val ORPHAN_AFTER_MS = 2L * 60L * 1000L
+
+    /**
+     * Phone QA 2026-10-15 15:00 (M30s, daily restart at 6:00): a run left RUNNING by a
+     * killed process. A fresh run is never treated so: right after the start there is a
+     * short pause before the service reports, so the last report must be old too.
+     */
+    fun isOrphaned(
+        running: Boolean,
+        workerAlive: Boolean,
+        nowMs: Long,
+        lastBeatMs: Long,
+    ): Boolean =
+        running && !workerAlive && (lastBeatMs <= 0L || nowMs - lastBeatMs >= ORPHAN_AFTER_MS)
+
+    fun interruptedMessage(importedCount: Int): String =
+        "Імпорт обірвався: телефон перезавантажився або Android зупинив застосунок. " +
+            (if (importedCount > 0) "Уже додано томів: $importedCount — вони лишаються. " else "") +
+            "Відкрий файл ще раз — додадуться лише томи, яких бракує."
+
     /** Install progress of the current volume as a whole percent — shown in text. */
     fun installPercent(progress: OperationProgress): Int? {
         val total = progress.total ?: return null
