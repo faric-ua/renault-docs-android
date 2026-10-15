@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.5"
+PD_VERSION="2026-10-15.6"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -51,43 +51,51 @@ detect_phone_ip() {
 # людина вводить лише останнє число. Enter без нічого = останній IP.
 # Повну адресу з крапками теж можна ввести.
 ask_target_ip() {
-  local own prefix last answer
+  # Підказка — лише текст у полі вводу, який можна дописати або стерти
+  # (власник 2026-10-15). Береться: мережа цього телефона → мережа останньої
+  # адреси → 192.168.0. За адресою підключаємось лише за тим, що в полі.
+  local own prefill last answer
   own="$(detect_phone_ip)"
   last="$(load_target)"
   last="${last%%:*}"
 
-  # Початок адреси підставляємо ЛИШЕ коли знаємо свою мережу. Раніше тут була
-  # «запасна» 192.168.50. — після зміни роутера (мережа 192.168.0.) це давало
-  # чужу адресу і «timed out» (2026-10-15).
-  prefix=""
   case "$own" in
-    *.*.*.*) prefix="${own%.*}." ;;
+    *.*.*.*) prefill="${own%.*}." ;;
+    *)
+      case "$last" in
+        *.*.*.*) prefill="${last%.*}." ;;
+        *) prefill="192.168.0." ;;
+      esac
+      ;;
   esac
 
+  [ -n "$own" ] && echo "Мій IP: $own" >&2
   if [ -n "$last" ]; then
-    echo "Enter без нічого = $last (останній)" >&2
+    echo "Лише Enter (нічого не дописуючи) = $last (останній)" >&2
   fi
-  if [ -n "$prefix" ]; then
-    echo "Мій IP: $own — введи лише останнє число (або повну адресу)." >&2
-    printf "IP телефону: %s" "$prefix" >&2
+  echo "Допиши останнє число або зітри й напиши своє:" >&2
+  if read -e -i "$prefill" -r -p "IP телефону: " answer 2>/dev/null; then
+    :
   else
-    echo "Свій IP не визначився — введи ПОВНУ адресу, напр. 192.168.0.113" >&2
-    printf "IP телефону: " >&2
+    printf "IP телефону: %s" "$prefill" >&2
+    read -r answer
+    case "$answer" in
+      *.*) ;;
+      "") answer="$prefill" ;;
+      *) answer="$prefill$answer" ;;
+    esac
   fi
-  read -r answer
+
   case "$answer" in
-    "") TARGET_IP="$last" ;;
-    *.*) TARGET_IP="$answer" ;;
+    ""|"$prefill") TARGET_IP="$last" ;;
+    *.*.*.*) TARGET_IP="$answer" ;;
     *)
-      if [ -n "$prefix" ]; then
-        TARGET_IP="$prefix$answer"
-      else
-        TARGET_IP=""
-        echo "Потрібна повна адреса з крапками." >&2
-      fi
+      TARGET_IP=""
+      echo "Адреса неповна: «$answer». Потрібно 4 числа через крапку." >&2
       ;;
   esac
 }
+
 
 
 load_target() {
