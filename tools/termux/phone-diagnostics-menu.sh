@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.10"
+PD_VERSION="2026-10-16.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1344,12 +1344,31 @@ crypto_prices() {
 }
 # crypto_prices end
 
+# Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
+# Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
+# Вужчий екран — проста шапка одним рядком.
+show_banner() {
+  local c="\033[1;32m" d="\033[0;32m" z="\033[0m" cols
+  cols="$(stty size 2>/dev/null | cut -d' ' -f2)"
+  if [ "${cols:-80}" -ge 45 ] 2>/dev/null; then
+    echo -e "${d}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${z}"
+    echo -e "${c}             █▀█ █ █ █▀█ █▀▄ █▀▀${z}"
+    echo -e "${c}             █▀▀ █▀█ █ █ █ █ █▀${z}"
+    echo -e "${c}             ▀   ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀${z}"
+    echo -e "${c} █▀▄ ▀█▀ █▀█ █▀▀ █▀▄ █▀█ █▀▀ ▀█▀ ▀█▀ █▀▀ █▀▀${z}"
+    echo -e "${c} █ █  █  █▀█ █ █ █ █ █ █ ▀▀█  █   █  █   ▀▀█${z}"
+    echo -e "${c} ▀▀  ▀▀▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀ ▀▀▀  ▀  ▀▀▀ ▀▀▀ ▀▀▀${z}"
+    echo -e "${d}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${z}"
+  else
+    echo -e "${c}━━ PHONE DIAGNOSTICS ━━${z}"
+  fi
+}
+
 while true; do
   clear
   target="$(load_target)"
-  echo "============================================================"
+  show_banner
   echo "             Phone Diagnostics Menu"
-  echo "============================================================"
   echo "Версія: $PD_VERSION"
   echo "ADB target: ${target:-не заданий}"
   echo "Logs: $LOG_DIR"
