@@ -411,6 +411,28 @@ class TermuxMenuContractTests(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
+    def test_phone_diagnostics_media_scan_report_only_reads(self):
+        # 2026-10-15: M30s — сканер медіа годинами тримав ~1 ядро (знімки 068, 069).
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("28) media_scan_report ;;", text)
+        self.assertIn('echo "28 — Що робить сканер медіа → файл (нічого не змінює)"', text)
+        fn = text[text.index("media_scan_report() {"):text.index("# media_scan_report end")]
+        self.assertIn("logcat -d", fn)
+        self.assertIn("-mmin -30", fn)
+        self.assertIn("top -b -n 1 -H", fn)
+        for forbidden in ("am force-stop", "pm disable", "pm clear", "settings put", "rm ", "reboot", "input ", "-delete"):
+            self.assertNotIn(forbidden, fn)
+
+    def test_phone_diagnostics_item13_stops_installed_media_module(self):
+        # 2026-10-15: на M30s пакет сканера може бути без «google».
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        fn = text[text.index("force_stop_google_media() {"):text.index("force_stop_samsung_media() {")]
+        self.assertIn("com.google.android.providers.media.module", fn)
+        self.assertIn("com.android.providers.media.module", fn)
+        self.assertIn("pm path", fn)
+
     def test_phone_diagnostics_open_with_intent_only_reads(self):
         # 2026-10-14: what «Мої файли» sends for .rdproject (dat=…, typ=…).
         repo = Path(__file__).resolve().parents[1]

@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-15.6"
+PD_VERSION="2026-10-15.7"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -561,7 +561,17 @@ force_stop_google_media() {
     echo
   } | tee -a "$CURRENT_LOG"
 
-  adb -s "$ADB_TARGET" shell am force-stop com.google.android.providers.media.module 2>&1 | tee -a "$CURRENT_LOG"
+  # 2026-10-15: на M30s процес зветься com.android.providers.media.module,
+  # а пакет може бути з google або без — зупиняємо той, що встановлений.
+  local pkg found=0
+  for pkg in com.google.android.providers.media.module com.android.providers.media.module; do
+    if adb -s "$ADB_TARGET" shell pm path "$pkg" 2>/dev/null | grep -q '^package:'; then
+      found=1
+      echo "Зупиняю: $pkg" | tee -a "$CURRENT_LOG"
+      adb -s "$ADB_TARGET" shell am force-stop "$pkg" 2>&1 | tee -a "$CURRENT_LOG"
+    fi
+  done
+  [ "$found" = 1 ] || echo "Пакет сканера медіа не знайдено — нічого не зупинено." | tee -a "$CURRENT_LOG"
   echo "Готово. Покористуйся телефоном 20–30 секунд і порівняй плавність." | tee -a "$CURRENT_LOG"
   pause_menu
 }
@@ -1107,6 +1117,59 @@ reset_target() {
   pause_menu
 }
 
+media_scan_report() {
+  # 2026-10-15: на M30s сканер медіа (com.android.providers.media.module)
+  # годинами тримав ~1 ядро (знімки 068, 069). Цей пункт лише читає:
+  # що він робить, які файли щойно змінювались, де багато файлів.
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  new_log "28" "media-scan" "Що робить сканер медіа"
+  echo "Збираю дані, до 3 хвилин. Нічого не змінюю."
+  echo
+  local pid
+  pid="$(adb -s "$ADB_TARGET" shell pidof com.android.providers.media.module 2>/dev/null | tr -d '\r' | awk '{print $1}')"
+  {
+    echo "=== Пакети сканера медіа ==="
+    adb -s "$ADB_TARGET" shell pm list packages -U 2>/dev/null | grep -i "providers.media" || true
+    echo
+    echo "PID процесу: ${pid:-не знайдено}"
+    if [ -n "$pid" ]; then
+      echo
+      echo "=== Потоки сканера (хто з них крутиться) ==="
+      adb -s "$ADB_TARGET" shell top -b -n 1 -H -p "$pid" 2>&1 | head -n 30
+      echo
+      echo "=== Журнал сканера (останні рядки) ==="
+      adb -s "$ADB_TARGET" shell logcat -d -v time --pid="$pid" -t 4000 2>&1 | tail -n 250
+    fi
+    echo
+    echo "=== Інші записи журналу про скан ==="
+    adb -s "$ADB_TARGET" shell logcat -d -v time -t 8000 2>&1 \
+      | grep -i -E "MediaScanner|ModernMediaScanner|MediaProvider|FuseDaemon|MediaService" \
+      | tail -n 120 || true
+    echo
+    echo "=== Фонові задачі сканера ==="
+    adb -s "$ADB_TARGET" shell dumpsys jobscheduler 2>/dev/null \
+      | grep -i -E "providers.media" | head -n 40 || true
+    echo
+    echo "=== Файли, змінені за останні 30 хв (без Android/) ==="
+    adb -s "$ADB_TARGET" shell "timeout 90 find /storage/emulated/0 -path '*/Android' -prune -o -type f -mmin -30 -print 2>/dev/null | head -n 80"
+    echo
+    echo "=== Скільки файлів у папках (верхній рівень і Documents) ==="
+    adb -s "$ADB_TARGET" shell 'cd /storage/emulated/0 2>/dev/null || exit 0
+      for d in */ Documents/*/ Music/*/; do
+        [ -d "$d" ] || continue
+        case "$d" in Android/) continue ;; esac
+        n=$(timeout 20 find "$d" -type f 2>/dev/null | wc -l)
+        nm=""; [ -f "$d.nomedia" ] && nm=" (.nomedia)"
+        echo "$n  $d$nm"
+      done | sort -rn | head -n 40'
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Готово. Надішли цей файл у чат."
+  pause_menu
+}
+# media_scan_report end
+
 while true; do
   clear
   target="$(load_target)"
@@ -1144,6 +1207,7 @@ while true; do
   echo "25 — Що надсилає «Відкрити за допомогою» → файл"
   echo "26 — Зберегти застосунок (усі частини APK) з телефона"
   echo "27 — Поставити збережений застосунок на телефон"
+  echo "28 — Що робить сканер медіа → файл (нічого не змінює)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1177,6 +1241,7 @@ while true; do
     25) open_with_intent ;;
     26) save_app_apks ;;
     27) install_saved_app ;;
+    28) media_scan_report ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
