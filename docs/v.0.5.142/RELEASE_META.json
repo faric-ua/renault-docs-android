@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.142",
+  "versionCode": 158,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.142-archive-stored",
+  "issues": [
+    147
+  ],
+  "scope": "Volume archive written STORED, no compressor (Phone QA M30s 2026-10-17 01:22–01:39: Android 11 wrote broken DEFLATE archives, a different zlib error each run, card and phone memory alike). Verifier names the broken file. Includes v0.5.141.",
+  "sourceBase": "v0.5.141/build157",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 372,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "c0fb4cf2960b707e017d4fe93649de2d2e58d4e3",
+  "signed_run_id": 38977588279,
+  "signed_run_number": 212,
+  "signed_android_apk_run": 212,
+  "artifact_id": 12079393793,
+  "artifact_name": "Renault-Docs-v0.5.142-Debug",
+  "artifact_digest": "sha256:dceecbbd3a484117bd07dcb24bb768cc8f2fcef5f1fb6e660099f37b343d78e9",
+  "next": "M30s: install over; NT8299A (phone memory) → «Зробити архів тому» → «Архів тому готовий»; then a card volume; open sections/PDF; PHONE DIAGNOSTICS: 33."
+}
