@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.1"
+PD_VERSION="2026-10-16.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -257,6 +257,10 @@ PAIRING
 
 33. Пункт 23 — приспати рідко вживані застосунки: не
     працюють у фоні, поки їх не відкрити. Пункт 24 — розбудити.
+
+36. Пункт 31 — що роблять потоки застосунку: на яких ядрах
+    (великих чи малих) і з яким пріоритетом. Запускати, поки
+    застосунок працює. НІЧОГО НЕ ЗМІНЮЄ.
 
 ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
 34. Пункт 26 — зберегти застосунок з підключеного
@@ -1344,6 +1348,64 @@ crypto_prices() {
 }
 # crypto_prices end
 
+app_threads_report() {
+  # 2026-10-16 (faric, M30s): Audio Converter кодує MP3 ~4 с на 1 % смуги
+  # (≈ пісня за реальний час), хоча процес бере 2+ ядра. Після перезавантаження
+  # (вільно 250 МБ замість 80) — так само. Цей пункт лише читає: які потоки
+  # застосунку крутяться, з яким пріоритетом, у якій групі ядер (великі / малі).
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local pkg
+  echo "Який застосунок дивитись? Enter = Audio Converter (ua.faric.audioconverter)."
+  printf "Пакет: "
+  read -r pkg
+  [ -n "$pkg" ] || pkg="ua.faric.audioconverter"
+  new_log "31" "app-threads" "Потоки застосунку: $pkg"
+  echo "Збираю дані ~15 секунд. Нічого не змінюю."
+  echo "Краще запускати, поки застосунок саме працює (напр. кодує)."
+  echo
+  local pid
+  pid="$(adb -s "$ADB_TARGET" shell pidof "$pkg" 2>/dev/null | tr -d '\r' | awk '{print $1}')"
+  {
+    echo "Пакет: $pkg"
+    echo "PID процесу: ${pid:-не знайдено (застосунок не запущений)}"
+    echo
+    echo "=== Ядра процесора: які групи на яких ядрах ==="
+    adb -s "$ADB_TARGET" shell 'for g in top-app foreground background system-background restricted; do
+        [ -f /dev/cpuset/$g/cpus ] && echo "$g: $(cat /dev/cpuset/$g/cpus)"
+      done
+      for c in /sys/devices/system/cpu/cpu[0-9]*; do
+        f=$(cat $c/cpufreq/cpuinfo_max_freq 2>/dev/null)
+        [ -n "$f" ] && echo "${c##*/}: до $((f / 1000)) МГц"
+      done' 2>&1
+    if [ -n "$pid" ]; then
+      echo
+      echo "=== Стан процесу в Android (група планування, пріоритет) ==="
+      adb -s "$ADB_TARGET" shell dumpsys activity processes "$pkg" 2>/dev/null \
+        | grep -E "ProcessRecord|curSchedGroup|setSchedGroup|curProcState|setProcState|curAdj|setAdj|hasForegroundServices" \
+        | head -n 20 || true
+      echo
+      echo "=== Потоки: група ядер (cpuset) і пріоритет (nice) ==="
+      adb -s "$ADB_TARGET" shell "for t in /proc/$pid/task/*; do
+          tid=\${t##*/}
+          name=\$(cat \$t/comm 2>/dev/null)
+          cs=\$(cat \$t/cpuset 2>/dev/null)
+          rest=\$(sed 's/.*) //' \$t/stat 2>/dev/null)
+          ni=\$(echo \$rest | cut -d' ' -f17)
+          cpu=\$(echo \$rest | cut -d' ' -f37)
+          echo \"\$tid  nice=\$ni  ядро=\$cpu  група=\$cs  \$name\"
+        done" 2>&1 | head -n 80
+      echo
+      echo "=== Хто з потоків крутиться (два знімки з перервою 5 с; дивись другий) ==="
+      adb -s "$ADB_TARGET" shell top -b -n 2 -d 5 -H -p "$pid" 2>&1 | head -n 70
+    fi
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Готово. Надішли цей файл у чат (шлях — нижче)."
+  pause_menu
+}
+# app_threads_report end
+
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
 # Вужчий екран — проста шапка одним рядком.
@@ -1403,6 +1465,7 @@ while true; do
   echo "28 — Що робить сканер медіа → файл (нічого не змінює)"
   echo "29 — Галерея: прибрати папки з .nomedia (файли не чіпає)"
   echo "30 — Ціни криптовалют для тренажера → файл (лише читає Binance)"
+  echo "31 — Що роблять потоки застосунку (ядра, пріоритет) → файл"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1439,6 +1502,7 @@ while true; do
     28) media_scan_report ;;
     29) gallery_nomedia_rescan ;;
     30) crypto_prices ;;
+    31) app_threads_report ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
