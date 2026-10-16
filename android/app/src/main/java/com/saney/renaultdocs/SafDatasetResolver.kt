@@ -25,6 +25,12 @@ class SafDatasetResolver(
         val uri: Uri,
         /** v0.5.138: the file itself, for volumes of our own provider (opened directly). */
         val file: File? = null,
+        /** Archives plan v2, stage 1: the volume's archive, when the volume is read from it. */
+        val archive: VolumeArchive? = null,
+        /** The path inside the volume (= inside [archive]). */
+        val archivePath: String? = null,
+        /** Size and time known without asking the disk (archive entries). */
+        val knownAttributes: VolumeFileIndex.Attributes? = null,
     ) {
         val isDirectory: Boolean
             get() = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
@@ -118,6 +124,30 @@ class SafDatasetResolver(
                 normalized.isBlank() -> ownSubPath
                 else -> "$ownSubPath/$normalized"
             }
+        // Archives plan v2, stage 1: a volume with a checked archive is read from it —
+        // the table of contents is already in memory, no disk call at all.
+        VolumeArchiveAccess.active(appContext, packageId)?.let { archive ->
+            val attributes = archive.attributes(inVolume) ?: return null
+            val documentId = LocalDatasetDocumentsProvider.documentId(packageId, inVolume)
+            val name = if (normalized.isBlank()) "" else normalized.substringAfterLast('/')
+            val node =
+                Node(
+                    relativePath = normalized,
+                    name = name,
+                    documentId = documentId,
+                    mimeType =
+                        LocalDatasetDocumentsProvider.mimeTypeFor(
+                            inVolume.substringAfterLast('/'),
+                            attributes.isDirectory,
+                        ),
+                    uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId),
+                    archive = archive,
+                    archivePath = inVolume,
+                    knownAttributes = attributes,
+                )
+            VolumeFileIndex.rememberNode(packageId, cacheKey, node)
+            return node
+        }
         val root =
             VolumeFileIndex.root(packageId) {
                 runCatching {
@@ -239,9 +269,11 @@ class SafDatasetResolver(
         relativePath: String,
     ): InputStream? =
         timedOpen(relativePath) { node ->
-            // v0.5.138: our own volume — open the file directly, without a round trip
-            // through the provider (which found the volume and the path again).
-            node.file?.let { runCatching { FileInputStream(it) }.getOrNull() }
+            // Archives plan v2, stage 1: straight from the volume's archive.
+            archiveStream(node)
+                // v0.5.138: our own volume — open the file directly, without a round trip
+                // through the provider (which found the volume and the path again).
+                ?: node.file?.let { runCatching { FileInputStream(it) }.getOrNull() }
                 ?: contentResolver.openInputStream(
                     node.uri,
                 )
@@ -251,14 +283,49 @@ class SafDatasetResolver(
         relativePath: String,
     ): ParcelFileDescriptor? =
         timedOpen(relativePath) { node ->
-            node.file?.let {
+            // Archives plan v2, stage 1: PdfRenderer needs a real file — copied out of the
+            // archive once into the phone cache ([VolumeArchiveFileCache]).
+            archiveRealFile(node)?.let {
                 runCatching { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) }.getOrNull()
             }
+                ?: node.file?.let {
+                    runCatching { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) }.getOrNull()
+                }
                 ?: contentResolver.openFileDescriptor(
                     node.uri,
                     "r",
                 )
         } as ParcelFileDescriptor?
+
+    /**
+     * Size and time of a file of our own volume without opening it — for caches keyed by
+     * them (drawn PDF pages). Null — not our volume, or no such file.
+     */
+    fun ownAttributes(relativePath: String): VolumeFileIndex.Attributes? {
+        val node = resolve(relativePath) ?: return null
+        node.knownAttributes?.let { return it }
+        return node.file?.let { VolumeFileIndex.attributes(it) }
+    }
+
+    private fun archiveStream(node: Node): InputStream? {
+        val archive = node.archive ?: return null
+        val path = node.archivePath ?: return null
+        return runCatching { archive.open(path) }.getOrElse {
+            // The card was taken out or the archive changed: look again next time.
+            ownPackageId?.let { id -> VolumeFileIndex.forget(id) }
+            null
+        }
+    }
+
+    private fun archiveRealFile(node: Node): File? {
+        val archive = node.archive ?: return null
+        val path = node.archivePath ?: return null
+        val packageId = ownPackageId ?: return null
+        return runCatching { VolumeArchiveAccess.realFile(appContext, archive, packageId, path) }.getOrElse {
+            VolumeFileIndex.forget(packageId)
+            null
+        }
+    }
 
     private fun directoryIndex(
         directoryPath: String,

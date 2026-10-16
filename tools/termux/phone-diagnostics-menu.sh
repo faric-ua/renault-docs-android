@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.10"
+PD_VERSION="2026-10-17.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1524,6 +1524,7 @@ renault_read_timing() {
     echo "=== Заміри (logcat, тег RenaultRead) ==="
     echo "LIST — перелік папки; OPEN — повільне відкриття файлу; SUM — підсумок тому; FAST — перше відкриття тому;"
     echo "PDF відкрито — відкриття PDF; СТОРІНКА — малювання і стиснення сторінки (з v0.5.139)."
+    echo "ARCHIVE — том читається з архіву (.rdpkg); ARCHIVE-PDF — PDF скопійовано з архіву в кеш (з v0.5.141)."
     adb -s "$ADB_TARGET" logcat -d -v time -s RenaultRead:I 2>&1 | tail -n 400
   } 2>&1 | tee -a "$CURRENT_LOG"
   echo
