@@ -77,9 +77,16 @@ class StatusCardCancelContract(unittest.TestCase):
         service = read("RdpkgExportService.kt")
         # The check sits inside the exporter's progress callback (a bad edit
         # once broke this call in CI — v0.5.105 history).
-        self.assertIn(PROGRESS_CHECK, service)
+        # v0.5.142: the export service shares one progress callback between «Експортувати
+        # .rdpkg» and «Зробити архів тому» — the same checkpoint, in a named lambda.
+        self.assertIn(
+            "val onProgress: (OperationProgress) -> Unit = { progress ->\n"
+            "                    dataSyncTimeout.checkActive()\n"
+            "                    if (runStore.isCancelRequested()) throw OperationCancelledException()",
+            service,
+        )
         self.assertGreaterEqual(service.count("if (runStore.isCancelRequested()) throw OperationCancelledException()"), 2)
-        cancelled = between(service, "if (error is OperationCancelledException", "val message =")
+        cancelled = between(service, "if (error is OperationCancelledException || error.cause is OperationCancelledException) {\n                    // v0.5.105", "val message =")
         self.assertIn("DocumentsContract.deleteDocument(contentResolver, Uri.parse(destinationUri))", cancelled)
         self.assertIn("Недороблений файл .rdpkg видалено", cancelled)
         self.assertIn("не вдалося видалити — видали його вручну", cancelled)

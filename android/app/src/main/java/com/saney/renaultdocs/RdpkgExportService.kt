@@ -62,34 +62,34 @@ class RdpkgExportService : Service() {
 
         Thread {
             try {
-                val result = RdpkgExporter.export(
-                    context = applicationContext,
-                    volume = volume,
-                    destinationUri = Uri.parse(destinationUri),
-                    progressState = { progress ->
-                        dataSyncTimeout.checkActive()
-                        if (runStore.isCancelRequested()) throw OperationCancelledException()
-                        val stage =
-                            progress.displayText()
-                        runStore.update(
-                            stage,
-                        )
-                        runStore.updateProgress(
-                            progress,
-                        )
-                        getSystemService(
-                            NotificationManager::class.java,
-                        ).notify(
-                            NOTIFICATION_ID,
-                            notification(
-                                text = stage,
-                                ongoing = true,
-                                current = progress.current,
-                                total = progress.total,
-                            ),
-                        )
-                    },
-                ).getOrThrow()
+                var lastShownAt = 0L
+                val onProgress: (OperationProgress) -> Unit = { progress ->
+                    dataSyncTimeout.checkActive()
+                    if (runStore.isCancelRequested()) throw OperationCancelledException()
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    // The archive writer reports every file (~8 thousand): show ~3 times a second.
+                    if (!archiveMode || now - lastShownAt >= 300L || progress.current == progress.total) {
+                        lastShownAt = now
+                        showExportProgress(progress)
+                    }
+                }
+                val result =
+                    if (archiveMode) {
+                        // v0.5.142: STORED entries, no compressor (M30s wrote broken DEFLATE).
+                        RdpkgExporter.exportArchive(
+                            context = applicationContext,
+                            volume = volume,
+                            target = java.io.File(requireNotNull(Uri.parse(destinationUri).path)),
+                            progressState = onProgress,
+                        ).getOrThrow()
+                    } else {
+                        RdpkgExporter.export(
+                            context = applicationContext,
+                            volume = volume,
+                            destinationUri = Uri.parse(destinationUri),
+                            progressState = onProgress,
+                        ).getOrThrow()
+                    }
                 dataSyncTimeout.checkActive()
                 if (runStore.isCancelRequested()) throw OperationCancelledException()
                 val label = listOfNotNull(volume.documentCode, volume.date).joinToString(" · ").ifBlank { volume.title }
@@ -150,6 +150,21 @@ class RdpkgExportService : Service() {
             }
         }.start()
         return START_REDELIVER_INTENT
+    }
+
+    private fun showExportProgress(progress: OperationProgress) {
+        val stage = progress.displayText()
+        runStore.update(stage)
+        runStore.updateProgress(progress)
+        getSystemService(NotificationManager::class.java).notify(
+            NOTIFICATION_ID,
+            notification(
+                text = stage,
+                ongoing = true,
+                current = progress.current,
+                total = progress.total,
+            ),
+        )
     }
 
     /**

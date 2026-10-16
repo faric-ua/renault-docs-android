@@ -83,7 +83,13 @@ object VolumeArchiveVerifier {
                 if (!seen.add(path)) {
                     return Result(false, seen.size, doneBytes, "В архіві файл двічі: $path")
                 }
-                val (archiveCrc, archiveSize) = crcOf(zip, counted = true)
+                val (archiveCrc, archiveSize) =
+                    try {
+                        crcOf(zip, counted = true)
+                    } catch (error: java.util.zip.ZipException) {
+                        // Which file and what zlib said — for the owner's card and the journal.
+                        return Result(false, seen.size, doneBytes, "Архів пошкоджений у файлі $path: ${error.message}")
+                    }
                 if (archiveSize != want.size) {
                     return Result(false, seen.size, doneBytes, "Розмір не збігся: $path")
                 }

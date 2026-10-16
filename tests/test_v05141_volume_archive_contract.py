@@ -88,6 +88,22 @@ class VolumeArchiveContract(unittest.TestCase):
         refresh = between(project, "private fun refreshRdpkgExportRunState()", "Read persisted source provenance")
         self.assertIn('"Архів тому готовий"', refresh)
 
+    def test_archive_written_stored_without_compressor(self):
+        # v0.5.142 (M30s 2026-10-17 01:22–01:39): DEFLATE written on Android 11 came out
+        # broken (different zlib error each time) — the archive uses no compressor at all.
+        writer = source("VolumeArchiveWriter.kt")
+        self.assertIn("zip.setMethod(ZipOutputStream.STORED)", writer)
+        self.assertIn("method = ZipEntry.STORED", writer)
+        self.assertNotIn("setLevel", writer)
+        self.assertNotIn("Deflater", writer)
+        exporter = source("RdpkgExporter.kt")
+        self.assertIn("fun exportArchive(", exporter)
+        self.assertIn("VolumeArchiveWriter.write(", exporter)
+        service = source("RdpkgExportService.kt")
+        self.assertIn("RdpkgExporter.exportArchive(", service)
+        verifier = source("VolumeArchiveVerifier.kt")
+        self.assertIn("Архів пошкоджений у файлі $path", verifier)
+
     def test_read_log_and_diagnostics_legend(self):
         access = source("VolumeArchiveAccess.kt")
         self.assertIn('"ARCHIVE том=', access)
