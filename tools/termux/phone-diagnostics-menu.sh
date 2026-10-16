@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.2"
+PD_VERSION="2026-10-16.3"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -261,6 +261,10 @@ PAIRING
 36. Пункт 31 — що роблять потоки застосунку: на яких ядрах
     (великих чи малих) і з яким пріоритетом. Запускати, поки
     застосунок працює. НІЧОГО НЕ ЗМІНЮЄ.
+37. Пункт 32 — прискорити застосунок: Android одразу
+    переводить увесь його код у машинний (те, що сам робить
+    уночі на зарядці). Звук, файли й дані — ті самі. Після
+    оновлення застосунку — ще раз. «2» — повернути як було.
 
 ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
 34. Пункт 26 — зберегти застосунок з підключеного
@@ -1406,6 +1410,81 @@ app_threads_report() {
 }
 # app_threads_report end
 
+app_compile_status() {
+  # Як Android зараз виконує код застосунку: verify/quicken = інтерпретатор + JIT,
+  # speed-profile = гарячі частини вже в машинному коді, speed = увесь код.
+  adb -s "$ADB_TARGET" shell dumpsys package dexopt 2>/dev/null \
+    | grep -A 6 "\[$1\]" | grep -E "\[$1\]|status=|reason=" | head -n 8
+}
+
+app_compile_speed() {
+  # 2026-10-16 (faric, M30s, пункт 31, лог 092): Audio Converter кодує MP3
+  # ~4 с на 1 %, а потік «Jit thread pool» крутиться 99 % ядра — стільки ж,
+  # скільки саме кодування. Застосунок зібрано на телефоні й поставлено щойно,
+  # тож Android виконує jump3r інтерпретатором і постійно докомпільовує.
+  # Повна компіляція (`cmd package compile -m speed`) робить те саме, що Android
+  # і так зробив би вночі на зарядці, лише зараз. Звук і файли — ті самі, дані
+  # застосунку не чіпаються. Нова версія застосунку (оновлення) скидає це —
+  # тоді пункт 32 ще раз.
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local pkg answer mode
+  echo "Прискорити застосунок: Android заздалегідь переводить увесь його код"
+  echo "у машинний (те, що він і так робить сам уночі на зарядці)."
+  echo "Звук і результат — ті самі. Дані застосунку НЕ чіпаються."
+  echo "Після оновлення застосунку — повторити цей пункт."
+  echo
+  echo "Який застосунок? Enter = Audio Converter (ua.faric.audioconverter)."
+  echo "Track Catcher — ua.faric.trackcatcher."
+  printf "Пакет: "
+  read -r pkg
+  [ -n "$pkg" ] || pkg="ua.faric.audioconverter"
+  if ! adb -s "$ADB_TARGET" shell pm path "$pkg" >/dev/null 2>&1; then
+    echo "Застосунку $pkg на підключеному телефоні немає."
+    pause_menu
+    return
+  fi
+  echo
+  echo "1 — прискорити (повна компіляція, 1–3 хв)"
+  echo "2 — повернути як було після встановлення"
+  printf "Вибір (Enter = 1): "
+  read -r mode
+  [ -n "$mode" ] || mode="1"
+  case "$mode" in 1|2) ;; *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;; esac
+  echo
+  echo "Якщо застосунок саме конвертує — краще дочекатись кінця файлу"
+  echo "(або поставити паузу «після цього файлу»)."
+  printf "Продовжити? Напиши так / ні (можна y / n): "
+  read -r answer
+  case "$answer" in
+    так|Так|ТАК|y|Y|yes|д|Д) ;;
+    *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;;
+  esac
+  new_log "32" "app-compile" "Компіляція застосунку: $pkg (режим $mode)"
+  {
+    echo "Пакет: $pkg"
+    echo
+    echo "=== Було ==="
+    app_compile_status "$pkg"
+    echo
+    if [ "$mode" = "1" ]; then
+      echo "=== Компілюю (speed), чекай ==="
+      adb -s "$ADB_TARGET" shell cmd package compile -m speed -f "$pkg" 2>&1
+    else
+      echo "=== Повертаю як після встановлення ==="
+      adb -s "$ADB_TARGET" shell cmd package compile --reset "$pkg" 2>&1
+    fi
+    echo
+    echo "=== Стало ==="
+    app_compile_status "$pkg"
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Готово. Відкрий застосунок заново і запусти наступний файл."
+  echo "Порівняй швидкість (скільки секунд на 1 %)."
+  pause_menu
+}
+# app_compile_speed end
+
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
 # Вужчий екран — проста шапка одним рядком.
@@ -1466,6 +1545,7 @@ while true; do
   echo "29 — Галерея: прибрати папки з .nomedia (файли не чіпає)"
   echo "30 — Ціни криптовалют для тренажера → файл (лише читає Binance)"
   echo "31 — Що роблять потоки застосунку (ядра, пріоритет) → файл"
+  echo "32 — Прискорити застосунок (машинний код; звук і дані ті самі)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1503,6 +1583,7 @@ while true; do
     29) gallery_nomedia_rescan ;;
     30) crypto_prices ;;
     31) app_threads_report ;;
+    32) app_compile_speed ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac

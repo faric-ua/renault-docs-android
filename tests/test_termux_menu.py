@@ -408,9 +408,6 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertNotIn("echo $KEY_PASSWORD", text)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
     def test_phone_diagnostics_media_scan_report_only_reads(self):
         # 2026-10-15: M30s — сканер медіа годинами тримав ~1 ядро (знімки 068, 069).
         repo = Path(__file__).resolve().parents[1]
@@ -459,6 +456,34 @@ if __name__ == "__main__":
         for forbidden in ("X-MBX-APIKEY", "/api/v3/order", "signature=", "secret", "adb "):
             self.assertNotIn(forbidden, fn)
 
+    def test_phone_diagnostics_app_threads_only_reads(self):
+        # 2026-10-16 (faric): Audio Converter на M30s кодує ~1x реального часу —
+        # дивимось потоки (ядра, nice, cpuset), нічого не змінюючи.
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("31) app_threads_report ;;", text)
+        self.assertIn('echo "31 — Що роблять потоки застосунку (ядра, пріоритет) → файл"', text)
+        fn = text[text.index("app_threads_report() {"):text.index("# app_threads_report end")]
+        self.assertIn("ua.faric.audioconverter", fn)
+        self.assertIn("top -b -n 2 -d 5 -H -p", fn)
+        self.assertIn("/cpuset", fn)
+        for forbidden in ("am force-stop", "pm disable", "pm clear", "settings put", "rm ", "reboot", "input ", "renice", "cmd package"):
+            self.assertNotIn(forbidden, fn)
+
+    def test_phone_diagnostics_app_compile_keeps_data(self):
+        # 2026-10-16 (лог 092): «Jit thread pool» 99 % поруч з кодуванням MP3 —
+        # повна компіляція застосунку, без чистки даних і перевстановлення.
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("32) app_compile_speed ;;", text)
+        self.assertIn('echo "32 — Прискорити застосунок (машинний код; звук і дані ті самі)"', text)
+        fn = text[text.index("app_compile_status() {"):text.index("# app_compile_speed end")]
+        self.assertIn("cmd package compile -m speed -f", fn)
+        self.assertIn("cmd package compile --reset", fn)
+        self.assertIn("так|Так|ТАК|y|Y", fn)
+        for forbidden in ("pm clear", "uninstall", "am force-stop", "rm ", "reboot", "settings put", "--delete", "bg-dexopt-job"):
+            self.assertNotIn(forbidden, fn)
+
     def test_phone_diagnostics_item13_stops_installed_media_module(self):
         # 2026-10-15: на M30s пакет сканера може бути без «google».
         repo = Path(__file__).resolve().parents[1]
@@ -474,8 +499,12 @@ if __name__ == "__main__":
         text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
         self.assertIn("25) open_with_intent ;;", text)
         self.assertIn('echo "25 — Що надсилає «Відкрити за допомогою» → файл"', text)
-        fn = text[text.index("open_with_intent() {"):text.index("reset_target() {")]
+        fn = text[text.index("open_with_intent() {"):text.index("save_app_apks() {")]
         self.assertIn("dumpsys activity activities", fn)
         self.assertIn("logcat -d", fn)
         for forbidden in ("pm ", "am force-stop", "settings put", "rm -", "reboot", "input "):
             self.assertNotIn(forbidden, fn)
+
+
+if __name__ == "__main__":
+    unittest.main()
