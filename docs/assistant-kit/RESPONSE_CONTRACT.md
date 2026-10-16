@@ -1,5 +1,7 @@
 # Renault Docs — Assistant Response Contract
 
+> **З 2026-10-16 формат відповіді — [`docs/RESPONSE_ALGORITHM.md`](../docs/RESPONSE_ALGORITHM.md)** — однаковий у всіх репо faric-ua (затвердив faric, чат «GitHub Storage»). Де цей документ із ним розходиться — діє `RESPONSE_ALGORITHM.md`; текст нижче лишається як історія.
+
 This contract defines how the assistant should communicate during Renault Docs work.
 
 ## Default response shape
