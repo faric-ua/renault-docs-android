@@ -485,6 +485,19 @@ class TermuxMenuContractTests(unittest.TestCase):
         for forbidden in ("pm clear", "uninstall", "am force-stop", "rm ", "reboot", "settings put", "--delete", "bg-dexopt-job"):
             self.assertNotIn(forbidden, fn)
 
+    def test_phone_diagnostics_crash_report_only_reads(self):
+        # 2026-10-16 (faric): Audio Converter закривається після «Стоп» — журнал падінь.
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        self.assertIn("34) app_crash_report ;;", text)
+        self.assertIn('echo "34 — Чому закрився застосунок (журнал падінь) → файл"', text)
+        fn = text[text.index("app_crash_report() {"):text.index("# app_crash_report end")]
+        self.assertIn("logcat -d -b crash", fn)
+        self.assertIn("exit-info", fn)
+        self.assertIn("pick_faric_app", fn)
+        for forbidden in ("logcat -c", "am force-stop", "pm clear", "cmd package", "rm ", "reboot", "settings put"):
+            self.assertNotIn(forbidden, fn)
+
     def test_phone_diagnostics_item13_stops_installed_media_module(self):
         # 2026-10-15: на M30s пакет сканера може бути без «google».
         repo = Path(__file__).resolve().parents[1]
