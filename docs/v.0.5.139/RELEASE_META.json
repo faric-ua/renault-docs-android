@@ -1,0 +1,13 @@
+{
+  "versionName": "0.5.139",
+  "versionCode": 155,
+  "phase": "development",
+  "branch": "perf/pdf-pages-v0.5.139",
+  "issues": [
+    147
+  ],
+  "scope": "PDF pages faster (owner 21:37–21:44 «хотів би ще швидше»): PDF kept open while viewed (no reopen per page/width), lossless PNG via FastPngEncoder (RGB, fastest zlib, stripes) instead of Bitmap.compress(PNG), drawn pages kept in app cache on phone memory (≤200 MB, key includes PDF size/time), timings in logcat (PDF відкрито / СТОРІНКА). Includes v0.5.138.",
+  "sourceBase": "v0.5.138/build154",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending"
+}
