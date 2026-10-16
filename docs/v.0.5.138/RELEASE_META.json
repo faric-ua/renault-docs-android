@@ -1,0 +1,13 @@
+{
+  "versionName": "0.5.138",
+  "versionCode": 154,
+  "phase": "development",
+  "branch": "perf/volume-quick-find-v0.5.138",
+  "issues": [
+    147
+  ],
+  "scope": "TODO №16 quick step (log 110): own-volume files found directly by known path (one file-system call, app-wide memory) instead of whole-folder listings; provider without canonical paths, one call per listed entry; files opened directly; Fast Pack descriptor remembered. Includes v0.5.137.",
+  "sourceBase": "v0.5.137/build153",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending"
+}

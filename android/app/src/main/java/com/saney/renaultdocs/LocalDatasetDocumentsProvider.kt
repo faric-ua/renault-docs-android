@@ -43,6 +43,8 @@ class LocalDatasetDocumentsProvider :
                     documentId,
                 file =
                     resolved.file,
+                attributes =
+                    resolved.attributes,
             )
         }
     }
@@ -58,7 +60,7 @@ class LocalDatasetDocumentsProvider :
             )
 
         if (
-            !parent.file.isDirectory
+            !parent.attributes.isDirectory
         ) {
             throw FileNotFoundException(
                 "Document is not a directory: " +
@@ -66,48 +68,56 @@ class LocalDatasetDocumentsProvider :
             )
         }
 
-        return MatrixCursor(
-            projection
-                ?: DEFAULT_DOCUMENT_PROJECTION,
-        ).apply {
+        // v0.5.138 (log 110): one file-system call per entry instead of 4–5 — on the
+        // memory card each call goes through FUSE (~30 ms).
+        val children =
             parent.file
                 .listFiles()
                 .orEmpty()
+                .mapNotNull { child ->
+                    VolumeFileIndex.attributes(child)?.let { child to it }
+                }
                 .sortedWith(
-                    compareBy<File> {
-                        !it.isDirectory
+                    compareBy<Pair<File, VolumeFileIndex.Attributes>> {
+                        !it.second.isDirectory
                     }.thenBy {
-                        it.name.lowercase(
+                        it.first.name.lowercase(
                             Locale.ROOT,
                         )
                     },
                 )
-                .forEach {
-                    child ->
-                    val relative =
-                        if (
-                            parent.relativePath
-                                .isBlank()
-                        ) {
-                            child.name
-                        } else {
-                            parent.relativePath +
-                                "/" +
-                                child.name
-                        }
 
-                    include(
-                        documentId =
-                            documentId(
-                                packageId =
-                                    parent.packageId,
-                                relativePath =
-                                    relative,
-                            ),
-                        file =
-                            child,
-                    )
-                }
+        return MatrixCursor(
+            projection
+                ?: DEFAULT_DOCUMENT_PROJECTION,
+        ).apply {
+            children.forEach { (child, attributes) ->
+                val relative =
+                    if (
+                        parent.relativePath
+                            .isBlank()
+                    ) {
+                        child.name
+                    } else {
+                        parent.relativePath +
+                            "/" +
+                            child.name
+                    }
+
+                include(
+                    documentId =
+                        documentId(
+                            packageId =
+                                parent.packageId,
+                            relativePath =
+                                relative,
+                        ),
+                    file =
+                        child,
+                    attributes =
+                        attributes,
+                )
+            }
         }
     }
 
@@ -131,7 +141,7 @@ class LocalDatasetDocumentsProvider :
             )
 
         if (
-            !resolved.file.isFile
+            resolved.attributes.isDirectory
         ) {
             throw FileNotFoundException(
                 "Document is not a file: " +
@@ -148,11 +158,14 @@ class LocalDatasetDocumentsProvider :
     override fun getDocumentType(
         documentId: String,
     ): String =
-        mimeType(
-            resolve(
-                documentId,
-            ).file,
-        )
+        resolve(
+            documentId,
+        ).let {
+            mimeTypeFor(
+                it.file.name,
+                it.attributes.isDirectory,
+            )
+        }
 
     override fun isChildDocument(
         parentDocumentId: String,
@@ -182,22 +195,25 @@ class LocalDatasetDocumentsProvider :
             return false
         }
 
+        // v0.5.138: compare the normalized paths inside the volume (no `..` can be in
+        // them) instead of canonical paths — each canonicalisation is several FUSE calls.
         val parentPath =
-            parent.file.canonicalPath
+            parent.relativePath
         val childPath =
-            child.file.canonicalPath
+            child.relativePath
 
-        return childPath ==
+        return parentPath.isBlank() ||
+            childPath ==
             parentPath ||
             childPath.startsWith(
-                parentPath +
-                    File.separator,
+                "$parentPath/",
             )
     }
 
     private fun MatrixCursor.include(
         documentId: String,
         file: File,
+        attributes: VolumeFileIndex.Attributes,
     ) {
         val values =
             arrayOfNulls<Any>(
@@ -221,23 +237,24 @@ class LocalDatasetDocumentsProvider :
 
                     DocumentsContract.Document
                         .COLUMN_MIME_TYPE ->
-                        mimeType(
-                            file,
+                        mimeTypeFor(
+                            file.name,
+                            attributes.isDirectory,
                         )
 
                     DocumentsContract.Document
                         .COLUMN_SIZE ->
                         if (
-                            file.isFile
+                            attributes.isDirectory
                         ) {
-                            file.length()
-                        } else {
                             null
+                        } else {
+                            attributes.size
                         }
 
                     DocumentsContract.Document
                         .COLUMN_LAST_MODIFIED ->
-                        file.lastModified()
+                        attributes.lastModified
 
                     DocumentsContract.Document
                         .COLUMN_FLAGS ->
@@ -309,27 +326,6 @@ class LocalDatasetDocumentsProvider :
                 context,
             )
 
-        val root =
-            packageDirectory(
-                appContext,
-                packageId,
-            )
-                .canonicalFile
-
-        if (
-            !root.isDirectory
-        ) {
-            // TODO №1 (2026-10-15): a volume put on the memory card while the card
-            // is out — say so plainly; it is not broken and nothing is deleted.
-            if (VolumeStorage.state(appContext, packageId) == VolumeState.CARD_MISSING) {
-                throw FileNotFoundException(VolumeStoragePolicy.CARD_MISSING_MESSAGE)
-            }
-            throw FileNotFoundException(
-                "Renault package is not installed: " +
-                    packageId,
-            )
-        }
-
         val normalized =
             SafDatasetResolver
                 .normalize(
@@ -339,99 +335,79 @@ class LocalDatasetDocumentsProvider :
                     "Invalid package path.",
                 )
 
-        val file =
-            if (
-                normalized.isBlank()
-            ) {
-                root
-            } else {
-                File(
+        // v0.5.138 (log 110, M30s): the volume folder is found once and remembered
+        // ([VolumeFileIndex]); the document is checked with one file-system call.
+        // Before: phone + card lookups and three canonical paths on every request.
+        // `normalized` has no `..` and installed volumes contain no symbolic links
+        // ([VolumeFileIndex.attributes] refuses them), so the path stays inside root.
+        repeat(2) { attempt ->
+            val root =
+                VolumeFileIndex.root(packageId) {
+                    packageDirectory(
+                        appContext,
+                        packageId,
+                    ).takeIf { it.isDirectory }
+                }
+
+            if (root == null) {
+                // TODO №1 (2026-10-15): a volume put on the memory card while the card
+                // is out — say so plainly; it is not broken and nothing is deleted.
+                if (VolumeStorage.state(appContext, packageId) == VolumeState.CARD_MISSING) {
+                    throw FileNotFoundException(VolumeStoragePolicy.CARD_MISSING_MESSAGE)
+                }
+                throw FileNotFoundException(
+                    "Renault package is not installed: " +
+                        packageId,
+                )
+            }
+
+            val file =
+                VolumeFileIndex.fileIn(
                     root,
                     normalized,
-                ).canonicalFile
-            }
-
-        val rootPath =
-            root.canonicalPath
-        val filePath =
-            file.canonicalPath
-
-        if (
-            filePath !=
-            rootPath &&
-            !filePath.startsWith(
-                rootPath +
-                    File.separator,
-            )
-        ) {
-            throw FileNotFoundException(
-                "Package path escapes its root.",
-            )
-        }
-
-        if (
-            !file.exists()
-        ) {
-            throw FileNotFoundException(
-                "Package document not found: " +
-                    normalized,
-            )
-        }
-
-        return ResolvedDocument(
-            packageId =
-                packageId,
-            relativePath =
-                normalized,
-            file =
-                file,
-        )
-    }
-
-    private fun mimeType(
-        file: File,
-    ): String {
-        if (
-            file.isDirectory
-        ) {
-            return DocumentsContract
-                .Document
-                .MIME_TYPE_DIR
-        }
-
-        val extension =
-            file.extension
-                .lowercase(
-                    Locale.ROOT,
                 )
 
-        return MimeTypeMap
-            .getSingleton()
-            .getMimeTypeFromExtension(
-                extension,
-            )
-            ?: when (
-                extension
-            ) {
-                "htm",
-                "html" ->
-                    "text/html"
+            val attributes =
+                VolumeFileIndex.attributes(
+                    file,
+                )
 
-                "json" ->
-                    "application/json"
-
-                "pdf" ->
-                    "application/pdf"
-
-                else ->
-                    "application/octet-stream"
+            if (attributes != null) {
+                return ResolvedDocument(
+                    packageId =
+                        packageId,
+                    relativePath =
+                        normalized,
+                    file =
+                        file,
+                    attributes =
+                        attributes,
+                )
             }
+
+            // The remembered folder may be gone (card taken out, volume moved): look
+            // for the volume once more before saying the document is missing.
+            if (attempt == 0 && !root.isDirectory) {
+                VolumeFileIndex.forget(packageId)
+            } else {
+                throw FileNotFoundException(
+                    "Package document not found: " +
+                        normalized,
+                )
+            }
+        }
+
+        throw FileNotFoundException(
+            "Package document not found: " +
+                normalized,
+        )
     }
 
     private data class ResolvedDocument(
         val packageId: String,
         val relativePath: String,
         val file: File,
+        val attributes: VolumeFileIndex.Attributes,
     )
 
     companion object {
@@ -565,7 +541,47 @@ class LocalDatasetDocumentsProvider :
             context: android.content.Context,
         ): File = VolumeStorage.phoneRoot(context)
 
-        private fun documentId(
+        /** Same type as before v0.5.138, from the name only — no file-system call. */
+        fun mimeTypeFor(
+            name: String,
+            isDirectory: Boolean,
+        ): String {
+            if (isDirectory) {
+                return DocumentsContract
+                    .Document
+                    .MIME_TYPE_DIR
+            }
+
+            val extension =
+                name.substringAfterLast('.', "")
+                    .lowercase(
+                        Locale.ROOT,
+                    )
+
+            return MimeTypeMap
+                .getSingleton()
+                .getMimeTypeFromExtension(
+                    extension,
+                )
+                ?: when (
+                    extension
+                ) {
+                    "htm",
+                    "html" ->
+                        "text/html"
+
+                    "json" ->
+                        "application/json"
+
+                    "pdf" ->
+                        "application/pdf"
+
+                    else ->
+                        "application/octet-stream"
+                }
+        }
+
+        fun documentId(
             packageId: String,
             relativePath: String,
         ): String =
