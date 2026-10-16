@@ -12,6 +12,14 @@
 
 ---
 
+## 2026-10-16 ~20:00 — Phone Diagnostics 26: «цей телефон» за замовчуванням
+
+- **Що:** `tools/termux/phone-diagnostics-menu.sh` (пункт 26), `tests/test_termux_menu.py`, журнал.
+- **Чому:** faric — зберегти Aolithium прямо з A26 для SAI, M30s — на вибір.
+- **Що це означає для чату Renault:** меню Phone Diagnostics — інструмент чату «GitHub Storage»; на застосунок Renault не впливає.
+
+---
+
 ## 2026-10-16 ~16:40 — єдиний алгоритм відповіді для всіх репо
 
 - **Що:** новий файл `docs/RESPONSE_ALGORITHM.md` (однаковий у всіх 6 репо, різний лише розділ «Меню цього репо»)

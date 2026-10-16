@@ -246,10 +246,16 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('26) save_app_apks ;;', text)
         self.assertIn('27) install_saved_app ;;', text)
         save = text[text.index('save_app_apks() {'):text.index('install_saved_app() {')]
-        self.assertIn('pm path "$pkg"', save)
+        self.assertIn('pm path $pkg', save)
         self.assertIn('adb -s "$ADB_TARGET" pull', save)
         self.assertIn('.apks', save)
         self.assertIn('SAI', save)
+        # 2026-10-16: за замовчуванням — цей телефон (без ADB), вибір 2 — підключений.
+        self.assertIn('Цей телефон', save)
+        self.assertIn('case "${answer:-1}" in', save)
+        self.assertIn('SRC="local"', save)
+        self.assertIn('cp "$path"', save)
+        self.assertIn('require_connection', save[save.index('2) SRC="adb"'):])
         for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'adb -s "$ADB_TARGET" install',
                           'pm install', 'rm -rf'):
             self.assertNotIn(forbidden, save)
