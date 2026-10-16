@@ -254,6 +254,7 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertIn('Цей телефон', save)
         self.assertIn('case "${answer:-1}" in', save)
         self.assertIn('SRC="local"', save)
+        self.assertIn('Показати всі встановлені застосунки', save)
         self.assertIn('cp "$path"', save)
         self.assertIn('require_connection', save[save.index('2) SRC="adb"'):])
         for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'adb -s "$ADB_TARGET" install',

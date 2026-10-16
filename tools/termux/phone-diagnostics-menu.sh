@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.8"
+PD_VERSION="2026-10-16.9"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1010,23 +1010,38 @@ save_app_apks() {
   read -r pattern
   pattern="${pattern:-bms|lith}"
 
-  list="$(src_run "pm list packages -3" | tr -d '\r' | sed 's/^package://' | grep -i -E "$pattern" | sort)"
+  local all total
+  all="$(src_run "pm list packages -3" | tr -d '\r' | sed -n 's/^package://p' | sort)"
+  list="$(printf '%s\n' "$all" | grep -i -E "$pattern")"
   if [ -z "$list" ]; then
+    total="$(printf '%s\n' "$all" | grep -c .)"
     echo "Нічого не знайдено за «$pattern»."
-    if [ "$SRC" = "local" ]; then
-      echo "Якщо застосунок точно є: Android міг не дати Termux список застосунків."
-      echo "Тоді з'єднай цей телефон сам із собою (пункти 3 і 4) і вибери 2."
+    if [ "$total" -eq 0 ]; then
+      if [ "$SRC" = "local" ]; then
+        echo "Android не дав Termux список застосунків."
+        echo "Тоді з'єднай цей телефон сам із собою (пункти 3 і 4) і вибери 2."
+      fi
+      pause_menu
+      return
     fi
-    pause_menu
-    return
+    # 2026-10-16: назва пакета буває зовсім не схожа на назву застосунку
+    # (Aolithium за «aolit» не знайшовся) — показати весь список.
+    echo "Назва пакета буває не схожа на назву застосунку."
+    printf "Показати всі встановлені застосунки (%s)? Enter = так, 0 = ні: " "$total"
+    read -r answer
+    case "$answer" in 0) echo "Скасовано."; pause_menu; return ;; esac
+    list="$all"
   fi
-
   echo
   i=0
   while IFS= read -r pkg; do
     i=$((i + 1))
-    version="$(src_version "$pkg")"
-    echo "  $i) $pkg  (версія ${version:-?})"
+    if [ "$(printf '%s\n' "$list" | grep -c .)" -le 15 ]; then
+      version="$(src_version "$pkg")"
+      echo "  $i) $pkg  (версія ${version:-?})"
+    else
+      echo "  $i) $pkg"
+    fi
   done <<EOF2
 $list
 EOF2
