@@ -19,6 +19,11 @@ class RenaultDocsApplication :
         registerActivityLifecycleCallbacks(
             this,
         )
+        // TODO №12: volumes put on the card before v0.5.137 lie in a folder without
+        // `.nomedia` — add the marker once, off the main thread (the card can be slow).
+        Thread {
+            runCatching { VolumeStorage.ensureCardNoMedia(this) }
+        }.start()
     }
 
     override fun onConfigurationChanged(

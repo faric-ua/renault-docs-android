@@ -25,6 +25,12 @@ data class RdprojectImportRunState(
     val message: String = "",
     val progressCurrent: Int = 0,
     val progressTotal: Int = 0,
+    /** TODO №15: chosen volumes already done (installed, recovered or already there). */
+    val doneVolumes: Int = 0,
+    /** Current volume for the second bar; blank — no volume in work right now. */
+    val volumeLabel: String = "",
+    /** Install percent of the current volume; -1 — still being copied from the file. */
+    val volumePercent: Int = -1,
     val startedAtMs: Long = 0L,
     val finishedAtMs: Long = 0L,
 ) {
@@ -67,6 +73,9 @@ class RdprojectImportRunStore(
             message = prefs.getString(KEY_MESSAGE, "").orEmpty(),
             progressCurrent = prefs.getInt(KEY_PROGRESS_CURRENT, 0),
             progressTotal = prefs.getInt(KEY_PROGRESS_TOTAL, 0),
+            doneVolumes = prefs.getInt(KEY_DONE_VOLUMES, 0),
+            volumeLabel = prefs.getString(KEY_VOLUME_LABEL, "").orEmpty(),
+            volumePercent = prefs.getInt(KEY_VOLUME_PERCENT, -1),
             startedAtMs = prefs.getLong(KEY_STARTED_AT, 0L),
             finishedAtMs = prefs.getLong(KEY_FINISHED_AT, 0L),
         )
@@ -106,6 +115,20 @@ class RdprojectImportRunStore(
             .putString(KEY_MESSAGE, message)
             .putInt(KEY_PROGRESS_CURRENT, current)
             .putInt(KEY_PROGRESS_TOTAL, total)
+            .putLong(KEY_BEAT_AT, System.currentTimeMillis())
+            .apply()
+    }
+
+    /** TODO №15: the current volume (second bar) and how many chosen volumes are done. */
+    fun volume(
+        label: String,
+        percent: Int,
+        done: Int,
+    ) {
+        prefs.edit()
+            .putString(KEY_VOLUME_LABEL, label)
+            .putInt(KEY_VOLUME_PERCENT, percent)
+            .putInt(KEY_DONE_VOLUMES, done)
             .putLong(KEY_BEAT_AT, System.currentTimeMillis())
             .apply()
     }
@@ -198,6 +221,9 @@ class RdprojectImportRunStore(
         private const val KEY_FILE_SIZE = "file_size"
         private const val KEY_PROJECT_ID = "project_id"
         private const val KEY_PROJECT_TITLE = "project_title"
+        private const val KEY_DONE_VOLUMES = "done_volumes"
+        private const val KEY_VOLUME_LABEL = "volume_label"
+        private const val KEY_VOLUME_PERCENT = "volume_percent"
         private const val KEY_WANTED = "wanted"
         private const val KEY_IMPORTED = "imported"
         private const val KEY_SKIPPED = "skipped"

@@ -17,6 +17,7 @@ import java.io.File
  */
 object VolumeStorage {
     private const val DIR = "rdpkg"
+    const val NO_MEDIA = ".nomedia"
     private const val PREFS = "volume_storage"
     private const val KEY_TARGET = "target_place"
     private const val KEY_ON_CARD = "on_card_ids"
@@ -37,6 +38,26 @@ object VolumeStorage {
     }
 
     fun cardPresent(context: Context): Boolean = cardRoot(context) != null
+
+    /**
+     * TODO №12, owner's rule 2026-10-15: volume files are only for this app — never
+     * indexed by the media service / Gallery. `.nomedia` goes into the volumes folder on
+     * the card first, before any volume file. Creating an empty file is all it does;
+     * nothing is ever deleted here. Returns true when the marker is there.
+     */
+    fun ensureNoMedia(folder: File): Boolean =
+        runCatching {
+            folder.mkdirs()
+            val marker = File(folder, NO_MEDIA)
+            marker.isFile || marker.createNewFile() || marker.isFile
+        }.getOrDefault(false)
+
+    /** The card's volumes folder, if the card is in and the folder already exists. */
+    fun ensureCardNoMedia(context: Context): Boolean {
+        val root = cardRoot(context) ?: return false
+        if (!root.isDirectory) return false
+        return ensureNoMedia(root)
+    }
 
     fun root(
         context: Context,

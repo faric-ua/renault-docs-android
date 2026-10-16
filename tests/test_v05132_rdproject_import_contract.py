@@ -125,9 +125,13 @@ class RdprojectImportContract(unittest.TestCase):
 
     def test_one_bar_for_the_whole_import(self):
         # TODO №3 (M30s 2026-10-14 20:36–20:39): the bar jumped between the share of
-        # the file and one volume's install. The bar is the share of the file only.
+        # the file and one volume's install. v0.5.134: the bar was the share of the file.
+        # TODO №15 (M30s 2026-10-16 01:42): the share of the file hit 100 % while the
+        # last volume still installed for 2 hours. v0.5.137: the main bar counts the
+        # chosen volumes (overallBarValue), the current volume has its own second bar.
         service = source("RdprojectImportService.kt")
-        self.assertIn("RdprojectImportProgress.fileBarValue(", service)
+        self.assertNotIn("RdprojectImportProgress.fileBarValue(", service)
+        self.assertIn("RdprojectImportProgress.overallBarValue(", service)
         self.assertIn("RdprojectImportProgress.installPercent(progress)", service)
         self.assertNotIn("current = progress.normalizedCurrent", service)
 

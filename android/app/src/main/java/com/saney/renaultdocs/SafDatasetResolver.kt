@@ -5,6 +5,8 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.util.Log
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -31,6 +33,9 @@ class SafDatasetResolver(
 
     private val contentResolver: ContentResolver =
         context.contentResolver
+
+    private val appContext: Context =
+        context.applicationContext
 
     // v0.5.110: a dataset may be addressed as a folder inside a permitted
     // tree (…/tree/<parent>/document/<copy>), e.g. a converter copy inside
@@ -63,6 +68,50 @@ class SafDatasetResolver(
 
     init {
         nodeCache[""] = root
+    }
+
+    // Stage 0 of the read-from-.rdpkg plan (TODO №16): which volume and where it lies.
+    private val ownPackageId: String? by lazy {
+        if (treeUri.authority == LocalDatasetDocumentsProvider.authority) {
+            VolumeReadStats.packageIdOf(rootDocumentId)
+        } else {
+            null
+        }
+    }
+
+    private val statsVolume: String by lazy {
+        ownPackageId ?: if (treeUri.authority == LocalDatasetDocumentsProvider.authority) rootDocumentId else "saf"
+    }
+
+    private val statsPlace: String by lazy {
+        VolumeReadStats.placeLabel(
+            ownPackageId?.let { runCatching { VolumeStorage.placeOf(appContext, it) }.getOrNull() },
+        )
+    }
+
+    private fun timedOpen(
+        relativePath: String,
+        open: (Node) -> Any?,
+    ): Any? {
+        val node = resolve(relativePath)
+        if (node == null) {
+            VolumeReadStats.recordOpen(statsVolume, 0L, found = false)
+            return null
+        }
+        if (node.isDirectory) return null
+        val started = SystemClock.elapsedRealtime()
+        val result = open(node)
+        val ms = SystemClock.elapsedRealtime() - started
+        val totals = VolumeReadStats.recordOpen(statsVolume, ms, found = result != null)
+        runCatching {
+            if (ms >= VolumeReadStats.SLOW_OPEN_MS) {
+                Log.i(VolumeReadStats.TAG, VolumeReadStats.openLine(statsVolume, statsPlace, relativePath, ms))
+            }
+            if (VolumeReadStats.shouldSummarize(totals)) {
+                Log.i(VolumeReadStats.TAG, VolumeReadStats.summaryLine(statsVolume, statsPlace, totals))
+            }
+        }
+        return result
     }
 
     fun resolve(
@@ -132,34 +181,22 @@ class SafDatasetResolver(
 
     fun openInputStream(
         relativePath: String,
-    ): InputStream? {
-        val node = resolve(relativePath)
-            ?: return null
-
-        if (node.isDirectory) {
-            return null
-        }
-
-        return contentResolver.openInputStream(
-            node.uri,
-        )
-    }
+    ): InputStream? =
+        timedOpen(relativePath) { node ->
+            contentResolver.openInputStream(
+                node.uri,
+            )
+        } as InputStream?
 
     fun openFileDescriptor(
         relativePath: String,
-    ): ParcelFileDescriptor? {
-        val node = resolve(relativePath)
-            ?: return null
-
-        if (node.isDirectory) {
-            return null
-        }
-
-        return contentResolver.openFileDescriptor(
-            node.uri,
-            "r",
-        )
-    }
+    ): ParcelFileDescriptor? =
+        timedOpen(relativePath) { node ->
+            contentResolver.openFileDescriptor(
+                node.uri,
+                "r",
+            )
+        } as ParcelFileDescriptor?
 
     private fun directoryIndex(
         directoryPath: String,
@@ -180,10 +217,22 @@ class SafDatasetResolver(
                 return it
             }
 
+            val listingStarted = SystemClock.elapsedRealtime()
             val children = queryChildren(
                 directoryPath = directoryPath,
                 directory = directory,
             )
+            val listingMs = SystemClock.elapsedRealtime() - listingStarted
+            val listingTotals = VolumeReadStats.recordListing(statsVolume, children.size, listingMs)
+            runCatching {
+                if (listingMs >= VolumeReadStats.SLOW_LISTING_MS) {
+                    Log.i(
+                        VolumeReadStats.TAG,
+                        VolumeReadStats.listingLine(statsVolume, statsPlace, directoryPath, children.size, listingMs),
+                    )
+                    Log.i(VolumeReadStats.TAG, VolumeReadStats.summaryLine(statsVolume, statsPlace, listingTotals))
+                }
+            }
 
             val exact = children.associateBy {
                 it.name

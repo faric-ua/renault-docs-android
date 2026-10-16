@@ -19,6 +19,58 @@ object RdprojectImportProgress {
         return maxOf(now, previous)
     }
 
+    /**
+     * TODO №15 (M30s 2026-10-16 01:42, «Етап: 100%» while «Том 18/18 · NT8494 —
+     * встановлюю 31 %» went on for 2 more hours): reading the file is fast, installing a
+     * volume on the card is slow, so the share of the file is a bad measure. The main
+     * bar is now the share of the chosen volumes done: finished volumes plus the
+     * installed part of the current one ([currentPart] in [scale] units). Never goes back.
+     */
+    fun overallBarValue(
+        done: Int,
+        total: Int,
+        currentPart: Int,
+        previous: Int,
+        scale: Int,
+    ): Int {
+        if (total <= 0) return maxOf(previous, 0)
+        val finished = done.coerceIn(0, total).toLong()
+        val part = if (finished >= total) 0L else currentPart.coerceIn(0, scale).toLong()
+        val now = ((finished * scale + part) / total).toInt().coerceIn(0, scale)
+        return maxOf(now, previous)
+    }
+
+    /** Line above the main bar: «Загалом: томів 17 з 18 · 96 %». */
+    fun overallLabel(
+        done: Int,
+        total: Int,
+        barValue: Int,
+        scale: Int,
+    ): String {
+        val percent = if (scale > 0) barValue.coerceIn(0, scale).toLong() * 100 / scale else 0L
+        return "Загалом: томів ${done.coerceIn(0, maxOf(total, 0))} з $total · $percent %"
+    }
+
+    /** Line above the second bar, for the current volume only (resets on each volume). */
+    fun volumeLabel(
+        label: String,
+        percent: Int?,
+    ): String =
+        if (percent == null) {
+            "Цей том: $label — копіюю з файлу"
+        } else {
+            "Цей том: $label — ${percent.coerceIn(0, 100)} %"
+        }
+
+    /**
+     * TODO №13: volumes that already lay unpacked on the phone / card but were missing
+     * from the project after a broken-off import; this run added them back.
+     */
+    fun recoveredMessage(
+        count: Int,
+        project: String,
+    ): String = "Повернуто до проєкту «$project» томів, що вже лежали на телефоні / карті: $count."
+
     /** No report for this long and no worker in this process — the run is gone. */
     const val ORPHAN_AFTER_MS = 2L * 60L * 1000L
 

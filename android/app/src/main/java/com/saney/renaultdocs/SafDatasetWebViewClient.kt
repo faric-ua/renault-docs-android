@@ -102,6 +102,16 @@ class SafDatasetWebViewClient(
                 prepared
                     ?.copiedToLocalCache
 
+            // Stage 0 of the read-from-.rdpkg plan (TODO №16): first open of a volume.
+            runCatching {
+                android.util.Log.i(
+                    VolumeReadStats.TAG,
+                    "FAST тека=${treeUri.lastPathSegment} архів=${prepared?.archive != null} " +
+                        "скопійовано=${prepared?.copiedToLocalCache} " +
+                        "мс=${(fastPackPrepareFinishedAtMs ?: 0L) - (fastPackPrepareStartedAtMs ?: 0L)}",
+                )
+            }
+
             prepared?.archive
         }
 

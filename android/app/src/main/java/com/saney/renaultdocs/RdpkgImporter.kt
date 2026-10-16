@@ -19,6 +19,35 @@ class PackageAlreadyInstalledException(
     )
 
 object RdpkgImporter {
+    /**
+     * TODO №13 (2026-10-16): the package id of a `.rdpkg` without unpacking it — only
+     * `rdpkg.json` is read. Lets an import see «this volume already lies on the phone /
+     * card» before spending minutes (hours on the card) unpacking it again. Null when
+     * the file has no valid manifest; the normal install then reports the real error.
+     */
+    fun peekPackageId(
+        file: File,
+    ): String? =
+        runCatching {
+            java.util.zip.ZipFile(file).use { zip ->
+                val entry = zip.getEntry(PACKAGE_MANIFEST) ?: return@use null
+                val json =
+                    JSONObject(
+                        zip.getInputStream(entry).bufferedReader(Charsets.UTF_8).use { it.readText() },
+                    )
+                if (json.optString("format") != FORMAT) return@use null
+                json.optString("package_id").trim().takeIf { isSafePackageId(it) }
+            }
+        }.getOrNull()
+
+    fun isSafePackageId(
+        packageId: String,
+    ): Boolean =
+        packageId.matches(Regex("[A-Za-z0-9._-]{1,160}")) &&
+            packageId != "." &&
+            packageId != ".." &&
+            !packageId.startsWith(".")
+
     const val FORMAT =
         "renault-volume-package-v1"
     const val SCHEMA_VERSION =
@@ -67,6 +96,11 @@ object RdpkgImporter {
                     .apply {
                         mkdirs()
                     }
+            // TODO №12: on the card the volumes folder is marked `.nomedia` before the
+            // first volume file is written (owner's rule 2026-10-15).
+            if (chosenPlace == VolumePlace.CARD) {
+                VolumeStorage.ensureNoMedia(packagesDirectory)
+            }
 
             val staging =
                 File(

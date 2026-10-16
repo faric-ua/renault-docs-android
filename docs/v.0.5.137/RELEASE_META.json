@@ -1,0 +1,13 @@
+{
+  "versionName": "0.5.137",
+  "versionCode": 153,
+  "phase": "development",
+  "branch": "feat/import-batch-v0.5.137",
+  "issues": [
+    147
+  ],
+  "scope": "TODO №11 «Скасувати» in the import notification; №12 .nomedia in the card volumes folder; №13 invisible volume recovered without unpacking again; №15 two labelled bars (overall by volumes + current volume); №16 stage 0 — read timing in logcat (tag RenaultRead) + Phone Diagnostics item 33. Includes v0.5.136.",
+  "sourceBase": "v0.5.136/build152",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending"
+}
