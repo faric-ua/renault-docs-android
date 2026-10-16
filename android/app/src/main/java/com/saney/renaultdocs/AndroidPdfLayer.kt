@@ -41,11 +41,8 @@ class AndroidPdfLayer(
     private val maxRenderWidth =
         if (compactMode) 1800 else 3000
 
-    private val fastRenderWidth =
-        if (compactMode) 1200 else 1600
-
-    private val neighborRenderWidthCap =
-        if (compactMode) 900 else 1200
+    // v0.5.140: fastRenderWidth (1200/1600) and neighborRenderWidthCap (900/1200) are gone —
+    // a page has two sizes only: «under the screen» and the maximum (log 112).
 
     private val highZoomNeighborRadius =
         if (compactMode) 0 else 1
@@ -896,7 +893,18 @@ class AndroidPdfLayer(
                   sections.push(section);
                 }
 
-                function targetWidth() {
+                // v0.5.140 (owner 2026-10-17 00:07): only two sizes of a page —
+                // «under the screen» and, once zoomed in, the maximum at once.
+                // Before: 1000 → 1600 → 2000/2400/2600 → 3000, each drawn and
+                // compressed again (log 112). Zooming out never redraws: the
+                // bigger picture already there is just shown smaller.
+                const ZOOMED_IN = 1.05;
+
+                function isZoomedIn() {
+                  return zoom > ZOOMED_IN;
+                }
+
+                function screenWidth() {
                   const viewport =
                     Math.max(
                       360,
@@ -914,22 +922,24 @@ class AndroidPdfLayer(
                       ${maxRenderWidth},
                       Math.max(
                         800,
-                        viewport * dpr * zoom
+                        viewport * dpr * Math.min(1, zoom)
                       )
                     )
                   );
                 }
 
-                function fastTargetWidth() {
-                  const fullWidth =
-                    targetWidth();
+                function targetWidth() {
+                  return isZoomedIn()
+                    ? ${maxRenderWidth}
+                    : screenWidth();
+                }
 
-                  return zoom >= 1.5
-                    ? Math.min(
-                        fullWidth,
-                        ${fastRenderWidth}
-                      )
-                    : fullWidth;
+                function fastTargetWidth() {
+                  // While scrolling a zoomed page: the screen-size picture
+                  // first (usually already drawn), the maximum when it stops.
+                  return isZoomedIn()
+                    ? screenWidth()
+                    : targetWidth();
                 }
 
                 function pageUrl(
@@ -1008,7 +1018,7 @@ class AndroidPdfLayer(
                     return 0;
                   }
 
-                  return zoom >= 1.5
+                  return isZoomedIn()
                     ? ${highZoomNeighborRadius}
                     : 2;
                 }
@@ -1018,7 +1028,8 @@ class AndroidPdfLayer(
                     return 0;
                   }
 
-                  return zoom >= 1.5
+                  // Maximum-size pictures are big in memory (M30s): keep few.
+                  return isZoomedIn()
                     ? ${highZoomRetainRadius}
                     : 4;
                 }
@@ -1026,16 +1037,9 @@ class AndroidPdfLayer(
                 function neighborRenderWidth(
                   preferFast = false
                 ) {
-                  if (zoom >= 2.5) {
-                    return Math.min(
-                      targetWidth(),
-                      ${neighborRenderWidthCap}
-                    );
-                  }
-
-                  return preferFast
-                    ? fastTargetWidth()
-                    : targetWidth();
+                  // v0.5.140: neighbours stay «under the screen»; a neighbour
+                  // gets the maximum when it becomes the page being looked at.
+                  return screenWidth();
                 }
 
                 function evictFarPages(index) {
@@ -1122,7 +1126,7 @@ class AndroidPdfLayer(
                           );
                         }
                       },
-                      zoom >= 1.5
+                      isZoomedIn()
                         ? 90
                         : 60
                     );
@@ -2050,7 +2054,7 @@ class AndroidPdfLayer(
                       );
                     }
 
-                    if (zoom >= 1.5) {
+                    if (isZoomedIn()) {
                       loadAround(
                         currentPage,
                         true

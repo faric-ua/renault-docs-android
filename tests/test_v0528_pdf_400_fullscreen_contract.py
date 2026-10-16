@@ -24,12 +24,14 @@ class V0528Pdf400FullscreenContractTests(unittest.TestCase):
             "android/app/src/main/java/com/saney/renaultdocs/AndroidPdfLayer.kt"
         )
 
-        self.assertIn("zoom >= 2.5", pdf)
-        self.assertIn("1200", pdf)
+        # v0.5.140 (owner 2026-10-17): two sizes only — «under the screen» and,
+        # once zoomed in, the maximum at once; neighbours stay «under the screen»
+        # (lighter than the old 1200 cap at zoom >= 2.5).
+        self.assertIn("? ${maxRenderWidth}", pdf)
         self.assertIn("3000", pdf)
         self.assertIn("if (compactMode) 1800 else 3000", pdf)
         self.assertIn(".coerceIn(600, maxRenderWidth)", pdf)
-        self.assertIn("1600", pdf)
+        self.assertIn("return screenWidth();", pdf)
 
     def test_pdf_toolbar_exposes_fullscreen_toggle(self):
         pdf = self._read(
