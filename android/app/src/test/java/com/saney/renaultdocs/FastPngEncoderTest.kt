@@ -1,9 +1,12 @@
 package com.saney.renaultdocs
 
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
 import java.io.File
 import java.nio.file.Files
-import javax.imageio.ImageIO
+import java.util.zip.CRC32
+import java.util.zip.Inflater
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -13,6 +16,60 @@ import org.junit.Test
 
 /** v0.5.139: fast lossless PNG for PDF pages + disk cache of drawn pages. */
 class FastPngEncoderTest {
+    /**
+     * Minimal PNG reader for the test (Android unit tests have no javax.imageio): checks the
+     * signature and every chunk CRC, inflates IDAT and undoes the row filters 0 and 1.
+     * Returns width, height and opaque ARGB pixels.
+     */
+    private fun decode(png: ByteArray): Triple<Int, Int, IntArray> {
+        val input = DataInputStream(ByteArrayInputStream(png))
+        val sig = ByteArray(8).also { input.readFully(it) }
+        assertArrayEquals(byteArrayOf(-119, 80, 78, 71, 13, 10, 26, 10), sig)
+        var width = 0
+        var height = 0
+        val idat = ByteArrayOutputStream()
+        while (true) {
+            val length = input.readInt()
+            val type = ByteArray(4).also { input.readFully(it) }
+            val data = ByteArray(length).also { input.readFully(it) }
+            val crc = CRC32().apply { update(type); update(data) }
+            assertEquals(crc.value.toInt(), input.readInt())
+            when (String(type, Charsets.US_ASCII)) {
+                "IHDR" -> {
+                    val h = DataInputStream(ByteArrayInputStream(data))
+                    width = h.readInt()
+                    height = h.readInt()
+                    assertEquals(8, h.readUnsignedByte())
+                    assertEquals(2, h.readUnsignedByte())
+                }
+                "IDAT" -> idat.write(data)
+                "IEND" -> break
+            }
+        }
+        val raw = ByteArray(height * (1 + width * 3))
+        Inflater().apply {
+            setInput(idat.toByteArray())
+            var off = 0
+            while (off < raw.size) off += inflate(raw, off, raw.size - off)
+            end()
+        }
+        val px = IntArray(width * height)
+        for (y in 0 until height) {
+            val rowStart = y * (1 + width * 3)
+            val filter = raw[rowStart].toInt()
+            assertTrue(filter == 0 || filter == 1)
+            val rgb = IntArray(width * 3)
+            for (i in 0 until width * 3) {
+                val v = raw[rowStart + 1 + i].toInt() and 0xFF
+                rgb[i] = if (filter == 1 && i >= 3) (v + rgb[i - 3]) and 0xFF else v
+            }
+            for (x in 0 until width) {
+                px[y * width + x] = (0xFF shl 24) or (rgb[x * 3] shl 16) or (rgb[x * 3 + 1] shl 8) or rgb[x * 3 + 2]
+            }
+        }
+        return Triple(width, height, px)
+    }
+
     private fun drawing(
         width: Int,
         height: Int,
@@ -31,21 +88,19 @@ class FastPngEncoderTest {
         val h = 157
         val px = drawing(w, h)
         val png = FastPngEncoder.encode(px, w, h)
-        val image = ImageIO.read(ByteArrayInputStream(png))
-        assertEquals(w, image.width)
-        assertEquals(h, image.height)
-        val back = IntArray(w * h)
-        image.getRGB(0, 0, w, h, back, 0, w)
-        assertArrayEquals(px.map { it or 0xFF000000.toInt() }.toIntArray(), back.map { it or 0xFF000000.toInt() }.toIntArray())
+        val (dw, dh, back) = decode(png)
+        assertEquals(w, dw)
+        assertEquals(h, dh)
+        assertArrayEquals(px.map { it or 0xFF000000.toInt() }.toIntArray(), back)
     }
 
     @Test
     fun alphaIsDroppedNotColours() {
         val px = intArrayOf(0x00FF0000, 0x7F00FF00, 0xFF0000FF.toInt())
-        val image = ImageIO.read(ByteArrayInputStream(FastPngEncoder.encode(px, 3, 1)))
-        assertEquals(0xFFFF0000.toInt(), image.getRGB(0, 0))
-        assertEquals(0xFF00FF00.toInt(), image.getRGB(1, 0))
-        assertEquals(0xFF0000FF.toInt(), image.getRGB(2, 0))
+        val (_, _, back) = decode(FastPngEncoder.encode(px, 3, 1))
+        assertEquals(0xFFFF0000.toInt(), back[0])
+        assertEquals(0xFF00FF00.toInt(), back[1])
+        assertEquals(0xFF0000FF.toInt(), back[2])
     }
 
     @Test
