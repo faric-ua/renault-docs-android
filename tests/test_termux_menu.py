@@ -463,8 +463,9 @@ class TermuxMenuContractTests(unittest.TestCase):
         text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
         self.assertIn("31) app_threads_report ;;", text)
         self.assertIn('echo "31 — Що роблять потоки застосунку (ядра, пріоритет) → файл"', text)
-        fn = text[text.index("app_threads_report() {"):text.index("# app_threads_report end")]
+        fn = text[text.index("pick_faric_app() {"):text.index("# app_threads_report end")]
         self.assertIn("ua.faric.audioconverter", fn)
+        self.assertIn("ua.faric.trackcatcher", fn)
         self.assertIn("top -b -n 2 -d 5 -H -p", fn)
         self.assertIn("/cpuset", fn)
         for forbidden in ("am force-stop", "pm disable", "pm clear", "settings put", "rm ", "reboot", "input ", "renice", "cmd package"):
