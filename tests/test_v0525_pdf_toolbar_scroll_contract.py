@@ -45,11 +45,12 @@ class V0525PdfToolbarScrollContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("function fastTargetWidth()", pdf)
-        self.assertIn("1600", pdf)
         self.assertIn("documentScrollActive", pdf)
         self.assertIn("180", pdf)
         self.assertIn("function neighborRadius()", pdf)
-        self.assertIn("zoom >= 1.5", pdf)
+        # v0.5.140: «zoomed in» is one rule for sizes, prefetch and eviction
+        # (was zoom >= 1.5 with an extra 1600 fast width).
+        self.assertIn("function isZoomedIn()", pdf)
         self.assertIn("function retainRadius()", pdf)
         self.assertIn("function evictFarPages(index)", pdf)
         self.assertIn("img.removeAttribute('src')", pdf)

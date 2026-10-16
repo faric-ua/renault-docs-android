@@ -36,8 +36,8 @@ class V0530PdfHighZoomScrollContractTests(unittest.TestCase):
         pdf = self._pdf()
 
         self.assertIn("function neighborRenderWidth(", pdf)
-        self.assertIn("if (zoom >= 2.5)", pdf)
-        self.assertIn("1200", pdf)
+        # v0.5.140: neighbours always «under the screen» (was: 1200 cap at zoom >= 2.5).
+        self.assertIn("return screenWidth();", pdf)
         self.assertIn("neighborWidth", pdf)
 
     def test_scroll_tracks_current_page_from_viewport_center(self):

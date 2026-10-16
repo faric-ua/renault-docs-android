@@ -44,8 +44,9 @@ class V0532PdfCompanionContractTests(unittest.TestCase):
         )
 
         self.assertIn("if (compactMode) 1800 else 3000", pdf)
-        self.assertIn("if (compactMode) 1200 else 1600", pdf)
-        self.assertIn("if (compactMode) 900 else 1200", pdf)
+        # v0.5.140: the fast (1200/1600) and neighbour (900/1200) widths are gone —
+        # two sizes only, so the companion's budget is its smaller maximum (1800).
+        self.assertNotIn("if (compactMode) 1200 else 1600", pdf)
         self.assertIn("if (compactMode) 0 else 1", pdf)
         self.assertIn("pdfCompactMode =\n                    true", viewer)
 

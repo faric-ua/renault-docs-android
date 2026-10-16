@@ -1,0 +1,13 @@
+{
+  "versionName": "0.5.140",
+  "versionCode": 156,
+  "phase": "development",
+  "branch": "perf/pdf-two-sizes-v0.5.140",
+  "issues": [
+    147
+  ],
+  "scope": "PDF page in two sizes only (owner 2026-10-17 00:07): «under the screen» and, once zoomed in (>105 %), the maximum at once — no intermediate 1600/2000/2400/2600 renders; zoom-out keeps the bigger picture; neighbours stay «under the screen». Includes v0.5.139.",
+  "sourceBase": "v0.5.139/build155",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending"
+}
