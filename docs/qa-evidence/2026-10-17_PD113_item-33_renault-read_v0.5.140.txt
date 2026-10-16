@@ -1,0 +1,170 @@
+Phone Diagnostics
+Sequence: 113
+Menu item: 33
+Task: Renault Docs: заміри читання томів
+Time: 2026-10-17 00:31:35 +0300
+ADB target: 192.168.50.119:38725
+Log: /storage/emulated/0/Documents/PhoneDiagnostics/logs/113_item-33_renault-read_20261017-003135.txt
+============================================================
+=== Renault Docs ===
+    versionName=0.5.140
+
+=== Заміри (logcat, тег RenaultRead) ===
+LIST — перелік папки; OPEN — повільне відкриття файлу; SUM — підсумок тому; FAST — перше відкриття тому.
+--------- beginning of crash
+--------- beginning of system
+--------- beginning of main
+10-16 21:32:05.999 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=33
+10-16 21:32:14.046 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 21:32:24.148 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 21:32:40.628 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 21:33:05.260 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=10
+10-16 21:33:12.682 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=3
+10-16 21:33:22.293 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=7
+10-16 21:33:25.936 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=4
+10-16 21:33:32.258 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=3
+10-16 23:48:32.584 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0056_A3.PDF» сторінок=1 мс=527
+10-16 23:48:32.903 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0056_A3.PDF» стор=1 ширина=1000 мс_малювання=27 мс_стиснення=68 байт=90119
+10-16 23:48:33.121 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=42
+10-16 23:48:34.441 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0056_A3.PDF» стор=1 ширина=1600 мс_малювання=21 мс_стиснення=86 байт=157622
+10-16 23:48:34.801 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0056_A3.PDF» стор=1 ширина=3000 мс_малювання=37 мс_стиснення=249 байт=362553
+10-16 23:48:37.708 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» сторінок=1 мс=37
+10-16 23:48:37.920 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» стор=1 ширина=1000 мс_малювання=25 мс_стиснення=40 байт=100488
+10-16 23:48:37.942 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=6
+10-16 23:48:39.040 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» стор=1 ширина=1600 мс_малювання=26 мс_стиснення=83 байт=177110
+10-16 23:48:39.412 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» стор=1 ширина=3000 мс_малювання=41 мс_стиснення=251 байт=398527
+10-16 23:48:43.035 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» сторінок=33 мс=31
+10-16 23:48:43.256 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=1 ширина=1000 мс_малювання=11 мс_стиснення=72 байт=129560
+10-16 23:48:43.402 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=2 ширина=1000 мс_малювання=51 мс_стиснення=68 байт=104664
+10-16 23:48:43.519 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=3 ширина=1000 мс_малювання=24 мс_стиснення=74 байт=165840
+10-16 23:48:43.537 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:48:45.564 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=1 ширина=3000 мс_малювання=72 мс_стиснення=489 байт=607533
+10-16 23:48:45.773 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=2 ширина=1200 мс_малювання=63 мс_стиснення=92 байт=133660
+10-16 23:48:47.026 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=2 ширина=1600 мс_малювання=77 мс_стиснення=162 байт=203383
+10-16 23:48:47.268 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=3 ширина=1600 мс_малювання=31 мс_стиснення=181 байт=323510
+10-16 23:48:47.718 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=4 ширина=1600 мс_малювання=42 мс_стиснення=179 байт=335881
+10-16 23:48:48.483 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=3 ширина=2400 мс_малювання=49 мс_стиснення=364 байт=567219
+10-16 23:48:48.923 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=4 ширина=2400 мс_малювання=45 мс_стиснення=356 байт=590931
+10-16 23:48:49.375 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=2 ширина=2400 мс_малювання=90 мс_стиснення=323 байт=359116
+10-16 23:48:49.595 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=5 ширина=1600 мс_малювання=23 мс_стиснення=169 байт=290533
+10-16 23:48:49.799 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=6 ширина=1600 мс_малювання=20 мс_стиснення=160 байт=152722
+10-16 23:48:49.964 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=7 ширина=1400 мс_малювання=14 мс_стиснення=135 байт=120992
+10-16 23:48:50.200 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=3 ширина=1400 мс_малювання=54 мс_стиснення=133 байт=266114
+10-16 23:48:51.555 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=7 ширина=1600 мс_малювання=25 мс_стиснення=171 байт=146330
+10-16 23:48:51.826 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=8 ширина=1600 мс_малювання=86 мс_стиснення=156 байт=244569
+10-16 23:48:52.097 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=9 ширина=1200 мс_малювання=19 мс_стиснення=111 байт=226488
+10-16 23:48:52.245 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=5 ширина=1200 мс_малювання=23 мс_стиснення=103 байт=193594
+10-16 23:48:52.934 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=10 ширина=1200 мс_малювання=23 мс_стиснення=114 байт=162537
+10-16 23:48:53.481 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=11 ширина=1200 мс_малювання=31 мс_стиснення=116 байт=241888
+10-16 23:48:53.693 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=12 ширина=1200 мс_малювання=22 мс_стиснення=110 байт=269109
+10-16 23:48:54.753 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=13 ширина=1200 мс_малювання=22 мс_стиснення=108 байт=171113
+10-16 23:48:55.690 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=14 ширина=1200 мс_малювання=33 мс_стиснення=118 байт=273592
+10-16 23:48:56.100 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=15 ширина=1200 мс_малювання=29 мс_стиснення=111 байт=261468
+10-16 23:48:57.228 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=16 ширина=1200 мс_малювання=22 мс_стиснення=116 байт=169863
+10-16 23:48:59.228 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=14 ширина=3000 мс_малювання=159 мс_стиснення=493 байт=970608
+10-16 23:49:00.555 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=15 ширина=1600 мс_малювання=24 мс_стиснення=180 байт=390447
+10-16 23:49:00.791 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=13 ширина=1600 мс_малювання=23 мс_стиснення=188 байт=252791
+10-16 23:49:01.121 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=15 ширина=2000 мс_малювання=42 мс_стиснення=258 байт=526373
+10-16 23:49:01.412 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=13 ширина=2000 мс_малювання=20 мс_стиснення=245 байт=347972
+10-16 23:49:01.630 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=16 ширина=1600 мс_малювання=17 мс_стиснення=168 байт=255572
+10-16 23:49:02.495 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=17 ширина=1600 мс_малювання=102 мс_стиснення=158 байт=244248
+10-16 23:49:03.111 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=18 ширина=1600 мс_малювання=30 мс_стиснення=168 байт=377484
+10-16 23:49:05.057 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» сторінок=21 мс=29
+10-16 23:49:05.291 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=1 ширина=1000 мс_малювання=17 мс_стиснення=74 байт=201104
+10-16 23:49:05.418 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=2 ширина=1000 мс_малювання=23 мс_стиснення=75 байт=224932
+10-16 23:49:05.573 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=3 ширина=1000 мс_малювання=44 мс_стиснення=77 байт=261837
+10-16 23:49:05.590 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:49:06.125 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=4 ширина=1000 мс_малювання=13 мс_стиснення=79 байт=144919
+10-16 23:49:06.261 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=5 ширина=1000 мс_малювання=21 мс_стиснення=85 байт=235945
+10-16 23:49:06.480 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=6 ширина=1000 мс_малювання=38 мс_стиснення=89 байт=173996
+10-16 23:49:06.622 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=7 ширина=1000 мс_малювання=42 мс_стиснення=84 байт=120495
+10-16 23:49:07.064 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=8 ширина=1000 мс_малювання=43 мс_стиснення=90 байт=219226
+10-16 23:49:08.779 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=6 ширина=1600 мс_малювання=33 мс_стиснення=174 байт=341642
+10-16 23:49:08.916 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=7 ширина=1200 мс_малювання=27 мс_стиснення=96 байт=154831
+10-16 23:49:09.078 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=5 ширина=1200 мс_малювання=32 мс_стиснення=112 байт=308820
+10-16 23:49:09.714 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=6 ширина=3000 мс_малювання=94 мс_стиснення=453 байт=606168
+10-16 23:49:14.539 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0056_A3.PDF» сторінок=1 мс=15
+10-16 23:49:14.904 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0056_A3.PDF» стор=1 ширина=2600 мс_малювання=28 мс_стиснення=193 байт=290635
+10-16 23:49:14.927 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:49:17.571 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» сторінок=1 мс=17
+10-16 23:49:17.725 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=9
+10-16 23:49:21.950 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» сторінок=33 мс=14
+10-16 23:49:22.394 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=14 ширина=2000 мс_малювання=35 мс_стиснення=255 байт=544462
+10-16 23:49:22.431 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:49:24.642 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=17 ширина=1200 мс_малювання=100 мс_стиснення=109 байт=167830
+10-16 23:49:24.782 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=18 ширина=1200 мс_малювання=19 мс_стиснення=105 байт=255473
+10-16 23:49:24.936 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=19 ширина=1200 мс_малювання=18 мс_стиснення=107 байт=233675
+10-16 23:49:25.183 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=20 ширина=1200 мс_малювання=15 мс_стиснення=103 байт=235707
+10-16 23:49:25.415 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=21 ширина=1200 мс_малювання=82 мс_стиснення=101 байт=166564
+10-16 23:49:25.552 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=22 ширина=1200 мс_малювання=17 мс_стиснення=103 байт=240788
+10-16 23:49:25.693 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=23 ширина=1200 мс_малювання=18 мс_стиснення=104 байт=224194
+10-16 23:49:25.832 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=24 ширина=1200 мс_малювання=20 мс_стиснення=100 байт=216773
+10-16 23:49:44.352 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0062_A3.PDF» сторінок=1 мс=30
+10-16 23:49:44.576 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0062_A3.PDF» стор=1 ширина=1000 мс_малювання=28 мс_стиснення=44 байт=128399
+10-16 23:49:44.595 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=7
+10-16 23:49:47.398 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0062_A3.PDF» стор=1 ширина=1600 мс_малювання=33 мс_стиснення=86 байт=222715
+10-16 23:49:47.793 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0062_A3.PDF» стор=1 ширина=3000 мс_малювання=50 мс_стиснення=264 байт=486632
+10-16 23:49:50.309 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=6
+10-16 23:49:56.338 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/119_4.PDF» сторінок=1 мс=33
+10-16 23:49:56.493 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/119_4.PDF» стор=1 ширина=1000 мс_малювання=20 мс_стиснення=16 байт=40852
+10-16 23:49:56.507 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:49:58.541 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=10
+10-16 23:49:58.818 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/119_4.PDF» стор=1 ширина=2400 мс_малювання=21 мс_стиснення=71 байт=151999
+10-16 23:50:01.940 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/119_4.PDF» стор=1 ширина=3000 мс_малювання=41 мс_стиснення=118 байт=228912
+10-16 23:50:42.148 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S26.PDF» сторінок=1 мс=27
+10-16 23:50:42.912 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S26.PDF» стор=1 ширина=1000 мс_малювання=463 мс_стиснення=60 байт=410066
+10-16 23:50:42.934 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:50:45.451 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S26.PDF» стор=1 ширина=1600 мс_малювання=588 мс_стиснення=117 байт=809971
+10-16 23:50:46.730 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S26.PDF» стор=1 ширина=3000 мс_малювання=711 мс_стиснення=322 байт=1876892
+10-16 23:50:49.052 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S28.PDF» сторінок=1 мс=27
+10-16 23:50:49.832 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S28.PDF» стор=1 ширина=1000 мс_малювання=478 мс_стиснення=58 байт=409698
+10-16 23:50:49.862 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 23:50:51.222 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S28.PDF» стор=1 ширина=1600 мс_малювання=598 мс_стиснення=117 байт=812094
+10-16 23:50:52.563 I/RenaultRead(28555): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S28.PDF» стор=1 ширина=3000 мс_малювання=730 мс_стиснення=327 байт=1885029
+10-16 23:50:54.822 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=6
+10-16 23:50:58.474 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=9
+10-16 23:51:03.350 I/RenaultRead(28555): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0062_A3.PDF» сторінок=1 мс=16
+10-16 23:51:03.480 I/RenaultRead(28555): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=10
+10-17 00:29:36.746 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0062_A3.PDF» сторінок=1 мс=783
+10-17 00:29:37.069 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=38
+10-17 00:29:47.631 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0064_A3.PDF» сторінок=1 мс=48
+10-17 00:29:47.896 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0064_A3.PDF» стор=1 ширина=1000 мс_малювання=33 мс_стиснення=61 байт=128404
+10-17 00:29:47.927 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=7
+10-17 00:29:49.899 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0064_A3.PDF» стор=1 ширина=3000 мс_малювання=48 мс_стиснення=260 байт=486157
+10-17 00:29:59.966 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S26.PDF» сторінок=1 мс=51
+10-17 00:30:00.199 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-17 00:30:06.700 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=6
+10-17 00:30:09.658 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S28.PDF» сторінок=1 мс=40
+10-17 00:30:09.888 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=6
+10-17 00:30:14.539 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=8
+10-17 00:30:16.476 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=6
+10-17 00:30:18.357 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S32.PDF» сторінок=1 мс=33
+10-17 00:30:19.126 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S32.PDF» стор=1 ширина=1000 мс_малювання=442 мс_стиснення=58 байт=403989
+10-17 00:30:19.154 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-17 00:30:21.544 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S32.PDF» стор=1 ширина=3000 мс_малювання=747 мс_стиснення=321 байт=1874958
+10-17 00:30:27.993 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/118_1.PDF» сторінок=1 мс=45
+10-17 00:30:28.166 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/118_1.PDF» стор=1 ширина=1000 мс_малювання=38 мс_стиснення=23 байт=45304
+10-17 00:30:28.183 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-17 00:30:29.918 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/NM/118_1.PDF» стор=1 ширина=3000 мс_малювання=66 мс_стиснення=164 байт=301302
+10-17 00:30:31.766 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=7
+10-17 00:30:48.259 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» сторінок=33 мс=49
+10-17 00:30:48.454 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=14
+10-17 00:30:52.579 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=3 ширина=3000 мс_малювання=113 мс_стиснення=499 байт=784980
+10-17 00:30:53.283 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=2 ширина=3000 мс_малювання=109 мс_стиснення=509 байт=499276
+10-17 00:30:57.977 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=4 ширина=1000 мс_малювання=23 мс_стиснення=81 байт=176510
+10-17 00:30:58.152 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=5 ширина=1000 мс_малювання=17 мс_стиснення=76 байт=151697
+10-17 00:30:58.258 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=6 ширина=1000 мс_малювання=16 мс_стиснення=75 байт=80061
+10-17 00:30:58.456 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=7 ширина=1000 мс_малювання=14 мс_стиснення=69 байт=75908
+10-17 00:30:58.617 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=8 ширина=1000 мс_малювання=56 мс_стиснення=75 байт=129784
+10-17 00:30:58.737 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=9 ширина=1000 мс_малювання=18 мс_стиснення=82 байт=177061
+10-17 00:30:58.840 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=10 ширина=1000 мс_малювання=16 мс_стиснення=72 байт=127315
+10-17 00:30:58.958 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=11 ширина=1000 мс_малювання=17 мс_стиснення=80 байт=188087
+10-17 00:30:59.073 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=12 ширина=1000 мс_малювання=17 мс_стиснення=81 байт=209759
+10-17 00:30:59.182 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=13 ширина=1000 мс_малювання=10 мс_стиснення=76 байт=132654
+10-17 00:30:59.305 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=14 ширина=1000 мс_малювання=19 мс_стиснення=83 байт=212026
+10-17 00:30:59.447 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=15 ширина=1000 мс_малювання=21 мс_стиснення=86 байт=205231
+10-17 00:31:00.991 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» стор=13 ширина=3000 мс_малювання=71 мс_стиснення=478 байт=617692
+10-17 00:31:03.585 I/RenaultRead(11502): PDF відкрито файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» сторінок=21 мс=38
+10-17 00:31:03.813 I/RenaultRead(11502): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=15
+10-17 00:31:05.506 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=1 ширина=3000 мс_малювання=102 мс_стиснення=499 байт=915057
+10-17 00:31:07.944 I/RenaultRead(11502): СТОРІНКА файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/AIDE.PDF» стор=4 ширина=3000 мс_малювання=65 мс_стиснення=508 байт=669520
