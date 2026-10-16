@@ -49,6 +49,8 @@ class RdpkgExportService : Service() {
             workerRunning.set(false); stopSelf(); return START_NOT_STICKY
         }
 
+        val archiveMode = VolumeArchiveAccess.isArchivePart(destinationUri)
+
         startForeground(
             NOTIFICATION_ID,
             notification(
@@ -91,11 +93,36 @@ class RdpkgExportService : Service() {
                 dataSyncTimeout.checkActive()
                 if (runStore.isCancelRequested()) throw OperationCancelledException()
                 val label = listOfNotNull(volume.documentCode, volume.date).joinToString(" · ").ifBlank { volume.title }
+                if (archiveMode) {
+                    // Archives plan v2, stage 1: the archive is used only after every file
+                    // was found equal to the folder; then it gets its final name.
+                    val message = finishArchive(volume, result, label, Uri.parse(destinationUri))
+                    runStore.complete(result.sha256, result.fileCount, message)
+                    getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Архів тому готовий.", false))
+                    return@Thread
+                }
                 val message = "Пакет .rdpkg збережено: $label · ${result.fileCount} файлів"
                 runStore.complete(result.sha256, result.fileCount, message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Експорт .rdpkg завершено.", false))
             } catch (error: Throwable) {
                 if (dataSyncTimeout.isExpired) return@Thread
+                if (archiveMode) {
+                    // Only this run's own unfinished archive file is removed; the volume and
+                    // any archive made before stay as they were.
+                    val part = Uri.parse(destinationUri).path?.let { java.io.File(it) }
+                    val removed = part?.let { !it.exists() || it.delete() } == true
+                    val cancelled = error is OperationCancelledException || error.cause is OperationCancelledException
+                    val tail = if (removed) "Недороблений архів видалено, сам том не змінено." else "Сам том не змінено."
+                    if (cancelled) {
+                        runStore.cancelled("Архів тому скасовано. $tail")
+                        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Архів тому скасовано.", false))
+                    } else {
+                        val message = (error.message ?: "Невідома помилка.") + " " + tail
+                        runStore.fail(message)
+                        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Архів тому: помилка", false))
+                    }
+                    return@Thread
+                }
                 if (error is OperationCancelledException || error.cause is OperationCancelledException) {
                     // v0.5.105: the file was created by this export a moment ago and is
                     // unfinished; remove only it, so no broken .rdpkg is left behind.
@@ -123,6 +150,61 @@ class RdpkgExportService : Service() {
             }
         }.start()
         return START_REDELIVER_INTENT
+    }
+
+    /**
+     * Archives plan v2, stage 1 (owner 2026-10-17 00:32). The packed file is compared with the
+     * folder file by file ([VolumeArchiveVerifier]); only when everything is equal it gets the
+     * name `<id>.rdpkg` and the volume is read from it. An older archive of this volume (made
+     * by this app for an earlier copy) is replaced. The unpacked folder is never touched.
+     */
+    private fun finishArchive(
+        volume: ProjectVolumeRecord,
+        result: RdpkgExporter.ExportResult,
+        label: String,
+        partUri: Uri,
+    ): String {
+        val part = java.io.File(requireNotNull(partUri.path))
+        val folder =
+            VolumeStorage.locate(applicationContext, result.packageId)
+                ?: error("Папку тому не знайдено.")
+        var lastShownAt = 0L
+        val check =
+            VolumeArchiveVerifier.verify(
+                folder = folder,
+                archive = part,
+                progress = { done, total ->
+                    dataSyncTimeout.checkActive()
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    if (now - lastShownAt >= 300L || done >= total) {
+                        lastShownAt = now
+                        val progress =
+                            OperationProgress.measured(
+                                stage = "Перевіряю архів…",
+                                current = (done.coerceAtMost(total) * 1000L / total.coerceAtLeast(1L)).toInt(),
+                                total = 1000,
+                            )
+                        runStore.update(progress.displayText())
+                        runStore.updateProgress(progress)
+                    }
+                },
+                isCancelled = { runStore.isCancelRequested() },
+            )
+        if (!check.ok) {
+            error("Архів не збігся з томом — не використовую. ${check.problem.orEmpty()}")
+        }
+        val target = java.io.File(part.parentFile, result.packageId + VolumeArchiveAccess.SUFFIX)
+        val replaced = target.exists()
+        if (replaced && !target.delete()) error("Не вдалося замінити старий архів тому.")
+        if (!part.renameTo(target)) error("Не вдалося дати архіву остаточну назву.")
+        VolumeArchiveAccess.setReadingOff(applicationContext, result.packageId, off = false)
+        VolumeFileIndex.forget(result.packageId)
+        val size = RdprojectImportSupport.formatBytes(target.length())
+        return buildString {
+            append("Архів тому зроблено і перевірено: $label · ${check.fileCount} файлів, $size. ")
+            if (replaced) append("Старий архів тому замінено. ")
+            append("Том тепер читається з архіву; папка тому лишилась як була.")
+        }
     }
 
     /**

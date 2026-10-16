@@ -759,12 +759,14 @@ class ProjectActivity : Activity() {
         if (!::rdpkgExportRunStore.isInitialized || !::project.isInitialized || !::operationStatus.isInitialized) return
         val state = rdpkgExportRunStore.load()
         if (state.projectId != project.id) return
+        // Archives plan v2, stage 1: «Зробити архів тому» runs through the same export service.
+        val archiveRun = VolumeArchiveAccess.isArchivePart(state.destinationUri)
 
         if (state.isRunning) {
             statusText.text = DEFAULT_STATUS_TEXT
             val stopping = rdpkgExportRunStore.isCancelRequested()
             operationStatus.showRunning(
-                title = "Експорт тому",
+                title = if (archiveRun) "Архів тому" else "Експорт тому",
                 detail =
                     if (stopping) {
                         STOPPING_DETAIL
@@ -796,6 +798,7 @@ class ProjectActivity : Activity() {
                         },
                 subject =
                     state.destinationUri
+                        ?.takeIf { !archiveRun }
                         ?.let {
                             uriText ->
                             DocumentFile
@@ -817,6 +820,19 @@ class ProjectActivity : Activity() {
         if (!state.isTerminal || state.finishedAtMs <= 0L || state.isTerminalDismissed) return
 
         statusText.text = DEFAULT_STATUS_TEXT
+        if (archiveRun) {
+            val title =
+                when (state.phase) {
+                    RdpkgExportRunPhase.COMPLETE -> "Архів тому готовий"
+                    RdpkgExportRunPhase.CANCELLED -> "Архів тому · скасовано"
+                    else -> "Архів тому · помилка"
+                }
+            operationStatus.showTerminal(title, state.message) {
+                rdpkgExportRunStore.dismissTerminal(state.finishedAtMs)
+                operationStatus.hide()
+            }
+            return
+        }
         if (state.phase == RdpkgExportRunPhase.COMPLETE) {
             val detail =
                 buildString {
@@ -1801,7 +1817,12 @@ class ProjectActivity : Activity() {
             CONFIRM_STOP_EXPORT ->
                 buildStopOperationDialog(
                     running = rdpkgExportRunStore.load().isRunning,
-                    title = "Зупинити експорт тому?",
+                    title =
+                        if (VolumeArchiveAccess.isArchivePart(rdpkgExportRunStore.load().destinationUri)) {
+                            "Зупинити архів тому?"
+                        } else {
+                            "Зупинити експорт тому?"
+                        },
                     message = "Недороблений файл .rdpkg, який створює цей експорт, буде видалено. Сам том не зміниться.",
                 ) { rdpkgExportRunStore.requestCancel() }
 
@@ -3820,6 +3841,44 @@ class ProjectActivity : Activity() {
             clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
             startRdpkgExport(volume)
         }
+        // Archives plan v2, stage 1 (owner 2026-10-17 00:32): the volume read from its one
+        // .rdpkg file. Making it never deletes anything; the folder stays.
+        val archivePackageId =
+            LocalDatasetDocumentsProvider.packageIdFromTreeUri(Uri.parse(volume.treeUri))
+        if (archivePackageId != null) {
+            when (VolumeArchiveAccess.status(this, archivePackageId)) {
+                VolumeArchiveStatus.NONE ->
+                    addAction("Зробити архів тому (перевірка, нічого не видаляє)") {
+                        clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                        startVolumeArchive(volume, archivePackageId)
+                    }
+                VolumeArchiveStatus.STALE ->
+                    addAction("Архів тому застарів — зробити заново") {
+                        clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                        startVolumeArchive(volume, archivePackageId)
+                    }
+                VolumeArchiveStatus.ACTIVE -> {
+                    addAction(title = "Читається з архіву ✓", enabled = false) {}
+                    addAction("Читати з папки (архів лишиться)") {
+                        clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                        VolumeArchiveAccess.setReadingOff(this, archivePackageId, off = true)
+                        statusText.text = "Том читається з папки. Архів лишився — увімкнути знову можна тут же."
+                    }
+                }
+                VolumeArchiveStatus.OFF ->
+                    addAction("Читати з архіву") {
+                        clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
+                        VolumeArchiveAccess.setReadingOff(this, archivePackageId, off = false)
+                        val now = VolumeArchiveAccess.status(this, archivePackageId)
+                        statusText.text =
+                            if (now == VolumeArchiveStatus.ACTIVE) {
+                                "Том читається з архіву."
+                            } else {
+                                "Архів тому застарів — зробіть його заново (меню тому)."
+                            }
+                    }
+            }
+        }
         val prepared =
             PreparedShareStore.existingVolumeFile(
                 this,
@@ -3878,7 +3937,8 @@ class ProjectActivity : Activity() {
         dialog =
             AlertDialog.Builder(this)
                 .setTitle(label)
-                .setView(actions)
+                // Archives plan v2: two more rows — scrolls when the screen is short (landscape).
+                .setView(ScrollView(this).apply { addView(actions) })
                 .create()
 
         trackProjectDialog(
@@ -4273,6 +4333,41 @@ class ProjectActivity : Activity() {
                 "Поділитися підготовленим томом",
             ),
         )
+    }
+
+    /**
+     * Archives plan v2, stage 1: pack the installed volume into `<id>.rdpkg.part` next to the
+     * volumes folder (same place: phone or card), check every file against the folder, and
+     * only then name it `<id>.rdpkg` ([RdpkgExportService.finishArchive]).
+     */
+    private fun startVolumeArchive(
+        volume: ProjectVolumeRecord,
+        packageId: String,
+    ) {
+        val part = VolumeArchiveAccess.partFile(this, packageId)
+        val folder = part?.parentFile
+        if (part == null || folder == null) {
+            statusText.text = "Папку тому не знайдено — архів не зроблено."
+            return
+        }
+        // Owner's rule 2026-10-15: `.nomedia` first, before any volume file.
+        if (!VolumeStorage.ensureNoMedia(folder)) {
+            statusText.text = "Не вдалося підготувати папку для архіву. Том не змінено."
+            return
+        }
+        val started =
+            RdpkgExportService.start(
+                context = this,
+                projectId = project.id,
+                volumeId = volume.id,
+                destinationUri = Uri.fromFile(part),
+            )
+        statusText.text =
+            if (started) {
+                DEFAULT_STATUS_TEXT
+            } else {
+                "Інша операція з томом ще йде — архів можна зробити після неї."
+            }
     }
 
     private fun startRdpkgExport(

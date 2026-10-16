@@ -112,7 +112,9 @@ class StatusCardCancelContract(unittest.TestCase):
         project = read("ProjectActivity.kt")
         for title, store, question in (
             ('title = "Імпорт тому"', "rdpkgImportRunStore", "Зупинити імпорт тому?"),
-            ('title = "Експорт тому"', "rdpkgExportRunStore", "Зупинити експорт тому?"),
+            # v0.5.141 (archives plan v2, stage 1): «Зробити архів тому» runs through the same
+            # export service, so the card title says which of the two is running.
+            ('title = if (archiveRun) "Архів тому" else "Експорт тому"', "rdpkgExportRunStore", "Зупинити експорт тому?"),
             ('title = "Підготовка тому"', "rdpkgShareRunStore", "Зупинити підготовку тому?"),
         ):
             with self.subTest(card=title):

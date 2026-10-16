@@ -2251,8 +2251,9 @@ class AndroidPdfLayer(
         width: Int,
     ): String? {
         if (pageDiskCache == null) return null
-        val file = runCatching { resolver.resolve(path)?.file }.getOrNull() ?: return null
-        val attributes = VolumeFileIndex.attributes(file) ?: return null
+        // Archives plan v2, stage 1: also for a volume read from its archive (the archive's
+        // size and time are in the entry's attributes, so a remade archive gets new pictures).
+        val attributes = runCatching { resolver.ownAttributes(path) }.getOrNull() ?: return null
         return PdfPageDiskCache.key(cacheNamespace, path, attributes.size, attributes.lastModified, pageIndex, width)
     }
 

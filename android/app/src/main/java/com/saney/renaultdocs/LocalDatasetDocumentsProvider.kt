@@ -41,8 +41,8 @@ class LocalDatasetDocumentsProvider :
             include(
                 documentId =
                     documentId,
-                file =
-                    resolved.file,
+                name =
+                    resolved.name,
                 attributes =
                     resolved.attributes,
             )
@@ -68,10 +68,30 @@ class LocalDatasetDocumentsProvider :
             )
         }
 
+        // Archives plan v2, stage 1: a volume read from its archive lists the archive's
+        // table of contents — no file-system call at all.
+        parent.archive?.let { archive ->
+            val listed =
+                archive.children(parent.relativePath)
+                    ?: throw FileNotFoundException("Document is not a directory: " + parentDocumentId)
+            return MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
+                listed.forEach { child ->
+                    include(
+                        documentId = documentId(parent.packageId, child.path),
+                        name = child.name,
+                        attributes = child.attributes,
+                    )
+                }
+            }
+        }
+
         // v0.5.138 (log 110): one file-system call per entry instead of 4–5 — on the
         // memory card each call goes through FUSE (~30 ms).
-        val children =
+        val folder =
             parent.file
+                ?: throw FileNotFoundException("Document is not a directory: " + parentDocumentId)
+        val children =
+            folder
                 .listFiles()
                 .orEmpty()
                 .mapNotNull { child ->
@@ -112,8 +132,8 @@ class LocalDatasetDocumentsProvider :
                             relativePath =
                                 relative,
                         ),
-                    file =
-                        child,
+                    name =
+                        child.name,
                     attributes =
                         attributes,
                 )
@@ -149,10 +169,57 @@ class LocalDatasetDocumentsProvider :
             )
         }
 
+        resolved.archive?.let { archive ->
+            return openFromArchive(archive, resolved)
+        }
+
         return ParcelFileDescriptor.open(
-            resolved.file,
+            requireNotNull(resolved.file),
             ParcelFileDescriptor.MODE_READ_ONLY,
         )
+    }
+
+    /**
+     * Archives plan v2, stage 1. A PDF needs a real file (PdfRenderer jumps around in it):
+     * it is copied out of the archive once into the phone cache ([VolumeArchiveFileCache]).
+     * Anything else is streamed through a pipe straight from the archive.
+     */
+    private fun openFromArchive(
+        archive: VolumeArchive,
+        resolved: ResolvedDocument,
+    ): ParcelFileDescriptor {
+        val appContext = requireNotNull(context)
+        if (resolved.name.endsWith(".pdf", ignoreCase = true)) {
+            val real =
+                runCatching {
+                    VolumeArchiveAccess.realFile(appContext, archive, resolved.packageId, resolved.relativePath)
+                }.getOrElse {
+                    VolumeFileIndex.forget(resolved.packageId)
+                    null
+                } ?: throw FileNotFoundException("Package document not found: " + resolved.relativePath)
+            return ParcelFileDescriptor.open(real, ParcelFileDescriptor.MODE_READ_ONLY)
+        }
+        val input =
+            runCatching { archive.open(resolved.relativePath) }.getOrElse {
+                VolumeFileIndex.forget(resolved.packageId)
+                null
+            } ?: throw FileNotFoundException("Package document not found: " + resolved.relativePath)
+        val pipe = ParcelFileDescriptor.createReliablePipe()
+        Thread {
+            val output = ParcelFileDescriptor.AutoCloseOutputStream(pipe[1])
+            try {
+                input.use { it.copyTo(output, 64 * 1024) }
+                output.close()
+            } catch (error: Exception) {
+                // The reader sees an error, not a silently cut file.
+                runCatching { pipe[1].closeWithError(error.message ?: "archive read failed") }
+                runCatching { input.close() }
+            }
+        }.apply {
+            name = "rdpkg-archive-pipe"
+            isDaemon = true
+        }.start()
+        return pipe[0]
     }
 
     override fun getDocumentType(
@@ -162,7 +229,7 @@ class LocalDatasetDocumentsProvider :
             documentId,
         ).let {
             mimeTypeFor(
-                it.file.name,
+                it.name,
                 it.attributes.isDirectory,
             )
         }
@@ -212,7 +279,7 @@ class LocalDatasetDocumentsProvider :
 
     private fun MatrixCursor.include(
         documentId: String,
-        file: File,
+        name: String,
         attributes: VolumeFileIndex.Attributes,
     ) {
         val values =
@@ -233,12 +300,12 @@ class LocalDatasetDocumentsProvider :
 
                     DocumentsContract.Document
                         .COLUMN_DISPLAY_NAME ->
-                        file.name
+                        name
 
                     DocumentsContract.Document
                         .COLUMN_MIME_TYPE ->
                         mimeTypeFor(
-                            file.name,
+                            name,
                             attributes.isDirectory,
                         )
 
@@ -335,6 +402,20 @@ class LocalDatasetDocumentsProvider :
                     "Invalid package path.",
                 )
 
+        // Archives plan v2, stage 1: a volume with a checked archive is read from it.
+        VolumeArchiveAccess.active(appContext, packageId)?.let { archive ->
+            val attributes =
+                archive.attributes(normalized)
+                    ?: throw FileNotFoundException("Package document not found: " + normalized)
+            return ResolvedDocument(
+                packageId = packageId,
+                relativePath = normalized,
+                file = null,
+                attributes = attributes,
+                archive = archive,
+            )
+        }
+
         // v0.5.138 (log 110, M30s): the volume folder is found once and remembered
         // ([VolumeFileIndex]); the document is checked with one file-system call.
         // Before: phone + card lookups and three canonical paths on every request.
@@ -406,9 +487,14 @@ class LocalDatasetDocumentsProvider :
     private data class ResolvedDocument(
         val packageId: String,
         val relativePath: String,
-        val file: File,
+        /** The unpacked file; null when the volume is read from its archive. */
+        val file: File?,
         val attributes: VolumeFileIndex.Attributes,
-    )
+        val archive: VolumeArchive? = null,
+    ) {
+        val name: String
+            get() = file?.name ?: relativePath.substringAfterLast('/').ifEmpty { packageId }
+    }
 
     companion object {
         private const val DOCUMENT_PREFIX =
