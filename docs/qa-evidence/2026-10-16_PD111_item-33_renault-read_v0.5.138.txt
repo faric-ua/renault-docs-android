@@ -1,0 +1,133 @@
+Phone Diagnostics
+Sequence: 111
+Menu item: 33
+Task: Renault Docs: заміри читання томів
+Time: 2026-10-16 21:34:05 +0300
+ADB target: 192.168.50.119:38725
+Log: /storage/emulated/0/Documents/PhoneDiagnostics/logs/111_item-33_renault-read_20261016-213404.txt
+============================================================
+=== Renault Docs ===
+    versionName=0.5.138
+
+=== Заміри (logcat, тег RenaultRead) ===
+LIST — перелік папки; OPEN — повільне відкриття файлу; SUM — підсумок тому; FAST — перше відкриття тому.
+--------- beginning of crash
+--------- beginning of system
+--------- beginning of main
+10-16 20:29:07.524 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault» записів=10 мс=277
+10-16 20:29:07.525 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=2 записів=14 мс_переліків=342 відкрито=0 мс_відкриття=0 не_знайдено=0
+10-16 20:29:07.738 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/modern-sections.json» мс=213
+10-16 20:29:12.628 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault» записів=10 мс=255
+10-16 20:29:12.628 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=4 записів=28 мс_переліків=685 відкрито=1 мс_відкриття=213 не_знайдено=0
+10-16 20:29:12.830 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir-index.json» мс=201
+10-16 20:29:12.984 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir» записів=2 мс=139
+10-16 20:29:12.984 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=5 записів=30 мс_переліків=824 відкрито=2 мс_відкриття=414 не_знайдено=0
+10-16 20:29:13.117 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir/sections» записів=1 мс=132
+10-16 20:29:13.117 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=6 записів=31 мс_переліків=956 відкрито=2 мс_відкриття=414 не_знайдено=0
+10-16 20:29:23.883 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir/sections/megane-ii-x84-b-c-s-nt8494-visu-v5-0» записів=330 мс=10766
+10-16 20:29:23.883 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=7 записів=361 мс_переліків=11722 відкрито=2 мс_відкриття=414 не_знайдено=0
+10-16 20:29:24.391 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir/sections/megane-ii-x84-b-c-s-nt8494-visu-v5-0/118.json» мс=502
+10-16 20:29:28.009 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«/» записів=4 мс=145
+10-16 20:29:28.009 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=8 записів=365 мс_переліків=11867 відкрито=3 мс_відкриття=916 не_знайдено=0
+10-16 20:29:28.383 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0» записів=3 мс=373
+10-16 20:29:28.383 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=9 записів=368 мс_переліків=12240 відкрито=3 мс_відкриття=916 не_знайдено=0
+10-16 20:29:28.650 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN» записів=4 мс=266
+10-16 20:29:28.650 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=10 записів=372 мс_переліків=12506 відкрито=3 мс_відкриття=916 не_знайдено=0
+10-16 20:29:28.840 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF» записів=4 мс=189
+10-16 20:29:28.840 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=11 записів=376 мс_переліків=12695 відкрито=3 мс_відкриття=916 не_знайдено=0
+10-16 20:29:46.851 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH» записів=523 мс=18010
+10-16 20:29:46.851 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=12 записів=899 мс_переліків=30705 відкрито=3 мс_відкриття=916 не_знайдено=0
+10-16 20:29:47.630 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» мс=773
+10-16 20:29:49.155 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» мс=1112
+10-16 20:29:49.831 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«/» записів=4 мс=204
+10-16 20:29:49.832 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=13 записів=903 мс_переліків=30909 відкрито=5 мс_відкриття=2801 не_знайдено=0
+10-16 20:29:50.733 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«renault-dataset.json» мс=900
+10-16 20:29:50.750 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=1182
+10-16 20:29:51.430 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» мс=254
+10-16 20:29:53.474 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/SCH/0057_A3.PDF» мс=1628
+10-16 20:30:01.984 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0» записів=3 мс=136
+10-16 20:30:01.984 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=15 записів=910 мс_переліків=31115 відкрито=8 мс_відкриття=5583 не_знайдено=0
+10-16 20:30:02.120 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN» записів=4 мс=135
+10-16 20:30:02.120 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=16 записів=914 мс_переліків=31250 відкрито=8 мс_відкриття=5583 не_знайдено=0
+10-16 20:30:02.270 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF» записів=4 мс=151
+10-16 20:30:02.271 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=17 записів=918 мс_переліків=31401 відкрито=8 мс_відкриття=5583 не_знайдено=0
+10-16 20:30:04.543 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC» записів=49 мс=2272
+10-16 20:30:04.544 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=18 записів=967 мс_переліків=33673 відкрито=8 мс_відкриття=5583 не_знайдено=0
+10-16 20:30:06.390 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S2.PDF» мс=1843
+10-16 20:30:07.964 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S2.PDF» мс=1279
+10-16 20:30:08.792 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«/» записів=4 мс=207
+10-16 20:30:08.793 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=19 записів=971 мс_переліків=33880 відкрито=10 мс_відкриття=8705 не_знайдено=0
+10-16 20:30:09.816 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«renault-dataset.json» мс=1021
+10-16 20:30:09.861 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=1347
+10-16 20:30:10.526 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S2.PDF» мс=228
+10-16 20:30:12.926 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/COMMUN/PDF/PC/S2.PDF» мс=1740
+10-16 20:30:18.031 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault» записів=10 мс=182
+10-16 20:30:18.031 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=21 записів=985 мс_переліків=34128 відкрито=13 мс_відкриття=11694 не_знайдено=0
+10-16 20:30:18.187 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir-index.json» мс=156
+10-16 20:30:18.317 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir» записів=2 мс=120
+10-16 20:30:18.317 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=22 записів=987 мс_переліків=34248 відкрито=14 мс_відкриття=11850 не_знайдено=0
+10-16 20:30:18.423 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir/documentation» записів=1 мс=106
+10-16 20:30:18.423 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=23 записів=988 мс_переліків=34354 відкрито=14 мс_відкриття=11850 не_знайдено=0
+10-16 20:30:18.592 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir/documentation/megane-ii-x84-b-c-s-nt8494-visu-v5-0.json» мс=169
+10-16 20:30:19.597 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«/» записів=4 мс=107
+10-16 20:30:19.597 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=24 записів=992 мс_переліків=34461 відкрито=15 мс_відкриття=12019 не_знайдено=0
+10-16 20:30:19.719 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0» записів=3 мс=121
+10-16 20:30:19.720 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=25 записів=995 мс_переліків=34582 відкрито=15 мс_відкриття=12019 не_знайдено=0
+10-16 20:30:19.848 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS» записів=2 мс=128
+10-16 20:30:19.848 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=26 записів=997 мс_переліків=34710 відкрито=15 мс_відкриття=12019 не_знайдено=0
+10-16 20:30:20.085 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT» записів=11 мс=237
+10-16 20:30:20.085 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=27 записів=1008 мс_переліків=34947 відкрито=15 мс_відкриття=12019 не_знайдено=0
+10-16 20:30:20.272 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=187
+10-16 20:30:21.360 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=927
+10-16 20:30:22.029 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=313
+10-16 20:30:22.607 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=193
+10-16 20:30:23.160 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=201
+10-16 20:30:24.025 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=537
+10-16 20:30:24.613 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=261
+10-16 20:30:25.174 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=253
+10-16 20:30:25.234 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«renault-dataset.json» мс=213
+10-16 20:30:25.241 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=306
+10-16 20:30:26.929 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=269
+10-16 20:30:29.238 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=1075
+10-16 20:30:30.894 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«Megane II X84(B,C,S) NT8494 Visu v5.0/RUS/DOCUMENT/PLATFUSI.PDF» мс=313
+10-16 20:30:33.612 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault» записів=10 мс=214
+10-16 20:30:33.613 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=30 записів=1026 мс_переліків=35294 відкрито=27 мс_відкриття=16761 не_знайдено=0
+10-16 20:30:33.769 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir-index.json» мс=156
+10-16 20:30:33.916 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir» записів=2 мс=137
+10-16 20:30:33.916 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=31 записів=1028 мс_переліків=35431 відкрито=28 мс_відкриття=16917 не_знайдено=0
+10-16 20:30:37.718 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault» записів=10 мс=220
+10-16 20:30:37.718 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=34 записів=1043 мс_переліків=35819 відкрито=28 мс_відкриття=16917 не_знайдено=0
+10-16 20:30:37.884 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir-index.json» мс=166
+10-16 20:30:38.055 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir» записів=2 мс=161
+10-16 20:30:38.055 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=35 записів=1045 мс_переліків=35980 відкрито=29 мс_відкриття=17083 не_знайдено=0
+10-16 20:30:38.166 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir/sections» записів=1 мс=111
+10-16 20:30:38.166 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=36 записів=1046 мс_переліків=36091 відкрито=29 мс_відкриття=17083 не_знайдено=0
+10-16 20:30:46.542 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir/sections/megane-ii-x84-b-c-s-nt8494-visu-v5-0» записів=330 мс=12529
+10-16 20:30:46.543 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=37 записів=1376 мс_переліків=48620 відкрито=29 мс_відкриття=17083 не_знайдено=0
+10-16 20:30:46.772 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir/sections/megane-ii-x84-b-c-s-nt8494-visu-v5-0/119.json» мс=226
+10-16 20:30:49.270 I/RenaultRead(16808): LIST том=megane-ii-nt8494 місце=карта папка=«_renault/runtime-ir/sections/megane-ii-x84-b-c-s-nt8494-visu-v5-0» записів=330 мс=11104
+10-16 20:30:49.271 I/RenaultRead(16808): SUM том=megane-ii-nt8494 місце=карта переліків=38 записів=1706 мс_переліків=59724 відкрито=30 мс_відкриття=17309 не_знайдено=0
+10-16 20:30:49.616 I/RenaultRead(16808): OPEN том=megane-ii-nt8494 місце=карта файл=«_renault/runtime-ir/sections/megane-ii-x84-b-c-s-nt8494-visu-v5-0/118.json» мс=340
+10-16 20:30:58.353 I/RenaultRead(16808): LIST том=megane-ii-nt8299a-2005-11-28 місце=телефон папка=«Megane II E,L,K 84_NT8299A_Visu v3.0_2005.11.28/COMMUN/PDF/SCH» записів=778 мс=193
+10-16 20:30:58.353 I/RenaultRead(16808): SUM том=megane-ii-nt8299a-2005-11-28 місце=телефон переліків=12 записів=1165 мс_переліків=306 відкрито=3 мс_відкриття=13 не_знайдено=0
+10-16 20:30:58.726 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=14
+10-16 20:31:06.598 I/RenaultRead(16808): LIST том=megane-ii-nt8299a-2005-11-28 місце=телефон папка=«Megane II E,L,K 84_NT8299A_Visu v3.0_2005.11.28/COMMUN/PDF/NM» записів=1283 мс=304
+10-16 20:31:06.598 I/RenaultRead(16808): SUM том=megane-ii-nt8299a-2005-11-28 місце=телефон переліків=18 записів=2467 мс_переліків=626 відкрито=7 мс_відкриття=29 не_знайдено=0
+10-16 20:31:06.903 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=8
+10-16 20:31:13.436 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=11
+10-16 20:31:19.056 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=13
+10-16 20:31:19.417 I/RenaultRead(16808): LIST том=megane-ii-nt8299a-2005-11-28 місце=телефон папка=«Megane II E,L,K 84_NT8299A_Visu v3.0_2005.11.28/COMMUN/PDF/NM» записів=1283 мс=270
+10-16 20:31:19.417 I/RenaultRead(16808): SUM том=megane-ii-nt8299a-2005-11-28 місце=телефон переліків=36 записів=4204 мс_переліків=1013 відкрито=16 мс_відкриття=65 не_знайдено=0
+10-16 20:31:28.881 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=12
+10-16 20:31:32.165 I/RenaultRead(16808): LIST том=megane-ii-nt8299a-2005-11-28 місце=телефон папка=«Megane II E,L,K 84_NT8299A_Visu v3.0_2005.11.28/COMMUN/PDF/SCH» записів=778 мс=161
+10-16 20:31:32.165 I/RenaultRead(16808): SUM том=megane-ii-nt8299a-2005-11-28 місце=телефон переліків=52 записів=5428 мс_переліків=1297 відкрито=23 мс_відкриття=101 не_знайдено=0
+10-16 20:31:32.514 I/RenaultRead(16808): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=11
+10-16 21:32:05.999 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=33
+10-16 21:32:14.046 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 21:32:24.148 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 21:32:40.628 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8494 архів=true скопійовано=false мс=5
+10-16 21:33:05.260 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=10
+10-16 21:33:12.682 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=3
+10-16 21:33:22.293 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=7
+10-16 21:33:25.936 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=4
+10-16 21:33:32.258 I/RenaultRead(24941): FAST тека=pkg:megane-ii-nt8299a-2005-11-28 архів=true скопійовано=false мс=3
