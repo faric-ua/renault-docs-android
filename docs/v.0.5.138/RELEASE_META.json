@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.138",
   "versionCode": 154,
-  "phase": "development",
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
   "branch": "perf/volume-quick-find-v0.5.138",
   "issues": [
     147
@@ -9,5 +9,17 @@
   "scope": "TODO №16 quick step (log 110): own-volume files found directly by known path (one file-system call, app-wide memory) instead of whole-folder listings; provider without canonical paths, one call per listed entry; files opened directly; Fast Pack descriptor remembered. Includes v0.5.137.",
   "sourceBase": "v0.5.137/build153",
   "phoneQa": "PENDING",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "pr_number": 352,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "d6117d10e12b8f2fe8f10e0e67cce9a4ce89d728",
+  "signed_run_id": 38942515018,
+  "signed_run_number": 208,
+  "signed_android_apk_run": 208,
+  "artifact_id": 12063333974,
+  "artifact_name": "Renault-Docs-v0.5.138-Debug",
+  "artifact_digest": "sha256:b334eff45e939e8a090d97be04c579c773f6503111e6f818dce4e1370053ba49",
+  "next": "M30s: 5 → 19 → 8 → 13 over v0.5.137; open NT8494 section 118 + same PDFs as log 110; Phone Diagnostics 33 → compare with log 110."
 }
