@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.5"
+PD_VERSION="2026-10-16.6"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -268,6 +268,9 @@ PAIRING
 38. Пункт 33 — Renault Docs: скільки часу йде на відкриття
     томів (з карти і з телефона). Спершу відкрий том і 2–3
     документи, потім цей пункт. НІЧОГО НЕ ЗМІНЮЄ.
+39. Пункт 34 — чому застосунок закрився сам: журнал падінь
+    Android і причина закриття. Запускати одразу після
+    закриття (до перезавантаження). НІЧОГО НЕ ЗМІНЮЄ.
 
 ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
 34. Пункт 26 — зберегти застосунок з підключеного
@@ -1525,6 +1528,49 @@ app_compile_speed() {
 }
 # app_compile_speed end
 
+app_crash_report() {
+  # 2026-10-16 12:29 (faric, M30s, Audio Converter 0.6.0): після «Стоп» застосунок
+  # закривається сам, хоча в списку недавніх лишається. У коді немає finish() —
+  # схоже на падіння. Журнал падінь Android (logcat -b crash) живе до перезавантаження.
+  # Лише читає.
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local pkg pid
+  pkg="$(pick_faric_app)"
+  new_log "34" "app-crash" "Чому закрився застосунок: $pkg"
+  echo "Збираю журнал падінь. Нічого не змінюю."
+  echo
+  pid="$(adb -s "$ADB_TARGET" shell pidof "$pkg" 2>/dev/null | tr -d '\r' | awk '{print $1}')"
+  {
+    echo "Пакет: $pkg"
+    echo "Зараз запущений: ${pid:-ні}"
+    echo "Версія: $(adb -s "$ADB_TARGET" shell dumpsys package "$pkg" 2>/dev/null | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
+    echo
+    echo "=== Журнал падінь (crash) — лише цей застосунок ==="
+    adb -s "$ADB_TARGET" logcat -d -b crash -v time 2>&1 | grep -A 40 -E "Process: $pkg|$pkg" | tail -n 160
+    echo
+    echo "=== Помилки Android про цей застосунок (ANR, «зупинено», вбито) ==="
+    adb -s "$ADB_TARGET" logcat -d -b main,system -v time -t 20000 2>&1 \
+      | grep -E "$pkg" \
+      | grep -i -E "FATAL|ANR|crash|died|Force stopping|Killing|kill|has died|Exception|finish|lowmemory|onTrimMemory" \
+      | tail -n 80
+    echo
+    echo "=== Останні записи самого застосунку ==="
+    if [ -n "$pid" ]; then
+      adb -s "$ADB_TARGET" logcat -d -v time --pid="$pid" -t 3000 2>&1 | tail -n 60
+    else
+      echo "(застосунок зараз не запущений — дивись блоки вище)"
+    fi
+    echo
+    echo "=== Закриття з причиною (Android 11+) ==="
+    adb -s "$ADB_TARGET" shell dumpsys activity exit-info "$pkg" 2>/dev/null | head -n 60
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Готово. Надішли цей файл у чат (шлях — нижче)."
+  pause_menu
+}
+# app_crash_report end
+
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
 # Вужчий екран — проста шапка одним рядком.
@@ -1587,6 +1633,7 @@ while true; do
   echo "31 — Що роблять потоки застосунку (ядра, пріоритет) → файл"
   echo "32 — Прискорити застосунок (машинний код; звук і дані ті самі)"
   echo "33 — Renault Docs: заміри читання томів → файл (нічого не змінює)"
+  echo "34 — Чому закрився застосунок (журнал падінь) → файл"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1626,6 +1673,7 @@ while true; do
     31) app_threads_report ;;
     32) app_compile_speed ;;
     33) renault_read_timing ;;
+    34) app_crash_report ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
