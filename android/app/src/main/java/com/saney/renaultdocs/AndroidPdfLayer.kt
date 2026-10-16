@@ -4,10 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.util.Log
 import android.util.LruCache
 import android.webkit.WebResourceResponse
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.Locale
 import org.json.JSONObject
 
@@ -19,6 +22,8 @@ class AndroidPdfLayer(
     private val viewerStateScope: String = "main",
     private val companionControlEnabled: Boolean = false,
     private val compactMode: Boolean = false,
+    /** v0.5.139: the app's cache folder for drawn pages; null — no disk cache. */
+    pageCacheDir: File? = null,
 ) {
     private val initialZoomPercent =
         // v0.5.119 (owner): maximum 500% (was 400%).
@@ -2197,6 +2202,16 @@ class AndroidPdfLayer(
                 return imageResponse(it)
             }
 
+        // v0.5.139: pages drawn before are kept in phone memory too ([PdfPageDiskCache]);
+        // the key changes when the PDF itself changes (size and time).
+        val diskKey = diskCacheKey(path, pageIndex, width)
+        if (diskKey != null) {
+            pageDiskCache?.get(diskKey)?.let {
+                sharedImageCache.put(cacheKey, it)
+                return imageResponse(it)
+            }
+        }
+
         val bytes = synchronized(
             sharedRenderLock,
         ) {
@@ -2213,6 +2228,7 @@ class AndroidPdfLayer(
                         cacheKey,
                         it,
                     )
+                    if (diskKey != null) pageDiskCache?.put(diskKey, it)
                 }
         } ?: return textError(
             "PDF page render failed.",
@@ -2221,111 +2237,153 @@ class AndroidPdfLayer(
         return imageResponse(bytes)
     }
 
+    private val pageDiskCache: PdfPageDiskCache? =
+        pageCacheDir?.let { PdfPageDiskCache(File(it, PdfPageDiskCache.DIR_NAME)) }
+
+    /** Only for our own volumes, where the file's size and time are known in one call. */
+    private fun diskCacheKey(
+        path: String,
+        pageIndex: Int,
+        width: Int,
+    ): String? {
+        if (pageDiskCache == null) return null
+        val file = runCatching { resolver.resolve(path)?.file }.getOrNull() ?: return null
+        val attributes = VolumeFileIndex.attributes(file) ?: return null
+        return PdfPageDiskCache.key(cacheNamespace, path, attributes.size, attributes.lastModified, pageIndex, width)
+    }
+
+    private fun logRead(line: String) {
+        runCatching { Log.i(VolumeReadStats.TAG, line) }
+    }
+
+    /**
+     * v0.5.139: the PDF stays open while it is viewed ([openPdf]) — before, every page and
+     * every width opened the file again (PLATFUSI.PDF — 11 times in log 110).
+     */
     private fun readInfo(
         path: String,
-    ): PdfInfo? {
+    ): PdfInfo? =
+        synchronized(sharedRenderLock) {
+            runCatching {
+                val opened = openPdf(path) ?: return@runCatching null
+                val renderer = opened.renderer
+                if (
+                    renderer.pageCount <= 0
+                ) {
+                    null
+                } else {
+                    renderer.openPage(
+                        0,
+                    ).use { page ->
+                        PdfInfo(
+                            pageCount =
+                                renderer.pageCount,
+                            firstPageWidth =
+                                page.width,
+                            firstPageHeight =
+                                page.height,
+                        )
+                    }
+                }
+            }.getOrNull()
+        }
+
+    /** Called under [sharedRenderLock]. */
+    private fun openPdf(
+        path: String,
+    ): OpenPdf? {
+        val key = "$cacheNamespace|$path"
+        openPdfs.remove(key)?.let {
+            // Re-insert: the most recently used stays last.
+            openPdfs[key] = it
+            return it
+        }
+        val started = SystemClock.elapsedRealtime()
         val pfd = resolver
             .openFileDescriptor(path)
             ?: return null
-
-        return runCatching {
-            pfd.use { descriptor ->
-                PdfRenderer(
-                    descriptor,
-                ).use { renderer ->
-                    if (
-                        renderer.pageCount <= 0
-                    ) {
-                        null
-                    } else {
-                        renderer.openPage(
-                            0,
-                        ).use { page ->
-                            PdfInfo(
-                                pageCount =
-                                    renderer.pageCount,
-                                firstPageWidth =
-                                    page.width,
-                                firstPageHeight =
-                                    page.height,
-                            )
-                        }
-                    }
-                }
+        val renderer =
+            runCatching { PdfRenderer(pfd) }.getOrElse {
+                runCatching { pfd.close() }
+                return null
             }
-        }.getOrNull()
+        val opened = OpenPdf(pfd, renderer)
+        openPdfs[key] = opened
+        while (openPdfs.size > MAX_OPEN_PDFS) {
+            val eldestKey = openPdfs.keys.first()
+            openPdfs.remove(eldestKey)?.close()
+        }
+        logRead("PDF відкрито файл=«$path» сторінок=${renderer.pageCount} мс=${SystemClock.elapsedRealtime() - started}")
+        return opened
     }
 
+    /** Called under [sharedRenderLock] (PdfRenderer allows one page at a time). */
     private fun renderPage(
         path: String,
         pageIndex: Int,
         width: Int,
-    ): ByteArray? {
-        val pfd = resolver
-            .openFileDescriptor(path)
-            ?: return null
+    ): ByteArray? =
+        runCatching {
+            val opened = openPdf(path) ?: return@runCatching null
+            val renderer = opened.renderer
+            if (
+                pageIndex !in
+                0 until renderer.pageCount
+            ) {
+                return@runCatching null
+            }
+            renderer.openPage(
+                pageIndex,
+            ).use { page ->
+                val height =
+                    (
+                        width.toDouble() *
+                            page.height /
+                            page.width
+                    )
+                        .toInt()
+                        .coerceAtLeast(1)
 
-        return runCatching {
-            pfd.use { descriptor ->
-                PdfRenderer(
-                    descriptor,
-                ).use { renderer ->
-                    if (
-                        pageIndex !in
-                        0 until renderer.pageCount
-                    ) {
-                        null
-                    } else {
-                        renderer.openPage(
-                            pageIndex,
-                        ).use { page ->
-                            val height =
-                                (
-                                    width.toDouble() *
-                                        page.height /
-                                        page.width
-                                )
-                                    .toInt()
-                                    .coerceAtLeast(1)
+                val bitmap =
+                    Bitmap.createBitmap(
+                        width,
+                        height,
+                        Bitmap.Config.ARGB_8888,
+                    )
 
-                            val bitmap =
-                                Bitmap.createBitmap(
-                                    width,
-                                    height,
-                                    Bitmap.Config.ARGB_8888,
-                                )
+                try {
+                    bitmap.eraseColor(
+                        Color.WHITE,
+                    )
 
-                            try {
-                                bitmap.eraseColor(
-                                    Color.WHITE,
-                                )
+                    val drawStarted = SystemClock.elapsedRealtime()
+                    page.render(
+                        bitmap,
+                        null,
+                        null,
+                        PdfRenderer.Page
+                            .RENDER_MODE_FOR_DISPLAY,
+                    )
+                    val drawMs = SystemClock.elapsedRealtime() - drawStarted
 
-                                page.render(
-                                    bitmap,
-                                    null,
-                                    null,
-                                    PdfRenderer.Page
-                                        .RENDER_MODE_FOR_DISPLAY,
-                                )
-
-                                ByteArrayOutputStream()
-                                    .use { out ->
-                                        bitmap.compress(
-                                            Bitmap.CompressFormat.PNG,
-                                            100,
-                                            out,
-                                        )
-                                        out.toByteArray()
-                                    }
-                            } finally {
-                                bitmap.recycle()
-                            }
+                    // v0.5.139: the same lossless PNG, RGB with the fastest zlib level, in
+                    // stripes ([FastPngEncoder]) instead of Bitmap.compress(PNG).
+                    val encodeStarted = SystemClock.elapsedRealtime()
+                    val bytes =
+                        FastPngEncoder.encodeRows(width, height) { y, rows, out ->
+                            bitmap.getPixels(out, 0, width, 0, y, width, rows)
                         }
-                    }
+                    val encodeMs = SystemClock.elapsedRealtime() - encodeStarted
+                    logRead(
+                        "СТОРІНКА файл=«$path» стор=${pageIndex + 1} ширина=$width " +
+                            "мс_малювання=$drawMs мс_стиснення=$encodeMs байт=${bytes.size}",
+                    )
+                    bytes
+                } finally {
+                    bitmap.recycle()
                 }
             }
         }.getOrNull()
-    }
 
     private fun imageResponse(
         bytes: ByteArray,
@@ -2422,9 +2480,38 @@ class AndroidPdfLayer(
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
 
+    private class OpenPdf(
+        val pfd: ParcelFileDescriptor,
+        val renderer: PdfRenderer,
+    ) {
+        fun close() {
+            runCatching { renderer.close() }
+            runCatching { pfd.close() }
+        }
+    }
+
     companion object {
         private val sharedRenderLock =
             Any()
+
+        /** At most this many PDFs stay open (main viewer + «Документація поруч»). */
+        private const val MAX_OPEN_PDFS = 2
+
+        /** Guarded by [sharedRenderLock]; the least recently used is closed first. */
+        private val openPdfs =
+            LinkedHashMap<String, OpenPdf>()
+
+        init {
+            // A volume installed again: its open PDFs point at old files — close them.
+            VolumeFileIndex.onForget { packageId ->
+                val tree = LocalDatasetDocumentsProvider.treeUriFor(packageId).toString()
+                synchronized(sharedRenderLock) {
+                    openPdfs.keys.filter { it.startsWith(tree) }.forEach { key ->
+                        openPdfs.remove(key)?.close()
+                    }
+                }
+            }
+        }
 
         private val sharedImageCache =
             object :

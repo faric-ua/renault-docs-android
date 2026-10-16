@@ -10,8 +10,11 @@ class V0524PdfViewerQualityCacheContractTests(unittest.TestCase):
             / "android/app/src/main/java/com/saney/renaultdocs/AndroidPdfLayer.kt"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("Bitmap.CompressFormat.PNG", pdf)
+        # v0.5.139: still lossless PNG, written by FastPngEncoder (RGB, fastest zlib
+        # level) instead of Bitmap.compress(PNG) — same pixels, much less time.
+        self.assertIn("FastPngEncoder.encodeRows(", pdf)
         self.assertNotIn("Bitmap.CompressFormat.JPEG", pdf)
+        self.assertNotIn("CompressFormat.WEBP", pdf)
         self.assertIn('"image/png"', pdf)
         self.assertIn("Math.min(\n                      2.5,", pdf)
         self.assertIn("3000", pdf)

@@ -79,6 +79,9 @@ class SafDatasetWebViewClient(
                 pdfCompanionControlEnabled,
             compactMode =
                 pdfCompactMode,
+            // v0.5.139: drawn pages are kept in the app's own cache (phone memory).
+            pageCacheDir =
+                context.applicationContext.cacheDir,
         )
 
     private val fastArchive =
