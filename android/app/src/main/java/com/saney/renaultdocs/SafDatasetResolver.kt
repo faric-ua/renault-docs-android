@@ -7,6 +7,8 @@ import android.provider.DocumentsContract
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.util.Log
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -21,6 +23,8 @@ class SafDatasetResolver(
         val documentId: String,
         val mimeType: String,
         val uri: Uri,
+        /** v0.5.138: the file itself, for volumes of our own provider (opened directly). */
+        val file: File? = null,
     ) {
         val isDirectory: Boolean
             get() = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
@@ -79,6 +83,13 @@ class SafDatasetResolver(
         }
     }
 
+    /** The tree may address a folder inside the volume (`pkg:<id>/<sub>`): that folder. */
+    private val ownSubPath: String by lazy {
+        val id = ownPackageId ?: return@lazy ""
+        val tail = rootDocumentId.removePrefix("pkg:").removePrefix(id).trimStart('/', ':')
+        normalize(tail).orEmpty()
+    }
+
     private val statsVolume: String by lazy {
         ownPackageId ?: if (treeUri.authority == LocalDatasetDocumentsProvider.authority) rootDocumentId else "saf"
     }
@@ -87,6 +98,46 @@ class SafDatasetResolver(
         VolumeReadStats.placeLabel(
             ownPackageId?.let { runCatching { VolumeStorage.placeOf(appContext, it) }.getOrNull() },
         )
+    }
+
+    /**
+     * v0.5.138 (log 110, M30s): our own volumes have known paths, so a file is checked
+     * directly — one file-system call — instead of listing every folder on the way
+     * (330 entries took 11–12.5 s on the memory card). Shared by the whole app
+     * ([VolumeFileIndex]). Null — not our volume, or not found exactly; the old
+     * listing (which also matches a different letter case) is used then.
+     */
+    private fun directNode(normalized: String): Node? {
+        val packageId = ownPackageId ?: return null
+        // Cached per tree: the same file reached through a sub-folder tree has another uri.
+        val cacheKey = rootDocumentId + "|" + normalized
+        VolumeFileIndex.nodeCached<Node>(packageId, cacheKey)?.let { return it }
+        val inVolume =
+            when {
+                ownSubPath.isBlank() -> normalized
+                normalized.isBlank() -> ownSubPath
+                else -> "$ownSubPath/$normalized"
+            }
+        val root =
+            VolumeFileIndex.root(packageId) {
+                runCatching {
+                    LocalDatasetDocumentsProvider.packageDirectory(appContext, packageId)
+                }.getOrNull()?.takeIf { it.isDirectory }
+            } ?: return null
+        val file = VolumeFileIndex.fileIn(root, inVolume)
+        val attributes = VolumeFileIndex.attributes(file) ?: return null
+        val documentId = LocalDatasetDocumentsProvider.documentId(packageId, inVolume)
+        val node =
+            Node(
+                relativePath = normalized,
+                name = if (normalized.isBlank()) "" else normalized.substringAfterLast('/'),
+                documentId = documentId,
+                mimeType = LocalDatasetDocumentsProvider.mimeTypeFor(file.name, attributes.isDirectory),
+                uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId),
+                file = file,
+            )
+        VolumeFileIndex.rememberNode(packageId, cacheKey, node)
+        return node
     }
 
     private fun timedOpen(
@@ -126,6 +177,11 @@ class SafDatasetResolver(
 
         if (normalized in missingPaths) {
             return null
+        }
+
+        directNode(normalized)?.let {
+            nodeCache[normalized] = it
+            return it
         }
 
         if (normalized.isBlank()) {
@@ -183,19 +239,25 @@ class SafDatasetResolver(
         relativePath: String,
     ): InputStream? =
         timedOpen(relativePath) { node ->
-            contentResolver.openInputStream(
-                node.uri,
-            )
+            // v0.5.138: our own volume — open the file directly, without a round trip
+            // through the provider (which found the volume and the path again).
+            node.file?.let { runCatching { FileInputStream(it) }.getOrNull() }
+                ?: contentResolver.openInputStream(
+                    node.uri,
+                )
         } as InputStream?
 
     fun openFileDescriptor(
         relativePath: String,
     ): ParcelFileDescriptor? =
         timedOpen(relativePath) { node ->
-            contentResolver.openFileDescriptor(
-                node.uri,
-                "r",
-            )
+            node.file?.let {
+                runCatching { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) }.getOrNull()
+            }
+                ?: contentResolver.openFileDescriptor(
+                    node.uri,
+                    "r",
+                )
         } as ParcelFileDescriptor?
 
     private fun directoryIndex(

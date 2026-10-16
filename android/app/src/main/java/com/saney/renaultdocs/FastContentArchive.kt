@@ -57,6 +57,17 @@ class FastContentArchive private constructor(
         private val preparationLock =
             Any()
 
+        private val descriptors =
+            java.util.concurrent.ConcurrentHashMap<String, Descriptor>()
+
+        init {
+            // A volume installed again may carry another Fast Pack.
+            VolumeFileIndex.onForget { packageId ->
+                val tree = LocalDatasetDocumentsProvider.treeUriFor(packageId).toString()
+                descriptors.keys.removeAll { it == tree || it.startsWith(tree) }
+            }
+        }
+
         fun prepare(
             context: Context,
             treeUri: Uri,
@@ -68,9 +79,15 @@ class FastContentArchive private constructor(
                         treeUri = treeUri,
                     )
 
+                // v0.5.138 (log 110): reading renault-dataset.json from the memory card
+                // took 0.2–1 s on every document; the descriptor is remembered per volume.
+                val cacheKey = treeUri.toString()
                 val descriptor =
-                    readDescriptor(
-                        resolver,
+                    (
+                        descriptors[cacheKey]
+                            ?: readDescriptor(
+                                resolver,
+                            )?.also { descriptors[cacheKey] = it }
                     )
                         ?: return@runCatching PrepareResult(
                             archive = null,

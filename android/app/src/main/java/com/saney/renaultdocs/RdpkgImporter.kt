@@ -219,6 +219,9 @@ object RdpkgImporter {
                     ) {
                         "Не вдалося підготувати оновлення встановленого пакета."
                     }
+                    VolumeFileIndex.forget(
+                        packageMetadata.packageId,
+                    )
                 }
 
                 var activated =
@@ -235,6 +238,11 @@ object RdpkgImporter {
 
                     activated =
                         true
+
+                    // v0.5.138: forget the remembered folder and files of this volume.
+                    VolumeFileIndex.forget(
+                        packageMetadata.packageId,
+                    )
 
                     VolumeStorage.rememberPlace(
                         appContext,
@@ -296,6 +304,10 @@ object RdpkgImporter {
                         finalDirectory
                             .deleteRecursively()
                     }
+
+                    VolumeFileIndex.forget(
+                        packageMetadata.packageId,
+                    )
 
                     if (
                         backupDirectory.exists()
