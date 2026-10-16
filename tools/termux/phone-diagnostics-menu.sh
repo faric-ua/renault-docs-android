@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.7"
+PD_VERSION="2026-10-16.8"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -273,8 +273,9 @@ PAIRING
     закриття (до перезавантаження). НІЧОГО НЕ ЗМІНЮЄ.
 
 ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
-34. Пункт 26 — зберегти застосунок з підключеного
-    телефона: УСІ частини APK (base + split_*) у
+34. Пункт 26 — зберегти застосунок: з ЦЬОГО телефона
+    (Enter) або з підключеного пунктом 4 (вибір 2).
+    УСІ частини APK (base + split_*) у
     Documents/PhoneDiagnostics/apk/ + один файл .apks
     для чужого телефона (ставиться застосунком SAI
     з Play Маркету). Нічого не змінює.
@@ -987,18 +988,35 @@ APK_DIR="$BASE_DIR/apk"
 
 save_app_apks() {
   clear
-  if ! require_connection; then pause_menu; return; fi
 
-  local pattern list pkg answer n i version dir paths path saved=0
-  echo "Зберегти застосунок з телефона: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
+  local pattern list pkg answer n i version dir paths path saved=0 here
+  here="$(getprop ro.product.model 2>/dev/null)"
+  echo "Звідки взяти застосунок?"
+  echo "  1) Цей телефон — ${here:-цей}   (Enter)"
+  echo "  2) Підключений по Wi-Fi (M30s чи інший; спершу пункт 4)"
+  printf "Номер (Enter = 1): "
+  read -r answer
+  case "${answer:-1}" in
+    1) SRC="local" ;;
+    2) SRC="adb"
+       if ! require_connection; then pause_menu; return; fi ;;
+    *) echo "Скасовано."; pause_menu; return ;;
+  esac
+
+  echo
+  echo "Зберегти застосунок з телефона: $(src_model)"
   echo
   printf "Що шукати в назві пакета (Enter = bms|lith): "
   read -r pattern
   pattern="${pattern:-bms|lith}"
 
-  list="$(adb -s "$ADB_TARGET" shell pm list packages -3 2>/dev/null | tr -d '\r' | sed 's/^package://' | grep -i -E "$pattern" | sort)"
+  list="$(src_run "pm list packages -3" | tr -d '\r' | sed 's/^package://' | grep -i -E "$pattern" | sort)"
   if [ -z "$list" ]; then
     echo "Нічого не знайдено за «$pattern»."
+    if [ "$SRC" = "local" ]; then
+      echo "Якщо застосунок точно є: Android міг не дати Termux список застосунків."
+      echo "Тоді з'єднай цей телефон сам із собою (пункти 3 і 4) і вибери 2."
+    fi
     pause_menu
     return
   fi
@@ -1007,7 +1025,7 @@ save_app_apks() {
   i=0
   while IFS= read -r pkg; do
     i=$((i + 1))
-    version="$(adb -s "$ADB_TARGET" shell dumpsys package "$pkg" 2>/dev/null | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
+    version="$(src_version "$pkg")"
     echo "  $i) $pkg  (версія ${version:-?})"
   done <<EOF2
 $list
@@ -1019,24 +1037,29 @@ EOF2
   pkg="$(printf '%s\n' "$list" | sed -n "${n}p")"
   if [ -z "$pkg" ]; then echo "Нема такого номера."; pause_menu; return; fi
 
-  version="$(adb -s "$ADB_TARGET" shell dumpsys package "$pkg" 2>/dev/null | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
+  version="$(src_version "$pkg")"
   dir="$APK_DIR/${pkg}_v${version:-unknown}"
   mkdir -p "$dir"
   new_log "26" "save-apk" "Зберегти застосунок $pkg"
 
-  paths="$(adb -s "$ADB_TARGET" shell pm path "$pkg" 2>/dev/null | tr -d '\r' | sed 's/^package://')"
+  paths="$(src_run "pm path $pkg" | tr -d '\r' | sed 's/^package://')"
   {
     echo "Пакет: $pkg"
     echo "Версія: ${version:-?}"
-    echo "Телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
-    echo "Android: $(adb -s "$ADB_TARGET" shell getprop ro.build.version.release)"
+    echo "Телефон: $(src_model)"
+    echo "Android: $(src_run 'getprop ro.build.version.release' | tr -d '\r')"
     echo "Частини:"
     printf '%s\n' "$paths"
   } | tee -a "$CURRENT_LOG" > "$dir/info.txt"
 
   while IFS= read -r path; do
     [ -n "$path" ] || continue
-    if adb -s "$ADB_TARGET" pull "$path" "$dir/$(basename "$path")" >> "$CURRENT_LOG" 2>&1; then
+    if [ "$SRC" = "local" ]; then
+      cp "$path" "$dir/$(basename "$path")" >> "$CURRENT_LOG" 2>&1
+    else
+      adb -s "$ADB_TARGET" pull "$path" "$dir/$(basename "$path")" >> "$CURRENT_LOG" 2>&1
+    fi
+    if [ $? -eq 0 ]; then
       saved=$((saved + 1))
       echo "ГОТОВО: $(basename "$path")" | tee -a "$CURRENT_LOG"
     else
@@ -1049,6 +1072,9 @@ EOF2
   echo | tee -a "$CURRENT_LOG"
   if [ "$saved" -eq 0 ]; then
     echo "НЕ ВИЙШЛО: телефон не віддав жодної частини APK." | tee -a "$CURRENT_LOG"
+    if [ "$SRC" = "local" ]; then
+      echo "Спробуй через Wi-Fi: з'єднай цей телефон сам із собою (пункти 3 і 4) і вибери 2." | tee -a "$CURRENT_LOG"
+    fi
     pause_menu
     return
   fi
@@ -1073,6 +1099,39 @@ EOF2
     echo "Файл .apks не вийшов (нема zip). Частини лежать у папці вище." | tee -a "$CURRENT_LOG"
   fi
   pause_menu
+}
+
+# 2026-10-16 (faric): «за замовчуванням — цей телефон (A26), а якщо що — можна
+# вибрати M30s». Aolithium стоїть і на A26, де працює саме меню, тож для нього
+# не треба з'єднувати A26 «сам із собою» по Wi-Fi: Termux бачить список
+# застосунків (pm) і може прочитати їхні APK напряму.
+# SRC = local (цей телефон) або adb (підключений пунктом 4).
+src_run() {
+  if [ "$SRC" = "local" ]; then
+    sh -c "$1" 2>/dev/null
+  else
+    adb -s "$ADB_TARGET" shell "$1" 2>/dev/null
+  fi
+}
+
+src_model() {
+  if [ "$SRC" = "local" ]; then
+    getprop ro.product.model 2>/dev/null
+  else
+    adb -s "$ADB_TARGET" shell getprop ro.product.model 2>/dev/null | tr -d '\r'
+  fi
+}
+
+# Версія: dumpsys (лише через ADB); на цьому телефоні — номер збірки з pm.
+src_version() {
+  local v code
+  v="$(src_run "dumpsys package $1" | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
+  if [ -z "$v" ]; then
+    code="$(src_run "pm list packages --show-versioncode $1" | tr -d '\r' \
+      | grep "^package:$1 " | sed -n 's/.*versionCode://p' | head -n 1)"
+    [ -n "$code" ] && v="build$code"
+  fi
+  printf '%s' "$v"
 }
 
 install_saved_app() {
@@ -1637,7 +1696,7 @@ while true; do
   echo "23 — Приспати рідко вживані застосунки"
   echo "24 — Розбудити застосунки з пункту 23"
   echo "25 — Що надсилає «Відкрити за допомогою» → файл"
-  echo "26 — Зберегти застосунок (усі частини APK) з телефона"
+  echo "26 — Зберегти застосунок (усі частини APK): цей телефон або підключений"
   echo "27 — Поставити збережений застосунок на телефон"
   echo "28 — Що робить сканер медіа → файл (нічого не змінює)"
   echo "29 — Галерея: прибрати папки з .nomedia (файли не чіпає)"
