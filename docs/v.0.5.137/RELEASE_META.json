@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.137",
   "versionCode": 153,
-  "phase": "development",
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
   "branch": "feat/import-batch-v0.5.137",
   "issues": [
     147
@@ -9,5 +9,17 @@
   "scope": "TODO №11 «Скасувати» in the import notification; №12 .nomedia in the card volumes folder; №13 invisible volume recovered without unpacking again; №15 two labelled bars (overall by volumes + current volume); №16 stage 0 — read timing in logcat (tag RenaultRead) + Phone Diagnostics item 33. Includes v0.5.136.",
   "sourceBase": "v0.5.136/build152",
   "phoneQa": "PENDING",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "pr_number": 342,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "8e8c3f1872b1eb030c9d4d8c51f641920a5d8093",
+  "signed_run_id": 38841396697,
+  "signed_run_number": 207,
+  "signed_android_apk_run": 207,
+  "artifact_id": 12021502531,
+  "artifact_name": "Renault-Docs-v0.5.137-Debug",
+  "artifact_digest": "sha256:21f8642f86b62a084fe132fe46cb43ee989b1522090b2b70d9a3631317e2aa4b",
+  "next": "M30s: 5 → 19 → 8 → 13, install over v0.5.135; open a card volume + 2–3 documents, then a phone volume; Phone Diagnostics 33 → log file."
 }
