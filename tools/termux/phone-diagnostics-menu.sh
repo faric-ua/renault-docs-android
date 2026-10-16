@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.3"
+PD_VERSION="2026-10-16.4"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1352,6 +1352,23 @@ crypto_prices() {
 }
 # crypto_prices end
 
+pick_faric_app() {
+  # 2026-10-16 (faric, лог 096): друкувати назву пакета на телефоні незручно —
+  # Enter залишав Audio Converter, хоча треба було Track Catcher. Тепер номер.
+  local choice
+  echo "Який застосунок?" >&2
+  echo "  1 — Audio Converter" >&2
+  echo "  2 — Track Catcher" >&2
+  echo "  або напиши назву пакета (напр. com.saney.renaultdocs)" >&2
+  printf "Вибір (Enter = 1): " >&2
+  read -r choice
+  case "$choice" in
+    ""|1) echo "ua.faric.audioconverter" ;;
+    2) echo "ua.faric.trackcatcher" ;;
+    *) echo "$choice" ;;
+  esac
+}
+
 app_threads_report() {
   # 2026-10-16 (faric, M30s): Audio Converter кодує MP3 ~4 с на 1 % смуги
   # (≈ пісня за реальний час), хоча процес бере 2+ ядра. Після перезавантаження
@@ -1360,10 +1377,7 @@ app_threads_report() {
   clear
   if ! require_connection; then pause_menu; return; fi
   local pkg
-  echo "Який застосунок дивитись? Enter = Audio Converter (ua.faric.audioconverter)."
-  printf "Пакет: "
-  read -r pkg
-  [ -n "$pkg" ] || pkg="ua.faric.audioconverter"
+  pkg="$(pick_faric_app)"
   new_log "31" "app-threads" "Потоки застосунку: $pkg"
   echo "Збираю дані ~15 секунд. Нічого не змінюю."
   echo "Краще запускати, поки застосунок саме працює (напр. кодує)."
@@ -1434,11 +1448,7 @@ app_compile_speed() {
   echo "Звук і результат — ті самі. Дані застосунку НЕ чіпаються."
   echo "Після оновлення застосунку — повторити цей пункт."
   echo
-  echo "Який застосунок? Enter = Audio Converter (ua.faric.audioconverter)."
-  echo "Track Catcher — ua.faric.trackcatcher."
-  printf "Пакет: "
-  read -r pkg
-  [ -n "$pkg" ] || pkg="ua.faric.audioconverter"
+  pkg="$(pick_faric_app)"
   if ! adb -s "$ADB_TARGET" shell pm path "$pkg" >/dev/null 2>&1; then
     echo "Застосунку $pkg на підключеному телефоні немає."
     pause_menu
