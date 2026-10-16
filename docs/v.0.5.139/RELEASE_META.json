@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.139",
   "versionCode": 155,
-  "phase": "development",
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
   "branch": "perf/pdf-pages-v0.5.139",
   "issues": [
     147
@@ -9,5 +9,17 @@
   "scope": "PDF pages faster (owner 21:37–21:44 «хотів би ще швидше»): PDF kept open while viewed (no reopen per page/width), lossless PNG via FastPngEncoder (RGB, fastest zlib, stripes) instead of Bitmap.compress(PNG), drawn pages kept in app cache on phone memory (≤200 MB, key includes PDF size/time), timings in logcat (PDF відкрито / СТОРІНКА). Includes v0.5.138.",
   "sourceBase": "v0.5.138/build154",
   "phoneQa": "PENDING",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "pr_number": 358,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS (2nd run; 1st failed: test used javax.imageio)",
+  "signed_apk": "PASS",
+  "source_sha": "d84af16b40c9ba16cc35f2376c8caaf535f1d3a4",
+  "signed_run_id": 38950943724,
+  "signed_run_number": 209,
+  "signed_android_apk_run": 209,
+  "artifact_id": 12067967680,
+  "artifact_name": "Renault-Docs-v0.5.139-Debug",
+  "artifact_digest": "sha256:b67526768637d7fd46dee7d119a223ecf439129f38af5ef15b90d86c836aa546",
+  "next": "M30s: install over v0.5.138; open PDFs 0057_A3, S2, PLATFUSI twice (second time from the page cache); PHONE DIAGNOSTICS: 18 → 33."
 }
