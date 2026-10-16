@@ -201,6 +201,52 @@ object RdpkgExporter {
             )
         }
 
+    /**
+     * v0.5.142: the volume archive (archives plan v2, stage 1) — same checks as [export], but
+     * written by [VolumeArchiveWriter] (every entry STORED, no compressor; see there why) into
+     * a plain file of the app's own folder.
+     */
+    fun exportArchive(
+        context: Context,
+        volume: ProjectVolumeRecord,
+        target: File,
+        progressState: ((OperationProgress) -> Unit)? = null,
+    ): Result<ExportResult> =
+        runCatching {
+            val appContext = context.applicationContext
+            val packageId =
+                LocalDatasetDocumentsProvider.packageIdFromTreeUri(Uri.parse(volume.treeUri))
+                    ?: error("Архів доступний лише для тому, встановленого з .rdpkg.")
+            val sourceRoot =
+                LocalDatasetDocumentsProvider.packageDirectory(appContext, packageId).canonicalFile
+            require(sourceRoot.isDirectory) { "Встановлений пакет не знайдено: " + packageId }
+            progressState?.invoke(OperationProgress.indeterminate("Перевіряю…"))
+            validateManagedPackage(sourceRoot = sourceRoot, packageId = packageId)
+            val written =
+                VolumeArchiveWriter.write(
+                    sourceRoot = sourceRoot,
+                    target = target,
+                    progress = { filesDone, filesTotal, bytesDone, bytesTotal ->
+                        progressState?.invoke(
+                            OperationProgress.weightedItemsAndBytes(
+                                stage = "Пакую том…",
+                                itemsDone = filesDone,
+                                itemsTotal = filesTotal,
+                                bytesDone = bytesDone,
+                                bytesTotal = bytesTotal,
+                                itemLabel = "Файлів",
+                            ),
+                        )
+                    },
+                )
+            ExportResult(
+                packageId = packageId,
+                fileCount = written.fileCount,
+                sourceBytes = written.sourceBytes,
+                sha256 = written.sha256,
+            )
+        }
+
     private fun validateManagedPackage(
         sourceRoot: File,
         packageId: String,

@@ -262,6 +262,49 @@ class VolumeArchiveTest {
         assertEquals(5_000L, own.single().length())
     }
 
+    @Test
+    fun storedWriterMakesAnArchiveThatPassesTheCheck() {
+        // A big file goes the «read twice» way.
+        write("Megane II/COMMUN/PDF/BIG.PDF", ByteArray(VolumeArchiveWriter.IN_MEMORY_MAX + 12345) { (it % 241).toByte() })
+        val target = File(dir, "stored.rdpkg")
+        var lastFiles = 0
+        val result = VolumeArchiveWriter.write(volume, target) { done, _, _, _ -> lastFiles = done }
+        val files = volume.walkTopDown().filter { it.isFile }.toList()
+        assertEquals(files.size, result.fileCount)
+        assertEquals(files.size, lastFiles)
+        assertEquals(files.sumOf { it.length() }, result.sourceBytes)
+        val sha =
+            java.security.MessageDigest.getInstance("SHA-256").digest(target.readBytes())
+                .joinToString("") { "%02x".format(it) }
+        assertEquals(sha, result.sha256)
+        java.util.zip.ZipFile(target).use { zip ->
+            val entries = zip.entries().toList()
+            assertTrue("every entry stored, no compressor", entries.all { it.method == ZipEntry.STORED })
+            assertEquals(entries.map { it.name }.sortedBy { it.lowercase() }, entries.map { it.name })
+        }
+        val check = VolumeArchiveVerifier.verify(volume, target)
+        assertTrue(check.problem, check.ok)
+        VolumeArchive.open(target).use { archive ->
+            files.forEach { file ->
+                val path = file.relativeTo(volume).invariantSeparatorsPath
+                assertArrayEquals(path, file.readBytes(), archive.open(path)!!.use { it.readBytes() })
+            }
+        }
+    }
+
+    @Test
+    fun verifierNamesTheBrokenFile() {
+        val archive = pack()
+        val bytes = archive.readBytes()
+        // Break the deflate stream of a level-1 (text) entry: its data starts right after the name.
+        val name = "_renault/modern-sections.json".toByteArray()
+        val at = indexOf(bytes, name) + name.size
+        for (i in 0 until 4) bytes[at + i] = 0xFF.toByte()
+        archive.writeBytes(bytes)
+        val result = VolumeArchiveVerifier.verify(volume, archive)
+        assertFalse(result.ok)
+    }
+
     private fun indexOf(
         haystack: ByteArray,
         needle: ByteArray,
