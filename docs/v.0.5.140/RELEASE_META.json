@@ -1,7 +1,7 @@
 {
   "versionName": "0.5.140",
   "versionCode": 156,
-  "phase": "development",
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
   "branch": "perf/pdf-two-sizes-v0.5.140",
   "issues": [
     147
@@ -9,5 +9,17 @@
   "scope": "PDF page in two sizes only (owner 2026-10-17 00:07): «under the screen» and, once zoomed in (>105 %), the maximum at once — no intermediate 1600/2000/2400/2600 renders; zoom-out keeps the bigger picture; neighbours stay «under the screen». Includes v0.5.139.",
   "sourceBase": "v0.5.139/build155",
   "phoneQa": "PENDING",
-  "qa_status": "phone-qa-pending"
+  "qa_status": "phone-qa-pending",
+  "pr_number": 362,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "6d3d692c2c8bd5a492e7c42d3c6b7ce90ef8be64",
+  "signed_run_id": 38967903091,
+  "signed_run_number": 210,
+  "signed_android_apk_run": 210,
+  "artifact_id": 12075113466,
+  "artifact_name": "Renault-Docs-v0.5.140-Debug",
+  "artifact_digest": "sha256:5c9c1d61b31aef522abdb2447e5df6a2ab20cd251def2475c493b6728e285898",
+  "next": "M30s: install over v0.5.139; open a PDF, pinch-zoom → page sharp at once; zoom out → no redraw; PHONE DIAGNOSTICS: 33 → widths only screen + 3000."
 }
