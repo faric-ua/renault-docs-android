@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.6"
+PD_VERSION="2026-10-16.7"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1546,8 +1546,20 @@ app_crash_report() {
     echo "Зараз запущений: ${pid:-ні}"
     echo "Версія: $(adb -s "$ADB_TARGET" shell dumpsys package "$pkg" 2>/dev/null | tr -d '\r' | sed -n 's/^ *versionName=//p' | head -n 1)"
     echo
-    echo "=== Журнал падінь (crash) — лише цей застосунок ==="
-    adb -s "$ADB_TARGET" logcat -d -b crash -v time 2>&1 | grep -A 40 -E "Process: $pkg|$pkg" | tail -n 160
+    echo "=== Журнал падінь (crash) — останнє падіння цього застосунку, повністю ==="
+    # 2026-10-16 (лог 102): «grep -A 40 | tail» обрізав верх стеку — саме те місце,
+    # де видно, що викликало падіння. Тепер — від заголовка останнього падіння.
+    local crash_text line_no
+    crash_text="$(adb -s "$ADB_TARGET" logcat -d -b crash -v time 2>&1)"
+    line_no="$(printf '%s\n' "$crash_text" | grep -n -E ">>> $pkg <<<|Process: $pkg" | tail -n 1 | cut -d: -f1)"
+    if [ -n "$line_no" ]; then
+      # Java-падіння: «FATAL EXCEPTION» за 2 рядки вище; нативне: «*** *** ***» — за ~6.
+      printf '%s\n' "$crash_text" | sed -n "$(( line_no > 8 ? line_no - 8 : 1 )),$(( line_no + 130 ))p"
+      echo
+      echo "Падінь цього застосунку в журналі: $(printf '%s\n' "$crash_text" | grep -c -E ">>> $pkg <<<|Process: $pkg")"
+    else
+      echo "(падінь цього застосунку в журналі немає)"
+    fi
     echo
     echo "=== Помилки Android про цей застосунок (ANR, «зупинено», вбито) ==="
     adb -s "$ADB_TARGET" logcat -d -b main,system -v time -t 20000 2>&1 \
