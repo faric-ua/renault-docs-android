@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.141",
+  "versionCode": 157,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.141-volume-archive",
+  "issues": [
+    147
+  ],
+  "scope": "Archives plan v2, stage 1 (owner 2026-10-17 00:32): a volume read straight from its one .rdpkg. Volume menu «Зробити архів тому» packs the folder into rdpkg-archive/<id>.rdpkg next to the volumes, checks every file (size + CRC), then reads from it; «Читати з папки / з архіву» switch; PDFs copied once into the phone cache. Nothing deleted. Includes v0.5.140.",
+  "sourceBase": "v0.5.140/build156",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 367,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "d102a7686d4d433729ac0515140d5c6ebb1f295b",
+  "signed_run_id": 38971634924,
+  "signed_run_number": 211,
+  "signed_android_apk_run": 211,
+  "artifact_id": 12076568315,
+  "artifact_name": "Renault-Docs-v0.5.141-Debug",
+  "artifact_digest": "sha256:5ad7aec896dac981cca9f42dc2e1b1910bec31e4f195bea8ade29e5c54bbd845",
+  "next": "A26: install over; volume in phone memory → ⋮ → «Зробити архів тому» → «Архів тому готовий»; open sections, schemes, PDF — all work; PHONE DIAGNOSTICS: 33 → ARCHIVE lines."
+}
