@@ -21,6 +21,11 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     private val detailRow: LinearLayout
     private var fullDetail: String = ""
     private val progressView: ProgressBar
+
+    // TODO №15 (2026-10-16): optional second bar for the current part of a long run
+    // (e.g. the current volume of a project import). Hidden unless a caller asks.
+    private val secondaryLabelView: TextView
+    private val secondaryProgressView: ProgressBar
     private val closeView: TextView
     private val cancelView: TextView
     private val detailsToggleView: TextView
@@ -138,6 +143,25 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         addView(progressView, LayoutParams(LayoutParams.MATCH_PARENT, Ui.dp(context, SharedOperationProgressBar.HEIGHT_DP)).apply {
             topMargin = Ui.dp(context, 10)
         })
+
+        secondaryLabelView = Ui.textView(context, "", 13f, Ui.muted).apply {
+            visibility = View.GONE
+            setSingleLine(true)
+            ellipsize = TextUtils.TruncateAt.MIDDLE
+            setPadding(0, Ui.dp(context, 10), 0, Ui.dp(context, 2))
+        }
+        addView(secondaryLabelView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        secondaryProgressView = SharedOperationProgressBar.create(context).apply {
+            visibility = View.GONE
+        }
+        addView(secondaryProgressView, LayoutParams(LayoutParams.MATCH_PARENT, Ui.dp(context, SharedOperationProgressBar.HEIGHT_DP)).apply {
+            topMargin = Ui.dp(context, 4)
+        })
+    }
+
+    private fun hideSecondary() {
+        secondaryLabelView.visibility = View.GONE
+        secondaryProgressView.visibility = View.GONE
     }
 
     // Opt-in for ProjectActivity; MainActivity keeps its existing status.
@@ -170,6 +194,10 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         total: Int? = null,
         onCancel: (() -> Unit)? = null,
         subject: String = "Renault Docs",
+        counterLabel: String? = null,
+        secondaryLabel: String? = null,
+        secondaryCurrent: Int? = null,
+        secondaryTotal: Int? = null,
     ) {
         visibility = View.VISIBLE
         titleView.text = title
@@ -186,7 +214,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         detailView.text = parts.stage
         detailView.setTextColor(Ui.muted)
         counterView.setTextColor(Ui.success)
-        counterView.text = parts.counter ?: if (current != null && total != null && total > 0) {
+        counterView.text = counterLabel ?: parts.counter ?: if (current != null && total != null && total > 0) {
             val percent = current.coerceIn(0, total).toLong() * 100L / total
             "Етап: ${percent}%"
         } else {
@@ -198,6 +226,15 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         cancelView.setOnClickListener(if (onCancel == null) null else View.OnClickListener { onCancel() })
         progressView.visibility = View.VISIBLE
         SharedOperationProgressBar.render(progressView, current, total)
+        if (secondaryLabel.isNullOrBlank()) {
+            hideSecondary()
+        } else {
+            secondaryLabelView.text = secondaryLabel
+            secondaryLabelView.visibility = View.VISIBLE
+            secondaryProgressView.visibility = View.VISIBLE
+            // Indeterminate while there is no measure yet (copying from the file).
+            SharedOperationProgressBar.render(secondaryProgressView, secondaryCurrent, secondaryTotal, color = Ui.accent)
+        }
     }
 
     fun showTerminal(
@@ -227,6 +264,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         detailView.text = OperationStatusDisplayFormat.wrapHashesForDisplay(detail)
         detailView.setTextColor(statusColor)
         counterView.text = ""
+        hideSecondary()
         updateProjectCompactUi()
         progressView.visibility = View.VISIBLE
         SharedOperationProgressBar.render(
@@ -338,6 +376,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
 
     fun hide() {
         visibility = View.GONE
+        hideSecondary()
         closeView.setOnClickListener(null)
         cancelView.setOnClickListener(null)
     }

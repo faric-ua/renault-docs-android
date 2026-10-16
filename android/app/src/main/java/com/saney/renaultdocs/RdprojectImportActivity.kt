@@ -122,6 +122,14 @@ class RdprojectImportActivity : Activity() {
                 render()
                 loadPreview(incoming)
             }
+            // TODO №11: «Скасувати» in the notification — the same question as the card.
+            intent?.getBooleanExtra(EXTRA_ASK_STOP, false) == true -> {
+                intent?.removeExtra(EXTRA_ASK_STOP)
+                render()
+                if (state.isRunning && !runStore.isCancelRequested()) {
+                    window.decorView.post { confirmDialogs.show(CONFIRM_STOP) }
+                }
+            }
             intent?.getBooleanExtra(EXTRA_PICK, false) == true && !state.isRunning -> {
                 if (state.isTerminal) runStore.clearTerminal()
                 render()
@@ -658,13 +666,34 @@ class RdprojectImportActivity : Activity() {
         }
         if (state.isRunning) {
             val stopping = runStore.isCancelRequested()
+            // TODO №15 (M30s 2026-10-16 01:42): two labelled bars — the whole import by
+            // volumes, and the current volume — instead of one «Етап» bar at 100 %.
+            val total = state.wantedFiles.size
+            val hasBar = state.progressTotal > 0
             operationStatus.showRunning(
                 title = "Імпорт проєкту",
                 detail = if (stopping) "Зупиняю після поточного безпечного кроку…" else state.message,
-                current = state.progressCurrent.takeIf { state.progressTotal > 0 },
-                total = state.progressTotal.takeIf { it > 0 },
+                current = state.progressCurrent.takeIf { hasBar },
+                total = state.progressTotal.takeIf { hasBar },
                 subject = state.projectTitle.ifBlank { "Renault Docs" },
                 onCancel = if (stopping) null else { { confirmDialogs.show(CONFIRM_STOP) } },
+                counterLabel =
+                    if (hasBar && total > 0) {
+                        RdprojectImportProgress.overallLabel(
+                            done = state.doneVolumes,
+                            total = total,
+                            barValue = state.progressCurrent,
+                            scale = state.progressTotal,
+                        )
+                    } else {
+                        null
+                    },
+                secondaryLabel =
+                    state.volumeLabel.takeIf { it.isNotBlank() }?.let {
+                        RdprojectImportProgress.volumeLabel(it, state.volumePercent.takeIf { p -> p >= 0 })
+                    },
+                secondaryCurrent = state.volumePercent.takeIf { it >= 0 },
+                secondaryTotal = 100.takeIf { state.volumePercent >= 0 },
             )
             return
         }
@@ -789,9 +818,16 @@ class RdprojectImportActivity : Activity() {
         private const val STATE_SELECTED = "rdprojectSelected"
         private const val STATE_PICKER_OPEN = "rdprojectPickerOpen"
         private const val EXTRA_PICK = "pickRdproject"
+        private const val EXTRA_ASK_STOP = "askStopRdprojectImport"
 
         /** Home → «Додати» → «Проєкт із файлу»: opens the file picker first. */
         fun pickIntent(activity: Activity): Intent =
             Intent(activity, RdprojectImportActivity::class.java).putExtra(EXTRA_PICK, true)
+
+        /** TODO №11: notification «Скасувати» → this screen asks «Зупинити імпорт проєкту?». */
+        fun askStopIntent(context: android.content.Context): Intent =
+            Intent(context, RdprojectImportActivity::class.java)
+                .putExtra(EXTRA_ASK_STOP, true)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
     }
 }

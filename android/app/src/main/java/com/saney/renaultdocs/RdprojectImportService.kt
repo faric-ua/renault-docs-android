@@ -34,15 +34,30 @@ class RdprojectImportService : Service() {
     @Volatile private var importedCount = 0
 
     @Volatile private var skippedCount = 0
+
+    /**
+     * TODO №13: volumes that already lay unpacked on the phone / card but were missing
+     * from the project (an import broken off between «unpacked» and «added»).
+     */
+    @Volatile private var recoveredCount = 0
     private var lastNotifyAt = 0L
 
     /**
      * TODO №3 (M30s 2026-10-14 20:36–20:39): the «Етап» bar jumped 1 % → 44 % → 40 % →
      * 70 % because it showed the share of the file while reading and the progress of
-     * one volume while installing it. Now the bar is always the share of the whole
-     * file already passed; the install of a volume is shown as «встановлюю N %» in text.
+     * one volume while installing it. v0.5.134 made it the share of the file passed.
+     *
+     * TODO №15 (M30s 2026-10-16 01:42): the share of the file reached 100 % while the
+     * last volume still installed for 2 hours. Now the main bar is the share of the
+     * chosen volumes done ([RdprojectImportProgress.overallBarValue]); the current
+     * volume has its own second bar. Both only go forward.
      */
-    @Volatile private var fileBarCurrent = -1
+    @Volatile private var overallBar = 0
+
+    /** Chosen volumes already done (installed, recovered or already in the project). */
+    @Volatile private var doneWanted = 0
+
+    @Volatile private var wantedTotal = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -155,7 +170,10 @@ class RdprojectImportService : Service() {
         workDir.mkdirs()
         importedCount = 0
         skippedCount = 0
-        fileBarCurrent = -1
+        recoveredCount = 0
+        overallBar = 0
+        doneWanted = 0
+        wantedTotal = 0
         metWanted.clear()
         val manifest = RdprojectImportSupport.readManifest(applicationContext, uri)
         val wanted = state.wantedFiles.toSet().intersect(manifest.volumes.map { it.file }.toSet())
@@ -169,7 +187,7 @@ class RdprojectImportService : Service() {
                 .toSet()
         require(wanted.isNotEmpty()) { "Файл змінився: томів, вибраних для імпорту, у ньому немає." }
         val wantedOrder = manifest.volumes.filter { wanted.contains(it.file) }
-        val fileSize = state.fileSizeBytes.takeIf { it > 0L } ?: RdprojectImportSupport.fileSize(this, uri)
+        wantedTotal = wantedOrder.size
         val input =
             contentResolver.openInputStream(uri)
                 ?: throw IllegalStateException(RdprojectImportSupport.NO_ACCESS)
@@ -195,7 +213,7 @@ class RdprojectImportService : Service() {
                                 "Пропускаю ${volume.label} — не вибрано"
                             }
                         }
-                    publish(text, progress.bytesRead, fileSize)
+                    publish(text, if (progress.wanted) volume.label else "")
                 },
                 onVolume = { volume, file ->
                     installVolume(store, manifest, wantedOrder, volume, file)
@@ -208,8 +226,14 @@ class RdprojectImportService : Service() {
             buildString {
                 if (importedCount > 0) {
                     append("Додано $importedCount ${RdprojectImportSupport.volumeNoun(importedCount)} до проєкту «$project».")
-                } else {
+                } else if (recoveredCount == 0) {
                     append("Нових томів не додано — усі вже є на телефоні.")
+                }
+                if (recoveredCount > 0) {
+                    append(
+                        (if (importedCount > 0) " " else "") +
+                            RdprojectImportProgress.recoveredMessage(recoveredCount, project),
+                    )
                 }
                 if (skippedCount > 0) append(" Пропущено (уже були): $skippedCount.")
                 if (missingWanted.isNotEmpty()) {
@@ -220,7 +244,7 @@ class RdprojectImportService : Service() {
                 }
                 append(" Наявні томи не змінено.")
             }
-        if (missingWanted.isNotEmpty() && importedCount == 0) {
+        if (missingWanted.isNotEmpty() && importedCount == 0 && recoveredCount == 0) {
             runStore.fail(summary)
             notify("Імпорт проєкту: файл неповний.", false)
         } else {
@@ -248,10 +272,20 @@ class RdprojectImportService : Service() {
         if (alreadyThere) {
             skippedCount++
             runStore.counts(importedCount, skippedCount)
+            volumeDone()
+            return
+        }
+        // TODO №13: the volume may already lie unpacked on the phone / card without
+        // being in the project (a run broken off between «unpacked» and «added»).
+        // Seen before unpacking — that alone took up to 13 hours per volume on the card.
+        val peekedId = RdpkgImporter.peekPackageId(file)
+        if (peekedId != null && VolumeStorage.locate(applicationContext, peekedId) != null) {
+            recoverOrSkip(store, manifest, peekedId)
             return
         }
         val text = "$position · ${volume.label} — встановлюю"
-        if (fileBarCurrent >= 0) runStore.update(text, fileBarCurrent, SCALE) else runStore.update(text)
+        runStore.update(text, overallBar, SCALE)
+        runStore.volume(volume.label, 0, doneWanted)
         notifyThrottled(text)
         val uri = FileProvider.getUriForFile(applicationContext, "$packageName.files", file)
         val result =
@@ -262,11 +296,18 @@ class RdprojectImportService : Service() {
                     dataSyncTimeout.checkActive()
                     val percent = RdprojectImportProgress.installPercent(progress)
                     val message = if (percent != null) "$text $percent %" else text
-                    if (fileBarCurrent >= 0) {
-                        runStore.update(message = message, current = fileBarCurrent, total = SCALE)
-                    } else {
-                        runStore.update(message)
+                    if (percent != null) {
+                        overallBar =
+                            RdprojectImportProgress.overallBarValue(
+                                done = doneWanted,
+                                total = wantedTotal,
+                                currentPart = percent * SCALE / 100,
+                                previous = overallBar,
+                                scale = SCALE,
+                            )
+                        runStore.volume(volume.label, percent, doneWanted)
                     }
+                    runStore.update(message = message, current = overallBar, total = SCALE)
                 },
                 // Stops only at the importer's safe checkpoints, never mid-activation.
                 isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() },
@@ -275,8 +316,7 @@ class RdprojectImportService : Service() {
         val imported =
             result.getOrElse { error ->
                 if (error is PackageAlreadyInstalledException) {
-                    skippedCount++
-                    runStore.counts(importedCount, skippedCount)
+                    recoverOrSkip(store, manifest, error.packageId)
                     return
                 }
                 throw error
@@ -290,6 +330,55 @@ class RdprojectImportService : Service() {
         )
         importedCount++
         runStore.counts(importedCount, skippedCount)
+        volumeDone()
+    }
+
+    /**
+     * TODO №13: the package is installed. If no project has it, it was left «invisible»
+     * by a broken-off run — read the installed volume and add it to the project (nothing
+     * is unpacked or replaced). If a project already has it, it is simply skipped.
+     */
+    private fun recoverOrSkip(
+        store: ProjectStore,
+        manifest: RdprojectManifest,
+        packageId: String,
+    ) {
+        val treeUri = LocalDatasetDocumentsProvider.treeUriFor(packageId)
+        val installed = PreparedVolumeReader.read(applicationContext, treeUri).getOrNull()
+        val inSomeProject =
+            installed == null ||
+                store.projects().any { project ->
+                    store.volumes(project.id).any { record ->
+                        record.treeUri == installed.treeUri || record.id == installed.id
+                    }
+                }
+        if (inSomeProject || installed == null) {
+            skippedCount++
+            runStore.counts(importedCount, skippedCount)
+        } else {
+            val project = ensureProject(store, manifest)
+            store.upsertVolume(
+                projectId = project.id,
+                volume = installed.copy(projectHint = project.id),
+            )
+            recoveredCount++
+        }
+        volumeDone()
+    }
+
+    /** One chosen volume finished (any outcome): main bar moves, second bar clears. */
+    private fun volumeDone() {
+        doneWanted++
+        overallBar =
+            RdprojectImportProgress.overallBarValue(
+                done = doneWanted,
+                total = wantedTotal,
+                currentPart = 0,
+                previous = overallBar,
+                scale = SCALE,
+            )
+        runStore.volume("", -1, doneWanted)
+        runStore.update(runStore.load().message, overallBar, SCALE)
     }
 
     /** The project is created only when the first volume is really installed. */
@@ -328,18 +417,13 @@ class RdprojectImportService : Service() {
         return "Том ${metWanted.indexOf(volume.file) + 1}/${wantedOrder.size}"
     }
 
+    /** [volumeLabel] — the chosen volume being copied from the file, blank while skipping. */
     private fun publish(
         text: String,
-        bytesRead: Long,
-        fileSize: Long,
+        volumeLabel: String,
     ) {
-        if (fileSize > 0L) {
-            val current = RdprojectImportProgress.fileBarValue(bytesRead, fileSize, fileBarCurrent, SCALE)
-            fileBarCurrent = current
-            runStore.update(text, current, SCALE)
-        } else {
-            runStore.update(text)
-        }
+        runStore.update(text, overallBar, SCALE)
+        runStore.volume(volumeLabel, -1, doneWanted)
         notifyThrottled(text)
     }
 
@@ -387,6 +471,28 @@ class RdprojectImportService : Service() {
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)
             .setOngoing(ongoing)
+            .apply {
+                // TODO №11 (M30s 2026-10-15 15:19): the notification could not be
+                // swiped away and had no «Скасувати». It opens the import screen with
+                // the same «Зупинити імпорт проєкту?» question as the card there.
+                if (ongoing && state.isRunning && !runStore.isCancelRequested()) {
+                    addAction(
+                        Notification.Action.Builder(
+                            android.graphics.drawable.Icon.createWithResource(
+                                this@RdprojectImportService,
+                                R.drawable.ic_notification_document,
+                            ),
+                            "Скасувати",
+                            PendingIntent.getActivity(
+                                this@RdprojectImportService,
+                                1,
+                                RdprojectImportActivity.askStopIntent(this@RdprojectImportService),
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                            ),
+                        ).build(),
+                    )
+                }
+            }
             .let { OperationAlert.alertIfFinal(this, it, ongoing, text) }
             .apply {
                 if (ongoing) {

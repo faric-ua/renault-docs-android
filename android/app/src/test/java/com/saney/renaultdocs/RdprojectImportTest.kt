@@ -274,6 +274,83 @@ class RdprojectImportTest {
     }
 
     @Test
+    fun overallBarCountsVolumesNotTheFile() {
+        // TODO №15 (M30s 2026-10-16 01:42): «Етап: 100%» while the last of 18 volumes
+        // still installed at 31 %. By volumes: 17 done + 31 % of the 18th ≈ 96 %.
+        val scale = 10_000
+        val bar = RdprojectImportProgress.overallBarValue(17, 18, 3_100, 0, scale)
+        assertEquals((17L * scale + 3_100) / 18, bar.toLong())
+        assertTrue(bar < scale)
+        assertEquals("Загалом: томів 17 з 18 · 96 %", RdprojectImportProgress.overallLabel(17, 18, bar, scale))
+        // All done — full; the current part no longer counts.
+        assertEquals(scale, RdprojectImportProgress.overallBarValue(18, 18, 9_000, bar, scale))
+        // A new volume starts at 0 % — the main bar does not go back.
+        val afterFirst = RdprojectImportProgress.overallBarValue(1, 18, 0, 0, scale)
+        assertEquals(afterFirst, RdprojectImportProgress.overallBarValue(1, 18, 0, afterFirst, scale))
+        assertEquals(9_000, RdprojectImportProgress.overallBarValue(0, 0, 0, 9_000, scale))
+        // Out-of-range input is clamped.
+        assertEquals(scale, RdprojectImportProgress.overallBarValue(40, 18, 99_999, 0, scale))
+    }
+
+    @Test
+    fun secondBarLabelIsAboutTheCurrentVolumeOnly() {
+        assertEquals("Цей том: NT8494 — 31 %", RdprojectImportProgress.volumeLabel("NT8494", 31))
+        assertEquals("Цей том: NT8494 — копіюю з файлу", RdprojectImportProgress.volumeLabel("NT8494", null))
+        assertEquals("Цей том: NT8494 — 100 %", RdprojectImportProgress.volumeLabel("NT8494", 140))
+    }
+
+    @Test
+    fun recoveredVolumesAreNamedInTheSummary() {
+        // TODO №13: a volume unpacked by a broken-off run but missing from the project.
+        val text = RdprojectImportProgress.recoveredMessage(2, "Megane II")
+        assertTrue(text.contains("«Megane II»"))
+        assertTrue(text.endsWith(": 2."))
+    }
+
+    @Test
+    fun packageIdIsReadWithoutUnpacking() {
+        // TODO №13: only rdpkg.json is read; a bad or unsafe id gives null.
+        val dir = Files.createTempDirectory("peek").toFile()
+        try {
+            fun pkg(
+                name: String,
+                json: String?,
+            ): File {
+                val file = File(dir, name)
+                ZipOutputStream(file.outputStream()).use { zip ->
+                    if (json != null) {
+                        zip.putNextEntry(ZipEntry("rdpkg.json"))
+                        zip.write(json.toByteArray(Charsets.UTF_8))
+                        zip.closeEntry()
+                    }
+                    zip.putNextEntry(ZipEntry("payload/a.htm"))
+                    zip.write("x".toByteArray())
+                    zip.closeEntry()
+                }
+                return file
+            }
+            val good =
+                JSONObject()
+                    .put("format", RdpkgImporter.FORMAT)
+                    .put("schema_version", RdpkgImporter.SCHEMA_VERSION)
+                    .put("package_id", "renault-megane-nt8494")
+                    .toString()
+            assertEquals("renault-megane-nt8494", RdpkgImporter.peekPackageId(pkg("good.rdpkg", good)))
+            assertNull(RdpkgImporter.peekPackageId(pkg("none.rdpkg", null)))
+            val unsafe = JSONObject(good).put("package_id", "../evil").toString()
+            assertNull(RdpkgImporter.peekPackageId(pkg("unsafe.rdpkg", unsafe)))
+            val dotted = JSONObject(good).put("package_id", ".import-x").toString()
+            assertNull(RdpkgImporter.peekPackageId(pkg("dotted.rdpkg", dotted)))
+            val foreign = JSONObject(good).put("format", "zip").toString()
+            assertNull(RdpkgImporter.peekPackageId(pkg("foreign.rdpkg", foreign)))
+            val broken = File(dir, "broken.rdpkg").apply { writeText("not a zip") }
+            assertNull(RdpkgImporter.peekPackageId(broken))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun installPercentIsWholeNumber() {
         assertEquals(40, RdprojectImportProgress.installPercent(OperationProgress("x", 2, 5)))
         assertNull(RdprojectImportProgress.installPercent(OperationProgress("x")))

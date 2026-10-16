@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-16.4"
+PD_VERSION="2026-10-16.5"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -265,6 +265,9 @@ PAIRING
     переводить увесь його код у машинний (те, що сам робить
     уночі на зарядці). Звук, файли й дані — ті самі. Після
     оновлення застосунку — ще раз. «2» — повернути як було.
+38. Пункт 33 — Renault Docs: скільки часу йде на відкриття
+    томів (з карти і з телефона). Спершу відкрий том і 2–3
+    документи, потім цей пункт. НІЧОГО НЕ ЗМІНЮЄ.
 
 ЗАСТОСУНКИ, ЯКИХ БІЛЬШЕ НЕМА В МАГАЗИНІ
 34. Пункт 26 — зберегти застосунок з підключеного
@@ -1424,6 +1427,33 @@ app_threads_report() {
 }
 # app_threads_report end
 
+renault_read_timing() {
+  # 2026-10-16 (Renault Docs, TODO №16, етап 0 плану «читати том з одного .rdpkg»):
+  # томи на карті M30s відкриваються дуже довго, у пам'яті телефона — швидко.
+  # Renault Docs з v0.5.137 пише в logcat (тег RenaultRead), скільки переліків папок
+  # і відкриттів файлів тому йде і скільки мілісекунд, окремо для карти й телефона.
+  # Пункт лише читає журнал. Нічого не змінює.
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  new_log "33" "renault-read" "Renault Docs: заміри читання томів"
+  echo "Спершу в Renault Docs відкрий том з карти і 2–3 документи (і для порівняння — том з телефона)."
+  echo "Потім цей пункт. Нічого не змінюю."
+  echo
+  {
+    echo "=== Renault Docs ==="
+    adb -s "$ADB_TARGET" shell dumpsys package com.saney.renaultdocs 2>/dev/null \
+      | grep -m 1 "versionName" || echo "versionName: ?"
+    echo
+    echo "=== Заміри (logcat, тег RenaultRead) ==="
+    echo "LIST — перелік папки; OPEN — повільне відкриття файлу; SUM — підсумок тому; FAST — перше відкриття тому."
+    adb -s "$ADB_TARGET" logcat -d -v time -s RenaultRead:I 2>&1 | tail -n 400
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Готово. Надішли цей файл у чат (шлях — нижче)."
+  pause_menu
+}
+# renault_read_timing end
+
 app_compile_status() {
   # Як Android зараз виконує код застосунку: verify/quicken = інтерпретатор + JIT,
   # speed-profile = гарячі частини вже в машинному коді, speed = увесь код.
@@ -1556,6 +1586,7 @@ while true; do
   echo "30 — Ціни криптовалют для тренажера → файл (лише читає Binance)"
   echo "31 — Що роблять потоки застосунку (ядра, пріоритет) → файл"
   echo "32 — Прискорити застосунок (машинний код; звук і дані ті самі)"
+  echo "33 — Renault Docs: заміри читання томів → файл (нічого не змінює)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1594,6 +1625,7 @@ while true; do
     30) crypto_prices ;;
     31) app_threads_report ;;
     32) app_compile_speed ;;
+    33) renault_read_timing ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
