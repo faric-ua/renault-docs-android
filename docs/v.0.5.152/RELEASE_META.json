@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.152",
+  "versionCode": 168,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v0.5.152-version-line",
+  "issues": [
+    147
+  ],
+  "scope": "TODO 25: home version line outside the height-limited Add list. First version for other phones only through Google Drive (built-in update link since 0.5.151).",
+  "sourceBase": "v0.5.151/build167",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 411,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "7cfd1002f31b2f6a1555b7deed4ab11db3d20c12",
+  "signed_run_id": 39051082770,
+  "signed_run_number": 222,
+  "signed_android_apk_run": 222,
+  "artifact_id": 12107812180,
+  "artifact_name": "Renault-Docs-v0.5.152-Debug",
+  "artifact_digest": "sha256:02b8825fdbc533ca963fad41bb54ab512b1575cb5570fe1ac3a0912c42fb67e5",
+  "next": "A26: install over via menu, «Опублікувати зараз»; M30s (0.5.151): «Перевірити оновлення» without a link → «Оновити» → home version line whole."
+}
