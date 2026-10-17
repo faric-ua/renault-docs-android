@@ -58,6 +58,13 @@ class ImportAsArchiveContract(unittest.TestCase):
         self.assertNotIn("deleteRecursively", body, "no folder is ever removed here")
         self.assertIn("VolumeArchiveAccess.setReadingOff(context, packageId, off = false)", body)
 
+    def test_check_progress_is_throttled(self):
+        # v0.5.144, M30s 2026-10-17 03:48: «до 50 % швидко, а потім довго» — every entry
+        # reported progress (run state + notification). Now like unpacking: ≤ every 100 ms.
+        importer = source("RdpkgImporter.kt")
+        body = between(importer, "    private fun installAsArchive(", "    private fun copyPackage(")
+        self.assertIn("now - lastCheckProgressAt < PROGRESS_THROTTLE_MS", body)
+
     def test_installed_means_folder_or_archive(self):
         storage = source("VolumeStorage.kt")
         self.assertIn('const val ARCHIVE_DIR = "rdpkg-archive"', storage)
