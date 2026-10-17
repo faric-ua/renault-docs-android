@@ -343,7 +343,7 @@ class AppUpdateUi(
             box.addView(
                 Ui.textView(
                     host,
-                    "Кроки 1–2: у вікні вибору натисни ☰ ліворуч → «Google Диск» → папка (напр. AppsAndroidSync → Renault Docs Projects → App) → «Зберегти».\n" +
+                    "Кроки 1–2: у вікні вибору натисни ☰ ліворуч → «Google Диск» → папка AppsAndroidSync → RenaultDocs → App → «Зберегти».\n" +
                         "Кроки 3–4: відкрий Google Диск → ⋮ біля файлу → «Надати доступ» → «Усі, хто має посилання» → " +
                         "«Копіювати посилання» → повернись сюди й натисни крок.",
                     13f,
