@@ -47,6 +47,8 @@ class MainActivity : Activity() {
     private lateinit var statusText: TextView
     private lateinit var operationStatus: OperationStatusView
     // v0.5.148: its own card for erasing files of deleted volumes (can run next to an import).
+    // v0.5.152 (TODO №25): the version line, outside the height-limited actions list.
+    private lateinit var homeVersionLine: TextView
     private lateinit var trashStatus: OperationStatusView
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
@@ -951,16 +953,6 @@ class MainActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                 ).apply { topMargin = Ui.dp(this@MainActivity, 10) },
             )
-            actions.addView(
-                Ui.textView(
-                    this@MainActivity,
-                    "v" + BuildConfig.VERSION_NAME + " · SAF reference mode",
-                    12f, Ui.muted,
-                ).apply {
-                    setPadding(0, Ui.dp(this@MainActivity, 12), 0, 0)
-                },
-            )
-
             homeAddPanelBody = BoundedAddActionsScrollView(this@MainActivity).apply {
                 isFillViewport = false
                 clipToPadding = false
@@ -968,6 +960,23 @@ class MainActivity : Activity() {
             }
             addView(
                 homeAddPanelBody,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ),
+            )
+            // v0.5.152 (TODO №25, M30s 19:41: «версія обрізана»): the version line was the last
+            // row of the height-limited actions list, so on a smaller screen only its top showed.
+            // Now it stands under the list, outside the scroll, and is always whole.
+            homeVersionLine = Ui.textView(
+                this@MainActivity,
+                "v" + BuildConfig.VERSION_NAME + " · SAF reference mode",
+                12f, Ui.muted,
+            ).apply {
+                setPadding(0, Ui.dp(this@MainActivity, 8), 0, 0)
+            }
+            addView(
+                homeVersionLine,
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1065,6 +1074,7 @@ class MainActivity : Activity() {
         val pinnedHere = homeAddPanelPinned && !landscape
         val expandedHere = if (landscape) homeAddLandscapeExpanded else homeAddPanelExpanded
         homeAddPanelBody.visibility = if (expandedHere) View.VISIBLE else View.GONE
+        if (::homeVersionLine.isInitialized) homeVersionLine.visibility = homeAddPanelBody.visibility
         homeAddPinButton.setLayerType(
             View.LAYER_TYPE_HARDWARE,
             if (pinnedHere) null else monochromePinPaint,
