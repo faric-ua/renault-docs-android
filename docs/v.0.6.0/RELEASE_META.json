@@ -1,0 +1,25 @@
+{
+  "versionName": "0.6.0",
+  "versionCode": 170,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/renodocs-0.6.0",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: separate app com.saney.renodocs beside Renault Docs 0.5.153; name Renodocs in app and guide; own Drive update channel (no built-in link).",
+  "sourceBase": "v0.5.153/build169",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 434,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "76b889ef81c470406aea781899cd29ea7333773c",
+  "signed_run_id": 39074603944,
+  "signed_run_number": 224,
+  "signed_android_apk_run": 224,
+  "artifact_id": 12116198950,
+  "artifact_name": "Renault-Docs-v0.6.0-Debug",
+  "artifact_digest": "sha256:597f05d355e00714f31aef979761703fe21207b77923d213558916d49f5db1db",
+  "next": "A26: install via menu (new app beside Renault Docs) → Add → Project from file → one Laguna II volume from logo-fixed → Classic start page shows the new logo."
+}
