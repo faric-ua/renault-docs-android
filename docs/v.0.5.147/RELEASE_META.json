@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.147",
+  "versionCode": 163,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.147-delete-volume-files",
+  "issues": [
+    147
+  ],
+  "scope": "Owner 2026-10-17 05:02: project menu «Видалити томи разом з файлами…» — ticks, confirmation, files renamed into rdpkg-trash, background erase resumed on start. Replaces archives stage 3 for the 18 unpacked Megane II volumes on the M30s card (re-import from A26 as one file each).",
+  "sourceBase": "v0.5.146/build162",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 395,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "7385ccb92b30eada295050aab4167068485d1620",
+  "signed_run_id": 38994095999,
+  "signed_run_number": 217,
+  "signed_android_apk_run": 217,
+  "artifact_id": 12086641458,
+  "artifact_name": "Renault-Docs-v0.5.147-Debug",
+  "artifact_digest": "sha256:b582e2b958db75d35498d2c6ff547480392953e54096f11829c0776537dfe765",
+  "next": "M30s: install over; home ⋮ Megane II → «Видалити томи разом з файлами…» → 18 ticked card volumes → «Видалити назавжди» → project shows 5 volumes; then .rdproject from A26 → import 18 as one file each."
+}
