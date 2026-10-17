@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.146",
+  "versionCode": 162,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v05146-sweep-progress",
+  "issues": [
+    147
+  ],
+  "scope": "TODO 21: indeterminate progress — two stripes sweep across the whole bar with easing (owner 2026-10-17 04:42 + video), all operation cards. Includes v0.5.145 (STORED packages on Android 11).",
+  "sourceBase": "v0.5.145/build161",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 392,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "dd41f48e50026e943141fb3ba3bb35b51dc37529",
+  "signed_run_id": 38992306675,
+  "signed_run_number": 216,
+  "signed_android_apk_run": 216,
+  "artifact_id": 12085388692,
+  "artifact_name": "Renault-Docs-v0.5.146-Debug",
+  "artifact_digest": "sha256:459eb15a885a385fe39c41a9b24d40103156e93b0e2115712779387bc7e0ab06",
+  "next": "M30s: install over; ⋮ NT8228A → «Підготувати і поділитися томом»: stripe runs across the bar while «триває обробка»; then «Поділитися» window, no damaged-file error."
+}
