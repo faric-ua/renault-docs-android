@@ -424,7 +424,7 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
                 "ConfirmActions.kt": (1, 1),
                 # v0.5.106: Home messages and the «Неправильне джерело» message
                 # moved into shared RestorableDialogs (they survive rotation).
-                "HomeProjectDialogController.kt": (3, 3),
+                "HomeProjectDialogController.kt": (5, 5),  # v0.5.147: delete volumes with files — list + confirmation
                 "RestorableDialogs.kt": (1, 1),
                 "LifecycleHelpDialogController.kt": (1, 1),
                 "ProjectActivity.kt": (9, 9),
@@ -436,7 +436,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         # v0.5.101 (#178): two export dialogs replaced by one step-by-step window.
         # v0.5.102 (#181): one confirmation before cancelling a long operation.
         # v0.5.135 (TODO №1): + Settings «Де зберігати нові томи».
-        self.assertEqual(20, total_builders)
+        # v0.5.147: + «Видалити томи разом з файлами» (list + confirmation).
+        self.assertEqual(22, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(

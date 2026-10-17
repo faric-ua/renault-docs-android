@@ -2,10 +2,15 @@ package com.saney.renaultdocs
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.res.ColorStateList
+import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.content.Intent
 import android.view.Gravity
+import android.widget.CheckBox
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import androidx.core.content.FileProvider
 import java.io.File
 
@@ -18,6 +23,8 @@ class HomeProjectDialogController(
     private val onShareFinished: (String) -> Unit,
     private val onExportFolderPickRequested: (String) -> Unit,
     private val onSeparateVolumeExportStart: (String, String, List<String>) -> Unit,
+    // v0.5.147: «Видалити томи разом з файлами» finished — message for the home screen.
+    private val onVolumesDeleted: (RenaultProject, String) -> Unit = { _, _ -> },
 ) {
     private var activeKind: String = ""
     private var activeProjectId: String? = null
@@ -26,6 +33,8 @@ class HomeProjectDialogController(
     // until "Почати експорт", and MainActivity revalidates exact IDs before the service.
     private var exportWizardState = ProjectExportWizardState()
     private var exportWizard: ProjectExportWizard? = null
+    // v0.5.147: ticks in «Видалити томи разом з файлами» (volume ids; survives rotation).
+    private var deleteSelection: MutableSet<String>? = null
     private val infoDialogs =
         RestorableDialogs(
             activity = activity,
@@ -55,6 +64,12 @@ class HomeProjectDialogController(
             } else {
                 ProjectExportWizardState()
             }
+        deleteSelection =
+            if (activeKind == DIALOG_DELETE_FILES || activeKind == DIALOG_DELETE_FILES_CONFIRM) {
+                state?.getStringArrayList(STATE_DELETE_SELECTION)?.toMutableSet()
+            } else {
+                null
+            }
     }
 
     fun save(outState: Bundle) {
@@ -78,6 +93,7 @@ class HomeProjectDialogController(
         outState.putString(STATE_EXPORT_STEP, exportWizardState.step.name)
         outState.putString(STATE_EXPORT_FOLDER, exportWizardState.folderUri)
         outState.putInt(STATE_EXPORT_SCROLL_Y, exportWizardState.scrollY)
+        deleteSelection?.let { outState.putStringArrayList(STATE_DELETE_SELECTION, ArrayList(it)) }
     }
 
     fun onDestroy() {
@@ -118,6 +134,12 @@ class HomeProjectDialogController(
 
             DIALOG_EXPORT_WIZARD ->
                 showExportWizard(project)
+
+            DIALOG_DELETE_FILES ->
+                showDeleteFilesChooser(project)
+
+            DIALOG_DELETE_FILES_CONFIRM ->
+                showDeleteFilesConfirm(project)
 
             else ->
                 clear()
@@ -254,6 +276,26 @@ class HomeProjectDialogController(
                 clear(DIALOG_ACTIONS)
                 activeParentKind = DIALOG_ACTIONS
                 confirmDeletePreparedProject(project)
+            }
+        }
+        // v0.5.147 (owner 2026-10-17 05:02): old unpacked volumes are deleted with their files
+        // and imported again as one file each. Only after a list with ticks and a «так».
+        val trashLeft = VolumeTrash.pendingItems(activity)
+        if (trashLeft > 0) {
+            addAction(
+                title = "Стираю у фоні файли видалених томів · лишилось " + trashLeft,
+                enabled = false,
+            ) {}
+        }
+        if (projectVolumes.isNotEmpty()) {
+            addAction(
+                title = "Видалити томи разом з файлами…",
+                danger = true,
+            ) {
+                clear(DIALOG_ACTIONS)
+                deleteSelection = null
+                activeParentKind = DIALOG_ACTIONS
+                showDeleteFilesChooser(project)
             }
         }
         addAction(
@@ -502,6 +544,199 @@ class HomeProjectDialogController(
         )
     }
 
+    /** v0.5.147: what «Видалити томи разом з файлами» lists for [project]. */
+    private fun deleteItems(project: RenaultProject): List<VolumeDeleteItem> {
+        fun packageOf(volume: ProjectVolumeRecord): String? =
+            runCatching { LocalDatasetDocumentsProvider.packageIdFromTreeUri(Uri.parse(volume.treeUri)) }.getOrNull()
+
+        val elsewhere =
+            store.projects()
+                .filter { it.id != project.id }
+                .flatMap { other -> store.volumes(other.id) }
+                .mapNotNull(::packageOf)
+                .toSet()
+        return store.volumes(project.id).map { volume ->
+            val packageId = packageOf(volume)?.takeIf { VolumeStorage.isInstalled(activity, it) }
+            val label =
+                listOfNotNull(volume.documentCode, volume.date)
+                    .joinToString(" · ")
+                    .ifBlank { volume.title }
+            VolumeDeleteItem(
+                volumeId = volume.id,
+                label = label,
+                packageId = packageId,
+                onCard = packageId != null && VolumeStorage.placeOf(activity, packageId) == VolumePlace.CARD,
+                unpackedFolder = packageId != null && VolumeStorage.locate(activity, packageId) != null,
+                usedInOtherProject = packageId != null && packageId in elsewhere,
+            )
+        }
+    }
+
+    private fun showDeleteFilesChooser(project: RenaultProject) {
+        activeKind = DIALOG_DELETE_FILES
+        activeProjectId = project.id
+
+        val items = deleteItems(project)
+        if (items.isEmpty()) {
+            clear(DIALOG_DELETE_FILES)
+            showMessage("Видалити томи", "У проєкті немає томів.")
+            return
+        }
+        val selection =
+            deleteSelection
+                ?: VolumeDeleteChoice.defaultSelection(items).toMutableSet().also { deleteSelection = it }
+        selection.retainAll(items.map { it.volumeId }.toSet())
+
+        fun dp(value: Int) = Ui.dp(activity, value)
+        val content =
+            LinearLayout(activity).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(18), dp(8), dp(18), dp(8))
+            }
+        content.addView(
+            Ui.textView(
+                activity,
+                "Позначено розпаковані томи на карті пам'яті. Зніми або додай галочки. " +
+                    "Нічого не видаляється, доки не підтвердиш на наступному кроці.",
+                14f,
+                Ui.muted,
+            ),
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply { bottomMargin = dp(10) },
+        )
+
+        lateinit var dialog: AlertDialog
+        fun refreshButton() {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+                isEnabled = selection.isNotEmpty()
+                text = "Далі (" + selection.size + ")"
+            }
+        }
+
+        items.forEach { item ->
+            val row =
+                LinearLayout(activity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    minimumHeight = dp(56)
+                    setPadding(dp(4), dp(6), dp(8), dp(6))
+                    isClickable = true
+                    isFocusable = true
+                }
+            val box =
+                CheckBox(activity).apply {
+                    buttonTintList = ColorStateList.valueOf(Ui.danger)
+                    isClickable = false
+                    isFocusable = false
+                    isChecked = item.volumeId in selection
+                }
+            val texts = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+            texts.addView(
+                Ui.textView(activity, item.label, 17f, Ui.text).apply {
+                    setTypeface(typeface, Typeface.BOLD)
+                },
+            )
+            texts.addView(Ui.textView(activity, VolumeDeleteChoice.placeLabel(item), 13f, Ui.muted))
+            row.addView(box, LinearLayout.LayoutParams(dp(44), dp(44)))
+            row.addView(
+                texts,
+                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    marginStart = dp(6)
+                },
+            )
+            row.setOnClickListener {
+                if (!selection.remove(item.volumeId)) selection.add(item.volumeId)
+                box.isChecked = item.volumeId in selection
+                refreshButton()
+            }
+            content.addView(row)
+        }
+
+        dialog =
+            AlertDialog.Builder(activity)
+                .setTitle("Видалити томи разом з файлами")
+                .setView(ScrollView(activity).apply { addView(content) })
+                .setNegativeButton("Скасувати") { _, _ ->
+                    val returnToActions = activeParentKind == DIALOG_ACTIONS
+                    clear(DIALOG_DELETE_FILES)
+                    if (returnToActions) showActions(project.id)
+                }
+                .setPositiveButton("Далі") { _, _ ->
+                    if (selection.isNotEmpty()) showDeleteFilesConfirm(project)
+                }
+                .create()
+        track(
+            dialog = dialog,
+            kind = DIALOG_DELETE_FILES,
+            projectId = project.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.DANGER,
+        )
+        refreshButton()
+    }
+
+    private fun showDeleteFilesConfirm(project: RenaultProject) {
+        val items = deleteItems(project)
+        val selection = deleteSelection.orEmpty()
+        val selected = items.filter { it.volumeId in selection }
+        if (selected.isEmpty()) {
+            showDeleteFilesChooser(project)
+            return
+        }
+        activeKind = DIALOG_DELETE_FILES_CONFIRM
+        activeProjectId = project.id
+
+        val dialog =
+            AlertDialog.Builder(activity)
+                .setTitle(VolumeDeleteChoice.confirmTitle(selected.size))
+                .setMessage(VolumeDeleteChoice.confirmMessage(project.title, selected))
+                .setNegativeButton("Назад") { _, _ ->
+                    showDeleteFilesChooser(project)
+                }
+                .setPositiveButton("Видалити назавжди") { _, _ ->
+                    clear(DIALOG_DELETE_FILES_CONFIRM)
+                    deleteVolumes(project, selected)
+                }
+                .create()
+        track(
+            dialog = dialog,
+            kind = DIALOG_DELETE_FILES_CONFIRM,
+            projectId = project.id,
+        )
+        dialog.show()
+        DialogUi.apply(
+            dialog = dialog,
+            role = DialogRole.DANGER,
+        )
+    }
+
+    /**
+     * Files first (one rename each into the trash), then the record: when the files cannot
+     * be moved, the volume stays in the project as it was. Off the main thread — the card
+     * on Android 11 can be slow even for a rename.
+     */
+    private fun deleteVolumes(
+        project: RenaultProject,
+        selected: List<VolumeDeleteItem>,
+    ) {
+        onVolumesDeleted(project, "Видаляю " + VolumeDeleteChoice.volumeCount(selected.size) + "…")
+        VolumeTrash.deleteVolumesInBackground(
+            context = activity,
+            store = store,
+            projectId = project.id,
+            selected = selected,
+        ) { outcome ->
+            activity.window.decorView.post {
+                if (!activity.isDestroyed) onVolumesDeleted(project, VolumeDeleteChoice.resultMessage(outcome))
+            }
+        }
+    }
+
     /** v0.5.106: messages survive rotation (text is saved with the screen state). */
     private fun showMessage(
         title: String,
@@ -615,6 +850,9 @@ class HomeProjectDialogController(
             exportWizardState = ProjectExportWizardState()
             exportWizard = null
         }
+        if (activeKind == DIALOG_DELETE_FILES || activeKind == DIALOG_DELETE_FILES_CONFIRM) {
+            deleteSelection = null
+        }
         activeKind = ""
         activeProjectId = null
         activeParentKind = null
@@ -679,5 +917,11 @@ class HomeProjectDialogController(
             "homeProjectDialogExportFolder"
         private const val STATE_EXPORT_SCROLL_Y =
             "homeProjectDialogExportScrollY"
+        private const val DIALOG_DELETE_FILES =
+            "deleteVolumesWithFiles"
+        private const val DIALOG_DELETE_FILES_CONFIRM =
+            "deleteVolumesWithFilesConfirm"
+        private const val STATE_DELETE_SELECTION =
+            "homeProjectDialogDeleteSelection"
     }
 }

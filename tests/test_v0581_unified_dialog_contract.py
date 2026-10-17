@@ -13,7 +13,7 @@ DIALOG_COUNTS = {
     "ProjectActivity.kt": 9,
     "RestorableDialogs.kt": 1,
     # v0.5.104: Home's stop question moved into shared ConfirmActions.
-    "HomeProjectDialogController.kt": 3,
+    "HomeProjectDialogController.kt": 5,  # v0.5.147: delete volumes with files
     "ConfirmActions.kt": 1,
     "ProjectExportWizard.kt": 1,
     "SettingsActivity.kt": 4,  # v0.5.135: + «Де зберігати нові томи»
