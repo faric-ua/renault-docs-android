@@ -675,7 +675,7 @@ class RdprojectImportActivity : Activity() {
                 detail = if (stopping) "Зупиняю після поточного безпечного кроку…" else state.message,
                 current = state.progressCurrent.takeIf { hasBar },
                 total = state.progressTotal.takeIf { hasBar },
-                subject = state.projectTitle.ifBlank { "Renault Docs" },
+                subject = state.projectTitle.ifBlank { "Renodocs" },
                 onCancel = if (stopping) null else { { confirmDialogs.show(CONFIRM_STOP) } },
                 counterLabel =
                     if (hasBar && total > 0) {
@@ -708,7 +708,7 @@ class RdprojectImportActivity : Activity() {
                     else -> "Імпорт проєкту · помилка"
                 },
             detail = state.message,
-            subject = state.projectTitle.ifBlank { "Renault Docs" },
+            subject = state.projectTitle.ifBlank { "Renodocs" },
             onClose = {
                 runStore.clearTerminal()
                 operationStatus.hide()

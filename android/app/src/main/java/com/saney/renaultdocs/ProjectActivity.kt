@@ -901,7 +901,7 @@ class ProjectActivity : Activity() {
             else DateFormat.getDateTimeInstance().format(Date(value))
 
         val report = buildString {
-            appendLine("Renault Docs — останнє native .rdpkg (лише читання)")
+            appendLine("Renodocs — останнє native .rdpkg (лише читання)")
             appendLine("Відкритий проєкт: ${project.title} (${project.id})")
             appendLine("Проєкт останньої операції: ${last.projectId ?: "немає"}")
             appendLine("Фаза: ${last.phase}")
@@ -938,7 +938,7 @@ class ProjectActivity : Activity() {
             .setView(content)
             .setPositiveButton("Копіювати звіт") { _, _ ->
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("Renault Docs source", report))
+                clipboard.setPrimaryClip(ClipData.newPlainText("Renodocs source", report))
                 Toast.makeText(this, "Звіт скопійовано", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Закрити", null)
@@ -1681,7 +1681,7 @@ class ProjectActivity : Activity() {
                                     ?.name
                             }
                         }
-                        ?: "Renault Docs"
+                        ?: "Renodocs"
 
                 operationStatus.showRunning(
                     title = "Створення .rdpkg",
@@ -4100,7 +4100,7 @@ class ProjectActivity : Activity() {
                         volume,
                 )
             }
-            ?: "Renault Docs"
+            ?: "Renodocs"
 
     private fun shareRdpkg(
         volume: ProjectVolumeRecord,
@@ -5109,7 +5109,7 @@ class ProjectActivity : Activity() {
                         "Створити .rdpkg з архіву",
                     message =
                         "Виберіть старий Renault архів ZIP, 7Z або RAR без попередньої розпаковки.\n\n" +
-                            "Renault Docs скопіює архів у приватну тимчасову область, безпечно розпакує його, знайде raw-том і створить .rdpkg. Оригінальний архів не змінюється.",
+                            "Renodocs скопіює архів у приватну тимчасову область, безпечно розпакує його, знайде raw-том і створить .rdpkg. Оригінальний архів не змінюється.",
                 )
 
             else ->

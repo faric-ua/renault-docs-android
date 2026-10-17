@@ -62,7 +62,7 @@ class V0562DriveCatalogContractTests(unittest.TestCase):
         activity = self.read(
             "android/app/src/main/java/com/saney/renaultdocs/DriveCatalogActivity.kt"
         )
-        self.assertIn('"Каталог Renault Docs"', activity)
+        self.assertIn('"Каталог Renodocs"', activity)
         self.assertIn('"Імпортувати вибране"', activity)
         self.assertIn("projectCard(", activity)
         self.assertIn("volumeRow(", activity)

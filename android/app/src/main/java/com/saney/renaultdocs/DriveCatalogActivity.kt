@@ -253,7 +253,7 @@ class DriveCatalogActivity : Activity() {
                 context =
                     this,
                 value =
-                    "Каталог Renault Docs",
+                    "Каталог Renodocs",
                 sizeSp =
                     24f,
                 color =
@@ -974,7 +974,7 @@ class DriveCatalogActivity : Activity() {
                         },
                 subject =
                     item?.fileName
-                        ?: "Renault Docs",
+                        ?: "Renodocs",
                 // v0.5.105: same «Скасувати» as the Home card, with a question.
                 onCancel =
                     if (stopping) {

@@ -26,8 +26,8 @@ import java.util.Locale
  */
 object AppUpdate {
     const val FORMAT = "renault-docs-update/1"
-    const val APK_FILE_NAME = "Renault Docs.apk"
-    const val VERSION_FILE_NAME = "renault-docs-onovlennia.json"
+    const val APK_FILE_NAME = "Renodocs.apk"
+    const val VERSION_FILE_NAME = "renodocs-onovlennia.json"
 
     /** Short «what changed» is cut to this many characters (the window stays small). */
     const val MAX_CHANGES = 600
@@ -164,11 +164,11 @@ object AppUpdate {
                     try {
                         MiniJson.parseFlat(text.orEmpty())
                     } catch (e: IllegalArgumentException) {
-                        throw WrongFileException("За цим посиланням — не файл версії Renault Docs.\n\n$LINK_HINT")
+                        throw WrongFileException("За цим посиланням — не файл версії Renodocs.\n\n$LINK_HINT")
                     }
                 if (json["format"] != FORMAT) {
                     if (json["format"] == PLACEHOLDER_FORMAT) throw IllegalArgumentException("Автор ще не опублікував жодної версії.")
-                    throw WrongFileException("Це не файл оновлень Renault Docs (інший формат).\n\n$LINK_HINT")
+                    throw WrongFileException("Це не файл оновлень Renodocs (інший формат).\n\n$LINK_HINT")
                 }
                 val pkg = json["package"] as? String ?: ""
                 val code = (json["versionCode"] as? Long) ?: -1L

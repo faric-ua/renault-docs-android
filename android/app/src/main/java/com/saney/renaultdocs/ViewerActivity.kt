@@ -1224,7 +1224,7 @@ class ViewerActivity : Activity() {
                         .trim()
                 }
                 .ifBlank {
-                    "Renault Docs"
+                    "Renodocs"
                 }
 
         val withoutBrand =

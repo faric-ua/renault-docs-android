@@ -25,7 +25,7 @@ class VolumeTrashService : Service() {
         super.onCreate()
         workWakeLock = BackgroundWorkWakeLock(this, "VolumeTrash")
         getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Renault Docs · стирання видалених томів", NotificationManager.IMPORTANCE_LOW),
+            NotificationChannel(CHANNEL_ID, "Renodocs · стирання видалених томів", NotificationManager.IMPORTANCE_LOW),
         )
     }
 
@@ -115,7 +115,7 @@ class VolumeTrashService : Service() {
     ) =
         android.app.Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_document)
-            .setContentTitle(if (ongoing) VolumeDeleteChoice.ERASE_TITLE else "Renault Docs")
+            .setContentTitle(if (ongoing) VolumeDeleteChoice.ERASE_TITLE else "Renodocs")
             .setContentText(text)
             .setStyle(android.app.Notification.BigTextStyle().bigText(text))
             .setContentIntent(

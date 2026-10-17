@@ -142,7 +142,7 @@ class VolumePackageCheckTest {
     fun wrongFormatFails() {
         val files = LinkedHashMap(goodFiles)
         files["rdpkg.json"] = """{"schema_version":1,"format":"other","package_id":"x"}""".toByteArray()
-        expectBad(pack(files), "Це не Renault Docs")
+        expectBad(pack(files), "Це не Renodocs")
     }
 
     @Test

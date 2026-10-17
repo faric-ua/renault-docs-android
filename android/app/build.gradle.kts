@@ -29,11 +29,13 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.saney.renaultdocs"
+        // 0.6.0 (owner 2026-10-18): Renodocs is a separate app beside Renault Docs 0.5.153,
+        // so its own package. Kotlin namespace stays com.saney.renaultdocs.
+        applicationId = "com.saney.renodocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 169
-        versionName = "0.5.153"
+        versionCode = 170
+        versionName = "0.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

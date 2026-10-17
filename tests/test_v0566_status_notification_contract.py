@@ -23,7 +23,7 @@ class V0566StatusNotificationContractTests(unittest.TestCase):
 
         self.assertIn("ClipboardManager::class.java", status)
         self.assertIn("ClipData.newPlainText(", status)
-        self.assertIn('"Renault Docs status"', status)
+        self.assertIn('"Renodocs status"', status)
         self.assertIn('"Статус скопійовано"', status)
         self.assertIn("copyCurrentText()", status)
         self.assertGreaterEqual(

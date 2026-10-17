@@ -52,7 +52,7 @@ class AppUpdateTest {
             AppUpdate.Manifest.parse("PK\u0003\u0004 binary")
             fail()
         } catch (e: AppUpdate.WrongFileException) {
-            assertTrue(e.message!!.contains("не файл версії Renault Docs"))
+            assertTrue(e.message!!.contains("не файл версії Renodocs"))
         }
         try {
             AppUpdate.Manifest.parse(AppUpdate.PLACEHOLDER)

@@ -221,15 +221,15 @@ def build():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Інструкція Renault Docs</title>
+<title>Інструкція Renodocs</title>
 <!-- Згенеровано docs/ua/user-guide/build_app_guide.py з build_guide.py. Не редагувати вручну. -->
 <style>{CSS}</style>
 </head>
 <body>
 <div class="wrap">
 <main id="home" class="stack">
-  <h1>Renault Docs</h1>
-  <p class="muted">Інструкція користувача для Renault Docs {build_guide.VERSION} · {build_guide.DATE}. Технічна документація Renault на телефоні: томи, схеми, розʼєми, PDF. Дотик по розділу — докладно, кнопка «Назад» телефона повертає.</p>
+  <h1>Renodocs</h1>
+  <p class="muted">Інструкція користувача для Renodocs {build_guide.VERSION} · {build_guide.DATE}. Технічна документація Renault на телефоні: томи, схеми, розʼєми, PDF. Дотик по розділу — докладно, кнопка «Назад» телефона повертає.</p>
   <ul class="features">
 {chr(10).join(items)}
   </ul>

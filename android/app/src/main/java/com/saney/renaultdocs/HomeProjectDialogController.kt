@@ -784,7 +784,7 @@ class HomeProjectDialogController(
                     project.title +
                         "\n\nПроєкт і " +
                         volumeCountLabel(volumeCount) +
-                        " буде прибрано з бібліотеки Renault Docs. " +
+                        " буде прибрано з бібліотеки Renodocs. " +
                         "Вихідні .rdpkg, SAF-папки та оригінальні Renault-файли на телефоні не видаляються." +
                         preparedNote,
                 )

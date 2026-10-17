@@ -100,7 +100,7 @@ class NativeRdpkgPreparationService : Service() {
 
                     updateNotification(
                         title =
-                            "Renault Docs · скасування",
+                            "Renodocs · скасування",
                         text =
                             "Зупиняю підготовку після поточної операції…",
                         projectId =
@@ -206,7 +206,7 @@ class NativeRdpkgPreparationService : Service() {
             NOTIFICATION_ID,
             buildNotification(
                 title =
-                    "Renault Docs · створення .rdpkg",
+                    "Renodocs · створення .rdpkg",
                 text =
                     if (
                         request.sourceKind ==
@@ -278,7 +278,7 @@ class NativeRdpkgPreparationService : Service() {
             NOTIFICATION_ID,
             buildNotification(
                 title =
-                    "Renault Docs · archive batch",
+                    "Renodocs · archive batch",
                 text =
                     "Продовжую вибрані томи…",
                 projectId =
@@ -470,7 +470,7 @@ class NativeRdpkgPreparationService : Service() {
 
                         updateNotificationThrottled(
                             title =
-                                "Renault Docs · архів → .rdpkg",
+                                "Renodocs · архів → .rdpkg",
                             text =
                                 progress.displayText(),
                             projectId =
@@ -511,7 +511,7 @@ class NativeRdpkgPreparationService : Service() {
             )
             updateNotification(
                 title =
-                    "Renault Docs · перевірка архіву",
+                    "Renodocs · перевірка архіву",
                 text =
                     "Шукаю Renault томи без розпакування…",
                 projectId =
@@ -619,7 +619,7 @@ class NativeRdpkgPreparationService : Service() {
 
                 notifyFinal(
                     title =
-                        "Renault Docs · вибери томи",
+                        "Renodocs · вибери томи",
                     text =
                         "Знайдено томів: " +
                             candidates.size,
@@ -676,7 +676,7 @@ class NativeRdpkgPreparationService : Service() {
 
                     notifyFinal(
                         title =
-                            "Renault Docs · том уже є",
+                            "Renodocs · том уже є",
                         text =
                             label +
                                 " · конвертацію пропущено",
@@ -1011,7 +1011,7 @@ class NativeRdpkgPreparationService : Service() {
 
                 notifyFinal(
                     title =
-                        "Renault Docs · томи вже є",
+                        "Renodocs · томи вже є",
                     text =
                         "Конвертацію пропущено.",
                     projectId =
@@ -1134,7 +1134,7 @@ class NativeRdpkgPreparationService : Service() {
 
                         updateNotificationThrottled(
                             title =
-                                "Renault Docs · створення .rdpkg",
+                                "Renodocs · створення .rdpkg",
                             text =
                                 display,
                             projectId =
@@ -1206,7 +1206,7 @@ class NativeRdpkgPreparationService : Service() {
 
             updateNotification(
                 title =
-                    "Renault Docs · перевірка .rdpkg",
+                    "Renodocs · перевірка .rdpkg",
                 text =
                     progressPrefix +
                         "Перевіряю та встановлюю пакет…",
@@ -1238,7 +1238,7 @@ class NativeRdpkgPreparationService : Service() {
 
                             updateNotificationThrottled(
                                 title =
-                                    "Renault Docs · перевірка .rdpkg",
+                                    "Renodocs · перевірка .rdpkg",
                                 text =
                                     progressPrefix +
                                         progress.displayText(),
@@ -1389,7 +1389,7 @@ class NativeRdpkgPreparationService : Service() {
 
         notifyFinal(
             title =
-                "Renault Docs · .rdpkg готовий",
+                "Renodocs · .rdpkg готовий",
             text =
                 processed.label +
                     " · " +
@@ -1492,7 +1492,7 @@ class NativeRdpkgPreparationService : Service() {
                 processed.imported.packageId,
             ).joinToString(":"),
             projectId = request.projectId,
-            title = "Renault Docs · .rdpkg готовий",
+            title = "Renodocs · .rdpkg готовий",
             text = processed.label + " · " +
                 processed.prepared.sectionCount + " native",
         )
@@ -1869,7 +1869,7 @@ class NativeRdpkgPreparationService : Service() {
 
         notifyFinal(
             title =
-                "Renault Docs · томи вже є",
+                "Renodocs · томи вже є",
             text =
                 "Розпакування не потрібне.",
             projectId =
@@ -1922,7 +1922,7 @@ class NativeRdpkgPreparationService : Service() {
 
         notifyFinal(
             title =
-                "Renault Docs · томи вже є",
+                "Renodocs · томи вже є",
             text =
                 label +
                     " · конвертацію пропущено",

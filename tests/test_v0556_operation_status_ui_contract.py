@@ -12,7 +12,7 @@ class OperationStatusUiContractTest(unittest.TestCase):
     def test_shared_surface_has_title_detail_progress_and_terminal_close(self):
         ui = self.read("OperationStatusView.kt")
         self.assertIn("class OperationStatusView", ui)
-        self.assertIn('"Renault Docs"', ui)
+        self.assertIn('"Renodocs"', ui)
         bar = self.read("SharedOperationProgressBar.kt")
         self.assertIn("SharedOperationProgressBar.create(context)", ui)
         self.assertIn("progressBarStyleHorizontal", bar)

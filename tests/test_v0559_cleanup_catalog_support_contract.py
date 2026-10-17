@@ -103,7 +103,7 @@ class V0559CleanupCatalogSupportContractTests(unittest.TestCase):
         )
 
         self.assertIn("SUPPORT_URL", links)
-        self.assertIn('"Підтримати Renault Docs"', settings)
+        self.assertIn('"Підтримати Renodocs"', settings)
         self.assertIn("ExternalLinks.SUPPORT_URL", settings)
         self.assertIn(
             "Не відкриває додаткових функцій.",

@@ -356,7 +356,7 @@ class AppUpdateUi(
                 Ui.textView(
                     host,
                     "Увага: файл версії не той, що вбудований у застосунок. Телефони без вставленого посилання цієї " +
-                        "публікації не побачать — скажи про це в чаті Renault Docs.",
+                        "публікації не побачать — скажи про це в чаті Renodocs.",
                     13.5f,
                     Ui.warning,
                 ).apply { setPadding(0, dp(10), 0, 0) },
@@ -489,8 +489,8 @@ class AppUpdateUi(
         val send =
             Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(
                 Intent.EXTRA_TEXT,
-                "Оновлення Renault Docs: ${AppUpdate.viewUrl(jsonId)}\n" +
-                    "Скопіюй це посилання, потім у Renault Docs: «Налаштування» → «Оновлення застосунку» → " +
+                "Оновлення Renodocs: ${AppUpdate.viewUrl(jsonId)}\n" +
+                    "Скопіюй це посилання, потім у Renodocs: «Налаштування» → «Оновлення застосунку» → " +
                     "«Перевірити оновлення» → «Вставити посилання».",
             )
         try {
@@ -538,7 +538,7 @@ class AppUpdateUi(
         }
         val info = host.applicationInfo
         if (!info.splitSourceDirs.isNullOrEmpty()) {
-            showProblem("Ця версія встановлена кількома файлами (split APK) — її не передати одним APK. Встав версію з меню Renault Docs і спробуй ще раз.", offerLink = false)
+            showProblem("Ця версія встановлена кількома файлами (split APK) — її не передати одним APK. Встав версію з меню Renodocs і спробуй ще раз.", offerLink = false)
             return
         }
         val source = File(info.sourceDir)
@@ -853,7 +853,7 @@ class AppUpdateUi(
                 key = KEY_PERMISSION,
                 title = "Один дозвіл — один раз",
                 text =
-                    "Файл перевірено. Щоб Android дозволив Renault Docs встановити оновлення, на наступному екрані увімкни " +
+                    "Файл перевірено. Щоб Android дозволив Renodocs встановити оновлення, на наступному екрані увімкни " +
                         "«Дозволити з цього джерела» й натисни «Назад» — встановлення почнеться саме.",
                 role = DialogRole.CONFIRM,
                 positive = "Відкрити дозвіл",
@@ -945,7 +945,10 @@ class AppUpdateUi(
          * (created by the author's phone 2026-10-17 16:08, «Усі, хто має посилання»; first
          * publication — 0.5.150 / 166). If the author creates the file again, the publish window warns.
          */
-        const val BUILT_IN_MANIFEST_ID = "1eCbsQzdHb0LclRL64nDjGCU3ICWELNC0"
+        // 0.6.0 Renodocs: own update channel (separate app beside Renault Docs 0.5.153).
+        // Empty until the author publishes the first Renodocs version to Drive;
+        // the stable channel (renault-docs-onovlennia.json) must not be used here.
+        const val BUILT_IN_MANIFEST_ID = ""
 
         private const val OTHER_LINK_HINT =
             "\n\nАвтор казав, що є новіша? Скопіюй посилання від нього й натисни «Інше посилання»."

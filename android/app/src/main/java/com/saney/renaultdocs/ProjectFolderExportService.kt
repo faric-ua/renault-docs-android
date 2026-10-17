@@ -523,7 +523,7 @@ class ProjectFolderExportService : Service() {
         )
         return Notification.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification_document)
-            .setContentTitle("Renault Docs · окремі томи")
+            .setContentTitle("Renodocs · окремі томи")
             .setContentText(message)
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)

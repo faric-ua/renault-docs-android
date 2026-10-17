@@ -101,7 +101,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         subjectView =
             Ui.textView(
                 context,
-                "Renault Docs",
+                "Renodocs",
                 12f,
                 Ui.muted,
             ).apply {
@@ -200,7 +200,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         current: Int? = null,
         total: Int? = null,
         onCancel: (() -> Unit)? = null,
-        subject: String = "Renault Docs",
+        subject: String = "Renodocs",
         counterLabel: String? = null,
         secondaryLabel: String? = null,
         secondaryCurrent: Int? = null,
@@ -213,7 +213,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             subject
                 .trim()
                 .ifBlank {
-                    "Renault Docs"
+                    "Renodocs"
                 }
         configureDetailLayout(terminal = false)
         fullDetail = detail
@@ -249,7 +249,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     fun showTerminal(
         title: String,
         detail: String,
-        subject: String = "Renault Docs",
+        subject: String = "Renodocs",
         outcome: OperationTerminalOutcome = OperationTerminalOutcome.fromTitle(title),
         onClose: () -> Unit,
     ) {
@@ -266,7 +266,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
             subject
                 .trim()
                 .ifBlank {
-                    "Renault Docs"
+                    "Renodocs"
                 }
         configureDetailLayout(terminal = true)
         fullDetail = detail
@@ -381,7 +381,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         )
             .setPrimaryClip(
                 ClipData.newPlainText(
-                    "Renault Docs status",
+                    "Renodocs status",
                     fullText,
                 ),
             )
