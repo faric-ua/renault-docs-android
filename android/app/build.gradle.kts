@@ -32,10 +32,15 @@ android {
         applicationId = "com.saney.renaultdocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 165
-        versionName = "0.5.149"
+        versionCode = 166
+        versionName = "0.5.150"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // v0.5.150: update from the author's Google Drive (Settings → «Оновлення застосунку»).
+        // A Google Play build must set this to false and drop REQUEST_INSTALL_PACKAGES:
+        // Play forbids apps that update themselves outside Play.
+        buildConfigField("boolean", "DRIVE_UPDATES", "true")
     }
 
     signingConfigs {

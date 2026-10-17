@@ -430,6 +430,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
                 "ProjectActivity.kt": (9, 9),
                 "ProjectExportWizard.kt": (1, 1),
                 "SettingsActivity.kt": (4, 4),  # v0.5.135: + «Де зберігати нові томи»
+                # v0.5.150: update windows — one builder, shown and themed in one place.
+                "AppUpdateUi.kt": (1, 1),
             },
             audited,
         )
@@ -437,7 +439,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         # v0.5.102 (#181): one confirmation before cancelling a long operation.
         # v0.5.135 (TODO №1): + Settings «Де зберігати нові томи».
         # v0.5.147: + «Видалити томи разом з файлами» (list + confirmation).
-        self.assertEqual(22, total_builders)
+        # v0.5.150: + AppUpdateUi (one builder for all update windows).
+        self.assertEqual(23, total_builders)
 
     def test_dialog_action_buttons_are_readable(self):
         dialog_ui = self.read(
