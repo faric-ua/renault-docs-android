@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.153",
+  "versionCode": 169,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.153-core-stable-guide",
+  "issues": [
+    147
+  ],
+  "scope": "Core Stable candidate: scope agreed by owner 2026-10-17 20:10; user guide updated for v0.5.142-0.5.152 (delete volumes with files, app update from Google Drive, leftovers of broken-off imports).",
+  "sourceBase": "v0.5.152/build168",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 414,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "3195cc0a2ae75b0bbf6c92ed98fe9a3c7374625f",
+  "signed_run_id": 39053205876,
+  "signed_run_number": 223,
+  "signed_android_apk_run": 223,
+  "artifact_id": 12108631130,
+  "artifact_name": "Renault-Docs-v0.5.153-Debug",
+  "artifact_digest": "sha256:50f53fba2fe95e5c4998be6b0549897a27051eb0ab281dcb88342bee10a11641",
+  "next": "A26: install over via menu, «Опублікувати зараз»; M30s: «Перевірити оновлення» → «Оновити»; guide shows the new sections; TODO 10 leftovers."
+}
