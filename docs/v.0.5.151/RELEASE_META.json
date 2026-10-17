@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.151",
+  "versionCode": 167,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.151-builtin-update-link",
+  "issues": [
+    147
+  ],
+  "scope": "Built-in update link (version file in AppsAndroidSync/RenaultDocs/App) and «знайдено: N» while counting files to erase (TODO 24). Includes v0.5.150.",
+  "sourceBase": "v0.5.150/build166",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 408,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "68ecf6caaafd03e8e176f08dff2168b67d11797b",
+  "signed_run_id": 39049636044,
+  "signed_run_number": 221,
+  "signed_android_apk_run": 221,
+  "artifact_id": 12107286902,
+  "artifact_name": "Renault-Docs-v0.5.151-Debug",
+  "artifact_digest": "sha256:128e5f52f843fea6327fa08f34a14bf31b73c4b53b1120807f413fa7be262c31",
+  "next": "A26: install 0.5.151 over, «Опублікувати зараз»; M30s on 0.5.150: «Перевірити оновлення» → paste link → «Є нова версія 0.5.151» → «Оновити»."
+}
