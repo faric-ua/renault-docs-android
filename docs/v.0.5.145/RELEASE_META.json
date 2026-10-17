@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.145",
+  "versionCode": 161,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v05145-stored-on-android11",
+  "issues": [
+    147
+  ],
+  "scope": "TODO 19: on Android 11 (or a phone where ZipStreamCheck once caught a broken file) .rdpkg exports/shares and .rdproject are written STORED (Phone QA M30s 2026-10-17 04:24: «Файл вийшов пошкоджений: invalid code lengths set»). Other phones unchanged. Includes v0.5.144.",
+  "sourceBase": "v0.5.144/build160",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 390,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "7fff2afcbacb0cae6201dc1507740e1097b1390f",
+  "signed_run_id": 38991073636,
+  "signed_run_number": 215,
+  "signed_android_apk_run": 215,
+  "artifact_id": 12084488895,
+  "artifact_name": "Renault-Docs-v0.5.145-Debug",
+  "artifact_digest": "sha256:7fabb35469bcdf212ae0352b1bb0c6dffa0ed5aca026d7214341dc55663ed230",
+  "next": "M30s: install over; Megane II ⋮ NT8228A → «Підготувати і поділитися томом» → «Поділитися» window (no damaged-file error)."
+}
