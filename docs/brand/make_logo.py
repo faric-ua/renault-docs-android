@@ -10,19 +10,20 @@ NAVY2 = (34, 42, 56)
 BLUE = (118, 189, 255)
 YEL = (244, 197, 66)
 WHITE = (255, 255, 255)
+BG = (255, 255, 0)  # start page of Laguna II volumes is yellow
 PAGE = (243, 246, 248)
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 
 def frame(t):
-    big = Image.new("RGB", (W * S, H * S), WHITE)
+    big = Image.new("RGB", (W * S, H * S), BG)
     d = ImageDraw.Draw(big)
     cx, cy, r = 200 * S, 170 * S, 140 * S
     # emblem: soft shadow + navy disc + blue ring
     sh = Image.new("L", big.size, 0)
     ImageDraw.Draw(sh).ellipse((cx - r + 6 * S, cy - r + 12 * S, cx + r + 6 * S, cy + r + 12 * S), fill=70)
     sh = sh.filter(ImageFilter.GaussianBlur(10 * S))
-    big.paste((150, 160, 175), (0, 0), sh)
+    big.paste((150, 150, 0), (0, 0), sh)
     d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=NAVY)
     # radial gradient inside
     for i in range(40):
@@ -84,7 +85,14 @@ def frame(t):
 
 
 frames = [frame(t) for t in range(N)]
-pal = [fr.convert("P", palette=Image.ADAPTIVE, colors=64) for fr in frames]
-pal[0].save("RENODOCS_LOGO.gif", save_all=True, append_images=pal[1:], duration=80, loop=0, optimize=True, disposal=1)
+def to_p(fr):
+    p = fr.convert("P", palette=Image.ADAPTIVE, colors=63)
+    pal_ = p.getpalette()[:63 * 3] + list(BG)
+    p2 = fr.quantize(palette=_pal_img(pal_), dither=Image.Dither.NONE)
+    return p2
+def _pal_img(pal_):
+    im = Image.new("P", (1, 1)); im.putpalette(pal_ + [0] * (768 - len(pal_))); return im
+pal = [to_p(fr) for fr in frames]
+pal[0].save("RENODOCS_LOGO.gif", save_all=True, append_images=pal[1:], duration=80, loop=0, optimize=False, disposal=2, transparency=63)
 frames[0].save("preview_frame0.png")
 frames[N // 2].save("preview_frame15.png")
