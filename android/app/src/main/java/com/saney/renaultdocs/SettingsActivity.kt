@@ -88,8 +88,24 @@ class SettingsActivity : Activity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        AppUpdateState.attach(this)
+    }
+
+    override fun onStop() {
+        AppUpdateState.detach(this)
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
+        // v0.5.150: update window back after rotation; install goes on after the permission screen.
+        if (AppUpdateSwitch.ENABLED) {
+            val updates = AppUpdateUi(this)
+            if (AppUpdateState.dialog == null) updates.restoreOpen()
+            updates.resumePendingInstall()
+        }
         // The card may be put in or taken out while the app is in the background.
         if (::storageValue.isInitialized) renderValues()
     }
@@ -183,6 +199,7 @@ class SettingsActivity : Activity() {
     }
 
     override fun onDestroy() {
+        AppUpdateState.onHostDestroy(this)
         if (::confirmDialogs.isInitialized) {
             confirmDialogs.onDestroy()
         }
@@ -202,6 +219,12 @@ class SettingsActivity : Activity() {
             resultCode,
             data,
         )
+
+        // v0.5.150: the author created the APK / version file on Google Drive.
+        if (AppUpdateUi.isRequest(requestCode)) {
+            AppUpdateUi(this).onFilePicked(requestCode, resultCode, data)
+            return
+        }
 
         if (
             requestCode !=
@@ -526,6 +549,13 @@ class SettingsActivity : Activity() {
         body.addCard(
             guideCard(),
         )
+
+        // v0.5.150 (owner 2026-10-17 15:49): update from Google Drive, with what's new.
+        if (AppUpdateSwitch.ENABLED) {
+            body.addCard(
+                AppUpdateUi(this).card(),
+            )
+        }
 
         body.addCard(
             supportCard(),

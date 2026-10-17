@@ -288,6 +288,8 @@ class MainActivity : Activity() {
         }
 
     override fun onDestroy() {
+        // v0.5.150: an update window of this screen is closed (rotation keeps its key).
+        AppUpdateState.onHostDestroy(this)
         if (::confirmDialogs.isInitialized) {
             confirmDialogs.onDestroy()
         }
@@ -299,6 +301,7 @@ class MainActivity : Activity() {
 
     override fun onStart() {
         super.onStart()
+        AppUpdateState.attach(this)
         rdprojectRunHandler.removeCallbacks(
             rdprojectRunRefresh,
         )
@@ -311,6 +314,7 @@ class MainActivity : Activity() {
         rdprojectRunHandler.removeCallbacks(
             rdprojectRunRefresh,
         )
+        AppUpdateState.detach(this)
         super.onStop()
     }
 
@@ -323,6 +327,14 @@ class MainActivity : Activity() {
         // v0.5.148: something left in the trash (app closed while erasing) — go on erasing.
         VolumeTrash.startErase(this)
         refreshTrashCard()
+        // v0.5.150: update from Google Drive — a window open before rotation comes back; after
+        // «Дозволити з цього джерела» installing goes on; once a day a quiet check.
+        if (AppUpdateSwitch.ENABLED) {
+            val updates = AppUpdateUi(this)
+            if (AppUpdateState.dialog == null) updates.restoreOpen()
+            updates.resumePendingInstall()
+            updates.autoCheck()
+        }
     }
 
     /**

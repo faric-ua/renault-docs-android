@@ -17,6 +17,10 @@
     <cache-path
         name="rdproject_import"
         path="rdproject-import/" />
+    <!-- v0.5.150: only a downloaded and checked update APK (AppUpdateUi). -->
+    <cache-path
+        name="app_update"
+        path="app-update/" />
     <files-path
         name="prepared_share"
         path="prepared-share/" />
