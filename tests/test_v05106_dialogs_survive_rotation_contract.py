@@ -119,7 +119,8 @@ class DialogsSurviveRotationContract(unittest.TestCase):
             self.assertIn(f"{key} ->", main)
         # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).
         self.assertIn("CONFIRM_CANCEL_IMPORT) buildCancelImportDialog()", read("DriveCatalogActivity.kt"))
-        self.assertIn("CONFIRM_RESET_BACKUP) buildResetBackupDialog()", read("SettingsActivity.kt"))
+        # v0.5.149: Settings routes two keys (+ «Залишки обірваних імпортів») with `when`.
+        self.assertIn("CONFIRM_RESET_BACKUP -> buildResetBackupDialog()", read("SettingsActivity.kt"))
 
     def test_stop_questions_skip_finished_operations_after_rotation(self):
         # v0.5.112: converter removed (archive branch archive/legacy-converter-v0.5.111).

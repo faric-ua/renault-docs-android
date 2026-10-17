@@ -49,7 +49,33 @@ object VolumeArchiveWriter {
         sourceRoot: File,
         target: File,
         progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
-    ): Result = writeTo(sourceRoot, target.outputStream(), progress)
+        listing: ((found: Int) -> Unit)? = null,
+    ): Result = writeTo(sourceRoot, target.outputStream(), progress, listing = listing)
+
+    /**
+     * v0.5.149 (TODO №21 п. 2, owner 2026-10-17 04:19): the volume's files in package order
+     * (sorted by path, files only). On the M30s card listing thousands of files takes 10+ s
+     * with no measure, so [listing] gets the number found so far (every [LISTING_REPORT_EVERY]
+     * files and at the end) — the card shows «Знайдено файлів: N» instead of an empty bar.
+     */
+    fun listFiles(
+        root: File,
+        listing: ((found: Int) -> Unit)? = null,
+    ): List<File> {
+        val found = ArrayList<File>()
+        for (file in root.walkTopDown()) {
+            if (!file.isFile) continue
+            found += file
+            if (found.size % LISTING_REPORT_EVERY == 0) listing?.invoke(found.size)
+        }
+        listing?.invoke(found.size)
+        return found.sortedWith(
+            compareBy<File> { relativePath(root, it).lowercase(Locale.ROOT) }
+                .thenBy { relativePath(root, it) },
+        )
+    }
+
+    const val LISTING_REPORT_EVERY = 100
 
     /**
      * v0.5.145: the same STORED archive into any stream (exports from a phone whose
@@ -59,17 +85,13 @@ object VolumeArchiveWriter {
         sourceRoot: File,
         output: java.io.OutputStream,
         progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
+        // v0.5.149: the caller may have listed the files already (one slow listing, not two).
+        files: List<File>? = null,
+        listing: ((found: Int) -> Unit)? = null,
     ): Result {
         val root = sourceRoot.canonicalFile
         require(root.isDirectory) { "Package source is not a directory: $root" }
-        val files =
-            root.walkTopDown()
-                .filter { it.isFile }
-                .toList()
-                .sortedWith(
-                    compareBy<File> { relativePath(root, it).lowercase(Locale.ROOT) }
-                        .thenBy { relativePath(root, it) },
-                )
+        val files = files ?: listFiles(root, listing)
         require(files.isNotEmpty()) { "Package source directory is empty." }
         val totalBytes = files.sumOf { it.length() }
         val digest = MessageDigest.getInstance("SHA-256")

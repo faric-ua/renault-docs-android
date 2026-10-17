@@ -63,6 +63,8 @@ object RdpkgZipWriter {
             processedBytes: Long,
             totalBytes: Long,
         ) -> Unit)? = null,
+        // v0.5.149 (TODO №21 п. 2): files found so far while the folder is listed.
+        listing: ((found: Int) -> Unit)? = null,
     ): WriteResult {
         val root =
             sourceRoot.canonicalFile
@@ -74,28 +76,13 @@ object RdpkgZipWriter {
                 root
         }
 
+        // Same order as before (path, lower case first) — one listing shared with the
+        // STORED path, which used to list the whole folder a second time (v0.5.145–148).
         val files =
-            root
-                .walkTopDown()
-                .filter {
-                    it.isFile
-                }
-                .toList()
-                .sortedWith(
-                    compareBy<File> {
-                        relativePath(
-                            root,
-                            it,
-                        ).lowercase(
-                            Locale.ROOT,
-                        )
-                    }.thenBy {
-                        relativePath(
-                            root,
-                            it,
-                        )
-                    }
-                )
+            VolumeArchiveWriter.listFiles(
+                root,
+                listing,
+            )
 
         require(
             files.isNotEmpty(),
@@ -113,6 +100,7 @@ object RdpkgZipWriter {
             return writeStored(
                 context = context,
                 root = root,
+                files = files,
                 destinationUri = destinationUri,
                 progress = progress,
                 byteProgress = byteProgress,
@@ -333,6 +321,7 @@ object RdpkgZipWriter {
     private fun writeStored(
         context: Context,
         root: File,
+        files: List<File>,
         destinationUri: Uri,
         progress: ((completed: Int, total: Int) -> Unit)?,
         byteProgress: ((Int, Int, Long, Long) -> Unit)?,
@@ -347,6 +336,7 @@ object RdpkgZipWriter {
                 VolumeArchiveWriter.writeTo(
                     sourceRoot = root,
                     output = TeeOutputStream(rawOutput, check.output),
+                    files = files,
                     progress = { filesDone, filesTotal, bytesDone, bytesTotal ->
                         val now = SystemClock.elapsedRealtime()
                         if (filesDone <= 1 || filesDone >= filesTotal || now - lastProgressAt >= PROGRESS_THROTTLE_MS) {

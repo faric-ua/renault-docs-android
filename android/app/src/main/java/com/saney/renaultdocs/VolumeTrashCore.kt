@@ -53,6 +53,29 @@ object VolumeTrashCore {
         return if (item.renameTo(target)) target else null
     }
 
+    /**
+     * v0.5.149 (TODO №10): what broken-off operations left beside the volumes — only names
+     * the app itself makes for unfinished work:
+     * - `…/rdpkg/.import-<uuid>` — unpacking of an import (until v0.5.142, and replacements);
+     * - `…/rdpkg-archive/.import-<uuid>.part` — copying of an import as one file (v0.5.143+);
+     * - `…/rdpkg-archive/<id>.rdpkg.part` — making a volume archive (v0.5.141+).
+     * Never `.backup-…` (may be the only old copy) and never a volume or a finished archive.
+     * Looks one level deep only (fast on the card). Sorted by name.
+     */
+    fun findLeftovers(volumesRoots: List<File>): List<File> =
+        volumesRoots.flatMap { root ->
+            val imports =
+                root.listFiles()?.filter { it.name.startsWith(".import-") }.orEmpty()
+            val archiveDir = File(root.parentFile ?: root, "rdpkg-archive")
+            val parts =
+                archiveDir.listFiles()?.filter { file ->
+                    file.isFile &&
+                        ((file.name.startsWith(".import-") && file.name.endsWith(".part")) ||
+                            (!file.name.startsWith(".") && file.name.endsWith(".rdpkg.part")))
+                }.orEmpty()
+            (imports + parts).sortedBy { it.name }
+        }
+
     /** Volumes waiting to be erased (top-level items in the trash folders). */
     fun pendingItems(trashDirs: List<File>): Int =
         trashDirs.sumOf { dir ->

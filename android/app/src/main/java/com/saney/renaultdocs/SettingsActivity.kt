@@ -20,6 +20,8 @@ class SettingsActivity : Activity() {
     private lateinit var pdfZoomValue: TextView
     private lateinit var pdfStepValue: TextView
     private lateinit var storageValue: TextView
+    // v0.5.149 (TODO №10): leftovers of broken-off imports / archives.
+    private lateinit var leftoversValue: TextView
     private lateinit var backupValue: TextView
     private lateinit var backupWarning: TextView
     private lateinit var backupChooseButton: Button
@@ -51,7 +53,11 @@ class SettingsActivity : Activity() {
                 activity = this,
                 stateKey = "settingsConfirm",
             ) { key ->
-                if (key == CONFIRM_RESET_BACKUP) buildResetBackupDialog() else null
+                when (key) {
+                    CONFIRM_RESET_BACKUP -> buildResetBackupDialog()
+                    CONFIRM_LEFTOVERS -> buildLeftoversDialog()
+                    else -> null
+                }
             }
         confirmDialogs.restore(
             savedInstanceState,
@@ -128,6 +134,53 @@ class SettingsActivity : Activity() {
 
             renderValues()
         }
+
+    /**
+     * v0.5.149 (TODO №10, planned 2026-10-15 «з "так" власника»): the list of what broken-off
+     * imports / archives left, then «Прибрати» — into the trash, erased with the bar on the
+     * home screen. Never while an import / archive runs.
+     */
+    private fun buildLeftoversDialog(): AlertDialog? {
+        val found = VolumeTrash.leftovers(this)
+        if (found.isEmpty() || VolumeTrash.leftoverWriterRunning(this)) return null
+        val names = found.take(12).joinToString("\n") { "• " + it.name + if (it.isDirectory) " (папка)" else "" }
+        val more = if (found.size > 12) "\n… і ще " + (found.size - 12) else ""
+        return ConfirmActions.confirm(
+            activity = this,
+            title = "Прибрати залишки: " + found.size + "?",
+            message =
+                names + more +
+                    "\n\nЦе недороблені файли обірваних імпортів і архівів. Томи, готові архіви й проєкти не чіпаються. " +
+                    "Стирання — у фоні, смуга на головному екрані.",
+            confirmLabel = "Прибрати",
+            keepLabel = "Залишити",
+        ) {
+            val moved = VolumeTrash.clearLeftovers(this)
+            statusText.setTextColor(Ui.muted)
+            statusText.text =
+                if (moved == null) {
+                    "Зараз іде імпорт або архів — нічого не чіпав. Спробуй після кінця."
+                } else {
+                    "Прибрано залишків: $moved. Стираються у фоні — смуга на головному екрані."
+                }
+            renderValues()
+        }
+    }
+
+    private fun onLeftoversClicked() {
+        val found = VolumeTrash.leftovers(this)
+        when {
+            found.isEmpty() -> {
+                statusText.setTextColor(Ui.muted)
+                statusText.text = "Залишків обірваних імпортів немає — прибирати нічого."
+            }
+            VolumeTrash.leftoverWriterRunning(this) -> {
+                statusText.setTextColor(Ui.muted)
+                statusText.text = "Зараз іде імпорт або архів — залишки покажу після кінця."
+            }
+            else -> confirmDialogs.show(CONFIRM_LEFTOVERS)
+        }
+    }
 
     override fun onDestroy() {
         if (::confirmDialogs.isInitialized) {
@@ -398,6 +451,21 @@ class SettingsActivity : Activity() {
                 },
                 valueHolder = {
                     storageValue = it
+                },
+            )
+        )
+
+        body.addCard(
+            settingRow(
+                title =
+                    "Залишки обірваних імпортів",
+                description =
+                    "Недороблені файли, що лишились, коли імпорт або архів тому обірвався (телефон перезапустився тощо). Спершу список, прибрати — лише після «Прибрати».",
+                onClick = {
+                    onLeftoversClicked()
+                },
+                valueHolder = {
+                    leftoversValue = it
                 },
             )
         )
@@ -1251,6 +1319,8 @@ class SettingsActivity : Activity() {
                     "%"
             }
 
+        leftoversValue.text =
+            VolumeTrash.leftovers(this).size.let { if (it == 0) "Немає" else "Знайдено: $it" }
         storageValue.text =
             VolumeStorage.choiceLine(this)
 
@@ -1610,6 +1680,8 @@ class SettingsActivity : Activity() {
 
         private const val CONFIRM_RESET_BACKUP =
             "resetBackupFolder"
+        private const val CONFIRM_LEFTOVERS =
+            "clearLeftovers"
         private const val STATE_DIALOG_KIND =
             "settingsDialogKind"
         private const val DIALOG_MODE =
