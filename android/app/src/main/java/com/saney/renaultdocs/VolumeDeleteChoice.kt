@@ -114,6 +114,7 @@ object VolumeDeleteChoice {
             append(" · ")
             if (p.counting) {
                 append("рахую файли…")
+                if (p.itemDone > 0) append(" ").append(p.itemDone)
             } else {
                 append((p.fraction * 100).toInt().coerceIn(0, 100))
                 append(" %")
@@ -126,7 +127,7 @@ object VolumeDeleteChoice {
 
     fun eraseDetail(p: VolumeTrashCore.EraseProgress): String =
         if (p.counting) {
-            "Рахую файли тому ${p.itemIndex}… Стерто вже: ${p.deletedFiles}."
+            "Рахую файли тому ${p.itemIndex}… знайдено: ${p.itemDone}. Стерто вже: ${p.deletedFiles}."
         } else {
             "Стерто файлів: ${p.deletedFiles} · у цьому томі ${p.itemDone} з ${p.itemFiles}."
         }

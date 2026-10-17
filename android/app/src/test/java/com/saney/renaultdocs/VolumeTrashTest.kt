@@ -77,6 +77,7 @@ class VolumeTrashTest {
         assertTrue(File(trash, ".nomedia").isFile)
         assertEquals(0, VolumeTrashCore.pendingItems(listOf(trash)))
         // Two volumes: each starts with «counting», then a known number of files.
+        // Counting reports at the start of each volume (+ every 250 found — not reached here).
         assertEquals(2, reports.count { it.counting })
         assertTrue(reports.all { it.itemTotal == 2 })
         assertEquals(setOf(1, 41), reports.filter { !it.counting }.map { it.itemFiles }.toSet())
@@ -88,6 +89,18 @@ class VolumeTrashTest {
         // Nothing outside the trash was touched.
         assertTrue(File(keep, "rdpkg.json").isFile)
         assertTrue(keepArchive.isFile)
+    }
+
+    @Test
+    fun countingReportsFoundFiles() {
+        val base = tempDir()
+        val volumes = File(base, "rdpkg").apply { mkdirs() }
+        val trash = VolumeTrashCore.trashDirFor(volumes)
+        VolumeTrashCore.moveIn(volumeFolder(volumes, "BIG", 600), trash, 1L)
+        val reports = mutableListOf<VolumeTrashCore.EraseProgress>()
+        VolumeTrashCore.eraseAll(listOf(trash)) { reports += it }
+        val counting = reports.filter { it.counting }.map { it.itemDone }
+        assertEquals(listOf(0, 250, 500), counting)
     }
 
     @Test
@@ -132,6 +145,12 @@ class VolumeTrashTest {
         assertNull(VolumeTrashCore.EraseProgress(2, 4, 100, 50, 150, 2_000L).remainingMs) // too soon
         assertEquals("Том 2 з 4 · 37 % · залишилось менше хвилини", VolumeDeleteChoice.eraseCounter(p))
         assertEquals("Том 3 з 4 · рахую файли…", VolumeDeleteChoice.eraseCounter(VolumeTrashCore.EraseProgress(3, 4, -1, 0, 9, 1_000L)))
+        // v0.5.151 (TODO №24): how many found so far while counting.
+        assertEquals("Том 3 з 4 · рахую файли… 1250", VolumeDeleteChoice.eraseCounter(VolumeTrashCore.EraseProgress(3, 4, -1, 1250, 9, 1_000L)))
+        assertEquals(
+            "Рахую файли тому 3… знайдено: 1250. Стерто вже: 9.",
+            VolumeDeleteChoice.eraseDetail(VolumeTrashCore.EraseProgress(3, 4, -1, 1250, 9, 1_000L)),
+        )
         assertEquals("~12 хв", VolumeDeleteChoice.durationLabel(12 * 60_000L))
         assertEquals("~1 год 05 хв", VolumeDeleteChoice.durationLabel(65 * 60_000L))
         assertEquals("менше хвилини", VolumeDeleteChoice.durationLabel(59_000L))

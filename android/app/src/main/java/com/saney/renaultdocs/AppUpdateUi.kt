@@ -941,10 +941,11 @@ class AppUpdateUi(
     companion object {
         /**
          * The version file on the author's Drive built into the app, so other phones check
-         * without pasting a link. Empty until the author's first publication (then Claude puts its
-         * ID here in the next version).
+         * without pasting a link: `AppsAndroidSync/RenaultDocs/App/renault-docs-onovlennia.json`
+         * (created by the author's phone 2026-10-17 16:08, «Усі, хто має посилання»; first
+         * publication — 0.5.150 / 166). If the author creates the file again, the publish window warns.
          */
-        const val BUILT_IN_MANIFEST_ID = ""
+        const val BUILT_IN_MANIFEST_ID = "1eCbsQzdHb0LclRL64nDjGCU3ICWELNC0"
 
         private const val OTHER_LINK_HINT =
             "\n\nАвтор казав, що є новіша? Скопіюй посилання від нього й натисни «Інше посилання»."
