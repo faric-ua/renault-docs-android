@@ -389,11 +389,18 @@ object RdpkgImporter {
         try {
             copyPackage(context, packageUri, part, progressState, isCancelled)
             if (isCancelled()) throw ConversionCancelledException()
+            // v0.5.144 (M30s 2026-10-17 03:48: «до 50 % швидко, а потім довго»): the check
+            // reports after every entry (~8 thousand small files); each report wrote the run
+            // state and posted a notification. Now at most ~10 times a second, like unpacking.
+            var lastCheckProgressAt = 0L
             val check =
                 try {
                     VolumePackageCheck.check(
                         file = part,
                         progress = { done, total ->
+                            val now = SystemClock.elapsedRealtime()
+                            if (done < total && now - lastCheckProgressAt < PROGRESS_THROTTLE_MS) return@check
+                            lastCheckProgressAt = now
                             progressState?.invoke(
                                 OperationProgress.measured(
                                     stage = "Перевіряю том…",
