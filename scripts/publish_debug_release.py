@@ -22,6 +22,11 @@ PROMOTION_DIR = (ROOT / "docs/release-promotions").resolve()
 VERSION_RE = re.compile(r"0\.[0-9]+\.[0-9]+")
 SHA_RE = re.compile(r"[0-9a-f]{40}")
 ARTIFACT_DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}")
+# Public digest of the stable developer signing certificate (not a secret). Core Stable
+# (#147, owner 2026-10-17) must be installable over the existing app, so it can only be
+# the very same signed artifact as the phone-tested -debug release.
+STABLE_SIGNER_SHA256 = "dd588fbb3093a047f81c24397fc6d2ab7f5a32040425a21dd24506cce59a9802"
+CORE_STABLE_SUFFIX = "-core-stable"
 
 
 def command(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -41,7 +46,11 @@ def validate_manifest(path: str | Path) -> dict:
     version = data.get("version")
     if not isinstance(version, str) or not VERSION_RE.fullmatch(version):
         raise ValueError("Invalid version")
-    if source.name != f"v{version}.json":
+    core_stable = data.get("channel") == "core-stable"
+    if "channel" in data and not core_stable:
+        raise ValueError("Unknown release channel")
+    expected_file = f"v{version}{CORE_STABLE_SUFFIX}.json" if core_stable else f"v{version}.json"
+    if source.name != expected_file:
         raise ValueError("Manifest filename differs from version")
     if type(data.get("version_code")) is not int or data["version_code"] <= 0:
         raise ValueError("Invalid versionCode")
@@ -53,6 +62,8 @@ def validate_manifest(path: str | Path) -> dict:
     expected_name = f"Renault-Docs-v{version}-Debug"
     if data.get("artifact_name") != expected_name:
         raise ValueError("Artifact name does not match the version")
+    if core_stable:
+        return validate_core_stable(data, source)
     if data.get("tag") != f"v{version}-debug":
         raise ValueError("Release tag must be versioned -debug")
     if data.get("prerelease") is not True:
@@ -86,6 +97,81 @@ def validate_manifest(path: str | Path) -> dict:
     if meta_digest != data["artifact_digest"]:
         raise ValueError("Release metadata artifact digest differs from promotion")
     return data
+
+
+def validate_core_stable(data: dict, source: Path) -> dict:
+    """Core Stable = the same signed artifact as an already promoted -debug release.
+
+    Nothing is rebuilt: run, artifact and digest must equal the -debug promotion of the
+    same version (which itself is checked against RELEASE_META), the owner's phone pass
+    must be written down, and the known limitations are part of the request.
+    """
+    version = data["version"]
+    if data.get("tag") != f"v{version}{CORE_STABLE_SUFFIX}":
+        raise ValueError("Core Stable tag must be versioned -core-stable")
+    if data.get("prerelease") is not False:
+        raise ValueError("Core Stable is a full release, not a prerelease")
+    if data.get("qa_status") != "core-stable-phone-pass":
+        raise ValueError("Core Stable needs the owner's phone pass")
+    evidence = data.get("phone_evidence")
+    if not isinstance(evidence, list) or not evidence or not all(
+        isinstance(x, str) and x.strip() for x in evidence
+    ):
+        raise ValueError("Core Stable needs written phone evidence")
+    limits = data.get("known_limitations")
+    if not isinstance(limits, list) or not limits or not all(
+        isinstance(x, str) and x.strip() for x in limits
+    ):
+        raise ValueError("Core Stable needs the list of known limitations")
+    if not isinstance(data.get("artifact_digest"), str) or not ARTIFACT_DIGEST_RE.fullmatch(data["artifact_digest"]):
+        raise ValueError("Missing GitHub artifact-bundle digest")
+    debug = validate_manifest(source.parent / f"v{version}.json")
+    for key in (
+        "version_code", "source_sha", "signed_run_id", "signed_run_number",
+        "artifact_id", "artifact_name", "artifact_digest",
+    ):
+        if data.get(key) != debug[key]:
+            raise ValueError(f"Core Stable differs from the tested -debug build: {key}")
+    return data
+
+
+def apk_signer_sha256(apk: Path) -> str:
+    """Signer certificate digest via apksigner of the GitHub runner's Android SDK."""
+    sdk = os.environ.get("ANDROID_SDK_ROOT") or os.environ.get("ANDROID_HOME") or ""
+    tools = sorted(Path(sdk, "build-tools").glob("*/apksigner")) if sdk else []
+    if not tools:
+        raise ValueError("apksigner not found on the runner")
+    out = command(str(tools[-1]), "verify", "--print-certs", str(apk)).stdout
+    match = re.search(r"Signer #1 certificate SHA-256 digest: ([0-9a-fA-F:]+)", out)
+    if not match:
+        raise ValueError("Signer certificate digest not printed")
+    return match.group(1).replace(":", "").lower()
+
+
+def core_stable_notes(data: dict, digest: str, signer: str) -> str:
+    lines = [
+        f"# Renault Docs v{data['version']} — Core Stable",
+        "",
+        "Перша стабільна версія основних функцій (#147). Без входу, ліцензій і оплати.",
+        "Це **той самий підписаний файл**, що й перевірений на телефоні "
+        f"`v{data['version']}-debug` — ставиться поверх, проєкти й томи лишаються.",
+        "Не видаляй застосунок і не чисть дані.",
+        "",
+        "## Перевірено на телефоні",
+        *[f"- {x}" for x in data["phone_evidence"]],
+        "",
+        "## Що поки не вміє (відомі обмеження)",
+        *[f"- {x}" for x in data["known_limitations"]],
+        "",
+        "## Дані збірки",
+        f"- Версія: {data['version']} (versionCode {data['version_code']})",
+        f"- Код: {data['source_sha']}",
+        f"- Збірка GitHub Actions: run {data['signed_run_id']} (#{data['signed_run_number']})",
+        f"- Сертифікат підпису SHA-256: {signer}",
+        f"- APK SHA-256: {digest}",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 def gh_api_json(endpoint: str) -> dict:
@@ -181,6 +267,19 @@ def publish(data: dict) -> None:
         )
         apk, checksum, digest = check_downloaded_apk(folder, data["version"])
         note = folder / "RELEASE_NOTES.md"
+        if data.get("channel") == "core-stable":
+            signer = apk_signer_sha256(apk)
+            if signer != STABLE_SIGNER_SHA256:
+                raise ValueError("APK is not signed with the stable developer certificate")
+            note.write_text(core_stable_notes(data, digest, signer), encoding="utf-8")
+            command(
+                "gh", "release", "create", tag, str(apk), str(checksum),
+                "--repo", repo, "--target", data["source_sha"],
+                "--title", f"Renault Docs v{data['version']} — Core Stable",
+                "--notes-file", str(note), "--latest",
+            )
+            print(f"Published {tag} (Core Stable), APK SHA-256 {digest}")
+            return
         note.write_text(
             f"# Renault Docs v{data['version']} — developer-signed debug build\n\n"
             "This is an Android **debug pre-release**, not a Play Store release.\n"
@@ -207,7 +306,7 @@ def publish(data: dict) -> None:
 
 def main() -> None:
     if len(sys.argv) != 2:
-        raise SystemExit("Usage: publish_debug_release.py docs/release-promotions/vX.Y.Z.json")
+        raise SystemExit("Usage: publish_debug_release.py docs/release-promotions/vX.Y.Z[-core-stable].json")
     data = validate_manifest(sys.argv[1])
     print(f"Validated signed promotion request: {data['tag']}")
     if os.getenv("GITHUB_ACTIONS") == "true":
