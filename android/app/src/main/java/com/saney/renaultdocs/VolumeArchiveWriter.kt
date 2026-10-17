@@ -48,9 +48,10 @@ object VolumeArchiveWriter {
     fun write(
         sourceRoot: File,
         target: File,
-        progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
+        // Before [progress]: a trailing lambda keeps meaning «progress» (v0.5.149).
         listing: ((found: Int) -> Unit)? = null,
-    ): Result = writeTo(sourceRoot, target.outputStream(), progress, listing = listing)
+        progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
+    ): Result = writeTo(sourceRoot, target.outputStream(), listing = listing, progress = progress)
 
     /**
      * v0.5.149 (TODO №21 п. 2, owner 2026-10-17 04:19): the volume's files in package order
@@ -84,10 +85,10 @@ object VolumeArchiveWriter {
     fun writeTo(
         sourceRoot: File,
         output: java.io.OutputStream,
-        progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
         // v0.5.149: the caller may have listed the files already (one slow listing, not two).
         files: List<File>? = null,
         listing: ((found: Int) -> Unit)? = null,
+        progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
     ): Result {
         val root = sourceRoot.canonicalFile
         require(root.isDirectory) { "Package source is not a directory: $root" }
