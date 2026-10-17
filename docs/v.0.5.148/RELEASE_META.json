@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.148",
+  "versionCode": 164,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.148-trash-progress",
+  "issues": [
+    147
+  ],
+  "scope": "Owner 2026-10-17 05:25: progress for erasing files of deleted volumes — count then erase per volume, VolumeTrashService with a bar in the shade (volume N of M, percent, time left), own home card and summary. Includes v0.5.147.",
+  "sourceBase": "v0.5.147/build163",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 397,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "ab4552ba0cfa8e073462a19249ba58598a0528a5",
+  "signed_run_id": 38995263664,
+  "signed_run_number": 218,
+  "signed_android_apk_run": 218,
+  "artifact_id": 12087106243,
+  "artifact_name": "Renault-Docs-v0.5.148-Debug",
+  "artifact_digest": "sha256:f200e093986f9f7567df1aa04c575c6b808dd60bcff8acb76735ba53ca69ac82",
+  "next": "M30s: install over; open the app → card «Стираю файли видалених томів» with «Том N з M · % · залишилось ~X хв» and the same bar in the shade; after the end — summary."
+}
