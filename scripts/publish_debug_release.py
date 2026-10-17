@@ -313,5 +313,20 @@ def main() -> None:
         publish(data)
 
 
+def annotate_failure(error: BaseException) -> None:
+    """Logs of Actions cannot be read from Claude's environment, annotations can (16.10 lesson)."""
+    detail = str(error)
+    if isinstance(error, subprocess.CalledProcessError):
+        tail = (error.stderr or error.stdout or "").strip()[-600:]
+        detail = f"{' '.join(map(str, error.cmd))[:200]} → exit {error.returncode}: {tail}"
+    message = detail.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+    print(f"::error title=Publisher::{type(error).__name__}: {message}")
+
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:  # noqa: BLE001 — re-raised after the annotation
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            annotate_failure(error)
+        raise
