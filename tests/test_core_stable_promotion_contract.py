@@ -100,6 +100,38 @@ class CoreStablePromotionContract(unittest.TestCase):
             self.assertIn(part, notes)
 
 
+class ApkSignerParsingContract(unittest.TestCase):
+    """First real publish (2026-10-17, run 39058925799): «Signer certificate digest not printed»."""
+
+    def run_with(self, out):
+        import os, subprocess
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp)
+        tool = tmp / "build-tools/35.0.0/apksigner"
+        tool.parent.mkdir(parents=True)
+        tool.write_text("x")
+        with mock.patch.dict(os.environ, {"ANDROID_SDK_ROOT": str(tmp)}), mock.patch.object(
+            publisher, "command", return_value=subprocess.CompletedProcess([], 0, out, "")
+        ) as cmd:
+            return publisher.apk_signer_sha256(Path("a.apk")), cmd
+
+    def test_both_apksigner_formats_and_verbose_flag(self):
+        digest = publisher.STABLE_SIGNER_SHA256
+        for prefix in ("Signer #1", "Signer (minSdkVersion=26, maxSdkVersion=2147483647)"):
+            got, cmd = self.run_with(f"{prefix} certificate SHA-256 digest: {digest}\n")
+            self.assertEqual(got, digest)
+            self.assertIn("--verbose", cmd.call_args.args)
+
+    def test_no_or_two_digests_rejected_with_output(self):
+        with self.assertRaisesRegex(ValueError, "got 0"):
+            self.run_with("Verifies\n")
+        with self.assertRaisesRegex(ValueError, "got 2"):
+            self.run_with(
+                "Signer #1 certificate SHA-256 digest: " + "a" * 64 + "\n"
+                "Signer #2 certificate SHA-256 digest: " + "b" * 64 + "\n"
+            )
+
+
 class CoreStableWorkflowContract(unittest.TestCase):
     def test_workflow_accepts_core_stable_file_and_publisher_checks_signer(self):
         wf = (ROOT / ".github/workflows/publish-verified-apk.yml").read_text(encoding="utf-8")

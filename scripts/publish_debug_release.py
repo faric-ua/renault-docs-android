@@ -138,14 +138,23 @@ def validate_core_stable(data: dict, source: Path) -> dict:
 def apk_signer_sha256(apk: Path) -> str:
     """Signer certificate digest via apksigner of the GitHub runner's Android SDK."""
     sdk = os.environ.get("ANDROID_SDK_ROOT") or os.environ.get("ANDROID_HOME") or ""
-    tools = sorted(Path(sdk, "build-tools").glob("*/apksigner")) if sdk else []
+    # Same tool and flags as android-debug.yml, which already checks the stable signer there.
+    pinned = Path(sdk, "build-tools/35.0.0/apksigner") if sdk else None
+    tools = [pinned] if pinned and pinned.is_file() else (
+        sorted(Path(sdk, "build-tools").glob("*/apksigner")) if sdk else []
+    )
     if not tools:
         raise ValueError("apksigner not found on the runner")
-    out = command(str(tools[-1]), "verify", "--print-certs", str(apk)).stdout
-    match = re.search(r"Signer #1 certificate SHA-256 digest: ([0-9a-fA-F:]+)", out)
-    if not match:
-        raise ValueError("Signer certificate digest not printed")
-    return match.group(1).replace(":", "").lower()
+    out = command(str(tools[-1]), "verify", "--verbose", "--print-certs", str(apk)).stdout
+    digests = {
+        d.replace(":", "").lower()
+        for d in re.findall(r"certificate SHA-256 digest: ([0-9a-fA-F:]{64,95})", out)
+    }
+    if len(digests) != 1:
+        raise ValueError(
+            f"Expected one signer certificate digest, got {len(digests)}: {out.strip()[-400:]}"
+        )
+    return digests.pop()
 
 
 def core_stable_notes(data: dict, digest: str, signer: str) -> str:
