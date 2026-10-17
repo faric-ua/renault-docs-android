@@ -47,7 +47,10 @@ class VolumeArchiveContract(unittest.TestCase):
 
     def test_archive_is_used_only_when_checked_and_matching(self):
         access = source("VolumeArchiveAccess.kt")
-        self.assertIn('const val DIR = "rdpkg-archive"', access)
+        # v0.5.143 (archives stage 2): the folder name moved to VolumeStorage, shared with the
+        # importer that keeps imported volumes as one archive file; the name did not change.
+        self.assertIn("const val DIR = VolumeStorage.ARCHIVE_DIR", access)
+        self.assertIn('const val ARCHIVE_DIR = "rdpkg-archive"', source("VolumeStorage.kt"))
         self.assertIn('const val PART_SUFFIX = ".rdpkg.part"', access)
         self.assertIn("sameManifest(folder, archive)", access, "volume installed again → old archive not used")
         self.assertIn("isReadingOff(appContext, packageId)", access)

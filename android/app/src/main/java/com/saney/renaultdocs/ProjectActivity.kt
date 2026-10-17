@@ -3857,14 +3857,19 @@ class ProjectActivity : Activity() {
                         clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                         startVolumeArchive(volume, archivePackageId)
                     }
-                VolumeArchiveStatus.ACTIVE -> {
+                VolumeArchiveStatus.ACTIVE ->
+                    if (VolumeArchiveAccess.isArchiveOnly(this, archivePackageId)) {
+                        // Archives plan v2, stage 2: imported as one file — there is no folder
+                        // to switch to.
+                        addAction(title = "Том — один файл-архів ✓", enabled = false) {}
+                    } else {
                     addAction(title = "Читається з архіву ✓", enabled = false) {}
                     addAction("Читати з папки (архів лишиться)") {
                         clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                         VolumeArchiveAccess.setReadingOff(this, archivePackageId, off = true)
                         statusText.text = "Том читається з папки. Архів лишився — увімкнути знову можна тут же."
                     }
-                }
+                    }
                 VolumeArchiveStatus.OFF ->
                     addAction("Читати з архіву") {
                         clearProjectDialogState(DIALOG_VOLUME_ACTIONS)

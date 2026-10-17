@@ -139,6 +139,18 @@ class RdpkgExportService : Service() {
                     getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Експорт .rdpkg скасовано.", false))
                     return@Thread
                 }
+                if (error is DamagedOutputException || error.cause is DamagedOutputException) {
+                    // TODO №19: the file this export just wrote would not open — remove only it,
+                    // so a broken .rdpkg never reaches Google Drive or another phone.
+                    val removed = runCatching {
+                        DocumentsContract.deleteDocument(contentResolver, Uri.parse(destinationUri))
+                    }.getOrDefault(false)
+                    val tail = if (removed) "Пошкоджений файл видалено." else "Пошкоджений файл не вдалося видалити — видали його вручну."
+                    val message = (error.message ?: "Файл вийшов пошкоджений.") + " " + tail
+                    runStore.fail(message)
+                    getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка експорту: файл пошкоджений", false))
+                    return@Thread
+                }
                 val message = error.message ?: "Невідома помилка експорту."
                 runStore.fail(message)
                 getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification("Помилка експорту: $message", false))

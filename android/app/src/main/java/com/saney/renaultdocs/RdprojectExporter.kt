@@ -367,8 +367,14 @@ object RdprojectExporter {
                         "w",
                     )
                     ?.use { raw ->
+                        // TODO №19 (2026-10-17): the project file is unpacked again while it
+                        // is written — on the M30s the compressor sometimes made a broken ZIP.
+                        ZipStreamCheck().use { check ->
                         ZipOutputStream(
-                            raw.buffered(),
+                            TeeOutputStream(
+                                raw.buffered(),
+                                check.output,
+                            ),
                         ).use { zip ->
                             val buffer =
                                 ByteArray(
@@ -510,6 +516,11 @@ object RdprojectExporter {
                                     ),
                                 )
                             }
+                        }
+                        check.finish(
+                            expectedFiles =
+                                projectFiles.size,
+                        )
                         }
                     }
                     ?: error(

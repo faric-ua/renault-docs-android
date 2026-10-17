@@ -18,6 +18,10 @@ import java.util.zip.ZipOutputStream
  * The prepared package directory is treated as immutable input. The writer
  * performs one ordered pass over it, computes SHA-256 while bytes are written,
  * and chooses a speed-oriented DEFLATE level per entry.
+ *
+ * TODO №19 (2026-10-17): every written byte is also unpacked by [ZipStreamCheck]; a ZIP that
+ * would not open (the M30s compressor, v0.5.141 history) fails the write with
+ * [DamagedOutputException] instead of reaching another phone.
  */
 object RdpkgZipWriter {
     private const val BUFFER_SIZE =
@@ -132,140 +136,157 @@ object RdpkgZipWriter {
             sourceBytes,
         )
 
-        DigestOutputStream(
-            rawOutput.buffered(),
-            digest,
-        ).use {
-            digestOutput ->
-            ZipOutputStream(
-                digestOutput,
+        // TODO №19 (2026-10-17): the written bytes are unpacked again while they are
+        // written ([ZipStreamCheck]) — on the M30s the compressor sometimes made a broken ZIP.
+        val check =
+            ZipStreamCheck()
+
+        try {
+            DigestOutputStream(
+                TeeOutputStream(
+                    rawOutput.buffered(),
+                    check.output,
+                ),
+                digest,
             ).use {
-                archive ->
-                val buffer =
-                    ByteArray(
-                        BUFFER_SIZE,
-                    )
-                var lastProgressAt =
-                    0L
-                var processedBytes =
-                    0L
-
-                files.forEachIndexed {
-                    index,
-                    source ->
-                    val relative =
-                        relativePath(
-                            root,
-                            source,
+                digestOutput ->
+                ZipOutputStream(
+                    digestOutput,
+                ).use {
+                    archive ->
+                    val buffer =
+                        ByteArray(
+                            BUFFER_SIZE,
                         )
+                    var lastProgressAt =
+                        0L
+                    var processedBytes =
+                        0L
 
-                    archive.setLevel(
-                        compressionLevelFor(
-                            relativePath =
-                                relative,
-                            size =
-                                source.length(),
-                        ),
-                    )
-
-                    archive.putNextEntry(
-                        ZipEntry(
-                            relative,
-                        ).apply {
-                            time =
-                                ZIP_EPOCH_MILLIS
-                        },
-                    )
-
-                    BufferedInputStream(
-                        source.inputStream(),
-                        BUFFER_SIZE,
-                    ).use {
-                        input ->
-                        while (
-                            true
-                        ) {
-                            val read =
-                                input.read(
-                                    buffer,
-                                )
-
-                            if (
-                                read <
-                                0
-                            ) {
-                                break
-                            }
-
-                            if (
-                                read ==
-                                0
-                            ) {
-                                continue
-                            }
-
-                            archive.write(
-                                buffer,
-                                0,
-                                read,
+                    files.forEachIndexed {
+                        index,
+                        source ->
+                        val relative =
+                            relativePath(
+                                root,
+                                source,
                             )
 
-                            processedBytes +=
-                                read
+                        archive.setLevel(
+                            compressionLevelFor(
+                                relativePath =
+                                    relative,
+                                size =
+                                    source.length(),
+                            ),
+                        )
 
-                            val byteNow =
-                                SystemClock.elapsedRealtime()
+                        archive.putNextEntry(
+                            ZipEntry(
+                                relative,
+                            ).apply {
+                                time =
+                                    ZIP_EPOCH_MILLIS
+                            },
+                        )
 
-                            if (
-                                byteNow -
-                                    lastProgressAt >=
-                                    PROGRESS_THROTTLE_MS
+                        BufferedInputStream(
+                            source.inputStream(),
+                            BUFFER_SIZE,
+                        ).use {
+                            input ->
+                            while (
+                                true
                             ) {
-                                byteProgress?.invoke(
-                                    index,
-                                    files.size,
-                                    processedBytes,
-                                    sourceBytes,
+                                val read =
+                                    input.read(
+                                        buffer,
+                                    )
+
+                                if (
+                                    read <
+                                    0
+                                ) {
+                                    break
+                                }
+
+                                if (
+                                    read ==
+                                    0
+                                ) {
+                                    continue
+                                }
+
+                                archive.write(
+                                    buffer,
+                                    0,
+                                    read,
                                 )
-                                lastProgressAt =
-                                    byteNow
+
+                                processedBytes +=
+                                    read
+
+                                val byteNow =
+                                    SystemClock.elapsedRealtime()
+
+                                if (
+                                    byteNow -
+                                        lastProgressAt >=
+                                        PROGRESS_THROTTLE_MS
+                                ) {
+                                    byteProgress?.invoke(
+                                        index,
+                                        files.size,
+                                        processedBytes,
+                                        sourceBytes,
+                                    )
+                                    lastProgressAt =
+                                        byteNow
+                                }
                             }
                         }
-                    }
 
-                    archive.closeEntry()
+                        archive.closeEntry()
 
-                    val completed =
-                        index +
-                            1
+                        val completed =
+                            index +
+                                1
 
-                    val now =
-                        SystemClock.elapsedRealtime()
+                        val now =
+                            SystemClock.elapsedRealtime()
 
-                    if (
-                        completed ==
-                        1 ||
-                        completed ==
-                        files.size ||
-                        now -
-                            lastProgressAt >=
-                            PROGRESS_THROTTLE_MS
-                    ) {
-                        progress?.invoke(
-                            completed,
-                            files.size,
-                        )
-                        byteProgress?.invoke(
-                            completed,
-                            files.size,
-                            processedBytes,
-                            sourceBytes,
-                        )
-                        lastProgressAt =
-                            now
+                        if (
+                            completed ==
+                            1 ||
+                            completed ==
+                            files.size ||
+                            now -
+                                lastProgressAt >=
+                                PROGRESS_THROTTLE_MS
+                        ) {
+                            progress?.invoke(
+                                completed,
+                                files.size,
+                            )
+                            byteProgress?.invoke(
+                                completed,
+                                files.size,
+                                processedBytes,
+                                sourceBytes,
+                            )
+                            lastProgressAt =
+                                now
+                        }
                     }
                 }
             }
+
+            check.finish(
+                expectedFiles =
+                    files.size,
+            )
+        } finally {
+            check.close()
         }
 
         return WriteResult(

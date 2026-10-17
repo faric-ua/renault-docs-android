@@ -17,6 +17,8 @@ import java.io.File
  */
 object VolumeStorage {
     private const val DIR = "rdpkg"
+    const val ARCHIVE_DIR = "rdpkg-archive"
+    const val ARCHIVE_SUFFIX = ".rdpkg"
     const val NO_MEDIA = ".nomedia"
     private const val PREFS = "volume_storage"
     private const val KEY_TARGET = "target_place"
@@ -79,12 +81,41 @@ object VolumeStorage {
         return card?.takeIf { it.isDirectory }
     }
 
+    /**
+     * Archives plan v2, stage 2: a volume imported as one `.rdpkg` file lies in the
+     * `rdpkg-archive` folder beside the volumes folder of the same place, with no unpacked
+     * folder. Here: that file for [root] (`…/rdpkg`), whether or not it exists.
+     */
+    fun archiveIn(
+        root: File,
+        packageId: String,
+    ): File = File(File(root.parentFile ?: root, ARCHIVE_DIR), packageId + ARCHIVE_SUFFIX)
+
+    /** The volume's archive file on the phone or the card (phone first), or null. */
+    fun locateArchive(
+        context: Context,
+        packageId: String,
+    ): File? {
+        archiveIn(phoneRoot(context), packageId).takeIf { it.isFile }?.let { return it }
+        return cardRoot(context)?.let { archiveIn(it, packageId) }?.takeIf { it.isFile }
+    }
+
+    /** The volume lies here in any form: an unpacked folder or one archive file. */
+    fun isInstalled(
+        context: Context,
+        packageId: String,
+    ): Boolean = locate(context, packageId) != null || locateArchive(context, packageId) != null
+
     fun placeOf(
         context: Context,
         packageId: String,
     ): VolumePlace? {
-        val found = locate(context, packageId) ?: return null
-        return if (found.parentFile == phoneRoot(context)) VolumePlace.PHONE else VolumePlace.CARD
+        val found = locate(context, packageId)
+        if (found != null) {
+            return if (found.parentFile == phoneRoot(context)) VolumePlace.PHONE else VolumePlace.CARD
+        }
+        val archive = locateArchive(context, packageId) ?: return null
+        return if (archive == archiveIn(phoneRoot(context), packageId)) VolumePlace.PHONE else VolumePlace.CARD
     }
 
     fun state(
@@ -92,9 +123,11 @@ object VolumeStorage {
         packageId: String,
     ): VolumeState {
         val cardRoot = cardRoot(context)
+        val phoneRoot = phoneRoot(context)
         return VolumeStoragePolicy.state(
-            onPhone = File(phoneRoot(context), packageId).isDirectory,
-            onCard = cardRoot?.let { File(it, packageId).isDirectory } == true,
+            onPhone = File(phoneRoot, packageId).isDirectory || archiveIn(phoneRoot, packageId).isFile,
+            onCard =
+                cardRoot?.let { File(it, packageId).isDirectory || archiveIn(it, packageId).isFile } == true,
             rememberedOnCard = rememberedOnCard(context, packageId),
             cardPresent = cardRoot != null,
         )

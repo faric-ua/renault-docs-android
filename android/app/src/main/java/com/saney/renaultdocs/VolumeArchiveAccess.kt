@@ -42,8 +42,8 @@ enum class VolumeArchiveStatus {
  * Nothing is ever deleted here.
  */
 object VolumeArchiveAccess {
-    const val DIR = "rdpkg-archive"
-    const val SUFFIX = ".rdpkg"
+    const val DIR = VolumeStorage.ARCHIVE_DIR
+    const val SUFFIX = VolumeStorage.ARCHIVE_SUFFIX
     const val PART_SUFFIX = ".rdpkg.part"
     private const val MANIFEST = "rdpkg.json"
     private const val PREFS = "volume_archive"
@@ -71,8 +71,10 @@ object VolumeArchiveAccess {
         val appContext = context.applicationContext
         val found =
             runCatching {
-                if (isReadingOff(appContext, packageId)) return@runCatching null
                 val folder = VolumeStorage.locate(appContext, packageId)
+                // «Читати з папки» means something only while there is a folder: a volume
+                // imported as one file (stage 2) is always read from its archive.
+                if (folder != null && isReadingOff(appContext, packageId)) return@runCatching null
                 val file = archiveFile(appContext, packageId, folder)?.takeIf { it.isFile } ?: return@runCatching null
                 val started = SystemClock.elapsedRealtime()
                 val archive = VolumeArchive.open(file)
@@ -103,7 +105,7 @@ object VolumeArchiveAccess {
         val appContext = context.applicationContext
         val folder = VolumeStorage.locate(appContext, packageId)
         val file = archiveFile(appContext, packageId, folder)?.takeIf { it.isFile } ?: return VolumeArchiveStatus.NONE
-        if (isReadingOff(appContext, packageId)) return VolumeArchiveStatus.OFF
+        if (folder != null && isReadingOff(appContext, packageId)) return VolumeArchiveStatus.OFF
         if (active(appContext, packageId) != null) return VolumeArchiveStatus.ACTIVE
         // There is a file, the owner did not switch it off, but it is not used: made for
         // another copy of the volume (or unreadable) — offer to make it again.
@@ -117,14 +119,17 @@ object VolumeArchiveAccess {
         folder: File? = VolumeStorage.locate(context, packageId),
     ): File? {
         folder?.parentFile?.parentFile?.let { return File(File(it, DIR), packageId + SUFFIX) }
-        // No unpacked folder (later stages): look on the phone, then on the card.
-        val candidates =
-            listOfNotNull(
-                VolumeStorage.phoneRoot(context).parentFile,
-                VolumeStorage.cardRoot(context)?.parentFile,
-            ).map { File(File(it, DIR), packageId + SUFFIX) }
-        return candidates.firstOrNull { it.isFile }
+        // No unpacked folder (imported as one file, stage 2): look on the phone, then on the card.
+        return VolumeStorage.locateArchive(context, packageId)
     }
+
+    /** True — the volume is kept only as its archive (imported as one file, stage 2). */
+    fun isArchiveOnly(
+        context: Context,
+        packageId: String,
+    ): Boolean =
+        VolumeStorage.locate(context, packageId) == null &&
+            VolumeStorage.locateArchive(context, packageId) != null
 
     /** The unfinished file while an archive is being made (it never gets read). */
     fun partFile(

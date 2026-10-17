@@ -49,7 +49,13 @@ class ImportBatchContract(unittest.TestCase):
     def test_invisible_volume_is_recovered_not_unpacked_again(self):
         service = source("RdprojectImportService.kt")
         self.assertIn("RdpkgImporter.peekPackageId(file)", service)
-        self.assertIn("VolumeStorage.locate(applicationContext, peekedId)", service)
+        # v0.5.143 (archives stage 2): a volume may also lie as one archive file with no
+        # folder — «installed» is now VolumeStorage.isInstalled (folder OR archive).
+        self.assertIn("VolumeStorage.isInstalled(applicationContext, peekedId)", service)
+        storage = source("VolumeStorage.kt")
+        installed = storage[storage.index("fun isInstalled("):storage.index("fun placeOf(")]
+        self.assertIn("locate(context, packageId) != null", installed)
+        self.assertIn("locateArchive(context, packageId) != null", installed)
         self.assertIn("private fun recoverOrSkip(", service)
         peek = service.index("RdpkgImporter.peekPackageId(file)")
         install = service.index("RdpkgImporter.install(")
