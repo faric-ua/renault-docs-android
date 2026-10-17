@@ -3,7 +3,7 @@
 #   docs/ua/USER_GUIDE.md            — Markdown with Mermaid (GitHub)
 #   docs/ua/Posibnyk-Renault-Docs.docx — Word with diagram pictures
 #   docs/ua/Posibnyk-Renault-Docs.pdf  — PDF (converted from the Word file)
-#   android/app/src/main/assets/guide/index.html — the guide inside the app (v0.5.130)
+#   android/app/src/main/assets/guide/index.html — the guide inside the app (since v0.5.130)
 # Needs: python3, graphviz (dot), node + npm package "docx", LibreOffice (soffice).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
