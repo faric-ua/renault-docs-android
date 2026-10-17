@@ -66,3 +66,6 @@ release-signing.properties
 # Our own user guide (built by docs/ua/user-guide/build.sh, not Renault material).
 !docs/ua/Posibnyk-Renault-Docs.pdf
 !docs/ua/user-guide/diagrams/*.png
+
+# Own brand artwork (Renodocs logo), not Renault material
+!docs/brand/renodocs-logo.gif
