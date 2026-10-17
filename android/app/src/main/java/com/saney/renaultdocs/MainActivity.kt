@@ -178,6 +178,11 @@ class MainActivity : Activity() {
                 onSeparateVolumeExportStart = { projectId, folderUri, volumeIds ->
                     startSeparateVolumeExport(projectId, folderUri, volumeIds)
                 },
+                onVolumesDeleted = { _, message ->
+                    // v0.5.147: «Видалити томи разом з файлами» — the result and fresh counts.
+                    statusText.text = message
+                    renderLibrary()
+                },
                 onShareFinished = { message ->
                     statusText.text = message
                     if (::operationStatus.isInitialized) {
