@@ -107,6 +107,8 @@ class CoreStableWorkflowContract(unittest.TestCase):
         src = (ROOT / "scripts/publish_debug_release.py").read_text(encoding="utf-8")
         self.assertIn("signer != STABLE_SIGNER_SHA256", src)
         self.assertIn('"--latest"', src)
+        # Actions logs are not readable from Claude's environment — failures must be annotations.
+        self.assertIn("::error title=Publisher::", src)
 
 
 if __name__ == "__main__":
