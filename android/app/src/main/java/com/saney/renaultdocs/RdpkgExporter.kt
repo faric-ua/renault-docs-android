@@ -169,6 +169,7 @@ object RdpkgExporter {
                             sourceRoot,
                         destinationUri =
                             destinationUri,
+                        listing = listingReporter(progressState),
                         progress = {
                             completed,
                             total ->
@@ -240,6 +241,7 @@ object RdpkgExporter {
                 VolumeArchiveWriter.write(
                     sourceRoot = sourceRoot,
                     target = target,
+                    listing = listingReporter(progressState),
                     progress = { filesDone, filesTotal, bytesDone, bytesTotal ->
                         progressState?.invoke(
                             OperationProgress.weightedItemsAndBytes(
@@ -315,6 +317,35 @@ object RdpkgExporter {
             sha256 = digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) },
         )
     }
+
+    /**
+     * v0.5.149 (TODO №21 п. 2): while the volume's files are listed (no measure yet — 10+ s
+     * on the M30s card) the card says «Шукаю файли тому… · Знайдено файлів: N».
+     * At most every 100 ms.
+     */
+    private fun listingReporter(
+        progressState: ((OperationProgress) -> Unit)?,
+    ): ((Int) -> Unit)? {
+        if (progressState == null) return null
+        var lastAt = 0L
+        return { found ->
+            val now = android.os.SystemClock.elapsedRealtime()
+            if (now - lastAt >= 100L) {
+                lastAt = now
+                progressState(listingProgress(found))
+            }
+        }
+    }
+
+    fun listingProgress(found: Int): OperationProgress =
+        OperationProgress(
+            stage = LISTING_STAGE,
+            itemCurrent = found,
+            itemLabel = LISTING_LABEL,
+        )
+
+    const val LISTING_STAGE = "Шукаю файли тому…"
+    const val LISTING_LABEL = "Знайдено файлів"
 
     private fun validateManagedPackage(
         sourceRoot: File,

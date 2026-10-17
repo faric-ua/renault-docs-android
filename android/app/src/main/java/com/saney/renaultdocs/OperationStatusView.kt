@@ -33,6 +33,12 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
     private var projectCompact = false
     private var projectDetailsExpanded = false
 
+    // v0.5.149 (TODO №23, M30s 2026-10-17 13:58: «NT8266A · 200…6-28»): a long stage line
+    // is no longer cut in the middle — in portrait it wraps to a second line. Once a run
+    // needed two lines it keeps two (the card does not jump); reset by [hide].
+    private var twoLineDetail = false
+    private var twoLineSecondary = false
+
     init {
         orientation = VERTICAL
         visibility = View.GONE
@@ -146,8 +152,9 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
 
         secondaryLabelView = Ui.textView(context, "", 13f, Ui.muted).apply {
             visibility = View.GONE
-            setSingleLine(true)
-            ellipsize = TextUtils.TruncateAt.MIDDLE
+            setSingleLine(false)
+            maxLines = 2
+            ellipsize = TextUtils.TruncateAt.END
             setPadding(0, Ui.dp(context, 10), 0, Ui.dp(context, 2))
         }
         addView(secondaryLabelView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
@@ -212,6 +219,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         fullDetail = detail
         val parts = OperationStatusDetailFormatter.split(detail)
         detailView.text = parts.stage
+        keepTwoLinesOnceNeeded()
         detailView.setTextColor(Ui.muted)
         counterView.setTextColor(Ui.success)
         counterView.text = counterLabel ?: parts.counter ?: if (current != null && total != null && total > 0) {
@@ -231,6 +239,7 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         } else {
             secondaryLabelView.text = secondaryLabel
             secondaryLabelView.visibility = View.VISIBLE
+            secondaryLabelView.minLines = if (twoLineSecondary) 2 else 1
             secondaryProgressView.visibility = View.VISIBLE
             // Indeterminate while there is no measure yet (copying from the file).
             SharedOperationProgressBar.render(secondaryProgressView, secondaryCurrent, secondaryTotal, color = Ui.accent)
@@ -304,8 +313,18 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         // Landscape keeps the stage and count side by side on one fixed-height row.
         detailRow.orientation = if (landscape) HORIZONTAL else VERTICAL
         counterView.visibility = View.VISIBLE
-        detailView.setSingleLine(true)
-        detailView.ellipsize = TextUtils.TruncateAt.MIDDLE
+        if (landscape) {
+            // Wide row next to the counter: one line, as before.
+            detailView.setSingleLine(true)
+            detailView.ellipsize = TextUtils.TruncateAt.MIDDLE
+        } else {
+            // TODO №23: wrap instead of cutting dates / codes in the middle.
+            detailView.setSingleLine(false)
+            detailView.maxLines = 2
+            detailView.minLines = if (twoLineDetail) 2 else 1
+            detailView.ellipsize = TextUtils.TruncateAt.END
+            detailView.setHorizontallyScrolling(false)
+        }
         counterView.setSingleLine(true)
         counterView.ellipsize = TextUtils.TruncateAt.END
         counterView.gravity = Gravity.CENTER_VERTICAL
@@ -374,8 +393,26 @@ class OperationStatusView(context: Context) : LinearLayout(context) {
         ).show()
     }
 
+    /** TODO №23: after layout — if a line needed two rows, keep two rows for this run. */
+    private fun keepTwoLinesOnceNeeded() {
+        post {
+            if (!twoLineDetail && detailView.maxLines == 2 && detailView.lineCount > 1) {
+                twoLineDetail = true
+                detailView.minLines = 2
+            }
+            if (!twoLineSecondary && secondaryLabelView.visibility == View.VISIBLE && secondaryLabelView.lineCount > 1) {
+                twoLineSecondary = true
+                secondaryLabelView.minLines = 2
+            }
+        }
+    }
+
     fun hide() {
         visibility = View.GONE
+        twoLineDetail = false
+        twoLineSecondary = false
+        detailView.minLines = 1
+        secondaryLabelView.minLines = 1
         hideSecondary()
         closeView.setOnClickListener(null)
         cancelView.setOnClickListener(null)

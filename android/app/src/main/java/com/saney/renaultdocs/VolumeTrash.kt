@@ -198,6 +198,55 @@ object VolumeTrash {
         }
     }
 
+    /** v0.5.149 (TODO №10): leftovers of broken-off imports / archives, phone and card. */
+    fun leftovers(context: Context): List<File> {
+        val appContext = context.applicationContext
+        return runCatching {
+            VolumeTrashCore.findLeftovers(
+                listOfNotNull(VolumeStorage.phoneRoot(appContext), VolumeStorage.cardRoot(appContext)),
+            )
+        }.getOrDefault(emptyList())
+    }
+
+    /**
+     * An operation that writes such files is running now — then nothing is touched (its
+     * own unfinished file may be among them).
+     */
+    fun leftoverWriterRunning(context: Context): Boolean {
+        val c = context.applicationContext
+        return runCatching {
+            RdprojectImportRunStore(c).load().isRunning ||
+                RdpkgImportRunStore(c).load().isRunning ||
+                CatalogImportRunStore(c).load().isRunning ||
+                RdpkgExportRunStore(c).load().isRunning ||
+                NativeRdpkgRunStore(c).load().isRunning
+        }.getOrDefault(true)
+    }
+
+    /**
+     * After the owner's «так»: the leftovers go into the trash of their own place (one
+     * rename each) and are erased with the same bar as deleted volumes. Returns how many
+     * were moved, or null when an operation is running (nothing touched).
+     */
+    fun clearLeftovers(context: Context): Int? {
+        val appContext = context.applicationContext
+        if (leftoverWriterRunning(appContext)) return null
+        val stamp = System.currentTimeMillis()
+        var moved = 0
+        for (item in leftovers(appContext)) {
+            val volumesRoot =
+                if (item.parentFile?.name == VolumeStorage.ARCHIVE_DIR) {
+                    File(item.parentFile?.parentFile, "rdpkg")
+                } else {
+                    item.parentFile ?: continue
+                }
+            if (VolumeTrashCore.moveIn(item, VolumeTrashCore.trashDirFor(volumesRoot), stamp) != null) moved++
+        }
+        runCatching { Log.i(TAG, "LEFTOVERS прибрано=$moved") }
+        startErase(appContext)
+        return moved
+    }
+
     /** The last finished erase, until the owner closes its card. */
     fun lastSummary(context: Context): Summary? {
         val p = prefs(context)
