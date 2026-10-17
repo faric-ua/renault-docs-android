@@ -126,6 +126,20 @@ object RdpkgExporter {
                     )
                     .canonicalFile
 
+            if (!sourceRoot.isDirectory) {
+                // Archives plan v2, stage 2: a volume imported as one file has no folder —
+                // its archive *is* the package; it is copied as it is (and checked again).
+                VolumeArchiveAccess.active(appContext, packageId)?.let { archive ->
+                    return@runCatching copyArchive(
+                        context = appContext,
+                        archive = archive,
+                        packageId = packageId,
+                        destinationUri = destinationUri,
+                        progressState = progressState,
+                    )
+                }
+            }
+
             require(
                 sourceRoot.isDirectory,
             ) {
@@ -246,6 +260,61 @@ object RdpkgExporter {
                 sha256 = written.sha256,
             )
         }
+
+    /**
+     * Archives plan v2, stage 2: export of a volume kept as one `.rdpkg` file. The file was
+     * checked entry by entry when it was installed; it is copied byte for byte and the copy
+     * is unpacked again while it is written ([ZipStreamCheck], TODO №19).
+     */
+    private fun copyArchive(
+        context: Context,
+        archive: VolumeArchive,
+        packageId: String,
+        destinationUri: Uri,
+        progressState: ((OperationProgress) -> Unit)?,
+    ): ExportResult {
+        val source = archive.file
+        val total = source.length().coerceAtLeast(1L)
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        val raw =
+            context.contentResolver.openOutputStream(destinationUri, "w")
+                ?: error("Android could not open the .rdpkg destination for writing.")
+        progressState?.invoke(OperationProgress.indeterminate("Копіюю том…"))
+        ZipStreamCheck().use { check ->
+            java.security.DigestOutputStream(TeeOutputStream(raw.buffered(), check.output), digest).use { out ->
+                source.inputStream().buffered(1024 * 1024).use { input ->
+                    val buffer = ByteArray(1024 * 1024)
+                    var done = 0L
+                    var lastShownAt = 0L
+                    while (true) {
+                        val read = input.read(buffer)
+                        if (read < 0) break
+                        if (read == 0) continue
+                        out.write(buffer, 0, read)
+                        done += read
+                        val now = android.os.SystemClock.elapsedRealtime()
+                        if (now - lastShownAt >= 100L || done >= total) {
+                            lastShownAt = now
+                            progressState?.invoke(
+                                OperationProgress.measured(
+                                    stage = "Копіюю том…",
+                                    current = (done.coerceAtMost(total) * 10_000L / total).toInt(),
+                                    total = 10_000,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+            check.finish(expectedFiles = archive.fileCount)
+        }
+        return ExportResult(
+            packageId = packageId,
+            fileCount = archive.fileCount,
+            sourceBytes = source.length(),
+            sha256 = digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) },
+        )
+    }
 
     private fun validateManagedPackage(
         sourceRoot: File,

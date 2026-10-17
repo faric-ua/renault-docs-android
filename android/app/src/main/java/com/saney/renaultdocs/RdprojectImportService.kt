@@ -275,11 +275,12 @@ class RdprojectImportService : Service() {
             volumeDone()
             return
         }
-        // TODO №13: the volume may already lie unpacked on the phone / card without
+        // TODO №13: the volume may already lie on the phone / card (unpacked, or as one
+        // archive file since stage 2) without
         // being in the project (a run broken off between «unpacked» and «added»).
         // Seen before unpacking — that alone took up to 13 hours per volume on the card.
         val peekedId = RdpkgImporter.peekPackageId(file)
-        if (peekedId != null && VolumeStorage.locate(applicationContext, peekedId) != null) {
+        if (peekedId != null && VolumeStorage.isInstalled(applicationContext, peekedId)) {
             recoverOrSkip(store, manifest, peekedId)
             return
         }

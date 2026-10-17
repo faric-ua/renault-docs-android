@@ -61,6 +61,15 @@ object RdpkgImporter {
     private const val PROGRESS_THROTTLE_MS =
         100L
 
+    /**
+     * Archives plan v2, stage 2 (v0.5.143): imports keep the package as one file. `false`
+     * would bring back unpacking every file (the way until v0.5.142).
+     */
+    const val IMPORT_AS_ARCHIVE =
+        true
+    private const val WHOLE = 10_000
+    private const val HALF = 5_000L
+
     data class ImportResult(
         val packageId: String,
         val treeUri: Uri,
@@ -100,6 +109,22 @@ object RdpkgImporter {
             // first volume file is written (owner's rule 2026-10-15).
             if (chosenPlace == VolumePlace.CARD) {
                 VolumeStorage.ensureNoMedia(packagesDirectory)
+            }
+
+            // Archives plan v2, stage 2 (owner 2026-10-17 03:10): the package is kept as one
+            // checked file and the volume is read from it — no thousands of files to write.
+            // Null only when this volume already lies unpacked and may be replaced: that
+            // replacement keeps the old way below.
+            if (IMPORT_AS_ARCHIVE) {
+                installAsArchive(
+                    context = appContext,
+                    packageUri = packageUri,
+                    chosenPlace = chosenPlace,
+                    packagesDirectory = packagesDirectory,
+                    progressState = progressState,
+                    isCancelled = isCancelled,
+                    refuseExistingPackage = refuseExistingPackage,
+                )?.let { return@runCatching it }
             }
 
             val staging =
@@ -334,6 +359,170 @@ object RdpkgImporter {
                 staging.deleteRecursively()
             }
         }
+
+    /**
+     * Archives plan v2, stage 2. Copies the package into `rdpkg-archive/.import-<uuid>.part`
+     * beside the volumes folder of the chosen place, checks it entry by entry
+     * ([VolumePackageCheck]) and only then names it `<package id>.rdpkg`; the volume is then
+     * read from it ([VolumeArchiveAccess]). An older archive of the same volume is set aside
+     * and put back if anything fails. Removes only its own unfinished file.
+     *
+     * Returns null — this volume lies unpacked and replacing is allowed: the caller unpacks
+     * as before (a folder and a different archive of one volume must never mix).
+     */
+    private fun installAsArchive(
+        context: Context,
+        packageUri: Uri,
+        chosenPlace: VolumePlace,
+        packagesDirectory: File,
+        progressState: ((OperationProgress) -> Unit)?,
+        isCancelled: () -> Boolean,
+        refuseExistingPackage: Boolean,
+    ): ImportResult? {
+        val archiveDirectory = File(packagesDirectory.parentFile ?: packagesDirectory, VolumeStorage.ARCHIVE_DIR)
+        archiveDirectory.mkdirs()
+        // Owner's rule 2026-10-15: `.nomedia` first, before any volume file.
+        require(VolumeStorage.ensureNoMedia(archiveDirectory)) {
+            "Не вдалося підготувати папку для тому."
+        }
+        val part = File(archiveDirectory, ".import-" + UUID.randomUUID().toString() + ".part")
+        try {
+            copyPackage(context, packageUri, part, progressState, isCancelled)
+            if (isCancelled()) throw ConversionCancelledException()
+            val check =
+                try {
+                    VolumePackageCheck.check(
+                        file = part,
+                        progress = { done, total ->
+                            progressState?.invoke(
+                                OperationProgress.measured(
+                                    stage = "Перевіряю том…",
+                                    current = (HALF + done.coerceAtMost(total) * HALF / total.coerceAtLeast(1L)).toInt(),
+                                    total = WHOLE,
+                                ),
+                            )
+                        },
+                        isCancelled = isCancelled,
+                    )
+                } catch (cancelled: OperationCancelledException) {
+                    throw ConversionCancelledException()
+                }
+            val packageId = check.packageId
+            val previousFolder = VolumeStorage.locate(context, packageId)
+            val previousArchive = VolumeStorage.locateArchive(context, packageId)
+            if (refuseExistingPackage && (previousFolder != null || previousArchive != null)) {
+                throw PackageAlreadyInstalledException(packageId)
+            }
+            if (previousFolder != null) return null
+            // Last cancellation checkpoint before the rename; never stop halfway through it.
+            if (isCancelled()) throw ConversionCancelledException()
+            progressState?.invoke(OperationProgress.measured("Встановлюю том…", WHOLE, WHOLE))
+            val target = File(archiveDirectory, packageId + VolumeStorage.ARCHIVE_SUFFIX)
+            val backup = previousArchive?.let { File(it.parentFile, ".backup-" + packageId + VolumeStorage.ARCHIVE_SUFFIX) }
+            backup?.delete()
+            if (previousArchive != null && backup != null) {
+                require(previousArchive.renameTo(backup)) {
+                    "Не вдалося підготувати оновлення встановленого пакета."
+                }
+                VolumeFileIndex.forget(packageId)
+            }
+            var activated = false
+            try {
+                require(part.renameTo(target)) { "Не вдалося активувати імпортований пакет." }
+                activated = true
+                // A volume kept as one file is always read from it (also forgets old answers).
+                VolumeArchiveAccess.setReadingOff(context, packageId, off = false)
+                VolumeFileIndex.forget(packageId)
+                VolumeStorage.rememberPlace(context, packageId, chosenPlace)
+                val treeUri = LocalDatasetDocumentsProvider.treeUriFor(packageId)
+                val volume = PreparedVolumeReader.read(context = context, treeUri = treeUri).getOrThrow()
+                if (check.projectId != null && volume.projectHint != null) {
+                    require(check.projectId == volume.projectHint) {
+                        "Project id у rdpkg не збігається з dataset manifest."
+                    }
+                }
+                backup?.delete()
+                return ImportResult(
+                    packageId = packageId,
+                    treeUri = treeUri,
+                    volume = volume,
+                    payloadFiles = check.fileCount,
+                    payloadBytes = check.bytes,
+                )
+            } catch (error: Throwable) {
+                // Only this run's own new file is removed; the older archive goes back.
+                if (activated) target.delete()
+                VolumeFileIndex.forget(packageId)
+                if (previousArchive != null && backup != null && backup.exists()) {
+                    backup.renameTo(previousArchive)
+                    VolumeStorage.rememberPlace(
+                        context,
+                        packageId,
+                        if (previousArchive == VolumeStorage.archiveIn(VolumeStorage.phoneRoot(context), packageId)) {
+                            VolumePlace.PHONE
+                        } else {
+                            VolumePlace.CARD
+                        },
+                    )
+                }
+                throw error
+            }
+        } finally {
+            if (part.exists()) part.delete()
+        }
+    }
+
+    /** One stream copy of the chosen package; progress 0–50 % (the check is the other half). */
+    private fun copyPackage(
+        context: Context,
+        packageUri: Uri,
+        target: File,
+        progressState: ((OperationProgress) -> Unit)?,
+        isCancelled: () -> Boolean,
+    ) {
+        val total =
+            runCatching {
+                context.contentResolver.openAssetFileDescriptor(packageUri, "r")?.use { it.length }
+            }.getOrNull()?.takeIf { it > 0L }
+        progressState?.invoke(
+            if (total != null) {
+                OperationProgress.measured("Копіюю том…", 0, WHOLE)
+            } else {
+                OperationProgress.indeterminate("Копіюю том…")
+            },
+        )
+        val input =
+            context.contentResolver.openInputStream(packageUri)
+                ?: error("Android не зміг відкрити вибраний .rdpkg.")
+        input.use { source ->
+            FileOutputStream(target).use { output ->
+                val buffer = ByteArray(1024 * 1024)
+                var done = 0L
+                var lastProgressAt = 0L
+                while (true) {
+                    if (isCancelled()) throw ConversionCancelledException()
+                    val read = source.read(buffer)
+                    if (read < 0) break
+                    if (read == 0) continue
+                    output.write(buffer, 0, read)
+                    done += read
+                    val now = SystemClock.elapsedRealtime()
+                    if (total != null && now - lastProgressAt >= PROGRESS_THROTTLE_MS) {
+                        lastProgressAt = now
+                        progressState?.invoke(
+                            OperationProgress.measured(
+                                stage = "Копіюю том…",
+                                current = (done.coerceAtMost(total) * HALF / total).toInt(),
+                                total = WHOLE,
+                            ),
+                        )
+                    }
+                }
+                output.fd.sync()
+            }
+        }
+        require(target.length() > 0L) { "RDPKG порожній." }
+    }
 
     private fun extract(
         context: Context,
