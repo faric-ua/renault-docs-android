@@ -564,7 +564,7 @@ class SettingsActivity : Activity() {
         body.addCard(
             infoCard(
                 title =
-                    "Renault Docs",
+                    "Renodocs",
                 text =
                     "Бібліотека Renault технічної документації для Android.\n\n" +
                         "Версія: v" +
@@ -1202,7 +1202,7 @@ class SettingsActivity : Activity() {
                     context =
                         this@SettingsActivity,
                     value =
-                        "Підтримати Renault Docs",
+                        "Підтримати Renodocs",
                     sizeSp =
                         17f,
                     color =

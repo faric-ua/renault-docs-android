@@ -231,7 +231,7 @@ class V0561LiveProgressContractTests(unittest.TestCase):
 
         self.assertIn("private val subjectView: TextView", status)
         self.assertIn("TextUtils.TruncateAt.MIDDLE", status)
-        self.assertIn('subject: String = "Renault Docs"', status)
+        self.assertIn('subject: String = "Renodocs"', status)
         self.assertIn("RdprojectExporter.defaultFileName(", main)
         self.assertIn("subject =", main)
         self.assertIn("volumeOperationSubject(", project)

@@ -157,7 +157,7 @@ object VolumePackageCheck {
         if (manifest.optInt("schema_version", 0) != SCHEMA_VERSION) {
             throw BadPackageException("Непідтримувана версія rdpkg schema.")
         }
-        if (manifest.optString("format") != FORMAT) throw BadPackageException("Це не Renault Docs .rdpkg.")
+        if (manifest.optString("format") != FORMAT) throw BadPackageException("Це не Renodocs .rdpkg.")
         val packageId = manifest.optString("package_id").trim()
         if (!isSafePackageId(packageId)) throw BadPackageException("RDPKG має некоректний package_id.")
         val projectId = manifest.optString("project_id").trim().takeIf { it.isNotBlank() }

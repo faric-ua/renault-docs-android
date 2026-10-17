@@ -58,7 +58,7 @@ object RdprojectManifestParser {
     const val MAX_MANIFEST_BYTES = 2 * 1024 * 1024
 
     private const val NOT_PROJECT_FILE =
-        "Це не файл проєкту Renault Docs (.rdproject)."
+        "Це не файл проєкту Renodocs (.rdproject)."
 
     fun parse(text: String): RdprojectManifest {
         val json =
@@ -70,7 +70,7 @@ object RdprojectManifestParser {
         val schema = json.optInt("schema_version", 0)
         if (schema != SCHEMA_VERSION) {
             throw RdprojectFormatException(
-                "Файл проєкту зроблено новішою версією Renault Docs (формат $schema). Оновіть застосунок.",
+                "Файл проєкту зроблено новішою версією Renodocs (формат $schema). Оновіть застосунок.",
             )
         }
         val project =

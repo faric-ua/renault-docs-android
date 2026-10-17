@@ -127,7 +127,8 @@ class CatalogToolAcceptsTheNewReport(unittest.TestCase):
 class Version(unittest.TestCase):
     def test_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn("versionName = \"0.5.1", gradle)
+        version = tuple(int(x) for x in gradle.split('versionName = "')[1].split('"')[0].split("."))
+        self.assertGreaterEqual(version, (0, 5, 125))  # 0.6.0: Renodocs line moved on
         self.assertGreaterEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)), 141)
 
 

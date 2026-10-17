@@ -427,7 +427,7 @@ class MainActivity : Activity() {
                 Ui.danger,
             )
             statusText.text =
-                "Сповіщення Renault Docs вимкнені. " +
+                "Сповіщення Renodocs вимкнені. " +
                     "Фонові процеси працюватимуть, але прогрес може не показуватися у шторці."
         }
     }
@@ -566,7 +566,7 @@ class MainActivity : Activity() {
         topBar.addView(
             Ui.textView(
                 context = this,
-                value = "Renault Docs",
+                value = "Renodocs",
                 sizeSp = 30f,
             ).apply {
                 setTypeface(
@@ -1339,7 +1339,7 @@ class MainActivity : Activity() {
                             runningVolumes,
                     )
                 } else {
-                    "Renault Docs"
+                    "Renodocs"
                 }
 
             operationStatus.showRunning(

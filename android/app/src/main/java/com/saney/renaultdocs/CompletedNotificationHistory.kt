@@ -207,7 +207,7 @@ internal object CompletedNotificationHistory {
         manager.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_ID,
-                "Renault Docs · результати",
+                "Renodocs · результати",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = "Останні завершені операції з томами Renault"
@@ -280,7 +280,7 @@ internal object CompletedNotificationHistory {
         )
         return Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_document)
-            .setContentTitle("Renault Docs · завершені операції")
+            .setContentTitle("Renodocs · завершені операції")
             .setContentText("Розгорни групу, щоб переглянути результати томів")
             .setGroup(GROUP_KEY)
             .setGroupSummary(true)

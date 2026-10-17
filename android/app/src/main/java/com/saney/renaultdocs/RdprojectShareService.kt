@@ -407,7 +407,7 @@ class RdprojectShareService : Service() {
                 R.drawable.ic_notification_document,
             )
             .setContentTitle(
-                "Renault Docs · підготовка проєкту",
+                "Renodocs · підготовка проєкту",
             )
             .setContentText(
                 text,

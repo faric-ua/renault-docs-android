@@ -1002,7 +1002,7 @@ object RdpkgImporter {
             ) ==
                 FORMAT,
         ) {
-            "Це не Renault Docs .rdpkg."
+            "Це не Renodocs .rdpkg."
         }
 
         val packageId =

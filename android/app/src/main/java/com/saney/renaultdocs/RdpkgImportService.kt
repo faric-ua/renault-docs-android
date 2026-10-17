@@ -89,7 +89,7 @@ class RdpkgImportService : Service() {
                 dataSyncTimeout.checkActive()
                 runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
                 publishResult(
-                    title = "Renault Docs · том імпортовано",
+                    title = "Renodocs · том імпортовано",
                     text = VolumeDuplicatePreflight.label(result.volume),
                 )
             } catch (error: Throwable) {
@@ -99,7 +99,7 @@ class RdpkgImportService : Service() {
                 ) {
                     runStore.cancelled("Імпорт тому скасовано. Том не додано, вихідний .rdpkg не змінено.")
                     publishResult(
-                        title = "Renault Docs · імпорт скасовано",
+                        title = "Renodocs · імпорт скасовано",
                         text = "Том не додано.",
                     )
                     return@Thread
@@ -107,7 +107,7 @@ class RdpkgImportService : Service() {
                 val message = error.message ?: "Невідома помилка імпорту."
                 runStore.fail(message)
                 publishResult(
-                    title = "Renault Docs · помилка імпорту",
+                    title = "Renodocs · помилка імпорту",
                     text = message,
                 )
             } finally {
@@ -183,7 +183,7 @@ class RdpkgImportService : Service() {
         val pending = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         return Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_document)
-            .setContentTitle("Renault Docs · .rdpkg")
+            .setContentTitle("Renodocs · .rdpkg")
             .setContentText(text)
             .setContentIntent(pending)
             .setColor(Ui.success)

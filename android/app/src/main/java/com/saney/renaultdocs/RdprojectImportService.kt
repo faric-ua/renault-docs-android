@@ -67,7 +67,7 @@ class RdprojectImportService : Service() {
             .createNotificationChannel(
                 NotificationChannel(
                     CHANNEL_ID,
-                    "Renault Docs project import",
+                    "Renodocs project import",
                     NotificationManager.IMPORTANCE_LOW,
                 ),
             )
@@ -467,7 +467,7 @@ class RdprojectImportService : Service() {
             )
         return Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_document)
-            .setContentTitle("Renault Docs · імпорт проєкту")
+            .setContentTitle("Renodocs · імпорт проєкту")
             .setContentText(text)
             .setContentIntent(pending)
             .setOnlyAlertOnce(true)

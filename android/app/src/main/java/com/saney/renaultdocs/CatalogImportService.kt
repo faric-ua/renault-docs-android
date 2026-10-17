@@ -33,7 +33,7 @@ class CatalogImportService : Service() {
             .createNotificationChannel(
                 NotificationChannel(
                     CHANNEL_ID,
-                    "Renault Docs catalog import",
+                    "Renodocs catalog import",
                     NotificationManager.IMPORTANCE_LOW,
                 ),
             )
@@ -425,7 +425,7 @@ class CatalogImportService : Service() {
                 R.drawable.ic_notification_document,
             )
             .setContentTitle(
-                "Renault Docs · каталог",
+                "Renodocs · каталог",
             )
             .setContentText(
                 text,

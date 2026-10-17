@@ -137,7 +137,7 @@ class SafDatasetWebViewClient(
             return htmlResponse(
                 statusCode = 404,
                 reason = "Not Found",
-                title = "Renault Docs",
+                title = "Renodocs",
                 body = "Порожній шлях усередині dataset.",
             )
         }
@@ -2313,7 +2313,7 @@ class SafDatasetWebViewClient(
                     titleFromHeading
                 }
                 .ifBlank {
-                    "Renault Docs"
+                    "Renodocs"
                 }
 
         val withoutBrand =
@@ -4139,7 +4139,7 @@ class SafDatasetWebViewClient(
             ByteArrayInputStream(
                 (
                     "Blocked external resource " +
-                        "in offline Renault Docs."
+                        "in offline Renodocs."
                 ).toByteArray(
                     Charsets.UTF_8,
                 )
