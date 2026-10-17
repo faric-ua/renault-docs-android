@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.149",
+  "versionCode": 165,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.149-small-fixes",
+  "issues": [
+    147
+  ],
+  "scope": "Small fixes in one go (owner 2026-10-17 15:35): TODO 23 card wraps long lines (no middle cut of dates); TODO 21.2 «Знайдено файлів: N» while listing, single listing on the STORED path; TODO 10 Settings → «Залишки обірваних імпортів» (list + «Прибрати»). Includes v0.5.147–148.",
+  "sourceBase": "v0.5.148/build164",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 403,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "a55e0119ed1003fd71d367b0d8d8a33dc0e7e91b",
+  "signed_run_id": 39033842083,
+  "signed_run_number": 219,
+  "signed_android_apk_run": 219,
+  "artifact_id": 12101168714,
+  "artifact_name": "Renault-Docs-v0.5.149-Debug",
+  "artifact_digest": "sha256:5067466212f1c52f85b89d4ca3b58ad224cc2021923b97c7c2d36f05249a8480",
+  "next": "M30s: install over; Settings → Томи → «Залишки обірваних імпортів» → list → «Прибрати» → bar on home; ⋮ volume on card → «Підготувати і поділитися томом» → «Знайдено файлів: N»."
+}
