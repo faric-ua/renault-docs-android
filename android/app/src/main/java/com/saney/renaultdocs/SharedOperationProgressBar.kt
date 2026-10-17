@@ -16,6 +16,9 @@ object SharedOperationProgressBar {
     fun create(context: Context): ProgressBar =
         ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = SCALE
+            // TODO №21 (owner 2026-10-17): «unknown how long» — a stripe running across the
+            // whole bar at changing speed, not the platform's flicker at the left edge.
+            indeterminateDrawable = SweepProgressDrawable(Ui.success, Ui.border)
             isIndeterminate = false
             progress = 0
             tint(this, Ui.success)
@@ -31,7 +34,8 @@ object SharedOperationProgressBar {
     fun tint(bar: ProgressBar, color: Int) {
         val colors = ColorStateList.valueOf(color)
         bar.progressTintList = colors
-        bar.indeterminateTintList = colors
+        val sweep = bar.indeterminateDrawable as? SweepProgressDrawable
+        if (sweep != null) sweep.setColors(color, Ui.border) else bar.indeterminateTintList = colors
         bar.progressBackgroundTintList = ColorStateList.valueOf(Ui.border)
     }
 
