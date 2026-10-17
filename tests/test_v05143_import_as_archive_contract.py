@@ -105,5 +105,24 @@ class ImportAsArchiveContract(unittest.TestCase):
         self.assertIn("Сам том не змінено.", check)
 
 
+    def test_v05145_no_compressor_where_it_breaks(self):
+        # Phone QA M30s 2026-10-17 04:24: ZipStreamCheck caught «invalid code lengths set» in
+        # «Підготувати і поділитися томом» NT8228A. Android 11 (or a phone where it once broke)
+        # writes packages STORED; other phones keep the compressor (same bytes as on Drive).
+        policy = source("ZipCompressionPolicy.kt")
+        self.assertIn("Build.VERSION.SDK_INT <= Build.VERSION_CODES.R", policy)
+        self.assertIn("fun rememberBroken(", policy)
+        writer = source("RdpkgZipWriter.kt")
+        self.assertIn("if (ZipCompressionPolicy.storedOnly(context))", writer)
+        self.assertIn("private fun writeStored(", writer)
+        self.assertIn("VolumeArchiveWriter.writeTo(", writer)
+        self.assertIn("ZipCompressionPolicy.rememberBroken(context)", writer)
+        project = source("RdprojectExporter.kt")
+        self.assertIn("val storedOnly = ZipCompressionPolicy.storedOnly(context)", project)
+        self.assertIn("method = ZipEntry.STORED", project)
+        self.assertIn("ZipCompressionPolicy.rememberBroken(context)", project)
+        self.assertIn("fun writeTo(", source("VolumeArchiveWriter.kt"))
+
+
 if __name__ == "__main__":
     unittest.main()

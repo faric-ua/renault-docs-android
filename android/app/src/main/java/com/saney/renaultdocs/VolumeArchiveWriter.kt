@@ -49,6 +49,16 @@ object VolumeArchiveWriter {
         sourceRoot: File,
         target: File,
         progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
+    ): Result = writeTo(sourceRoot, target.outputStream(), progress)
+
+    /**
+     * v0.5.145: the same STORED archive into any stream (exports from a phone whose
+     * compressor breaks, [ZipCompressionPolicy]). [output] is closed at the end.
+     */
+    fun writeTo(
+        sourceRoot: File,
+        output: java.io.OutputStream,
+        progress: ((filesDone: Int, filesTotal: Int, bytesDone: Long, bytesTotal: Long) -> Unit)? = null,
     ): Result {
         val root = sourceRoot.canonicalFile
         require(root.isDirectory) { "Package source is not a directory: $root" }
@@ -66,7 +76,7 @@ object VolumeArchiveWriter {
         val buffer = ByteArray(256 * 1024)
         var doneBytes = 0L
         progress?.invoke(0, files.size, 0L, totalBytes)
-        DigestOutputStream(BufferedOutputStream(target.outputStream(), 1024 * 1024), digest).use { out ->
+        DigestOutputStream(BufferedOutputStream(output, 1024 * 1024), digest).use { out ->
             ZipOutputStream(out).use { zip ->
                 zip.setMethod(ZipOutputStream.STORED)
                 files.forEachIndexed { index, file ->
