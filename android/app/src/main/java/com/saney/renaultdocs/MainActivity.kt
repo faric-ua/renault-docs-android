@@ -46,6 +46,8 @@ class MainActivity : Activity() {
     }
     private lateinit var statusText: TextView
     private lateinit var operationStatus: OperationStatusView
+    // v0.5.148: its own card for erasing files of deleted volumes (can run next to an import).
+    private lateinit var trashStatus: OperationStatusView
     private lateinit var store: DatasetStore
     private lateinit var projectStore: ProjectStore
     private lateinit var settings: AppSettings
@@ -72,6 +74,7 @@ class MainActivity : Activity() {
         object : Runnable {
             override fun run() {
                 refreshRdprojectShareRunState()
+                refreshTrashCard()
                 rdprojectRunHandler.postDelayed(
                     this,
                     RDPROJECT_RUN_REFRESH_MS,
@@ -317,6 +320,42 @@ class MainActivity : Activity() {
             renderLibrary()
         }
         refreshRdprojectShareRunState()
+        // v0.5.148: something left in the trash (app closed while erasing) — go on erasing.
+        VolumeTrash.startErase(this)
+        refreshTrashCard()
+    }
+
+    /**
+     * v0.5.148 (owner 05:25): the bar for erasing files of deleted volumes — «Том 5 з 23 ·
+     * 34 % · залишилось ~12 хв»; after the end — how many files and how long, until closed.
+     * Reads only memory and preferences (called every 100 ms).
+     */
+    private fun refreshTrashCard() {
+        if (!::trashStatus.isInitialized) return
+        val step = VolumeTrash.progress
+        if (step != null) {
+            trashStatus.showRunning(
+                title = VolumeDeleteChoice.ERASE_TITLE,
+                detail = VolumeDeleteChoice.eraseDetail(step),
+                current = if (step.counting && step.itemIndex == 1) null else (step.fraction * 1000).toInt(),
+                total = if (step.counting && step.itemIndex == 1) null else 1000,
+                counterLabel = VolumeDeleteChoice.eraseCounter(step),
+            )
+            return
+        }
+        val summary = VolumeTrash.lastSummary(this)
+        if (summary != null) {
+            trashStatus.showTerminal(
+                title = VolumeDeleteChoice.eraseDoneTitle(summary.left),
+                detail = VolumeDeleteChoice.eraseDoneDetail(summary.files, summary.volumes, summary.ms, summary.left),
+                outcome = if (summary.left == 0) OperationTerminalOutcome.SUCCESS else OperationTerminalOutcome.NEUTRAL,
+            ) {
+                VolumeTrash.dismissSummary(this, summary.finishedAt)
+                trashStatus.hide()
+            }
+            return
+        }
+        if (trashStatus.visibility != View.GONE) trashStatus.hide()
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -963,6 +1002,17 @@ class MainActivity : Activity() {
             }
             addView(
                 operationStatus,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = Ui.dp(this@MainActivity, 8) },
+            )
+            trashStatus = OperationStatusView(this@MainActivity).apply {
+                useProjectCompactLayout(true)
+                visibility = View.GONE
+            }
+            addView(
+                trashStatus,
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,

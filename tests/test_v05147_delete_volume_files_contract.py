@@ -57,7 +57,9 @@ class DeleteVolumeFilesContract(unittest.TestCase):
         self.assertIn('!packageId.contains(\'/\')', trash)
         self.assertNotIn(".delete()", trash, "VolumeTrash only renames; erasing is in the core")
         self.assertNotIn("Thread {", source("HomeProjectDialogController.kt"))
-        self.assertIn("VolumeTrash.startErase(this)", source("RenaultDocsApplication.kt"))
+        # v0.5.148: resumed when the home screen opens (a foreground service cannot be started
+        # from Application.onCreate in the background).
+        self.assertIn("VolumeTrash.startErase(this)", source("MainActivity.kt"))
 
     def test_old_rules_unchanged(self):
         project = source("ProjectActivity.kt")

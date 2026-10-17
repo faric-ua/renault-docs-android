@@ -23,9 +23,6 @@ class RenaultDocsApplication :
         // `.nomedia` — add the marker once, off the main thread (the card can be slow).
         Thread {
             runCatching { VolumeStorage.ensureCardNoMedia(this) }
-            // v0.5.147: finish erasing files of volumes deleted earlier (if the app was
-            // closed before the background eraser was done). Only the trash folders.
-            runCatching { VolumeTrash.startErase(this) }
         }.start()
     }
 

@@ -189,6 +189,12 @@
             android:stopWithTask="false" />
 
         <service
+            android:name=".VolumeTrashService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <service
             android:name=".NativeRdpkgPreparationService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
