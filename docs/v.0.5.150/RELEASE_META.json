@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.150",
+  "versionCode": 166,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v0.5.150-drive-update",
+  "issues": [
+    147
+  ],
+  "scope": "Owner 2026-10-17 15:49–15:50: update the app from Google Drive (AppsAndroidSync/RenaultDocs/App) — check, window with what changed and «Детальніше», «Оновити» / «Не зараз», checked APK install; author publish sheet; DRIVE_UPDATES switch for a Play build. Includes v0.5.149.",
+  "sourceBase": "v0.5.149/build165",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 405,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "049144123056b6effaca8f12e7a9788233b2034e",
+  "signed_run_id": 39034957286,
+  "signed_run_number": 220,
+  "signed_android_apk_run": 220,
+  "artifact_id": 12102200538,
+  "artifact_name": "Renault-Docs-v0.5.150-Debug",
+  "artifact_digest": "sha256:5e1fca824f98408dd7bf046c76d74703f3da9fc9f136aeb427311afebc622a05",
+  "next": "Author phone: install over; Settings → Оновлення застосунку → Опублікувати цю версію на Диск → steps 1–4 into AppsAndroidSync/RenaultDocs/App → Опублікувати зараз; then the other phone: Перевірити оновлення with the shared link."
+}
