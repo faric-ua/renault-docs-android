@@ -175,8 +175,8 @@ class FixVolumeLogoTest(unittest.TestCase):
         self.assertIn("26)\n      fix_volume_logo", menu)
         script = (repo / "tools/termux/reno-fix-volume-logo.sh").read_text(encoding="utf-8")
         self.assertIn("fix_volume_logo.py", script)
-        self.assertIn("docs/brand/renodocs-logo.gif", script)
-        self.assertTrue((repo / "docs/brand/renodocs-logo.gif").is_file())
+        self.assertIn("docs/brand/volume-logo.gif", script)
+        self.assertTrue((repo / "docs/brand/volume-logo.gif").is_file())
 
 
 if __name__ == "__main__":

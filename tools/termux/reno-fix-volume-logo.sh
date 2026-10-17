@@ -5,7 +5,7 @@ set -u
 # (ICONES/LOGO.GIF, 2023). Пишемо НОВІ файли з нашим лого в папку logo-fixed поруч;
 # оригінали не змінюються.
 REPO="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
-LOGO="$REPO/docs/brand/renodocs-logo.gif"
+LOGO="$REPO/docs/brand/volume-logo.gif"
 
 echo "============================================================"
 echo " Renault Docs · Замінити зіпсоване лого (Laguna II)"

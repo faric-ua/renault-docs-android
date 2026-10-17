@@ -69,3 +69,5 @@ release-signing.properties
 
 # Own brand artwork (Renodocs logo), not Renault material
 !docs/brand/renodocs-logo.gif
+!docs/brand/volume-logo.gif
+!docs/brand/emblems/*.png
