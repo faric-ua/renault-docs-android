@@ -289,6 +289,26 @@ class VolumePackageCheckTest {
     }
 
     @Test
+    fun storedPackageFromAFolderPassesBothChecks() {
+        // v0.5.145: on the M30s exports are written STORED through VolumeArchiveWriter.writeTo.
+        val folder = File(dir, "vol").apply { mkdirs() }
+        goodFiles.forEach { (path, bytes) -> File(folder, path).apply { parentFile.mkdirs(); writeBytes(bytes) } }
+        val target = File(dir, "stored.rdpkg")
+        val check = ZipStreamCheck()
+        val written =
+            check.use {
+                val result = VolumeArchiveWriter.writeTo(folder, TeeOutputStream(target.outputStream(), it.output))
+                assertEquals(goodFiles.size, it.finish(expectedFiles = result.fileCount))
+                result
+            }
+        assertEquals(goodFiles.size, written.fileCount)
+        assertEquals(goodFiles.size, VolumePackageCheck.check(target).fileCount)
+        val sha = java.security.MessageDigest.getInstance("SHA-256").digest(target.readBytes())
+            .joinToString("") { "%02x".format(it) }
+        assertEquals(sha, written.sha256)
+    }
+
+    @Test
     fun streamCheckDoesNotBlockTheWriterOnGarbage() {
         val destination = ByteArrayOutputStream()
         val check = ZipStreamCheck()

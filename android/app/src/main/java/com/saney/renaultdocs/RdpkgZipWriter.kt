@@ -108,6 +108,17 @@ object RdpkgZipWriter {
                 it.length()
             }
 
+        // v0.5.145: on a phone whose compressor breaks (M30s, Android 11) — no compressor.
+        if (ZipCompressionPolicy.storedOnly(context)) {
+            return writeStored(
+                context = context,
+                root = root,
+                destinationUri = destinationUri,
+                progress = progress,
+                byteProgress = byteProgress,
+            )
+        }
+
         val digest =
             MessageDigest.getInstance(
                 "SHA-256",
@@ -281,10 +292,17 @@ object RdpkgZipWriter {
                 }
             }
 
-            check.finish(
-                expectedFiles =
-                    files.size,
-            )
+            try {
+                check.finish(
+                    expectedFiles =
+                        files.size,
+                )
+            } catch (damaged: DamagedOutputException) {
+                // v0.5.145: this phone's compressor broke a file — from now on it writes
+                // without one ([ZipCompressionPolicy]); the owner repeats the operation.
+                ZipCompressionPolicy.rememberBroken(context)
+                throw damaged
+            }
         } finally {
             check.close()
         }
@@ -306,6 +324,47 @@ object RdpkgZipWriter {
                         )
                     },
         )
+    }
+
+    /**
+     * v0.5.145: the package with every entry STORED ([VolumeArchiveWriter] — same order and
+     * names), still checked while written ([ZipStreamCheck]). Progress at most every 100 ms.
+     */
+    private fun writeStored(
+        context: Context,
+        root: File,
+        destinationUri: Uri,
+        progress: ((completed: Int, total: Int) -> Unit)?,
+        byteProgress: ((Int, Int, Long, Long) -> Unit)?,
+    ): WriteResult {
+        val rawOutput =
+            context.applicationContext.contentResolver.openOutputStream(destinationUri, "w")
+                ?: error("Android could not open the .rdpkg destination for writing.")
+        val check = ZipStreamCheck()
+        try {
+            var lastProgressAt = 0L
+            val written =
+                VolumeArchiveWriter.writeTo(
+                    sourceRoot = root,
+                    output = TeeOutputStream(rawOutput, check.output),
+                    progress = { filesDone, filesTotal, bytesDone, bytesTotal ->
+                        val now = SystemClock.elapsedRealtime()
+                        if (filesDone <= 1 || filesDone >= filesTotal || now - lastProgressAt >= PROGRESS_THROTTLE_MS) {
+                            lastProgressAt = now
+                            progress?.invoke(filesDone, filesTotal)
+                            byteProgress?.invoke(filesDone, filesTotal, bytesDone, bytesTotal)
+                        }
+                    },
+                )
+            check.finish(expectedFiles = written.fileCount)
+            return WriteResult(
+                fileCount = written.fileCount,
+                sourceBytes = written.sourceBytes,
+                sha256 = written.sha256,
+            )
+        } finally {
+            check.close()
+        }
     }
 
     /**

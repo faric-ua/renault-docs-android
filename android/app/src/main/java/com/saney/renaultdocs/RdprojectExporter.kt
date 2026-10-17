@@ -369,6 +369,7 @@ object RdprojectExporter {
                     ?.use { raw ->
                         // TODO №19 (2026-10-17): the project file is unpacked again while it
                         // is written — on the M30s the compressor sometimes made a broken ZIP.
+                        val storedOnly = ZipCompressionPolicy.storedOnly(context)
                         ZipStreamCheck().use { check ->
                         ZipOutputStream(
                             TeeOutputStream(
@@ -392,7 +393,24 @@ object RdprojectExporter {
                                 zip.putNextEntry(
                                     ZipEntry(
                                         relative,
-                                    ),
+                                    ).apply {
+                                        // v0.5.145: no compressor on a phone where it breaks
+                                        // ([ZipCompressionPolicy]); the CRC is read first.
+                                        if (storedOnly) {
+                                            val crc = java.util.zip.CRC32()
+                                            file.inputStream().buffered().use { input ->
+                                                while (true) {
+                                                    val read = input.read(buffer)
+                                                    if (read < 0) break
+                                                    if (read > 0) crc.update(buffer, 0, read)
+                                                }
+                                            }
+                                            method = ZipEntry.STORED
+                                            size = file.length()
+                                            compressedSize = file.length()
+                                            this.crc = crc.value
+                                        }
+                                    },
                                 )
 
                                 file.inputStream()
@@ -517,10 +535,15 @@ object RdprojectExporter {
                                 )
                             }
                         }
-                        check.finish(
-                            expectedFiles =
-                                projectFiles.size,
-                        )
+                        try {
+                            check.finish(
+                                expectedFiles =
+                                    projectFiles.size,
+                            )
+                        } catch (damaged: DamagedOutputException) {
+                            ZipCompressionPolicy.rememberBroken(context)
+                            throw damaged
+                        }
                         }
                     }
                     ?: error(
