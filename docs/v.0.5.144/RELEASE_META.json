@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.144",
+  "versionCode": 160,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/v05144-check-progress-throttle",
+  "issues": [
+    147
+  ],
+  "scope": "Archive import: progress of the package check throttled to ≤10/s (M30s 2026-10-17 03:48: slow after 50 % — every entry wrote run state and posted a notification). Includes v0.5.143.",
+  "sourceBase": "v0.5.143/build159",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 382,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "ea1171a656155e446a0d2b9f5e6af0cfbd5b28d7",
+  "signed_run_id": 38988358525,
+  "signed_run_number": 214,
+  "signed_android_apk_run": 214,
+  "artifact_id": 12083997300,
+  "artifact_name": "Renault-Docs-v0.5.144-Debug",
+  "artifact_digest": "sha256:d33423f02f87e2339ddef82e87ef4bf0d76aa6830696b0f57e5f660a2062ba5e",
+  "next": "M30s: install over; import one Laguna II volume from A26 to the card — whole bar in minutes; volume menu «Том — один файл-архів ✓»; documents open."
+}
