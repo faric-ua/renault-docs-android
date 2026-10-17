@@ -264,6 +264,12 @@ migrate_rdpkg_names() {
   pause_menu
 }
 
+fix_volume_logo() {
+  clear
+  bash "$REPO/tools/termux/reno-fix-volume-logo.sh"
+  pause_menu
+}
+
 build_public_catalog() {
   clear
   bash "$REPO/tools/termux/reno-build-public-catalog.sh"
@@ -355,6 +361,7 @@ while true; do
   echo "23 — Legacy quarantine *_android (move/restore, без видалення)"
   echo "24 — Міграція назв локальних .rdpkg (безпечне перейменування)"
   echo "25 — Створити public Catalog v4 (15 пакетів)"
+  echo "26 — Замінити зіпсоване лого в томах Laguna II"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -436,6 +443,9 @@ while true; do
       ;;
     25)
       build_public_catalog
+      ;;
+    26)
+      fix_volume_logo
       ;;
     0)
       clear
