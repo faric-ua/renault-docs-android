@@ -67,8 +67,8 @@ class VolumeTrashTest {
         VolumeTrashCore.moveIn(volumeFolder(volumes, "NT8227A", 40), trash, 1L)
         VolumeTrashCore.moveIn(File(archives, "NT8228A.rdpkg").apply { writeText("zip") }, trash, 1L)
 
-        val reports = mutableListOf<Pair<Long, Int>>()
-        val result = VolumeTrashCore.eraseAll(listOf(trash), reportEvery = 10) { d, l -> reports += d to l }
+        val reports = mutableListOf<VolumeTrashCore.EraseProgress>()
+        val result = VolumeTrashCore.eraseAll(listOf(trash), reportEvery = 10) { reports += it }
 
         assertEquals(42L, result.deletedFiles) // 40 pages + rdpkg.json + one archive
         assertEquals(0, result.leftItems)
@@ -76,8 +76,15 @@ class VolumeTrashTest {
         assertTrue(trash.isDirectory)
         assertTrue(File(trash, ".nomedia").isFile)
         assertEquals(0, VolumeTrashCore.pendingItems(listOf(trash)))
-        assertTrue(reports.size >= 4)
-        assertEquals(42L to 0, reports.last())
+        // Two volumes: each starts with «counting», then a known number of files.
+        assertEquals(2, reports.count { it.counting })
+        assertTrue(reports.all { it.itemTotal == 2 })
+        assertEquals(setOf(1, 41), reports.filter { !it.counting }.map { it.itemFiles }.toSet())
+        assertEquals(42L, reports.last().deletedFiles)
+        assertEquals(1.0, reports.last().fraction, 1e-9)
+        // The share done never goes back.
+        val fractions = reports.map { it.fraction }
+        assertEquals(fractions, fractions.sorted())
         // Nothing outside the trash was touched.
         assertTrue(File(keep, "rdpkg.json").isFile)
         assertTrue(keepArchive.isFile)
@@ -116,6 +123,22 @@ class VolumeTrashTest {
     }
 
     @Test
+    fun remainingTimeFromTheSpeedSoFar() {
+        // Volume 2 of 4, half done → 37.5 % after 30 s → ~50 s left.
+        val p = VolumeTrashCore.EraseProgress(2, 4, 100, 50, 150, 30_000L)
+        assertEquals(0.375, p.fraction, 1e-9)
+        assertEquals(50_000L, p.remainingMs)
+        assertNull(VolumeTrashCore.EraseProgress(1, 4, 100, 1, 1, 30_000L).remainingMs) // too early
+        assertNull(VolumeTrashCore.EraseProgress(2, 4, 100, 50, 150, 2_000L).remainingMs) // too soon
+        assertEquals("Том 2 з 4 · 37 % · залишилось менше хвилини", VolumeDeleteChoice.eraseCounter(p))
+        assertEquals("Том 3 з 4 · рахую файли…", VolumeDeleteChoice.eraseCounter(VolumeTrashCore.EraseProgress(3, 4, -1, 0, 9, 1_000L)))
+        assertEquals("~12 хв", VolumeDeleteChoice.durationLabel(12 * 60_000L))
+        assertEquals("~1 год 05 хв", VolumeDeleteChoice.durationLabel(65 * 60_000L))
+        assertEquals("менше хвилини", VolumeDeleteChoice.durationLabel(59_000L))
+        assertTrue(VolumeDeleteChoice.eraseDoneDetail(5000, 23, 14 * 60_000L, 0).startsWith("Стерто файлів: 5000 (23 томи) за 14 хв."))
+    }
+
+    @Test
     fun defaultSelectionTicksOnlyUnpackedFoldersOnTheCard() {
         val items =
             listOf(
@@ -146,6 +169,9 @@ class VolumeTrashTest {
         val result =
             VolumeDeleteChoice.resultMessage(VolumeDeleteOutcome(listOf("NT8227A"), emptyList(), listOf("NT8228A (x)")))
         assertTrue(result.startsWith("Видалено з проєкту: 1 том."))
+        assertTrue(result.contains("Файли 1 тому стираються"))
+        val many = VolumeDeleteChoice.resultMessage(VolumeDeleteOutcome(List(23) { "NT$it" }, emptyList(), emptyList()))
+        assertTrue(many.contains("Файли 23 томів стираються"))
         assertTrue(result.contains("стираються у фоні"))
         assertTrue(result.contains("NT8228A (x)"))
     }

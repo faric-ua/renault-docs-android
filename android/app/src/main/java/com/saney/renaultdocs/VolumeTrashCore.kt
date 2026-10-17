@@ -60,37 +60,70 @@ object VolumeTrashCore {
         }
 
     /**
-     * Erases everything inside [trashDirs] (the folders themselves and `.nomedia` stay).
-     * [progress] gets the number of files erased so far and the items left, at most every
-     * [reportEvery] files and once at the end.
+     * v0.5.148 (owner 05:25: «як подивитися, чи вони досі стираються… і скільки це времені
+     * займе… чому немає прогрес-бара?»): what the eraser is doing now.
+     * [itemFiles] is -1 while the files of the current volume are being counted.
+     */
+    data class EraseProgress(
+        val itemIndex: Int,
+        val itemTotal: Int,
+        val itemFiles: Int,
+        val itemDone: Int,
+        val deletedFiles: Long,
+        val elapsedMs: Long,
+    ) {
+        val counting: Boolean get() = itemFiles < 0
+
+        /** Share of the whole run, 0..1: finished volumes plus the share of the current one. */
+        val fraction: Double
+            get() {
+                if (itemTotal <= 0) return 1.0
+                val inItem = if (itemFiles > 0) itemDone.toDouble() / itemFiles else 0.0
+                return ((itemIndex - 1).coerceAtLeast(0) + inItem.coerceIn(0.0, 1.0)) / itemTotal
+            }
+
+        /** Time left, from the speed so far; null while there is too little to judge. */
+        val remainingMs: Long?
+            get() {
+                val f = fraction
+                if (f < 0.02 || elapsedMs < 5_000L || f >= 1.0) return null
+                return (elapsedMs * (1.0 - f) / f).toLong()
+            }
+    }
+
+    /**
+     * Erases everything inside [trashDirs] (the folders themselves and `.nomedia` stay),
+     * one volume at a time: first its files are listed (counted), then erased from that
+     * list — so every file is looked at only once and the share done is known.
+     * [progress] is called at the start of each volume, after counting, at most every
+     * [reportEvery] files and at the end.
      */
     fun eraseAll(
         trashDirs: List<File>,
         isCancelled: () -> Boolean = { false },
-        reportEvery: Int = 500,
-        progress: (deletedFiles: Long, leftItems: Int) -> Unit = { _, _ -> },
+        reportEvery: Int = 200,
+        clock: () -> Long = { System.currentTimeMillis() },
+        progress: (EraseProgress) -> Unit = {},
     ): EraseResult {
+        val started = clock()
+        val items =
+            trashDirs.flatMap { dir ->
+                dir.listFiles()?.filter { it.name != NO_MEDIA }.orEmpty().sortedBy { it.name }
+            }
         var deleted = 0L
-        var sinceReport = 0
         var cancelled = false
 
-        fun counted() {
-            deleted++
-            sinceReport++
-            if (sinceReport >= reportEvery) {
-                sinceReport = 0
-                progress(deleted, pendingItems(trashDirs))
-            }
-        }
-
-        // Depth first, without recursion limits on deep trees and without following links.
-        fun erase(top: File) {
+        items@ for ((index, item) in items.withIndex()) {
+            val number = index + 1
+            progress(EraseProgress(number, items.size, -1, 0, deleted, clock() - started))
+            // Post-order list: children before their folder; links are not followed.
+            val order = ArrayList<Pair<File, Boolean>>()
             val stack = ArrayDeque<Pair<File, Boolean>>()
-            stack.addLast(top to false)
+            stack.addLast(item to false)
             while (stack.isNotEmpty()) {
                 if (isCancelled()) {
                     cancelled = true
-                    return
+                    break@items
                 }
                 val (file, childrenDone) = stack.removeLast()
                 val isLink = runCatching { Files.isSymbolicLink(file.toPath()) }.getOrDefault(false)
@@ -100,20 +133,29 @@ object VolumeTrashCore {
                     file.listFiles()?.forEach { child -> stack.addLast(child to false) }
                     continue
                 }
-                if (file.delete() && !isFolder) counted()
+                order += file to isFolder
             }
-        }
-
-        for (dir in trashDirs) {
-            val items = dir.listFiles()?.filter { it.name != NO_MEDIA }.orEmpty()
-            for (item in items) {
-                erase(item)
-                if (cancelled) break
+            val files = order.count { !it.second }
+            var done = 0
+            progress(EraseProgress(number, items.size, files, 0, deleted, clock() - started))
+            for ((file, isFolder) in order) {
+                if (isCancelled()) {
+                    cancelled = true
+                    break@items
+                }
+                if (file.delete() && !isFolder) {
+                    deleted++
+                    done++
+                    if (done % reportEvery == 0) {
+                        progress(EraseProgress(number, items.size, files, done, deleted, clock() - started))
+                    }
+                } else if (!isFolder) {
+                    done++ // could not erase it — counted as looked at; the next start tries again
+                }
             }
-            if (cancelled) break
+            progress(EraseProgress(number, items.size, files, files, deleted, clock() - started))
         }
         val left = pendingItems(trashDirs)
-        progress(deleted, left)
         return EraseResult(deletedFiles = deleted, leftItems = left, cancelled = cancelled)
     }
 }

@@ -78,9 +78,10 @@ object VolumeDeleteChoice {
             append(volumeCount(removed))
             append('.')
             if (outcome.withFiles.isNotEmpty()) {
+                // v0.5.148: «Файли 23 томів» (was «Файли 23 томи» — wrong case, M30s 05:24).
                 append(" Файли ")
-                append(volumeCount(outcome.withFiles.size))
-                append(" стираються у фоні — можна вже імпортувати їх заново.")
+                append(volumeCountOf(outcome.withFiles.size))
+                append(" стираються у фоні (смуга — нижче і в шторці) — можна вже імпортувати їх заново.")
             }
             if (outcome.recordOnly.isNotEmpty()) {
                 append(" Лише запис (файли лишились): ")
@@ -93,6 +94,76 @@ object VolumeDeleteChoice {
                 append('.')
             }
         }
+
+    /** «файли 1 тому», «файли 23 томів» — after a noun (genitive). */
+    fun volumeCountOf(count: Int): String {
+        val noun = if (count % 10 == 1 && count % 100 != 11) "тому" else "томів"
+        return "$count $noun"
+    }
+
+    // v0.5.148 (owner 05:25): the bar of the background eraser — words for the card and the shade.
+    const val ERASE_TITLE = "Стираю файли видалених томів"
+
+    /** «Том 5 з 23 · 34 % · залишилось ~12 хв» (or «рахую файли…» at the start of a volume). */
+    fun eraseCounter(p: VolumeTrashCore.EraseProgress): String =
+        buildString {
+            append("Том ")
+            append(p.itemIndex)
+            append(" з ")
+            append(p.itemTotal)
+            append(" · ")
+            if (p.counting) {
+                append("рахую файли…")
+            } else {
+                append((p.fraction * 100).toInt().coerceIn(0, 100))
+                append(" %")
+            }
+            p.remainingMs?.let {
+                append(" · залишилось ")
+                append(durationLabel(it))
+            }
+        }
+
+    fun eraseDetail(p: VolumeTrashCore.EraseProgress): String =
+        if (p.counting) {
+            "Рахую файли тому ${p.itemIndex}… Стерто вже: ${p.deletedFiles}."
+        } else {
+            "Стерто файлів: ${p.deletedFiles} · у цьому томі ${p.itemDone} з ${p.itemFiles}."
+        }
+
+    fun eraseDoneTitle(left: Int): String =
+        if (left == 0) "Файли видалених томів стерто" else "Файли видалених томів · стерто не все"
+
+    fun eraseDoneDetail(
+        files: Long,
+        volumes: Int,
+        ms: Long,
+        left: Int,
+    ): String =
+        buildString {
+            append("Стерто файлів: ")
+            append(files)
+            append(" (")
+            append(volumeCount(volumes))
+            append(") за ")
+            append(durationLabel(ms).removePrefix("~"))
+            append('.')
+            if (left > 0) {
+                append(" Не стерлось: ")
+                append(volumeCount(left))
+                append(" — спробую ще раз при наступному відкритті застосунку.")
+            }
+        }
+
+    /** «менше хвилини», «~12 хв», «~1 год 05 хв». */
+    fun durationLabel(ms: Long): String {
+        val minutes = (ms + 30_000L) / 60_000L
+        return when {
+            ms < 60_000L -> "менше хвилини"
+            minutes < 60 -> "~$minutes хв"
+            else -> "~${minutes / 60} год %02d хв".format(minutes % 60)
+        }
+    }
 
     fun volumeCount(count: Int): String {
         val mod100 = count % 100
