@@ -1,0 +1,25 @@
+{
+  "versionName": "0.5.143",
+  "versionCode": 159,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/v05143-import-as-archive",
+  "issues": [
+    147
+  ],
+  "scope": "Archives plan v2, stage 2: import (.rdpkg, .rdproject, catalog) keeps the volume as one file checked entry by entry (VolumePackageCheck) and reads it from there — no unpacking. TODO 19: every written ZIP (export, share, .rdproject) is unpacked again while written (ZipStreamCheck); a damaged file fails and is removed. Includes v0.5.142.",
+  "sourceBase": "v0.5.142/build158",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 378,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "054842bffa164c21d1a107a2c4e24897ce74dd25",
+  "signed_run_id": 38986289663,
+  "signed_run_number": 213,
+  "signed_android_apk_run": 213,
+  "artifact_id": 12083581426,
+  "artifact_name": "Renault-Docs-v0.5.143-Debug",
+  "artifact_digest": "sha256:a3783b17c22215a52806e9670faf23430566aa767a3112f7c819683c2929a186",
+  "next": "A26: install over; import one .rdpkg volume (phone) → «Том — один файл-архів ✓», documents open. M30s (when free): import one volume to the card — minutes; export one volume from M30s."
+}
