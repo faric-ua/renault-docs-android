@@ -19,6 +19,7 @@ import java.nio.file.Files
  */
 object VolumeTrashCore {
     const val TRASH_DIR = "rdpkg-trash"
+    const val FOUND_REPORT_EVERY = 250
     private const val NO_MEDIA = ".nomedia"
 
     data class EraseResult(
@@ -91,6 +92,7 @@ object VolumeTrashCore {
         val itemIndex: Int,
         val itemTotal: Int,
         val itemFiles: Int,
+        // While [counting] (v0.5.151, TODO №24): files found so far in this volume.
         val itemDone: Int,
         val deletedFiles: Long,
         val elapsedMs: Long,
@@ -141,6 +143,7 @@ object VolumeTrashCore {
             progress(EraseProgress(number, items.size, -1, 0, deleted, clock() - started))
             // Post-order list: children before their folder; links are not followed.
             val order = ArrayList<Pair<File, Boolean>>()
+            var found = 0
             val stack = ArrayDeque<Pair<File, Boolean>>()
             stack.addLast(item to false)
             while (stack.isNotEmpty()) {
@@ -157,6 +160,13 @@ object VolumeTrashCore {
                     continue
                 }
                 order += file to isFolder
+                // v0.5.151 (TODO №24, M30s 16:17: «рахую файли…» for minutes): files found so far.
+                if (!isFolder) {
+                    found++
+                    if (found % FOUND_REPORT_EVERY == 0) {
+                        progress(EraseProgress(number, items.size, -1, found, deleted, clock() - started))
+                    }
+                }
             }
             val files = order.count { !it.second }
             var done = 0
