@@ -185,3 +185,22 @@ class CatalogV6File(unittest.TestCase):
         flow = (ROOT / ".github/workflows/verify-drive-catalog.yml").read_text(encoding="utf-8")
         self.assertIn("workflow_dispatch", flow)
         self.assertIn("contents: read", flow)
+
+
+class Renodocs067(unittest.TestCase):
+    SRC = ROOT / "android/app/src/main/java/com/saney/renaultdocs"
+
+    def test_app_reads_catalog_v6(self):
+        links = (self.SRC / "ExternalLinks.kt").read_text(encoding="utf-8")
+        self.assertIn('"1_uergxSFTjQX1rzxeaLL0GR3vNaus_kv"', links)
+        gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
+        self.assertIn('versionName = "0.6.7"', gradle)
+        self.assertIn("versionCode = 177", gradle)
+        self.assertTrue((ROOT / "android/app/src/main/assets/whats_new.txt").read_text(encoding="utf-8").startswith("0.6.7\n"))
+
+    def test_google_refusal_reason_is_shown(self):
+        screen = (self.SRC / "DriveCatalogActivity.kt").read_text(encoding="utf-8")
+        self.assertIn("onDone = { token, reason ->", screen)
+        self.assertNotIn("onDone = { _, _ ->", screen)
+        self.assertIn('(driveRefusal?.let { " (Google: $it)" } ?: "")', screen)
+        self.assertIn('"дозвіл не дано"', screen)

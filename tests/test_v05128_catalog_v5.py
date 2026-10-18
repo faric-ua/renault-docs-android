@@ -16,7 +16,8 @@ class CatalogV5(unittest.TestCase):
     def test_manifest_points_to_the_new_file(self):
         links = (ROOT / "android/app/src/main/java/com/saney/renaultdocs/ExternalLinks.kt").read_text(encoding="utf-8")
         file_id = re.search(r'PROJECT_CATALOG_MANIFEST_FILE_ID =\s*"([^"]+)"', links).group(1)
-        self.assertEqual(file_id, "1js1nkR4OSOtGIXxgMukIqOc8EeERn6vo")
+        # 0.6.7: the app moved on to catalog v6 (a newer NEW file); v5 itself is untouched on Drive.
+        self.assertIn(file_id, {"1js1nkR4OSOtGIXxgMukIqOc8EeERn6vo", "1_uergxSFTjQX1rzxeaLL0GR3vNaus_kv"})
         self.assertNotIn("1mH0YJo1ts_GzpXz9Y4bx7Aj9DKBSgwwA", links)
         self.assertIn("PROJECT_CATALOG_MANIFEST_FILE_ID +", links)
 

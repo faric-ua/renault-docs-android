@@ -118,28 +118,29 @@ class CatalogScreen(unittest.TestCase):
 
     def test_status_shows_how_opened(self):
         self.assertIn('DriveVia.ACCOUNT -> " · через акаунт Google"', self.screen)
-        self.assertIn('DriveVia.PUBLIC -> " · відкритий доступ"', self.screen)
+        # 0.6.7 (TODO №33): «відкритий доступ» may carry Google's reason after it.
+        self.assertRegex(self.screen, r'DriveVia\.PUBLIC ->\s+" · відкритий доступ"')
         self.assertIn("if (error is DriveAccessException)", self.screen)
 
 
 class Release(unittest.TestCase):
     def test_version(self):
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.6.6"', gradle)
-        self.assertIn("versionCode = 176", gradle)
+        # 0.6.6 = build 176; later versions build on it.
+        self.assertGreaterEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)), 176)
         self.assertIn('implementation("com.google.android.gms:play-services-auth:', gradle)
         # Package stays final (owner 2026-10-18 17:38) — the OAuth clients are tied to it.
         self.assertIn('applicationId = "com.farsan.renodocs"', gradle)
 
     def test_whats_new_and_guide(self):
         news = (ROOT / "android/app/src/main/assets/whats_new.txt").read_text(encoding="utf-8")
-        self.assertTrue(news.startswith("0.6.6\n"))
-        self.assertIn("через твій акаунт Google", news.split("\n\n")[0])
+        section = news[news.index("0.6.6\n"):].split("\n\n")[0]
+        self.assertIn("через твій акаунт Google", section)
         guide = (ROOT / "docs/ua/USER_GUIDE.md").read_text(encoding="utf-8")
-        self.assertIn("Renodocs v0.6.6", guide)
+        self.assertRegex(guide, r"Renodocs v0\.6\.([6-9]|\d\d)")
         self.assertIn("Через акаунт Google", guide)
         app = (ROOT / "android/app/src/main/assets/guide/index.html").read_text(encoding="utf-8")
-        self.assertIn("Renodocs v0.6.6", app)
+        self.assertRegex(app, r"Renodocs v0\.6\.([6-9]|\d\d)")
         self.assertTrue(re.search(r"Через акаунт Google", app))
 
     def test_setup_doc_has_drive_steps(self):

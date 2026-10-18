@@ -40,8 +40,8 @@ android {
         applicationId = "com.farsan.renodocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 176
-        versionName = "0.6.6"
+        versionCode = 177
+        versionName = "0.6.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

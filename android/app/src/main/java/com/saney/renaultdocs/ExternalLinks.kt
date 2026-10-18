@@ -16,11 +16,13 @@ object ExternalLinks {
     const val PROJECT_CATALOG_URL =
         "https://drive.google.com/drive/folders/1UyN4UIgaNMrpG-5mLuDBd9laFEbwmb4Y"
 
-    // v0.5.128 (#162 stage 2): catalog v5 — Megane II 22 volumes, Laguna II 10.
-    // A NEW Drive file (the connector cannot replace a file's content); the
-    // previous v4 file stays on Drive untouched as a fallback.
+    // v0.5.128 (#162 stage 2): catalog v5 — Megane II 22 volumes, Laguna II 10
+    // (file 1js1nkR4OSOtGIXxgMukIqOc8EeERn6vo; stable 0.5.153 keeps reading it).
+    // 0.6.7 (owner 2026-10-18 «давай уже заменим те томи»): catalog v6 — the same
+    // volumes, the 10 Laguna II files replaced by copies with the new start-page logo
+    // (config/renault-docs-catalog.v6.json). A NEW Drive file again; v5 stays untouched.
     const val PROJECT_CATALOG_MANIFEST_FILE_ID =
-        "1js1nkR4OSOtGIXxgMukIqOc8EeERn6vo"
+        "1_uergxSFTjQX1rzxeaLL0GR3vNaus_kv"
 
     const val PROJECT_CATALOG_MANIFEST_URL =
         "https://drive.usercontent.google.com/download?id=" +
