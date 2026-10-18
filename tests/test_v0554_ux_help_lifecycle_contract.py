@@ -205,7 +205,8 @@ class V0554UxHelpLifecycleContractTests(unittest.TestCase):
         self.assertIn("buildAddPanel()", project)
         self.assertIn('value =\n                        "Додати"', project)
         self.assertIn('"Авто"', project)
-        self.assertIn('".rdpkg · один том"', project)
+        # 0.6.3 (owner 2026-10-18): «Авто» takes one or several volumes.
+        self.assertIn('".rdpkg · один або кілька"', project)
         self.assertIn('"Вручну"', project)
         self.assertIn('"Папка / SAF"', project)
         self.assertIn("openPackagePicker()", project)
