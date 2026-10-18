@@ -1,0 +1,30 @@
+{
+  "versionName": "0.6.5",
+  "versionCode": 175,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/0.6.5-login-and-import-once + feat/0.6.5-package-farsan + feat/0.6.5-web-client-id",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: final package com.farsan.renodocs (new app beside the old Renodocs); Settings → «Акаунт Google» sign-in via Credential Manager (shows the account, locks nothing); a finished import is added to the project once (TODO №30).",
+  "sourceBase": "v0.6.4/build174",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 465,
+  "pr_numbers": [
+    463,
+    464,
+    465
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "e99930234fe4d64511a870b6518d1cef32788e28",
+  "signed_run_id": 39138624334,
+  "signed_run_number": 231,
+  "signed_android_apk_run": 231,
+  "artifact_id": 12141140516,
+  "artifact_name": "Renault-Docs-v0.6.5-Debug",
+  "artifact_digest": "sha256:e35f83707369b9815ab9749c3e7e6c3c967f4a8e262e218616477ecce2256fe1",
+  "next": "A26: install 0.6.5 (new app com.farsan.renodocs) → Settings → «Акаунт Google» → «Увійти через Google» → card shows the account; then add volumes."
+}
