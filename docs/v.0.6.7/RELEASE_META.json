@@ -1,0 +1,30 @@
+{
+  "versionName": "0.6.7",
+  "versionCode": 177,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/renodocs-0.6.7",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: catalog v6 — the 10 Laguna II volumes replaced by copies with the new start-page logo (new Drive manifest; CI verified manifest and all 10 volumes byte-for-byte); status line shows Google's reason when Drive permission is not given (TODO №33).",
+  "sourceBase": "v0.6.6/build176",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 478,
+  "pr_numbers": [
+    475,
+    477,
+    478
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "b2ecb5ba99def437242acd9bd8a0b529406ab271",
+  "signed_run_id": 39149422479,
+  "signed_run_number": 233,
+  "signed_android_apk_run": 233,
+  "artifact_id": 12144886777,
+  "artifact_name": "Renault-Docs-v0.6.7-Debug",
+  "artifact_digest": "sha256:e134f4cc3766f028f428b4ebf0966fead714f11ff087ed43aa6ec43d6dce8ad6",
+  "next": "A26: install 0.6.7 over 0.6.6 → «Готові проєкти» → «Каталог v6 · через акаунт Google» → take one Laguna II volume again → Classic start page shows the new logo."
+}
