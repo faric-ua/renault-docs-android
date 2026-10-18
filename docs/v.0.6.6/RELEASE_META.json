@@ -1,0 +1,28 @@
+{
+  "versionName": "0.6.6",
+  "versionCode": 176,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/0.6.6-closed-catalog-drive",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: «Готові проєкти» and volume downloads through the signed-in Google account (Drive API, drive.readonly, token in memory only); old public link as fallback while the owner's folder is open; status «через акаунт Google» / «відкритий доступ»; «Вийти» forgets the permission.",
+  "sourceBase": "v0.6.5/build175",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 469,
+  "pr_numbers": [
+    469
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "a78ad917cd8996b10d6ee5b9ba52cd25b34e0497",
+  "signed_run_id": 39141489518,
+  "signed_run_number": 232,
+  "signed_android_apk_run": 232,
+  "artifact_id": 12141801839,
+  "artifact_name": "Renault-Docs-v0.6.6-Debug",
+  "artifact_digest": "sha256:3582b8ec19e3ad36cbff0cd24290909aea29e01d4821ca76af3c303aa30da22a",
+  "next": "Owner: Google Cloud steps 7–8 (Drive API, drive.readonly). A26: install 0.6.6 over 0.6.5 → «Готові проєкти» → Google permission → status «Каталог v5 · через акаунт Google»."
+}
