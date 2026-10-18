@@ -1,0 +1,25 @@
+{
+  "versionName": "0.6.1",
+  "versionCode": 171,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "renodocs/0.6.1-polish",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: volume logo with transparent background (no lighter square), «Renault» removed from own captions (TODO 28), muted emblem behind project tiles, one of 4 per launch (TODO 27).",
+  "sourceBase": "v0.6.0/build170",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 440,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "520cdf6578c1f9debb16401f9c026611866fdec5",
+  "signed_run_id": 39081816680,
+  "signed_run_number": 225,
+  "signed_android_apk_run": 225,
+  "artifact_id": 12119520869,
+  "artifact_name": "Renault-Docs-v0.6.1-Debug",
+  "artifact_digest": "sha256:cae21c8bfcf6ba0ba26403fef9c31dce24a403ae9b4e8c976b4e34511f714d0e",
+  "next": "A26: install Renodocs 0.6.1 over 0.6.0 → home shows «Мої проєкти» and a muted emblem; RENAULT DOCS: 26 again → Laguna II volume from logo-fixed → Classic start page without square."
+}
