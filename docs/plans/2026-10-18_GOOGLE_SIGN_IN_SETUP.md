@@ -53,6 +53,7 @@ _Рішення власника 2026-10-18 18:31 — варіант (а): др�
 
 ## Журнал
 
+- **2026-10-18 18:40–18:48** — власник зробив кроки 7–8: Google Drive API увімкнено; у «Data Access» галочка лише на `.../auth/drive.readonly` → «Update» → «Save» (скріни). Google показує його в розділі «Your restricted scopes → Drive scopes». Урок: (1) Claude спершу (18:40) порадив не зберігати дозвіл, бо не помітив, що варіант (а) вже вибрано й код 0.6.6 його потребує, — плутанину виправлено 18:43; (2) у списку дозволів Drive схожих рядків багато (`drive`, `drive.file`, `drive.metadata.readonly`…) — потрібен рівно `drive.readonly` (лише читати й завантажувати, без права міняти).
 - **2026-10-18 18:31** — власник вибрав варіант (а) для закритого каталогу. Код 0.6.6: каталог і томи через Drive API з дозволом `drive.readonly`; кроки 7–8 — вище.
 
 - **2026-10-18 17:03–17:59** — власник зробив усе з телефона: проєкт RenoDocs (ID `renodocs`), Auth Platform External/Testing, test users `faric.eset`, `faric.kpi`; Android-клієнт `com.farsan.renodocs` + SHA-1; Web-клієнт «Renodocs Web» → Client ID `47038347839-tqo68lvq…tdiss.apps.googleusercontent.com` вписано в `android/gradle.properties`. Урок: після створення Android-клієнта Google теж показує «Client ID» — його в застосунок не вписують; у застосунок іде лише ID Web-клієнта (Android-клієнт Google впізнає сам за пакетом і SHA-1).
