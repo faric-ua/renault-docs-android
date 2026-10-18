@@ -1,3 +1,12 @@
+## 2026-10-18 17:59–18:20 — Renodocs 0.6.5 опубліковано
+
+- Власник 17:59 надіслав Web Client ID (текстом, як просив Claude — у скріні легко сплутати `l` і `1`). Вписано в `android/gradle.properties` (PR #465), тест перевіряє формат.
+- Підписаний APK run 231 → реліз `v0.6.5-debug` (PR #466, `validate_manifest` + `verify_ci_source` OK; публікатор — з першої спроби).
+- Claude перевірив сам опублікований файл: у маніфесті `com.farsan.renodocs` (старої назви нема), Client ID — у коді застосунку, SHA-1 підпису — той, що вписано в Google Cloud.
+- На телефоні ще не бачили. Google попереджав: налаштування можуть почати діяти через 5 хв – кілька годин.
+
+---
+
 ## 2026-10-18 17:03–17:40 — Google Cloud для входу; остаточний пакет com.farsan.renodocs
 
 - **Google Cloud (власник з телефона):** проєкт **RenoDocs** (ID `renodocs`; «Try for free» з карткою не натискали — не потрібно), Google Auth Platform: External, режим Testing; test users — `faric.eset@gmail.com`, `faric.kpi@gmail.com`. Одна заминка: після «Create» сторінка не оновилась — Claude порадив не тиснути вдруге (двійники), а перевірити список проєктів; проєкт уже був.
