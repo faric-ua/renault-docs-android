@@ -991,10 +991,13 @@ class DriveCatalogActivity : Activity() {
                         count,
                     )
             } else {
+                // TODO №35: тим самим рядком, що й після завантаження каталогу,
+                // щоб не губилось «· через акаунт Google» / «· відкритий доступ».
                 catalog
                     ?.let {
-                        "Каталог v" +
-                            it.catalogVersion
+                        catalogStatus(
+                            it,
+                        )
                     }
                     ?: "Каталог"
             }
