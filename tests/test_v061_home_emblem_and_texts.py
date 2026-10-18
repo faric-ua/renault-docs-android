@@ -34,15 +34,9 @@ class HomeEmblem(unittest.TestCase):
         self.assertGreater(alpha, 0.05)
         self.assertLessEqual(alpha, 0.25, "muted so the tiles stay readable")
 
-    def test_emblem_sits_behind_the_project_list(self):
-        main = (SRC / "MainActivity.kt").read_text(encoding="utf-8")
-        start = main.index("val libraryArea = FrameLayout(this)")
-        block = main[start:start + 2000]
-        image = block.index("setImageResource(HomeEmblem.current)")
-        scroll = block.index("libraryArea.addView(\n            scroll,")
-        self.assertLess(image, scroll, "emblem first = drawn behind the tiles")
-        self.assertIn("isClickable = false", block)
-        self.assertIn("IMPORTANT_FOR_ACCESSIBILITY_NO", block)
+    # 0.6.1 had test_emblem_sits_behind_the_project_list (an ImageView behind
+    # the home list). In 0.6.2 the owner asked for the emblem on every screen —
+    # it became the screen background; see test_v062_emblem_everywhere.py.
 
 
 class NoRenaultInOwnCaptions(unittest.TestCase):

@@ -201,9 +201,8 @@ class DriveCatalogActivity : Activity() {
             ).apply {
                 orientation =
                     LinearLayout.VERTICAL
-                setBackgroundColor(
-                    Ui.background,
-                )
+                background =
+                    Ui.emblemScreenBackground(context)
             }
 
         Ui.applySystemInsets(

@@ -250,9 +250,8 @@ class VolumeDocumentationActivity : Activity() {
             LinearLayout(this).apply {
                 orientation =
                     LinearLayout.VERTICAL
-                setBackgroundColor(
-                    Ui.background,
-                )
+                background =
+                    Ui.emblemScreenBackground(context)
             }
 
         Ui.applySystemInsets(root)
