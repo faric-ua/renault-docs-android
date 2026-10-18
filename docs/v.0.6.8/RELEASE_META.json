@@ -1,0 +1,28 @@
+{
+  "versionName": "0.6.8",
+  "versionCode": 178,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/todo-34-35-menu-restart-catalog-line",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs small fixes in one go: catalog «import finished» card collapses into a quiet grey line «Останній імпорт: NT… · date, time» on the next opening (TODO №36, owner chose A); catalog status line keeps «· через акаунт Google» after selection (TODO №35); Termux menu reopens itself when update changed menu.sh (TODO №34).",
+  "sourceBase": "v0.6.7/build177",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 483,
+  "pr_numbers": [
+    483
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "c6e82703260ba34dd5c99f63f231cf6a0e3312a0",
+  "signed_run_id": 39155677469,
+  "signed_run_number": 234,
+  "signed_android_apk_run": 234,
+  "artifact_id": 12146902935,
+  "artifact_name": "Renault-Docs-v0.6.8-Debug",
+  "artifact_digest": "sha256:14682c6c3e7cd724479f7dbe34ef52ec59f483a49ec14e946bb11bf5e6a84d20",
+  "next": "A26: RENAULT DOCS: 5 (menu reopens itself) → 19 → 8 → 13, install 0.6.8 over 0.6.7 → «Готові проєкти»: grey line «Останній імпорт…» instead of the green card; top line «Каталог v6 · через акаунт Google» stays after ticking a volume."
+}
