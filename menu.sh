@@ -270,6 +270,12 @@ fix_volume_logo() {
   pause_menu
 }
 
+logo_fixed_report() {
+  clear
+  bash "$REPO/tools/termux/reno-logo-fixed-report.sh"
+  pause_menu
+}
+
 build_public_catalog() {
   clear
   bash "$REPO/tools/termux/reno-build-public-catalog.sh"
@@ -362,6 +368,7 @@ while true; do
   echo "24 — Міграція назв локальних .rdpkg (безпечне перейменування)"
   echo "25 — Створити public Catalog v4 (15 пакетів)"
   echo "26 — Замінити зіпсоване лого в томах Laguna II"
+  echo "27 — Звіт для Диска: томи Laguna II з новим лого"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -446,6 +453,9 @@ while true; do
       ;;
     26)
       fix_volume_logo
+      ;;
+    27)
+      logo_fixed_report
       ;;
     0)
       clear
