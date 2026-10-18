@@ -200,6 +200,8 @@ object GoogleAccountFlow {
     /** «Вийти»: the card forgets the account at once; Google's saved choice is cleared too. */
     fun signOut(activity: Activity) {
         GoogleAccountStore(activity).clear()
+        // 0.6.6: the Drive token (memory only) goes too — the closed catalogue needs sign-in again.
+        DriveAccess.forget()
         val done = "Вийшов з акаунта Google. Томи й проєкти лишились, як були."
         try {
             CredentialManager.create(activity).clearCredentialStateAsync(

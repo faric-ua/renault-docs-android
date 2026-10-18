@@ -40,6 +40,12 @@ class DriveCatalogActivity : Activity() {
     private val selectedIds =
         linkedSetOf<String>()
 
+    // 0.6.6 (#133 closed catalogue): Google's «allow reading Drive» question — once per screen.
+    private var driveAsked =
+        false
+    private var driveWindowOpen =
+        false
+
     private val handler =
         Handler(
             Looper.getMainLooper(),
@@ -71,6 +77,15 @@ class DriveCatalogActivity : Activity() {
             CatalogImportRunStore(
                 this,
             )
+
+        driveAsked =
+            savedInstanceState?.getBoolean(
+                STATE_DRIVE_ASKED,
+            ) == true
+        driveWindowOpen =
+            savedInstanceState?.getBoolean(
+                STATE_DRIVE_WINDOW,
+            ) == true
 
         savedInstanceState
             ?.getStringArrayList(
@@ -127,9 +142,17 @@ class DriveCatalogActivity : Activity() {
                 Ui.accent,
             )
             statusText.text =
-                "Каталог v" +
-                    retainedCatalog.catalogVersion
+                catalogStatus(
+                    retainedCatalog,
+                )
             renderCatalog()
+        } else if (driveWindowOpen) {
+            // Google's window is still open (screen turned): its answer loads the catalogue.
+            statusText.setTextColor(
+                Ui.muted,
+            )
+            statusText.text =
+                ASKING_GOOGLE_TEXT
         } else {
             loadCatalog()
         }
@@ -163,6 +186,14 @@ class DriveCatalogActivity : Activity() {
     override fun onSaveInstanceState(
         outState: Bundle,
     ) {
+        outState.putBoolean(
+            STATE_DRIVE_ASKED,
+            driveAsked,
+        )
+        outState.putBoolean(
+            STATE_DRIVE_WINDOW,
+            driveWindowOpen,
+        )
         outState.putStringArrayList(
             STATE_SELECTED_IDS,
             ArrayList(
@@ -362,7 +393,96 @@ class DriveCatalogActivity : Activity() {
         return root
     }
 
+    /**
+     * 0.6.6: signed in → first ask Google for «read files on Drive» (once per screen; Google
+     * shows its window only the first time). Without sign-in, or if the person says no —
+     * the catalogue still loads the old public way while the owner's folder is open.
+     */
     private fun loadCatalog() {
+        if (
+            !driveAsked &&
+            DriveAccess.isSignedIn(this) &&
+            DriveAccess.cachedToken() == null
+        ) {
+            driveAsked =
+                true
+            statusText.setTextColor(
+                Ui.muted,
+            )
+            statusText.text =
+                ASKING_GOOGLE_TEXT
+            DriveAccess.ask(
+                activity =
+                    this,
+                onNeedsWindow = { sender ->
+                    try {
+                        driveWindowOpen =
+                            true
+                        startIntentSenderForResult(
+                            sender,
+                            REQUEST_DRIVE_ACCESS,
+                            null,
+                            0,
+                            0,
+                            0,
+                        )
+                    } catch (error: Throwable) {
+                        driveWindowOpen =
+                            false
+                        fetchCatalog()
+                    }
+                },
+                onDone = { _, _ ->
+                    fetchCatalog()
+                },
+            )
+            return
+        }
+        fetchCatalog()
+    }
+
+    /** The answer from Google's permission window. */
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: android.content.Intent?,
+    ) {
+        super.onActivityResult(
+            requestCode,
+            resultCode,
+            data,
+        )
+        if (requestCode != REQUEST_DRIVE_ACCESS) {
+            return
+        }
+        driveWindowOpen =
+            false
+        if (resultCode == RESULT_OK) {
+            DriveAccess.tokenFromResult(
+                this,
+                data,
+            )
+        }
+        if (::statusText.isInitialized) {
+            fetchCatalog()
+        }
+    }
+
+    private fun catalogStatus(
+        loaded: DriveCatalog,
+    ): String =
+        "Каталог v" +
+            loaded.catalogVersion +
+            when (DriveCatalogClient.lastVia) {
+                DriveVia.ACCOUNT -> " · через акаунт Google"
+                DriveVia.PUBLIC -> " · відкритий доступ"
+                null -> ""
+            }
+
+    private fun fetchCatalog() {
+        if (isFinishing || isDestroyed) {
+            return
+        }
         statusText.setTextColor(
             Ui.muted,
         )
@@ -372,7 +492,9 @@ class DriveCatalogActivity : Activity() {
         Thread {
             runCatching {
                 DriveCatalogClient
-                    .loadCatalog()
+                    .loadCatalog(
+                        applicationContext,
+                    )
             }
                 .onSuccess {
                     loaded ->
@@ -383,8 +505,9 @@ class DriveCatalogActivity : Activity() {
                             Ui.accent,
                         )
                         statusText.text =
-                            "Каталог v" +
-                                loaded.catalogVersion
+                            catalogStatus(
+                                loaded,
+                            )
                         renderCatalog()
                     }
                 }
@@ -395,11 +518,15 @@ class DriveCatalogActivity : Activity() {
                             Ui.danger,
                         )
                         statusText.text =
-                            "Не вдалося завантажити каталог: " +
-                                (
-                                    error.message
-                                        ?: "невідома помилка"
-                                )
+                            if (error is DriveAccessException) {
+                                error.message.orEmpty()
+                            } else {
+                                "Не вдалося завантажити каталог: " +
+                                    (
+                                        error.message
+                                            ?: "невідома помилка"
+                                    )
+                            }
                     }
                 }
         }.start()
@@ -1104,5 +1231,13 @@ class DriveCatalogActivity : Activity() {
             250L
         private const val STATE_SELECTED_IDS =
             "selectedIds"
+        private const val STATE_DRIVE_ASKED =
+            "driveAsked"
+        private const val STATE_DRIVE_WINDOW =
+            "driveWindowOpen"
+        private const val REQUEST_DRIVE_ACCESS =
+            6606
+        private const val ASKING_GOOGLE_TEXT =
+            "Питаю Google дозвіл читати каталог…"
     }
 }

@@ -22,7 +22,8 @@ class ExportOnlyNewContract(unittest.TestCase):
     def test_wizard_has_only_new_button_and_marks_published(self):
         w = (SRC / "ProjectExportWizard.kt").read_text(encoding="utf-8")
         self.assertIn('"Вибрати лише нові для каталогу"', w)
-        self.assertIn("DriveCatalogClient.loadCatalog()", w)
+        # 0.6.6: loadCatalog takes a context (closed catalogue through the account).
+        self.assertIn("DriveCatalogClient.loadCatalog(activity.applicationContext)", w)
         self.assertIn("state.selectOnly(planIds) { it !in published }", w)
         self.assertIn("уже в каталозі «Готові проєкти»", w)
         self.assertIn("Вибір не змінено.", w)
