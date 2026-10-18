@@ -696,8 +696,37 @@ class MainActivity : Activity() {
             )
         )
 
-        root.addView(
+        // TODO №27: one of the owner's four emblems behind the project tiles,
+        // muted, a different one on every launch (HomeEmblem). It does not
+        // scroll and does not take touches.
+        val libraryArea = FrameLayout(this)
+        libraryArea.addView(
+            android.widget.ImageView(this).apply {
+                setImageResource(HomeEmblem.current)
+                scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                adjustViewBounds = false
+                alpha = HomeEmblem.ALPHA
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                isClickable = false
+                isFocusable = false
+                val pad = Ui.dp(this@MainActivity, 24)
+                setPadding(pad, pad, pad, pad)
+            },
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        libraryArea.addView(
             scroll,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+
+        root.addView(
+            libraryArea,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
@@ -912,7 +941,7 @@ class MainActivity : Activity() {
             actions.addView(
                 Ui.textView(
                     this@MainActivity,
-                    "Проєкт = модель Renault · томи додаються окремо.",
+                    "Проєкт = модель авто · томи додаються окремо.",
                     14f, Ui.muted,
                 ).apply {
                     setPadding(0, Ui.dp(this@MainActivity, 10), 0, 0)
@@ -1309,7 +1338,7 @@ class MainActivity : Activity() {
             state.isRunning
         ) {
             statusText.text =
-                "Проєкт = модель Renault · томи додаються окремо."
+                "Проєкт = модель авто · томи додаються окремо."
 
             val runningProject =
                 state.projectId
@@ -1516,7 +1545,7 @@ class MainActivity : Activity() {
         libraryContainer.addView(
             Ui.textView(
                 context = this,
-                value = "Мої Renault",
+                value = "Мої проєкти",
                 sizeSp = 21f,
             ).apply {
                 setTypeface(
@@ -1852,7 +1881,7 @@ class MainActivity : Activity() {
         private const val HELP_LIBRARY =
             "library"
         private const val DEFAULT_HOME_STATUS =
-            "Проєкт = модель Renault · томи додаються окремо."
+            "Проєкт = модель авто · томи додаються окремо."
         private const val STATE_HOME_ADD_EXPANDED = "main_home_add_expanded"
         private const val STATE_STATUS_DETAILS_EXPANDED = "main_status_details_expanded"
         private const val STATE_STATUS_TEXT =

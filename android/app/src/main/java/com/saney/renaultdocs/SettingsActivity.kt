@@ -566,7 +566,7 @@ class SettingsActivity : Activity() {
                 title =
                     "Renodocs",
                 text =
-                    "Бібліотека Renault технічної документації для Android.\n\n" +
+                    "Бібліотека технічної документації для Android.\n\n" +
                         "Версія: v" +
                         BuildConfig.VERSION_NAME +
                         " (build " +

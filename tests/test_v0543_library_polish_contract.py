@@ -15,7 +15,7 @@ class V0543LibraryPolishContractTests(unittest.TestCase):
         self.assertIn('"Додати"', main)
         self.assertIn('"Новий том"', main)
         self.assertIn('"Новий проєкт"', main)
-        self.assertIn('"Мої Renault"', main)
+        self.assertIn('"Мої проєкти"', main)
         self.assertIn("buildHomeAddPanel()", main)
         # v0.5.112 (owner decision 2026-10-12): «Інструменти» with «Конвертер»
         # and «Legacy» removed from Home; archive branch archive/legacy-converter-v0.5.111.

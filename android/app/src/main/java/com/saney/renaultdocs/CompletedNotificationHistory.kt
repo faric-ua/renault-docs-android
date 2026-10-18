@@ -210,7 +210,7 @@ internal object CompletedNotificationHistory {
                 "Renodocs · результати",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
-                description = "Останні завершені операції з томами Renault"
+                description = "Останні завершені операції з томами"
             },
         )
     }

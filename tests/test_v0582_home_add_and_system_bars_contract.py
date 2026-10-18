@@ -65,7 +65,7 @@ class V0582HomeAndBars(unittest.TestCase):
         main = source("MainActivity.kt")
         renderer = main.split("private fun renderLibrary()", 1)[1].split("private fun buildProjectTile(", 1)[0]
         self.assertIn("projectStore.projects()", renderer)
-        self.assertIn('value = "Мої Renault"', renderer)
+        self.assertIn('value = "Мої проєкти"', renderer)
         self.assertIn("buildProjectTile(", renderer)
         self.assertNotIn("buildToolsPanel()", renderer)
         # v0.5.111: «Старі бібліотеки» moved out of the collapsible Add panel
@@ -93,7 +93,7 @@ class V0582HomeAndBars(unittest.TestCase):
         main = source("MainActivity.kt")
         self.assertIn("visibleLegacyRecords.forEach", main)
         self.assertIn("buildDatasetTile(record)", main)
-        # v0.5.111: tiles are added to libraryContainer under «Мої Renault».
+        # v0.5.111: tiles are added to libraryContainer under «Мої проєкти» (до 0.6.1 — «Мої Renault»).
         renderer = main.split("private fun renderLibrary()", 1)[1].split("private fun buildProjectTile(", 1)[0]
         self.assertIn("libraryContainer.addView(\n                    buildDatasetTile(record)", renderer)
         bound = source("BoundedAddActionsScrollView.kt")
