@@ -67,5 +67,51 @@ class CatalogLineTests(unittest.TestCase):
         self.assertEqual(text.count('"Каталог v"'), 1)
 
 
+class LastImportCompactTests(unittest.TestCase):
+    """TODO №36, варіант А (faric 2026-10-18 21:40)."""
+
+    def setUp(self):
+        self.activity = CATALOG.read_text(encoding="utf-8")
+        self.store = (CATALOG.parent / "CatalogImportRunStore.kt").read_text(encoding="utf-8")
+
+    def test_store_remembers_card_was_seen_and_resets(self):
+        self.assertIn('KEY_TERMINAL_SEEN = "terminal_seen"', self.store)
+        mark = self.store[self.store.index("fun markTerminalSeen()"):self.store.index("fun isTerminalSeen()")]
+        self.assertIn("CatalogImportPhase.COMPLETE", mark)  # помилки не згортаються
+        # Новий імпорт і × чистять усе (prefs.clear) — разом з позначкою.
+        self.assertIn(".clear()", self.store[self.store.index("fun begin("):self.store.index("fun update(")])
+        self.assertIn(".clear()", self.store[self.store.index("fun clearTerminal()"):])
+
+    def test_activity_compacts_only_on_next_opening(self):
+        a = self.activity
+        on_create = a[a.index("override fun onCreate("):a.index("override fun onSaveInstanceState(")]
+        self.assertIn("importStore.isTerminalSeen()", on_create)
+        self.assertIn("STATE_COMPACT_LAST_IMPORT", on_create)
+        refresh = a[a.index("private fun refreshImportState()"):a.index("private fun closeFinishedImport(")]
+        running = refresh[:refresh.index("!state.isTerminal")]
+        self.assertIn("compactLastImport =\n                false", running)
+        self.assertIn("LastImportLine.text(", refresh)
+        self.assertLess(refresh.index("LastImportLine.text("), refresh.index("importStore.markTerminalSeen()"))
+        self.assertLess(refresh.index("importStore.markTerminalSeen()"), refresh.index("operationStatus.showTerminal("))
+        close = a[a.index("private fun closeFinishedImport("):]
+        self.assertIn("importStore\n            .clearTerminal()", close)
+        self.assertIn("lastImportRow.visibility", close)
+
+    def test_formatter_and_jvm_test_exist(self):
+        line = (CATALOG.parent / "LastImportLine.kt").read_text(encoding="utf-8")
+        self.assertIn('"Останній імпорт: ', line)
+        self.assertTrue((REPO / "android/app/src/test/java/com/saney/renaultdocs/LastImportLineTest.kt").exists())
+
+    def test_version_and_guide(self):
+        gradle = (REPO / "android/app/build.gradle.kts").read_text(encoding="utf-8")
+        self.assertIn('versionName = "0.6.8"', gradle)
+        self.assertIn("versionCode = 178", gradle)
+        self.assertTrue((REPO / "android/app/src/main/assets/whats_new.txt").read_text(encoding="utf-8").startswith("0.6.8\n"))
+        for path in ("docs/ua/USER_GUIDE.md", "android/app/src/main/assets/guide/index.html"):
+            text = (REPO / path).read_text(encoding="utf-8")
+            self.assertIn("v0.6.8", text)
+            self.assertIn("Останній імпорт", text)
+
+
 if __name__ == "__main__":
     unittest.main()

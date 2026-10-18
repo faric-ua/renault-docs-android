@@ -194,9 +194,10 @@ class Renodocs067(unittest.TestCase):
         links = (self.SRC / "ExternalLinks.kt").read_text(encoding="utf-8")
         self.assertIn('"1_uergxSFTjQX1rzxeaLL0GR3vNaus_kv"', links)
         gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.6.7"', gradle)
-        self.assertIn("versionCode = 177", gradle)
-        self.assertTrue((ROOT / "android/app/src/main/assets/whats_new.txt").read_text(encoding="utf-8").startswith("0.6.7\n"))
+        # 0.6.8 moved the version on; 0.6.7 stays in «Що нового», build only grows.
+        import re
+        self.assertGreaterEqual(int(re.search(r"versionCode = (\d+)", gradle).group(1)), 177)
+        self.assertIn("\n0.6.7\n", "\n" + (ROOT / "android/app/src/main/assets/whats_new.txt").read_text(encoding="utf-8"))
 
     def test_google_refusal_reason_is_shown(self):
         screen = (self.SRC / "DriveCatalogActivity.kt").read_text(encoding="utf-8")
