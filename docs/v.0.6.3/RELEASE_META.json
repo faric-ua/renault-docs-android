@@ -1,0 +1,25 @@
+{
+  "versionName": "0.6.3",
+  "versionCode": 173,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "renodocs/0.6.3-auto-several",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: «Авто» imports several .rdpkg at once (queue on the project screen; import service unchanged).",
+  "sourceBase": "v0.6.2/build172",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 448,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "7549e4bd955729c4ae64df26f6e606e583305b1c",
+  "signed_run_id": 39088624164,
+  "signed_run_number": 227,
+  "signed_android_apk_run": 227,
+  "artifact_id": 12120799910,
+  "artifact_name": "Renault-Docs-v0.6.3-Debug",
+  "artifact_digest": "sha256:3b84ac1d4e9cf5a588716ce2d70c99ec271bacc3e04001f68afaea04f7fe2f46",
+  "next": "A26: Renodocs 0.6.3 over → a project → «Авто» → select 2–3 .rdpkg (long-press) → card «Том 1 з 3…» → all added."
+}
