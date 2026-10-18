@@ -233,6 +233,9 @@ class TermuxMenuContractTests(unittest.TestCase):
         self.assertNotIn('prefix="192.168.50."', text)
         self.assertIn('ip -4 addr show wlan0', text)
         self.assertIn('read -e -i "$prefill"', text)
+        # 2026-10-18: поле вводу має бути видимим — stderr у read не глушити.
+        self.assertNotIn('answer 2>/dev/null', text)
+        self.assertIn('echo "Адреса: $TARGET_IP" >&2', text)
         self.assertIn('prefill="192.168.0."', text)
         self.assertEqual(text.count('ask_target_ip\n'), 2)
         self.assertNotIn('192.168.x.x', text)

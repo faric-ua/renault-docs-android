@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-17.1"
+PD_VERSION="2026-10-18.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -77,13 +77,20 @@ ask_target_ip() {
       ;;
   esac
 
-  [ -n "$own" ] && echo "Мій IP: $own" >&2
+  if [ -n "$own" ]; then
+    echo "Мій IP: $own" >&2
+  else
+    echo "Мій IP: не вдалось дізнатись — підказка з останньої адреси, перевір мережу." >&2
+  fi
   if [ -n "$last" ]; then
     echo "Лише Enter (нічого не дописуючи) = $last (останній)" >&2
   fi
   echo "Допиши останнє число або зітри й напиши своє:" >&2
-  if read -e -i "$prefill" -r -p "IP телефону: " answer 2>/dev/null; then
-    :
+  # 2026-10-18 (faric): поле було невидиме — `read -e` пише підказку й текст
+  # у stderr, а `2>/dev/null` його ховав: стирав і писав наосліп. Тепер stderr
+  # не глушимо; редагована підказка — лише якщо bash її вміє (4+).
+  if [ "${BASH_VERSINFO[0]:-0}" -ge 4 ] && [ -t 0 ]; then
+    read -e -i "$prefill" -r -p "IP телефону: " answer
   else
     printf "IP телефону: %s" "$prefill" >&2
     read -r answer
@@ -102,6 +109,8 @@ ask_target_ip() {
       echo "Адреса неповна: «$answer». Потрібно 4 числа через крапку." >&2
       ;;
   esac
+  # Завжди показати, яку адресу взято (2026-10-18).
+  [ -n "$TARGET_IP" ] && echo "Адреса: $TARGET_IP" >&2
 }
 
 
