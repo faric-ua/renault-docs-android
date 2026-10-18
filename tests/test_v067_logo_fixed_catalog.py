@@ -159,3 +159,29 @@ class Menu(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CatalogV6File(unittest.TestCase):
+    def test_v6_is_v5_with_ten_laguna_volumes_replaced(self):
+        v6 = json.loads((ROOT / "config/renault-docs-catalog.v6.json").read_text(encoding="utf-8"))
+        report = json.loads((ROOT / "config/laguna-ii-logo-fixed-report.json").read_text(encoding="utf-8"))
+        self.assertEqual(v6["catalog_version"], 6)
+        by_report = {f["package_id"]: f for f in report["files"]}
+        changed = 0
+        for p5, p6 in zip(V5["projects"], v6["projects"]):
+            self.assertEqual([v["id"] for v in p5["volumes"]], [v["id"] for v in p6["volumes"]])
+            for a, b in zip(p5["volumes"], p6["volumes"]):
+                if a == b:
+                    continue
+                changed += 1
+                self.assertEqual(p5["id"], "laguna-ii")
+                self.assertEqual({k for k in a if a[k] != b[k]}, {"drive_file_id", "size_bytes", "sha256"})
+                self.assertEqual((b["size_bytes"], b["sha256"]),
+                                 (by_report[b["id"]]["size_bytes"], by_report[b["id"]]["sha256"]))
+        self.assertEqual(changed, 10)
+
+    def test_online_check_tool_and_workflow(self):
+        self.assertTrue((ROOT / "tools/verify_drive_catalog_online.py").is_file())
+        flow = (ROOT / ".github/workflows/verify-drive-catalog.yml").read_text(encoding="utf-8")
+        self.assertIn("workflow_dispatch", flow)
+        self.assertIn("contents: read", flow)

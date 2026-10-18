@@ -1,0 +1,88 @@
+{
+  "format": "renodocs-logo-fixed-report-v1",
+  "schema_version": 1,
+  "generated_at": "2026-10-18T20:10:12+03:00",
+  "folder": "logo-fixed",
+  "files": [
+    {
+      "file_name": "Laguna-II_X74_NT8183A_Visu_2001-01-22.rdpkg",
+      "package_id": "laguna-ii-nt8183a-2001-01-22",
+      "bad_logo_places": 0,
+      "size_bytes": 30433676,
+      "sha256": "4fcdab77965d16221fe8d7a716094acf7c5484d3eb4d51a34e413a53d0a39330",
+      "catalog_id": "laguna-ii-nt8183a-2001-01-22"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8218A_Visu_2002-05-01.rdpkg",
+      "package_id": "laguna-ii-nt8218a-2002-05-01",
+      "bad_logo_places": 0,
+      "size_bytes": 37474989,
+      "sha256": "5a326672aef0b6ed76c5cfe4ce300ef3277e782b15ddd8dbe91e84b3007d7cfa",
+      "catalog_id": "laguna-ii-nt8218a-2002-05-01"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8236A_Visu_2002-11-18.rdpkg",
+      "package_id": "laguna-ii-nt8236a-2002-11-18",
+      "bad_logo_places": 0,
+      "size_bytes": 41107820,
+      "sha256": "f14fde44a5eedc232f25e035785233bf8dbbd20d1f30552d157ac0954f4ead3f",
+      "catalog_id": "laguna-ii-nt8236a-2002-11-18"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8240A_Visu_2003-11-17.rdpkg",
+      "package_id": "laguna-ii-nt8240a-2003-11-17",
+      "bad_logo_places": 0,
+      "size_bytes": 67323004,
+      "sha256": "04a1332f904a3cbcabd368afd2eae7deb46cdd84b92b711715ec31ae47604436",
+      "catalog_id": "laguna-ii-nt8240a-2003-11-17"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8254A_Visu_2004-06-21.rdpkg",
+      "package_id": "laguna-ii-nt8254a-2004-06-21",
+      "bad_logo_places": 0,
+      "size_bytes": 66518606,
+      "sha256": "376a2103c604c4afe020d46737d59f08248a47a638bffa917aa04a03e0966141",
+      "catalog_id": "laguna-ii-nt8254a-2004-06-21"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8282A_Visu_2005-04-22.rdpkg",
+      "package_id": "laguna-ii-nt8282a-2005-04-22",
+      "bad_logo_places": 0,
+      "size_bytes": 58722509,
+      "sha256": "a04c4b1e056e65b327de66960e1187a3ae89baf6fe0f92a995b9f5f369a975bc",
+      "catalog_id": "laguna-ii-nt8282a-2005-04-22"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8283A_Visu-v3.0_2005-08-29.rdpkg",
+      "package_id": "laguna-ii-nt8283a-2005-08-29",
+      "bad_logo_places": 0,
+      "size_bytes": 68194011,
+      "sha256": "c77bcb770da18e7f447553a6df795aa9c56d3c644c8c000612fc90c1fb0ca187",
+      "catalog_id": "laguna-ii-nt8283a-2005-08-29"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8307A_Visu-v3.0_2005-12-12.rdpkg",
+      "package_id": "laguna-ii-nt8307a-2005-12-12",
+      "bad_logo_places": 0,
+      "size_bytes": 73603289,
+      "sha256": "b5d82bbe6ce1012ced12ad38cefe5c7962de10dde393051a0289e04448521bf9",
+      "catalog_id": "laguna-ii-nt8307a-2005-12-12"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8327A_Visu-v3.0_2006-02-06.rdpkg",
+      "package_id": "laguna-ii-nt8327a-2006-02-06",
+      "bad_logo_places": 0,
+      "size_bytes": 73107292,
+      "sha256": "67d165f5b63ff543e2f6c2ac5e3e6095bf01c2d68308aec267c1a028b1d6fdce",
+      "catalog_id": "laguna-ii-nt8327a-2006-02-06"
+    },
+    {
+      "file_name": "Laguna-II_X74_NT8328A_Visu-v3.0_2006-05-09.rdpkg",
+      "package_id": "laguna-ii-nt8328a-2006-05-09",
+      "bad_logo_places": 0,
+      "size_bytes": 74245981,
+      "sha256": "2a0eae59344e1134b7062f90a1608129bb3fe1e54d9dd3e79d0972c9f223e723",
+      "catalog_id": "laguna-ii-nt8328a-2006-05-09"
+    }
+  ]
+}
