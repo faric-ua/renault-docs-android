@@ -38,6 +38,7 @@ class ProjectActivity : Activity() {
     private lateinit var settings: AppSettings
     private lateinit var nativeRunStore: NativeRdpkgRunStore
     private lateinit var rdpkgImportRunStore: RdpkgImportRunStore
+    private lateinit var rdpkgImportQueue: RdpkgImportQueue
     private lateinit var rdpkgExportRunStore: RdpkgExportRunStore
     private lateinit var rdpkgShareRunStore: RdpkgShareRunStore
     private lateinit var helpDialogs:
@@ -266,6 +267,10 @@ class ProjectActivity : Activity() {
             )
         rdpkgImportRunStore =
             RdpkgImportRunStore(
+                this,
+            )
+        rdpkgImportQueue =
+            RdpkgImportQueue(
                 this,
             )
         rdpkgExportRunStore =
@@ -576,16 +581,19 @@ class ProjectActivity : Activity() {
             return
         }
 
-        val uri = data?.data
-        if (uri == null) {
+        // 0.6.3 (owner 2026-10-18): «Авто» may return several files (ClipData).
+        val uris = pickedUris(data)
+        if (uris.isEmpty()) {
             statusText.text = "Android не повернув адресу .rdpkg."
             return
         }
 
-        persistReadPermission(
-            uri = uri,
-            returnedFlags = data.flags,
-        )
+        uris.forEach { uri ->
+            persistReadPermission(
+                uri = uri,
+                returnedFlags = data?.flags ?: 0,
+            )
+        }
 
         val existing = rdpkgImportRunStore.load()
         if (existing.isRunning) {
@@ -593,7 +601,28 @@ class ProjectActivity : Activity() {
             return
         }
 
-        statusText.text = "Імпортую .rdpkg…"
+        if (uris.size > 1) {
+            val queue = ImportQueueState.start(project.id, uris.map { it.toString() })
+            val (first, rest) = queue.next() ?: return
+            rdpkgImportQueue.save(rest)
+            startRdpkgImport(Uri.parse(first), rest.label())
+        } else {
+            rdpkgImportQueue.clear()
+            startRdpkgImport(uris.first(), null)
+        }
+    }
+
+    private fun pickedUris(data: Intent?): List<Uri> {
+        if (data == null) return emptyList()
+        val clip = data.clipData
+        if (clip != null && clip.itemCount > 0) {
+            return (0 until clip.itemCount).mapNotNull { clip.getItemAt(it).uri }.distinct()
+        }
+        return listOfNotNull(data.data)
+    }
+
+    private fun startRdpkgImport(uri: Uri, queueLabel: String?) {
+        statusText.text = if (queueLabel == null) "Імпортую .rdpkg…" else "Імпортую .rdpkg · $queueLabel…"
         val started = RdpkgImportService.start(
             context = this,
             projectId = project.id,
@@ -602,6 +631,32 @@ class ProjectActivity : Activity() {
         if (!started) {
             statusText.text = "Не вдалося запустити імпорт .rdpkg."
         }
+    }
+
+    /**
+     * Several files picked in «Авто»: after one finishes (done / failed), start
+     * the next. Returns true when the next import was started.
+     */
+    private fun continueRdpkgQueue(succeeded: Boolean, packageUri: String?): Boolean {
+        var queue = rdpkgImportQueue.load()
+        if (!queue.isActive || queue.projectId != project.id) return false
+        queue = if (succeeded) {
+            queue.markDone()
+        } else {
+            queue.markFailed(
+                packageUri?.let { RdprojectImportSupport.displayName(this, Uri.parse(it)) } ?: "?",
+            )
+        }
+        val next = queue.next()
+        if (next == null) {
+            rdpkgImportQueue.clear()
+            statusText.text = queue.summary()
+            return false
+        }
+        val (uri, rest) = next
+        rdpkgImportQueue.save(rest)
+        startRdpkgImport(Uri.parse(uri), rest.label())
+        return true
     }
 
     private fun refreshRdpkgImportRunState() {
@@ -619,8 +674,10 @@ class ProjectActivity : Activity() {
             statusText.text = DEFAULT_STATUS_TEXT
             if (::operationStatus.isInitialized) {
                 val stopping = rdpkgImportRunStore.isCancelRequested()
+                val queue = rdpkgImportQueue.load()
                 operationStatus.showRunning(
-                    title = "Імпорт тому",
+                    title = "Імпорт тому" +
+                        if (queue.isActive && queue.projectId == project.id) " · " + queue.label() else "",
                     detail = if (stopping) STOPPING_DETAIL else detail,
                     current =
                         state.progressCurrent
@@ -651,8 +708,13 @@ class ProjectActivity : Activity() {
         if (!state.isTerminal || state.finishedAtMs <= 0L) return
 
         if (state.phase == RdpkgImportRunPhase.CANCELLED) {
+            val queue = rdpkgImportQueue.load()
+            val rest = if (queue.isActive && queue.projectId == project.id) queue.pending.size else 0
+            if (rest > 0) rdpkgImportQueue.clear()
             if (::operationStatus.isInitialized) {
-                operationStatus.showTerminal("Імпорт тому · скасовано", state.message) {
+                val message =
+                    if (rest > 0) state.message + " Решту томів (" + rest + ") не імпортовано." else state.message
+                operationStatus.showTerminal("Імпорт тому · скасовано", message) {
                     rdpkgImportRunStore.consume(state.finishedAtMs)
                 }
             }
@@ -660,6 +722,15 @@ class ProjectActivity : Activity() {
         }
 
         if (state.phase == RdpkgImportRunPhase.FAILED) {
+            // Several files: note the failed one and go on with the next
+            // (a single import keeps the old card until ✕).
+            val queue = rdpkgImportQueue.load()
+            if (queue.isActive && queue.projectId == project.id &&
+                rdpkgImportRunStore.consume(state.finishedAtMs) &&
+                continueRdpkgQueue(succeeded = false, packageUri = state.packageUri)
+            ) {
+                return
+            }
             val detail = "Не вдалося імпортувати .rdpkg: " + state.message
             statusText.text = detail
             if (::operationStatus.isInitialized) {
@@ -685,7 +756,9 @@ class ProjectActivity : Activity() {
                 volume = imported,
                 allowOverride = true,
             )
-            rdpkgImportRunStore.consume(state.finishedAtMs)
+            if (rdpkgImportRunStore.consume(state.finishedAtMs)) {
+                continueRdpkgQueue(succeeded = true, packageUri = state.packageUri)
+            }
         }.onFailure { error ->
             statusText.text =
                 "Пакет встановлено, але не вдалося додати том у проєкт: " +
@@ -2725,7 +2798,7 @@ class ProjectActivity : Activity() {
                     label =
                         "Авто",
                     subtitle =
-                        ".rdpkg · один том",
+                        ".rdpkg · один або кілька",
                     primary =
                         true,
                 ) {
@@ -5086,7 +5159,7 @@ class ProjectActivity : Activity() {
                         "Додати",
                     message =
                         "Розгорни панель «Додати», щоб побачити всі способи.\n\n" +
-                            "Авто — вибрати один готовий .rdpkg.\n" +
+                            "Авто — вибрати один або кілька готових .rdpkg (щоб вибрати кілька — утримай перший файл, потім торкайся інших). Томи ставляться по черзі.\n" +
                             "Вручну — вибрати вже підготовлену папку через SAF.\n" +
                             "Створити .rdpkg з raw — підготувати пакет з оригінальної Renault-папки.\n" +
                             "Створити .rdpkg з архіву — використати ZIP, 7Z або RAR без ручної розпаковки.\n\n" +
@@ -5125,6 +5198,11 @@ class ProjectActivity : Activity() {
                 )
                 type =
                     "*/*"
+                // 0.6.3: several volumes at once (long-press the first file).
+                putExtra(
+                    Intent.EXTRA_ALLOW_MULTIPLE,
+                    true,
+                )
                 addFlags(
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                 )
