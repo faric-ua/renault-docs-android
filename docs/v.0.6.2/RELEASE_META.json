@@ -1,0 +1,25 @@
+{
+  "versionName": "0.6.2",
+  "versionCode": 172,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "renodocs/0.6.2-emblem-everywhere",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: emblem on every app screen and inside menu dialogs (25%), tile fills half transparent; document viewer and guide unchanged.",
+  "sourceBase": "v0.6.1/build171",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 443,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "68aa2d9ff55d715f6b1bf6dda623d8e26edee6e0",
+  "signed_run_id": 39083585604,
+  "signed_run_number": 226,
+  "signed_android_apk_run": 226,
+  "artifact_id": 12119797997,
+  "artifact_name": "Renault-Docs-v0.6.2-Debug",
+  "artifact_digest": "sha256:894935058d8946554322cccaf3dffbfbb97f809ba9c06a25eea70fe9bc434847",
+  "next": "A26: install Renodocs 0.6.2 over → home, a project, Settings and a ⋮ menu show the emblem through half-transparent tiles; text readable."
+}
