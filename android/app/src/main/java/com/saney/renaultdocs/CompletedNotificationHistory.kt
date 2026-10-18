@@ -72,6 +72,7 @@ internal object CompletedNotificationHistory {
             projectId = projectId,
             title = title,
             text = text,
+            finishedAtMs = System.currentTimeMillis(),
         )
 
         // Store the *real* displayed content before posting. Pre-v0.5.93
@@ -187,6 +188,7 @@ internal object CompletedNotificationHistory {
             .put("title", record.title)
             .put("text", record.text)
             .put("dismissed", record.dismissed)
+            .put("finished_at_ms", record.finishedAtMs)
             .toString()
 
     private fun decode(raw: String): CompletedNotificationRecord? =
@@ -200,6 +202,7 @@ internal object CompletedNotificationHistory {
                 title = json.getString("title"),
                 text = json.getString("text"),
                 dismissed = json.optBoolean("dismissed", false),
+                finishedAtMs = json.optLong("finished_at_ms", 0L),
             )
         }.getOrNull()
 
@@ -260,6 +263,16 @@ internal object CompletedNotificationHistory {
             .setAutoCancel(true)
             .setOngoing(false)
             .setOnlyAlertOnce(true)
+            // 0.6.4: the real finish time; a restored old record without it shows
+            // no time at all rather than a wrong «just now».
+            .apply {
+                if (record.finishedAtMs > 0L) {
+                    setWhen(record.finishedAtMs)
+                    setShowWhen(true)
+                } else {
+                    setShowWhen(false)
+                }
+            }
             .let { if (alert) OperationAlert.terminal(context, it, record.title) else it }
             .build()
     }

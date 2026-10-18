@@ -56,6 +56,12 @@ class RdpkgImportService : Service() {
         workWakeLock.acquire()
 
         Thread {
+            // 0.6.4 (several volumes in «Авто»): the project screen starts the
+            // next import the moment it sees this one finished. So the worker is
+            // marked free *before* the result is written, and the service stops
+            // only if no newer start came in (stopSelfResult(startId)) — otherwise
+            // the next start could be dropped or the next service stopped.
+            var finish: () -> Unit = {}
             try {
                 val result = RdpkgImporter.install(
                     context = applicationContext,
@@ -87,35 +93,50 @@ class RdpkgImportService : Service() {
                     isCancelled = { dataSyncTimeout.isExpired || runStore.isCancelRequested() },
                 ).getOrThrow()
                 dataSyncTimeout.checkActive()
-                runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
-                publishResult(
-                    title = "Renodocs · том імпортовано",
-                    text = VolumeDuplicatePreflight.label(result.volume),
-                )
+                finish = {
+                    runStore.complete(result.packageId, "Пакет .rdpkg імпортовано.")
+                    publishResult(
+                        title = "Renodocs · том імпортовано",
+                        text = VolumeDuplicatePreflight.label(result.volume),
+                    )
+                }
             } catch (error: Throwable) {
-                if (dataSyncTimeout.isExpired) return@Thread
-                if (runStore.isCancelRequested() &&
+                if (dataSyncTimeout.isExpired) {
+                    finish = {}
+                } else if (runStore.isCancelRequested() &&
                     (error is ConversionCancelledException || error.cause is ConversionCancelledException)
                 ) {
-                    runStore.cancelled("Імпорт тому скасовано. Том не додано, вихідний .rdpkg не змінено.")
-                    publishResult(
-                        title = "Renodocs · імпорт скасовано",
-                        text = "Том не додано.",
-                    )
-                    return@Thread
+                    finish = {
+                        runStore.cancelled("Імпорт тому скасовано. Том не додано, вихідний .rdpkg не змінено.")
+                        publishResult(
+                            title = "Renodocs · імпорт скасовано",
+                            text = "Том не додано.",
+                        )
+                    }
+                } else {
+                    val message = error.message ?: "Невідома помилка імпорту."
+                    finish = {
+                        runStore.fail(message)
+                        publishResult(
+                            title = "Renodocs · помилка імпорту",
+                            text = message,
+                        )
+                    }
                 }
-                val message = error.message ?: "Невідома помилка імпорту."
-                runStore.fail(message)
-                publishResult(
-                    title = "Renodocs · помилка імпорту",
-                    text = message,
-                )
             } finally {
                 workWakeLock.release()
                 workerRunning.set(false)
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
-                stopSelf()
+            }
+            // Android's dataSync timeout already stopped the service: never
+            // publish a success after it (onTimeout wrote the failure).
+            if (dataSyncTimeout.isExpired) return@Thread
+            try {
+                finish()
+            } finally {
+                if (stopSelfResult(startId)) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+                }
             }
         }.start()
         return START_REDELIVER_INTENT
