@@ -46,6 +46,11 @@ class DriveCatalogActivity : Activity() {
     private var driveWindowOpen =
         false
 
+    // 0.6.7 (TODO №33): why Google gave no permission — shown next to «відкритий доступ»
+    // instead of silently falling back to the public link.
+    private var driveRefusal: String? =
+        null
+
     private val handler =
         Handler(
             Looper.getMainLooper(),
@@ -432,7 +437,9 @@ class DriveCatalogActivity : Activity() {
                         fetchCatalog()
                     }
                 },
-                onDone = { _, _ ->
+                onDone = { token, reason ->
+                    driveRefusal =
+                        if (token == null) shortReason(reason) else null
                     fetchCatalog()
                 },
             )
@@ -457,12 +464,17 @@ class DriveCatalogActivity : Activity() {
         }
         driveWindowOpen =
             false
-        if (resultCode == RESULT_OK) {
-            DriveAccess.tokenFromResult(
-                this,
-                data,
-            )
-        }
+        val token =
+            if (resultCode == RESULT_OK) {
+                DriveAccess.tokenFromResult(
+                    this,
+                    data,
+                )
+            } else {
+                null
+            }
+        driveRefusal =
+            if (token == null) DRIVE_NOT_GRANTED_TEXT else null
         if (::statusText.isInitialized) {
             fetchCatalog()
         }
@@ -475,9 +487,19 @@ class DriveCatalogActivity : Activity() {
             loaded.catalogVersion +
             when (DriveCatalogClient.lastVia) {
                 DriveVia.ACCOUNT -> " · через акаунт Google"
-                DriveVia.PUBLIC -> " · відкритий доступ"
+                DriveVia.PUBLIC ->
+                    " · відкритий доступ" +
+                        (driveRefusal?.let { " (Google: $it)" } ?: "")
                 null -> ""
             }
+
+    private fun shortReason(
+        reason: String?,
+    ): String {
+        val text =
+            reason?.trim()?.takeIf { it.isNotEmpty() } ?: DRIVE_NOT_GRANTED_TEXT
+        return if (text.length > 80) text.take(77) + "…" else text
+    }
 
     private fun fetchCatalog() {
         if (isFinishing || isDestroyed) {
@@ -1239,5 +1261,7 @@ class DriveCatalogActivity : Activity() {
             6606
         private const val ASKING_GOOGLE_TEXT =
             "Питаю Google дозвіл читати каталог…"
+        private const val DRIVE_NOT_GRANTED_TEXT =
+            "дозвіл не дано"
     }
 }
