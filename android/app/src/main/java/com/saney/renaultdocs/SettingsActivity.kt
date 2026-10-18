@@ -27,6 +27,9 @@ class SettingsActivity : Activity() {
     private lateinit var backupChooseButton: Button
     private lateinit var backupResetButton: Button
     private lateinit var statusText: TextView
+    // 0.6.5 (#133): «Акаунт Google» card.
+    private lateinit var accountText: TextView
+    private lateinit var accountButton: TextView
 
     private var activeDialogKind: String = ""
     private lateinit var confirmDialogs: RestorableDialogs
@@ -56,6 +59,7 @@ class SettingsActivity : Activity() {
                 when (key) {
                     CONFIRM_RESET_BACKUP -> buildResetBackupDialog()
                     CONFIRM_LEFTOVERS -> buildLeftoversDialog()
+                    CONFIRM_SIGN_OUT -> buildSignOutDialog()
                     else -> null
                 }
             }
@@ -91,9 +95,18 @@ class SettingsActivity : Activity() {
     override fun onStart() {
         super.onStart()
         AppUpdateState.attach(this)
+        // 0.6.5: the sign-in result may come after rotation — it goes to the screen shown now.
+        GoogleAccountFlow.listener = { message ->
+            if (::statusText.isInitialized) {
+                statusText.setTextColor(Ui.muted)
+                statusText.text = message
+                renderAccount()
+            }
+        }
     }
 
     override fun onStop() {
+        GoogleAccountFlow.listener = null
         AppUpdateState.detach(this)
         super.onStop()
     }
@@ -180,6 +193,108 @@ class SettingsActivity : Activity() {
                     "Прибрано залишків: $moved. Стираються у фоні — смуга на головному екрані."
                 }
             renderValues()
+        }
+    }
+
+    /**
+     * 0.6.5 (#133 «вхід через Google»): who is signed in. Signing in locks nothing — own volumes,
+     * import and reading work as without it; the closed catalogue for friends comes next.
+     */
+    private fun accountCard(): View =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = Ui.roundedBackground(this@SettingsActivity, Ui.surface, Ui.accent)
+            val pad = Ui.dp(this@SettingsActivity, 16)
+            setPadding(pad, Ui.dp(this@SettingsActivity, 14), pad, Ui.dp(this@SettingsActivity, 14))
+            addView(
+                Ui.textView(this@SettingsActivity, "Акаунт Google", 17f, Ui.entityTitle).apply {
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                },
+            )
+            accountText =
+                Ui.textView(this@SettingsActivity, "", Ui.secondaryTextSp, Ui.muted).apply {
+                    setPadding(0, Ui.dp(this@SettingsActivity, 6), 0, 0)
+                }
+            addView(accountText)
+            accountButton =
+                Ui.textView(this@SettingsActivity, "", 16f, Ui.accent).apply {
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                    isClickable = true
+                    isFocusable = true
+                    minHeight = Ui.dp(this@SettingsActivity, 48)
+                    val inner = Ui.dp(this@SettingsActivity, 14)
+                    setPadding(inner, Ui.dp(this@SettingsActivity, 10), inner, Ui.dp(this@SettingsActivity, 10))
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                        ).apply { topMargin = Ui.dp(this@SettingsActivity, 10) }
+                    setOnClickListener { onAccountButton() }
+                }
+            addView(accountButton)
+        }
+
+    private fun renderAccount() {
+        if (!::accountText.isInitialized) return
+        val account = GoogleAccountStore(this).current()
+        when {
+            account != null -> {
+                accountText.text =
+                    "Увійдено: " + account.label() + ".\nВхід поки лише показує акаунт — томи, імпорт і читання працюють як і без нього."
+                accountButton.text = "Вийти"
+                accountButton.setTextColor(Ui.text)
+                accountButton.background = Ui.roundedBackground(this, Ui.surfaceAlt, Ui.muted, 11)
+            }
+            GoogleAccountFlow.busy -> {
+                accountText.text = "Іде вхід через Google…"
+                accountButton.text = "Увійти через Google"
+                accountButton.setTextColor(Ui.accent)
+                accountButton.background = Ui.roundedBackground(this, Ui.surfaceAlt, Ui.accent, 11)
+            }
+            else -> {
+                accountText.text =
+                    if (GoogleAccountConfig.isConfigured) {
+                        "Не увійдено. Вхід поки лише показує акаунт — нічого не закриває, томи працюють як і без нього."
+                    } else {
+                        GoogleAccountConfig.NOT_CONFIGURED_TEXT
+                    }
+                accountButton.text = "Увійти через Google"
+                accountButton.setTextColor(Ui.accent)
+                accountButton.background = Ui.roundedBackground(this, Ui.surfaceAlt, Ui.accent, 11)
+            }
+        }
+    }
+
+    private fun onAccountButton() {
+        if (GoogleAccountStore(this).current() != null) {
+            confirmDialogs.show(CONFIRM_SIGN_OUT)
+            return
+        }
+        if (!GoogleAccountConfig.isConfigured) {
+            statusText.setTextColor(Ui.muted)
+            statusText.text = GoogleAccountConfig.NOT_CONFIGURED_TEXT
+            return
+        }
+        statusText.setTextColor(Ui.muted)
+        statusText.text = "Відкриваю вхід Google…"
+        GoogleAccountFlow.signIn(this)
+        renderAccount()
+    }
+
+    /** Owner rule 2026-10-12: anything that undoes something asks first. */
+    private fun buildSignOutDialog(): AlertDialog? {
+        val account = GoogleAccountStore(this).current() ?: return null
+        return ConfirmActions.confirm(
+            activity = this,
+            title = "Вийти з акаунта Google?",
+            message =
+                account.label() +
+                    "\n\nЗастосунок забуде акаунт. Томи, проєкти й налаштування лишаються. Увійти можна знову будь-коли.",
+            confirmLabel = "Вийти",
+            keepLabel = "Залишитись",
+        ) {
+            GoogleAccountFlow.signOut(this)
+            renderAccount()
         }
     }
 
@@ -433,6 +548,17 @@ class SettingsActivity : Activity() {
                     ),
                 )
             }
+
+        // 0.6.5 (#133, owner 2026-10-18 16:33): sign-in only shows the account, locks nothing.
+        body.addView(
+            sectionTitle(
+                "Акаунт",
+            )
+        )
+
+        body.addCard(
+            accountCard(),
+        )
 
         body.addView(
             sectionTitle(
@@ -1323,6 +1449,8 @@ class SettingsActivity : Activity() {
         }
 
     private fun renderValues() {
+        renderAccount()
+
         modeValue.text =
             when (
                 settings.defaultOpenMode
@@ -1711,6 +1839,8 @@ class SettingsActivity : Activity() {
             "resetBackupFolder"
         private const val CONFIRM_LEFTOVERS =
             "clearLeftovers"
+        private const val CONFIRM_SIGN_OUT =
+            "signOut"
         private const val STATE_DIALOG_KIND =
             "settingsDialogKind"
         private const val DIALOG_MODE =

@@ -14,6 +14,9 @@ val renaultDevKeyAlias =
 val renaultDevKeyPassword =
     providers.environmentVariable("RENAULT_DEV_KEY_PASSWORD").orNull
 
+val renodocsWebClientId =
+    providers.gradleProperty("renodocs.googleWebClientId").orNull?.trim().orEmpty()
+
 val renaultDevKeystoreFile = renaultDevKeystorePath
     ?.takeIf { it.isNotBlank() }
     ?.let { file(it) }
@@ -34,8 +37,8 @@ android {
         applicationId = "com.saney.renodocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 174
-        versionName = "0.6.4"
+        versionCode = 175
+        versionName = "0.6.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -43,6 +46,12 @@ android {
         // A Google Play build must set this to false and drop REQUEST_INSTALL_PACKAGES:
         // Play forbids apps that update themselves outside Play.
         buildConfigField("boolean", "DRIVE_UPDATES", "true")
+
+        // 0.6.5 (#133 «вхід через Google»): Web client ID of the owner's Google Cloud project.
+        // Not a secret (Google client IDs are public). Empty = the card says sign-in is not set up.
+        // The Android OAuth client in the same project: package com.saney.renodocs + SHA-1 of the
+        // stable debug key (docs/plans/2026-10-18_GOOGLE_SIGN_IN_SETUP.md).
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$renodocsWebClientId\"")
     }
 
     signingConfigs {
@@ -97,6 +106,10 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.tukaani:xz:1.10")
     implementation("com.github.junrar:junrar:8.1.1")
+    // 0.6.5: «Увійти через Google» (Android Credential Manager).
+    implementation("androidx.credentials:credentials:1.6.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

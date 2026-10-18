@@ -37,9 +37,13 @@ class DurableRdpkgImportContractTest(unittest.TestCase):
         project = read("ProjectActivity.kt")
         self.assertIn("refreshRdpkgImportRunState()", project)
         self.assertIn("rdpkgImportRunStore.consume(state.finishedAtMs)", project)
-        handoff = project.index("importPreparedVolume(", project.index("private fun refreshRdpkgImportRunState"))
-        consume = project.index("rdpkgImportRunStore.consume(state.finishedAtMs)", handoff)
-        self.assertLess(handoff, consume)
+        # v0.5.55 required «add the volume, then consume». 0.6.5 (TODO №30, owner 2026-10-18):
+        # that order let one finished import be added to the project twice («Том оновлено» for a
+        # new volume). Now the finished import is claimed first (once per finish), then added.
+        refresh = project.index("private fun refreshRdpkgImportRunState")
+        handoff = project.index("importPreparedVolume(", refresh)
+        consume = project.index("if (!rdpkgImportRunStore.consume(state.finishedAtMs)) return", refresh)
+        self.assertLess(consume, handoff)
         self.assertIn("LocalDatasetDocumentsProvider.treeUriFor(packageId)", project)
         self.assertIn("importPreparedVolume(", project)
         self.assertIn("allowOverride = true", project)

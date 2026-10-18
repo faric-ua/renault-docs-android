@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.os.IBinder
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -31,7 +32,10 @@ class RdpkgImportService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action != ACTION_START) return START_NOT_STICKY
-        if (!workerRunning.compareAndSet(false, true)) return START_REDELIVER_INTENT
+        if (!workerRunning.compareAndSet(false, true)) {
+            runCatching { Log.i(ProjectActivity.IMPORT_LOG_TAG, "SERVICE start while busy startId=$startId") }
+            return START_REDELIVER_INTENT
+        }
         val projectId = intent.getStringExtra(EXTRA_PROJECT_ID)
         val packageUri = intent.getStringExtra(EXTRA_PACKAGE_URI)
         if (projectId.isNullOrBlank() || packageUri.isNullOrBlank()) {
@@ -46,6 +50,7 @@ class RdpkgImportService : Service() {
             return START_NOT_STICKY
         }
 
+        runCatching { Log.i(ProjectActivity.IMPORT_LOG_TAG, "SERVICE start startId=$startId redelivery=${flags and START_FLAG_REDELIVERY != 0}") }
         startForeground(
             NOTIFICATION_ID,
             notification(

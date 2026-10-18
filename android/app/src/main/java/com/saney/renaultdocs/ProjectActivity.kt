@@ -9,6 +9,7 @@ import android.content.res.Configuration
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
@@ -747,6 +748,13 @@ class ProjectActivity : Activity() {
             return
         }
 
+        // 0.6.5 (TODO №30, owner 2026-10-18 13:47–14:03): a volume that was not in the project
+        // came back as «Том оновлено» — it had been written into the project twice. First claim
+        // the finished import (one claim per finish), only then add the volume: the same result
+        // can no longer be added twice, whatever calls this again.
+        if (!rdpkgImportRunStore.consume(state.finishedAtMs)) return
+        runCatching { Log.i(IMPORT_LOG_TAG, "PROJECT add package=$packageId finishedAt=${state.finishedAtMs}") }
+
         val treeUri = LocalDatasetDocumentsProvider.treeUriFor(packageId)
         PreparedVolumeReader.read(
             context = applicationContext,
@@ -756,13 +764,16 @@ class ProjectActivity : Activity() {
                 volume = imported,
                 allowOverride = true,
             )
-            if (rdpkgImportRunStore.consume(state.finishedAtMs)) {
-                continueRdpkgQueue(succeeded = true, packageUri = state.packageUri)
-            }
+            continueRdpkgQueue(succeeded = true, packageUri = state.packageUri)
         }.onFailure { error ->
-            statusText.text =
+            val detail =
                 "Пакет встановлено, але не вдалося додати том у проєкт: " +
                     (error.message ?: "невідома помилка")
+            statusText.text = detail
+            // The import is already claimed: note it and go on with the next file of «Авто».
+            if (!continueRdpkgQueue(succeeded = false, packageUri = state.packageUri)) {
+                statusText.text = detail
+            }
         }
     }
 
@@ -5302,6 +5313,8 @@ class ProjectActivity : Activity() {
     }
 
     companion object {
+        /** 0.6.5 (TODO №30): one line per import in logcat — `RenaultImport`. */
+        const val IMPORT_LOG_TAG = "RenaultImport"
         private const val EXTRA_PROJECT_ID =
             "projectId"
         private const val EXTRA_OPEN_PICKER =
