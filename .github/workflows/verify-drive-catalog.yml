@@ -1,0 +1,38 @@
+name: Verify Drive catalog
+
+# Owner 2026-10-18 (catalog v6): check that the catalog and volumes on Google Drive are
+# byte-for-byte what the repo says. Read-only; started by hand (workflow_dispatch).
+on:
+  workflow_dispatch:
+    inputs:
+      catalog:
+        description: "Catalog file in the repo"
+        required: true
+        default: "config/renault-docs-catalog.v6.json"
+      manifest_id:
+        description: "Drive file id of the published catalog (empty = skip)"
+        required: false
+        default: ""
+      project:
+        description: "Only this project id (empty = all)"
+        required: false
+        default: "laguna-ii"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compare with Google Drive
+        run: >
+          python tools/verify_drive_catalog_online.py
+          --catalog "${{ inputs.catalog }}"
+          --manifest-id "${{ inputs.manifest_id }}"
+          --project "${{ inputs.project }}"
