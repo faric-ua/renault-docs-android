@@ -40,4 +40,5 @@ Client ID — не секрет (Google показує його кожному �
 
 ## Журнал
 
+- **2026-10-18 17:03–17:59** — власник зробив усе з телефона: проєкт RenoDocs (ID `renodocs`), Auth Platform External/Testing, test users `faric.eset`, `faric.kpi`; Android-клієнт `com.farsan.renodocs` + SHA-1; Web-клієнт «Renodocs Web» → Client ID `47038347839-tqo68lvq…tdiss.apps.googleusercontent.com` вписано в `android/gradle.properties`. Урок: після створення Android-клієнта Google теж показує «Client ID» — його в застосунок не вписують; у застосунок іде лише ID Web-клієнта (Android-клієнт Google впізнає сам за пакетом і SHA-1).
 - **2026-10-18 ~17:00** — код 0.6.5 (картка «Акаунт Google», `GoogleAccount.kt`, Credential Manager 1.6.0 + googleid 1.1.1); Client ID порожній — чекаємо власника.
