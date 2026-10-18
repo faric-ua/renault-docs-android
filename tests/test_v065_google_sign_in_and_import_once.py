@@ -36,7 +36,9 @@ class GoogleSignInBuild(unittest.TestCase):
         self.assertIn('providers.gradleProperty("renodocs.googleWebClientId")', self.gradle)
         self.assertIn('buildConfigField("String", "GOOGLE_WEB_CLIENT_ID"', self.gradle)
         props = (ROOT / "android/gradle.properties").read_text(encoding="utf-8")
-        self.assertRegex(props, r"(?m)^renodocs\.googleWebClientId=")
+        # Owner 17:59: the Web client of project RenoDocs (the Android client is separate and is
+        # never put into the app — Google matches it by package + SHA-1).
+        self.assertRegex(props, r"(?m)^renodocs\.googleWebClientId=\d+-[0-9a-z]+\.apps\.googleusercontent\.com$")
         # A real client ID looks like 1234-abc.apps.googleusercontent.com — never in the code.
         self.assertNotRegex(read("GoogleAccount"), r"\d+-[0-9a-z]+\.apps\.googleusercontent\.com")
 
