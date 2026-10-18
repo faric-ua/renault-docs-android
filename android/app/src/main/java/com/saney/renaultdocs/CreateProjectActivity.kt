@@ -110,7 +110,7 @@ class CreateProjectActivity : Activity() {
                 context =
                     this,
                 value =
-                    "Новий проєкт Renault",
+                    "Новий проєкт",
                 sizeSp =
                     24f,
                 color =

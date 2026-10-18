@@ -3,7 +3,7 @@
 The owner added the converted Kangoo copy with «Legacy» (status: «Додано…
 · томів: 1») but could not find it: the «Старі бібліотеки» list lived inside
 the collapsible «Додати» panel (cut off when open, hidden when closed). It is
-now its own section in the library list, under «Мої Renault».
+now its own section in the library list, under «Мої проєкти» (до 0.6.1 — «Мої Renault»).
 """
 from pathlib import Path
 import unittest
@@ -19,7 +19,7 @@ class OldLibrariesVisibleContract(unittest.TestCase):
     def test_section_is_in_library_list_after_projects(self):
         main = MAIN.read_text(encoding="utf-8")
         renderer = main.split("private fun renderLibrary()", 1)[1].split("private fun buildProjectTile(", 1)[0]
-        self.assertLess(renderer.index('value = "Мої Renault"'), renderer.index('value = "Старі бібліотеки"'))
+        self.assertLess(renderer.index('value = "Мої проєкти"'), renderer.index('value = "Старі бібліотеки"'))
         self.assertLess(renderer.index("buildProjectTile("), renderer.index('value = "Старі бібліотеки"'))
         self.assertIn("libraryContainer.addView(\n                    buildDatasetTile(record)", renderer)
         self.assertIn("Копії для браузера (…_android)", renderer)

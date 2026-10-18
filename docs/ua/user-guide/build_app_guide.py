@@ -25,7 +25,7 @@ DEFAULT_OUT = ROOT / "android/app/src/main/assets/guide/index.html"
 # Icon + one-line description for the home list, per section id.
 HOME = {
     "shcho": ("📘", "Проєкт, том, .rdpkg, .rdproject і ⇧ — що це таке"),
-    "holovnyi": ("🏠", "Панель «Додати», «Мої Renault», меню ⋮"),
+    "holovnyi": ("🏠", "Панель «Додати», «Мої проєкти», меню ⋮"),
     "dodaty": ("➕", "З файлу, Windows-папки, архіву або каталогу"),
     "katalog": ("☁️", "Каталог: «✓ Встановлено», «Імпортувати вибране»"),
     "import": ("📦", "Відкрити .rdproject: додати томи, яких ще немає"),

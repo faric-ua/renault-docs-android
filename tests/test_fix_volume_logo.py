@@ -160,6 +160,43 @@ class FixVolumeLogoTest(unittest.TestCase):
         self.assertEqual([p.name for p in fx.find_packages([folder])], ["NT8183A.rdpkg", "clean.rdpkg"])
         self.assertEqual(sorted(p.name for p in (folder / "logo-fixed").iterdir()), ["NT8183A.rdpkg"])
 
+    def test_second_run_replaces_previous_copy(self):
+        # 2026-10-18 03:05: logo redone with transparent background; the owner
+        # runs item 26 again on the same originals.
+        folder = self.root / "Download"
+        folder.mkdir()
+        make_rdpkg(folder / "NT8183A.rdpkg")
+        original = (folder / "NT8183A.rdpkg").read_bytes()
+        args = ["--directory", str(folder), "--logo", str(self.logo), "--apply"]
+        self.assertEqual(fx.main(args), 0)
+        first = (folder / "logo-fixed" / "NT8183A.rdpkg").read_bytes()
+        self.logo.write_bytes(GOOD + b"v2")
+        self.assertEqual(fx.main(args), 0)
+        second = (folder / "logo-fixed" / "NT8183A.rdpkg").read_bytes()
+        self.assertNotEqual(first, second)
+        self.assertEqual((folder / "NT8183A.rdpkg").read_bytes(), original)
+        self.assertEqual(sorted(p.name for p in (folder / "logo-fixed").iterdir()), ["NT8183A.rdpkg"])
+
+    def test_volume_logo_has_transparent_background(self):
+        # Solid background gave a slightly different yellow square on the page.
+        repo = Path(__file__).resolve().parents[1]
+        data = (repo / "docs/brand/volume-logo.gif").read_bytes()
+        self.assertTrue(data.startswith(b"GIF89a"))
+        self.assertEqual(int.from_bytes(data[6:8], "little"), 400)
+        self.assertEqual(int.from_bytes(data[8:10], "little"), 400)
+        self.assertLess(len(data), 120_000)
+        gce = data.find(b"\x21\xf9\x04")  # Graphic Control Extension
+        self.assertGreater(gce, 0)
+        self.assertTrue(data[gce + 3] & 0x01, "GIF must have a transparent colour")
+        try:
+            from PIL import Image  # not installed in CI — pixel check runs locally
+        except ImportError:
+            return
+        with Image.open(repo / "docs/brand/volume-logo.gif") as image:
+            rgba = image.convert("RGBA")
+        for corner in [(0, 0), (399, 0), (0, 399), (399, 399)]:
+            self.assertEqual(rgba.getpixel(corner)[3], 0)
+
     def test_real_fingerprint_constants(self):
         self.patches[0].stop(); self.patches[1].stop()
         try:

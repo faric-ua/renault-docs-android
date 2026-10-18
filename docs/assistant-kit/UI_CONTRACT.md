@@ -43,7 +43,7 @@ Device and CI acceptance evidence for this new candidate is pending; keep histor
 - Home mirrors Project `Додати`: fixed header with original colored 📌 when portrait-pinned, grayscale/inactive pin in landscape, ▲/▼, and Help.
 - Home pin is a distinct persisted setting: do not change a per-project pinned preference.
 - Landscape starts with actions collapsed, but lets the user expand them temporarily without modifying the portrait pin or expanded state; returning portrait restores portrait state.
-- The Home Add action body has its own bounded scroll surface, while `Мої Renault` is an independent project-list scroll below it.
+- The Home Add action body has its own bounded scroll surface, while `Мої проєкти` (до Renodocs 0.6.1 — `Мої Renault`) is an independent project-list scroll below it.
 - New volume, new project, Ready Projects/Drive and project-vs-volume explanation live **inside** expanded Add.
 - v0.5.112 (owner decision 2026-10-12): Tools (Converter/Legacy) and «Старі бібліотеки» are removed from Home. Do not bring them back without the owner. An old Renault folder becomes a volume via Project → «Створити .rdpkg з raw» / «… з архіву». History: `docs/ua/CONVERTER.md`, branch `archive/legacy-converter-v0.5.111`.
 - Running/terminal operation status lives inside Home Add **outside** the collapsible action body, so progress/cancel/result remains accessible even with action buttons hidden.

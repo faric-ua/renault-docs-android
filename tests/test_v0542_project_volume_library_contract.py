@@ -34,7 +34,7 @@ class V0542ProjectVolumeLibraryContractTests(unittest.TestCase):
 
         self.assertIn('"До якого проєкту додати том?"', chooser)
         self.assertIn("ProjectActivity.intent(", chooser)
-        self.assertIn('"Мої Renault"', main)
+        self.assertIn('"Мої проєкти"', main)
         self.assertIn("ProjectChooserActivity::class.java", main)
         self.assertIn("CreateProjectActivity::class.java", main)
 

@@ -385,6 +385,7 @@ def main(argv: list[str] | None = None) -> int:
     failed = 0
     for number, (path, _places) in enumerate(affected, start=1):
         print(f"[{number}/{len(affected)}] {path.name} …", flush=True)
+        previous = (path.parent / OUTPUT_FOLDER / path.name).exists()
         try:
             target, report = fix_file(path, logo)
         except (FixError, BadZipFile, OSError, ValueError, KeyError) as error:
@@ -392,6 +393,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"    ✗ не вийшло: {error}. Оригінал не змінено.")
             continue
         print(f"    ✓ замінено місць: {report.count}, перевірено → {target}")
+        if previous:
+            # 2026-10-18: the logo was redone (transparent background) and the
+            # owner runs item 26 again — our own earlier copy is replaced.
+            print("    (попередню копію в «logo-fixed» замінено новою; оригінал не змінено)")
 
     print()
     if failed:
