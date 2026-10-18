@@ -271,7 +271,8 @@ class RdprojectImportActivity : Activity() {
         val root =
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(Ui.background)
+                background =
+                    Ui.emblemScreenBackground(context)
             }
         Ui.applySystemInsets(root)
 

@@ -54,9 +54,10 @@ object Ui {
         fill: Int,
         stroke: Int = border,
         radiusDp: Int = 14,
+        opaque: Boolean = false,
     ): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
-        setColor(fill)
+        setColor(if (opaque) fill else tileFill(context, fill))
         cornerRadius = dp(context, radiusDp).toFloat()
         setStroke(dp(context, 1), stroke)
     }
@@ -66,10 +67,65 @@ object Ui {
         radiusDp: Int = 10,
     ): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
-        setColor(selectedFill)
+        setColor(tileFill(context, selectedFill))
         cornerRadius = dp(context, radiusDp).toFloat()
         setStroke(dp(context, 2), success)
     }
+
+    // ---- Emblem behind the screens (Renodocs 0.6.2, owner 2026-10-18 03:33) ----
+    // «емблема на всіх сторінках… а плитки прозорі на 50 % — не текст, а самі
+    // плитки, щоб через них трохи просвічувалась емблема». See HomeEmblem.
+
+    /** Tile colours that become half transparent on emblem screens. */
+    private val translucentTileFills: Set<Int> by lazy { setOf(surface, surfaceAlt, selectedFill) }
+
+    /** 50 %: 0x80. Text and frames stay opaque — only the tile fill. */
+    const val TILE_ALPHA: Int = 0x80
+
+    fun tileFill(context: Context, fill: Int): Int =
+        if (fill in translucentTileFills && isEmblemScreen(context)) {
+            (fill and 0x00FFFFFF) or (TILE_ALPHA shl 24)
+        } else {
+            fill
+        }
+
+    /**
+     * App's own screens (lists, menus, settings) — yes. The document viewer and
+     * the guide (WebView pages) — no: panels over a document stay opaque.
+     */
+    fun isEmblemScreen(context: Context): Boolean {
+        val activity = activityOf(context) ?: return false
+        return activity !is ViewerActivity && activity !is GuideActivity
+    }
+
+    private fun activityOf(context: Context): Activity? {
+        var current: Context? = context
+        repeat(8) {
+            if (current is Activity) return current as Activity
+            current = (current as? android.content.ContextWrapper)?.baseContext ?: return null
+        }
+        return null
+    }
+
+    /** Screen background: the dark app colour with the emblem in the middle. */
+    fun emblemScreenBackground(context: Context): android.graphics.drawable.Drawable =
+        EmblemBackgroundDrawable(
+            base = android.graphics.drawable.ColorDrawable(background),
+            emblem = HomeEmblem.bitmap(context),
+            fill = HomeEmblem.SCREEN_FILL,
+        )
+
+    /** Menu / dialog panel: the opaque panel with the emblem inside. */
+    fun emblemDialogBackground(context: Context, panel: android.graphics.drawable.Drawable): android.graphics.drawable.Drawable =
+        if (isEmblemScreen(context)) {
+            EmblemBackgroundDrawable(
+                base = panel,
+                emblem = HomeEmblem.bitmap(context),
+                fill = HomeEmblem.DIALOG_FILL,
+            )
+        } else {
+            panel
+        }
 
     /** Marks a list button as one choice of [scope]; see [refreshChoices]. */
     data class ChoiceTag(

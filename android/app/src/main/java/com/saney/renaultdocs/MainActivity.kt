@@ -554,7 +554,8 @@ class MainActivity : Activity() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Ui.background)
+            background =
+                    Ui.emblemScreenBackground(context)
         }
         Ui.applySystemInsets(root)
 
@@ -696,37 +697,11 @@ class MainActivity : Activity() {
             )
         )
 
-        // TODO №27: one of the owner's four emblems behind the project tiles,
-        // muted, a different one on every launch (HomeEmblem). It does not
-        // scroll and does not take touches.
-        val libraryArea = FrameLayout(this)
-        libraryArea.addView(
-            android.widget.ImageView(this).apply {
-                setImageResource(HomeEmblem.current)
-                scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
-                adjustViewBounds = false
-                alpha = HomeEmblem.ALPHA
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                isClickable = false
-                isFocusable = false
-                val pad = Ui.dp(this@MainActivity, 24)
-                setPadding(pad, pad, pad, pad)
-            },
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            ),
-        )
-        libraryArea.addView(
-            scroll,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            ),
-        )
-
+        // TODO №27: the emblem is now the background of the whole screen
+        // (Ui.emblemScreenBackground on root, Renodocs 0.6.2); in 0.6.1 it was an
+        // ImageView behind this list only.
         root.addView(
-            libraryArea,
+            scroll,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,

@@ -34,8 +34,8 @@ android {
         applicationId = "com.saney.renodocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 171
-        versionName = "0.6.1"
+        versionCode = 172
+        versionName = "0.6.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

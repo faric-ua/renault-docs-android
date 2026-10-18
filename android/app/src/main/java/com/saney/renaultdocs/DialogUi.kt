@@ -53,16 +53,24 @@ object DialogUi {
 
         registeredDialogs[dialog] = Unit
 
+        // The panel itself stays opaque (it sits over a screen); the emblem is
+        // drawn inside it, and the tiles in the menu are half transparent
+        // (Renodocs 0.6.2, owner 2026-10-18 03:33).
         val rounded =
-            Ui.roundedBackground(
-                context =
-                    context,
-                fill =
-                    Ui.surfaceAlt,
-                stroke =
-                    Ui.border,
-                radiusDp =
-                    16,
+            Ui.emblemDialogBackground(
+                context,
+                Ui.roundedBackground(
+                    context =
+                        context,
+                    fill =
+                        Ui.surfaceAlt,
+                    stroke =
+                        Ui.border,
+                    radiusDp =
+                        16,
+                    opaque =
+                        true,
+                ),
             )
 
         val parentPanel =

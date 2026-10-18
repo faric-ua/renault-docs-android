@@ -241,9 +241,8 @@ class ModernVolumeActivity : Activity() {
             LinearLayout(this).apply {
                 orientation =
                     LinearLayout.VERTICAL
-                setBackgroundColor(
-                    Ui.background,
-                )
+                background =
+                    Ui.emblemScreenBackground(context)
             }
 
         Ui.applySystemInsets(root)
@@ -1290,9 +1289,8 @@ class ModernVolumeActivity : Activity() {
             LinearLayout(this).apply {
                 orientation =
                     LinearLayout.VERTICAL
-                setBackgroundColor(
-                    Ui.background,
-                )
+                background =
+                    Ui.emblemScreenBackground(context)
             }
 
         Ui.applySystemInsets(root)
