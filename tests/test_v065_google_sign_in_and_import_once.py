@@ -42,9 +42,11 @@ class GoogleSignInBuild(unittest.TestCase):
 
     def test_package_stays_renodocs(self):
         # The Android OAuth client in Google Cloud is tied to this package + SHA-1.
-        self.assertIn('applicationId = "com.saney.renodocs"', self.gradle)
+        # Final package (owner 17:38): com.saney.renodocs (0.6.0–0.6.4) → com.farsan.renodocs.
+        self.assertIn('applicationId = "com.farsan.renodocs"', self.gradle)
+        self.assertNotIn('applicationId = "com.saney.renodocs"', self.gradle)
         setup = (ROOT / "docs/plans/2026-10-18_GOOGLE_SIGN_IN_SETUP.md").read_text(encoding="utf-8")
-        self.assertIn("com.saney.renodocs", setup)
+        self.assertIn("Package name: `com.farsan.renodocs`", setup)
         self.assertIn("41:02:35:0E:27:87:FD:53:8B:BF:58:A2:19:29:3A:13:22:35:E6:18", setup)
 
     def test_keep_rule_for_release(self):

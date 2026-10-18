@@ -34,7 +34,10 @@ android {
     defaultConfig {
         // 0.6.0 (owner 2026-10-18): Renodocs is a separate app beside Renault Docs 0.5.153,
         // so its own package. Kotlin namespace stays com.saney.renaultdocs.
-        applicationId = "com.saney.renodocs"
+        // 0.6.5 (owner 2026-10-18 17:37–17:38): final package com.farsan.renodocs (was
+        // com.saney.renodocs in 0.6.0–0.6.4) — installs as a new app; never rename again
+        // (a new package = a new app with empty volumes; Google Play forbids changing it).
+        applicationId = "com.farsan.renodocs"
         minSdk = 26
         targetSdk = 36
         versionCode = 175
@@ -49,7 +52,7 @@ android {
 
         // 0.6.5 (#133 «вхід через Google»): Web client ID of the owner's Google Cloud project.
         // Not a secret (Google client IDs are public). Empty = the card says sign-in is not set up.
-        // The Android OAuth client in the same project: package com.saney.renodocs + SHA-1 of the
+        // The Android OAuth client in the same project: package com.farsan.renodocs + SHA-1 of the
         // stable debug key (docs/plans/2026-10-18_GOOGLE_SIGN_IN_SETUP.md).
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$renodocsWebClientId\"")
     }

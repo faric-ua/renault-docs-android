@@ -18,7 +18,7 @@ _Етап #133 «вхід через Google». Власник 2026-10-18 16:33: 
    назва застосунку **Renodocs**, пошта підтримки — своя; «Audience» — **External**; контактна пошта — своя → «Create».
 4. «Audience» → «Test users» → «Add users» → своя пошта (друзів — пізніше). Поки застосунок у режимі «Testing», увійти можуть лише люди з цього списку (до 100).
 5. «Clients» → «Create client» → тип **Android**:
-   - Package name: `com.saney.renodocs`
+   - Package name: `com.farsan.renodocs` (остаточна назва з 0.6.5; до того було `com.saney.renodocs`)
    - SHA-1: `41:02:35:0E:27:87:FD:53:8B:BF:58:A2:19:29:3A:13:22:35:E6:18`
    → «Create».
 6. «Clients» → «Create client» → тип **Web application** → назва «Renodocs Web» → «Create» → скопіювати **Client ID** (закінчується на `.apps.googleusercontent.com`) і надіслати в чат.
