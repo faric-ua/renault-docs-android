@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-18.1"
+PD_VERSION="2026-10-18.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -1668,6 +1668,324 @@ app_crash_report() {
 }
 # app_crash_report end
 
+# junk_cleanup start
+# 35 — «Прибрати сміття в проєктах» (faric 2026-10-18 15:36: «пройшов по всім
+# репозиторіям і сказав, що от такий об'єм файлів нам не потрібний»).
+# Лише ЦЕЙ телефон (у чужий Termux ADB не заглядає). Репо шукає сам — працює на
+# будь-якому телефоні, де стоїть це меню.
+# Спершу ПОКАЗУЄ групи з розмірами; видаляє тільки вибрані групи й лише після «так».
+# Не чіпає ніколи: код і історію репо (.git), ключі підпису й токени, Android SDK,
+# Gradle і його кеш поточної версії, тома/записи/музику в Documents, застосунки,
+# збережені пунктом 26, файли в Download (лише показує).
+# Корені можна підмінити (JC_HOME, JC_DOCS, JC_PREFIX) — так це меню перевіряють тести.
+
+jc_kb() {
+  [ "$#" -gt 0 ] || { echo 0; return; }
+  du -sk -- "$@" 2>/dev/null | awk '{s += $1} END {print s + 0}'
+}
+
+jc_human() {
+  awk -v k="${1:-0}" 'BEGIN {
+    if (k >= 1048576) printf "%.1f ГБ", k / 1048576;
+    else if (k >= 1024) printf "%d МБ", k / 1024;
+    else printf "%d КБ", k }'
+}
+
+# Короткий шлях для екрана: ~/… і Documents/…
+jc_short() {
+  local p="$1"
+  case "$p" in
+    "$JC_HOME"/*) p="~/${p#"$JC_HOME"/}" ;;
+    "$JC_DOCS"/*) p="Documents/${p#"$JC_DOCS"/}" ;;
+    "$JC_PREFIX"/*) p="\$PREFIX/${p#"$JC_PREFIX"/}" ;;
+  esac
+  printf '%s' "$p"
+}
+
+# Остання перевірка перед rm: лише всередині дозволених коренів і ніколи —
+# ключі, токени, історія git.
+jc_safe_path() {
+  local p="$1"
+  case "$p" in
+    ""|/|"$JC_HOME"|"$JC_DOCS"|"$JC_PREFIX") return 1 ;;
+    *"/../"*|*"/.."|*"/.android"|*"/.android/"*|*"/.git"|*"/.git/"*) return 1 ;;
+    *"-secrets"*|*"/.config"|*"/.config/"*|*"/.ssh"|*"/.ssh/"*) return 1 ;;
+    *"/PhoneDiagnostics/apk/"*) return 1 ;;
+    "$JC_HOME"/?*|"$JC_DOCS"/?*|"$JC_PREFIX"/tmp/?*|"$JC_PREFIX"/var/cache/apt/?*) return 0 ;;
+  esac
+  return 1
+}
+
+# Збірка зараз іде? (клієнт Gradle живе лише під час збірки; фоновий демон — ні)
+jc_build_running() {
+  ps -ef 2>/dev/null | grep -E 'org\.gradle\.launcher\.GradleMain|org\.gradle\.wrapper\.GradleWrapperMain' | grep -v grep >/dev/null
+}
+
+# Репо на цьому телефоні: у домашній папці Termux (і на рівень глибше) та в Documents.
+jc_repos() {
+  local d
+  for d in "$JC_HOME"/*/ "$JC_HOME"/*/*/ "$JC_DOCS"/*/; do
+    [ -d "${d}.git" ] && printf '%s\n' "${d%/}"
+  done
+}
+
+# Група 1: результати збірки — папка build/ поруч із build.gradle(.kts) і .gradle/
+# поруч із settings.gradle(.kts). Лише якщо в git там нічого не записано.
+jc_list_build() {
+  local repo f dir rel tracked sub
+  while IFS= read -r repo; do
+    while IFS= read -r -d '' f; do
+      dir="$(dirname -- "$f")"
+      for sub in build .gradle; do
+        [ -d "$dir/$sub" ] || continue
+        case "$sub:$(basename -- "$f")" in
+          build:build.gradle*|.gradle:settings.gradle*) ;;
+          *) continue ;;
+        esac
+        rel="${dir#"$repo"}"; rel="${rel#/}"
+        # git не відповів — не ризикуємо, пропускаємо.
+        tracked="$(git -c safe.directory='*' -C "$repo" ls-files -- "${rel:+$rel/}$sub" 2>/dev/null)" || continue
+        [ -z "$tracked" ] && printf '%s\n' "$dir/$sub"
+      done
+    done < <(find "$repo" -maxdepth 4 \( -name .git -o -name build -o -name .gradle -o -name node_modules \) -prune \
+              -o -type f \( -name build.gradle -o -name build.gradle.kts -o -name settings.gradle -o -name settings.gradle.kts \) -print0 2>/dev/null)
+  done < <(jc_repos)
+}
+
+# Група 2: старі APK у Documents (2 найновіші кожного застосунку лишаються).
+# Папки: <застосунок>/apk, <застосунок>/artifacts/apk, <застосунок>/packages
+# (у packages — лише *-v<версія>*.apk, щоб не зачепити тома Renault).
+JC_KEEP_APK=2
+jc_list_old_apk() {
+  local app name
+  for app in "$JC_DOCS"/*/; do
+    app="${app%/}"
+    name="$(basename -- "$app")"
+    [ "$name" = "PhoneDiagnostics" ] && continue
+    {
+      [ -d "$app/apk" ] && find "$app/apk" -type f -name '*.apk' -printf '%T@\t%p\n' 2>/dev/null
+      [ -d "$app/artifacts/apk" ] && find "$app/artifacts/apk" -type f -name '*.apk' -printf '%T@\t%p\n' 2>/dev/null
+      [ -d "$app/packages" ] && find "$app/packages" -type f -name '*-v[0-9]*.apk' -printf '%T@\t%p\n' 2>/dev/null
+    } | sort -rn | awk -F '\t' -v keep="$JC_KEEP_APK" 'NR > keep {print $2}'
+  done
+}
+
+# Група 3: скачане й тимчасове в Termux.
+jc_list_temp() {
+  local p p_ver
+  for p in "$JC_HOME/.cache/track-catcher" "$JC_HOME/.cache/audio-converter" \
+           "$JC_HOME/renault-apk-artifact" "$JC_HOME/renault-release-apk"; do
+    [ -e "$p" ] && printf '%s\n' "$p"
+  done
+  # Інсталятори, які вже розпаковано.
+  [ -f "$JC_HOME/commandlinetools-linux.zip" ] && [ -d "$JC_HOME/android-sdk/cmdline-tools" ] &&
+    printf '%s\n' "$JC_HOME/commandlinetools-linux.zip"
+  for p in "$JC_HOME"/gradle-*-bin.zip; do
+    [ -f "$p" ] || continue
+    p_ver="$(basename -- "$p" -bin.zip)"
+    [ -d "$JC_HOME/gradle/$p_ver" ] && printf '%s\n' "$p"
+  done
+  # Тимчасові файли Termux старші за добу (свіже може бути потрібне зараз).
+  if [ -d "$JC_PREFIX/tmp" ]; then
+    while IFS= read -r -d '' p; do
+      [ -S "$p" ] && continue
+      [ -n "$(find "$p" -mmin -1440 -print -quit 2>/dev/null)" ] && continue
+      printf '%s\n' "$p"
+    done < <(find "$JC_PREFIX/tmp" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
+  fi
+  # Старі журнали фонового Gradle і скачані пакети pkg.
+  find "$JC_HOME/.gradle/daemon" -type f -name '*.log' -mmin +1440 2>/dev/null
+  find "$JC_PREFIX/var/cache/apt/archives" -maxdepth 1 -type f -name '*.deb' 2>/dev/null
+}
+
+# Версії Gradle, якими збирають на цьому телефоні.
+jc_gradle_versions() {
+  local d
+  for d in "$JC_HOME"/gradle/gradle-*/; do
+    [ -d "$d" ] && basename -- "$d" | sed 's/^gradle-//'
+  done
+  for d in "$JC_HOME"/.gradle/wrapper/dists/gradle-*/; do
+    [ -d "$d" ] && basename -- "$d" | sed 's/^gradle-//; s/-\(bin\|all\)$//'
+  done
+  while IFS= read -r d; do
+    grep -h 'distributionUrl' "$d/gradle/wrapper/gradle-wrapper.properties" "$d"/*/gradle/wrapper/gradle-wrapper.properties 2>/dev/null |
+      sed -n 's/.*gradle-\([0-9][0-9.]*\)-\(bin\|all\)\.zip.*/\1/p'
+  done < <(jc_repos)
+}
+
+# Група 4: кеш старих версій Gradle (~/.gradle/caches/<версія>, ~/.gradle/daemon/<версія>).
+# Якщо жодної своєї версії не знайдено — не пропонуємо нічого (не вгадуємо).
+jc_list_old_gradle() {
+  local used d v
+  used="$(jc_gradle_versions | sort -u)"
+  [ -n "$used" ] || return 0
+  for d in "$JC_HOME"/.gradle/caches/*/ "$JC_HOME"/.gradle/daemon/*/; do
+    [ -d "$d" ] || continue
+    v="$(basename -- "$d")"
+    printf '%s' "$v" | grep -Eq '^[0-9]+\.[0-9]+(\.[0-9]+)?$' || continue
+    printf '%s\n' "$used" | grep -Fxq "$v" && continue
+    printf '%s\n' "${d%/}"
+  done
+}
+
+JC_TITLES=(
+  ""
+  "Результати збірки в проєктах (build/, .gradle/) — перебудуються самі, наступна збірка довша на кілька хвилин"
+  "Старі APK у Documents — лишаю по $JC_KEEP_APK найновіші кожного застосунку"
+  "Скачане й тимчасове в Termux (завантажені APK, старі тимчасові файли, пакети pkg)"
+  "Кеш старих версій Gradle — зараз ними не збирають"
+)
+
+jc_list_group() {
+  case "$1" in
+    1) jc_list_build ;;
+    2) jc_list_old_apk ;;
+    3) jc_list_temp ;;
+    4) jc_list_old_gradle ;;
+  esac | sort -u
+}
+
+junk_cleanup() {
+  clear
+  JC_HOME="${JC_HOME:-$HOME}"
+  JC_DOCS="${JC_DOCS:-/storage/emulated/0/Documents}"
+  JC_PREFIX="${JC_PREFIX:-${PREFIX:-/data/data/com.termux/files/usr}}"
+  new_log "35" "junk-cleanup" "Прибрати сміття в проєктах"
+
+  local g n k total=0 answer chosen="" p sel_k=0 deleted=0 failed=0 shown
+  local -a lists sizes counts
+
+  if jc_build_running; then
+    echo "Зараз іде збірка APK. Дочекайся кінця й відкрий цей пункт знову." | tee -a "$CURRENT_LOG"
+    echo "Нічого не видалено." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+
+  {
+    echo "Прибрати сміття в проєктах — цей телефон: $(getprop ro.product.model 2>/dev/null)"
+    echo "Вільно зараз: $(df -h "$JC_HOME" 2>/dev/null | awk 'NR==2 {print $4}')"
+    echo
+    echo "Знайдені проєкти (репо):"
+    jc_repos | while IFS= read -r p; do echo "  $(jc_short "$p")"; done
+    echo
+    echo "Рахую, що можна прибрати (1–2 хвилини)…"
+  } | tee -a "$CURRENT_LOG"
+
+  for g in 1 2 3 4; do
+    lists[$g]="$(jc_list_group "$g")"
+    if [ -n "${lists[$g]}" ]; then
+      mapfile -t _jc_paths <<<"${lists[$g]}"
+      counts[$g]="${#_jc_paths[@]}"
+      sizes[$g]="$(jc_kb "${_jc_paths[@]}")"
+    else
+      counts[$g]=0
+      sizes[$g]=0
+    fi
+    total=$((total + sizes[g]))
+  done
+
+  {
+    echo
+    echo "Що можна прибрати:"
+    for g in 1 2 3 4; do
+      printf '  %s) %-8s %s\n' "$g" "$(jc_human "${sizes[$g]}")" "${JC_TITLES[$g]}"
+      [ "${counts[$g]}" -gt 0 ] || echo "              (нічого)"
+    done
+    echo "  Разом: $(jc_human "$total")"
+    echo
+    echo "Не чіпаю (лише для відома):"
+    k=0
+    while IFS= read -r p; do k=$((k + $(jc_kb "$p/.git"))); done < <(jc_repos)
+    printf '  %-8s %s\n' "$(jc_human "$k")" "історія git у проєктах"
+    [ -d "$JC_HOME/.gradle/caches" ] && printf '  %-8s %s\n' "$(jc_human "$(jc_kb "$JC_HOME/.gradle/caches")")" "кеш Gradle (з ним збірка швидка; старі версії — у групі 4)"
+    [ -d "$JC_HOME/android-sdk" ] && printf '  %-8s %s\n' "$(jc_human "$(jc_kb "$JC_HOME/android-sdk")")" "Android SDK (потрібен для збірки)"
+    [ -d "$JC_DOCS/PhoneDiagnostics/apk" ] && printf '  %-8s %s\n' "$(jc_human "$(jc_kb "$JC_DOCS/PhoneDiagnostics/apk")")" "застосунки, збережені пунктом 26"
+    n="$(find "$JC_DOCS/../Download" -maxdepth 2 -type f \( -name '*.apk' -o -name '*.apks' \) 2>/dev/null | wc -l)"
+    if [ "${n:-0}" -gt 0 ]; then
+      mapfile -t _jc_paths < <(find "$JC_DOCS/../Download" -maxdepth 2 -type f \( -name '*.apk' -o -name '*.apks' \) 2>/dev/null)
+      printf '  %-8s %s\n' "$(jc_human "$(jc_kb "${_jc_paths[@]}")")" "APK у Download: $n шт. — переглянь сам у «Моїх файлах»"
+    fi
+    echo "  ключі підпису, токени, тома Renault, записи й музика — ніколи"
+    echo
+  } | tee -a "$CURRENT_LOG"
+
+  if [ "$total" -eq 0 ]; then
+    echo "Прибирати нічого. Нічого не видалено." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+
+  printf "Які групи видалити? Номери через пробіл (напр. 1 3), «все» — усі, Enter — нічого: "
+  read -r answer
+  case "$answer" in
+    все|всі|Все|Всі) answer="1 2 3 4" ;;
+  esac
+  for n in $answer; do
+    case "$n" in
+      1|2|3|4) [ "${counts[$n]}" -gt 0 ] && case " $chosen " in *" $n "*) ;; *) chosen="$chosen $n" ;; esac ;;
+      *) echo "Нема групи «$n» — пропускаю." ;;
+    esac
+  done
+  chosen="${chosen# }"
+  if [ -z "$chosen" ]; then
+    echo "Скасовано. Нічого не видалено." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+
+  {
+    echo
+    echo "Буде видалено (групи: $chosen):"
+  } | tee -a "$CURRENT_LOG"
+  shown=0
+  for g in $chosen; do
+    sel_k=$((sel_k + sizes[g]))
+    while IFS= read -r p; do
+      echo "  [$g] $(jc_short "$p")" >> "$CURRENT_LOG"
+      if [ "$shown" -lt 15 ]; then echo "  [$g] $(jc_short "$p")"; fi
+      shown=$((shown + 1))
+    done <<<"${lists[$g]}"
+  done
+  [ "$shown" -gt 15 ] && echo "  … і ще $((shown - 15)) (повний список — у лозі)"
+  echo "Звільниться приблизно: $(jc_human "$sel_k")" | tee -a "$CURRENT_LOG"
+  echo
+  printf "Видалити? Введи «так» і Enter (будь-що інше — скасувати): "
+  read -r answer
+  if [ "$answer" != "так" ]; then
+    echo "Скасовано. Нічого не видалено." | tee -a "$CURRENT_LOG"
+    pause_menu
+    return
+  fi
+
+  echo | tee -a "$CURRENT_LOG"
+  for g in $chosen; do
+    while IFS= read -r p; do
+      [ -n "$p" ] || continue
+      if ! jc_safe_path "$p"; then
+        echo "  ПРОПУЩЕНО (захищене місце): $(jc_short "$p")" | tee -a "$CURRENT_LOG"
+        continue
+      fi
+      if rm -rf -- "$p" 2>/dev/null && [ ! -e "$p" ]; then
+        deleted=$((deleted + 1))
+        echo "  видалено: $(jc_short "$p")" >> "$CURRENT_LOG"
+        # Порожня папка версії APK після видалення — теж геть (лише порожня).
+        [ "$g" = "2" ] && rmdir -- "$(dirname -- "$p")" 2>/dev/null
+      else
+        failed=$((failed + 1))
+        echo "  НЕ ВИЙШЛО: $(jc_short "$p")" | tee -a "$CURRENT_LOG"
+      fi
+    done <<<"${lists[$g]}"
+  done
+
+  {
+    echo "ГОТОВО: видалено $deleted, не вийшло $failed."
+    echo "Вільно тепер: $(df -h "$JC_HOME" 2>/dev/null | awk 'NR==2 {print $4}')"
+  } | tee -a "$CURRENT_LOG"
+  pause_menu
+}
+# junk_cleanup end
+
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
 # Вужчий екран — проста шапка одним рядком.
@@ -1731,6 +2049,7 @@ while true; do
   echo "32 — Прискорити застосунок (машинний код; звук і дані ті самі)"
   echo "33 — Renault Docs: заміри читання томів → файл (нічого не змінює)"
   echo "34 — Чому закрився застосунок (журнал падінь) → файл"
+  echo "35 — Прибрати сміття в проєктах (спершу покаже; видаляє лише після «так»)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -1771,6 +2090,7 @@ while true; do
     32) app_compile_speed ;;
     33) renault_read_timing ;;
     34) app_crash_report ;;
+    35) junk_cleanup ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
