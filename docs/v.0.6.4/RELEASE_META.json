@@ -1,0 +1,25 @@
+{
+  "versionName": "0.6.4",
+  "versionCode": 174,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "renodocs/0.6.4-notification-time",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: restored completion notifications show the real finish time; import service frees itself before writing the result and stops only for the latest start (Auto queue).",
+  "sourceBase": "v0.6.3/build173",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 451,
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "5d50655db045d3e989400fa95791479a7889b557",
+  "signed_run_id": 39090972261,
+  "signed_run_number": 228,
+  "signed_android_apk_run": 228,
+  "artifact_id": 12123210377,
+  "artifact_name": "Renault-Docs-v0.6.4-Debug",
+  "artifact_digest": "sha256:addeef223c89ccc60d85dd022c64529177bc35ca07f44e3141a119f15bc6a78d",
+  "next": "A26: Renodocs 0.6.4 over → next import → notification shows its real time; after the following update it keeps that time."
+}
