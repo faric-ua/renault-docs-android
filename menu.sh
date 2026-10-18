@@ -11,6 +11,24 @@ pause_menu() {
   read -r _
 }
 
+# TODO №34 (faric 2026-10-18 20:09): bash тримає старий список меню в пам'яті,
+# тож після оновлення нові пункти не видно, доки меню не закрити (0) і не відкрити знову.
+# Тепер: якщо оновлення змінило menu.sh — меню саме відкривається заново.
+menu_fingerprint() {
+  cksum < "$REPO/menu.sh" 2>/dev/null || true
+}
+
+restart_menu_if_changed() {
+  local before="$1" after
+  after="$(menu_fingerprint)"
+  if [ -n "$before" ] && [ -n "$after" ] && [ "$before" != "$after" ]; then
+    echo
+    echo "Меню теж оновилось — після Enter відкриється нове меню з новими пунктами."
+    pause_menu
+    exec bash "$REPO/menu.sh"
+  fi
+}
+
 repo_dirty() {
   ! git diff --quiet ||
     ! git diff --cached --quiet ||
@@ -87,11 +105,15 @@ update_project() {
   echo "Поточна гілка: $branch"
   echo
 
+  local menu_before
+  menu_before="$(menu_fingerprint)"
+
   if git fetch --prune origin \
        "+refs/heads/$branch:refs/remotes/origin/$branch" &&
      git merge --ff-only "refs/remotes/origin/$branch"; then
     echo
     echo "Готово."
+    restart_menu_if_changed "$menu_before"
   else
     echo
     echo "Оновлення не виконано. Подивись повідомлення Git вище."
@@ -115,7 +137,10 @@ download_latest_apk() {
 
 download_phone_candidate() {
   clear
+  local menu_before
+  menu_before="$(menu_fingerprint)"
   bash "$REPO/tools/termux/reno-candidate.sh"
+  restart_menu_if_changed "$menu_before"
   pause_menu
 }
 

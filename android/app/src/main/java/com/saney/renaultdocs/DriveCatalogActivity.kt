@@ -30,6 +30,11 @@ class DriveCatalogActivity : Activity() {
         TextView
     private lateinit var importButton:
         TextView
+    // TODO №36: тихий сірий рядок «Останній імпорт…» замість великої картки.
+    private lateinit var lastImportRow: LinearLayout
+    private lateinit var lastImportText: TextView
+    private var compactLastImport = false
+
     private lateinit var operationStatus:
         OperationStatusView
 
@@ -91,6 +96,16 @@ class DriveCatalogActivity : Activity() {
             savedInstanceState?.getBoolean(
                 STATE_DRIVE_WINDOW,
             ) == true
+
+        // TODO №36: картку вже бачили під час минулого відкриття — тепер лише рядок.
+        // Після повороту екрана лишається той вигляд, що був.
+        compactLastImport =
+            if (savedInstanceState != null) {
+                savedInstanceState.getBoolean(STATE_COMPACT_LAST_IMPORT)
+            } else {
+                importStore.load().phase == CatalogImportPhase.COMPLETE &&
+                    importStore.isTerminalSeen()
+            }
 
         savedInstanceState
             ?.getStringArrayList(
@@ -198,6 +213,10 @@ class DriveCatalogActivity : Activity() {
         outState.putBoolean(
             STATE_DRIVE_WINDOW,
             driveWindowOpen,
+        )
+        outState.putBoolean(
+            STATE_COMPACT_LAST_IMPORT,
+            compactLastImport,
         )
         outState.putStringArrayList(
             STATE_SELECTED_IDS,
@@ -336,6 +355,76 @@ class DriveCatalogActivity : Activity() {
 
         root.addView(
             operationStatus,
+        )
+
+        lastImportText =
+            Ui.textView(
+                context =
+                    this,
+                value =
+                    "",
+                sizeSp =
+                    Ui.secondaryTextSp,
+                color =
+                    Ui.muted,
+            ).apply {
+                contentDescription =
+                    "Останній імпорт. Натисни, щоб побачити подробиці"
+                setOnClickListener {
+                    // Подробиці — та сама велика картка, лише до наступного відкриття.
+                    compactLastImport =
+                        false
+                    refreshImportState()
+                }
+            }
+        val lastImportClose =
+            Ui.textView(
+                context =
+                    this,
+                value =
+                    "×",
+                sizeSp =
+                    20f,
+                color =
+                    Ui.muted,
+            ).apply {
+                gravity =
+                    Gravity.CENTER
+                minWidth =
+                    Ui.dp(this@DriveCatalogActivity, 44)
+                minHeight =
+                    Ui.dp(this@DriveCatalogActivity, 44)
+                contentDescription =
+                    "Прибрати рядок «Останній імпорт»"
+                setOnClickListener {
+                    closeFinishedImport(CatalogImportPhase.COMPLETE)
+                }
+            }
+        lastImportRow =
+            LinearLayout(
+                this,
+            ).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+                gravity =
+                    Gravity.CENTER_VERTICAL
+                visibility =
+                    View.GONE
+                addView(
+                    lastImportText,
+                    LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1f,
+                    ),
+                )
+                addView(
+                    lastImportClose,
+                )
+            }
+
+        root.addView(
+            lastImportRow,
         )
 
         val scroll =
@@ -991,10 +1080,13 @@ class DriveCatalogActivity : Activity() {
                         count,
                     )
             } else {
+                // TODO №35: тим самим рядком, що й після завантаження каталогу,
+                // щоб не губилось «· через акаунт Google» / «· відкритий доступ».
                 catalog
                     ?.let {
-                        "Каталог v" +
-                            it.catalogVersion
+                        catalogStatus(
+                            it,
+                        )
                     }
                     ?: "Каталог"
             }
@@ -1071,7 +1163,8 @@ class DriveCatalogActivity : Activity() {
 
     private fun refreshImportState() {
         if (
-            !::operationStatus.isInitialized
+            !::operationStatus.isInitialized ||
+            !::lastImportRow.isInitialized
         ) {
             return
         }
@@ -1082,6 +1175,12 @@ class DriveCatalogActivity : Activity() {
         if (
             state.isRunning
         ) {
+            // Новий імпорт: його підсумок спершу знову великою карткою (TODO №36).
+            compactLastImport =
+                false
+            lastImportRow.visibility =
+                View.GONE
+
             val item =
                 state.items
                     .getOrNull(
@@ -1142,8 +1241,31 @@ class DriveCatalogActivity : Activity() {
         if (
             !state.isTerminal
         ) {
+            lastImportRow.visibility =
+                View.GONE
             return
         }
+
+        if (
+            state.phase ==
+            CatalogImportPhase.COMPLETE &&
+            compactLastImport
+        ) {
+            operationStatus.hide()
+            lastImportText.text =
+                LastImportLine.text(
+                    state.items.map { it.documentCode },
+                    state.finishedAtMs,
+                )
+            lastImportRow.visibility =
+                View.VISIBLE
+            return
+        }
+
+        lastImportRow.visibility =
+            View.GONE
+        // Помилки й скасування лишаються великою карткою — їх треба помітити.
+        importStore.markTerminalSeen()
 
         operationStatus.showTerminal(
             title =
@@ -1162,21 +1284,33 @@ class DriveCatalogActivity : Activity() {
             detail =
                 state.message,
             onClose = {
-                importStore
-                    .clearTerminal()
-                operationStatus.hide()
-
-                if (
-                    state.phase ==
-                    CatalogImportPhase.COMPLETE
-                ) {
-                    selectedIds.clear()
-                    renderCatalog()
-                } else {
-                    updateSelectionSummary()
-                }
+                closeFinishedImport(
+                    state.phase,
+                )
             },
         )
+    }
+
+    private fun closeFinishedImport(
+        phase: CatalogImportPhase,
+    ) {
+        importStore
+            .clearTerminal()
+        operationStatus.hide()
+        lastImportRow.visibility =
+            View.GONE
+        compactLastImport =
+            false
+
+        if (
+            phase ==
+            CatalogImportPhase.COMPLETE
+        ) {
+            selectedIds.clear()
+            renderCatalog()
+        } else {
+            updateSelectionSummary()
+        }
     }
 
     /** v0.5.105: stopping a catalog download/import asks once. */
@@ -1257,6 +1391,8 @@ class DriveCatalogActivity : Activity() {
             "driveAsked"
         private const val STATE_DRIVE_WINDOW =
             "driveWindowOpen"
+        private const val STATE_COMPACT_LAST_IMPORT =
+            "compactLastImport"
         private const val REQUEST_DRIVE_ACCESS =
             6606
         private const val ASKING_GOOGLE_TEXT =

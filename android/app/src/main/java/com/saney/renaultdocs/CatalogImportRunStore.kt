@@ -348,6 +348,19 @@ class CatalogImportRunStore(
 
     fun isCancelRequested(): Boolean = prefs.getBoolean(KEY_CANCEL_REQUESTED, false)
 
+    /**
+     * TODO №36 (2026-10-18): велику картку «Імпорт із каталогу завершено» вже показали.
+     * Наступне відкриття каталогу покаже лише сірий рядок «Останній імпорт…».
+     * Скидається з новим імпортом ([begin] чистить усе) і з × ([clearTerminal]).
+     */
+    fun markTerminalSeen() {
+        if (load().phase == CatalogImportPhase.COMPLETE && !isTerminalSeen()) {
+            prefs.edit().putBoolean(KEY_TERMINAL_SEEN, true).apply()
+        }
+    }
+
+    fun isTerminalSeen(): Boolean = prefs.getBoolean(KEY_TERMINAL_SEEN, false)
+
     fun cancelled(message: String) {
         prefs.edit()
             .putString(KEY_PHASE, CatalogImportPhase.CANCELLED.name)
@@ -358,6 +371,7 @@ class CatalogImportRunStore(
 
     companion object {
         private const val KEY_CANCEL_REQUESTED = "cancel_requested"
+        private const val KEY_TERMINAL_SEEN = "terminal_seen"
         private const val PREFS =
             "renault_docs_catalog_import"
         private const val KEY_PHASE =
