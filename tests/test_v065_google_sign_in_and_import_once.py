@@ -132,22 +132,15 @@ class ImportAddedOnce(unittest.TestCase):
 
 
 class Release(unittest.TestCase):
+    # 0.6.6 took the next number: exact version pins live in the newest test only
+    # (tests/test_v066_closed_catalog_drive_access.py); here — that 0.6.5 is recorded.
     def test_version_and_whats_new(self):
-        gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
-        self.assertIn('versionName = "0.6.5"', gradle)
-        self.assertIn("versionCode = 175", gradle)
         news = (ROOT / "android/app/src/main/assets/whats_new.txt").read_text(encoding="utf-8")
-        self.assertTrue(news.startswith("0.6.5\n"))
-        self.assertIn("Акаунт Google", news.split("\n\n")[0])
+        block = news[news.index("0.6.5\n"):].split("\n\n")[0]
+        self.assertIn("Акаунт Google", block)
 
     def test_guide_mentions_account(self):
         guide = (ROOT / "docs/ua/USER_GUIDE.md").read_text(encoding="utf-8")
-        self.assertIn("Renodocs v0.6.5", guide)
         self.assertIn("«Акаунт Google»", guide)
         app = (ROOT / "android/app/src/main/assets/guide/index.html").read_text(encoding="utf-8")
-        self.assertIn("Renodocs v0.6.5", app)
         self.assertTrue(re.search(r"Акаунт Google", app))
-
-
-if __name__ == "__main__":
-    unittest.main()

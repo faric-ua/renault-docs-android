@@ -211,6 +211,8 @@ class CatalogImportService : Service() {
 
             DriveCatalogClient
                 .downloadPackage(
+                    context =
+                        applicationContext,
                     driveFileId =
                         item.driveFileId,
                     destination =

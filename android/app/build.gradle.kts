@@ -40,8 +40,8 @@ android {
         applicationId = "com.farsan.renodocs"
         minSdk = 26
         targetSdk = 36
-        versionCode = 175
-        versionName = "0.6.5"
+        versionCode = 176
+        versionName = "0.6.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -113,6 +113,8 @@ dependencies {
     implementation("androidx.credentials:credentials:1.6.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    // 0.6.6 (#133 closed catalogue): AuthorizationClient — permission «read files on Drive».
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

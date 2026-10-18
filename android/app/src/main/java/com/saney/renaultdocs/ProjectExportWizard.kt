@@ -236,7 +236,7 @@ class ProjectExportWizard(
                     CatalogPublishedFilter.publishedVolumeIds(
                         plan,
                         CatalogPublishedFilter.catalogVolumesFor(
-                            DriveCatalogClient.loadCatalog(),
+                            DriveCatalogClient.loadCatalog(activity.applicationContext),
                             project.id,
                         ),
                     )
