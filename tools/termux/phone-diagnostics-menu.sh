@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-18.2"
+PD_VERSION="2026-10-20.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -709,6 +709,15 @@ cleanup_report() {
     echo
     echo "=== ADS / ANALYTICS PACKAGES (installed) ==="
     adb -s "$ADB_TARGET" shell pm list packages | grep -i -E "msa|analytics|joyose|hybrid|bugreport|mipicks|facebook" || true
+    echo
+    # 2026-10-20 (faric: «що можна відключити, щоб полегшити життя старенькому Samsung»):
+    # повний список вбудованих програм, які зараз увімкнені, — з нього складаємо
+    # список «вимкнути» для Samsung (пункти 21/22 вимикають, не видаляють).
+    echo "=== SYSTEM PACKAGES ENABLED (pm list packages -s -e) ==="
+    adb -s "$ADB_TARGET" shell pm list packages -s -e 2>/dev/null | sed 's/^package://' | sort || true
+    echo
+    echo "=== USER APPS ENABLED (pm list packages -3 -e) ==="
+    adb -s "$ADB_TARGET" shell pm list packages -3 -e 2>/dev/null | sed 's/^package://' | sort || true
   } >> "$CURRENT_LOG" 2>&1
   echo "1/3 — застосунки й налаштування: готово"
 
