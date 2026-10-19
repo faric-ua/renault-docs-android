@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.2"
+PD_VERSION="2026-10-20.3"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -861,7 +861,8 @@ package_label() {
     com.google.android.apps.podcasts) echo "Google Подкасти" ;;
     com.google.android.videos) echo "Google TV" ;;
     com.google.android.apps.youtube.music) echo "YouTube Music" ;;
-    com.zhiliaoapp.musically|com.ss.android.ugc.trill) echo "TikTok" ;;
+    com.zhiliaoapp.musically) echo "TikTok" ;;
+    com.ss.android.ugc.trill) echo "TikTok (азійська версія)" ;;
     com.zhiliaoapp.musically.go) echo "TikTok Lite" ;;
     com.estrongs.android.pop) echo "ES Провідник" ;;
     com.moonshot.kimichat) echo "Kimi" ;;
@@ -871,6 +872,33 @@ package_label() {
     com.sec.android.diagmonagent) echo "Samsung: діагностика (службова)" ;;
     com.samsung.android.dynamiclock) echo "Samsung: динамічні шпалери екрана блокування" ;;
     com.samsung.android.game.gos) echo "Samsung: Game Optimizing Service" ;;
+    com.samsung.android.app.watchmanager2) echo "Galaxy Wearable (годинник)" ;;
+    com.samsung.android.app.sharelive) echo "Quick Share" ;;
+    com.samsung.android.scloud) echo "Samsung Cloud" ;;
+    com.sec.android.daemonapp) echo "Погода Samsung" ;;
+    com.samsung.android.bio.face.service) echo "Розпізнавання обличчя" ;;
+    com.samsung.android.smartface) echo "Розумне очікування (камера дивиться на тебе)" ;;
+    com.google.android.projection.gearhead) echo "Android Auto" ;;
+    com.samsung.android.mdx.kit) echo "Зв'язок з Windows" ;;
+    com.microsoft.skydrive) echo "OneDrive" ;;
+    com.netflix.partner.activation) echo "Netflix (службова)" ;;
+    com.android.chrome) echo "Chrome" ;;
+    com.google.android.youtube) echo "YouTube" ;;
+    com.openai.chatgpt) echo "ChatGPT" ;;
+    ai.qwenlm.chat.android) echo "Qwen" ;;
+    kling.ai.video.chat) echo "Kling AI" ;;
+    com.brave.browser) echo "Brave" ;;
+    com.anthropic.claude) echo "Claude" ;;
+    ua.faric.doramaland.video.dev|ua.faric.doramaland.video.debug) echo "Dorama" ;;
+    com.saney.renaultdocs) echo "Renault Docs" ;;
+    com.sec.android.app.myfiles) echo "Мої файли" ;;
+    com.android.settings) echo "Налаштування" ;;
+    com.sec.android.gallery3d) echo "Галерея" ;;
+    com.samsung.android.video) echo "Samsung Відео" ;;
+    com.suno.android) echo "Suno" ;;
+    com.maxmpz.audioplayer) echo "Poweramp" ;;
+    com.aimp.player) echo "AIMP" ;;
+    com.aimp.cutter) echo "AIMP Cutter" ;;
     com.voe.superbill) echo "voe.superbill" ;;
     *) echo "$1" ;;
   esac
@@ -2041,6 +2069,232 @@ junk_cleanup() {
 }
 # junk_cleanup end
 
+# record_mode start
+# 36 / 37 — «Режим запису» (faric 2026-10-20 01:05: «перед записом все виключив, а після
+# запису все назад включив … зайшов, тикнув — все відключилось; вранці тикнув — все
+# запустилось, як і було»). Для T85 Track Catcher: на M30s ривки 10–20 мс від нестачі пам'яті.
+# 36 запам'ятовує, як було, і лише тоді міняє; 37 повертає рівно те, що змінив 36.
+# Нічого не видаляє: закриває (як змахнути з «Недавніх»), приспає, тимчасово вимикає
+# службове (pm disable-user), вмикає «Не турбувати». Дані застосунків не чіпає.
+# Програми запису й плеєр, з якого пишемо, не чіпає ніколи.
+
+# Закрити й приспати на час запису (якщо встановлені).
+REC_SLEEP_PACKAGES="com.zhiliaoapp.musically com.zhiliaoapp.musically.go com.ss.android.ugc.trill com.estrongs.android.pop com.moonshot.kimichat com.android.vending com.google.android.googlequicksearchbox com.android.chrome com.google.android.youtube com.openai.chatgpt ai.qwenlm.chat.android kling.ai.video.chat com.brave.browser"
+# Лише закрити (не присипляти): потрібні вдень, але не під час запису.
+REC_STOP_PACKAGES="com.anthropic.claude ua.faric.doramaland.video.dev ua.faric.doramaland.video.debug com.saney.renaultdocs com.sec.android.app.myfiles com.android.settings com.sec.android.gallery3d com.samsung.android.video"
+# Тимчасово вимкнути (повертає 37): годинник, Quick Share, Samsung Cloud, погода,
+# обличчя, Android Auto, Windows-зв'язок, OneDrive і службові з пункту 21.
+REC_DISABLE_PACKAGES="com.samsung.android.app.watchmanager2 com.samsung.android.app.sharelive com.samsung.android.scloud com.sec.android.daemonapp com.samsung.android.bio.face.service com.samsung.android.smartface com.google.android.projection.gearhead com.samsung.android.mdx.kit com.microsoft.skydrive com.netflix.partner.activation com.facebook.appmanager com.facebook.services com.facebook.system com.samsung.android.dqagent com.sec.android.diagmonagent com.samsung.android.dynamiclock com.samsung.android.game.gos"
+# Плеєри: закривається той, з якого НЕ пишемо.
+REC_PLAYERS="com.suno.android com.maxmpz.audioplayer com.aimp.player com.aimp.cutter"
+# Ніколи не чіпати.
+REC_KEEP="ua.faric.trackcatcher com.termux com.termux.widget"
+
+rec_state_file() {
+  local serial
+  serial="$(adb -s "$ADB_TARGET" shell getprop ro.serialno 2>/dev/null | tr -d '\r')"
+  [ -n "$serial" ] || serial="$(printf '%s' "$ADB_TARGET" | tr -c 'A-Za-z0-9' '_')"
+  printf '%s/record-mode-%s.state' "$STATE_DIR" "$serial"
+}
+
+rec_has() {
+  adb -s "$ADB_TARGET" shell pm path "$1" >/dev/null 2>&1
+}
+
+rec_kept() {
+  case " $REC_KEEP $REC_PLAYER_KEEP $REC_LOCAL_KEEP " in *" $1 "*) return 0 ;; esac
+  return 1
+}
+
+rec_appops() {
+  local v
+  v="$(adb -s "$ADB_TARGET" shell cmd appops get "$1" RUN_ANY_IN_BACKGROUND 2>/dev/null | tr -d '\r')"
+  case "$v" in
+    *ignore*) echo ignore ;;
+    *deny*) echo deny ;;
+    *allow*) echo allow ;;
+    *) echo default ;;
+  esac
+}
+
+rec_bucket_name() {
+  case "$1" in
+    10) echo active ;; 20) echo working_set ;; 30) echo frequent ;;
+    40|50) echo rare ;; 45) echo restricted ;; *) echo "" ;;
+  esac
+}
+
+rec_zen_name() {
+  case "$1" in 1) echo priority ;; 2) echo none ;; 3) echo alarms ;; *) echo off ;; esac
+}
+
+record_mode_on() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local state answer pkg n=0 en_list was bucket zen here there
+  state="$(rec_state_file)"
+  if [ -f "$state" ]; then
+    echo "Режим запису вже увімкнено ($(sed -n 's/^time //p' "$state"))."
+    echo "Спершу поверни все пунктом 37 — інакше загубиться, як було."
+    pause_menu; return
+  fi
+
+  echo "РЕЖИМ ЗАПИСУ — телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model | tr -d '\r')"
+  echo
+  echo "З якого плеєра пишеш? Його не чіпаю, інші плеєри закрию."
+  echo "  1) Suno   (Enter)"
+  echo "  2) Poweramp"
+  echo "  3) AIMP"
+  echo "  4) Інший — плеєри не закривати"
+  printf "Номер: "
+  read -r answer
+  case "${answer:-1}" in
+    1) REC_PLAYER_KEEP="com.suno.android" ;;
+    2) REC_PLAYER_KEEP="com.maxmpz.audioplayer com.maxmpz.equalizer" ;;
+    3) REC_PLAYER_KEEP="com.aimp.player com.aimp.cutter" ;;
+    4) REC_PLAYER_KEEP="$REC_PLAYERS" ;;
+    *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;;
+  esac
+
+  # Меню запущене на тому самому телефоні (A26 сам до себе) — Claude не закривати.
+  here="$(getprop ro.product.model 2>/dev/null)"
+  there="$(adb -s "$ADB_TARGET" shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+  REC_LOCAL_KEEP=""
+  [ -n "$here" ] && [ "$here" = "$there" ] && REC_LOCAL_KEEP="com.anthropic.claude"
+
+  echo
+  echo "Що зроблю (усе повертає пункт 37):"
+  echo "  • закрию важкі застосунки й інші плеєри (Claude, ES, TikTok, Play, Google, Chrome…)"
+  echo "  • приспю їх до ранку, щоб самі не запускались"
+  echo "  • тимчасово вимкну: годинник, Quick Share, Samsung Cloud, погоду, обличчя, Android Auto…"
+  echo "  • «Не турбувати»: лише будильники — звуки сповіщень не потраплять у запис"
+  echo "Не чіпаю: Track Catcher, плеєр запису, Termux, дзвінки, месенджери."
+  printf "Увімкнути режим запису? так / ні: "
+  read -r answer
+  case "$answer" in
+    так|Так|ТАК|y|Y|yes|д|Д) ;;
+    *) echo "Скасовано. Нічого не змінено."; pause_menu; return ;;
+  esac
+
+  new_log "36" "record-mode-on" "Режим запису: вимкнути зайве"
+  {
+    echo "target $ADB_TARGET"
+    echo "model $there"
+    echo "time $(date '+%Y-%m-%d %H:%M')"
+  } > "$state"
+
+  # 1) «Не турбувати» — запам'ятати, як було.
+  zen="$(adb -s "$ADB_TARGET" shell settings get global zen_mode 2>/dev/null | tr -d '\r')"
+  case "$zen" in 0|1|2|3) ;; *) zen=0 ;; esac
+  echo "zen $zen" >> "$state"
+  if adb -s "$ADB_TARGET" shell cmd notification set_dnd alarms >> "$CURRENT_LOG" 2>&1; then
+    echo "ГОТОВО: «Не турбувати» — лише будильники (було: $(rec_zen_name "$zen"))" | tee -a "$CURRENT_LOG"
+  else
+    echo "НЕ ВИЙШЛО: «Не турбувати» — увімкни вручну зі шторки" | tee -a "$CURRENT_LOG"
+  fi
+
+  # 2) Тимчасово вимкнути службове — лише те, що зараз увімкнено.
+  en_list="$(adb -s "$ADB_TARGET" shell pm list packages -e 2>/dev/null | tr -d '\r')"
+  for pkg in $REC_DISABLE_PACKAGES; do
+    rec_kept "$pkg" && continue
+    printf '%s\n' "$en_list" | grep -qx "package:$pkg" || continue
+    if adb -s "$ADB_TARGET" shell pm disable-user --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1; then
+      echo "disabled $pkg" >> "$state"
+      echo "вимкнено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
+    fi
+  done
+
+  # 3) Закрити й приспати важкі; інші плеєри — лише закрити.
+  for pkg in $REC_SLEEP_PACKAGES; do
+    rec_kept "$pkg" && continue
+    rec_has "$pkg" || continue
+    was="$(rec_appops "$pkg")"
+    bucket="$(adb -s "$ADB_TARGET" shell am get-standby-bucket "$pkg" 2>/dev/null | tr -d '\r')"
+    echo "appops $pkg $was" >> "$state"
+    echo "bucket $pkg $bucket" >> "$state"
+    adb -s "$ADB_TARGET" shell am force-stop "$pkg" >> "$CURRENT_LOG" 2>&1
+    adb -s "$ADB_TARGET" shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >> "$CURRENT_LOG" 2>&1
+    adb -s "$ADB_TARGET" shell am set-standby-bucket "$pkg" restricted >> "$CURRENT_LOG" 2>&1
+    echo "закрито й приспано: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
+  done
+  for pkg in $REC_STOP_PACKAGES $REC_PLAYERS; do
+    rec_kept "$pkg" && continue
+    rec_has "$pkg" || continue
+    if [ "$pkg" = "ua.faric.audioconverter" ]; then continue; fi
+    adb -s "$ADB_TARGET" shell am force-stop "$pkg" >> "$CURRENT_LOG" 2>&1
+    echo "закрито: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
+  done
+
+  # Audio Converter не закриваю: може саме конвертувати. Лише нагадую.
+  if adb -s "$ADB_TARGET" shell pidof ua.faric.audioconverter >/dev/null 2>&1; then
+    echo "УВАГА: Audio Converter відкритий. Якщо не конвертує — закрий його сам (змахни з «Недавніх»)." | tee -a "$CURRENT_LOG"
+  fi
+
+  {
+    echo
+    echo "ГОТОВО: режим запису увімкнено, змін: $n."
+    echo "Запиши: відкрий плеєр і Track Catcher. Вранці — пункт 37, усе повернеться."
+    echo "Що саме змінено (для 37): $state"
+  } | tee -a "$CURRENT_LOG"
+  pause_menu
+}
+
+record_mode_off() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local state line kind pkg val name ok=0 failed=0 done_path
+  state="$(rec_state_file)"
+  if [ ! -f "$state" ]; then
+    echo "Режим запису на цьому телефоні не вмикався (пункт 36) — повертати нічого."
+    pause_menu; return
+  fi
+  new_log "37" "record-mode-off" "Режим запису: повернути як було"
+  echo "Повертаю, як було до $(sed -n 's/^time //p' "$state")..." | tee -a "$CURRENT_LOG"
+
+  while IFS= read -r line; do
+    kind="${line%% *}"; line="${line#* }"
+    case "$kind" in
+      disabled)
+        pkg="$line"
+        if adb -s "$ADB_TARGET" shell pm enable --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1; then
+          echo "увімкнено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+        else
+          echo "НЕ ВИЙШЛО увімкнути: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+        fi ;;
+      appops)
+        pkg="${line%% *}"; val="${line#* }"
+        adb -s "$ADB_TARGET" shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND "$val" >> "$CURRENT_LOG" 2>&1 \
+          && ok=$((ok + 1)) || failed=$((failed + 1)) ;;
+      bucket)
+        pkg="${line%% *}"; val="${line#* }"; name="$(rec_bucket_name "$val")"
+        if [ -n "$name" ]; then
+          adb -s "$ADB_TARGET" shell am set-standby-bucket "$pkg" "$name" >> "$CURRENT_LOG" 2>&1 \
+            && ok=$((ok + 1)) || failed=$((failed + 1))
+        fi
+        echo "розбуджено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG" ;;
+      zen)
+        name="$(rec_zen_name "$line")"
+        if adb -s "$ADB_TARGET" shell cmd notification set_dnd "$name" >> "$CURRENT_LOG" 2>&1; then
+          echo "«Не турбувати» — як було ($name)" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+        else
+          echo "НЕ ВИЙШЛО: «Не турбувати» — перевір зі шторки" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+        fi ;;
+    esac
+  done < "$state"
+
+  if [ "$failed" -eq 0 ]; then
+    # Файл стану не видаляю — лишаю як історію з позначкою часу.
+    done_path="${state%.state}.done-$(date '+%Y%m%d-%H%M%S')"
+    mv "$state" "$done_path"
+    echo "ГОТОВО: усе повернуто ($ok)." | tee -a "$CURRENT_LOG"
+    echo "Годинник: якщо не підключився сам — відкрий Galaxy Wearable." | tee -a "$CURRENT_LOG"
+  else
+    echo "Повернуто $ok, не вийшло $failed. Запусти пункт 37 ще раз (після пункту 4, якщо зв'язок пропав)." | tee -a "$CURRENT_LOG"
+  fi
+  pause_menu
+}
+# record_mode end
+
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
 # Вужчий екран — проста шапка одним рядком.
@@ -2105,6 +2359,8 @@ while true; do
   echo "33 — Renault Docs: заміри читання томів → файл (нічого не змінює)"
   echo "34 — Чому закрився застосунок (журнал падінь) → файл"
   echo "35 — Прибрати сміття в проєктах (спершу покаже; видаляє лише після «так»)"
+  echo "36 — Перед записом: усе зайве вимкнути (режим запису)"
+  echo "37 — Після запису: усе повернути, як було"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -2146,6 +2402,8 @@ while true; do
     33) renault_read_timing ;;
     34) app_crash_report ;;
     35) junk_cleanup ;;
+    36) record_mode_on ;;
+    37) record_mode_off ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
