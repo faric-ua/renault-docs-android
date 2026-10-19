@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.3"
+PD_VERSION="2026-10-20.4"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -13,8 +13,9 @@ SLEEP_PACKAGES="cn.wps.xiaomi.abroad.lite com.cubleopard.pocketlifeworld com.ein
 # 2026-10-20 (чат Track Catcher, T85; faric): M30s пише музику з ривками 10–20 мс — бракує пам'яті.
 # Для Samsung — свої списки; пункти 21–24 беруть список за виробником підключеного телефона.
 # Не чіпати: Track Catcher, Audio Converter, Suno, Poweramp, AIMP, месенджери, Quick Share, Samsung Cloud.
+# Galaxy Wearable — у списку «вимкнути»: годинника в faric нема (faric 2026-10-20 01:13–01:15).
 SAMSUNG_SLEEP_PACKAGES="com.zhiliaoapp.musically com.ss.android.ugc.trill com.zhiliaoapp.musically.go com.estrongs.android.pop com.moonshot.kimichat com.android.vending com.google.android.googlequicksearchbox"
-SAMSUNG_BLOAT_PACKAGES="com.facebook.appmanager com.facebook.services com.facebook.system com.samsung.android.dqagent com.sec.android.diagmonagent com.samsung.android.dynamiclock com.samsung.android.game.gos"
+SAMSUNG_BLOAT_PACKAGES="com.samsung.android.app.watchmanager2 com.facebook.appmanager com.facebook.services com.facebook.system com.samsung.android.dqagent com.sec.android.diagmonagent com.samsung.android.dynamiclock com.samsung.android.game.gos"
 BLOAT_PACKAGES="com.miui.msa.global com.amazon.appmanager com.ebay.carrier com.facebook.appmanager com.facebook.services com.facebook.system com.mi.globalminusscreen com.google.android.apps.magazines"
 STATE_DIR="$BASE_DIR/state"
 COUNTER_FILE="$STATE_DIR/sequence"
@@ -889,7 +890,8 @@ package_label() {
     kling.ai.video.chat) echo "Kling AI" ;;
     com.brave.browser) echo "Brave" ;;
     com.anthropic.claude) echo "Claude" ;;
-    ua.faric.doramaland.video.dev|ua.faric.doramaland.video.debug) echo "Dorama" ;;
+    ua.faric.doramaland.video.dev) echo "Dorama (dev)" ;;
+    ua.faric.doramaland.video.debug) echo "Dorama (debug)" ;;
     com.saney.renaultdocs) echo "Renault Docs" ;;
     com.sec.android.app.myfiles) echo "Мої файли" ;;
     com.android.settings) echo "Налаштування" ;;
@@ -2226,6 +2228,9 @@ record_mode_on() {
   done
 
   # Audio Converter не закриваю: може саме конвертувати. Лише нагадую.
+  if [ -n "$REC_LOCAL_KEEP" ]; then
+    echo "УВАГА: меню працює на цьому ж телефоні — Claude не закриваю. Перед записом закрий його сам." | tee -a "$CURRENT_LOG"
+  fi
   if adb -s "$ADB_TARGET" shell pidof ua.faric.audioconverter >/dev/null 2>&1; then
     echo "УВАГА: Audio Converter відкритий. Якщо не конвертує — закрий його сам (змахни з «Недавніх»)." | tee -a "$CURRENT_LOG"
   fi
