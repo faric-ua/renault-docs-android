@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.1"
+PD_VERSION="2026-10-20.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -10,6 +10,11 @@ BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
 # Пункти 23–24: рідко вживані застосунки бабусиного Redmi (звіт 17, кошик 40).
 # Не працюють у фоні, поки їх не відкрити; відкриваються як звичайно.
 SLEEP_PACKAGES="cn.wps.xiaomi.abroad.lite com.cubleopard.pocketlifeworld com.einnovation.temu com.google.android.apps.bard com.google.android.apps.podcasts com.google.android.videos com.google.android.apps.youtube.music com.zhiliaoapp.musically com.voe.superbill"
+# 2026-10-20 (чат Track Catcher, T85; faric): M30s пише музику з ривками 10–20 мс — бракує пам'яті.
+# Для Samsung — свої списки; пункти 21–24 беруть список за виробником підключеного телефона.
+# Не чіпати: Track Catcher, Audio Converter, Suno, Poweramp, AIMP, месенджери, Quick Share, Samsung Cloud.
+SAMSUNG_SLEEP_PACKAGES="com.zhiliaoapp.musically com.ss.android.ugc.trill com.zhiliaoapp.musically.go com.estrongs.android.pop com.moonshot.kimichat com.android.vending com.google.android.googlequicksearchbox"
+SAMSUNG_BLOAT_PACKAGES="com.facebook.appmanager com.facebook.services com.facebook.system com.samsung.android.dqagent com.sec.android.diagmonagent com.samsung.android.dynamiclock com.samsung.android.game.gos"
 BLOAT_PACKAGES="com.miui.msa.global com.amazon.appmanager com.ebay.carrier com.facebook.appmanager com.facebook.services com.facebook.system com.mi.globalminusscreen com.google.android.apps.magazines"
 STATE_DIR="$BASE_DIR/state"
 COUNTER_FILE="$STATE_DIR/sequence"
@@ -537,6 +542,23 @@ audio_snapshot() {
     echo
     echo "=== audio focus/active/mode ==="
     adb -s "$ADB_TARGET" shell dumpsys audio       | grep -i -E "focus|active|mode"       | head -n 120       || true
+    # 2026-10-20 (чат Track Catcher, T85): чи увімкнені ефекти звуку Samsung (Dolby Atmos,
+    # SoundAlive, Adapt Sound, UHQ) — вони обробляють звук в audioserver і вантажать M30s.
+    # Лише читає; вимикати — у Налаштуваннях телефона.
+    echo
+    echo "=== sound effects settings (system/global/secure) ==="
+    for ns in system global secure; do
+      adb -s "$ADB_TARGET" shell settings list "$ns" 2>/dev/null \
+        | grep -i -E "dolby|atmos|soundalive|sound_alive|adapt_sound|uhq|upscal|equalizer|surround|sound_effect|tube_amp|concert_hall" \
+        | sed "s/^/$ns: /"
+    done
+    echo
+    echo "=== effect packages ==="
+    adb -s "$ADB_TARGET" shell pm list packages 2>/dev/null | grep -i -E "dolby|soundalive|audio.*effect|sec.android.app.soundalive" || true
+    echo
+    echo "=== audio_flinger effects (media.audio_flinger) ==="
+    adb -s "$ADB_TARGET" shell dumpsys media.audio_flinger 2>/dev/null \
+      | grep -i -E "effect|session|dolby|soundalive|name:" | head -n 80 || true
   } 2>&1 | tee -a "$CURRENT_LOG"
   pause_menu
 }
@@ -839,10 +861,32 @@ package_label() {
     com.google.android.apps.podcasts) echo "Google Подкасти" ;;
     com.google.android.videos) echo "Google TV" ;;
     com.google.android.apps.youtube.music) echo "YouTube Music" ;;
-    com.zhiliaoapp.musically) echo "TikTok" ;;
+    com.zhiliaoapp.musically|com.ss.android.ugc.trill) echo "TikTok" ;;
+    com.zhiliaoapp.musically.go) echo "TikTok Lite" ;;
+    com.estrongs.android.pop) echo "ES Провідник" ;;
+    com.moonshot.kimichat) echo "Kimi" ;;
+    com.android.vending) echo "Play Маркет (у фоні; оновлення — вручну)" ;;
+    com.google.android.googlequicksearchbox) echo "Google (пошук і стрічка)" ;;
+    com.samsung.android.dqagent) echo "Samsung: збір даних про якість (службова)" ;;
+    com.sec.android.diagmonagent) echo "Samsung: діагностика (службова)" ;;
+    com.samsung.android.dynamiclock) echo "Samsung: динамічні шпалери екрана блокування" ;;
+    com.samsung.android.game.gos) echo "Samsung: Game Optimizing Service" ;;
     com.voe.superbill) echo "voe.superbill" ;;
     *) echo "$1" ;;
   esac
+}
+
+# Список за виробником підключеного телефона: Samsung — свій, решта — бабусин Redmi.
+target_is_samsung() {
+  adb -s "$ADB_TARGET" shell getprop ro.product.manufacturer 2>/dev/null | tr -d '\r' | grep -qi samsung
+}
+
+bloat_list() {
+  if target_is_samsung; then printf '%s' "$SAMSUNG_BLOAT_PACKAGES"; else printf '%s' "$BLOAT_PACKAGES"; fi
+}
+
+sleep_list() {
+  if target_is_samsung; then printf '%s' "$SAMSUNG_SLEEP_PACKAGES"; else printf '%s' "$SLEEP_PACKAGES"; fi
 }
 
 set_bloat_enabled() {
@@ -852,11 +896,12 @@ set_bloat_enabled() {
   clear
   if ! require_connection; then pause_menu; return; fi
 
-  local pkg answer disabled_list ok=0 skipped=0 failed=0
+  local pkg answer disabled_list ok=0 skipped=0 failed=0 list
+  list="$(bloat_list)"
   echo "$title"
   echo "Телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
   echo
-  for pkg in $BLOAT_PACKAGES; do
+  for pkg in $list; do
     echo "  • $(package_label "$pkg")"
   done
   echo
@@ -871,7 +916,7 @@ set_bloat_enabled() {
   esac
 
   new_log "$item" "bloat-$mode" "$title"
-  for pkg in $BLOAT_PACKAGES; do
+  for pkg in $list; do
     if ! adb -s "$ADB_TARGET" shell pm path "$pkg" >/dev/null 2>&1; then
       echo "— $(package_label "$pkg"): немає на телефоні" | tee -a "$CURRENT_LOG"
       skipped=$((skipped + 1))
@@ -910,11 +955,12 @@ set_apps_sleep() {
   clear
   if ! require_connection; then pause_menu; return; fi
 
-  local pkg answer op bucket ok=0 skipped=0 failed=0
+  local pkg answer op bucket ok=0 skipped=0 failed=0 list
+  list="$(sleep_list)"
   echo "$title"
   echo "Телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model)"
   echo
-  for pkg in $SLEEP_PACKAGES; do
+  for pkg in $list; do
     echo "  • $(package_label "$pkg")"
   done
   echo
@@ -930,7 +976,7 @@ set_apps_sleep() {
   esac
 
   new_log "$item" "apps-$mode" "$title"
-  for pkg in $SLEEP_PACKAGES; do
+  for pkg in $list; do
     if ! adb -s "$ADB_TARGET" shell pm path "$pkg" >/dev/null 2>&1; then
       echo "— $(package_label "$pkg"): немає на телефоні" | tee -a "$CURRENT_LOG"
       skipped=$((skipped + 1))
@@ -2033,7 +2079,7 @@ while true; do
   echo "7  — CPU/Media monitor 30 секунд → файл"
   echo "8  — TOP snapshot → файл"
   echo "9  — Media / Photo / Gallery процеси → файл"
-  echo "10 — Audio diagnostics → файл"
+  echo "10 — Audio diagnostics → файл (і ефекти звуку: Dolby Atmos)"
   echo "11 — RAM / swap → файл"
   echo "12 — Повний diagnostic bundle → файл"
   echo "13 — A/B: force-stop Google MediaProvider"
@@ -2044,9 +2090,9 @@ while true; do
   echo "18 — Оновити це меню з GitHub"
   echo "19 — Анімації швидше (0,5x)"
   echo "20 — Анімації як було (1x)"
-  echo "21 — Вимкнути рекламу MIUI і службові Amazon/eBay/Facebook"
+  echo "21 — Вимкнути зайве службове (свій список для Redmi і Samsung)"
   echo "22 — Повернути програми з пункту 21"
-  echo "23 — Приспати рідко вживані застосунки"
+  echo "23 — Приспати рідкі й важкі застосунки (свій список для Redmi і Samsung)"
   echo "24 — Розбудити застосунки з пункту 23"
   echo "25 — Що надсилає «Відкрити за допомогою» → файл"
   echo "26 — Зберегти застосунок (усі частини APK): цей телефон або підключений"

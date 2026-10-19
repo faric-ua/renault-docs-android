@@ -223,6 +223,36 @@ class TermuxMenuContractTests(unittest.TestCase):
         for forbidden in ('pm uninstall', 'pm clear', 'pm disable', 'trim-caches', 'force-stop', 'rm -', 'reboot'):
             self.assertNotIn(forbidden, fn)
 
+    def test_phone_diagnostics_samsung_lists_spare_recording_apps(self):
+        # 2026-10-20 (чат Track Catcher, T85): M30s пише музику з ривками — свої списки для Samsung.
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        sleep = next(l for l in text.splitlines() if l.startswith('SAMSUNG_SLEEP_PACKAGES='))
+        bloat = next(l for l in text.splitlines() if l.startswith('SAMSUNG_BLOAT_PACKAGES='))
+        for want in ('com.zhiliaoapp.musically', 'com.estrongs.android.pop', 'com.moonshot.kimichat', 'com.android.vending'):
+            self.assertIn(want, sleep)
+        for keep in ('trackcatcher', 'audioconverter', 'com.suno', 'maxmpz', 'aimp', 'whatsapp', 'telegram',
+                     'viber', 'sharelive', 'scloud', 'doramaland', 'renault', 'com.termux', 'anthropic'):
+            self.assertNotIn(keep, sleep)
+            self.assertNotIn(keep, bloat)
+        for keep in ('com.android.vending', 'googlequicksearchbox', 'com.google.android.gms', 'sharelive', 'scloud'):
+            self.assertNotIn(keep, bloat)
+        self.assertIn('if target_is_samsung; then printf', text)
+        for fn_name, nxt in (('set_bloat_enabled() {', 'set_apps_sleep() {'), ('set_apps_sleep() {', 'open_with_intent() {')):
+            fn = text[text.index(fn_name):text.index(nxt)]
+            self.assertIn('for pkg in $list; do', fn)
+            self.assertNotIn('$BLOAT_PACKAGES', fn)
+            self.assertNotIn('$SLEEP_PACKAGES', fn)
+
+    def test_phone_diagnostics_audio_item_reads_sound_effects_only(self):
+        repo = Path(__file__).resolve().parents[1]
+        text = (repo / "tools" / "termux" / "phone-diagnostics-menu.sh").read_text(encoding="utf-8")
+        fn = text[text.index('audio_snapshot() {'):text.index('memory_snapshot() {')]
+        self.assertIn('dolby|atmos|soundalive', fn)
+        self.assertIn('dumpsys media.audio_flinger', fn)
+        for forbidden in ('settings put', 'pm disable', 'pm clear', 'force-stop'):
+            self.assertNotIn(forbidden, fn)
+
     def test_phone_diagnostics_ip_prompt_prefills_network(self):
         repo = Path(__file__).resolve().parents[1]
         text = (
