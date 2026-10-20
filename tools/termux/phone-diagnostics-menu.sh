@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.8"
+PD_VERSION="2026-10-20.9"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2280,7 +2280,8 @@ record_mode_on() {
   {
     echo
     echo "ГОТОВО: режим запису увімкнено, змін: $n."
-    echo "Запиши: відкрий плеєр і Track Catcher. Вранці — пункт 37, усе повернеться."
+    echo "Запиши: відкрий плеєр і Track Catcher."
+    echo "Після запису: СПЕРШУ пункт 38 (що було за ніч), ПОТІМ 37 — 37 зменшить журнал, і ніч зітреться."
     echo "Що саме змінено (для 37): $state"
   } | tee -a "$CURRENT_LOG"
   pause_menu
