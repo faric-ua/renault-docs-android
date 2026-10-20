@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.6"
+PD_VERSION="2026-10-20.7"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2329,6 +2329,86 @@ record_mode_off() {
 }
 # record_mode end
 
+# night_report start
+# 38 — «Що було за ніч» (faric 2026-10-20 14:42: «що вночі було … хто міг перегружати
+# процесор чи пам'ять … пісні взагалі погано записались»). Знімки 12 показують лише
+# останні хвилини; тут — те, що Android пам'ятає годинами: чому закривались програми
+# (exit-info живе й після закриття), тиск пам'яті за години (procstats), вбивства
+# через нестачу пам'яті (журнал подій), нагрів, обриви звуку (underrun). Лише читає.
+NIGHT_PACKAGES="com.suno.android ua.faric.trackcatcher com.maxmpz.audioplayer com.aimp.player com.anthropic.claude"
+
+night_report() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local hours pkg
+  echo "ЩО БУЛО ЗА НІЧ — лише читаю, нічого не змінюю."
+  printf "За скільки годин? (Enter — 12): "
+  read -r hours
+  case "${hours:-12}" in *[!0-9]*|'') hours=12 ;; *) hours="${hours:-12}" ;; esac
+  new_log "38" "night-report" "Що було за ніч (${hours} год)"
+  echo "Збираю (~1 хв)..."
+  {
+    echo "=== Телефон ==="
+    echo "Модель: $(rec_adb shell getprop ro.product.model | tr -d '\r')"
+    echo "Зараз: $(rec_adb shell date | tr -d '\r')"
+    echo "Увімкнений: $(rec_adb shell uptime | tr -d '\r')"
+    echo
+    echo "=== Чому закривались програми запису (Android пам'ятає й після закриття) ==="
+    echo "(reason: LOW_MEMORY — забрала система через пам'ять; USER_REQUESTED / SIGNALED — закрили; CRASH — падіння)"
+    for pkg in $NIGHT_PACKAGES; do
+      rec_has "$pkg" || continue
+      echo "--- $pkg (зараз запущений: $(rec_adb shell pidof "$pkg" 2>/dev/null | tr -d '\r' | awk '{print $1}' | grep . || echo ні))"
+      rec_adb shell dumpsys activity exit-info "$pkg" 2>/dev/null | tr -d '\r' \
+        | grep -E "ApplicationExitInfo|timestamp=|reason=|description=|importance=|pss=|rss=" | head -n 40
+    done
+    echo
+    echo "=== Вбивства через нестачу пам'яті й закриття (журнал подій) ==="
+    rec_adb shell logcat -d -b events -v time 2>/dev/null | tr -d '\r' \
+      | grep -E "am_kill|am_proc_died|am_low_memory|am_anr|am_crash|am_wtf" | tail -n 150
+    echo
+    echo "=== Тиск пам'яті за ${hours} год (procstats: Normal / Moderate / Low / Critical) ==="
+    rec_adb shell dumpsys procstats --hours "$hours" 2>/dev/null | tr -d '\r' \
+      | sed -n '/Memory usage:/,/^$/p;/Run time Stats:/,/^$/p;/System memory usage:/,/^$/p' | head -n 80
+    echo
+    echo "--- Програми запису в procstats (скільки були живі, пам'ять) ---"
+    for pkg in $NIGHT_PACKAGES; do
+      rec_adb shell dumpsys procstats --hours "$hours" "$pkg" 2>/dev/null | tr -d '\r' \
+        | grep -E "^ *\* |TOTAL|Top|Fgs|Service|Cached|Imp Bg" | head -n 12
+    done
+    echo
+    echo "=== Найбільше енергії/процесора з останньої зарядки (batterystats) ==="
+    rec_adb shell dumpsys batterystats 2>/dev/null | tr -d '\r' \
+      | sed -n '/Estimated power use/,/^ *$/p' | head -n 45
+    echo
+    echo "=== Нагрів і зарядка ==="
+    rec_adb shell dumpsys thermalservice 2>/dev/null | tr -d '\r' \
+      | grep -E "Thermal Status|IsStatusOverride|Temperature\{" | head -n 25
+    rec_adb shell dumpsys battery 2>/dev/null | tr -d '\r' \
+      | grep -E "AC powered|USB powered|level|temperature|status" | head -n 8
+    echo
+    echo "=== Обриви звуку (underrun — програвач не встиг дати звук) ==="
+    rec_adb shell dumpsys media.audio_flinger 2>/dev/null | tr -d '\r' \
+      | grep -i -E "Output thread|Input thread|underrun|overrun|Standby|Sample rate|Frames written|Write blocked|Delayed write" \
+      | head -n 80
+    echo
+    echo "=== Хто грав і хто писав звук (історія) ==="
+    rec_adb shell dumpsys audio 2>/dev/null | tr -d '\r' \
+      | grep -E "requestAudioFocus|abandonAudioFocus|AudioPlaybackConfiguration|recording|capture" | tail -n 40
+    echo
+    echo "=== Wi-Fi: обриви з'єднання (Suno грає з інтернету) ==="
+    rec_adb shell logcat -d -b events,main,system -v time 2>/dev/null | tr -d '\r' \
+      | grep -i -E "wifi.*(disconnect|connected|roam)|CTRL-EVENT-(DIS)?CONNECTED|NetworkAgent.*(lost|disconnected)" | tail -n 40
+    echo
+    echo "=== Track Catcher про себе (останнє в журналі) ==="
+    rec_adb shell logcat -d -v time 2>/dev/null | tr -d '\r' \
+      | grep -i -E "trackcatcher|TrackCatcher|SegmentFinisher|FinisherQueue|gap|underrun" | tail -n 80
+  } 2>&1 | tee -a "$CURRENT_LOG"
+  echo
+  echo "Готово. Надішли цей файл у чат (шлях — нижче)."
+  pause_menu
+}
+# night_report end
+
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
 # Вужчий екран — проста шапка одним рядком.
@@ -2395,6 +2475,7 @@ while true; do
   echo "35 — Прибрати сміття в проєктах (спершу покаже; видаляє лише після «так»)"
   echo "36 — Перед записом: усе зайве вимкнути (режим запису)"
   echo "37 — Після запису: усе повернути, як було"
+  echo "38 — Що було за ніч: хто закрив, пам'ять, нагрів, обриви звуку → файл (лише читає)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -2438,6 +2519,7 @@ while true; do
     35) junk_cleanup ;;
     36) record_mode_on ;;
     37) record_mode_off ;;
+    38) night_report ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
