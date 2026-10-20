@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.7"
+PD_VERSION="2026-10-20.8"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2132,6 +2132,18 @@ rec_bucket_name() {
   esac
 }
 
+# Журнал телефона (logcat): розмір кожного буфера, напр. «main 256K». Звичайно 256 КБ —
+# це ~1,5 години; 20.10 пункт 38 через це не побачив ночі (faric 14:58: «збільшити журнал»).
+REC_LOG_BUFFERS="main system events crash"
+REC_LOG_SIZE="16M"
+rec_logbuf_sizes() {
+  local b
+  for b in $REC_LOG_BUFFERS; do
+    rec_adb logcat -b "$b" -g 2>/dev/null | tr -d '\r' \
+      | sed -n "s/^$b: ring buffer is \([0-9][0-9]*\) *\([KMG]\).*/$b \1\2/p" | head -n 1
+  done
+}
+
 rec_zen_name() {
   case "$1" in 1) echo priority ;; 2) echo none ;; 3) echo alarms ;; *) echo off ;; esac
 }
@@ -2176,6 +2188,7 @@ record_mode_on() {
   echo "  • приспю їх до ранку, щоб самі не запускались"
   echo "  • тимчасово вимкну: годинник, Quick Share, Samsung Cloud, погоду, обличчя, Android Auto…"
   echo "  • «Не турбувати»: лише будильники — звуки сповіщень не потраплять у запис"
+  echo "  • журнал телефона більший на ніч — пункт 38 потім побачить усю ніч"
   echo "Не чіпаю: Track Catcher, плеєр запису, Termux, дзвінки, месенджери."
   printf "Увімкнути режим запису? так / ні: "
   read -r answer
@@ -2199,6 +2212,25 @@ record_mode_on() {
     echo "ГОТОВО: «Не турбувати» — лише будильники (було: $(rec_zen_name "$zen"))" | tee -a "$CURRENT_LOG"
   else
     echo "НЕ ВИЙШЛО: «Не турбувати» — увімкни вручну зі шторки" | tee -a "$CURRENT_LOG"
+  fi
+
+  # 1б) Більший журнал телефона на ніч — щоб пункт 38 бачив усю ніч, а не останні ~1,5 год.
+  local logbuf_before logbuf_after
+  logbuf_before="$(rec_logbuf_sizes)"
+  if [ -n "$logbuf_before" ]; then
+    for pkg in $REC_LOG_BUFFERS; do
+      rec_adb logcat -b "$pkg" -G "$REC_LOG_SIZE" >> "$CURRENT_LOG" 2>&1
+    done
+    logbuf_after="$(rec_logbuf_sizes)"
+    if [ "$logbuf_after" != "$logbuf_before" ]; then
+      printf '%s\n' "$logbuf_before" | sed 's/^/logbuf /' >> "$state"
+      echo "ГОТОВО: журнал телефона більший на ніч (було: $(printf '%s' "$logbuf_before" | tr '\n' ' '))" | tee -a "$CURRENT_LOG"
+      n=$((n + 1))
+    else
+      echo "НЕ ВИЙШЛО: телефон не дав збільшити журнал (пункт 38 побачить лише останні години)" | tee -a "$CURRENT_LOG"
+    fi
+  else
+    echo "НЕ ВИЙШЛО: не прочитав розмір журналу телефона" | tee -a "$CURRENT_LOG"
   fi
 
   # 2) Тимчасово вимкнути службове — лише те, що зараз увімкнено.
@@ -2280,6 +2312,13 @@ rec_apply_file() {
             REC_OK=$((REC_OK + 1)); else REC_FAIL=$((REC_FAIL + 1)); fi
         fi
         echo "розбуджено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG" ;;
+      logbuf)
+        pkg="${line%% *}"; val="${line#* }"
+        if rec_adb logcat -b "$pkg" -G "$val" >> "$CURRENT_LOG" 2>&1; then
+          echo "журнал телефона ($pkg) — як був: $val" | tee -a "$CURRENT_LOG"; REC_OK=$((REC_OK + 1))
+        else
+          echo "НЕ ВИЙШЛО: журнал ($pkg) — лишився більшим до перезапуску телефона" | tee -a "$CURRENT_LOG"; REC_FAIL=$((REC_FAIL + 1))
+        fi ;;
       zen)
         name="$(rec_zen_name "$line")"
         if rec_adb shell cmd notification set_dnd "$name" >> "$CURRENT_LOG" 2>&1; then
@@ -2360,6 +2399,11 @@ night_report() {
       echo "--- $pkg (зараз запущений: $(rec_adb shell pidof "$pkg" 2>/dev/null | tr -d '\r' | awk '{print $1}' | grep . || echo ні))"
       rec_adb shell dumpsys activity exit-info "$pkg" 2>/dev/null | tr -d '\r' \
         | grep -E "ApplicationExitInfo|timestamp=|reason=|description=|importance=|pss=|rss=" | head -n 40
+    done
+    echo
+    echo "=== Скільки годин пам'ятає журнал телефона ==="
+    for pkg in main events; do
+      echo "$pkg: з $(rec_adb shell "logcat -d -b $pkg -v time | head -n 3" 2>/dev/null | tr -d '\r' | grep -v '^-' | head -n 1 | cut -c1-18) (розмір: $(rec_adb logcat -b "$pkg" -g 2>/dev/null | tr -d '\r' | head -n 1))"
     done
     echo
     echo "=== Вбивства через нестачу пам'яті й закриття (журнал подій) ==="

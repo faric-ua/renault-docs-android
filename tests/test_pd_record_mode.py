@@ -27,6 +27,18 @@ except Exception:
 args = sys.argv[1:]
 if args[:1] == ["-s"]:
     args = args[2:]
+if args[:1] == ["logcat"]:
+    # adb logcat -b <буфер> -g / -G <розмір> (20.10 14:58: більший журнал на ніч)
+    bufs = st.setdefault("logbuf", {"main": "256K", "system": "256K", "events": "256K", "crash": "256K"})
+    b = args[args.index("-b") + 1]
+    if "-G" in args:
+        if not st.get("logbuf_refuse"):
+            bufs[b] = args[args.index("-G") + 1]
+            json.dump(st, open(db, "w"))
+    elif "-g" in args:
+        v = bufs[b]
+        print("%s: ring buffer is %s %siB (12 KiB consumed), max entry is 5120 B" % (b, v[:-1], v[-1]))
+    sys.exit(0)
 if args[:1] != ["shell"]:
     sys.exit(0)
 cmd = " ".join(args[1:]).split()
@@ -123,6 +135,23 @@ class RecordModeTest(unittest.TestCase):
 
     def phone(self):
         return json.loads(self.db.read_text())
+
+    def test_log_buffer_bigger_at_night_and_restored(self):
+        out = self.run_fn("record_mode_on", "1\nтак\n")
+        self.assertIn("журнал телефона більший", out)
+        self.assertEqual(self.phone()["logbuf"]["main"], "16M")
+        self.assertEqual(self.phone()["logbuf"]["events"], "16M")
+        out = self.run_fn("record_mode_off", "")
+        self.assertIn("журнал телефона (main) — як був: 256K", out)
+        self.assertEqual(self.phone()["logbuf"], {"main": "256K", "system": "256K", "events": "256K", "crash": "256K"})
+
+    def test_log_buffer_refused_is_reported_and_not_saved(self):
+        st = json.loads(self.db.read_text()); st["logbuf_refuse"] = True
+        self.db.write_text(json.dumps(st))
+        out = self.run_fn("record_mode_on", "1\nтак\n")
+        self.assertIn("телефон не дав збільшити журнал", out)
+        state = next((self.tmp / "state").glob("record-mode-*.state")).read_text()
+        self.assertNotIn("logbuf", state)
 
     def test_on_then_off_restores_exactly(self):
         out = self.run_fn("record_mode_on", "1\nтак\n")
