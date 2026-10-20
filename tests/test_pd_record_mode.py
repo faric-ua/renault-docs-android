@@ -19,6 +19,11 @@ FAKE_ADB = r'''#!/usr/bin/env python3
 import json, os, sys
 db = os.environ["FAKE_PHONE"]
 st = json.load(open(db))
+# Справжній `adb shell` читає stdin — так і тут (20.10: 37 через це повернув лише 1 рядок).
+try:
+    sys.stdin.read()
+except Exception:
+    pass
 args = sys.argv[1:]
 if args[:1] == ["-s"]:
     args = args[2:]
@@ -153,6 +158,26 @@ class RecordModeTest(unittest.TestCase):
         states = list((self.tmp / "state").glob("record-mode-*"))
         self.assertTrue(any(".done-" in s.name for s in states))
         self.assertFalse(any(s.name.endswith(".state") for s in states))
+
+    def test_off_repairs_old_unfinished_restore(self):
+        # 20.10 03:51: старий 37 повернув лише «Не турбувати» і перейменував файл на .done-;
+        # потім 36 ще раз (новий .state). Новий 37 має повернути обидва — і стане як спочатку.
+        self.run_fn("record_mode_on", "1\nтак\n")
+        state = next((self.tmp / "state").glob("record-mode-*.state"))
+        old = state.with_name(state.name.replace(".state", ".done-20261020-035149"))
+        state.rename(old)
+        p = self.phone(); p["zen"] = 1; self.db.write_text(json.dumps(p))  # старий 37 повернув лише zen
+        self.run_fn("record_mode_on", "1\nтак\n")
+        out = self.run_fn("record_mode_off", "")
+        self.assertIn("усе повернуто", out)
+        p = self.phone()
+        self.assertEqual(p["zen"], 1)
+        self.assertEqual(p["disabled"], ["com.moonshot.kimichat"])
+        self.assertEqual(p["bucket"]["com.android.vending"], 10)
+        self.assertEqual(p["bucket"]["com.zhiliaoapp.musically"], 20)
+        self.assertNotIn("com.zhiliaoapp.musically", p["appops"])
+        self.assertIn("restored-ok", old.read_text())
+        self.assertIn("не вмикався", self.run_fn("record_mode_off", ""))
 
     def test_cancel_changes_nothing(self):
         self.run_fn("record_mode_on", "1\nні\n")
