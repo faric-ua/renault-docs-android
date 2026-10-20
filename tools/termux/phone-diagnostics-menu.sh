@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.5"
+PD_VERSION="2026-10-20.6"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2093,15 +2093,20 @@ REC_PLAYERS="com.suno.android com.maxmpz.audioplayer com.aimp.player com.aimp.cu
 # Ніколи не чіпати.
 REC_KEEP="ua.faric.trackcatcher com.termux com.termux.widget"
 
+# adb без stdin: інакше `adb shell` читає те, що йде на вхід (файл стану чи клавіатуру).
+rec_adb() {
+  adb -s "$ADB_TARGET" "$@" </dev/null
+}
+
 rec_state_file() {
   local serial
-  serial="$(adb -s "$ADB_TARGET" shell getprop ro.serialno 2>/dev/null | tr -d '\r')"
+  serial="$(rec_adb shell getprop ro.serialno 2>/dev/null | tr -d '\r')"
   [ -n "$serial" ] || serial="$(printf '%s' "$ADB_TARGET" | tr -c 'A-Za-z0-9' '_')"
   printf '%s/record-mode-%s.state' "$STATE_DIR" "$serial"
 }
 
 rec_has() {
-  adb -s "$ADB_TARGET" shell pm path "$1" >/dev/null 2>&1
+  rec_adb shell pm path "$1" >/dev/null 2>&1
 }
 
 rec_kept() {
@@ -2111,7 +2116,7 @@ rec_kept() {
 
 rec_appops() {
   local v
-  v="$(adb -s "$ADB_TARGET" shell cmd appops get "$1" RUN_ANY_IN_BACKGROUND 2>/dev/null | tr -d '\r')"
+  v="$(rec_adb shell cmd appops get "$1" RUN_ANY_IN_BACKGROUND 2>/dev/null | tr -d '\r')"
   case "$v" in
     *ignore*) echo ignore ;;
     *deny*) echo deny ;;
@@ -2142,7 +2147,7 @@ record_mode_on() {
     pause_menu; return
   fi
 
-  echo "РЕЖИМ ЗАПИСУ — телефон: $(adb -s "$ADB_TARGET" shell getprop ro.product.model | tr -d '\r')"
+  echo "РЕЖИМ ЗАПИСУ — телефон: $(rec_adb shell getprop ro.product.model | tr -d '\r')"
   echo
   echo "З якого плеєра пишеш? Його не чіпаю, інші плеєри закрию."
   echo "  1) Suno   (Enter)"
@@ -2161,7 +2166,7 @@ record_mode_on() {
 
   # Меню запущене на тому самому телефоні (A26 сам до себе) — Claude не закривати.
   here="$(getprop ro.product.model 2>/dev/null)"
-  there="$(adb -s "$ADB_TARGET" shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+  there="$(rec_adb shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
   REC_LOCAL_KEEP=""
   [ -n "$here" ] && [ "$here" = "$there" ] && REC_LOCAL_KEEP="com.anthropic.claude"
 
@@ -2187,23 +2192,23 @@ record_mode_on() {
   } > "$state"
 
   # 1) «Не турбувати» — запам'ятати, як було.
-  zen="$(adb -s "$ADB_TARGET" shell settings get global zen_mode 2>/dev/null | tr -d '\r')"
+  zen="$(rec_adb shell settings get global zen_mode 2>/dev/null | tr -d '\r')"
   case "$zen" in 0|1|2|3) ;; *) zen=0 ;; esac
   echo "zen $zen" >> "$state"
-  if adb -s "$ADB_TARGET" shell cmd notification set_dnd alarms >> "$CURRENT_LOG" 2>&1; then
+  if rec_adb shell cmd notification set_dnd alarms >> "$CURRENT_LOG" 2>&1; then
     echo "ГОТОВО: «Не турбувати» — лише будильники (було: $(rec_zen_name "$zen"))" | tee -a "$CURRENT_LOG"
   else
     echo "НЕ ВИЙШЛО: «Не турбувати» — увімкни вручну зі шторки" | tee -a "$CURRENT_LOG"
   fi
 
   # 2) Тимчасово вимкнути службове — лише те, що зараз увімкнено.
-  en_list="$(adb -s "$ADB_TARGET" shell pm list packages -e 2>/dev/null | tr -d '\r')"
+  en_list="$(rec_adb shell pm list packages -e 2>/dev/null | tr -d '\r')"
   for pkg in $REC_DISABLE_PACKAGES; do
     rec_kept "$pkg" && continue
     printf '%s\n' "$en_list" | grep -qx "package:$pkg" || continue
-    adb -s "$ADB_TARGET" shell pm disable-user --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1
+    rec_adb shell pm disable-user --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1
     # Перевіряємо, що справді вимкнено (Samsung деякі службові не дає — 20.10, GOS).
-    if adb -s "$ADB_TARGET" shell pm list packages -d 2>/dev/null | tr -d '\r' | grep -qx "package:$pkg"; then
+    if rec_adb shell pm list packages -d 2>/dev/null | tr -d '\r' | grep -qx "package:$pkg"; then
       echo "disabled $pkg" >> "$state"
       echo "вимкнено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
     else
@@ -2216,19 +2221,19 @@ record_mode_on() {
     rec_kept "$pkg" && continue
     rec_has "$pkg" || continue
     was="$(rec_appops "$pkg")"
-    bucket="$(adb -s "$ADB_TARGET" shell am get-standby-bucket "$pkg" 2>/dev/null | tr -d '\r')"
+    bucket="$(rec_adb shell am get-standby-bucket "$pkg" 2>/dev/null | tr -d '\r')"
     echo "appops $pkg $was" >> "$state"
     echo "bucket $pkg $bucket" >> "$state"
-    adb -s "$ADB_TARGET" shell am force-stop "$pkg" >> "$CURRENT_LOG" 2>&1
-    adb -s "$ADB_TARGET" shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >> "$CURRENT_LOG" 2>&1
-    adb -s "$ADB_TARGET" shell am set-standby-bucket "$pkg" restricted >> "$CURRENT_LOG" 2>&1
+    rec_adb shell am force-stop "$pkg" >> "$CURRENT_LOG" 2>&1
+    rec_adb shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >> "$CURRENT_LOG" 2>&1
+    rec_adb shell am set-standby-bucket "$pkg" restricted >> "$CURRENT_LOG" 2>&1
     echo "закрито й приспано: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
   done
   for pkg in $REC_STOP_PACKAGES $REC_PLAYERS; do
     rec_kept "$pkg" && continue
     rec_has "$pkg" || continue
     if [ "$pkg" = "ua.faric.audioconverter" ]; then continue; fi
-    adb -s "$ADB_TARGET" shell am force-stop "$pkg" >> "$CURRENT_LOG" 2>&1
+    rec_adb shell am force-stop "$pkg" >> "$CURRENT_LOG" 2>&1
     echo "закрито: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
   done
 
@@ -2236,7 +2241,7 @@ record_mode_on() {
   if [ -n "$REC_LOCAL_KEEP" ]; then
     echo "УВАГА: меню працює на цьому ж телефоні — Claude не закриваю. Перед записом закрий його сам." | tee -a "$CURRENT_LOG"
   fi
-  if adb -s "$ADB_TARGET" shell pidof ua.faric.audioconverter >/dev/null 2>&1; then
+  if rec_adb shell pidof ua.faric.audioconverter >/dev/null 2>&1; then
     echo "УВАГА: Audio Converter відкритий. Якщо не конвертує — закрий його сам (змахни з «Недавніх»)." | tee -a "$CURRENT_LOG"
   fi
 
@@ -2249,57 +2254,76 @@ record_mode_on() {
   pause_menu
 }
 
-record_mode_off() {
-  clear
-  if ! require_connection; then pause_menu; return; fi
-  local state line kind pkg val name ok=0 failed=0 done_path
-  state="$(rec_state_file)"
-  if [ ! -f "$state" ]; then
-    echo "Режим запису на цьому телефоні не вмикався (пункт 36) — повертати нічого."
-    pause_menu; return
-  fi
-  new_log "37" "record-mode-off" "Режим запису: повернути як було"
-  echo "Повертаю, як було до $(sed -n 's/^time //p' "$state")..." | tee -a "$CURRENT_LOG"
-
-  while IFS= read -r line; do
+# Повернути все з одного файлу стану. Файл читаємо через дескриптор 3, а adb — з </dev/null:
+# інакше `adb shell` з'їдає решту файлу зі stdin. Так 20.10 о 03:51 пункт 37 повернув лише
+# «Не турбувати» (перший рядок з adb), а 11 вимкнених програм і 12 приспаних лишились як були.
+rec_apply_file() {
+  local file="$1" line kind pkg val name
+  while IFS= read -r line <&3; do
     kind="${line%% *}"; line="${line#* }"
     case "$kind" in
       disabled)
         pkg="$line"
-        if adb -s "$ADB_TARGET" shell pm enable --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1; then
-          echo "увімкнено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+        if rec_adb shell pm enable --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1; then
+          echo "увімкнено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; REC_OK=$((REC_OK + 1))
         else
-          echo "НЕ ВИЙШЛО увімкнути: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+          echo "НЕ ВИЙШЛО увімкнути: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; REC_FAIL=$((REC_FAIL + 1))
         fi ;;
       appops)
         pkg="${line%% *}"; val="${line#* }"
-        adb -s "$ADB_TARGET" shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND "$val" >> "$CURRENT_LOG" 2>&1 \
-          && ok=$((ok + 1)) || failed=$((failed + 1)) ;;
+        if rec_adb shell cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND "$val" >> "$CURRENT_LOG" 2>&1; then
+          REC_OK=$((REC_OK + 1)); else REC_FAIL=$((REC_FAIL + 1)); fi ;;
       bucket)
         pkg="${line%% *}"; val="${line#* }"; name="$(rec_bucket_name "$val")"
         if [ -n "$name" ]; then
-          adb -s "$ADB_TARGET" shell am set-standby-bucket "$pkg" "$name" >> "$CURRENT_LOG" 2>&1 \
-            && ok=$((ok + 1)) || failed=$((failed + 1))
+          if rec_adb shell am set-standby-bucket "$pkg" "$name" >> "$CURRENT_LOG" 2>&1; then
+            REC_OK=$((REC_OK + 1)); else REC_FAIL=$((REC_FAIL + 1)); fi
         fi
         echo "розбуджено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG" ;;
       zen)
         name="$(rec_zen_name "$line")"
-        if adb -s "$ADB_TARGET" shell cmd notification set_dnd "$name" >> "$CURRENT_LOG" 2>&1; then
-          echo "«Не турбувати» — як було ($name)" | tee -a "$CURRENT_LOG"; ok=$((ok + 1))
+        if rec_adb shell cmd notification set_dnd "$name" >> "$CURRENT_LOG" 2>&1; then
+          echo "«Не турбувати» — як було ($name)" | tee -a "$CURRENT_LOG"; REC_OK=$((REC_OK + 1))
         else
-          echo "НЕ ВИЙШЛО: «Не турбувати» — перевір зі шторки" | tee -a "$CURRENT_LOG"; failed=$((failed + 1))
+          echo "НЕ ВИЙШЛО: «Не турбувати» — перевір зі шторки" | tee -a "$CURRENT_LOG"; REC_FAIL=$((REC_FAIL + 1))
         fi ;;
     esac
-  done < "$state"
+  done 3< "$file"
+}
 
-  if [ "$failed" -eq 0 ]; then
-    # Файл стану не видаляю — лишаю як історію з позначкою часу.
-    done_path="${state%.state}.done-$(date '+%Y%m%d-%H%M%S')"
-    mv "$state" "$done_path"
-    echo "ГОТОВО: усе повернуто ($ok)." | tee -a "$CURRENT_LOG"
-    echo "Годинник: якщо не підключився сам — відкрий Galaxy Wearable." | tee -a "$CURRENT_LOG"
+record_mode_off() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local state base f todo="" before
+  state="$(rec_state_file)"
+  base="${state%.state}"
+  # Що повертати: поточний стан (новіший) і старі файли, які 37 ще не повернув до кінця
+  # (без позначки restored-ok) — від новішого до найстарішого, щоб наприкінці стало як було спочатку.
+  [ -f "$state" ] && todo="$state"
+  for f in $(ls -1 "$base".done-* 2>/dev/null | sort -r); do
+    grep -q '^restored-ok' "$f" 2>/dev/null || todo="$todo $f"
+  done
+  if [ -z "$todo" ]; then
+    echo "Режим запису на цьому телефоні не вмикався (пункт 36) — повертати нічого."
+    pause_menu; return
+  fi
+  new_log "37" "record-mode-off" "Режим запису: повернути як було"
+  REC_OK=0; REC_FAIL=0
+  for f in $todo; do
+    before="$REC_FAIL"
+    echo "Повертаю, як було до $(sed -n 's/^time //p' "$f")..." | tee -a "$CURRENT_LOG"
+    rec_apply_file "$f"
+    if [ "$REC_FAIL" -eq "$before" ]; then
+      echo "restored-ok $(date '+%Y-%m-%d %H:%M')" >> "$f"
+      # Файл стану не видаляю — лишаю як історію з позначкою часу.
+      [ "$f" = "$state" ] && mv "$state" "$base.done-$(date '+%Y%m%d-%H%M%S')"
+    fi
+  done
+
+  if [ "$REC_FAIL" -eq 0 ]; then
+    echo "ГОТОВО: усе повернуто ($REC_OK)." | tee -a "$CURRENT_LOG"
   else
-    echo "Повернуто $ok, не вийшло $failed. Запусти пункт 37 ще раз (після пункту 4, якщо зв'язок пропав)." | tee -a "$CURRENT_LOG"
+    echo "Повернуто $REC_OK, не вийшло $REC_FAIL. Запусти пункт 37 ще раз (після пункту 4, якщо зв'язок пропав)." | tee -a "$CURRENT_LOG"
   fi
   pause_menu
 }
