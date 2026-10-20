@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.4"
+PD_VERSION="2026-10-20.5"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -884,6 +884,7 @@ package_label() {
     com.microsoft.skydrive) echo "OneDrive" ;;
     com.netflix.partner.activation) echo "Netflix (службова)" ;;
     com.android.chrome) echo "Chrome" ;;
+    com.google.android.gm) echo "Gmail" ;;
     com.google.android.youtube) echo "YouTube" ;;
     com.openai.chatgpt) echo "ChatGPT" ;;
     ai.qwenlm.chat.android) echo "Qwen" ;;
@@ -2081,7 +2082,7 @@ junk_cleanup() {
 # Програми запису й плеєр, з якого пишемо, не чіпає ніколи.
 
 # Закрити й приспати на час запису (якщо встановлені).
-REC_SLEEP_PACKAGES="com.zhiliaoapp.musically com.zhiliaoapp.musically.go com.ss.android.ugc.trill com.estrongs.android.pop com.moonshot.kimichat com.android.vending com.google.android.googlequicksearchbox com.android.chrome com.google.android.youtube com.openai.chatgpt ai.qwenlm.chat.android kling.ai.video.chat com.brave.browser"
+REC_SLEEP_PACKAGES="com.google.android.gm com.zhiliaoapp.musically com.zhiliaoapp.musically.go com.ss.android.ugc.trill com.estrongs.android.pop com.moonshot.kimichat com.android.vending com.google.android.googlequicksearchbox com.android.chrome com.google.android.youtube com.openai.chatgpt ai.qwenlm.chat.android kling.ai.video.chat com.brave.browser"
 # Лише закрити (не присипляти): потрібні вдень, але не під час запису.
 REC_STOP_PACKAGES="com.anthropic.claude ua.faric.doramaland.video.dev ua.faric.doramaland.video.debug com.saney.renaultdocs com.sec.android.app.myfiles com.android.settings com.sec.android.gallery3d com.samsung.android.video"
 # Тимчасово вимкнути (повертає 37): годинник, Quick Share, Samsung Cloud, погода,
@@ -2166,7 +2167,7 @@ record_mode_on() {
 
   echo
   echo "Що зроблю (усе повертає пункт 37):"
-  echo "  • закрию важкі застосунки й інші плеєри (Claude, ES, TikTok, Play, Google, Chrome…)"
+  echo "  • закрию важкі застосунки й інші плеєри (Claude, Gmail, ES, TikTok, Play, Google, Chrome…)"
   echo "  • приспю їх до ранку, щоб самі не запускались"
   echo "  • тимчасово вимкну: годинник, Quick Share, Samsung Cloud, погоду, обличчя, Android Auto…"
   echo "  • «Не турбувати»: лише будильники — звуки сповіщень не потраплять у запис"
@@ -2200,9 +2201,13 @@ record_mode_on() {
   for pkg in $REC_DISABLE_PACKAGES; do
     rec_kept "$pkg" && continue
     printf '%s\n' "$en_list" | grep -qx "package:$pkg" || continue
-    if adb -s "$ADB_TARGET" shell pm disable-user --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1; then
+    adb -s "$ADB_TARGET" shell pm disable-user --user 0 "$pkg" >> "$CURRENT_LOG" 2>&1
+    # Перевіряємо, що справді вимкнено (Samsung деякі службові не дає — 20.10, GOS).
+    if adb -s "$ADB_TARGET" shell pm list packages -d 2>/dev/null | tr -d '\r' | grep -qx "package:$pkg"; then
       echo "disabled $pkg" >> "$state"
       echo "вимкнено: $(package_label "$pkg")" | tee -a "$CURRENT_LOG"; n=$((n + 1))
+    else
+      echo "НЕ ВИЙШЛО (телефон не дав вимкнути): $(package_label "$pkg")" | tee -a "$CURRENT_LOG"
     fi
   done
 

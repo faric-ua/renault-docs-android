@@ -40,7 +40,9 @@ elif cmd[:3] == ["pm", "list", "packages"]:
     elif "-d" in cmd: out = "\n".join("package:" + p for p in st["disabled"])
     else: out = "\n".join("package:" + p for p in st["installed"])
 elif cmd[:2] == ["pm", "disable-user"]:
-    st["disabled"].append(cmd[-1]); save(); out = "new state: disabled-user"
+    if cmd[-1] not in st.get("refuse", []):
+        st["disabled"].append(cmd[-1]); save()
+    out = "new state: disabled-user"
 elif cmd[:2] == ["pm", "enable"]:
     st["disabled"] = [p for p in st["disabled"] if p != cmd[-1]]; save(); out = "new state: enabled"
 elif cmd[:3] == ["cmd", "appops", "get"]:
@@ -68,7 +70,8 @@ START = {
                   "com.zhiliaoapp.musically", "com.estrongs.android.pop", "com.android.vending",
                   "com.anthropic.claude", "com.samsung.android.app.watchmanager2", "com.samsung.android.app.sharelive",
                   "com.samsung.android.scloud", "com.facebook.services", "com.whatsapp", "org.telegram.messenger",
-                  "com.termux", "com.moonshot.kimichat"],
+                  "com.termux", "com.moonshot.kimichat", "com.samsung.android.game.gos", "com.google.android.gm"],
+    "refuse": ["com.samsung.android.game.gos"],
     "disabled": ["com.moonshot.kimichat"],
     "appops": {"com.estrongs.android.pop": "ignore"},
     "bucket": {"com.estrongs.android.pop": 40, "com.zhiliaoapp.musically": 20, "com.android.vending": 10},
@@ -127,6 +130,9 @@ class RecordModeTest(unittest.TestCase):
         self.assertEqual(p["appops"]["com.zhiliaoapp.musically"], "ignore")
         self.assertEqual(p["bucket"]["com.android.vending"], 45)
         self.assertIn("com.anthropic.claude", p["stopped"])
+        self.assertIn("com.google.android.gm", p["stopped"])
+        self.assertIn("телефон не дав вимкнути", out)
+        self.assertNotIn("com.samsung.android.game.gos", p["disabled"])
         self.assertIn("com.maxmpz.audioplayer", p["stopped"])  # інший плеєр
         for keep in ("com.suno.android", "ua.faric.trackcatcher", "com.termux", "com.whatsapp", "org.telegram.messenger"):
             self.assertNotIn(keep, p["stopped"])
