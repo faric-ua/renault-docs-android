@@ -65,7 +65,8 @@ class NightReportTest(unittest.TestCase):
         r = subprocess.run(["bash", "-c", script], input="\n", text=True, capture_output=True, env=env, timeout=60)
         self.assertEqual(r.returncode, 0, r.stderr)
         for section in ("Чому закривались", "Вбивства", "Тиск пам'яті за 12 год", "Нагрів",
-                        "Обриви звуку", "Wi-Fi", "Track Catcher про себе"):
+                        "Обриви звуку", "Wi-Fi", "Track Catcher про себе",
+                        "Програми запису в журналі подій", "по годинах"):
             self.assertIn(section, r.stdout)
         self.assertIn("LOW_MEMORY", r.stdout)
         calls = log.read_text()
