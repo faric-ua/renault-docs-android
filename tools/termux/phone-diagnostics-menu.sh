@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-20.9"
+PD_VERSION="2026-10-21.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2411,6 +2411,16 @@ night_report() {
     rec_adb shell logcat -d -b events -v time 2>/dev/null | tr -d '\r' \
       | grep -E "am_kill|am_proc_died|am_low_memory|am_anr|am_crash|am_wtf" | tail -n 150
     echo
+    # 21.10: tail -n 150 вище показав лише 11:57–13:50, а нічні рядки програм запису відрізав.
+    echo "=== Програми запису в журналі подій — за весь час, що він пам'ятає ==="
+    rec_adb shell logcat -d -b events -v time 2>/dev/null | tr -d '\r' \
+      | grep -E "am_kill|am_proc_died|am_proc_start|am_anr|am_crash" \
+      | grep -E "com.suno.android|ua.faric.trackcatcher|com.maxmpz.audioplayer|com.aimp.player" | tail -n 200
+    echo
+    echo "--- Скільки програм закрила система по годинах (am_kill) ---"
+    rec_adb shell logcat -d -b events -v time 2>/dev/null | tr -d '\r' \
+      | grep "am_kill" | cut -c1-8 | uniq -c
+    echo
     echo "=== Тиск пам'яті за ${hours} год (procstats: Normal / Moderate / Low / Critical) ==="
     rec_adb shell dumpsys procstats --hours "$hours" 2>/dev/null | tr -d '\r' \
       | sed -n '/Memory usage:/,/^$/p;/Run time Stats:/,/^$/p;/System memory usage:/,/^$/p' | head -n 80
@@ -2442,7 +2452,8 @@ night_report() {
     echo
     echo "=== Wi-Fi: обриви з'єднання (Suno грає з інтернету) ==="
     rec_adb shell logcat -d -b events,main,system -v time 2>/dev/null | tr -d '\r' \
-      | grep -i -E "wifi.*(disconnect|connected|roam)|CTRL-EVENT-(DIS)?CONNECTED|NetworkAgent.*(lost|disconnected)" | tail -n 40
+      | grep -i -E "CTRL-EVENT-(DIS)?CONNECTED|CTRL-EVENT-SSID|reason=[0-9]|onLost|NetworkAgent.*(lost|disconnected)|ADB wifi device disconnected|wifi.*(disconnected|roam)" \
+      | grep -v -i "capabilities" | tail -n 80
     echo
     echo "=== Track Catcher про себе (останнє в журналі) ==="
     rec_adb shell logcat -d -v time 2>/dev/null | tr -d '\r' \
