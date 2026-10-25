@@ -1,6 +1,6 @@
 # Посібник Renodocs
 
-_Для користувача. Посібник для Renodocs v0.6.9, 25.10.2026. Схеми — Mermaid (GitHub показує їх як картинки)._
+_Для користувача. Посібник для Renodocs v0.6.10, 25.10.2026. Схеми — Mermaid (GitHub показує їх як картинки)._
 
 Цей самий посібник файлами: [Word](Posibnyk-Renault-Docs.docx) · [PDF](Posibnyk-Renault-Docs.pdf). Перезібрати всі формати: `docs/ua/user-guide/build.sh`.
 
