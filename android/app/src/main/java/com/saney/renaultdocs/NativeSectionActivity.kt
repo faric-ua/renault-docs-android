@@ -4606,10 +4606,10 @@ class NativeSectionActivity : Activity() {
                 it.cells.size
             }
                 ?: 1
+        // TODO №37: природні ширини всіх колонок (і останньої) — для плану ширин.
         val compactWidths =
             IntArray(
-                (columnCount - 1)
-                    .coerceAtLeast(0),
+                columnCount,
             ) { column ->
                 measuredCompactColumnWidth(
                     rows = displayRows,
@@ -4618,6 +4618,8 @@ class NativeSectionActivity : Activity() {
                         columnCount,
                 )
             }
+        val cellViews =
+            mutableListOf<MutableList<TextView>>()
 
         val tableBody =
             LinearLayout(this).apply {
@@ -4650,6 +4652,9 @@ class NativeSectionActivity : Activity() {
                         Gravity.CENTER_VERTICAL
                 }
 
+            val rowCells =
+                mutableListOf<TextView>()
+
             for (
                 column in
                 0 until columnCount
@@ -4664,7 +4669,7 @@ class NativeSectionActivity : Activity() {
                         columnCount == 2 &&
                         column == 0
 
-                rowView.addView(
+                val cell =
                     tableCell(
                         value = value,
                         header = row.header,
@@ -4673,26 +4678,23 @@ class NativeSectionActivity : Activity() {
                         column = column,
                         columnCount =
                             columnCount,
+                    )
+                rowCells.add(
+                    cell,
+                )
+                // Ширину ставить applyTableColumnPlan (нижче).
+                rowView.addView(
+                    cell,
+                    LinearLayout.LayoutParams(
+                        compactWidths[column],
+                        LinearLayout.LayoutParams
+                            .MATCH_PARENT,
                     ),
-                    if (
-                        column <
-                        columnCount - 1
-                    ) {
-                        LinearLayout.LayoutParams(
-                            compactWidths[column],
-                            LinearLayout.LayoutParams
-                                .MATCH_PARENT,
-                        )
-                    } else {
-                        LinearLayout.LayoutParams(
-                            0,
-                            LinearLayout.LayoutParams
-                                .MATCH_PARENT,
-                            1f,
-                        )
-                    }
                 )
             }
+            cellViews.add(
+                rowCells,
+            )
 
             tableBody.addView(
                 rowView,
@@ -4705,7 +4707,121 @@ class NativeSectionActivity : Activity() {
             )
         }
 
-        return tableBody
+        // TODO №37 (faric 2026-10-25): «якщо не влазить — хай таблиця прокручується
+        // вліво-вправо». Таблиця лежить у HorizontalScrollView; ширини колонок рахує
+        // TableColumnPlan — спершу за шириною екрана, потім за справжньою шириною місця.
+        val tableScroll =
+            HorizontalScrollView(this).apply {
+                isFillViewport = true
+                isHorizontalScrollBarEnabled = true
+                overScrollMode =
+                    View.OVER_SCROLL_IF_CONTENT_SCROLLS
+            }
+        tableScroll.addView(
+            tableBody,
+            android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams
+                    .WRAP_CONTENT,
+                android.widget.FrameLayout.LayoutParams
+                    .WRAP_CONTENT,
+            ),
+        )
+
+        var appliedFor = -1
+        fun applyPlan(available: Int) {
+            if (available <= 0 || available == appliedFor) return
+            appliedFor = available
+            applyTableColumnPlan(
+                tableBody = tableBody,
+                cellViews = cellViews,
+                natural = compactWidths,
+                available = available,
+            )
+        }
+
+        applyPlan(
+            resources.displayMetrics.widthPixels -
+                Ui.dp(
+                    this,
+                    TABLE_SIDE_GUTTER_DP,
+                ),
+        )
+        tableScroll.addOnLayoutChangeListener {
+            view, left, _, right, _, _, _, _, _ ->
+            val width =
+                right - left - view.paddingLeft - view.paddingRight
+            if (width > 0 && width != appliedFor) {
+                view.post {
+                    applyPlan(
+                        width,
+                    )
+                }
+            }
+        }
+
+        return tableScroll
+    }
+
+    /** TODO №37: ставить ширини колонок і перенос рядків за [TableColumnPlan]. */
+    private fun applyTableColumnPlan(
+        tableBody: LinearLayout,
+        cellViews: List<List<TextView>>,
+        natural: IntArray,
+        available: Int,
+    ) {
+        val plan =
+            TableColumnPlan.plan(
+                natural = natural,
+                available = available,
+                minLast =
+                    Ui.dp(
+                        this,
+                        TABLE_MIN_LAST_COLUMN_DP,
+                    ),
+                maxMiddle =
+                    (available * TABLE_MAX_MIDDLE_SHARE).toInt(),
+            )
+        val lastColumn =
+            natural.size - 1
+
+        for (row in cellViews) {
+            row.forEachIndexed { column, cell ->
+                val params =
+                    cell.layoutParams as LinearLayout.LayoutParams
+                params.width =
+                    plan.widths[column]
+                params.weight = 0f
+                cell.layoutParams = params
+
+                val wrap =
+                    plan.wrap[column]
+                cell.setSingleLine(
+                    !wrap,
+                )
+                if (wrap) {
+                    cell.maxLines =
+                        Int.MAX_VALUE
+                    cell.ellipsize =
+                        null
+                    if (column != lastColumn) {
+                        // Довгий текст у середній колонці — зліва, як опис.
+                        cell.gravity =
+                            Gravity.START or
+                                Gravity.CENTER_VERTICAL
+                    }
+                }
+            }
+        }
+
+        tableBody.layoutParams =
+            (tableBody.layoutParams ?: android.widget.FrameLayout.LayoutParams(0, 0)).apply {
+                width =
+                    plan.total
+                height =
+                    android.widget.FrameLayout.LayoutParams
+                        .WRAP_CONTENT
+            }
+        tableBody.requestLayout()
     }
 
     private fun measuredCompactColumnWidth(
@@ -5543,6 +5659,11 @@ class NativeSectionActivity : Activity() {
     )
 
     companion object {
+        // TODO №37: таблиці ширші за екран прокручуються вбік.
+        private const val TABLE_SIDE_GUTTER_DP = 24
+        private const val TABLE_MIN_LAST_COLUMN_DP = 140
+        private const val TABLE_MAX_MIDDLE_SHARE = 0.6f
+
         private const val HELP_SECTION =
             "section"
         private const val STATE_MENU_LABEL =
