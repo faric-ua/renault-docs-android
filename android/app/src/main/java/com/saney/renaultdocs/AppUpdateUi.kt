@@ -343,7 +343,7 @@ class AppUpdateUi(
             box.addView(
                 Ui.textView(
                     host,
-                    "Кроки 1–2: у вікні вибору натисни ☰ ліворуч → «Google Диск» → папка AppsAndroidSync → RenaultDocs → App → «Зберегти».\n" +
+                    "Кроки 1–2: у вікні вибору натисни ☰ ліворуч → «Google Диск» → папка AppsAndroidSync → RenaultDocs → AppsPlay → «Зберегти».\n" +
                         "Кроки 3–4: відкрий Google Диск → ⋮ біля файлу → «Надати доступ» → «Усі, хто має посилання» → " +
                         "«Копіювати посилання» → повернись сюди й натисни крок.",
                     13f,
@@ -945,10 +945,14 @@ class AppUpdateUi(
          * (created by the author's phone 2026-10-17 16:08, «Усі, хто має посилання»; first
          * publication — 0.5.150 / 166). If the author creates the file again, the publish window warns.
          */
-        // 0.6.0 Renodocs: own update channel (separate app beside Renault Docs 0.5.153).
-        // Empty until the author publishes the first Renodocs version to Drive;
+        // 0.6.0 Renodocs: own update channel (separate app beside Renault Docs 0.5.153);
         // the stable channel (renault-docs-onovlennia.json) must not be used here.
-        const val BUILT_IN_MANIFEST_ID = ""
+        // 0.6.10 (TODO №38, owner 2026-10-25 18:08 «роздати хлопцям, щоб самі оновлювали…
+        // вшиті посилання»): `AppsAndroidSync/RenaultDocs/AppsPlay/renodocs-onovlennia.json`,
+        // created by the author's phone 2026-10-25 18:12, «Усі, хто має посилання»; first
+        // publication — 0.6.9 / 179 (Claude checked: size and SHA-256 = release v0.6.9-debug).
+        // A Google Play build turns updates off with BuildConfig.DRIVE_UPDATES = false.
+        const val BUILT_IN_MANIFEST_ID = "1W3iekCBodJCbJcXxjH-8t7CnZsxB_R6w"
 
         private const val OTHER_LINK_HINT =
             "\n\nАвтор казав, що є новіша? Скопіюй посилання від нього й натисни «Інше посилання»."

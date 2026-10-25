@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 
-VERSION = "v0.6.9"
+VERSION = "v0.6.10"
 DATE = "25.10.2026"
 
 S = []  # sections: (id, title, blocks)
