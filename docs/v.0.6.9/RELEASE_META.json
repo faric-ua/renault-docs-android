@@ -1,0 +1,28 @@
+{
+  "versionName": "0.6.9",
+  "versionCode": 179,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/todo-37-wide-tables",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: native structured tables wider than the screen scroll sideways (HorizontalScrollView); column widths from TableColumnPlan — no column collapses to ~0 px, long middle-column text wraps (TODO №37, 5-column «Опис контактів» in section 119).",
+  "sourceBase": "v0.6.8/build178",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 501,
+  "pr_numbers": [
+    501
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "125f7d1e23944574d68b0e9dd9e1c3b0e38dc3b3",
+  "signed_run_id": 40208619310,
+  "signed_run_number": 235,
+  "signed_android_apk_run": 235,
+  "artifact_id": 12604833010,
+  "artifact_name": "Renault-Docs-v0.6.9-Debug",
+  "artifact_digest": "sha256:b3bc8d2823b3dec77bac82f25b270a6cb04a0a6461e896a7311ddf43313b8275",
+  "next": "A26: install 0.6.9 over 0.6.8 → section 119 → Роз'єм K4M831/CA,CAREG/BVA4 → «Опис контактів»: description wraps, rows normal height, table swipes sideways if wider than screen."
+}
