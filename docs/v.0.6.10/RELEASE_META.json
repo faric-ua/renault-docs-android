@@ -1,0 +1,28 @@
+{
+  "versionName": "0.6.10",
+  "versionCode": 180,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "fix/todo-38-builtin-update-link",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: Drive update channel built in (BUILT_IN_MANIFEST_ID = renodocs-onovlennia.json in RenaultDocs/AppsPlay, first published from A26 as 0.6.9/179) so friends update without pasting a link (TODO №38).",
+  "sourceBase": "v0.6.9/build179",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 506,
+  "pr_numbers": [
+    506
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "c3a8052b8e7ce26e7af20c1487524ddafd57c841",
+  "signed_run_id": 40211061507,
+  "signed_run_number": 236,
+  "signed_android_apk_run": 236,
+  "artifact_id": 12606420130,
+  "artifact_name": "Renault-Docs-v0.6.10-Debug",
+  "artifact_digest": "sha256:33d3a0d77027fed1d0234e824591857d64e7f58c79d7dfd761de1503a6b31283",
+  "next": "A26: install 0.6.10 over 0.6.9 → Settings → «Оновлення застосунку» shows «Нові версії беруться з Google Диска автора» → «Опублікувати зараз» (0.6.10 to Drive) → friends get this APK once."
+}
