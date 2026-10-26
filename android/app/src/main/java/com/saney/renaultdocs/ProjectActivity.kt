@@ -3920,7 +3920,10 @@ class ProjectActivity : Activity() {
             )
         }
 
-        addAction("Експортувати .rdpkg") {
+        addAction(
+            title = SharePolicy.title("Експортувати .rdpkg"),
+            enabled = SharePolicy.SHARING_ENABLED,
+        ) {
             clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
             startRdpkgExport(volume)
         }
@@ -3974,7 +3977,10 @@ class ProjectActivity : Activity() {
                 volume,
             )
         if (prepared == null) {
-            addAction("Підготувати і поділитися томом") {
+            addAction(
+                title = SharePolicy.title("Підготувати і поділитися томом"),
+                enabled = SharePolicy.SHARING_ENABLED,
+            ) {
                 clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                 shareRdpkg(volume)
             }
@@ -3986,7 +3992,10 @@ class ProjectActivity : Activity() {
             ) {}
         }
         if (prepared != null) {
-            addAction("Поділитися підготовленим .rdpkg") {
+            addAction(
+                title = SharePolicy.title("Поділитися підготовленим .rdpkg"),
+                enabled = SharePolicy.SHARING_ENABLED,
+            ) {
                 clearProjectDialogState(DIALOG_VOLUME_ACTIONS)
                 sharePreparedRdpkg(
                     volume,
@@ -4188,6 +4197,11 @@ class ProjectActivity : Activity() {
     private fun shareRdpkg(
         volume: ProjectVolumeRecord,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         if (!RdpkgExporter.canFastExport(volume)) {
             statusText.text =
                 "Поділитися можна томом, встановленим з .rdpkg. " +
@@ -4310,6 +4324,11 @@ class ProjectActivity : Activity() {
     private fun sharePreparedRdpkg(
         file: File,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         val uri = FileProvider.getUriForFile(this, packageName + ".files", file)
         val send =
             Intent(Intent.ACTION_SEND).apply {
@@ -4390,6 +4409,11 @@ class ProjectActivity : Activity() {
         volume: ProjectVolumeRecord,
         file: File,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         if (!file.exists()) {
             statusText.text =
                 "Підготовлений .rdpkg уже відсутній."
@@ -4461,6 +4485,11 @@ class ProjectActivity : Activity() {
     private fun startRdpkgExport(
         volume: ProjectVolumeRecord,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         if (
             !RdpkgExporter.canFastExport(
                 volume,
