@@ -1,0 +1,28 @@
+{
+  "versionName": "0.6.11",
+  "versionCode": 181,
+  "phase": "stable_signed_debug_release_promoted_phone_qa_pending",
+  "branch": "feat/todo-39-no-sharing",
+  "issues": [
+    133
+  ],
+  "scope": "Renodocs: sharing/export of volumes and projects disabled (SharePolicy.SHARING_ENABLED=false) — 5 menu items greyed with « · вимкнено», guards at every share/export entry (TODO №39).",
+  "sourceBase": "v0.6.10/build180",
+  "phoneQa": "PENDING",
+  "qa_status": "phone-qa-pending",
+  "pr_number": 510,
+  "pr_numbers": [
+    510
+  ],
+  "pr_tests": "PASS",
+  "pr_android_check": "PASS",
+  "signed_apk": "PASS",
+  "source_sha": "0d90e411f83c0874ac9dd50cd05b1e9cff14914b",
+  "signed_run_id": 40400144960,
+  "signed_run_number": 237,
+  "signed_android_apk_run": 237,
+  "artifact_id": 12687958011,
+  "artifact_name": "Renault-Docs-v0.6.11-Debug",
+  "artifact_digest": "sha256:a136631fdb467a0b82540c7bd4a7d9130e10a542ff1cf51be3ba4a018ffb96e6",
+  "next": "A26: install 0.6.11 over 0.6.10 → ⋮ of a volume and ⋮ of a project: share/export items grey « · вимкнено»; then «Опублікувати зараз» so friends get it."
+}
