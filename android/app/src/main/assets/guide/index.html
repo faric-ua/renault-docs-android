@@ -60,7 +60,7 @@ ul.points li{background:var(--surface); border:1px solid var(--border); border-r
 <div class="wrap">
 <main id="home" class="stack">
   <h1>Renodocs</h1>
-  <p class="muted">Інструкція користувача для Renodocs v0.6.10 · 25.10.2026. Технічна документація Renault на телефоні: томи, схеми, розʼєми, PDF. Дотик по розділу — докладно, кнопка «Назад» телефона повертає.</p>
+  <p class="muted">Інструкція користувача для Renodocs v0.6.11 · 26.10.2026. Технічна документація Renault на телефоні: томи, схеми, розʼєми, PDF. Дотик по розділу — докладно, кнопка «Назад» телефона повертає.</p>
   <ul class="features">
 <li><a href="#shcho"><span class="ic" aria-hidden="true">📘</span><span><b>Що це за застосунок</b><span class="d">Проєкт, том, .rdpkg, .rdproject і ⇧ — що це таке</span></span><span class="chev" aria-hidden="true">›</span></a></li>
 <li><a href="#holovnyi"><span class="ic" aria-hidden="true">🏠</span><span><b>Головний екран</b><span class="d">Панель «Додати», «Мої проєкти», меню ⋮</span></span><span class="chev" aria-hidden="true">›</span></a></li>
@@ -148,6 +148,7 @@ ul.points li{background:var(--surface); border:1px solid var(--border); border-r
 <section id="podilytysia" class="page stack" hidden>
 <a class="back" href="#">← Усі розділи</a>
 <h2>Як поділитися</h2>
+<p class="note">З v0.6.11 у Renodocs передавати томи й проєкти іншим <b>вимкнено автором</b>: «Підготувати і поділитися томом», «Експортувати .rdpkg», «Експортувати томи окремо» і «Поділитися проєктом … (.rdproject)» стоять у меню сірими з позначкою «вимкнено». Імпорт і читання працюють, як раніше. Нижче — як ці пункти працюють, коли їх увімкнено.</p>
 <p>Є три способи — залежно від того, скільки томів потрібно передати.</p>
 <div class="diagram"><ul class="tree"><li><span class="q">Що передати?</span><ul><li><span class="via">один том</span><span class="n">⋮ тому → «Підготувати і поділитися томом»</span><ul><li><span class="n">Зʼявляється ⇧ → «Поділитися»</span></li></ul></li><li><span class="via">кілька томів у папку</span><span class="n">⋮ проєкту → «Експортувати томи окремо»</span><ul><li><span class="n">Крок 1: томи → Крок 2: папка → Крок 3: «Почати експорт»</span></li></ul></li><li><span class="via">весь проєкт одним файлом</span><span class="n">⋮ проєкту → «Поділитися проєктом … (.rdproject)»</span><ul><li><span class="n">Зʼявляється ⇧ біля проєкту → «Поділитися»</span></li></ul></li></ul></li></ul></div>
 <ul class="points"><li><b>Правило ⇧:</b> один підготовлений файл на том і на проєкт. Щоб зробити новий — спершу видали старий через ⋮.</li><li>Ще один шлях для одного тому: ⋮ тому → «Експортувати .rdpkg» → вибрати, куди зберегти.</li><li>Однойменні файли в папці не перезаписуються. Файл, який уже лежить у папці, застосунок звіряє за SHA-256: якщо збігся — пише «уже був», не копіює вдруге.</li><li><b>«Вибрати лише нові для каталогу»</b> у кроці 1 сам ставить галочки на томи, яких ще нема в «Готові проєкти».</li><li>На кроках 2 і 3 видно назву вибраної папки. У кінці в папку пишеться короткий JSON-звіт — навіть якщо щось не вдалося.</li></ul>

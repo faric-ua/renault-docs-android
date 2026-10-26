@@ -236,17 +236,24 @@ class HomeProjectDialogController(
         val prepared =
             snapshot?.file
 
-        addAction("Експортувати томи окремо (.rdpkg)") {
+        addAction(
+            title = SharePolicy.title("Експортувати томи окремо (.rdpkg)"),
+            enabled = SharePolicy.SHARING_ENABLED,
+        ) {
             clear(DIALOG_ACTIONS)
             exportWizardState = ProjectExportWizardState()
             showExportWizard(project)
         }
 
         addAction(
-            preparedShareTitle(
-                snapshot,
-                projectVolumes,
-            ),
+            title =
+                SharePolicy.title(
+                    preparedShareTitle(
+                        snapshot,
+                        projectVolumes,
+                    ),
+                ),
+            enabled = SharePolicy.SHARING_ENABLED,
         ) {
             clear(DIALOG_ACTIONS)
             if (prepared != null) {
@@ -333,6 +340,11 @@ class HomeProjectDialogController(
      * Checks never start SAF or export; stored opaque IDs survive rotation, not list indices.
      */
     private fun showExportWizard(project: RenaultProject) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            android.widget.Toast.makeText(activity, SharePolicy.OFF_MESSAGE, android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
         val plan = runCatching {
             ProjectVolumeExportPlan.build(project, store.volumes(project.id))
         }.getOrElse {
@@ -381,6 +393,11 @@ class HomeProjectDialogController(
     private fun shareProject(
         project: RenaultProject,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            android.widget.Toast.makeText(activity, SharePolicy.OFF_MESSAGE, android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
         val volumes = store.volumes(project.id)
         if (volumes.isEmpty()) {
             showMessage(
@@ -517,6 +534,11 @@ class HomeProjectDialogController(
         project: RenaultProject,
         file: File,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            android.widget.Toast.makeText(activity, SharePolicy.OFF_MESSAGE, android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
         if (!file.exists()) {
             showMessage(
                 title = "Підготовлений файл",

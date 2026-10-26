@@ -1214,6 +1214,11 @@ class MainActivity : Activity() {
         }
 
     private fun openProjectFolderExportPicker(projectId: String) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         if (folderExportRunStore.load().isRunning ||
             rdprojectShareRunStore.load().isRunning
         ) {
@@ -1237,6 +1242,11 @@ class MainActivity : Activity() {
         folderUri: String,
         volumeIds: List<String>,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         if (folderExportRunStore.load().isRunning ||
             rdprojectShareRunStore.load().isRunning
         ) {
@@ -1480,6 +1490,11 @@ class MainActivity : Activity() {
     private fun sharePreparedRdproject(
         file: File,
     ) {
+        // TODO №39: передавати томи в Renodocs вимкнено.
+        if (!SharePolicy.SHARING_ENABLED) {
+            statusText.text = SharePolicy.OFF_MESSAGE
+            return
+        }
         val uri =
             FileProvider.getUriForFile(
                 this,
