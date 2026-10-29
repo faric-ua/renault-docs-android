@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-29.1"
+PD_VERSION="2026-10-29.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2599,6 +2599,171 @@ screen_record_chunks() {
 }
 # screen_record end
 
+# screen_glue start
+# Пункт 40 — склеїти шматки пункту 39 в одне відео і додати звук з Track Catcher
+# (faric 2026-10-29 15:04). Звук підганяється за часом: кожен шматок і кожна пісня
+# мають час кінця (час файлу на тому телефоні) і тривалість → знаємо, коли почались.
+# Для кожного шматка беремо саме його відрізок звуку — пропуски між шматками не зсувають звук.
+SGLUE_LOCAL="${PD_LOCAL_MOVIES:-/storage/emulated/0/Movies/PhoneDiagnostics}"
+SGLUE_TC_DIR="/sdcard/Music/Track Catcher"
+
+sglue_dur() {
+  ffprobe -v error -show_entries format=duration -of csv=p=0 "$1" 2>/dev/null | head -n 1
+}
+
+# «час|розмір|шлях» для файлів за шаблоном на тому телефоні
+sglue_stat() {
+  rec_adb shell "stat -c '%Y|%s|%n' $1 2>/dev/null" | tr -d '\r' | grep '|' | sort -t'|' -k3
+}
+
+# Взяти файл з телефона: якщо це той самий телефон і файл уже тут — без копії.
+sglue_fetch() {
+  local remote="$1" size="$2" work="$3" local_try base
+  base="${remote##*/}"
+  case "$remote" in
+    /sdcard/Movies/PhoneDiagnostics/*) local_try="$SGLUE_LOCAL/$base" ;;
+    *) local_try="" ;;
+  esac
+  if [ -n "$local_try" ] && [ -f "$local_try" ] && [ "$(stat -c %s "$local_try" 2>/dev/null)" = "$size" ]; then
+    printf '%s\n' "$local_try"; return 0
+  fi
+  adb -s "$ADB_TARGET" pull "$remote" "$work/$base" </dev/null >/dev/null 2>&1 || return 1
+  printf '%s\n' "$work/$base"
+}
+
+screen_glue() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local answer sessions prefix i line mt sz path f d st t0="" tend="" work out total
+  local chunk_files="" songs="" n=0 k inputs filt mixin off part list
+  echo "СКЛЕЇТИ ЗАПИС ЕКРАНА + ЗВУК З TRACK CATCHER"
+  echo
+  if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+    echo "Потрібна програма ffmpeg (≈ 30–60 МБ)."
+    printf "Встановити зараз? (так — y, ні — Enter): "
+    read -r answer
+    case "$answer" in y|Y|т|Т|так|Так) pkg install -y ffmpeg ;; *) pause_menu; return ;; esac
+    hash -r
+    command -v ffmpeg >/dev/null 2>&1 || { echo "ffmpeg не встановився."; pause_menu; return; }
+  fi
+
+  sessions="$(rec_adb shell ls "$SREC_DIR/" 2>/dev/null | tr -d '\r' \
+    | sed -n 's/^\(screen-[0-9]\{8\}-[0-9]\{4\}\)_[0-9][0-9]*\.mp4$/\1/p' | sort -u -r)"
+  if [ -z "$sessions" ]; then
+    echo "На телефоні нема записів пункту 39 (Movies/PhoneDiagnostics)."
+    pause_menu; return
+  fi
+  echo "Записи на телефоні (новіші зверху):"
+  i=0
+  for f in $sessions; do i=$((i + 1)); echo "  $i — $f"; done
+  printf "Який склеїти? (Enter — 1): "
+  read -r answer
+  case "${answer:-1}" in *[!0-9]*) answer=1 ;; esac
+  prefix="$(printf '%s\n' $sessions | sed -n "${answer:-1}p")"
+  [ -n "$prefix" ] || { echo "Нема такого номера."; pause_menu; return; }
+
+  new_log "40" "screen-glue" "Склеїти $prefix + звук"
+  work="$HOME/.cache/pd-glue/$prefix"
+  rm -rf "$work"; mkdir -p "$work"
+  echo "Беру шматки..."
+  while IFS='|' read -r mt sz path; do
+    [ -n "$path" ] || continue
+    f="$(sglue_fetch "$path" "$sz" "$work")" || { echo "Не вдалось взяти $path"; continue; }
+    d="$(sglue_dur "$f")"
+    [ -n "$d" ] || { echo "Пошкоджений шматок: ${path##*/} — пропускаю" | tee -a "$CURRENT_LOG"; continue; }
+    st="$(awk -v m="$mt" -v d="$d" 'BEGIN{printf "%.3f", m-d}')"
+    [ -n "$t0" ] || t0="$st"
+    tend="$mt"
+    n=$((n + 1))
+    chunk_files="$chunk_files$f|$st|$d
+"
+    echo "  ${path##*/}: $(awk -v d="$d" 'BEGIN{printf "%d:%02d", d/60, d%60}')" | tee -a "$CURRENT_LOG"
+  done <<EOF
+$(sglue_stat "$SREC_DIR/${prefix}_*.mp4")
+EOF
+  [ "$n" -gt 0 ] || { echo "Жодного цілого шматка."; rm -rf "$work"; pause_menu; return; }
+  total="$(awk -v a="$t0" -v b="$tend" 'BEGIN{printf "%.3f", b-a}')"
+
+  echo "Шукаю пісні Track Catcher за цей час..."
+  k=0
+  while IFS='|' read -r mt sz path; do
+    [ -n "$path" ] || continue
+    # Кінець пісні має бути після початку відео і не пізніше ніж 20 хв після його кінця.
+    awk -v m="$mt" -v a="$t0" -v b="$tend" 'BEGIN{exit !(m > a && m < b + 1200)}' || continue
+    f="$(sglue_fetch "$path" "$sz" "$work")" || continue
+    d="$(sglue_dur "$f")"
+    [ -n "$d" ] || continue
+    st="$(awk -v m="$mt" -v d="$d" 'BEGIN{printf "%.3f", m-d}')"
+    awk -v s="$st" -v b="$tend" 'BEGIN{exit !(s < b)}' || continue
+    k=$((k + 1))
+    songs="$songs$f|$st
+"
+    echo "  ♪ ${path##*/} — з $(awk -v s="$st" -v a="$t0" 'BEGIN{o=s-a; sg=(o<0)?"-":""; if(o<0)o=-o; printf "%s%d:%02d", sg, o/60, o%60}') від початку відео" | tee -a "$CURRENT_LOG"
+  done <<EOF
+$(sglue_stat "'$SGLUE_TC_DIR'/*")
+EOF
+  if [ "$k" -eq 0 ]; then
+    echo "Пісень Track Catcher за цей час не знайшов (Music/Track Catcher)."
+    printf "Склеїти без звуку? (так — y, ні — Enter): "
+  else
+    printf "Склеїти з цим звуком? (так — y, ні — Enter): "
+  fi
+  read -r answer
+  case "$answer" in y|Y|т|Т|так|Так) ;; *) echo "Не склеюю."; rm -rf "$work"; pause_menu; return ;; esac
+
+  echo "Складаю звук..."
+  local -a args
+  args=(-nostdin -y -v error -f lavfi -t "$total" -i anullsrc=r=48000:cl=stereo)
+  filt=""; mixin="[0:a]"; i=0
+  while IFS='|' read -r f st; do
+    [ -n "$f" ] || continue
+    i=$((i + 1))
+    off="$(awk -v s="$st" -v a="$t0" 'BEGIN{printf "%.3f", s-a}')"
+    if awk -v o="$off" 'BEGIN{exit !(o < 0)}'; then
+      args+=(-ss "$(awk -v o="$off" 'BEGIN{printf "%.3f", -o}')" -i "$f")
+      filt="$filt[$i:a]aresample=48000,aformat=channel_layouts=stereo[s$i];"
+    else
+      args+=(-i "$f")
+      filt="$filt[$i:a]aresample=48000,aformat=channel_layouts=stereo,adelay=$(awk -v o="$off" 'BEGIN{printf "%d", o*1000}'):all=1[s$i];"
+    fi
+    mixin="$mixin[s$i]"
+  done <<EOF
+$songs
+EOF
+  args+=(-filter_complex "${filt}${mixin}amix=inputs=$((i + 1)):normalize=0:duration=first[out]" -map "[out]" -c:a pcm_s16le "$work/timeline.wav")
+  ffmpeg "${args[@]}" >>"$CURRENT_LOG" 2>&1
+  [ -s "$work/timeline.wav" ] || { echo "Не вдалось скласти звук — подробиці в лозі."; rm -rf "$work"; pause_menu; return; }
+
+  echo "Склеюю відео..."
+  list="$work/list.txt"; : > "$list"; i=0
+  while IFS='|' read -r f st d; do
+    [ -n "$f" ] || continue
+    i=$((i + 1))
+    part="$work/part_$(printf '%03d' "$i").mp4"
+    off="$(awk -v s="$st" -v a="$t0" 'BEGIN{o=s-a; if(o<0)o=0; printf "%.3f", o}')"
+    ffmpeg -nostdin -y -v error -i "$f" -ss "$off" -t "$d" -i "$work/timeline.wav" \
+      -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -shortest "$part" >>"$CURRENT_LOG" 2>&1
+    [ -s "$part" ] && echo "file '$part'" >> "$list"
+  done <<EOF
+$chunk_files
+EOF
+  mkdir -p "$SGLUE_LOCAL"
+  out="$SGLUE_LOCAL/${prefix}_zvuk.mp4"
+  [ "$k" -eq 0 ] && out="$SGLUE_LOCAL/${prefix}_razom.mp4"
+  ffmpeg -nostdin -y -v error -f concat -safe 0 -i "$list" -c copy -movflags +faststart "$out" >>"$CURRENT_LOG" 2>&1
+  rm -rf "$work"
+  if [ -s "$out" ]; then
+    command -v termux-media-scan >/dev/null 2>&1 && termux-media-scan "$out" >/dev/null 2>&1
+    echo "Готово: $out" | tee -a "$CURRENT_LOG"
+    echo "Довжина: $(awk -v d="$(sglue_dur "$out")" 'BEGIN{printf "%d:%02d", d/60, d%60}')"
+    echo "Лежить на ЦЬОМУ телефоні: Movies/PhoneDiagnostics/${out##*/}"
+  else
+    echo "Не вийшло склеїти — подробиці в лозі."
+  fi
+  pause_menu
+}
+# screen_glue end
+
 # Вужчий екран — проста шапка одним рядком.
 show_banner() {
   local c="\033[1;32m" d="\033[0;32m" z="\033[0m" cols
@@ -2665,6 +2830,7 @@ while true; do
   echo "37 — Після запису: усе повернути, як було"
   echo "38 — Що було за ніч: хто закрив, пам'ять, нагрів, обриви звуку → файл (лише читає)"
   echo "39 — Запис екрана шматками по 3 хв (без звуку; Track Catcher не заважає)"
+  echo "40 — Склеїти запис 39 в одне відео + звук пісні з Track Catcher"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -2710,6 +2876,7 @@ while true; do
     37) record_mode_off ;;
     38) night_report ;;
     39) screen_record_chunks ;;
+    40) screen_glue ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
