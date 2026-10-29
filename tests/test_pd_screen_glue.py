@@ -67,7 +67,9 @@ class ScreenGlueTest(unittest.TestCase):
                   "-c:v", "libx264", "-pix_fmt", "yuv420p", str(f)])
             os.utime(f, (base + end, base + end))
         # пісня звучала з 4-ї по 7-му секунду
-        song = self.music / "Виконавець — Пісня (2).mp3"
+        # Track Catcher кладе пісню в підпапку альбому (faric 2026-10-29 15:17 — так її й не знайшло)
+        (self.music / "VOL. 2 — NIGHT").mkdir()
+        song = self.music / "VOL. 2 — NIGHT" / "Виконавець — Пісня (2).mp3"
         make(["-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000", "-t", "3",
               "-ac", "2", str(song)])
         os.utime(song, (base + 7, base + 7))
