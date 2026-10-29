@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-21.1"
+PD_VERSION="2026-10-29.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2467,6 +2467,138 @@ night_report() {
 
 # Шапка меню: велика назва між смужками (faric 2026-10-16 — «щоб одразу видно, яке це меню»).
 # Букви — напівблоки ▀▄█ (шрифт 3×5, згенеровано скриптом menu_banner.py), ширина 45 знаків.
+# screen_record start
+# Пункт 39 — запис екрана шматками (faric 2026-10-29, з чату Track Catcher).
+# Запис екрана Samsung і Track Catcher не працюють разом: Android дає дозвіл
+# «Запис екрана» (MediaProjection) лише одному застосунку. `adb shell screenrecord`
+# цього дозволу не просить — нікому не заважає. Пише без звуку, до 3 хв за раз,
+# тому пишемо шматками поспіль _001, _002… — потім склеїти. Звук — окремо.
+SREC_DIR="/sdcard/Movies/PhoneDiagnostics"
+SREC_SECONDS="${PD_SREC_SECONDS:-180}"
+SREC_BITRATE="6000000"
+SREC_MIN_FREE_KB=1048576
+SREC_STOP="$STATE_DIR/screen-record.stop"
+SREC_COUNT="$STATE_DIR/screen-record.count"
+
+srec_free_kb() {
+  rec_adb shell df /sdcard 2>/dev/null | tr -d '\r' | awk 'NR==2 {print $4}'
+}
+
+srec_worker() {
+  local prefix="$1" n=0 name start took fails=0 free
+  while [ ! -f "$SREC_STOP" ]; do
+    n=$((n + 1))
+    name="$(printf '%s_%03d.mp4' "$prefix" "$n")"
+    echo "$n" > "$SREC_COUNT"
+    echo "$(date '+%H:%M:%S') шматок $n почато: $SREC_DIR/$name" >> "$CURRENT_LOG"
+    start="$(date +%s)"
+    rec_adb shell screenrecord --bit-rate "$SREC_BITRATE" --time-limit "$SREC_SECONDS" "$SREC_DIR/$name" >> "$CURRENT_LOG" 2>&1
+    took=$(( $(date +%s) - start ))
+    echo "$(date '+%H:%M:%S') шматок $n закінчено (${took} с)" >> "$CURRENT_LOG"
+    [ -f "$SREC_STOP" ] && break
+    if [ "$(adb -s "$ADB_TARGET" get-state 2>/dev/null)" != "device" ]; then
+      echo "Зв'язок з телефоном пропав — зупиняю." >> "$CURRENT_LOG"
+      echo "lost" > "$SREC_STOP"; break
+    fi
+    if [ "$took" -lt 3 ]; then
+      fails=$((fails + 1))
+      if [ "$fails" -ge 3 ]; then
+        echo "screenrecord тричі поспіль не почав писати — зупиняю." >> "$CURRENT_LOG"
+        echo "fail" > "$SREC_STOP"; break
+      fi
+    else
+      fails=0
+    fi
+    free="$(srec_free_kb)"
+    case "$free" in
+      ''|*[!0-9]*) ;;
+      *) if [ "$free" -lt "$SREC_MIN_FREE_KB" ]; then
+           echo "Місця менше 1 ГБ — зупиняю." >> "$CURRENT_LOG"
+           echo "space" > "$SREC_STOP"; break
+         fi ;;
+    esac
+  done
+}
+
+screen_record_chunks() {
+  clear
+  if ! require_connection; then pause_menu; return; fi
+  local model free answer prefix pid started el count why files f
+  model="$(rec_adb shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+  echo "ЗАПИС ЕКРАНА шматками по $((SREC_SECONDS / 60)) хв — без звуку"
+  echo
+  echo "Телефон: ${model:-?} ($ADB_TARGET)"
+  echo "  Інший телефон — спершу пункт 4 (A26 сам до себе або M30s)."
+  echo "Файли: Movies/PhoneDiagnostics на тому телефоні, по порядку _001, _002…"
+  echo "Дозвіл «Запис екрана» не потрібен — Track Catcher і візуалізатору не заважає."
+  echo "Звук сюди не пишеться — візьми пісню з Track Catcher."
+  free="$(srec_free_kb)"
+  case "$free" in
+    ''|*[!0-9]*) ;;
+    *) echo "Вільно на тому телефоні: $((free / 1024)) МБ (3 хв ≈ 135 МБ)."
+       if [ "$free" -lt "$SREC_MIN_FREE_KB" ]; then
+         echo "Замало місця (менше 1 ГБ) — не починаю."
+         pause_menu; return
+       fi ;;
+  esac
+  echo
+  printf "Почати? (так — y, ні — Enter): "
+  read -r answer
+  case "$answer" in y|Y|т|Т|так|Так) ;; *) echo "Не починаю."; pause_menu; return ;; esac
+
+  prefix="screen-$(date '+%Y%m%d-%H%M')"
+  new_log "39" "screen-record" "Запис екрана шматками (${model:-?})"
+  rm -f "$SREC_STOP" "$SREC_COUNT"
+  rec_adb shell mkdir -p "$SREC_DIR" >/dev/null 2>&1
+  command -v termux-wake-lock >/dev/null 2>&1 && termux-wake-lock 2>/dev/null
+  srec_worker "$prefix" &
+  pid=$!
+  started="$(date +%s)"
+  echo
+  echo "ПИШУ. Можна вийти з Termux і вмикати пісню."
+  echo "Щоб зупинити — повернись сюди і натисни Enter."
+  echo
+  while kill -0 "$pid" 2>/dev/null; do
+    if read -r -t 5 _; then break; fi
+    el=$(( $(date +%s) - started ))
+    count="$(cat "$SREC_COUNT" 2>/dev/null)"
+    printf "\r  Іде %02d:%02d, шматок %s   " $((el / 60)) $((el % 60)) "${count:-1}"
+  done
+  echo
+  [ -f "$SREC_STOP" ] || echo "stop" > "$SREC_STOP"
+  echo "Зупиняю..."
+  rec_adb shell 'kill -INT $(pidof screenrecord) 2>/dev/null' >/dev/null 2>&1
+  wait "$pid" 2>/dev/null
+  command -v termux-wake-unlock >/dev/null 2>&1 && termux-wake-unlock 2>/dev/null
+  why="$(cat "$SREC_STOP" 2>/dev/null)"
+  rm -f "$SREC_STOP" "$SREC_COUNT"
+
+  files="$(rec_adb shell ls "$SREC_DIR/" 2>/dev/null | tr -d '\r' | grep "^${prefix}_[0-9]*\.mp4$")"
+  # Щоб Галерея побачила файли одразу.
+  rec_adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
+  for f in $files; do
+    rec_adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$SREC_DIR/$f" >/dev/null 2>&1
+  done
+  {
+    echo "Зупинено: ${why:-stop}"
+    echo "Файли:"
+    rec_adb shell ls -l "$SREC_DIR/" 2>/dev/null | tr -d '\r' | grep " ${prefix}_"
+  } >> "$CURRENT_LOG"
+
+  echo
+  case "$why" in
+    lost) echo "⚠ Зв'язок з телефоном пропав — запис зупинився сам." ;;
+    fail) echo "⚠ Телефон не дав почати запис (screenrecord). Подробиці — у лозі." ;;
+    space) echo "⚠ Закінчилось місце — запис зупинився сам." ;;
+  esac
+  echo "Готово. Шматків: $(printf '%s\n' "$files" | grep -c .)"
+  echo "Папка на телефоні: Movies/PhoneDiagnostics"
+  for f in $files; do echo "  $f"; done
+  echo "Склеювати по порядку номерів. Між шматками може бути пропуск ~1 с."
+  pause_menu
+}
+# screen_record end
+
 # Вужчий екран — проста шапка одним рядком.
 show_banner() {
   local c="\033[1;32m" d="\033[0;32m" z="\033[0m" cols
@@ -2532,6 +2664,7 @@ while true; do
   echo "36 — Перед записом: усе зайве вимкнути (режим запису)"
   echo "37 — Після запису: усе повернути, як було"
   echo "38 — Що було за ніч: хто закрив, пам'ять, нагрів, обриви звуку → файл (лише читає)"
+  echo "39 — Запис екрана шматками по 3 хв (без звуку; Track Catcher не заважає)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -2576,6 +2709,7 @@ while true; do
     36) record_mode_on ;;
     37) record_mode_off ;;
     38) night_report ;;
+    39) screen_record_chunks ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
