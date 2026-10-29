@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-29.2"
+PD_VERSION="2026-10-29.3"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2605,7 +2605,14 @@ screen_record_chunks() {
 # мають час кінця (час файлу на тому телефоні) і тривалість → знаємо, коли почались.
 # Для кожного шматка беремо саме його відрізок звуку — пропуски між шматками не зсувають звук.
 SGLUE_LOCAL="${PD_LOCAL_MOVIES:-/storage/emulated/0/Movies/PhoneDiagnostics}"
-SGLUE_TC_DIR="/sdcard/Music/Track Catcher"
+SGLUE_MUSIC_DIR="/sdcard/Music"
+# Track Catcher кладе пісні в підпапки за альбомом (Music/Track Catcher/<альбом>/),
+# а за налаштуванням — і в інші папки Music (faric 2026-10-29 15:17: пісню не знайшло).
+# Тому шукаємо звук у всій Music, з підпапками; підходять лише файли за час запису.
+sglue_find_audio() {
+  rec_adb shell "find '$SGLUE_MUSIC_DIR' -type f \\( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.m4a' -o -iname '*.ogg' -o -iname '*.opus' \\) -exec stat -c '%Y|%s|%n' {} + 2>/dev/null" \
+    | tr -d '\r' | grep '|' | sort -t'|' -k3
+}
 
 sglue_dur() {
   ffprobe -v error -show_entries format=duration -of csv=p=0 "$1" 2>/dev/null | head -n 1
@@ -2700,10 +2707,11 @@ EOF
 "
     echo "  ♪ ${path##*/} — з $(awk -v s="$st" -v a="$t0" 'BEGIN{o=s-a; sg=(o<0)?"-":""; if(o<0)o=-o; printf "%s%d:%02d", sg, o/60, o%60}') від початку відео" | tee -a "$CURRENT_LOG"
   done <<EOF
-$(sglue_stat "'$SGLUE_TC_DIR'/*")
+$(sglue_find_audio)
 EOF
   if [ "$k" -eq 0 ]; then
-    echo "Пісень Track Catcher за цей час не знайшов (Music/Track Catcher)."
+    echo "Пісень за цей час не знайшов (Music і всі підпапки)."
+    echo "Track Catcher зберігає пісню, коли вона доходить до кінця або натиснуто «Стоп» у ньому."
     printf "Склеїти без звуку? (так — y, ні — Enter): "
   else
     printf "Склеїти з цим звуком? (так — y, ні — Enter): "
