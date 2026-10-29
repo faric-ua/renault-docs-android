@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-29.3"
+PD_VERSION="2026-10-29.4"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2610,7 +2610,8 @@ SGLUE_MUSIC_DIR="/sdcard/Music"
 # а за налаштуванням — і в інші папки Music (faric 2026-10-29 15:17: пісню не знайшло).
 # Тому шукаємо звук у всій Music, з підпапками; підходять лише файли за час запису.
 sglue_find_audio() {
-  rec_adb shell "find '$SGLUE_MUSIC_DIR' -type f \\( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.m4a' -o -iname '*.ogg' -o -iname '*.opus' \\) -exec stat -c '%Y|%s|%n' {} + 2>/dev/null" \
+  # Music у пам'яті телефона і на карті пам'яті (/storage/XXXX-XXXX/Music).
+  rec_adb shell "for d in '$SGLUE_MUSIC_DIR' /storage/*-*/Music; do [ -d \"\$d\" ] && find \"\$d\" -type f \\( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.m4a' -o -iname '*.ogg' -o -iname '*.opus' \\) -exec stat -c '%Y|%s|%n' {} + 2>/dev/null; done" \
     | tr -d '\r' | grep '|' | sort -t'|' -k3
 }
 
@@ -2712,6 +2713,12 @@ EOF
   if [ "$k" -eq 0 ]; then
     echo "Пісень за цей час не знайшов (Music і всі підпапки)."
     echo "Track Catcher зберігає пісню, коли вона доходить до кінця або натиснуто «Стоп» у ньому."
+    echo "Запис екрана йшов: $(date -d "@${t0%.*}" '+%H:%M:%S' 2>/dev/null) – $(date -d "@$tend" '+%H:%M:%S' 2>/dev/null)"
+    echo "Найновіші звукові файли, які бачу (час — коли збережено):"
+    sglue_find_audio | sort -t'|' -k1 -n -r | head -n 3 | while IFS='|' read -r mt sz path; do
+      echo "  $(date -d "@$mt" '+%d.%m %H:%M:%S' 2>/dev/null)  ${path#/sdcard/}"
+    done | tee -a "$CURRENT_LOG"
+    [ -n "$(sglue_find_audio | head -n 1)" ] || echo "  (жодного — у Music звуку не видно)" | tee -a "$CURRENT_LOG"
     printf "Склеїти без звуку? (так — y, ні — Enter): "
   else
     printf "Склеїти з цим звуком? (так — y, ні — Enter): "
