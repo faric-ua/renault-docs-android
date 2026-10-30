@@ -43,7 +43,7 @@ pause_menu() {
   fi
   echo
   printf "Натисни Enter, щоб повернутися в меню..."
-  read -r _
+  read -r _ || exit 0  # Termux закрили не пунктом 0 — вийти, а не крутитись (2026-10-30)
 }
 
 detect_phone_ip() {
@@ -2849,7 +2849,7 @@ while true; do
   echo "0  — Вийти"
   echo
   printf "Вибір: "
-  read -r choice
+  read -r choice || exit 0  # Termux закрили не пунктом 0 — вийти, а не крутитись (2026-10-30)
 
   case "$choice" in
     1) show_help ;;
