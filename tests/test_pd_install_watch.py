@@ -33,6 +33,13 @@ elif "query-activities" in cmd:
     print("  com.samsung.android.packageinstaller/.InstallStart")
 elif "resolve-activity" in cmd:
     print("android/com.android.internal.app.ResolverActivity")
+elif "dumpsys package" in cmd:
+    cnt = os.environ["CNT"]
+    n = int(open(cnt).read()) if os.path.exists(cnt) else 0
+    open(cnt, "w").write(str(n + 1))
+    new = os.environ.get("UPDATED") and n > 0
+    print("    versionName=" + ("0.9.2" if new else "0.9.1"))
+    print("    lastUpdateTime=" + ("2026-11-04 00:14:40" if new else "2026-11-03 20:00:00"))
 elif "date" in cmd:
     print("11-04 00:10:00.000")
 elif "logcat" in cmd:
@@ -66,7 +73,7 @@ class InstallWatchTest(unittest.TestCase):
                   f"new_log() {{ CURRENT_LOG='{self.tmp}/log.txt'; : > \"$CURRENT_LOG\"; }}\n"
                   + rec + body + "install_watch\n")
         (self.tmp / "item.sh").write_text(script)
-        env = dict(os.environ, PATH=f"{self.tmp}/bin:" + os.environ["PATH"], ADB_LOG=str(self.tmp / "adb.log"), **extra)
+        env = dict(os.environ, PATH=f"{self.tmp}/bin:" + os.environ["PATH"], ADB_LOG=str(self.tmp / "adb.log"), CNT=str(self.tmp / "cnt"), PD_IW_TAIL="0", **extra)
         out = subprocess.run(["bash", str(self.tmp / "item.sh")], input="\n", capture_output=True, text=True,
                              env=env, timeout=60).stdout
         return out, (self.tmp / "log.txt").read_text()
@@ -82,6 +89,12 @@ class InstallWatchTest(unittest.TestCase):
         adb_log = (self.tmp / "adb.log").read_text()
         self.assertIn("logcat -d -v time -T '11-04 00:10:00.000'", adb_log)
         self.assertNotIn("logcat -c", adb_log)
+
+    def test_update_installed(self):
+        out, _ = self.run_item(UPDATED="1")
+        self.assertIn("Версія до спроби (ua.faric.doramaland.video.dev): 0.9.1", out)
+        self.assertIn("Версія після спроби: 0.9.2", out)
+        self.assertIn("Що закрило установщик: ВСТАНОВИЛОСЬ", out)
 
     def test_no_unknown_sources_permission(self):
         out, _ = self.run_item(OPS="default")

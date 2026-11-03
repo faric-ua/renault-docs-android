@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-11-04.1"
+PD_VERSION="2026-11-04.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2961,7 +2961,10 @@ EOF
 # Пункт 43 — чому не встановилось оновлення (запит чату Dorama T328, 04.11.2026):
 # M30s ставить оновлення Dorama лише з другого разу — екран «блимає», і нічого.
 # Лише читає: установщики, дозвіл «невідомі застосунки», журнал Android за час спроби.
-IW_FILTER='PackageInstaller|InstallStart|PackageInstallerActivity|InstallInstalling|InstallFailed|ActivityTaskManager|ResolverActivity|ChooserActivity|UriGrants|SecurityException|Permission Denial|INSTALL_FAILED|doramaland'
+IW_FILTER='PackageInstaller|InstallStart|InstallStaging|PackageInstallerActivity|InstallInstalling|InstallSuccess|InstallFailed|START u0|Displayed|ResolverActivity|ChooserActivity|UriGrants|SecurityException|Permission Denial|INSTALL_FAILED|VerifyApps|PackageManager|am_proc_died|am_kill'
+IW_TAIL="${PD_IW_TAIL:-20}"
+# версія і час останнього оновлення пакета: «versionName lastUpdateTime»
+iw_ver() { rec_adb shell "dumpsys package $1" | tr -d '\r' | awk -F= '/versionName=/{v=$2} /lastUpdateTime=/{t=$2} END{print v" · "t}'; }
 IW_WAIT="${PD_IW_WAIT:-180}"
 
 install_watch() {
@@ -2993,12 +2996,18 @@ install_watch() {
     [ -n "$inst" ] && printf '%s\n' "$inst" || echo "не вдалося прочитати"
     echo "За замовчуванням: $(rec_adb shell 'cmd package resolve-activity --brief -a android.intent.action.VIEW -t application/vnd.android.package-archive -d content://x/y.apk 2>/dev/null' | tr -d '\r' | tail -n 1)"
   } | tee -a "$CURRENT_LOG"
+  local before="" after="" p1
+  p1="$(printf '%s\n' $pkgs | grep -m1 '\.dev$')"; [ -n "$p1" ] || p1="$(printf '%s\n' $pkgs | head -n 1)"
+  [ -n "$p1" ] && before="$(iw_ver "$p1")" && echo "Версія до спроби ($p1): $before" | tee -a "$CURRENT_LOG"
   start="$(rec_adb shell "date '+%m-%d %H:%M:%S.000'" | tr -d '\r')"
   echo
   echo "Тепер на тому телефоні: Dorama → оновлення → вибери установщик."
   echo "Коли екран «блимне» (або встановиться) — повернись сюди і натисни Enter."
   echo "(чекаю до $((IW_WAIT / 60)) хв)"
   read -r -t "$IW_WAIT" answer || true
+  echo "Чекаю ще ${IW_TAIL} с — щоб у журнал потрапив кінець встановлення…"
+  sleep "$IW_TAIL"
+  [ -n "$p1" ] && after="$(iw_ver "$p1")"
   log="$(rec_adb shell "logcat -d -v time -T '$start'" | tr -d '\r' | grep -E "$IW_FILTER")"
   {
     echo
@@ -3006,7 +3015,10 @@ install_watch() {
     [ -n "$log" ] && printf '%s\n' "$log" | tail -n 200 || echo "нічого не записано"
   } | tee -a "$CURRENT_LOG" >/dev/null
   echo "Журнал: $(printf '%s\n' "$log" | grep -c .) рядків — у файлі."
-  if printf '%s' "$log" | grep -qE 'Permission Denial|SecurityException'; then
+  [ -n "$p1" ] && echo "Версія після спроби: $after" | tee -a "$CURRENT_LOG"
+  if [ -n "$before" ] && [ "$before" != "$after" ]; then
+    verdict="ВСТАНОВИЛОСЬ: версія / час оновлення змінились ($before → $after); «блимання» — це перезапуск Dorama після заміни"
+  elif printf '%s' "$log" | grep -qE 'Permission Denial|SecurityException'; then
     verdict="установщик не отримав доступу до файлу (Permission Denial / SecurityException) — дозвіл на адресу FileProvider загубився"
   elif printf '%s' "$log" | grep -qE 'INSTALL_FAILED[A-Z_]*'; then
     verdict="Android відмовив: $(printf '%s' "$log" | grep -oE 'INSTALL_FAILED[A-Z_]*' | head -n 1)"
@@ -3014,7 +3026,11 @@ install_watch() {
     verdict="установщик відкрив дозвіл «невідомі застосунки» і після нього закрився — тому вдається лише вдруге"
   elif printf '%s' "$ops" | grep -qvE 'allow'; then
     verdict="у Dorama нема дозволу «невідомі застосунки»: перший раз Android питає дозвіл і закриває установщик"
-  elif [ "${n_inst:-0}" -gt 1 ]; then
+  elif printf '%s' "$log" | grep -q 'InstallInstalling'; then
+    verdict="встановлення почалось (кнопку «Встановити» натиснуто), але версія не змінилась — обірвалось на перевірці Play Protect або системою; дивись рядки VerifyApps / am_kill"
+  elif printf '%s' "$log" | grep -q 'PackageInstallerActivity' && ! printf '%s' "$log" | grep -q 'InstallInstalling'; then
+    verdict="вікно установщика відкрилось і закрилось без «Встановити» — його закрили або перекрило інше вікно"
+  elif [ "${n_inst:-0}" -gt 1 ] && printf '%s' "$log" | grep -q 'ResolverActivity'; then
     verdict="установщиків кілька (${n_inst}) — після вибору у вікні Android установщик закрився; у журналі явної помилки нема, дивись рядки ResolverActivity / PackageInstaller"
   else
     verdict="у журналі явної причини нема — дивись рядки PackageInstaller у файлі"
