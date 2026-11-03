@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-11-03.1"
+PD_VERSION="2026-11-03.2"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2845,6 +2845,107 @@ sd_card_info() {
 }
 # sd_card_info end
 
+# load_check start
+# Пункт 42 — перевірка під час завантаження (запит чату Dorama, T326, 03.11.2026):
+# хто гальмує — Wi-Fi / інтернет, флешка чи сам телефон. Лише читає; два знімки лічильників
+# з паузою, а на цьому телефоні тим часом — контрольне завантаження (curl) у той самий інтернет.
+LC_SEC="${PD_LOADCHECK_SEC:-10}"
+LC_URL="${PD_LOADCHECK_URL:-https://speed.cloudflare.com/__down?bytes=200000000}"
+LC_SNAP='echo PDSNAP; cat /proc/net/dev; echo PDDISK; cat /proc/diskstats'
+
+# Які диски на тому телефоні: «імʼя тип» (SD — флешка; MMC, sd* — пам'ять телефона)
+lc_disks() {
+  rec_adb shell 'for b in /sys/block/mmcblk[0-9] /sys/block/sd[a-z]; do [ -e "$b" ] || continue; n=${b##*/}; t=$(cat $b/device/type 2>/dev/null); echo "$n ${t:-UFS}"; done' | tr -d '\r'
+}
+
+# з двох знімків: «rx_байт_за_період» для wlan0 і рядки диска «імʼя читМБ/с запМБ/с зайнято%»
+lc_calc() {
+  awk -v sec="$LC_SEC" -v disks="$3" '
+    BEGIN { n=split(disks, d, " "); for (i=1;i<=n;i++) want[d[i]]=1 }
+    FNR==1 { f++ }
+    /^PDSNAP/ { mode="net"; next } /^PDDISK/ { mode="disk"; next }
+    mode=="net" && $1 ~ /^wlan0:/ { if ($1 == "wlan0:") rx[f]=$2; else { sub(/^wlan0:/, "", $1); rx[f]=$1 } }
+    mode=="disk" && ($3 in want) { r[f,$3]=$6; w[f,$3]=$10; t[f,$3]=$13 }
+    END {
+      printf "NET %.2f\n", (rx[2]-rx[1])/1048576/sec
+      for (k in want) printf "DISK %s %.1f %.1f %d\n", k, (r[2,k]-r[1,k])*512/1048576/sec, (w[2,k]-w[1,k])*512/1048576/sec, (t[2,k]-t[1,k])/(sec*10)
+    }' "$1" "$2"
+}
+
+load_check() {
+  clear
+  require_connection || { pause_menu; return; }
+  ADB_TARGET="$(load_target)"
+  new_log "42" "load-check" "Перевірка під час завантаження: мережа, флешка, телефон"
+  local tmp a b disks names model wifi link rssi freq net ctl ctlmb top cpu mem swap avail temp line kind sdline sdbusy sdw verdict
+  tmp="$(mktemp -d)"
+  model="$(rec_adb shell getprop ro.product.model | tr -d '\r')"
+  echo "Телефон: ${model:-?}. Запусти завантаження в Dorama — заміряю ${LC_SEC} с." | tee -a "$CURRENT_LOG"
+  echo
+  disks="$(lc_disks)"; names="$(printf '%s\n' "$disks" | awk '{print $1}' | tr '\n' ' ')"
+  wifi="$(rec_adb shell 'cmd wifi status 2>/dev/null; dumpsys wifi 2>/dev/null | grep -m1 "mWifiInfo"' | tr -d '\r')"
+  link="$(printf '%s' "$wifi" | grep -o 'Link speed: [0-9]*' | head -n1 | grep -o '[0-9]*$')"
+  rssi="$(printf '%s' "$wifi" | grep -o 'RSSI: -[0-9]*' | head -n1 | grep -o '\-[0-9]*$')"
+  freq="$(printf '%s' "$wifi" | grep -o 'Frequency: [0-9]*' | head -n1 | grep -o '[0-9]*$')"
+  rec_adb shell "$LC_SNAP" | tr -d '\r' > "$tmp/a"
+  ( command -v curl >/dev/null 2>&1 && curl -s -o /dev/null -m "$LC_SEC" -w '%{speed_download}' "$LC_URL" > "$tmp/ctl" 2>/dev/null ) &
+  sleep "$LC_SEC"
+  rec_adb shell "$LC_SNAP" | tr -d '\r' > "$tmp/b"
+  wait
+  top="$(rec_adb shell 'top -b -n 1 2>/dev/null | grep doramaland' | tr -d '\r' | head -n 1)"
+  cpu="$(printf '%s' "$top" | awk '{for(i=1;i<=NF;i++) if ($i ~ /^[SRDZ]$/) {print $(i+1); exit}}')"
+  mem="$(rec_adb shell 'cat /proc/meminfo' | tr -d '\r')"
+  avail="$(printf '%s\n' "$mem" | awk '/^MemAvailable:/{printf "%d", $2/1024}')"
+  swap="$(printf '%s\n' "$mem" | awk '/^SwapTotal:/{t=$2} /^SwapFree:/{f=$2} END{printf "%d", (t-f)/1024}')"
+  temp="$(rec_adb shell 'dumpsys battery 2>/dev/null' | tr -d '\r' | awk '/temperature:/{printf "%.1f", $2/10; exit}')"
+  lc_calc "$tmp/a" "$tmp/b" "$names" > "$tmp/r"
+  net="$(awk '/^NET/{print $2}' "$tmp/r")"
+  ctl="$(cat "$tmp/ctl" 2>/dev/null)"; ctlmb="$(awk -v b="${ctl:-0}" 'BEGIN{printf "%.2f", b/1048576}')"
+  {
+    echo "=== Мережа (Wi-Fi) ==="
+    echo "Зв'язок з роутером: ${link:-?} Мбіт/с · сигнал ${rssi:-?} дБм · частота ${freq:-?} МГц"
+    echo "Реально йде через Wi-Fi (Dorama та все інше): ${net} МБ/с"
+    if [ -n "$ctl" ]; then echo "Контрольний файл (curl на ЦЬОМУ телефоні, той самий час): ${ctlmb} МБ/с"
+    else echo "Контрольний файл: curl недоступний — пропущено"; fi
+    echo
+    echo "=== Пам'ять: флешка і пам'ять телефона ==="
+  } | tee -a "$CURRENT_LOG"
+  sdline=""
+  while read -r line; do
+    [ -n "$line" ] || continue
+    set -- $line
+    kind="$(printf '%s\n' "$disks" | awk -v n="$1" '$1==n{print $2}')"
+    if [ "$kind" = "SD" ]; then kind="ФЛЕШКА"; sdline="$1"; sdw="$3"; sdbusy="$4"; else kind="пам'ять телефона"; fi
+    echo "$1 ($kind): читання $2 МБ/с · запис $3 МБ/с · зайнята $4 %" | tee -a "$CURRENT_LOG"
+  done <<EOF
+$(awk '/^DISK/{print $2, $3, $4, $5}' "$tmp/r" | sort)
+EOF
+  {
+    echo
+    echo "=== Телефон ==="
+    echo "Dorama: процесор ${cpu:-?} % (у top 100 % = одне ядро)"
+    echo "Вільна пам'ять: ${avail:-?} МБ · підкачка зайнята: ${swap:-?} МБ · батарея ${temp:-?} °C"
+  } | tee -a "$CURRENT_LOG"
+  verdict="$(awk -v net="${net:-0}" -v ctl="$ctlmb" -v has="${ctl:+1}" -v sd="${sdbusy:-0}" -v cpu="${cpu:-0}" -v av="${avail:-9999}" -v link="${link:-0}" 'BEGIN{
+    if (sd+0 >= 80) { print "ФЛЕШКА — зайнята майже весь час, вона не встигає"; exit }
+    if (av+0 > 0 && av+0 < 250) { print "ТЕЛЕФОН — мало вільної пам'"'"'яті"; exit }
+    if (cpu+0 >= 90) { print "ТЕЛЕФОН — Dorama завантажує процесор"; exit }
+    if (has && ctl+0 > 2*(net+0) && ctl+0 > 1) { print "САМА DORAMA або сервер серій — інтернет швидший у " int(ctl/(net+0.01)) " раз(и)"; exit }
+    if (has && ctl+0 < 1.5) { print "ІНТЕРНЕТ / Wi-Fi — навіть контрольний файл іде повільно"; exit }
+    if (link+0 > 0 && link+0 < 50) { print "Wi-Fi — слабкий зв'"'"'язок з роутером"; exit }
+    print "явного вузького місця не видно — повторити під час повільного завантаження" }')"
+  {
+    echo
+    echo "=== Підсумок ==="
+    local ctltxt="—" sdtxt="нема"; [ -n "$ctl" ] && ctltxt="$ctlmb МБ/с"; [ -n "$sdline" ] && sdtxt="запис $sdw МБ/с, зайнята $sdbusy %"
+    echo "мережа ${net} МБ/с (контрольний файл $ctltxt) · флешка $sdtxt · Dorama процесор ${cpu:-?} %"
+    echo "Вузьке місце: $verdict"
+  } | tee -a "$CURRENT_LOG"
+  rm -rf "$tmp"
+  pause_menu
+}
+# load_check end
+
 # Вужчий екран — проста шапка одним рядком.
 show_banner() {
   local c="\033[1;32m" d="\033[0;32m" z="\033[0m" cols
@@ -2913,6 +3014,7 @@ while true; do
   echo "39 — Запис екрана шматками по 3 хв (без звуку; Track Catcher не заважає)"
   echo "40 — Склеїти запис 39 в одне відео + звук пісні з Track Catcher"
   echo "41 — Що за флешка: виробник, модель, об'єм, швидкість (без розбирання телефона)"
+  echo "42 — Перевірка під час завантаження: хто гальмує — Wi-Fi, флешка чи телефон → файл"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -2960,6 +3062,7 @@ while true; do
     39) screen_record_chunks ;;
     40) screen_glue ;;
     41) sd_card_info ;;
+    42) load_check ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
