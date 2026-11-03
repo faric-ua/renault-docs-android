@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-11-03.3"
+PD_VERSION="2026-11-03.4"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2854,12 +2854,17 @@ sd_card_info() {
 # хто гальмує — Wi-Fi / інтернет, флешка чи сам телефон. Лише читає; два знімки лічильників
 # з паузою, а на цьому телефоні тим часом — контрольне завантаження (curl) у той самий інтернет.
 LC_SEC="${PD_LOADCHECK_SEC:-10}"
-LC_URL="${PD_LOADCHECK_URL:-https://speed.cloudflare.com/__down?bytes=200000000}"
+LC_URL="${PD_LOADCHECK_URL:-https://proof.ovh.net/files/100Mb.dat}"
 LC_SNAP='echo PDSNAP; cat /proc/net/dev; echo PDDISK; cat /proc/diskstats'
 
 # Які диски на тому телефоні: «імʼя тип» (SD — флешка; MMC, sd* — пам'ять телефона)
 lc_disks() {
-  rec_adb shell 'for b in /sys/block/mmcblk[0-9] /sys/block/sd[a-z]; do [ -e "$b" ] || continue; n=${b##*/}; t=$(cat $b/device/type 2>/dev/null); echo "$n ${t:-UFS}"; done' | tr -d '\r'
+  local out
+  out="$(rec_adb shell 'for b in /sys/block/mmcblk[0-9] /sys/block/sd[a-z]; do [ -e "$b" ] || continue; n=${b##*/}; t=$(cat $b/device/type 2>/dev/null); echo "$n ${t:-UFS}"; done' | tr -d '\r')"
+  # M30s 03.11: /sys/block з ADB не видно — беремо назви з /proc/diskstats.
+  # Якщо є sd* (UFS — пам'ять телефона), то mmcblk* — це флешка.
+  [ -n "$out" ] || out="$(rec_adb shell 'cat /proc/diskstats' | tr -d '\r' | awk '$3 ~ /^(mmcblk[0-9]|sd[a-z])$/ {print $3}' | sort -u | awk '{n[NR]=$1; if ($1 ~ /^sd/) ufs=1} END{for(i=1;i<=NR;i++) print n[i], (n[i] ~ /^mmcblk/ ? (ufs ? "SD" : "MMC?") : "UFS")}')"
+  printf '%s\n' "$out"
 }
 
 # з двох знімків: «rx_байт_за_період» для wlan0 і рядки диска «імʼя читМБ/с запМБ/с зайнято%»
@@ -2892,7 +2897,7 @@ load_check() {
   rssi="$(printf '%s' "$wifi" | grep -o 'RSSI: -[0-9]*' | head -n1 | grep -o '\-[0-9]*$')"
   freq="$(printf '%s' "$wifi" | grep -o 'Frequency: [0-9]*' | head -n1 | grep -o '[0-9]*$')"
   rec_adb shell "$LC_SNAP" | tr -d '\r' > "$tmp/a"
-  ( command -v curl >/dev/null 2>&1 && curl -s -o /dev/null -m "$LC_SEC" -w '%{speed_download}' "$LC_URL" > "$tmp/ctl" 2>/dev/null ) &
+  ( command -v curl >/dev/null 2>&1 && curl -sL -o /dev/null -m "$LC_SEC" -w '%{speed_download}' "$LC_URL" > "$tmp/ctl" 2>/dev/null ) &
   sleep "$LC_SEC"
   rec_adb shell "$LC_SNAP" | tr -d '\r' > "$tmp/b"
   wait
@@ -2905,12 +2910,14 @@ load_check() {
   lc_calc "$tmp/a" "$tmp/b" "$names" > "$tmp/r"
   net="$(awk '/^NET/{print $2}' "$tmp/r")"
   ctl="$(cat "$tmp/ctl" 2>/dev/null)"; ctlmb="$(awk -v b="${ctl:-0}" 'BEGIN{printf "%.2f", b/1048576}')"
+  # 0 — сайт не відповів або curl обірвався: це не заміряна швидкість (M30s 03.11 — висновок «інтернет» був хибний).
+  awk -v b="${ctl:-0}" 'BEGIN{exit !(b+0 < 1000)}' && ctl=""
   {
     echo "=== Мережа (Wi-Fi) ==="
     echo "Зв'язок з роутером: ${link:-?} Мбіт/с · сигнал ${rssi:-?} дБм · частота ${freq:-?} МГц"
     echo "Реально йде через Wi-Fi (Dorama та все інше): ${net} МБ/с"
     if [ -n "$ctl" ]; then echo "Контрольний файл (curl на ЦЬОМУ телефоні, той самий час): ${ctlmb} МБ/с"
-    else echo "Контрольний файл: curl недоступний — пропущено"; fi
+    else echo "Контрольний файл: не вдалося (нема curl або сайт не відповів) — у висновку не враховано"; fi
     echo
     echo "=== Пам'ять: флешка і пам'ять телефона ==="
   } | tee -a "$CURRENT_LOG"
