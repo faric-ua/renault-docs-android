@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-10-29.4"
+PD_VERSION="2026-11-03.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2779,6 +2779,72 @@ EOF
 }
 # screen_glue end
 
+# sd_card_info start
+# Пункт 41 — що за флешка (faric 2026-11-03 15:05: «щоб я не розбирав телефон»).
+# Паспорт карти (CID) зашитий у саму карту: виробник, модель, дата — наклейку підробити можна, його ні.
+# Лише читає. Замір запису — тільки після «так»: пише свій тимчасовий файл і одразу його прибирає.
+sd_maker_name() {
+  case "$(printf '%d' "$1" 2>/dev/null)" in
+    1) echo "Panasonic" ;; 2) echo "Toshiba / Kioxia" ;; 3) echo "SanDisk" ;; 27) echo "Samsung" ;;
+    29) echo "ADATA" ;; 39) echo "Phison (Kingston, PNY та ін.)" ;; 40) echo "Lexar" ;; 49) echo "Silicon Power" ;;
+    65) echo "Kingston" ;; 116) echo "Transcend" ;; 118) echo "Patriot" ;; 130) echo "Sony" ;; 156) echo "Angelbird / Hoodman" ;;
+    0) echo "НЕ ВКАЗАНО (0) — так буває в підробках" ;;
+    *) echo "невідомий код (часто — дешеві або підроблені карти)" ;;
+  esac
+}
+
+sd_card_info() {
+  clear
+  require_connection || { pause_menu; return; }
+  ADB_TARGET="$(load_target)"
+  new_log "41" "sd-card" "Що за флешка (паспорт карти, об'єм, швидкість)"
+  local found=0 b t name manf oem date sectors gb mnt answer
+  for b in $(rec_adb shell 'ls -d /sys/block/mmcblk* 2>/dev/null' | tr -d '\r'); do
+    t="$(rec_adb shell "cat $b/device/type 2>/dev/null" | tr -d '\r')"
+    [ "$t" = "SD" ] || continue
+    found=1
+    name="$(rec_adb shell "cat $b/device/name 2>/dev/null" | tr -d '\r')"
+    manf="$(rec_adb shell "cat $b/device/manfid 2>/dev/null" | tr -d '\r')"
+    oem="$(rec_adb shell "cat $b/device/oemid 2>/dev/null" | tr -d '\r')"
+    date="$(rec_adb shell "cat $b/device/date 2>/dev/null" | tr -d '\r')"
+    sectors="$(rec_adb shell "cat $b/size 2>/dev/null" | tr -d '\r')"
+    gb="$(awk -v s="${sectors:-0}" 'BEGIN{printf "%.0f", s*512/1000000000}')"
+    {
+      echo "=== Карта пам'яті (${b##*/}) ==="
+      echo "Виробник:   $(sd_maker_name "${manf:-0}") [код ${manf:-?}, OEM ${oem:-?}]"
+      echo "Модель:     ${name:-?}"
+      echo "Випущена:   ${date:-?}"
+      echo "Об'єм:      ${gb} ГБ (так рахують на наклейках)"
+    } | tee -a "$CURRENT_LOG"
+  done
+  if [ "$found" = 0 ]; then
+    echo "Карту пам'яті не знайдено (або Android не дає прочитати її паспорт)." | tee -a "$CURRENT_LOG"
+  fi
+  echo | tee -a "$CURRENT_LOG"
+  echo "=== Де підключена ===" | tee -a "$CURRENT_LOG"
+  rec_adb shell 'df -h /storage/*-* 2>/dev/null' | tr -d '\r' | tee -a "$CURRENT_LOG"
+  mnt="$(rec_adb shell 'ls -d /storage/*-* 2>/dev/null' | tr -d '\r' | head -n 1)"
+  echo
+  if [ -z "$mnt" ]; then pause_menu; return; fi
+  echo "Заміряти швидкість запису? Запише тимчасовий файл 256 МБ на карту і одразу його прибере."
+  echo "Музику на цей час краще поставити на паузу."
+  printf "Набери «так» або y, щоб почати (Enter — пропустити): "
+  read -r answer || answer=""
+  case "$answer" in
+    так|Так|y|Y|yes)
+      local tmp="$mnt/PhoneDiagnostics-speedtest.tmp" res
+      res="$(rec_adb shell "s=\$(date +%s%N); dd if=/dev/zero of='$tmp' bs=1048576 count=256 2>/dev/null && sync; e=\$(date +%s%N); sz=\$(stat -c %s '$tmp' 2>/dev/null); rm -f '$tmp'; echo \"\$s \$e \${sz:-0}\"" | tr -d '\r')"
+      echo "=== Замір запису ===" >> "$CURRENT_LOG"
+      echo "$res" | awk '{ms=($2-$1)/1000000; if ($3>0 && ms>0) printf "Запис: %.0f МБ/с (256 МБ за %.1f с)\n", $3/1048576/(ms/1000), ms/1000; else print "Не вдалося записати на карту (Android не дав доступу з ADB)."}' | tee -a "$CURRENT_LOG"
+      ;;
+    *) echo "Замір пропущено." | tee -a "$CURRENT_LOG" ;;
+  esac
+  echo
+  echo "Справжні карти: виробник SanDisk / Samsung / Kingston / Lexar…, дата не порожня, об'єм як на наклейці."
+  pause_menu
+}
+# sd_card_info end
+
 # Вужчий екран — проста шапка одним рядком.
 show_banner() {
   local c="\033[1;32m" d="\033[0;32m" z="\033[0m" cols
@@ -2846,6 +2912,7 @@ while true; do
   echo "38 — Що було за ніч: хто закрив, пам'ять, нагрів, обриви звуку → файл (лише читає)"
   echo "39 — Запис екрана шматками по 3 хв (без звуку; Track Catcher не заважає)"
   echo "40 — Склеїти запис 39 в одне відео + звук пісні з Track Catcher"
+  echo "41 — Що за флешка: виробник, модель, об'єм, швидкість (без розбирання телефона)"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -2892,6 +2959,7 @@ while true; do
     38) night_report ;;
     39) screen_record_chunks ;;
     40) screen_glue ;;
+    41) sd_card_info ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
