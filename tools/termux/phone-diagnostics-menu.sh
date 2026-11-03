@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-11-03.2"
+PD_VERSION="2026-11-03.3"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2799,18 +2799,22 @@ sd_card_info() {
   ADB_TARGET="$(load_target)"
   new_log "41" "sd-card" "Що за флешка (паспорт карти, об'єм, швидкість)"
   local found=0 b t name manf oem date sectors gb mnt answer
-  for b in $(rec_adb shell 'ls -d /sys/block/mmcblk* 2>/dev/null' | tr -d '\r'); do
-    t="$(rec_adb shell "cat $b/device/type 2>/dev/null" | tr -d '\r')"
+  # Спершу /sys/block/mmcblk*/device; якщо Android не пускає (так на M30s, 03.11) — /sys/class/mmc_host/*/mmc*.
+  local devs
+  devs="$(rec_adb shell 'for d in /sys/block/mmcblk*/device; do [ -r "$d/type" ] && echo "$d"; done 2>/dev/null' | tr -d '\r')"
+  [ -n "$devs" ] || devs="$(rec_adb shell 'for d in /sys/class/mmc_host/*/mmc*:*; do [ -r "$d/type" ] && echo "$d"; done 2>/dev/null' | tr -d '\r')"
+  for b in $devs; do
+    t="$(rec_adb shell "cat $b/type 2>/dev/null" | tr -d '\r')"
     [ "$t" = "SD" ] || continue
     found=1
-    name="$(rec_adb shell "cat $b/device/name 2>/dev/null" | tr -d '\r')"
-    manf="$(rec_adb shell "cat $b/device/manfid 2>/dev/null" | tr -d '\r')"
-    oem="$(rec_adb shell "cat $b/device/oemid 2>/dev/null" | tr -d '\r')"
-    date="$(rec_adb shell "cat $b/device/date 2>/dev/null" | tr -d '\r')"
-    sectors="$(rec_adb shell "cat $b/size 2>/dev/null" | tr -d '\r')"
+    name="$(rec_adb shell "cat $b/name 2>/dev/null" | tr -d '\r')"
+    manf="$(rec_adb shell "cat $b/manfid 2>/dev/null" | tr -d '\r')"
+    oem="$(rec_adb shell "cat $b/oemid 2>/dev/null" | tr -d '\r')"
+    date="$(rec_adb shell "cat $b/date 2>/dev/null" | tr -d '\r')"
+    sectors="$(rec_adb shell "cat $b/../size 2>/dev/null || cat $b/block/*/size 2>/dev/null" | tr -d '\r' | head -n 1)"
     gb="$(awk -v s="${sectors:-0}" 'BEGIN{printf "%.0f", s*512/1000000000}')"
     {
-      echo "=== Карта пам'яті (${b##*/}) ==="
+      echo "=== Карта пам'яті ==="
       echo "Виробник:   $(sd_maker_name "${manf:-0}") [код ${manf:-?}, OEM ${oem:-?}]"
       echo "Модель:     ${name:-?}"
       echo "Випущена:   ${date:-?}"
