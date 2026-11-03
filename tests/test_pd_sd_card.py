@@ -88,6 +88,19 @@ class SdCardTest(unittest.TestCase):
         self.assertRegex(out, r"Запис: \d+ МБ/с")
         self.assertEqual(list(self.sd.iterdir()), [])
 
+    def test_fallback_to_mmc_host(self):
+        # M30s 03.11: /sys/block/mmcblk*/device не читається — паспорт є в /sys/class/mmc_host.
+        shutil.rmtree(self.tmp / "dev" / "sys" / "block")
+        host = self.tmp / "dev" / "sys" / "class" / "mmc_host" / "mmc1" / "mmc1:aaaa"
+        (host / "block" / "mmcblk1").mkdir(parents=True)
+        for k, v in {"type": "SD", "name": "EB1QT", "manfid": "0x00001b", "oemid": "0x534d", "date": "01/2024"}.items():
+            (host / k).write_text(v + "\n")
+        (host / "block" / "mmcblk1" / "size").write_text("1000000000\n")
+        out = self.run_item("\n")
+        self.assertIn("Samsung", out)
+        self.assertIn("EB1QT", out)
+        self.assertIn("512 ГБ", out)
+
     def test_menu_lists_item(self):
         text = MENU.read_text(encoding="utf-8")
         self.assertIn('echo "41 — Що за флешка', text)
