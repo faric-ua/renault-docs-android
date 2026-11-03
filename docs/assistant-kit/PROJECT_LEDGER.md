@@ -6,6 +6,12 @@
 
 
 
+
+## 2026-11-04 — Phone Diagnostics 43 «Чому не встановилось оновлення» (запит чату Dorama T328)
+
+- **Що хотіли:** M30s ставить оновлення Dorama лише з другого разу: вибір установщика → екран «блимає» → нічого. Зняти журнал у момент першої спроби.
+- **Що зробили:** пункт 43 — Dorama на телефоні, `appops get <pkg> REQUEST_INSTALL_PACKAGES`, установщики APK (`cmd package query-activities` / `resolve-activity`), час телефона як мітка → faric робить спробу → Enter → `logcat -d -T <мітка>` з фільтром (PackageInstaller, InstallStart, ActivityTaskManager, Resolver/Chooser, UriGrants, SecurityException, Permission Denial, INSTALL_FAILED, doramaland). Журнал не очищується. Висновок одним рядком. Тест `tests/test_pd_install_watch.py`. PD_VERSION 2026-11-04.1.
+
 ## 2026-11-03 — Phone Diagnostics 42 «Перевірка під час завантаження» (запит чату Dorama T326)
 
 - **Що хотіли:** Dorama качає повільно (≈ 0,35 МБ/с; APK з Диска теж гальмує; на M30s плеєр з флешки замовкав). Зрозуміти, хто вузьке місце: Wi-Fi / інтернет, флешка чи телефон.

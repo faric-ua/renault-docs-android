@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -u
 
-PD_VERSION="2026-11-03.4"
+PD_VERSION="2026-11-04.1"
 PD_REPO="faric-ua/renault-docs-android"
 PD_SOURCE_PATH="tools/termux/phone-diagnostics-menu.sh"
 BASE_DIR="/storage/emulated/0/Documents/PhoneDiagnostics"
@@ -2957,6 +2957,77 @@ EOF
 }
 # load_check end
 
+# install_watch start
+# Пункт 43 — чому не встановилось оновлення (запит чату Dorama T328, 04.11.2026):
+# M30s ставить оновлення Dorama лише з другого разу — екран «блимає», і нічого.
+# Лише читає: установщики, дозвіл «невідомі застосунки», журнал Android за час спроби.
+IW_FILTER='PackageInstaller|InstallStart|PackageInstallerActivity|InstallInstalling|InstallFailed|ActivityTaskManager|ResolverActivity|ChooserActivity|UriGrants|SecurityException|Permission Denial|INSTALL_FAILED|doramaland'
+IW_WAIT="${PD_IW_WAIT:-180}"
+
+install_watch() {
+  clear
+  require_connection || { pause_menu; return; }
+  ADB_TARGET="$(load_target)"
+  new_log "43" "install-watch" "Чому не встановилось оновлення (установщик, дозвіл, журнал)"
+  local pkgs pkg inst ops start answer log verdict n_inst
+  echo "Телефон: $(rec_adb shell getprop ro.product.model | tr -d '\r')" | tee -a "$CURRENT_LOG"
+  pkgs="$(rec_adb shell 'pm list packages doramaland' | tr -d '\r' | sed 's/^package://')"
+  {
+    echo
+    echo "=== Dorama на телефоні ==="
+    [ -n "$pkgs" ] && printf '%s\n' "$pkgs" || echo "не знайдено"
+    echo
+    echo "=== Дозвіл «Встановлення невідомих застосунків» ==="
+  } | tee -a "$CURRENT_LOG"
+  ops=""
+  for pkg in $pkgs; do
+    answer="$(rec_adb shell "appops get $pkg REQUEST_INSTALL_PACKAGES" | tr -d '\r' | head -n 1)"
+    echo "$pkg: ${answer:-?}" | tee -a "$CURRENT_LOG"
+    ops="$ops $answer"
+  done
+  inst="$(rec_adb shell 'cmd package query-activities --brief -a android.intent.action.VIEW -t application/vnd.android.package-archive -d content://x/y.apk 2>/dev/null' | tr -d '\r' | grep '/' )"
+  n_inst="$(printf '%s\n' "$inst" | grep -c '/')"
+  {
+    echo
+    echo "=== Хто вміє встановлювати APK (установщики) ==="
+    [ -n "$inst" ] && printf '%s\n' "$inst" || echo "не вдалося прочитати"
+    echo "За замовчуванням: $(rec_adb shell 'cmd package resolve-activity --brief -a android.intent.action.VIEW -t application/vnd.android.package-archive -d content://x/y.apk 2>/dev/null' | tr -d '\r' | tail -n 1)"
+  } | tee -a "$CURRENT_LOG"
+  start="$(rec_adb shell "date '+%m-%d %H:%M:%S.000'" | tr -d '\r')"
+  echo
+  echo "Тепер на тому телефоні: Dorama → оновлення → вибери установщик."
+  echo "Коли екран «блимне» (або встановиться) — повернись сюди і натисни Enter."
+  echo "(чекаю до $((IW_WAIT / 60)) хв)"
+  read -r -t "$IW_WAIT" answer || true
+  log="$(rec_adb shell "logcat -d -v time -T '$start'" | tr -d '\r' | grep -E "$IW_FILTER")"
+  {
+    echo
+    echo "=== Журнал Android від $start (лише установщик, дозволи, Dorama) ==="
+    [ -n "$log" ] && printf '%s\n' "$log" | tail -n 200 || echo "нічого не записано"
+  } | tee -a "$CURRENT_LOG" >/dev/null
+  echo "Журнал: $(printf '%s\n' "$log" | grep -c .) рядків — у файлі."
+  if printf '%s' "$log" | grep -qE 'Permission Denial|SecurityException'; then
+    verdict="установщик не отримав доступу до файлу (Permission Denial / SecurityException) — дозвіл на адресу FileProvider загубився"
+  elif printf '%s' "$log" | grep -qE 'INSTALL_FAILED[A-Z_]*'; then
+    verdict="Android відмовив: $(printf '%s' "$log" | grep -oE 'INSTALL_FAILED[A-Z_]*' | head -n 1)"
+  elif printf '%s' "$log" | grep -qE 'UNKNOWN_SOURCES|unknown sources|MANAGE_UNKNOWN_APP_SOURCES'; then
+    verdict="установщик відкрив дозвіл «невідомі застосунки» і після нього закрився — тому вдається лише вдруге"
+  elif printf '%s' "$ops" | grep -qvE 'allow'; then
+    verdict="у Dorama нема дозволу «невідомі застосунки»: перший раз Android питає дозвіл і закриває установщик"
+  elif [ "${n_inst:-0}" -gt 1 ]; then
+    verdict="установщиків кілька (${n_inst}) — після вибору у вікні Android установщик закрився; у журналі явної помилки нема, дивись рядки ResolverActivity / PackageInstaller"
+  else
+    verdict="у журналі явної причини нема — дивись рядки PackageInstaller у файлі"
+  fi
+  {
+    echo
+    echo "=== Висновок ==="
+    echo "Що закрило установщик: $verdict"
+  } | tee -a "$CURRENT_LOG"
+  pause_menu
+}
+# install_watch end
+
 # Вужчий екран — проста шапка одним рядком.
 show_banner() {
   local c="\033[1;32m" d="\033[0;32m" z="\033[0m" cols
@@ -3026,6 +3097,7 @@ while true; do
   echo "40 — Склеїти запис 39 в одне відео + звук пісні з Track Catcher"
   echo "41 — Що за флешка: виробник, модель, об'єм, швидкість (без розбирання телефона)"
   echo "42 — Перевірка під час завантаження: хто гальмує — Wi-Fi, флешка чи телефон → файл"
+  echo "43 — Чому не встановилось оновлення: установщик, дозвіл, журнал у момент спроби → файл"
   echo "0  — Вийти"
   echo
   printf "Вибір: "
@@ -3074,6 +3146,7 @@ while true; do
     40) screen_glue ;;
     41) sd_card_info ;;
     42) load_check ;;
+    43) install_watch ;;
     0) clear; exit 0 ;;
     *) echo; echo "Невідомий пункт: $choice"; sleep 1 ;;
   esac
