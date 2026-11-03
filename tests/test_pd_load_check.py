@@ -30,10 +30,18 @@ if "PDSNAP" in cmd:
     print("Inter-|   Receive")
     print(f" wlan0: {rx} 100 0 0 0 0 0 0 5000 50 0 0 0 0 0 0")
     print("PDDISK")
-    print(f" 179 0 mmcblk0 10 0 {100 + n*2048} 5 20 0 {200} 9 0 {100 + n*100} 10 0 0 0 0")
-    print(f" 179 128 mmcblk1 10 0 100 5 20 0 {200 + n*20480} 9 3 {100 + n*950} 10 0 0 0 0")
+    if os.environ.get("M30S"):
+        print(f"   8 0 sda 10 0 {100 + n*2048} 5 20 0 200 9 0 {100 + n*100} 10 0 0 0 0")
+        print(f"   8 1 sda1 10 0 100 5 20 0 200 9 0 100 10 0 0 0 0")
+        print(f" 179 0 mmcblk0 10 0 100 5 20 0 {200 + n*20480} 9 3 {100 + n*950} 10 0 0 0 0")
+    else:
+        print(f" 179 0 mmcblk0 10 0 {100 + n*2048} 5 20 0 {200} 9 0 {100 + n*100} 10 0 0 0 0")
+        print(f" 179 128 mmcblk1 10 0 100 5 20 0 {200 + n*20480} 9 3 {100 + n*950} 10 0 0 0 0")
 elif "/sys/block" in cmd:
-    print("mmcblk0 MMC"); print("mmcblk1 SD")
+    if not os.environ.get("M30S"):
+        print("mmcblk0 MMC"); print("mmcblk1 SD")
+elif "cat /proc/diskstats" in cmd:
+    print(" 8 0 sda 1 0 1 1 1 0 1 1 0 1 1 0 0 0 0"); print(" 8 1 sda1 1 0 1 1 1 0 1 1 0 1 1 0 0 0 0"); print(" 179 0 mmcblk0 1 0 1 1 1 0 1 1 0 1 1 0 0 0 0")
 elif "wifi" in cmd:
     print("Wifi is connected to \"home\"\nWifiInfo: SSID: \"home\", RSSI: -67, Link speed: 72Mbps, Frequency: 2437MHz")
 elif "top" in cmd:
@@ -52,7 +60,7 @@ class LoadCheckTest(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp(prefix="pd42-"))
         (self.tmp / "bin").mkdir()
-        for name, body in (("adb", FAKE_ADB), ("curl", "#!/bin/sh\nprintf 4194304\n")):
+        for name, body in (("adb", FAKE_ADB), ("curl", "#!/bin/sh\nprintf \"${CURLOUT:-4194304}\"\n")):
             f = self.tmp / "bin" / name
             f.write_text(body)
             f.chmod(0o755)
@@ -60,7 +68,7 @@ class LoadCheckTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def test_flash_is_bottleneck(self):
+    def run_item(self, **extra):
         text = MENU.read_text(encoding="utf-8")
         rec = re.search(r"(rec_adb\(\) \{.*?\n\}\n)", text, re.S).group(1)
         body = re.search(r"# load_check start\n(.*?)# load_check end\n", text, re.S).group(1)
@@ -70,9 +78,22 @@ class LoadCheckTest(unittest.TestCase):
                   + rec + body + "load_check\n")
         (self.tmp / "item.sh").write_text(script)
         env = dict(os.environ, PATH=f"{self.tmp}/bin:" + os.environ["PATH"], CNT=str(self.tmp / "cnt"),
-                   PD_LOADCHECK_SEC="1")
-        out = subprocess.run(["bash", str(self.tmp / "item.sh")], capture_output=True, text=True,
-                             env=env, timeout=60).stdout
+                   PD_LOADCHECK_SEC="1", **extra)
+        return subprocess.run(["bash", str(self.tmp / "item.sh")], capture_output=True, text=True,
+                              env=env, timeout=60).stdout
+
+    def test_m30s_no_sys_block_and_failed_curl(self):
+        # Звіт 325 (M30s 03.11): /sys/block не видно, curl дав 0 — висновок «інтернет» був хибний.
+        out = self.run_item(M30S="1", CURLOUT="0.000")
+        self.assertIn("mmcblk0 (ФЛЕШКА): читання 0.0 МБ/с · запис 10.0 МБ/с · зайнята 95 %", out)
+        self.assertIn("sda (пам'ять телефона)", out)
+        self.assertNotIn("sda1", out)
+        self.assertIn("Контрольний файл: не вдалося", out)
+        self.assertNotIn("ІНТЕРНЕТ", out)
+        self.assertIn("Вузьке місце: ФЛЕШКА", out)
+
+    def test_flash_is_bottleneck(self):
+        out = self.run_item()
         self.assertIn("72 Мбіт/с", out)
         self.assertIn("-67 дБм", out)
         self.assertIn("2437 МГц", out)
