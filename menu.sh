@@ -394,6 +394,7 @@ while true; do
   echo "25 — Створити public Catalog v4 (15 пакетів)"
   echo "26 — Замінити зіпсоване лого в томах Laguna II"
   echo "27 — Звіт для Диска: томи Laguna II з новим лого"
+  echo "28 — 🔑 Покласти ключ підпису в «Ключі» (для брата)"
   echo "0 — Вийти"
   echo
   printf "Вибір: "
@@ -481,6 +482,9 @@ while true; do
       ;;
     27)
       logo_fixed_report
+      ;;
+    28)
+      clear; bash "$REPO/tools/termux/faric-keys-put.sh" "Renault Docs"; pause_menu
       ;;
     0)
       clear
