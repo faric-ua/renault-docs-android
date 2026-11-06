@@ -71,3 +71,9 @@ release-signing.properties
 !docs/brand/renodocs-logo.gif
 !docs/brand/volume-logo.gif
 !docs/brand/emblems/*.png
+
+# Ключі підпису — ніколи не в git (інспектор 2026-11-06)
+*.age
+*-signing.properties
+local-build-env.sh
+Ключі/
